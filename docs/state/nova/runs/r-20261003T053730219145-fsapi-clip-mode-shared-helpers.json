@@ -1,0 +1,1655 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "8c4d11f89d6f6390087b06af9d71e89586cc4a16",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 26026649,
+      "input_tokens_cumulative": 26026649,
+      "output_tokens": 78589,
+      "output_tokens_cumulative": 78589,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 370,
+    "files": 11,
+    "removed": 308
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "analytic_carrier",
+        "path": "tests/test_solve_path_census_inputs.py"
+      },
+      "run_function": {
+        "line": 121,
+        "name": "_problem",
+        "path": "benchmarks/exact_clip_seed_amplitude.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier",
+        "path": "tests/test_exact_clip_seed_bracket.py"
+      },
+      "run_function": {
+        "line": 163,
+        "name": "_seed_row",
+        "path": "benchmarks/exact_clip_seed_amplitude.py"
+      },
+      "window_line": 171
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 786,
+        "name": "summarize",
+        "path": "benchmarks/exact_support_floor_attribution.py"
+      },
+      "window_line": 809
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 786,
+        "name": "summarize",
+        "path": "benchmarks/exact_support_floor_attribution.py"
+      },
+      "window_line": 811
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 786,
+        "name": "summarize",
+        "path": "benchmarks/exact_support_floor_attribution.py"
+      },
+      "window_line": 807
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "analytic_carrier",
+        "path": "tests/test_solve_path_census_inputs.py"
+      },
+      "run_function": {
+        "line": 239,
+        "name": "_build_context",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 247
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 880,
+        "name": "_verdict",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 909
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 880,
+        "name": "_verdict",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 907
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1072
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1072
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1072
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 1010,
+        "name": "run",
+        "path": "benchmarks/fixture_positional_stiffness.py"
+      },
+      "window_line": 1072
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 392,
+        "name": "_per_cell_moment_attribution",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 456
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 392,
+        "name": "_per_cell_moment_attribution",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 458
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 612,
+        "name": "_decompose_image",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 666
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 805,
+        "name": "_mode_measure",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 870
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 805,
+        "name": "_mode_measure",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 849
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 805,
+        "name": "_mode_measure",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 850
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 951,
+        "name": "_mode_measure_decomposed",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 1109
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 951,
+        "name": "_mode_measure_decomposed",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 1112
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 951,
+        "name": "_mode_measure_decomposed",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 1118
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "analytic_carrier",
+        "path": "tests/test_solve_path_census_inputs.py"
+      },
+      "run_function": {
+        "line": 1422,
+        "name": "run",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 1433
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 2181,
+        "name": "_write_newton_report",
+        "path": "benchmarks/oracle_start_newton_probe.py"
+      },
+      "window_line": 2265
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 253,
+        "name": "measure",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 577
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 253,
+        "name": "measure",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 575
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 335
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "read_health",
+        "path": "benchmarks/plasma_cell_first_step_directions.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "analytic_carrier",
+        "path": "tests/test_solve_path_census_inputs.py"
+      },
+      "run_function": {
+        "line": 439,
+        "name": "measure",
+        "path": "benchmarks/plasma_cell_terminal_state.py"
+      },
+      "window_line": 476
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 339
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "measure_arm",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 338
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 357,
+        "name": "shape_diagnostic",
+        "path": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      "window_line": 449
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_diverted_exact_read",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "run_function": {
+        "line": 233,
+        "name": "_build_context",
+        "path": "benchmarks/unit_amplitude_current_census.py"
+      },
+      "window_line": 253
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 488,
+        "name": "_state_census",
+        "path": "benchmarks/unit_amplitude_current_census.py"
+      },
+      "window_line": 597
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 488,
+        "name": "_state_census",
+        "path": "benchmarks/unit_amplitude_current_census.py"
+      },
+      "window_line": 597
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 488,
+        "name": "_state_census",
+        "path": "benchmarks/unit_amplitude_current_census.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 768,
+        "name": "measure",
+        "path": "benchmarks/unit_amplitude_current_census.py"
+      },
+      "window_line": 865
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "9dd7669dfc39c57226d8f305d0046fd6755b3152"
+  ],
+  "completed_at": "2026-10-03T06:20:35.526Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T05:37:49Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest process",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "set_support_clip_mode/support_clip_mode",
+    "nova/equilibrium/forward_operator.py"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T06:37:31.643133+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T05:37:31Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 25,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 120000,
+    "observed_at": "2026-10-03T05:37:06Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T06:20:35.526Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T053730219145-fsapi-clip-mode-shared-helpers/manifest.md",
+  "member": "disposable-r-20261003T053730219145-fsapi-clip-mode-shared-helpers",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsapi-clip-mode-shared-helpers",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 674,
+          "cached_input_tokens": 679870,
+          "input_tokens": 680546,
+          "output_tokens": 2496,
+          "reasoning_output_tokens": 973,
+          "total_tokens": 683042,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: the process-global support clip mode (nova/equilibrium/forward_operator.py _SUPPORT_CLIP_MODE, set_support_clip_mode and support_clip_mode) is being retired. The certificate hub benchmarks/solovev_certificate.py migrated at 30b49fbe4: its helpers take an additive clip_mode keyword whose default None keeps the prior behaviour, and its internal set-and-restore pairs became explicit threading through ForwardFluxOperator.with_clip_mode and ForwardSolveRequest(clip_mode=...). This node migrates the ten helpers that other benchmarks import, in the same way: oracle_start_newton_probe, plasma_cell_terminal_state, plasma_cell_fixed_point_attribution, plasma_cell_trip_panels, plasma_cell_first_step_directions, plasma_cell_map_fidelity, exact_clip_seed_amplitude, exact_support_floor_attribution, unit_amplitude_current_census and fixture_positional_stiffness. Rules: (a) every set-and-restore of the global becomes explicit threading of that mode to each operator, profile and request built inside, so that no global is set; where a solovev_certificate helper is called, pass its clip_mode keyword; (b) every helper in these files that another file imports and that builds an operator, profile or request gains clip_mode: str | None = None, where None keeps today's behaviour exactly; (c) existing call signatures stay valid, so changes are additive keywords only; (d) a receipt that records a mode records the solving operator's mode, never support_clip_mode(). Gate, logged under the run directory: (1) grep finds no set_support_clip_mode or support_clip_mode in the ten files; (2) the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python compiles each file with py_compile; (3) every test module that imports any of the ten files, run with JAX_PLATFORMS=cpu and -m 'not slow' in one fresh pytest process per file in place on this fleet allocation, adds no failure against the dispatch base. Compare by test id, and record baseline_suite and after_suite with failure_ids and the literal command per module. For the base arm use git worktree add of the dispatch base under /tmp, removed before the manifest is written, not a git archive, so source_revision resolves. Every uv command carries --no-sync and nothing runs uv sync. Write the manifest before any long step; its status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Move the ten shared helper benchmarks off the process-global support clip mode",
+    "id": "fsapi-clip-mode-shared-helpers",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T05:37:31Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 25,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 120000,
+      "observed_at": "2026-10-03T05:37:06Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T053730219145-fsapi-clip-mode-shared-helpers/manifest.md",
+    "negative_control": "",
+    "plan": "forward-solve-api",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/oracle_start_newton_probe.py",
+      "benchmarks/plasma_cell_terminal_state.py",
+      "benchmarks/plasma_cell_fixed_point_attribution.py",
+      "benchmarks/plasma_cell_trip_panels.py",
+      "benchmarks/plasma_cell_first_step_directions.py",
+      "benchmarks/plasma_cell_map_fidelity.py",
+      "benchmarks/exact_clip_seed_amplitude.py",
+      "benchmarks/exact_support_floor_attribution.py",
+      "benchmarks/unit_amplitude_current_census.py",
+      "benchmarks/fixture_positional_stiffness.py",
+      "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-shared-helpers.html",
+      "docs/figures/forward-solve-api/fsapi-clip-mode-shared-helpers"
+    ]
+  },
+  "orientation_input_tokens": 4058685.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsapi-clip-mode-shared-helpers",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T05:37:34.468095+00:00",
+    "score": 0.71875,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.99,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9dd7669dfc39c57226d8f305d0046fd6755b3152",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8c4d11f89d6f6390087b06af9d71e89586cc4a16",
+    "reviewed_head_sha": "9dd7669dfc39c57226d8f305d0046fd6755b3152",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 90
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T053730219145-fsapi-clip-mode-shared-helpers",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "e87d608b-0d54-461b-9688-f6188964e8f3",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 26224708,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2556.795,
+    "generated_tokens": 86259,
+    "generation_seconds": 1183.459,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.5,
+    "machine_seconds": 1373.336,
+    "peak_input_tokens": 196759,
+    "tokens_per_second": 72.89,
+    "wall_tokens_per_second": 33.74
+  },
+  "time_budget": "60m",
+  "tool_steps": 195.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2566,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T06:20:43Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T05:37:54Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T053730219145-fsapi-clip-mode-shared-helpers",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 13506,
+    "worker_pid": 1684690
+  },
+  "worker_seconds": 2531,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

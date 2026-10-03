@@ -1,0 +1,603 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "79c98c14f38f92dc41853a5f91abe1a08cfa0924",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 19380480,
+      "cached_input_tokens_cumulative": 19380480,
+      "input_tokens": 19561397,
+      "input_tokens_cumulative": 19561397,
+      "output_tokens": 46008,
+      "output_tokens_cumulative": 46008,
+      "reasoning_output_tokens": 16119,
+      "reasoning_output_tokens_cumulative": 16119
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-03T17:52:16Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-03T16:58:28Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "malformed-node",
+  "follow_on_paths": [],
+  "gate": "failed",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.85,
+    "plan": "centroid-constrained-oracle-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.46787674124103,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-06T05:02:33Z, which is after this node's 3600s horizon ending 2026-10-03T17:58:04.541020+00:00",
+    "horizon_ends_at": "2026-10-03T17:58:04.541020+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-03T16:58:03Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-06T05:02:33Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 533730,
+    "state": "quiet",
+    "utilisation_pct": 29.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-03T16:58:03Z",
+    "read_at": "2026-10-03T16:58:04Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 29.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T17:52:16Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T165801907034-cco-certificate-ladder-110-300-clip-explicit/manifest.md",
+  "member": "disposable-r-20261003T165801907034-cco-certificate-ladder-110-300-clip-explicit",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cco-certificate-ladder-110-300-clip-explicit",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2309,
+          "cached_input_tokens": 654109,
+          "input_tokens": 656420,
+          "output_tokens": 1525,
+          "reasoning_output_tokens": 299,
+          "total_tokens": 657945,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Continue from 79c98c14f (failed run r-20261003T141823788120; its report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-certificate-ladder-110-300.md shows every exact row equal to its whole-cell control to the digit because clip_mode was not passed in the typed request). The driver under docs/figures/centroid-constrained-oracle-solve/certificate-ladder-110-300/ passes the support mode explicitly in every typed solve request (exact for the certificate rows, the whole-cell mode for the controls), and refuses to write a row receipt when the realised operator support mode differs from the requested one or when an exact row and its control share a terminal state digest. The control uses the exact arm derived centroid tolerance. Each row receipt records the accepted Newton promotions and, when there are none, the solver history field that says why. ONE H200 job (betelgeuse, gpu_0003_grpA, one card, 8 CPUs, --mem=128G, --time=02:00:00, TMPDIR=/tmp in submit and payload, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python without uv, RECKON_ALLOW_NESTED_LAUNCH=1 sbatch; if still PENDING on resources after a minute, titan) runs weak, moderate and strong at -110 and -300 cells, both arms, from the production seed, each row persisted as it lands; once the job is admitted, commit, write status waiting with the sacct probe and job id, and end the turn. The resumed turn re-renders the twelve line-contour panels (shared levels, both null sets, wall, residual and converged flag in the caption), rewrites the report table with the clause verdicts, the accepted-promotion count per row and whether exact and control differ, and updates the fragment. A row that fails a clause is reported as measured, never tuned; no source under nova/ is edited. Keep scratch under the run directory.",
+    "estimated_hours": null,
+    "goal": "rerun the 110 and 300 cell centroid certificate with each arm support mode passed explicitly in the typed request, so the exact rows and their whole-cell controls are actually different measurements",
+    "id": "cco-certificate-ladder-110-300-clip-explicit",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-03T16:58:03Z",
+      "read_at": "2026-10-03T16:58:04Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 29.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T165801907034-cco-certificate-ladder-110-300-clip-explicit/manifest.md",
+    "negative_control": "",
+    "plan": "centroid-constrained-oracle-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/centroid-constrained-oracle-solve/certificate-ladder-110-300",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-certificate-ladder-110-300.html",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-certificate-ladder-110-300.md",
+      "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-certificate-ladder-110-300-clip-explicit.html",
+      "docs/figures/centroid-constrained-oracle-solve/cco-certificate-ladder-110-300-clip-explicit"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.4677333209693475,
+      "derived": 0.12926842511276462,
+      "drain_hours": 168.0,
+      "effective_limit": 0.12926842511276462,
+      "elapsed_fraction": 0.11751675010251328,
+      "elapsed_hours": 19.74281401722223,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-03T16:58:08+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.71,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.29,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.20352199999999998,
+      "decided_by": "window",
+      "margin": 0.515228,
+      "name": "cco-certificate-ladder-110-300-clip-explicit",
+      "score": 0.71875,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.29
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.130462,
+        "observed_at": "2026-10-03T16:58:08+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.29,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "cco-certificate-ladder-110-300-clip-explicit",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-03T16:58:08.130462+00:00",
+    "score": 0.71875,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.78,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 453.112,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2197.987,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5430594882407408,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 94.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.5430594882407408,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-04T06:00:00Z",
+        "utilisation_pct": 93.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 19,
+          "passed": 95,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 51
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.02,
+      "claude-haiku": 0,
+      "claude-opus": 0.01,
+      "clive": 0.8,
+      "codex": 0.02,
+      "codex-astra": 0.03,
+      "codex-luna": 0.01,
+      "codex-terra": 0.02,
+      "hold": 0.09
+    },
+    "rendered_token_estimate": 1475,
+    "usage": {
+      "cost": 0.00015771,
+      "input_tokens": 3755,
+      "output_tokens": 99
+    }
+  },
+  "plan": "centroid-constrained-oracle-solve",
+  "plan_impl_at_dispatch": 0.85,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "331311bb93cc9f6257141ba0425f741a927bc78a",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "none",
+  "role": "implement",
+  "run_id": "r-20261003T165801907034-cco-certificate-ladder-110-300-clip-explicit",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a102b4-1120-7bd0-bc53-4ddc4dce2ab6",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 19380480,
+    "cumulative_input_tokens": 38941877,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 62127
+  },
+  "time_budget": "60m",
+  "tool_steps": 97.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3228,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T17:52:20Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-03T17:13:40Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T165801907034-cco-certificate-ladder-110-300-clip-explicit",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 466,
+    "worker_pid": 720766
+  },
+  "worker_seconds": 3228,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-03T17:52:16Z",
+    "session_id": "01a102b4-1120-7bd0-bc53-4ddc4dce2ab6",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-certificate-ladder-110-300-clip-explicit"
+  }
+}

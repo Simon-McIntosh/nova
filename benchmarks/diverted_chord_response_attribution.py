@@ -198,7 +198,7 @@ def render(row, data, output):
     )
     fig, axis = plt.subplots(figsize=(6, 7), constrained_layout=True)
     contour = poloidal.draw_flux_contours(
-        axis, radial, height, raster, levels, color="#444444"
+        axis, radial, height, raster, levels, color="#444444", wall=units
     )
     assert any(len(part) > 1 for group in contour.allsegs for part in group)
     poloidal.draw_wall(axis, units=units)

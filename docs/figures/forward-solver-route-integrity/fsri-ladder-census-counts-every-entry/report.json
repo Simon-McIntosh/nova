@@ -1,0 +1,67 @@
+{
+  "census_commit": "5721de656b968e95ec150603911c8fe29e6a4ba5",
+  "complete": true,
+  "family_verdict": "no ladder rung was observed in the measured rows, so no row indicates whether the ladders are a fallback or a hot path",
+  "fence_base_sha": "52bfefc0a0f02412d8910",
+  "fixed_point_commit": "f3a1f8e302b00ff0650aae021a1a236165242522",
+  "fixed_point_digest": "7ec0441bdfa39d8c8107be99aa23c7843c9fb8b254951db4826c364fac180780",
+  "instruction_census": {
+    "by_owner": {
+      "_backtracking_scores": 2614,
+      "_rebuilt_model_promotion": 40237,
+      "_steepest_descent_promotion": 17352
+    },
+    "instructions": {
+      "_backtracked_promotion": 0,
+      "_backtracking_scores": 2614,
+      "_complete_newton_promotion": 0,
+      "_rebuilt_model_promotion": 40237,
+      "_steepest_descent_promotion": 17352
+    },
+    "ladder_entries": [
+      "_backtracking_scores",
+      "_backtracked_promotion",
+      "_complete_newton_promotion",
+      "_rebuilt_model_promotion",
+      "_steepest_descent_promotion"
+    ],
+    "optimized_instructions": 302553,
+    "share": {
+      "_backtracked_promotion": 0.0,
+      "_backtracking_scores": 0.008639808562466742,
+      "_complete_newton_promotion": 0.0,
+      "_rebuilt_model_promotion": 0.13299157502982947,
+      "_steepest_descent_promotion": 0.057351935032870276
+    }
+  },
+  "missing": [],
+  "rows": [
+    {
+      "case": "diverted-single-null",
+      "cells": -300,
+      "converged": false,
+      "executions": {
+        "_backtracked_promotion": 0,
+        "_backtracking_scores": 0,
+        "_complete_newton_promotion": 0,
+        "_rebuilt_model_promotion": 0,
+        "_steepest_descent_promotion": 0
+      },
+      "executions_per_trip": {
+        "_backtracked_promotion": 0.0,
+        "_backtracking_scores": 0.0,
+        "_complete_newton_promotion": 0.0,
+        "_rebuilt_model_promotion": 0.0,
+        "_steepest_descent_promotion": 0.0
+      },
+      "fired_in_trips": {},
+      "requested_cells": -300,
+      "residual_status": "finite",
+      "terminal_fixed_point_residual": 2.3408233665296123,
+      "termination": "active_set_settled",
+      "trips": 2
+    }
+  ],
+  "verdict": "no measured row converged, so ladder activity is reported on non-converging rows only",
+  "worktree_head": "5721de656b968e95ec150603911c8fe29e6a4ba5"
+}

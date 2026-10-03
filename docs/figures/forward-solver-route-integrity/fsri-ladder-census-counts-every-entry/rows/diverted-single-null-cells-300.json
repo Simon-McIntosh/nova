@@ -1,0 +1,25 @@
+{
+  "case": "diverted-single-null",
+  "cells": -300,
+  "converged": false,
+  "executions": {
+    "_backtracked_promotion": 0,
+    "_backtracking_scores": 0,
+    "_complete_newton_promotion": 0,
+    "_rebuilt_model_promotion": 0,
+    "_steepest_descent_promotion": 0
+  },
+  "executions_per_trip": {
+    "_backtracked_promotion": 0.0,
+    "_backtracking_scores": 0.0,
+    "_complete_newton_promotion": 0.0,
+    "_rebuilt_model_promotion": 0.0,
+    "_steepest_descent_promotion": 0.0
+  },
+  "fired_in_trips": {},
+  "requested_cells": -300,
+  "residual_status": "finite",
+  "terminal_fixed_point_residual": 2.3408233665296123,
+  "termination": "active_set_settled",
+  "trips": 2
+}

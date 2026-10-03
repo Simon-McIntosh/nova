@@ -1,0 +1,442 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "a51a137af4b354968bdc5f371842a1f57c686398",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6226834,
+      "input_tokens_cumulative": 6226834,
+      "output_tokens": 42963,
+      "output_tokens_cumulative": 42963,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 398,
+    "files": 2,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "window_line": 240
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "window_line": 240
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "window_line": 242
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "window_line": 264
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "window_line": 264
+    },
+    {
+      "existing_function": {
+        "line": 559,
+        "name": "test_mast_efm_geometry_matches_host_contour_route",
+        "path": "tests/test_transport_geometry_reference.py"
+      },
+      "run_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "window_line": 266
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "d7e149b6a209d08be16b66976eb120be248f3d9b",
+    "74acfe4a3447cbab168f109ab5da2e0789c48215"
+  ],
+  "completed_at": "2026-10-03T02:35:58.989Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-03T01:23:00Z",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.65,
+    "plan": "forward-solver-route-integrity",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-03T02:07:39.772225+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-03T01:22:39Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 3,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 11,
+    "mean_context": 120000,
+    "observed_at": "2026-10-03T01:22:36Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-03T02:35:58.989Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012237519319-fsri-krylov-reverse-mode-guard/manifest.md",
+  "member": "disposable-r-20261003T012237519319-fsri-krylov-reverse-mode-guard",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_krylov_reverse_mode_guard.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsri-krylov-reverse-mode-guard",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2792,
+          "cached_input_tokens": 503185,
+          "input_tokens": 505979,
+          "output_tokens": 1201,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 507180,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Context: item (3) of followup f-fsri-krylov-slice-2-review-findings. _qualified_krylov_step (nova/equilibrium/fixed_point.py:2693) is built on jax.custom_batching.custom_vmap (:2653), which has no reverse-mode rule, so a caller that reverse-differentiates through it either fails or silently differentiates something else. Its call sites today are fixed_point.py:3297, 3339, 3925, 5301 and 5395. The merged implicit picard derivative (f8cd09f83) is the positive case: its adjoint is a custom_linear_solve on the terminal map and never reverse-differentiates the Krylov step. Deliverable: tests/test_krylov_reverse_mode_guard.py. (1) jax.grad of the picard route on the small fixture that tests/test_picard_implicit_derivative.py uses returns finite gradients, the positive case. (2) Every function that calls _qualified_krylov_step is enumerated by inspecting fixed_point.py's source with ast. For each, assert that it sits under a custom_vjp, custom_jvp or custom_linear_solve rule, or that it is a forward-only route, named in an explicit allowlist with a one-line reason, so a new reverse-mode caller fails the test until it is classified. (3) A direct jax.grad through _qualified_krylov_step raises, documenting the missing rule. Gate, logged under the run directory: the file passes with JAX_PLATFORMS=cpu in place on this fleet allocation. The negative control, applied in a scratch copy that is not committed, adds a new function to fixed_point.py that calls _qualified_krylov_step with no derivative rule, and the census test must fail naming it. tests/test_picard_implicit_derivative.py adds no failure. Every uv command carries --no-sync and nothing runs uv sync. The manifest's status is one of complete, blocked or failed.",
+    "estimated_hours": null,
+    "goal": "Add a test that fails when a reverse-mode caller reaches the Krylov step without a derivative rule",
+    "id": "fsri-krylov-reverse-mode-guard",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-03T01:22:39Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 3,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 11,
+      "mean_context": 120000,
+      "observed_at": "2026-10-03T01:22:36Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "lane document publishes no 'throughput' block, so the rate its generating population achieved is not measured",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012237519319-fsri-krylov-reverse-mode-guard/manifest.md",
+    "negative_control": "add a new fixed_point function calling _qualified_krylov_step with no derivative rule in a scratch copy; the census test must fail naming it",
+    "plan": "forward-solver-route-integrity",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_krylov_reverse_mode_guard.py",
+      "docs/evidence/fragments/forward-solver-route-integrity/fsri-krylov-reverse-mode-guard.html",
+      "docs/figures/forward-solver-route-integrity/fsri-krylov-reverse-mode-guard"
+    ]
+  },
+  "orientation_input_tokens": 2416876.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsri-krylov-reverse-mode-guard",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-03T01:22:43.456626+00:00",
+    "score": 0.6625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5016.647,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-solver-route-integrity",
+  "plan_impl_at_dispatch": 0.65,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "74acfe4a3447cbab168f109ab5da2e0789c48215",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a51a137af4b354968bdc5f371842a1f57c686398",
+    "reviewed_head_sha": "74acfe4a3447cbab168f109ab5da2e0789c48215",
+    "scores": {
+      "durability": 18,
+      "evidence": 19,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "run_id": "r-20261003T012237519319-fsri-krylov-reverse-mode-guard",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "c6cd44ee-c774-461b-9094-0c58ccfa901e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 15574421,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2220.102,
+    "generated_tokens": 102114,
+    "generation_seconds": 856.497,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 82.8,
+    "machine_seconds": 1363.605,
+    "peak_input_tokens": 190494,
+    "tokens_per_second": 119.22,
+    "wall_tokens_per_second": 46.0
+  },
+  "time_budget": "45m",
+  "tool_steps": 66.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 4378,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-03T02:36:03Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-03T01:58:53Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261003T012237519319-fsri-krylov-reverse-mode-guard",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 17680,
+    "worker_pid": 3638192
+  },
+  "worker_seconds": 4340,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

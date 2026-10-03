@@ -1,0 +1,675 @@
+{
+  "shot": 22475,
+  "revision": "9c4a2257aba7787c7734b12c00a0f2de547ba651",
+  "host": "98dci4-clu-2018.iter.org",
+  "wall_rz_m": [
+    [
+      1.899999976158142,
+      0.4050000011920929
+    ],
+    [
+      1.5551042556762695,
+      0.4050000011920929
+    ],
+    [
+      1.5551042556762695,
+      0.8225002288818359
+    ],
+    [
+      1.407930612564087,
+      0.8225002288818359
+    ],
+    [
+      1.407930612564087,
+      1.0330003499984741
+    ],
+    [
+      1.039931058883667,
+      1.0330003499984741
+    ],
+    [
+      1.039931058883667,
+      1.1950000524520874
+    ],
+    [
+      1.899999976158142,
+      1.1950000524520874
+    ],
+    [
+      1.899999976158142,
+      1.8250000476837158
+    ],
+    [
+      0.5649306774139404,
+      1.8250000476837158
+    ],
+    [
+      0.5649306774139404,
+      1.7280815839767456
+    ],
+    [
+      0.7835000157356262,
+      1.7280815839767456
+    ],
+    [
+      0.7835000157356262,
+      1.7155816555023193
+    ],
+    [
+      0.5825902819633484,
+      1.5470000505447388
+    ],
+    [
+      0.4165000021457672,
+      1.5470000505447388
+    ],
+    [
+      0.2800000011920929,
+      1.683500051498413
+    ],
+    [
+      0.2800000011920929,
+      1.229088544845581
+    ],
+    [
+      0.19524440169334412,
+      1.0835000276565552
+    ],
+    [
+      0.19524440169334412,
+      -1.0835000276565552
+    ],
+    [
+      0.2800000011920929,
+      -1.229088544845581
+    ],
+    [
+      0.2800000011920929,
+      -1.683500051498413
+    ],
+    [
+      0.4165000021457672,
+      -1.5470000505447388
+    ],
+    [
+      0.5825902819633484,
+      -1.5470000505447388
+    ],
+    [
+      0.7835000157356262,
+      -1.7155816555023193
+    ],
+    [
+      0.7835000157356262,
+      -1.7280815839767456
+    ],
+    [
+      0.5649306774139404,
+      -1.7280815839767456
+    ],
+    [
+      0.5649306774139404,
+      -1.8250000476837158
+    ],
+    [
+      1.899999976158142,
+      -1.8250000476837158
+    ],
+    [
+      1.899999976158142,
+      -1.1950000524520874
+    ],
+    [
+      1.039931058883667,
+      -1.1950000524520874
+    ],
+    [
+      1.039931058883667,
+      -1.0330003499984741
+    ],
+    [
+      1.407930612564087,
+      -1.0330003499984741
+    ],
+    [
+      1.407930612564087,
+      -0.8225002288818359
+    ],
+    [
+      1.5551042556762695,
+      -0.8225002288818359
+    ],
+    [
+      1.5551042556762695,
+      -0.4050000011920929
+    ],
+    [
+      1.899999976158142,
+      -0.4050000011920929
+    ],
+    [
+      1.899999976158142,
+      0.4050000011920929
+    ]
+  ],
+  "rows": [
+    {
+      "identity": "22475/30",
+      "row": 30,
+      "polarity": -1,
+      "target_centroid_source": "efm/current_centrd_z",
+      "setup_wall_seconds": 45.910865678451955,
+      "compilation_cache_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143528356497-pfs-reversed-current-guard-panels/scratch/jax-cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "revision": "9c4a2257aba7787c7734b12c00a0f2de547ba651",
+      "host": "98dci4-clu-2018.iter.org",
+      "conclusion": "the free solve converges but its achieved state is refused by the topology read at the requested class (NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component); the guard is never evaluated; the conditioned re-solve was entered and the conditioned solve raised (NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component).",
+      "free": {
+        "free_converged": true,
+        "free_terminal_residual": 0.0,
+        "free_termination": "CONVERGED",
+        "free_trips": 3,
+        "free_newton_steps_per_trip": [
+          24,
+          1,
+          0
+        ],
+        "free_residual_trace": [
+          0.13505513140695347,
+          0.08270882108935039,
+          0.0
+        ],
+        "free_wall_seconds": 43.948238593526185,
+        "requested_class": 1,
+        "requested_class_name": "DIVERTED",
+        "convergence_criterion": 1e-08,
+        "guard_tolerance_m": 0.05,
+        "efm": {
+          "target_centroid_z_m": 0.010112413205206394,
+          "efm_axis_r_m": 0.9218915700912476,
+          "efm_axis_z_m": 0.004172320943325758,
+          "reference_plasma_current_A": -626198.9375
+        },
+        "centroid_read": {
+          "exception": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        },
+        "candidate_census": {
+          "o_candidates": [],
+          "o_retained_valid": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "x_candidates": [
+            {
+              "r_m": 1.77984,
+              "z_m": 0.00027,
+              "flux_wb": 0.786778,
+              "kind": 0,
+              "distance_to_reference_m": 0.969218050616589
+            }
+          ],
+          "x_retained_valid": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "candidate_slots": 30,
+          "overflow": [
+            false,
+            false
+          ]
+        },
+        "guard": {
+          "target_z_m": 0.010112413205206394,
+          "guard_uses_absolute_value": true,
+          "tolerance_m": 0.05,
+          "achieved_z_m": null,
+          "error_m": null,
+          "guard_ok": false,
+          "guard_signed_lower": false,
+          "guard_signed_upper": false,
+          "note": "achieved centroid unavailable; the guard was never evaluated"
+        },
+        "topology": {
+          "requested": {
+            "admitted": false,
+            "requested": 1,
+            "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+          },
+          "emergent": {
+            "admitted": false,
+            "requested": null,
+            "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+          }
+        },
+        "conditioning": {
+          "entered": true,
+          "why": "free branch guard false (achieved centroid unavailable; the guard was never evaluated)",
+          "solve_exception": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        },
+        "frame_path": {
+          "constructed": false,
+          "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        }
+      }
+    },
+    {
+      "identity": "22475/50",
+      "row": 50,
+      "polarity": -1,
+      "target_centroid_source": "efm/current_centrd_z",
+      "setup_wall_seconds": 46.56692659761757,
+      "compilation_cache_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143528356497-pfs-reversed-current-guard-panels/scratch/jax-cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "revision": "9c4a2257aba7787c7734b12c00a0f2de547ba651",
+      "host": "98dci4-clu-2018.iter.org",
+      "conclusion": "the free solve fails to contract: terminal residual None, termination ACTIVE_SET_SETTLED after 11 trips; the conditioned re-solve was entered and the conditioned solve raised (NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component).",
+      "free": {
+        "free_converged": false,
+        "free_terminal_residual": null,
+        "free_termination": "ACTIVE_SET_SETTLED",
+        "free_trips": 11,
+        "free_newton_steps_per_trip": [
+          5,
+          4,
+          0,
+          4,
+          2,
+          17,
+          4,
+          5,
+          0,
+          0,
+          0
+        ],
+        "free_residual_trace": [
+          0.20903133896832335,
+          0.03004440431566259,
+          0.05986218088521716,
+          0.14679191229860564,
+          0.15283472733181935,
+          0.11460638857728503,
+          0.12389758896587984,
+          0.11236583158991541,
+          NaN,
+          NaN,
+          NaN
+        ],
+        "free_wall_seconds": 134.8681356338784,
+        "requested_class": 1,
+        "requested_class_name": "DIVERTED",
+        "convergence_criterion": 1e-08,
+        "guard_tolerance_m": 0.05,
+        "efm": {
+          "target_centroid_z_m": 0.005321870092302561,
+          "efm_axis_r_m": 0.9427813291549683,
+          "efm_axis_z_m": 0.0043948739767074585,
+          "reference_plasma_current_A": -734164.0625
+        },
+        "centroid_read": {
+          "exception": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        },
+        "candidate_census": {
+          "o_candidates": [],
+          "o_retained_valid": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "x_candidates": [],
+          "x_retained_valid": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "candidate_slots": 30,
+          "overflow": [
+            false,
+            false
+          ]
+        },
+        "guard": {
+          "target_z_m": 0.005321870092302561,
+          "guard_uses_absolute_value": true,
+          "tolerance_m": 0.05,
+          "achieved_z_m": null,
+          "error_m": null,
+          "guard_ok": false,
+          "guard_signed_lower": false,
+          "guard_signed_upper": false,
+          "note": "achieved centroid unavailable; the guard was never evaluated"
+        },
+        "topology": {
+          "requested": {
+            "admitted": false,
+            "requested": 1,
+            "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+          },
+          "emergent": {
+            "admitted": false,
+            "requested": null,
+            "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+          }
+        },
+        "conditioning": {
+          "entered": true,
+          "why": "free solve not converged",
+          "solve_exception": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        },
+        "frame_path": {
+          "constructed": false,
+          "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        }
+      }
+    },
+    {
+      "identity": "22475/55",
+      "row": 55,
+      "polarity": -1,
+      "target_centroid_source": "efm/current_centrd_z",
+      "setup_wall_seconds": 45.28658950235695,
+      "compilation_cache_directory": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143528356497-pfs-reversed-current-guard-panels/scratch/jax-cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe",
+      "revision": "9c4a2257aba7787c7734b12c00a0f2de547ba651",
+      "host": "98dci4-clu-2018.iter.org",
+      "conclusion": "the free solve fails to contract: terminal residual 0.13798999335500364, termination ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED after 16 trips; the conditioned re-solve was entered and the conditioned solve raised (NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component).",
+      "free": {
+        "free_converged": false,
+        "free_terminal_residual": 0.13798999335500364,
+        "free_termination": "ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED",
+        "free_trips": 16,
+        "free_newton_steps_per_trip": [
+          5,
+          2,
+          0,
+          4,
+          0,
+          1,
+          0,
+          0,
+          5,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "free_residual_trace": [
+          0.19277054331297,
+          0.24702954464342247,
+          0.2920820652788719,
+          0.174084742548154,
+          0.14550928600257687,
+          0.15491086842163004,
+          0.14661133552703817,
+          0.13799287860162635,
+          0.15210636845152575,
+          0.14622439544224203,
+          0.16486502262654476,
+          0.15464926088810105,
+          0.14607748445316013,
+          0.15535118224835004,
+          0.1469917933534963,
+          0.13798999335500364
+        ],
+        "free_wall_seconds": 132.06464341748506,
+        "requested_class": 1,
+        "requested_class_name": "DIVERTED",
+        "convergence_criterion": 1e-08,
+        "guard_tolerance_m": 0.05,
+        "efm": {
+          "target_centroid_z_m": 0.0055735730566084385,
+          "efm_axis_r_m": 0.9518334865570068,
+          "efm_axis_z_m": 0.004914466291666031,
+          "reference_plasma_current_A": -734427.1875
+        },
+        "centroid_read": {
+          "exception": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        },
+        "candidate_census": {
+          "o_candidates": [
+            {
+              "r_m": 0.39094,
+              "z_m": 0.51199,
+              "flux_wb": 0.625819,
+              "kind": 1,
+              "distance_to_reference_m": 0.7031726324661803
+            },
+            {
+              "r_m": 0.5381,
+              "z_m": -1.34245,
+              "flux_wb": 0.277907,
+              "kind": 1,
+              "distance_to_reference_m": 1.3904081440692524
+            }
+          ],
+          "o_retained_valid": [
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "x_candidates": [
+            {
+              "r_m": 0.43866,
+              "z_m": 0.51761,
+              "flux_wb": 0.624466,
+              "kind": 0,
+              "distance_to_reference_m": 0.6751981855792635
+            },
+            {
+              "r_m": 1.84285,
+              "z_m": -0.02172,
+              "flux_wb": 1.257826,
+              "kind": 0,
+              "distance_to_reference_m": 0.9644498316953986
+            }
+          ],
+          "x_retained_valid": [
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "candidate_slots": 30,
+          "overflow": [
+            false,
+            false
+          ]
+        },
+        "guard": {
+          "target_z_m": 0.0055735730566084385,
+          "guard_uses_absolute_value": true,
+          "tolerance_m": 0.05,
+          "achieved_z_m": null,
+          "error_m": null,
+          "guard_ok": false,
+          "guard_signed_lower": false,
+          "guard_signed_upper": false,
+          "note": "achieved centroid unavailable; the guard was never evaluated"
+        },
+        "topology": {
+          "requested": {
+            "admitted": false,
+            "requested": 1,
+            "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+          },
+          "emergent": {
+            "admitted": false,
+            "requested": null,
+            "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+          }
+        },
+        "conditioning": {
+          "entered": true,
+          "why": "free solve not converged",
+          "solve_exception": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        },
+        "frame_path": {
+          "constructed": false,
+          "error": "NoQualifiedAxisError: no qualified magnetic-axis candidate has a resolved component"
+        }
+      }
+    }
+  ]
+}

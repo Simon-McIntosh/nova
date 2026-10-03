@@ -95,9 +95,7 @@ def _source_revision() -> str:
     ).stdout.strip()
 
 
-def _census_rows(
-    block: Any, valid: Any | None = None
-) -> list[dict[str, Any]]:
+def _census_rows(block: Any, valid: Any | None = None) -> list[dict[str, Any]]:
     """Return host-printable (R, Z, flux, kind) rows from an O or X block.
 
     The census stores a fixed number of slots and zero-fills the ones a slice
@@ -373,8 +371,7 @@ def _state_label(free: dict[str, Any]) -> str:
         else f"terminal residual {residual:.3e}"
     )
     return (
-        f"unconverged ({text}, {free['free_termination']}, "
-        f"{free['free_trips']} trips)"
+        f"unconverged ({text}, {free['free_termination']}, {free['free_trips']} trips)"
     )
 
 
@@ -400,10 +397,12 @@ def _draw_census_panel(axis, free: dict[str, Any], wall: np.ndarray) -> None:
     axis. The panel carries the first wall and the admission verdict, and names
     its terminal state and residual in the title.
     """
-    from nova.media import poloidal
+    from nova.media import ink, poloidal
 
-    poloidal.poloidal_axes(axis)
-    poloidal.draw_wall(axis, units=(np.asarray(wall, dtype=float),), linewidth=0.9)
+    polygon = np.asarray(wall, dtype=float)
+    ink.poloidal_axes(axis)
+    poloidal.draw_wall(axis, units=(polygon,), linewidth=0.9)
+
     efm = free["efm"]
     axis.plot(
         efm["efm_axis_r_m"],
@@ -423,39 +422,68 @@ def _draw_census_panel(axis, free: dict[str, Any], wall: np.ndarray) -> None:
         fontsize=8,
         color="#2e7d32",
     )
+
     census = free.get("candidate_census") or {}
-    o_rows = census.get("o_candidates", [])
-    x_rows = census.get("x_candidates", [])
+    o_rows = list(census.get("o_candidates", []))
+    x_rows = list(census.get("x_candidates", []))
+
+    def _inside(rows: list[dict[str, Any]]) -> np.ndarray:
+        if not rows:
+            return np.zeros(0, dtype=bool)
+        points = np.array([[row["r_m"], row["z_m"]] for row in rows], dtype=float)
+        return np.asarray(poloidal.inside_wall_units(points, polygon), dtype=bool)
+
+    o_inside = _inside(o_rows)
+    x_inside = _inside(x_rows)
+
+    axis_point = None
     if o_rows:
-        axis.plot(
-            [row["r_m"] for row in o_rows],
-            [row["z_m"] for row in o_rows],
-            marker="^",
-            markersize=8,
-            markerfacecolor="none",
-            markeredgecolor="#3b6ea5",
-            linestyle="none",
-            zorder=5,
+        nearest = int(
+            np.argmin([row.get("distance_to_reference_m", 0.0) for row in o_rows])
         )
+        axis_point = (o_rows[nearest]["r_m"], o_rows[nearest]["z_m"])
+        for row, inside in zip(o_rows, o_inside):
+            if (row["r_m"], row["z_m"]) == axis_point or not inside:
+                continue
+            axis.plot(
+                row["r_m"],
+                row["z_m"],
+                marker="^",
+                markersize=6,
+                markerfacecolor="none",
+                markeredgecolor="#3b6ea5",
+                linestyle="none",
+                zorder=5,
+            )
+
+    admitted_x = np.array(
+        [[row["r_m"], row["z_m"]] for row, keep in zip(x_rows, x_inside) if keep],
+        dtype=float,
+    )
+    other_x = np.array(
+        [[row["r_m"], row["z_m"]] for row, keep in zip(x_rows, x_inside) if not keep],
+        dtype=float,
+    )
+    poloidal.draw_nulls(
+        axis,
+        magnetic_axis=axis_point,
+        x_points=admitted_x if admitted_x.size else None,
+        other_x_points=other_x if other_x.size else None,
+        contain=polygon,
+    )
+
+    count = len(o_rows) + len(x_rows)
+    if count:
+        anchor = axis_point or (x_rows[0]["r_m"], x_rows[0]["z_m"])
         axis.annotate(
-            f"{len(o_rows)} O-point candidate(s)",
-            (o_rows[0]["r_m"], o_rows[0]["z_m"]),
+            f"{len(o_rows)} O candidate(s), {len(x_rows)} X candidate(s)",
+            anchor,
             xytext=(6, 6),
             textcoords="offset points",
             fontsize=8,
             color="#3b6ea5",
         )
-    if x_rows:
-        axis.plot(
-            [row["r_m"] for row in x_rows],
-            [row["z_m"] for row in x_rows],
-            marker="x",
-            markersize=7,
-            color="#a33b3b",
-            linestyle="none",
-            zorder=5,
-        )
-    if not o_rows and not x_rows:
+    else:
         axis.text(
             0.5,
             0.04,
@@ -884,7 +912,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "wall_rz_m": wall.tolist(),
         "rows": rows,
     }
-    output.write_text(json.dumps(receipt, indent=2, default=str) + "\n", encoding="utf-8")
+    output.write_text(
+        json.dumps(receipt, indent=2, default=str) + "\n", encoding="utf-8"
+    )
     figures = _render_receipt(receipt, figures_dir, revision)
     print("=== DIAGNOSIS RECEIPT ===")
     print(json.dumps(receipt, indent=2, default=str))

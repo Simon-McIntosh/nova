@@ -152,7 +152,7 @@ def analytic_membership(requested: int, archived: dict) -> dict:
     )
     confined = production_confined_support(profile_support, field, selected)
     moments, *_trace = analytic_condition_moments(
-        operator, source, exact, field, confined, selected
+        operator, operator.source, exact, field, confined, selected
     )
     coupled_moments = operator.coupling_current_moments(moments)
     amplitude = operator.current_normalisation_amplitude(

@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -277,6 +277,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s22-weak110-receipt-20261003" data-who="" data-when="">
     <div class="r-comment-body"><p>The weak-110 exact-clip receipt qualifies on the fixed solver. It was merged at 3f69179ab and measured on H200 job 1280628. Global residual 2.68e-14. Row residual 9.5e-15 pitches against the derived 1.66e-4. Compensator +0.198 mT. Net span offset -3.86e-4 of span against 1e-3. Map RMS 0.092 Wb over 772 samples. The no-row control is refused at 3.30 times the tolerance. Review 88/100 failed only the per-Newton-pass row clause. The coordinator moved that clause to the solve rework, because stopped solves shift promotion one by 3.64 percent (r-20261003T141337624101). The ladder now runs in two parts: 110 and 300 cells (r-20261003T141823788120, titan job 1280637), and a bounded 500/1000 probe on today's code (r-20261003T142002106912, H200 job 1280644).</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt" data-who="reckon-build" data-when="2026-10-03T13:50:51Z">
+    <div class="r-comment-body"><p>Repaired weak-110 H200 receipt qualifies at global 2.681e-14, first-moment row 9.529e-15 pitches against 1.660e-4 and net span -3.860e-4; same-seed no-row misses by 3.296x; [panel](/nova/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/flux-panels.png) and [report](/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-repaired-constrained-remeasure-receipt.md).</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T065922634567-review-of-cco-flux-level-compensating-term-2" data-who="reckon-ship" data-when="2026-09-19T07:12:54.415Z">
     <div class="r-comment-body"><p>Review stored: 79/100, four findings</p></div>

@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="113">
+<meta name="plan-version" content="114">
 <meta name="plan-impl" content="0.96">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -669,6 +669,9 @@ number and residual.</p>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261003T143313642333-cank-bound-test-writes-tmp-path" data-who="reckon-build" data-when="2026-10-03T15:31:13.311Z">
     <div class="r-comment-body"><p>The compensator-bound test now writes its admission receipt beneath pytest tmp_path and asserts the committed docs/ receipt is byte-identical after the solve; the over-ceiling arm reads 54.64758697677363 at base 0dfce2a0d (two runs, bit-equal) versus 40.8556693262511 at writer revision d884fe594, so the 40.86-to-54.65 A move is code, not nondeterminism.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261003T153135907657-review-of-cank-bound-test-writes-tmp-path" data-who="reckon-build" data-when="2026-10-03T15:58:51.384Z">
+    <div class="r-comment-body"><p>Independent review of r-20261003T143313642333-cank-bound-test-writes-tmp-path (node cank-bound-test-writes-tmp-path, commit 5faacc773) scored 17/16/19/17/19 (goal_fidelity/evidence/scope_discipline/durability/fit, total 88, verdict pass); the defect fix is sound and independently reproduced, with four follow-on findings (gate-arm revision labelling, a writer-arm value that does not bit-reproduce its committed receipt, a frozen committed receipt left without a producer, and a negative-control log that aborted before its summary).</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260923T003137764402-review-of-cna-edge-contours-print-exponent-errors" data-who="reckon-ship" data-when="2026-09-23T01:37:08.211Z">
     <div class="r-comment-body"><p>review stored</p></div>

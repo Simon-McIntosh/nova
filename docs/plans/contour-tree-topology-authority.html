@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 </head>
 <body>
   <main class="plan-doc">
@@ -468,7 +468,10 @@
     <div class="r-comment-body"><p>review-3 restates nova:contour-tree-topology-authority (revision e4fedfd80 / HEAD b2cc96f45, plan blob 1b01505b8, plan digest sha256:9ad6ead9...) at its margin revision: intent in the reviewer's own words, the one open decision field-representation-on-hex-cells with all three options, and all five done-whens; 125 prose sentences enumerated, 5 flagged with two-or-more readings (040, 043, 065, 088, 097); no plan file edited.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261002T235408135394-review-of-ctta-sweep-receipt-comparator" data-who="reckon-build" data-when="2026-10-03T00:10:33.538Z">
-    <div class="r-comment-body"><p>Independent review of f7f823c667f9b65740a04d5de40d991e60a2cd4e..c01f5f4c359de3f9e09cbefe6c8a0cc027637b23 is parsed at both granted review paths, verdict pass-with-follow-ons, scores 18/19/20/16/18 = 91/100; the seven-field comparator reproduces (gate 15 passed EXIT=0, negative control 1 failed 14 passed EXIT=1 on test_single_field_difference_names_that_field[edge_valid]), and an independent end-to-end run on four real certificate fixtures compares all seven fields (identical 0 mismatches exit 0; one edge_valid change names edge_valid exit 1); added_failure_count 0 is measured from the reviewed run&#x27;s own completed baseline and after suite arms (8 passed each).</p></div>
+    <div class="r-comment-body"><p>Independent review of f7f823c667f9b65740a04d5de40d991e60a2cd4e..c01f5f4c359de3f9e09cbefe6c8a0cc027637b23 is parsed at both granted review paths, verdict pass-with-follow-ons, scores 18/19/20/16/18 = 91/100; the seven-field comparator reproduces (gate 15 passed EXIT=0, negative control 1 failed 14 passed EXIT=1 on test_single_field_difference_names_that_field[edge_valid]), and an independent end-to-end run on four real certificate fixtures compares all seven fields (identical 0 mismatches exit 0; one edge_valid change names edge_valid exit 1); added_failure_count 0 is measured from the reviewed run's own completed baseline and after suite arms (8 passed each).</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261002T233111531441-ctta-carrier-adjacency-index-dtype" data-who="reckon-build" data-when="2026-10-03T00:01:05.286Z">
+    <div class="r-comment-body"><p>Carrier adjacency indices and their scatter tables now share CARRIER_INDEX_DTYPE (int32) — _carrier adjacency casts the caller edge array once and builds neighbours/counts at that dtype; the two capacity tests carry filterwarnings(&quot;error::FutureWarning&quot;) and pass (base fails them at EXIT=1, head EXIT=0), and the four-file gate adds no failure (base and head both 11/8/6/8 passed).</p></div>
 </div>
 </section>
 </main>

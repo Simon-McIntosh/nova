@@ -13,6 +13,7 @@ from nova.jax.config import configure_dtypes
 
 
 @pytest.mark.slow
+@pytest.mark.timeout(600)
 def test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier() -> None:
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True

@@ -25,7 +25,7 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="121">
+<meta name="plan-version" content="122">
 <meta name="plan-commits" content="e464be9d,6fb07a40,6af77248,d554b33f,84fd0185,5b203a42,bf199860">
 <meta name="plan-artifacts" content="docs/evidence/archive/forward-solve-api-landed.html,docs/figures/forward-solve-api/coil-edit-latency.json,docs/figures/forward-solve-api/receipt-topology.json,docs/figures/forward-solve-api/traced-current-bitwise.json,benchmarks/traced_current_bitwise.py">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
@@ -203,6 +203,11 @@
 <article class="r-fu" data-id="f-fsapi-unqualified-axis-eager-readers" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build forward-solve-api" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Eager readers now refuse an unqualified iterate: migrate them with the clip-mode refactor</h4>
     <div class="r-fu-body"><p>The fused-route axis enforcement merged at bb6331523 makes <code>_support_partition</code> raise <code>NoQualifiedAxisError</code> for an iterate, seed or perturbation with no admitted axis, where it used to return a partition. Traced callers are unaffected. Eager callers that can now raise, per S22's audit (~/.config/reckon/crew/reports/nova/s22/msc-fused-route-wider-gate.md): benchmarks/plasma_cell_trip_panels.py:232, nan_tangent_localisation.py:226/254/320, settled_mask_stall.py:980/1016, observable_route_discriminator.py:225, oracle_start_newton_probe.py:406, scripts/moment_branch_integration/measure.py:35 (xpoint_cell_allocation_rca.py:713 already catches it). In nova/equilibrium/forward.py the production eager hosts at :934 (cell_current_moments), :1385 and :1390 (_integral_state, linear branch) now raise where they served achieved labels, and no test exercises those three routes on an unqualified state. The refusal is asserted only through the fixture route in tests/test_fused_same_state_read.py, whose _first_unqualified_map_state raises a bare AssertionError if the relaxed map does not leave the qualified region within HOST_EVALUATIONS, so a slower fixture fails for the wrong reason. Fold each call site into the f-fsapi-clip-mode-is-a-request-field brief: migrate it or make it catch the refusal explicitly, add tests for the three forward.py routes, and make the fixture's exit a named failure.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solve-api</pre>
+    </article>
+<article class="r-fu" data-id="f-fsapi-outboard-census-exact-total" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solve-api" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Find why the outboard-hole census books 15.49 MA where its committed state holds 14.01 MA</h4>
+    <div class="r-fu-body"><p>The tier-2 clip-mode review (run r-20261003T062154341121) found tests/test_outboard_hole_census_gate.py failing identically at base 8c4d11f89 and at the tier-2 head. The failure is an assertion: the exact booked total is 15491539.124767 A against the committed state's 14013835.43717596 A, a relative gap of 0.105 against a bound of 1e-6. Request-routed exact solves ran chord between af7403bc0 and the clip-mode bridge (60e51288a). So first establish when the committed state was written, and in which clip mode its solve actually ran. Then decide, by measurement, whether the committed state or the current booking is wrong. Done when the cause is named by file and line, and the test passes against a committed state whose clip mode is recorded and verified, with no tolerance widened.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solve-api</pre>
     </article>
 </section>

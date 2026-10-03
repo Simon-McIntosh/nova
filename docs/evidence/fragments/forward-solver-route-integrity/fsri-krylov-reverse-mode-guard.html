@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="forward-solver-route-integrity">
+  <title>Krylov reverse-mode guard — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsri-krylov-reverse-mode-guard">
+  <p><code>tests/test_krylov_reverse_mode_guard.py</code> guards the reverse-mode
+  boundary of <code>_qualified_krylov_step</code>. That step is served by a
+  <code>jax.custom_batching.custom_vmap</code> stream: the stream carries a
+  batching rule and no derivative rule, so a caller that
+  reverse-differentiates through it fails to linearise rather than returning the
+  step's derivative. Three tests pin the boundary:</p>
+  <ol>
+    <li>the implicit Picard route is the reverse-mode positive case:
+    <code>jax.grad</code> of the converged fixture returns the finite implicit
+    tangent;</li>
+    <li>every function that calls <code>_qualified_krylov_step</code> is
+    enumerated by parsing <code>fixed_point.py</code> with <code>ast</code> and
+    must either sit under a <code>custom_jvp</code>, <code>custom_vjp</code> or
+    <code>custom_linear_solve</code> rule or be named in
+    <code>_FORWARD_ONLY_CALLERS</code> with a one-line reason, so an
+    unclassified caller fails the test naming itself. The four forward-only
+    callers are <code>_manifold_newton_krylov.newton_body.attempt_step</code>,
+    <code>_newton_krylov_inner.newton_body.attempt_step</code>,
+    <code>kink_aware_newton_krylov.krylov_step</code> and
+    <code>kink_aware_newton_krylov.newton_body.clarke_step</code>;</li>
+    <li>a direct <code>jax.grad</code> through the raw step raises
+    (<code>ValueError: Linearization failed to produce known values for all
+    output primals</code>), documenting the missing rule.</li>
+  </ol>
+  <p>Head arm (JAX_PLATFORMS=cpu on the fleet allocation):
+  <strong>3 passed, EXIT=0</strong>. <code>tests/test_picard_implicit_derivative.py</code>
+  adds no failure (<strong>5 passed, EXIT=0</strong>).</p>
+  <p>Negative control: a scratch copy of the module appends one module-level
+  function, <code>_unclassified_krylov_caller</code>, that calls
+  <code>_qualified_krylov_step</code> with no derivative rule. The census test
+  fails and names it — <code>FAILED
+  tests/test_krylov_reverse_mode_guard.py::test_every_krylov_caller_is_classified</code>,
+  <strong>1 failed, 2 passed, EXIT=1</strong> — with the assertion message
+  <code>Unclassified caller(s) of _qualified_krylov_step:
+  _unclassified_krylov_caller (lines [5645])</code>. The scratch run reaches the
+  mutant module through <code>--import-mode=importlib</code> with
+  <code>PYTHONPATH</code> on the scratch tree, named on the log's
+  <code>module_file</code> header line.</p>
+  <p>Receipts under
+  <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012237519319-fsri-krylov-reverse-mode-guard/logs/</code>:
+  <code>krylov-reverse-mode-guard-head.log</code>,
+  <code>krylov-reverse-mode-guard-negative-control.log</code>,
+  <code>picard-implicit-derivative.log</code>.</p>
+</article>
+</main>
+</body>
+</html>

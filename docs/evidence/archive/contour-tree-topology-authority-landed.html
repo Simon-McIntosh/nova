@@ -100,6 +100,12 @@
     <p>All 18 base and head receipts match, and the 33-test topology gate passes. Restoring the repeated-neighbour sweep makes the 1074-cell case 101 s again. The review scored 89 of 100 and re-measured 0.464 s at 1089 vertices.</p>
     <p>Two limits remain. The sweep is a <code>fori_loop</code> of vertex visits, each running a data-dependent <code>while_loop</code>, so on the H200 it is launch-latency bound and slower than CPU for one field. The new int64 index scatter raises a JAX FutureWarning that a later release will turn into an error. Both, with the uncommitted receipt comparator and performance guard, are open as f-ctta-sweep-durability-and-placement. Figure: <code>/nova/figures/contour-tree-topology-authority/sweep-cost/cpu-execute-seconds.png</code>.</p>
   </section>
+
+  <section id="carrier-index-dtype">
+    <h2>One dtype for the carrier indices and their tables</h2>
+    <p>Run <code>r-20261002T233111531441-ctta-carrier-adjacency-index-dtype</code> (local lane), merged at <code>ce663e84e</code>, review 92 of 100, closes item (2) of f-ctta-sweep-durability-and-placement. <code>_carrier_adjacency</code> now casts the edge endpoints once to <code>CARRIER_INDEX_DTYPE</code> (int32) and builds the neighbour and count tables at that dtype, so no scatter mixes integer widths. Carrier vertex indices are bounded by the mesh size, so the narrower type is exact.</p>
+    <p>The two capacity tests in <code>tests/test_contour_tree_merge.py</code> carry <code>filterwarnings("error::FutureWarning")</code>. With the warning promoted to an error, both fail at the dispatch base and pass at the merge. Restoring the int64 cast fails them again. The four contour-tree test files pass unchanged: merge 11, mesh 8, conventions 6 and brute-force 8, the same at base and head.</p>
+  </section>
 </main>
 </body>
 </html>

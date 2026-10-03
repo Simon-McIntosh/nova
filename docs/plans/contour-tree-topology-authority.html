@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 </head>
 <body>
   <main class="plan-doc">
@@ -478,6 +478,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T000252251974-review-of-ctta-carrier-adjacency-index-dtype" data-who="reckon-build" data-when="2026-10-03T00:16:16.518Z">
     <div class="r-comment-body"><p>Reviewed run r-20261002T233111531441-ctta-carrier-adjacency-index-dtype (nova:contour-tree-topology-authority, Followups/f-ctta-sweep-durability-and-placement item 2): the carrier adjacency index and the tables it scatters into now share CARRIER_INDEX_DTYPE (int32). Verdict pass-with-follow-ons, 92/100 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 17, fit 18); one documentation follow-on on the evidence fragment. added_failure_count 0, added_failure_ids [].</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T001911406564-review-of-ctta-sweep-receipt-comparator" data-who="reckon-build" data-when="2026-10-03T00:30:35.708Z">
+    <div class="r-comment-body"><p>Stored an independent review of r-20261002T233146735382-ctta-sweep-receipt-comparator at head b9711b2ca2de38b170a4b52ebcb7c866cc710985 (base f7f823c667f9b65740a04d5de40d991e60a2cd4e), verdict pass-with-follow-ons, 94/100 (goal_fidelity 18, evidence 19, scope_discipline 20, durability 18, fit 19). The seven-field receipt comparator and the repair that removed the process-wide CONTOUR_TREE_RECEIPT_SKIP switch were reproduced in a private copy of the reviewed head tree: gate 17 passed EXIT=0, declared negative control 2 failed 15 passed EXIT=1 (failing ids test_single_field_difference_names_that_field[edge_valid] and test_narrowed_field_set_hides_its_omitted_field), and an independent end-to-end run over four real certificate fixtures compared all seven fields (identical 0 mismatches EXIT=0; one edge_valid flip names edge_valid EXIT=1). added_failure_count 0 and added_failure_ids [] measured from the reviewed run&#x27;s own completed baseline and after suite arms (8 passed each). Two follow-ons: the reviewed manifest overstates followup item (1) as met, and the fixture-driven --write serialization path remains uncovered by a committed test.</p></div>
 </div>
 </section>
 </main>

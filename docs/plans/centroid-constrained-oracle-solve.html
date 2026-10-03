@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -242,6 +242,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261003T121544352422-cco-first-moment-centroid-consumers" data-who="reckon-build" data-when="2026-10-03T12:40:29Z">
     <div class="r-comment-body"><p>Consumer inventory and report identify 42 of 42 direct invocations plus indirect centroid-row readers; exact-clip 135-cell input shift on a displaced state is R +5.849878655870278 mm, Z -0.03278931795223927 mm, net current 0 A; table and report paths listed under changed_paths.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261003T124118859508-review-of-cco-first-moment-centroid-consumers" data-who="reckon-build" data-when="2026-10-03T12:51:18.503Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261003T121544352422 (base fda483e45, head 4fa444e91, commits 8d324df31 + 4fa444e91) stored: 5 dimensions scored 18/16/19/15/18 (total 86), verdict pass-with-follow-ons; the inventory is complete against an independent census (42 direct invocations = 44 total current_moment_observation( hits minus 2 definitions) and contains every consumer the prior review named, and its shift figures reproduce the gate logs exactly (analytic R +0.006092233036050665, displaced R +0.005849878655870278, Z -3.278931795223927e-05, 0 A); three follow-on findings only.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260917T053656352101-review-of-cco-bounded-row-step-control" data-who="s19c-review-cco-c" data-when="2026-09-17T06:45:40.145Z">
     <div class="r-comment-body"><p>Independent review of r-20260916T205409901465-cco-bounded-row-step-control stored at the fence path, total 84, findings recorded on the reviewed run's completion</p></div>

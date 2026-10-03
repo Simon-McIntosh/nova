@@ -268,11 +268,17 @@ def _read_sol_ledger() -> dict[str, Any]:
             "reason": f"receipt absent at {SOL_LEDGER_RECEIPT.relative_to(ROOT)}",
         }
     receipt = json.loads(SOL_LEDGER_RECEIPT.read_text(encoding="utf-8"))
+    if "clip_mode" not in receipt:
+        raise ValueError(
+            f"{SOL_LEDGER_RECEIPT} predates the 'clip_mode' receipt key and "
+            "carries the retired clip-mode key instead; it must be regenerated "
+            "by benchmarks/sol_ledger_current_census.py before this census reads it"
+        )
     return {
         "route": "sol-ledger-census",
         "status": "read-from-committed-receipt",
         "receipt": str(SOL_LEDGER_RECEIPT.relative_to(ROOT)),
-        "clip_mode": receipt.get("clip_mode"),
+        "clip_mode": receipt["clip_mode"],
         "plasma_current_a": receipt.get("plasma_current_a"),
         "common_sol_over_plasma_current": receipt.get("common_sol_over_plasma_current"),
         "fixed_point_residual": receipt.get("fixed_point_residual"),

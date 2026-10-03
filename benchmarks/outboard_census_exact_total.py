@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import io
 import json
 import os
@@ -136,6 +137,22 @@ def _install_absent_saddle_bridge(forward_operator: Any) -> None:
     forward_operator.ForwardFluxOperator._profile_support = bridged
 
 
+@contextmanager
+def _operator_clip_mode(forward_operator: Any, operator: Any, mode: str):
+    """Yield an operator configured by the interface present in its revision."""
+
+    if hasattr(operator, "with_clip_mode"):
+        selected = operator.with_clip_mode(mode)
+        yield selected, "with_clip_mode"
+        return
+    previous = forward_operator.support_clip_mode()
+    forward_operator.set_support_clip_mode(mode)
+    try:
+        yield operator, "set_support_clip_mode"
+    finally:
+        forward_operator.set_support_clip_mode(previous)
+
+
 def _measure(revision: str, scratch: Path) -> dict[str, Any]:
     tree = _archive_tree(revision, scratch)
     previous = list(sys.path)
@@ -161,51 +178,69 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
         context = census._build_context(control)
         state = np.asarray(control["terminal_flux_wb"], dtype=np.float64)
         operator = context["operator"]
-        probe = census._partition_probe(operator, state, "exact")
-        curve = census._curve_probe(
-            operator,
-            probe["base_masks"],
-            probe["topology"],
-            probe["sample_psi_norm"],
+        legacy_mode = (
+            None
+            if hasattr(operator, "with_clip_mode")
+            else forward_operator.support_clip_mode()
         )
+        with _operator_clip_mode(forward_operator, operator, "exact") as (
+            exact_operator,
+            mode_strategy,
+        ):
+            probe = census._partition_probe(exact_operator, state, "exact")
+            curve = census._curve_probe(
+                exact_operator,
+                probe["base_masks"],
+                probe["topology"],
+                probe["sample_psi_norm"],
+            )
         analytic = census._cell_analysis(
             context["machine"], context["exact"], context["target_current"]
         )
-        booked = census._state_census(
-            operator,
-            context["machine"],
-            state,
-            "terminal",
-            context["target_current"],
-            analytic,
-            curve,
-        )["unit_amplitude_totals_a"]
-        exact_operator = operator.with_clip_mode("exact")
-        exact_probe = census._partition_probe(exact_operator, state, "exact")
-        exact_field = forward_operator.flux_field_polynomial(
-            exact_operator._support_moment_stencils,
-            exact_probe["moment_masks"].psi_norm,
-            exact_probe["sample_psi_norm"],
-        )
-        profile = _FluxSelectedProfile(
-            exact_operator.source.core, exact_operator.source.common_sol
-        )
-        support_vertices = np.asarray(exact_probe["profile_support"].support_vertices)
-        support_count = np.asarray(exact_probe["profile_support"].vertex_count)
-        selected = np.asarray(exact_field.active) & np.asarray(
-            exact_probe["moment_masks"].profile_participation
-        )
-        reference_values = [
-            _exact_support_current(
-                support_vertices[cell, : support_count[cell]],
-                exact_field,
-                profile,
-                cell,
+        try:
+            booked = census._state_census(
+                operator,
+                context["machine"],
+                state,
+                "terminal",
+                context["target_current"],
+                analytic,
+                curve,
+            )["unit_amplitude_totals_a"]
+        finally:
+            if legacy_mode is not None:
+                forward_operator.set_support_clip_mode(legacy_mode)
+        with _operator_clip_mode(forward_operator, operator, "exact") as (
+            exact_operator,
+            _reference_mode_strategy,
+        ):
+            exact_probe = census._partition_probe(exact_operator, state, "exact")
+            exact_field = forward_operator.flux_field_polynomial(
+                exact_operator._support_moment_stencils,
+                exact_probe["moment_masks"].psi_norm,
+                exact_probe["sample_psi_norm"],
             )
-            if selected[cell] and support_count[cell] >= 3
-            else (0.0, 0.0)
-            for cell in range(len(support_vertices))
-        ]
+            profile = _FluxSelectedProfile(
+                exact_operator.source.core, exact_operator.source.common_sol
+            )
+            support_vertices = np.asarray(
+                exact_probe["profile_support"].support_vertices
+            )
+            support_count = np.asarray(exact_probe["profile_support"].vertex_count)
+            selected = np.asarray(exact_field.active) & np.asarray(
+                exact_probe["moment_masks"].profile_participation
+            )
+            reference_values = [
+                _exact_support_current(
+                    support_vertices[cell, : support_count[cell]],
+                    exact_field,
+                    profile,
+                    cell,
+                )
+                if selected[cell] and support_count[cell] >= 3
+                else (0.0, 0.0)
+                for cell in range(len(support_vertices))
+            ]
         reference = float(sum(value for value, _error in reference_values))
         error_bound = float(sum(error for _value, error in reference_values))
         exact = float(booked["exact"])
@@ -213,7 +248,10 @@ def _measure(revision: str, scratch: Path) -> dict[str, Any]:
             "revision": revision,
             "archive_tree": str(tree),
             "module": str(Path(census.__file__).resolve()),
+            "forward_operator_module": str(Path(forward_operator.__file__).resolve()),
             "cwd": str(Path.cwd().resolve()),
+            "mode_strategy": mode_strategy,
+            "solving_operator_mode": "exact",
             "jax_backend": jax.default_backend(),
             "chord_booked_a": float(booked["chord"]),
             "exact_booked_a": exact,

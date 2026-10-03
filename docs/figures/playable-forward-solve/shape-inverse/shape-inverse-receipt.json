@@ -38155,5 +38155,43 @@
     "closure_floor": 0.8,
     "current_ceiling_a": 20000.0,
     "any_weight_admitted": false
-  }
+  },
+  "historical_control_comparison": [
+    {
+      "arm": "upper-point-plus-20mm",
+      "arm_error_m": 0.018987504282355894,
+      "control_error_m": 0.08099883747270042,
+      "control_minus_arm_error_m": 0.062011333190344534,
+      "control_beats_arm": false,
+      "comparison_admissible": false,
+      "arm_free_circuits": 13,
+      "control_free_circuits": 101,
+      "control_extra_circuit_maximum_change_a": 57486.595318677915,
+      "control_source_commit": "13e432711867c8dd3338060e80ac0cf47f45982b",
+      "arm_source_commit": "b5559a8c56ad4fb0638fa587e2382f2d95d7b5a4"
+    },
+    {
+      "arm": "elongation-plus-5pct",
+      "arm_error_m": 0.07968370298776183,
+      "control_error_m": 0.066680761093275,
+      "control_minus_arm_error_m": -0.013002941894486822,
+      "control_beats_arm": true,
+      "comparison_admissible": false,
+      "arm_free_circuits": 13,
+      "control_free_circuits": 101,
+      "control_extra_circuit_maximum_change_a": 53376.25657870066,
+      "control_source_commit": "13e432711867c8dd3338060e80ac0cf47f45982b",
+      "arm_source_commit": "b5559a8c56ad4fb0638fa587e2382f2d95d7b5a4"
+    }
+  ],
+  "historical_control_source_path": "all-prescribed-negative-control.json",
+  "historical_wall_source_path": "response-comparison-states.npz:wall",
+  "arm_figure_titles": [
+    "upper point +20 mm | shape inverse\ninverse 18.99 mm\nall prescribed 81.00 mm\ncontrol higher; unconverged",
+    "elongation +5% | shape inverse\ninverse 79.68 mm\nall prescribed 66.68 mm\ncontrol lower; unconverged"
+  ],
+  "control_figure_titles": [
+    "upper point +20 mm | all prescribed\ninverse 18.99 mm\nall prescribed 81.00 mm\ncontrol higher; unconverged",
+    "elongation +5% | all prescribed\ninverse 79.68 mm\nall prescribed 66.68 mm\ncontrol lower; unconverged"
+  ]
 }

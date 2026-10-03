@@ -19,5 +19,11 @@ the earlier tracked certificate paths were restored after copying.</p>
 <p>The dispatch-base H200 arm imported the archived
 <code>a51a137af4b354968bdc5f371842a1f57c686398</code> source and completed all
 33 selected ids: <code>33 passed, 2 warnings, 1322.88 s</code>. The matching
-committed-head arm is recorded beside it in the node manifest and H200 logs.</p>
+head arm initially isolated one changed result:
+<code>test_the_accelerator_routes_agree_on_the_fixed_point</code> reported
+<code>2.3728714792309975e-06</code> against the <code>1e-6</code> bound. That
+showed the fallback was carrying frozen-partition capabilities. Commit
+<code>f56b62a6b</code> retains the acceptance map while removing those
+capabilities from the live fallback; the H200 recheck passes the formerly
+failing id in <code>689.02 s</code>.</p>
 </section>

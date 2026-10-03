@@ -107,3 +107,20 @@ def test_resolved_defaults_default_to_chord() -> None:
 
     assert omitted.clip_mode == "chord"
     assert explicit_exact.clip_mode == "exact"
+
+
+def test_request_and_resolved_defaults_reject_none_clip_mode() -> None:
+    """The typed request boundary never admits an undeclared support mode."""
+
+    policy = declared_forward_solve_policy()
+    with pytest.raises(ValueError, match="unknown support clip mode None"):
+        ForwardSolveRequest(
+            carrier_identity="clip-mode-none",
+            source_profile=object(),
+            seed_policy=ExplicitSolveSeed(np.zeros(4)),
+            policy=policy,
+            route=policy.route,
+            clip_mode=None,
+        )
+    with pytest.raises(ValueError, match="unknown support clip mode None"):
+        ResolvedForwardSolveDefaults.from_policy(policy, clip_mode=None)

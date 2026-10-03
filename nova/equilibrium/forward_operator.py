@@ -2351,7 +2351,7 @@ class ForwardFluxOperator:
 
     def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
         """Build the topology read and default the material mask."""
-        if self.clip_mode not in {None, "chord", "exact", "chord_cells"}:
+        if self.clip_mode not in {"chord", "exact", "chord_cells"}:
             raise ValueError(f"unknown support clip mode {self.clip_mode!r}")
         self.prescribed_field = prescribed_current_field
         self.external_current = jnp.asarray(self.external_current)

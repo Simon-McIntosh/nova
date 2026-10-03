@@ -561,6 +561,8 @@ class ResolvedForwardSolveDefaults:
         receipt always records a concrete mode.
         """
 
+        if clip_mode not in {"chord", "exact", "chord_cells"}:
+            raise ValueError(f"unknown support clip mode {clip_mode!r}")
         default = declared_forward_solve_policy(nova_version)
         default_values = default.to_dict()
         actual_values = policy.to_dict()

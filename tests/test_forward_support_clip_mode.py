@@ -165,3 +165,16 @@ def test_operator_clip_modes_apply_through_with_clip_mode(tmp_path):
     assert not np.array_equal(chord_raw, exact_raw)
     assert np.any(chord_raw != exact_raw)
     assert not np.array_equal(exact_raw, chord_cells_raw)
+
+
+def test_operator_rejects_none_clip_mode_at_each_entry() -> None:
+    """Construction and explicit mode updates require a declared mode."""
+
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+
+    operator = object.__new__(ForwardFluxOperator)
+    operator.clip_mode = None
+    with pytest.raises(ValueError, match="unknown support clip mode None"):
+        operator.__post_init__(None)
+    with pytest.raises(ValueError, match="unknown support clip mode None"):
+        operator.with_clip_mode(None)

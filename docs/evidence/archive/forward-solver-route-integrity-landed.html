@@ -1998,6 +1998,29 @@ Receipt: <code>/nova/figures/forward-solver-route-integrity/single-site-krylov/b
     <p>The last two are carried by f-fsri-lane-prelude-errexit-and-pin-writes.</p>
   </section>
 
+  <section id="operator-geometry-as-operands-measurement">
+    <h2>§2 — geometry as operands: constants fall 95 percent, compile wall unchanged, 300-cell solve not reproducible</h2>
+    <p>Run <code>r-20261003T121900467909-fsri-operator-geometry-as-operands</code> (codex-terra), closed as a failed measurement. Its code is not merged: the lead halted patches to this solver route on 2026-10-03, and the replacement solve takes geometry as traced operands by design. The worktree tip is <code>3ebee4846</code>; the fragment lives there at <code>docs/evidence/fragments/forward-solver-route-integrity/fsri-operator-geometry-as-operands.html</code>.</p>
+    <table>
+      <thead><tr><th>cells</th><th>arm</th><th>compile wall [s]</th><th>captured constants [MB]</th><th>terminal state</th></tr></thead>
+      <tbody>
+        <tr><td>132</td><td>closure, geometry A</td><td>137.7</td><td>4.74</td><td>digest 3154c2a1</td></tr>
+        <tr><td>132</td><td>closure, geometry B</td><td>128.9</td><td>4.75</td><td>digest 3154c2a1</td></tr>
+        <tr><td>132</td><td>operand</td><td>127.8</td><td>0.73</td><td>digest 3154c2a1</td></tr>
+        <tr><td>300</td><td>closure, geometry A</td><td>137.1</td><td>15.1</td><td>digest d1789a17</td></tr>
+        <tr><td>300</td><td>closure, geometry B</td><td>134.1</td><td>15.1</td><td>digest 9d144674</td></tr>
+        <tr><td>300</td><td>operand (two states)</td><td>135.8</td><td>0.72</td><td>digests 211f07ac, e9e14c2f</td></tr>
+      </tbody>
+    </table>
+    <p>Three readings for the design of the replacement solve (H200 jobs 1280633 and 1280634):</p>
+    <ul>
+      <li>Passing geometry as operands removes about 95 percent of the constants baked into the program at both sizes.</li>
+      <li>It does not change the compile wall, which sits near 135 s at both 132 and 300 cells. Compile time is driven by the program's control flow, not by captured constants.</li>
+      <li>At 300 cells the four arms produced four distinct terminal states, where at 132 cells all three agreed to the bit. The certificate solve at 300 cells is therefore not reproducible across arms on one card, and no boundary comparison can be judged there until the solve itself is deterministic.</li>
+    </ul>
+    <p>The run's earlier failure, two compiled programs for two same-shape geometries, was traced to the geometry digest in the operator's pytree auxiliary data; the worker's layout identity excluded it. A process-global LRU cache of compiled programs was added along the way and is one reason the code does not merge.</p>
+  </section>
+
 </main>
 </body>
 </html>

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="64">
+<meta name="plan-version" content="65">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -531,7 +531,10 @@
     <div class="r-comment-body"><p>Independent review of r-20261003T154320591361-fsa-extract-frozen-current-gate-driver (base f2ea3fc1511f3deddce9328f7dff4f72771c7af5..head 0f8f89c9ca3835816233cf3416c8778d7a744a70) stored at total 92/100, verdict pass, with 1 follow-on finding and added_failure_count 0 against the reviewed run's base 3 failed / after 0 failed gate logs.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261003T160921208577-fsa-restore-msc-figure-artifacts-compressed" data-who="reckon-build" data-when="2026-10-03T16:19:02.629Z">
-    <div class="r-comment-body"><p>Restored the six millisecond-solve figure artifacts main&#x27;s reports reference — compile-memory.svg and solve-profile-300/1000.svg byte-for-byte from refs/s19-tips (committed blobs a37d5b5d/203b2bc2/c8fd7fe9 equal the tip blobs), and the three solve-profile JSON receipts (198.8/82.8/83.0 MB raw) gzip-compressed to .json.gz (30.4/14.8/15.1 MB) each decompressing to the exact tip blob (decompressed sha256 4141747c/ed24f962/45ab6988 equal the tip-blob sha256), no raw JSON ever staged; solve-profile/report.md repointed to the .json.gz names (two-line diff) with a check_report_figures.py added in each directory whose red-before run is EXIT=1 (MISSING 1 of 1 and 5 of 5) and green-after is EXIT=0 (RESOLVED 1 of 1 and 5 of 5, all three archives parse as JSON); largest committed file 29.0 MB, verified with git cat-file -s on commit 5751c065c.</p></div>
+    <div class="r-comment-body"><p>Restored the six millisecond-solve figure artifacts main's reports reference — compile-memory.svg and solve-profile-300/1000.svg byte-for-byte from refs/s19-tips (committed blobs a37d5b5d/203b2bc2/c8fd7fe9 equal the tip blobs), and the three solve-profile JSON receipts (198.8/82.8/83.0 MB raw) gzip-compressed to .json.gz (30.4/14.8/15.1 MB) each decompressing to the exact tip blob (decompressed sha256 4141747c/ed24f962/45ab6988 equal the tip-blob sha256), no raw JSON ever staged; solve-profile/report.md repointed to the .json.gz names (two-line diff) with a check_report_figures.py added in each directory whose red-before run is EXIT=1 (MISSING 1 of 1 and 5 of 5) and green-after is EXIT=0 (RESOLVED 1 of 1 and 5 of 5, all three archives parse as JSON); largest committed file 29.0 MB, verified with git cat-file -s on commit 5751c065c.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261003T161918355337-review-of-fsa-restore-msc-figure-artifacts-compressed" data-who="reckon-build" data-when="2026-10-03T16:27:33.081Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261003T160921208577-fsa-restore-msc-figure-artifacts-compressed (base e1428d907, head 0fa83088d, commits 5751c065c + 0fa83088d), scoring goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18 = 91/100, verdict pass. All six restored artifacts independently verified: three SVGs blob-identical to their s19 tips (a37d5b5d/203b2bc2/c8fd7fe9 equal a799465ff / 7d3c7e757), three .json.gz decompressing to sha256 equal to their tip-blob sha256 (4141747c=2e33f631, ed24f962=2543ab3c, 45ab6988=ce75bfea), largest committed file 30387706 B &lt; 50 MB, no raw .json in the tree, report.md repoint is the exact two-line diff, and the defect is real at base (report-referenced artifacts absent). added_failure_count 0, added_failure_ids [].</p></div>
 </div>
 </section>
   </main>

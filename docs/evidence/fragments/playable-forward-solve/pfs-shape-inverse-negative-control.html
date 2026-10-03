@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="plan-slug" content="playable-forward-solve">
+<meta name="plan-status" content="active">
+<title>Shape-inverse historical control — landing record</title>
+</head>
+<body>
+<section id="pfs-shape-inverse-negative-control">
+<h2>The all-prescribed terminal error does not establish a discriminating control</h2>
+<p>The original comparison is reproduced by
+<code>shape-inverse-receipt.json:historical_control_comparison</code>. On the upper-point
+command the shape arm ends at <code>18.99 mm</code> and the all-prescribed terminal
+state at <code>81.00 mm</code>. On elongation they end at <code>79.68 mm</code> and
+<code>66.68 mm</code>, respectively: the control's terminal error is
+<code>13.00 mm</code> lower. The latter defeats a claim that the shape arm wins on
+both commands.</p>
+<p>The historical control also changes the experiment. The terminal update has
+<code>101</code> driven circuits against the shape arm's <code>13</code>, granting
+<code>88</code> passive or vessel circuits extra authority. On elongation the
+largest change on an extra circuit is <code>53.38 kA</code>, above the stated
+<code>20 kA</code> ceiling. Both all-prescribed terminal solves record
+<code>converged: false</code>; the shape arms record <code>true</code>. The historical
+control and shape arms name different source commits. Thus the lower terminal
+distance is a diagnostic observation under added actuators and an unsettled solve,
+not a valid performance ranking. The separate direction-reversal control is also
+refused for non-convergence; no two-command discriminating control is claimed.</p>
+<figure>
+  <img src="/nova/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.png" alt="Upper-point and elongation shape-inverse terminal turning points beside the commanded points and machine wall.">
+  <figcaption>Shape-inverse terminal turning points. Each panel names both
+  errors from <code>historical_control_comparison[].arm_error_m</code> and
+  <code>control_error_m</code>; the all-prescribed terminal state is marked
+  unconverged. The wall is the persisted
+  <code>response-comparison-states.npz:wall</code> unit.</figcaption>
+</figure>
+<figure>
+  <img src="/nova/figures/playable-forward-solve/shape-inverse/all-prescribed-negative-control.png" alt="All-prescribed terminal turning points on the same machine-wall view and with the same commands.">
+  <figcaption>All-prescribed terminal turning points, drawn with the same panel
+  geometry and scale. The upper-point terminal error is higher; the elongation
+  terminal error is lower. Both states are unconverged, as recorded at
+  <code>all-prescribed-negative-control.json:arms[].converged</code>. The wall comes
+  from the same persisted state as the companion figure.</figcaption>
+</figure>
+</section>
+</body>
+</html>

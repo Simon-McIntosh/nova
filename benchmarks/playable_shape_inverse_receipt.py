@@ -49,7 +49,7 @@ from nova.jax.config import (
     configure_persistent_compilation_cache,
     default_persistent_compilation_cache_root,
 )
-from nova.media import ink
+from nova.media import ink, poloidal
 
 from apps.playable.production import ForwardMachine, ProductionSolver
 
@@ -1212,76 +1212,147 @@ def _null_receipt(
     return payload, equilibrium
 
 
-def _draw(arms: list[dict[str, Any]], path: Path) -> None:
-    """Plot commanded and achieved shape beside the circuit-current response."""
-    figure, axes = plt.subplots(len(arms), 2, figsize=(11, 4.5 * len(arms)))
-    axes = np.atleast_2d(axes)
-    for row, arm in enumerate(arms):
-        previous = np.asarray(arm["previous_turning_points_m"])
-        commanded = np.asarray(arm["commanded_turning_points_m"])
-        achieved_points = arm["achieved_turning_points_m"]
-        achieved = None if achieved_points is None else np.asarray(achieved_points)
-        shape_axis = axes[row, 0]
-        shapes = [(previous, "o", "previous"), (commanded, "x", "commanded")]
-        if achieved is not None:
-            shapes.append((achieved, "+", "achieved"))
-        for points, marker, label in shapes:
-            closed = np.vstack((points, points[0]))
-            shape_axis.plot(closed[:, 0], closed[:, 1], alpha=0.65)
-            shape_axis.scatter(points[:, 0], points[:, 1], marker=marker, label=label)
-        for index, (before, command) in enumerate(
-            zip(previous, commanded, strict=True)
-        ):
-            shape_axis.plot(
-                [before[0], command[0]], [before[1], command[1]], color="0.75"
-            )
-            if achieved is not None:
-                after = achieved[index]
-                shape_axis.plot(
-                    [command[0], after[0]],
-                    [command[1], after[1]],
-                    color="tab:red",
-                    linestyle=":",
+def _historical_comparison(
+    arms: list[dict[str, Any]], controls: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Check each stored terminal error against its actual turning points."""
+    if len(arms) != len(controls):
+        raise ValueError("each controlled arm needs one historical control")
+    rows = []
+    for arm, control in zip(arms, controls, strict=True):
+        if arm["arm"] != control["arm"]:
+            raise ValueError("historical control commands differ")
+        for candidate in (arm, control):
+            achieved = np.asarray(candidate["achieved_turning_points_m"], dtype=float)
+            commanded = np.asarray(candidate["commanded_turning_points_m"], dtype=float)
+            observed = float(np.max(np.linalg.norm(achieved - commanded, axis=1)))
+            if not np.isclose(
+                observed, candidate["final_turning_point_error_m"], atol=1e-10, rtol=0
+            ):
+                raise ValueError(
+                    f"{candidate['arm']} stored turning-point error differs"
                 )
-        shape_axis.set_aspect("equal")
-        if achieved is None:
-            shape_axis.set_title(
-                f"{arm['arm']}: refused {arm['admissibility_trials']} fractions"
-            )
-        else:
-            shape_axis.set_title(
-                f"{arm['arm']}: error "
-                f"{1000 * arm['final_turning_point_error_m']:.2f} mm"
-            )
-        shape_axis.set_xlabel("R / m")
-        shape_axis.set_ylabel("Z / m")
-        shape_axis.legend()
+        arm_delta = np.asarray(arm["rounds"][-1]["coil_delta_a"], dtype=float)
+        control_delta = np.asarray(control["rounds"][-1]["coil_delta_a"], dtype=float)
+        arm_error = float(arm["final_turning_point_error_m"])
+        control_error = float(control["final_turning_point_error_m"])
+        rows.append(
+            {
+                "arm": arm["arm"],
+                "arm_error_m": arm_error,
+                "control_error_m": control_error,
+                "control_minus_arm_error_m": control_error - arm_error,
+                "control_beats_arm": control_error < arm_error,
+                "comparison_admissible": bool(
+                    arm["converged"] and control["converged"]
+                ),
+                "arm_free_circuits": int(arm_delta.size),
+                "control_free_circuits": int(control_delta.size),
+                "control_extra_circuit_maximum_change_a": float(
+                    np.max(np.abs(control_delta[arm_delta.size :]))
+                ),
+                "control_source_commit": control["runtime"]["source_commit"],
+                "arm_source_commit": arm["runtime"]["source_commit"],
+            }
+        )
+    return rows
 
-        current_axis = axes[row, 1]
-        if achieved is None:
-            trials = arm["admission_refusal_sequence"]
-            current_axis.plot(
-                [trial["fraction"] for trial in trials],
-                [trial["maximum_absolute_current_change_a"] for trial in trials],
-                marker="o",
+
+def _shape_titles(
+    rows: list[dict[str, Any]], controls: list[dict[str, Any]], *, subject: str
+) -> list[str]:
+    """Make every displayed number traceable to a paired receipt row."""
+    titles = []
+    for row, control in zip(rows, controls, strict=True):
+        command = (
+            "upper point +20 mm" if row["arm"].startswith("upper") else "elongation +5%"
+        )
+        direction = "control lower" if row["control_beats_arm"] else "control higher"
+        titles.append(
+            f"{command} | {subject}\n"
+            f"inverse {1000 * row['arm_error_m']:.2f} mm\n"
+            f"all prescribed {1000 * row['control_error_m']:.2f} mm\n"
+            f"{direction}; {'converged' if control['converged'] else 'unconverged'}"
+        )
+    return titles
+
+
+def _draw(
+    arms: list[dict[str, Any]],
+    path: Path,
+    wall: np.ndarray,
+    titles: list[str],
+) -> None:
+    """Draw identical shape panels against the persisted machine wall."""
+    figure, axes = plt.subplots(1, len(arms), figsize=(14, 6))
+    for axis, arm, title in zip(np.atleast_1d(axes), arms, titles, strict=True):
+        ink.poloidal_axes(axis)
+        poloidal.draw_wall(axis, units=(wall,))
+        for key, label, colour, style, marker in (
+            ("previous_turning_points_m", "previous", "0.55", ":", "o"),
+            ("commanded_turning_points_m", "commanded", "#252525", "--", "x"),
+            ("achieved_turning_points_m", "terminal", "#73559D", "-", "+"),
+        ):
+            points = arm.get(key)
+            if points is None:
+                continue
+            points = np.asarray(points, dtype=float)
+            closed = np.vstack((points, points[0]))
+            axis.plot(
+                closed[:, 0],
+                closed[:, 1],
+                color=colour,
+                linestyle=style,
+                linewidth=2.6,
+                label=label,
             )
-            current_axis.set_xscale("log", base=2)
-            current_axis.set_title("nonlinear refusal sequence")
-            current_axis.set_xlabel("proposed current fraction")
-            current_axis.set_ylabel("maximum current change / A")
-        else:
-            currents = arm["coil_current_by_circuit_a"]
-            current_axis.bar(range(len(currents)), list(currents.values()))
-            current_axis.set_title(
-                f"{arm['round_count']} rounds, {arm['total_trips']} trips, "
-                f"{arm['total_wall_s']:.3f} s"
-            )
-            current_axis.set_xlabel("circuit index")
-            current_axis.set_ylabel("current / A")
-    figure.tight_layout()
+            axis.scatter(points[:, 0], points[:, 1], color=colour, marker=marker, s=55)
+        axis.set_title(title, fontsize=15)
+    handles, labels = axes[0].get_legend_handles_labels()
+    figure.legend(
+        handles, labels, loc="lower center", ncol=3, frameon=False, fontsize=16
+    )
+    figure.subplots_adjust(left=0.04, right=0.96, top=0.69, bottom=0.14, wspace=0.08)
     path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=160)
+    figure.savefig(
+        path, dpi=100, metadata={"Description": json.dumps({"titles": titles})}
+    )
     plt.close(figure)
+
+
+def _render_historical_figures(directory: Path) -> dict[str, Any]:
+    """Regenerate paired panels from stored receipts and the stored wall."""
+    path = directory / "shape-inverse-receipt.json"
+    receipt = json.loads(path.read_text(encoding="utf-8"))
+    historical = json.loads(
+        (directory / "all-prescribed-negative-control.json").read_text(encoding="utf-8")
+    )
+    rows = _historical_comparison(receipt["arms"], historical["arms"])
+    with np.load(directory / "response-comparison-states.npz") as states:
+        wall = np.asarray(states["wall"])
+    receipt["historical_control_comparison"] = rows
+    receipt["historical_control_source_path"] = "all-prescribed-negative-control.json"
+    receipt["historical_wall_source_path"] = "response-comparison-states.npz:wall"
+    receipt["arm_figure_titles"] = _shape_titles(
+        rows, historical["arms"], subject="shape inverse"
+    )
+    receipt["control_figure_titles"] = _shape_titles(
+        rows, historical["arms"], subject="all prescribed"
+    )
+    _draw(
+        receipt["arms"],
+        directory / "shape-inverse-receipt.png",
+        wall,
+        receipt["arm_figure_titles"],
+    )
+    _draw(
+        historical["arms"],
+        directory / "all-prescribed-negative-control.png",
+        wall,
+        receipt["control_figure_titles"],
+    )
+    _write(path, receipt)
+    return receipt
 
 
 def _despine(axis) -> None:
@@ -1948,7 +2019,26 @@ def measure(
     }
     receipt["regularisation_sweep"] = _regularisation_curves(receipt)
     _write(directory / "shape-inverse-receipt.json", receipt)
-    _draw(arms, directory / "shape-inverse-receipt.png")
+    if (directory / "all-prescribed-negative-control.json").exists() and (
+        directory / "response-comparison-states.npz"
+    ).exists():
+        receipt = _render_historical_figures(directory)
+    else:
+        titles = [
+            f"{arm['arm']}: "
+            + (
+                f"terminal error {1000 * arm['final_turning_point_error_m']:.2f} mm"
+                if arm["final_turning_point_error_m"] is not None
+                else "terminal state refused"
+            )
+            for arm in arms
+        ]
+        _draw(
+            arms,
+            directory / "shape-inverse-receipt.png",
+            np.asarray(machine.wall),
+            titles,
+        )
     return receipt
 
 
@@ -1961,9 +2051,18 @@ def main() -> None:
     parser.add_argument("--direction-reversal-control", action="store_true")
     parser.add_argument("--finalize-receipt", action="store_true")
     parser.add_argument("--retract-control", action="store_true")
+    parser.add_argument("--render-historical-figures", action="store_true")
     parser.add_argument("--control-directory", type=Path)
     parser.add_argument("--command", choices=COMMAND_NAMES)
     arguments = parser.parse_args()
+    if arguments.render_historical_figures:
+        receipt = _render_historical_figures(arguments.directory)
+        print(
+            "HISTORICAL-FIGURES "
+            + json.dumps(receipt["historical_control_comparison"]),
+            flush=True,
+        )
+        return
     if arguments.finalize_receipt:
         receipt = _finalize_receipt(arguments.directory)
         print("RECEIPT-FINALIZED " + json.dumps(receipt), flush=True)

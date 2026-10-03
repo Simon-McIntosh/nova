@@ -1,0 +1,21 @@
+<section id="fsri-ladder-census-counts-every-entry">
+  <h2>Recovery-ladder census counts every entry and fails on a renamed rung</h2>
+  <p>The census now enumerates the promotion and recovery ladder entries from
+  <code>nova/equilibrium/fixed_point.py</code> by naming convention
+  (<code>*_promotion</code> and <code>_backtrack*</code>) and requires the scan to
+  reproduce the five known rungs, so a renamed or added rung raises by name
+  instead of dropping out as a quiet zero. All five entries are wrapped at trace
+  time (the trip entry separately), and the report names the revision that
+  committed the measured module rather than the worktree head at write time.</p>
+  <p>The test <code>tests/test_recovery_ladder_census.py</code> passes five cases
+  under <code>JAX_PLATFORMS=cpu</code> on this allocation. The negative control
+  renames <code>_rebuilt_model_promotion</code> in a full tree copy and fails three
+  cases naming it, under <code>--import-mode=importlib</code> with the imported
+  module path printed. The census re-ran one certificate row
+  (<code>diverted-single-null</code> at <code>-300</code>) and reports all five
+  entries with per-solve execution counts and instruction shares; three entries
+  carry instruction share (13.30 percent rebuilt-model, 5.74 percent
+  steepest-descent, 0.86 percent backtracking-scores). The runtime ladder counts
+  on this row are zero while the solver telemetry records one promotion attempt,
+  which is recorded as a follow-on instrument discrepancy.</p>
+</section>

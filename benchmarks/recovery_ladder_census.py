@@ -27,11 +27,61 @@ CALLERS = SHARED / "callers-candidate-300.json"
 CENSUS = SHARED / "census-candidate-300.json"
 OUTPUT_ROOT = ROOT / "docs/figures/forward-solver-route-integrity/recovery-ladders"
 TRIP = "_newton_krylov_inner"
-COUNTED = (
+
+# The promotion and recovery ladder is the set of module-level entries whose
+# names mark a promotion rung (``*_promotion``) or the backtracking ladder and
+# its continuation recovery (``_backtrack*``).  They are enumerated from the
+# module rather than hand-listed, and the enumeration is required to reproduce
+# LADDER_ENTRIES exactly, so a renamed or added rung fails loudly instead of
+# dropping out of the census as a quiet zero.
+RUNG_PREFIX = "_backtrack"
+RUNG_SUFFIX = "_promotion"
+LADDER_ENTRIES = (
+    "_backtracking_scores",
+    "_backtracked_promotion",
+    "_complete_newton_promotion",
     "_rebuilt_model_promotion",
     "_steepest_descent_promotion",
 )
-PATHS = (TRIP, *COUNTED)
+
+
+def enumerated_entries(module=fixed_point):
+    """Enumerate the ladder entries the module defines, by naming convention."""
+    return tuple(
+        sorted(
+            name
+            for name, value in vars(module).items()
+            if callable(value)
+            and not name.startswith("__")
+            and (name.startswith(RUNG_PREFIX) or name.endswith(RUNG_SUFFIX))
+        )
+    )
+
+
+def counted_entries(module=fixed_point):
+    """Return the counted ladder entries, refusing a module that disagrees.
+
+    An entry the convention finds but LADDER_ENTRIES does not name, or a named
+    entry the module no longer carries, is a rename or an addition the census
+    must not absorb silently, so both directions are refused by name.
+    """
+
+    found = set(enumerated_entries(module))
+    expected = set(LADDER_ENTRIES)
+    if found != expected:
+        missing = sorted(expected - found)
+        unexpected = sorted(found - expected)
+        raise RuntimeError(
+            "recovery-ladder census: counted paths absent from %s: %s; "
+            "uncounted ladder-shaped paths: %s"
+            % (
+                module.__name__,
+                ", ".join(missing) or "none",
+                ", ".join(unexpected) or "none",
+            )
+        )
+    return LADDER_ENTRIES
+
 
 _EVENTS: list[str] = []
 _LOCK = threading.Lock()
@@ -52,20 +102,29 @@ def _wrap(name, function):
     return counted
 
 
+def wrapped_paths(module=fixed_point):
+    """The trip entry plus every counted ladder entry, wrapped at trace time."""
+    return (TRIP, *counted_entries(module))
+
+
 @contextlib.contextmanager
-def instrumented():
+def instrumented(module=None):
+    module = fixed_point if module is None else module
     saved = {}
-    for name in PATHS:
-        function = getattr(fixed_point, name, None)
+    for name in wrapped_paths(module):
+        function = getattr(module, name, None)
         if function is None:
-            continue
+            raise RuntimeError(
+                "recovery-ladder census: counted path %r is absent from %s"
+                % (name, module.__name__)
+            )
         saved[name] = function
-        setattr(fixed_point, name, _wrap(name, function))
+        setattr(module, name, _wrap(name, function))
     try:
         yield
     finally:
         for name, function in saved.items():
-            setattr(fixed_point, name, function)
+            setattr(module, name, function)
 
 
 def _attribute(events):
@@ -82,6 +141,7 @@ def _attribute(events):
 
 
 def _instruction_share():
+    entries = counted_entries()
     total = json.loads(CENSUS.read_text())["optimized_instructions"]
     by_owner = {}
     for row in json.loads(CALLERS.read_text()):
@@ -89,7 +149,7 @@ def _instruction_share():
         for chain, _weight in row.get("callers", []):
             for frame in chain:
                 owner = frame.split(":")[0].split(".")[0]
-                if owner in COUNTED:
+                if owner in entries:
                     who = owner
                     break
             if who is not None:
@@ -100,11 +160,12 @@ def _instruction_share():
         by_owner[who] = by_owner.get(who, 0) + value
     instructions = {}
     share = {}
-    for name in COUNTED:
+    for name in entries:
         value = by_owner.get(name, 0)
         instructions[name] = value
         share[name] = value / total
     return {
+        "ladder_entries": list(entries),
         "optimized_instructions": total,
         "instructions": instructions,
         "share": share,
@@ -139,6 +200,7 @@ def run(rows, output, scratch_root):
     figures = output / "scratch-figures"
     figures.mkdir(parents=True, exist_ok=True)
     saved = _redirect(solovev_certificate, scratch, figures)
+    entries = counted_entries()
     receipts = []
     try:
         for case, cells in rows:
@@ -154,7 +216,7 @@ def run(rows, output, scratch_root):
                 converged = recorded.get("converged")
             per_solve = {}
             per_trip = {}
-            for name in COUNTED:
+            for name in entries:
                 if name == TRIP:
                     continue
                 per_solve[name] = counts.get(name, 0)
@@ -220,7 +282,9 @@ def _merged(output, requested):
     ]
     payload = {
         "fence_base_sha": FENCE_BASE,
-        "base_sha": _base_sha(),
+        "worktree_head": _base_sha(),
+        "fixed_point_commit": _committing_revision("nova/equilibrium/fixed_point.py"),
+        "census_commit": _committing_revision("benchmarks/recovery_ladder_census.py"),
         "fixed_point_digest": _digest(),
         "instruction_census": _instruction_share(),
         "complete": not missing,
@@ -310,6 +374,24 @@ def _base_sha():
     return out.stdout.strip()
 
 
+def _committing_revision(path):
+    """Return the revision that last committed ``path``.
+
+    Stamping the commit that carries the measured module, rather than the
+    worktree head at write time, keeps the report's provenance true after the
+    report's own commit advances the head.
+    """
+    import subprocess
+
+    out = subprocess.run(
+        ["git", "-C", str(ROOT), "log", "-1", "--format=%H", "--", path],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return out.stdout.strip()
+
+
 def _digest():
     data = (ROOT / "nova/equilibrium/fixed_point.py").read_bytes()
     return hashlib.sha256(data).hexdigest()
@@ -324,7 +406,15 @@ def _markdown(payload):
     lines.append("")
     lines.append("Fence base revision `%s`." % payload["fence_base_sha"])
     lines.append("")
-    lines.append("Worktree head `%s`." % payload["base_sha"])
+    lines.append(
+        "`nova/equilibrium/fixed_point.py` committing revision `%s`."
+        % payload["fixed_point_commit"]
+    )
+    lines.append("")
+    lines.append(
+        "Census module committing revision `%s`; worktree head `%s`."
+        % (payload["census_commit"], payload["worktree_head"])
+    )
     lines.append("")
     lines.append(
         "Complete: `%s`; missing rows: `%s`."
@@ -338,9 +428,7 @@ def _markdown(payload):
     header = "| path | instructions | share of %d |" % total
     lines.append(header)
     lines.append("| --- | --- | --- |")
-    for name in COUNTED:
-        if name == TRIP:
-            continue
+    for name in census["ladder_entries"]:
         value = census["instructions"].get(name, 0)
         share = census["share"].get(name, 0.0)
         lines.append("| `%s` | %d | %.4f%% |" % (name, value, share * 100.0))
@@ -356,9 +444,7 @@ def _markdown(payload):
         lines.append("")
         lines.append("| path | executions | per trip | trips |")
         lines.append("| --- | --- | --- | --- |")
-        for name in COUNTED:
-            if name == TRIP:
-                continue
+        for name in census["ladder_entries"]:
             fired = row["fired_in_trips"].get(name, [])
             per = row["executions_per_trip"].get(name)
             trips = ", ".join(str(t) for t in fired) or "none"

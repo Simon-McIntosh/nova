@@ -517,6 +517,33 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "2c1b8f615fba68c0f0dbfebb8f3b4bf7770b99d0",
+  "release": {
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 272977,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261003T102819374453-review-2-of-fsapi-sol-ledger-receipt-regeneration",
+    "scratch_removed": true,
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-2-of-fsapi-sol-ledger-receipt-regeneration",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

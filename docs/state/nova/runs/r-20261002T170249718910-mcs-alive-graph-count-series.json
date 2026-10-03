@@ -142,10 +142,10 @@
   "follow_on_paths": [],
   "gate": "passed",
   "gate_check": {
-    "command": "sbatch /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/run_measurement.sbatch",
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py --output-dir /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series/docs/figures/millisecond-converged-solve/cuda-graph-count --programs 20",
     "exit_status": 0,
     "log_digest": null,
-    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170249718910-mcs-alive-graph-count-series/analysis.log"
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170249718910-mcs-alive-graph-count-series/titan-job-1280456.log"
   },
   "impl_move": {
     "at_complete": null,

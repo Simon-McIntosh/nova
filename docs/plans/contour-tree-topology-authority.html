@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 </head>
 <body>
   <main class="plan-doc">
@@ -474,7 +474,10 @@
     <div class="r-comment-body"><p>Carrier adjacency indices and their scatter tables now share CARRIER_INDEX_DTYPE (int32) — _carrier adjacency casts the caller edge array once and builds neighbours/counts at that dtype; the two capacity tests carry filterwarnings("error::FutureWarning") and pass (base fails them at EXIT=1, head EXIT=0), and the four-file gate adds no failure (base and head both 11/8/6/8 passed).</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20261003T000059615499-review-of-ctta-scatter-segmented-max-equivalence" data-who="reckon-build" data-when="2026-10-03T00:14:48.574Z">
-    <div class="r-comment-body"><p>Reviewed run r-20261002T233222856971-ctta-scatter-segmented-max-equivalence (head 35d6ee1a22f494d1537c33ba30cd1a9f94c6ddb3, base f7f823c667f9b65740a04d5de40d991e60a2cd4e) and stored a parsed record scoring durability 19, evidence 12, fit 20, goal_fidelity 12, scope_discipline 18 (total 81, verdict pass-with-follow-ons). The central finding is that the added test pins a test-local jax.numpy identity (identity.at[keys].max == jax.ops.segment_max), not the product&#x27;s combine: the product contains no maximum scatter and the module imports only _carrier_adjacency, so the product&#x27;s last-write-wins combine at contour_tree.py:326 is never exercised, and the negative control mutates nothing in the product. The reviewed worktree is clean.</p></div>
+    <div class="r-comment-body"><p>Reviewed run r-20261002T233222856971-ctta-scatter-segmented-max-equivalence (head 35d6ee1a22f494d1537c33ba30cd1a9f94c6ddb3, base f7f823c667f9b65740a04d5de40d991e60a2cd4e) and stored a parsed record scoring durability 19, evidence 12, fit 20, goal_fidelity 12, scope_discipline 18 (total 81, verdict pass-with-follow-ons). The central finding is that the added test pins a test-local jax.numpy identity (identity.at[keys].max == jax.ops.segment_max), not the product's combine: the product contains no maximum scatter and the module imports only _carrier_adjacency, so the product's last-write-wins combine at contour_tree.py:326 is never exercised, and the negative control mutates nothing in the product. The reviewed worktree is clean.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-run-r-20261003T000252251974-review-of-ctta-carrier-adjacency-index-dtype" data-who="reckon-build" data-when="2026-10-03T00:16:16.518Z">
+    <div class="r-comment-body"><p>Reviewed run r-20261002T233111531441-ctta-carrier-adjacency-index-dtype (nova:contour-tree-topology-authority, Followups/f-ctta-sweep-durability-and-placement item 2): the carrier adjacency index and the tables it scatters into now share CARRIER_INDEX_DTYPE (int32). Verdict pass-with-follow-ons, 92/100 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 17, fit 18); one documentation follow-on on the evidence fragment. added_failure_count 0, added_failure_ids [].</p></div>
 </div>
 </section>
 </main>

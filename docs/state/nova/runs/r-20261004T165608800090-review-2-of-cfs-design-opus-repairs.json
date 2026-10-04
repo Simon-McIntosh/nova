@@ -1,0 +1,563 @@
+{
+  "agent": {
+    "alias": "opus 5.5",
+    "backend": "claude-opus",
+    "effort": "high",
+    "launch": "cli",
+    "model": "claude-opus-5-5",
+    "sandbox": "read-only"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "claude-opus",
+  "base_sha": "5b8095bef63647d67ddb50ac71892766f680d723",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": 2.9941912000000004,
+    "cost_usd_cumulative": 2.9941912000000004,
+    "detail": "backend reports utilisation and reset time",
+    "headroom": "known",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": "seven_day",
+    "refusal": false,
+    "resets_at": "2026-10-05T20:00:00Z",
+    "surpassed_threshold": 0.75,
+    "threshold_status": "allowed_warning",
+    "tokens": {
+      "cache_creation_input_tokens": 180580,
+      "cache_creation_input_tokens_cumulative": 180580,
+      "cache_read_input_tokens": 4690696,
+      "cache_read_input_tokens_cumulative": 4690696,
+      "fallback_credit": null,
+      "inference_geo": "not_available",
+      "input_tokens": 68,
+      "input_tokens_cumulative": 68,
+      "output_tokens": 30557,
+      "output_tokens_cumulative": 30557,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": 76.0
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-04T17:03:23.421Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-04T16:56:26Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": false,
+    "matched_measure": null,
+    "override": false,
+    "role": "review",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "document-base.log",
+    "document-head.log"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.0,
+    "plan": "converged-forward-solve",
+    "reason": "role-not-enforced:review",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "claude-opus",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'claude-opus'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-04T17:56:11.252715+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-04T16:15:03.136Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-05T20:00:00Z",
+    "seconds_until_reset": 97428,
+    "state": "quiet",
+    "utilisation_pct": 73.0
+  },
+  "lane_declaration": {
+    "backend": "claude-opus",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-04T16:15:03.136Z",
+    "read_at": "2026-10-04T16:56:11Z",
+    "resolved_backend": "claude-opus",
+    "utilisation_pct": 73.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-04T17:03:23.421Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T165608800090-review-2-of-cfs-design-opus-repairs/manifest.md",
+  "member": "disposable-r-20261004T165608800090-review-2-of-cfs-design-opus-repairs",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "review-2-of-cfs-design-opus-repairs",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2798,
+          "cached_input_tokens": 799980,
+          "input_tokens": 802780,
+          "output_tokens": 934,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 803714,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "the review for r-20261004T161650844174-cfs-design-opus-repairs stores a parsed record scoring all 5 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run's own baseline_suite and after_suite gate logs; the review judges the whole document docs/research/converged-forward-solve-design.html for interface correctness, oracle independence, the three defect mechanisms against their cited evidence, the measured C*(h/R0)^p budgets and their probe, the DIII-D clause set against plan section 6, and the acceptance test list, and names every blocking finding or states there is none; the turn ends once that record is stored and the manifest reads complete",
+    "estimated_hours": 1.5,
+    "goal": "Second claude-opus re-review of the converged forward solve design document at a42ac76b5, after its two blocking findings were repaired",
+    "id": "review-2-of-cfs-design-opus-repairs",
+    "lane_declaration": {
+      "backend": "claude-opus",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-04T16:15:03.136Z",
+      "read_at": "2026-10-04T16:56:11Z",
+      "resolved_backend": "claude-opus",
+      "utilisation_pct": 73.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T165608800090-review-2-of-cfs-design-opus-repairs/manifest.md",
+    "negative_control": "",
+    "plan": "converged-forward-solve",
+    "requested_backend": "claude-opus",
+    "requires_decisions": [],
+    "role": "review",
+    "section": "§1",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261004T161650844174-cfs-design-opus-repairs.json",
+      "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261004T161650844174-cfs-design-opus-repairs.at-a42ac76b5ceb6b95e0c7db5a90cf105237544686.json"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "claude-opus",
+    "member": null,
+    "node": "review-2-of-cfs-design-opus-repairs",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-04T16:56:13.788876+00:00",
+    "score": 0.625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "codex",
+    "comment": "",
+    "confidence": 0.17,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 1.127408823912037,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend"
+        ],
+        "resets_at": "2026-10-05T20:00:00Z",
+        "utilisation_pct": 73.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "review-excluded-backend",
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "codex",
+    "jev_latency_ms": 311.02,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 407.43,
+    "model": "gpt-6-sol",
+    "offered": [
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 12,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 200,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 3
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": null,
+        "burn_multiple": 1.8830625547796362,
+        "congestion": null,
+        "days_to_reset": 5.178496786875,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 8,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.28623584417410713,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 49.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": null,
+        "burn_multiple": 1.8830625547796362,
+        "congestion": null,
+        "days_to_reset": 5.178496786875,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 8,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.28623584417410713,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 49.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": null,
+        "burn_multiple": 1.8830625547796362,
+        "congestion": null,
+        "days_to_reset": 5.178496786875,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.28623584417410713,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 49.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "clive": 0.29,
+      "codex": 0.33,
+      "codex-astra": 0.27,
+      "codex-luna": 0.04,
+      "hold": 0.07
+    },
+    "rendered_token_estimate": 812,
+    "usage": {
+      "cost": 0.00010332,
+      "input_tokens": 2460,
+      "output_tokens": 61
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "5b8095bef63647d67ddb50ac71892766f680d723",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "role": "review",
+  "route_mode": "explicit",
+  "run_id": "r-20261004T165608800090-review-2-of-cfs-design-opus-repairs",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§1",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "90c75f03-93ac-4e79-8b73-6a2998981cb7",
+  "session_model": "claude-opus-5-5",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4690696,
+    "cumulative_input_tokens": 4871344,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+    "elapsed_seconds": 426.316,
+    "generated_tokens": 30557,
+    "generation_seconds": 372.03,
+    "input_budget_tokens": 1000000,
+    "input_utilisation_pct": 19.2,
+    "machine_seconds": 54.286,
+    "peak_input_tokens": 191502,
+    "tokens_per_second": 82.14,
+    "wall_tokens_per_second": 71.68
+  },
+  "time_budget": "60m",
+  "tool_steps": 33.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 417,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-04T17:03:46Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-04T16:56:30Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261004T165608800090-review-2-of-cfs-design-opus-repairs",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 223,
+    "worker_pid": 1008540
+  },
+  "worker_seconds": 385,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

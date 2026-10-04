@@ -23,12 +23,12 @@
   <title>Exact-clip moment quadrature | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-03">
+<meta name="plan-modified" content="2026-10-04">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="88">
 </head>
 <body>
   <main class="plan-doc">
@@ -266,10 +266,11 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
     <p class="r-fu-outcome">Superseded, not repaired. The endpoint-moment route (899f3cf99, 2026-09-22) evaluates no edge samples: cut_cell_moment_evaluation_bound() at nova/equilibrium/clip_quadrature.py:122-124 returns the 25-point Chebyshev density grid, and _ARC_EDGE_ORDER = 4 survives only as the independent reference rule. The under-500 evaluation contract is met by a route that no longer samples arcs, so the violated 621 sampled-arc ceiling has nothing left to bound. Evidence: S22 wave-2 triage (review pass 94/100).</p>
     </article>
-<article class="r-fu" data-id="f-ecq-overflow-refusal-consumption" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="solver clip-and-quadrature review (codex terra)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ecq-overflow-refusal-consumption" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="solver clip-and-quadrature review (codex terra)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="2026-10-04T12:21:18+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Surface traced-capacity refusals from the production solve</h4>
     <div class="r-fu-body"><p>From review <code>solver clip-and-quadrature review (codex terra)</code>: <code>docs/evidence/archive/figure-and-solver-audit-landed.html#fsa-audit-solver-clip-and-quadrature</code>.</p><p>Commit f7fefbd780aae7ef3d9707722fc4d80a1f0742cd made nova/equilibrium/separatrix_clip.py:1253 turn overflow into included=0, silently dropping a real cell. Commit 57af295535461807787caa1b19a1eae04ae5f9d7 added assert_no_refusal at current separatrix_clip.py:249, but the only invocation is tests/test_equilibrium_separatrix_clip.py:719; no production nova caller invokes it. Call the refusal check at the appropriate solve/receipt boundary and add a route-level test proving an over-capacity cell stops a solve instead of becoming an empty support.</p></div>
     <pre class="r-fu-prompt">/reckon-build exact-clip-moment-quadrature</pre>
+    <p class="r-fu-outcome">Handed to the solve rework (S21 design node; lead ruling of 2026-10-03 to halt Newton-Krylov patches). A capacity refusal that stops the solve, instead of an over-capacity cell becoming an empty support, is a stated requirement of the new solve. Done — no followup in this plan: the chain closes here and continues in the solve rework.</p>
     </article>
 <article class="r-fu" data-id="f-ecq-density-promotion-record" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="solver clip-and-quadrature review (codex terra)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build exact-clip-moment-quadrature" data-resolved-at="2026-10-02T08:34:45+00:00" data-resolved-by="reckon-build s22-nova">
     <h4 class="r-fu-title">Correct the failed exact-density promotion record</h4>

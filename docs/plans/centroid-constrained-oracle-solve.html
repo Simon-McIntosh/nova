@@ -23,8 +23,8 @@
   <title>Centroid-constrained oracle solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="79">
+<meta name="plan-modified" content="2026-10-04">
+<meta name="plan-version" content="80">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -89,10 +89,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-cco-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create s19-handoff" data-written-at="2026-09-16" data-recommends-skill="/reckon-build centroid-constrained-oracle-solve §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cco-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create s19-handoff" data-written-at="2026-09-16" data-recommends-skill="/reckon-build centroid-constrained-oracle-solve §2" data-resolved-at="2026-10-04T12:20:59+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">A compensating exterior-field unknown for the coil-less fixture and the centroid row imposed on the analytic rows</h4>
     <div class="r-fu-body"><p>Expose two bounded uniform field increments on the Solovev fixture exterior as a compensating unknown implementing the existing protocol, impose CurrentCentroidConstraint on the weak, moderate, strong and single-null rows through the machine interface with no fixture-specific solver branch, decide the compensating unknown (the plan's open decision), and show with a positive control that a deliberately displaced seed is driven back to the analytic centroid. Then the certificate re-solve of section 3.</p></div>
     <pre class="r-fu-prompt">/reckon-build centroid-constrained-oracle-solve §2</pre>
+    <p class="r-fu-outcome">Handed to the solve rework (S21 design node; lead ruling of 2026-10-03 to halt Newton-Krylov patches). The compensating exterior-field unknown and the first-moment centroid row are in place and qualify at weak-110 (3f69179ab). The section 3 certificate re-run on the analytic rows is now a requirement of the new solve, which inherits the S22 acceptance rows. Those rows are zero accepted promotions from the production seed at 110, 300 and 1000 cells; strong-1000 converging to a state that misses the map and boundary clauses; and the DIII-D gate frames. The driver at 831f498b8 is the base for that re-run.</p>
     </article>
 <article class="r-fu" data-id="f-cco-review-repairs" data-status="resolved" data-written-by="coordinator" data-written-at="2026-09-19T07:16:00Z" data-recommends-skill="/reckon-build" data-resolved-at="2026-10-02T08:03:31+00:00" data-resolved-by="reckon-build s22-nova">
     <h4 class="r-fu-title">SVG companions, a persisted terminal state, a gauge-free level error and a guard that guards</h4>
@@ -112,10 +113,11 @@
     <pre class="r-fu-prompt">/reckon-build centroid-constrained-oracle-solve</pre>
     <p class="r-fu-outcome">The no-row arm now discriminates. In the repaired weak-110 exact-clip receipt (merged 3f69179ab; job 1280628), the same 20 mm displaced seed solved without the row terminates 0.2550 mm radially off the oracle first-moment centroid, 3.30 times the derived 0.0774 mm tolerance, so it is refused. The positive arm reaches 9.5e-15 pitches. With the first-moment row and the tangent repair in place, the unconstrained map's own fixed point is measurably displaced, and only the row moves it to the oracle.</p>
     </article>
-<article class="r-fu" data-id="f-cco-positive-terminal-state-owner" data-status="open" data-written-by="reckon-build s22-nova" data-written-at="2026-10-02T08:05:00Z" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cco-positive-terminal-state-owner" data-status="resolved" data-written-by="reckon-build s22-nova" data-written-at="2026-10-02T08:05:00Z" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="2026-10-04T12:20:59+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Persist the positive centroid control&#x27;s terminal state</h4>
     <div class="r-fu-body">The positive centroid control arm has no persisted terminal state, so its panel is drawn from its receipt rather than from contours of the state, unlike the negative arm. The state path that would persist it belongs to forward-solver-route-integrity. When that lands, re-render control-positive from the persisted state through benchmarks/centroid_constrained_fixture_receipt.py.</div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity</pre>
+    <p class="r-fu-outcome">Handed to the solve rework (S21 design node). Persisting the terminal state is part of the new solve's per-promotion history requirement, so the positive centroid arm will carry its terminal state when the certificate is re-run there.</p>
     </article>
 <article class="r-fu" data-id="f-cco-row-clause-in-stop-test" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="nova-fd" data-written-at="2026-10-02" data-recommends-skill="/reckon-build centroid-constrained-oracle-solve §3" data-resolved-at="2026-10-03T15:06:19+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">After the root-cause fixes, put the centroid row clause in the stop test and re-measure once</h4>

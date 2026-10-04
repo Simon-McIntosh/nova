@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-04">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -263,10 +263,11 @@
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
     <p class="r-fu-outcome">Source repaired across the tree. The painter mask landed on 2026-10-02. The inventory (r-20261003T142831974130, review 92) found 78 renderer call sites that triangulate a scattered field without the wall, and the AST scanner tests/renderer_wall_scan.py (merged 418c46c17, guard form 8a83014b2) found 84 on main. Ten disjoint batches routed every one through draw_scattered_contours with the wall or draw_flux_contours with wall=. The batches were Solovev and SOL, plasma-cell, exact and centroid, limited and residual, program, chord and frozen, current and allocation, EFIT, figure scripts, centroid drivers, and Shafranov. The EFIT parity panels also became line contours, because the plotting rules forbid filled contours for scalar maps. Each batch was gated by the scanner on its own files, with a red base arm. The scanner now reports zero unguarded calls over benchmarks/ and docs/figures/ at main. The committed figures these drivers drew are not yet regenerated. That is f-fsa-regenerate-wall-masked-figures, and the tree-wide guard test is f-fsa-renderer-wall-guard-test.</p>
     </article>
-<article class="r-fu" data-id="f-fsa-regenerate-the-low-state-figures" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-regenerate-the-low-state-figures" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-cc" data-written-at="2026-09-23" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-04T12:21:04+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Regenerate the two exact-clip low-state figures with the repaired check</h4>
     <div class="r-fu-body"><p>The low-state check repair landed at 80022a503. It prints the full level array and every panel's residual and converged flag, and the test asserts the recorded titles. The two named figures under docs/figures/cut-cell-current-attribution/exact-clip-low-state are still the pre-repair images. The solve that would regenerate them died on the cold-seed amplitude nan at forward_operator.py current_normalisation_amplitude, which was the moment-bank overflow repaired at 1542d6df6. tests/test_exact_clip_low_state_render.py::test_receipt_records_the_render_only_route stays red until both figures render. One H200 job (betelgeuse, gpu_0003_grpA, account grpa, 8 cores, 64G) runs the exact_clip_low_state_discriminator solve, then renders on the login node. Held behind the map-fidelity gate, because these panels draw the certificate forward state.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit</pre>
+    <p class="r-fu-outcome">Handed to the solve rework (S21 design node). The two exact-clip low-state figures draw the certificate forward state, so they are regenerated once the new solve passes its joint residual, map and boundary gate. Until then tests/test_exact_clip_low_state_render.py stays red on the absent render receipt; this was measured identically at base and head by fsa-wall-mask-exact-and-centroid.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-production-solver-receipt-writer-revision" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-02" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-03T16:15:29+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Make the production-solver receipt writer emit source_revision itself</h4>

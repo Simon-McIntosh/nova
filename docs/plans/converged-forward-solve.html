@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="converged-forward-solve">
+  <meta name="plan-title"     content="Converged Forward Solve — one topology read, one booking, one map, one Newton solve">
+  <meta name="plan-summary"   content="Rebuild the GS forward solve behind four pure functions, retire the NK ladders and frozen/live split, converge on exact inputs">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="48.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="critical">
+  <meta name="plan-sprint"    content="S21">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-tags"      content="equilibrium,grad-shafranov,fixed-point,topology,jax,convergence">
+  <meta name="plan-blocks"    content="single-grid-solver-cutover">
+  <title>Converged Forward Solve | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s0">Why this plan exists</h2>
+    <p>Lead directive, 2026-10-03: the Newton-Krylov, cut-cell, diverted and topology defects are to be identified and fixed once, with a deep implementation behind a narrow interface. The present code is sprawl. <code>nova/equilibrium</code> is 54,102 lines in 54 files. The axis and saddle are found in 17 files and the plasma region is decided in 23. <code>newton_krylov</code> takes 30 parameters, <code>_active_set_newton_krylov</code> takes 24 and runs 590 lines, and <code>forward.py</code> defines <code>solve</code> three times. The route carries four solvers, two clip modes, five promotion and recovery rungs and a frozen/live split, and 33 commits in 15 days to <code>fixed_point.py</code> alone, most of them guards, fallbacks and reverts.</p>
+    <p>The outcome of that route, measured on 2026-10-03: at the one certificate rung where the map is qualified (weak exact, 300 cells) the production solve stops at residual 0.0374 against a bound of 1e-12. From the production seed every certificate row at 110, 300 and 1000 cells accepts zero Newton steps, so each terminal state is its seed, while the same weak-110 row from a seed displaced 20 mm accepts four steps and reaches 2.7e-14. The strong-1000 row reaches 1.6e-15 on a state that misses the map and boundary clauses. On the DIII-D gate frames the current source is 10× better than the artifact and converges on none. The route the sprint set out to restore does not converge, and each layer added to it made a non-converging route look better rather than fix why it does not converge.</p>
+    <p>Three defects, in one vocabulary. The Grad-Shafranov fixed point is ψ = ψ_ext + G·J(ψ), with G the frozen coupling matrix and J depending on ψ only through the topology read (axis flux, boundary flux, membership) and the profile.</p>
+    <ol>
+      <li><strong>Membership.</strong> Private-flux cells are booked as plasma because the sub-cell booking tests the flux level without connectivity to the axis. The decomposition at <code>6cb5b3e25</code> proved it: analytic membership cuts the 132-cell exact error from 0.181 to 0.071 and the X-point offset from 115 mm to 6 mm, while the contour-tree region and the X-point wedge change nothing.</li>
+      <li><strong>Topology.</strong> Axis and saddle are chosen in 17 places by different rules, so the typed selector has no containment, the vertex-ring census was inert, and a finer grid admits different saddles.</li>
+      <li><strong>Newton.</strong> The Newton direction is computed for the frozen map while the step is scored against the live map. Newton is solving the wrong function; the ladders compensate; the zero accepted steps from the production seed are what that looks like.</li>
+    </ol>
+
+    <h2 id="s1">§1 — The design: four pure functions and the inventory they replace</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>One research document, written by the design node, that fixes the interface below in signatures and invariants, inventories the 17 null-finding and 23 region-finding implementations and names the single function each collapses into, explains the three defects with the measured evidence, and states the acceptance in §6 as a test list. It is reviewed on the strongest lane before any implementation node dispatches.</p>
+    <figure>
+      <svg viewBox="0 0 860 150" width="860" height="150" role="img" aria-label="Four functions in sequence: topology read, current booking, GS map, fixed-point solve" style="max-width:100%;height:auto;font-family:system-ui;font-size:14px">
+        <g fill="none" stroke="#333" stroke-width="1">
+          <rect x="10" y="30" width="190" height="70" fill="#fff"/>
+          <rect x="230" y="30" width="190" height="70" fill="#fff"/>
+          <rect x="450" y="30" width="190" height="70" fill="#fff"/>
+          <rect x="670" y="30" width="180" height="70" fill="#fff"/>
+          <path d="M200 65 H230 M420 65 H450 M640 65 H670"/>
+          <path d="M224 61 L230 65 L224 69 M444 61 L450 65 L444 69 M664 61 L670 65 L664 69"/>
+          <path d="M760 100 V125 H105 V100" stroke-dasharray="4 3"/>
+          <path d="M101 106 L105 100 L109 106"/>
+        </g>
+        <g fill="#111">
+          <text x="105" y="56" text-anchor="middle" font-weight="600">topology.read(ψ)</text>
+          <text x="105" y="78" text-anchor="middle" font-size="12">axis, saddle or contact, ψ_axis, ψ_b, membership</text>
+          <text x="325" y="56" text-anchor="middle" font-weight="600">current.book(ψ, read)</text>
+          <text x="325" y="78" text-anchor="middle" font-size="12">cell moments from the exact clip</text>
+          <text x="545" y="56" text-anchor="middle" font-weight="600">gs.apply(ψ)</text>
+          <text x="545" y="78" text-anchor="middle" font-size="12">ψ_ext + G @ book(ψ, read(ψ)), and its JVP</text>
+          <text x="760" y="56" text-anchor="middle" font-weight="600">solve.fixed_point(ψ0)</text>
+          <text x="760" y="78" text-anchor="middle" font-size="12">Newton-GMRES, one line search</text>
+          <text x="430" y="140" text-anchor="middle" font-size="12" fill="#555">the solve calls the map; the map calls the booking; the booking calls the read. Geometry enters every function as traced operands.</text>
+        </g>
+      </svg>
+      <figcaption>The narrow interface. Four pure functions, one module each, geometry as traced operands, no closures, no process globals, no environment switches.</figcaption>
+    </figure>
+    <ul>
+      <li><code>topology.read(ψ) → axis, saddle or limiter contact, ψ_axis, ψ_b, membership, qualification</code>. The contour-tree authority the lead ruled: hex cells, no raster, no normalised flux, σ from COCOS. The saddle is admitted by connectivity. This is the only place any of these is decided, and it returns a qualification verdict the solve honours.</li>
+      <li><code>current.book(ψ, read) → cell moments</code>. The exact clip is the one booking; chord becomes a quadrature degree, not a route. Membership is sub-cell and axis-connected. A traced-capacity refusal stops the solve with a reason; an over-capacity cell never becomes an empty support.</li>
+      <li><code>gs.apply(ψ) = ψ_ext + G @ book(ψ, read(ψ))</code>, with its JVP. The implicit Picard derivative, the moment-map derivative and the boundary-flux envelope derivative, all of which pass their contracts today, carry over.</li>
+      <li><code>solve.fixed_point(ψ0, constraints) → ψ*, receipt</code>. Newton-GMRES with the operator applied at one call site inside a <code>lax.scan</code>, one line search, termination on the global residual and every constraint row (|row| ≤ 1e-12), or a stop with a reason. The receipt carries the per-promotion history: global residual, each row's residual and the accepted state. No host conversion of a traced target anywhere.</li>
+    </ul>
+    <p>Done when the research document exists at <code>docs/research/converged-forward-solve-design.html</code> with the signatures, invariants, inventory table, defect mechanisms with evidence anchors, and the §6 acceptance as a test list; and its read-back review on the strongest lane finds no sentence with two readings.</p>
+
+    <h2 id="s2">§2 — The topology read</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="10.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Implement <code>topology.read</code> as a single module against the analytic Solov'ev oracles: the weak-rotation reactor-static case (limited, no X-point) and the diverted single-null case, at every certificate resolution. The oracle for each is the analytic state's own critical points and its exact plasma region.</p>
+    <p>Done when: on both analytic states at 132, 300, 550, 1074 and 2616 realised cells, the read places the axis and every admitted X-point within one pitch of the analytic position, returns the analytic membership for every cell to within the clip's quadrature error, and reports the limited case as limited and the diverted case as diverted; the read is pure, traced, and differentiable in the null positions through the implicit function theorem on ∇ψ = 0; and a negative control that shifts the analytic state by one pitch is rejected by the qualification verdict.</p>
+
+    <h2 id="s3">§3 — The current booking</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Implement <code>current.book</code> over the read's membership, with the exact clip as the one booking. Chord is a quadrature degree of the same function. The private-flux region is excluded by construction, because membership is axis-connected before any sub-cell polygon is clipped.</p>
+    <p>Done when: at the analytic diverted state, the booked current moments reproduce the analytic cell moments to the clip's stated quadrature error at every certificate resolution, the private-flux cells book zero plasma current, the net current matches the analytic total to 1e-12 relative, and the booking is differentiable in ψ with its JVP matching central differences to the moment-map contract's existing stages (smooth control, axis flux, boundary flux, support partition).</p>
+
+    <h2 id="s4">§4 — The map and its derivative</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Implement <code>gs.apply</code> as ψ_ext + G @ book(ψ, read(ψ)) with geometry (mesh, coupling blocks, stencils) as traced operands and nothing captured as closure constants. Carry the implicit Picard derivative, the moment-map derivative and the boundary-flux envelope derivative into it.</p>
+    <p>Done when: evaluated once at the analytic state with no solve, the map reproduces it within 1e-2 relative sup at every certificate rung in exact mode for both cases (the map-fidelity gate); the JVP matches central differences at the existing contract's tolerances; one compiled program serves two geometries of the same shape, counted as compilations; and the program's compile wall, executable size and host memory during a cold compile are reported.</p>
+
+    <h2 id="s5">§5 — The fixed-point solve</h2>
+    <section data-reckon="section" data-id="s5" data-effort-hours="10.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Implement <code>solve.fixed_point</code> as Newton-GMRES on the map's own JVP, applied at one call site served from a <code>lax.scan</code>, with one line search. It terminates when the global residual and every constraint row are at or below 1e-12, or stops with a stated reason. It emits the per-promotion history. It traces under <code>jax.jit</code> and <code>jax.vmap</code>. The promotion ladders, the frozen/live split, the live-read fallback and the active-set recovery are not carried; they are retired in §6.</p>
+    <p>Done when: from the production seed, every row of §6's acceptance table accepts Newton steps and reaches the joint acceptance; the solve traces under <code>jax.jit</code> and <code>jax.vmap</code> with eager-equal terminal states; the per-promotion history is emitted and agrees with the terminal receipt; and the compile-cost bounds of §6 hold.</p>
+
+    <h2 id="s6">§6 — Acceptance and retirement</h2>
+    <section data-reckon="section" data-id="s6" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>The gate is the joint acceptance the lead locked, never the residual alone: a solve can reach 1e-12 on a wrong map, and the strong-1000 row did.</p>
+    <table>
+      <thead><tr><th>clause</th><th>bound</th></tr></thead>
+      <tbody>
+        <tr><td>global residual</td><td>≤ 1e-12</td></tr>
+        <tr><td>every constraint row</td><td>|row| ≤ 1e-12</td></tr>
+        <tr><td>axis and every admitted X-point</td><td>within one pitch of the analytic</td></tr>
+        <tr><td>map fidelity at the analytic state, no solve</td><td>≤ 1e-2 relative sup, exact mode</td></tr>
+        <tr><td>compiled programs per mesh shape</td><td>one</td></tr>
+        <tr><td>executable size</td><td>≤ 50 MB</td></tr>
+        <tr><td>compile wall</td><td>≤ 60 s on the H200</td></tr>
+        <tr><td>host memory during a cold compile</td><td>bounded and reported; 151 GB RSS is the failure signature</td></tr>
+        <tr><td>tracing</td><td><code>jax.jit</code> and <code>jax.vmap</code> over the production solve</td></tr>
+      </tbody>
+    </table>
+    <p>Acceptance rows, all from the production seed with the centroid row imposed where it exists:</p>
+    <ul>
+      <li>the analytic certificate: weak-rotation reactor-static and diverted single-null at 132, 300, 550, 1074 and 2616 cells, exact mode;</li>
+      <li>the centroid-constrained certificate: weak, moderate and strong at 110, 300 and 1000 cells plus single-null at 500, driver base <code>831f498b8</code>;</li>
+      <li>the five DIII-D gate frames (44, 137, 144, 146, 179) at tolerance 1e-6 or better;</li>
+      <li>the calibration target: the weak-110 exact-clip receipt at <code>3f69179ab</code> (global 2.68e-14, row 9.5e-15 pitches, net span −3.86e-4, no-row control refused at 3.30×).</li>
+    </ul>
+    <p>Before arm, recorded for every row: zero accepted steps from the production seed at residuals 1.7e-2 to 4.1e-1 (jobs 1280657, 1280644); weak exact 300 stops at 0.0374 (job 1280625); DIII-D frame 44 at 0.0029.</p>
+    <p>Retirement. When §5 passes the table on every row, the promotion and recovery rungs, the frozen/live split, the live-read fallback, the active-set route, the anderson and reduced-Newton routes and the chord route as a separate code path are deleted, not kept beside the new solve. <code>fixed_point.py</code>, <code>forward.py</code> and <code>forward_operator.py</code> shrink to the four functions and their receipts. Done when the deletion lands with the acceptance table green at its head and no test weakened to admit it.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="retire-not-patch" data-choice="retire" data-by="lead" data-when="2026-10-03">
+        <p class="r-dec-q">Are the Newton-Krylov promotion ladders and the frozen/live split patched or retired?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="retire">retire</button>
+          <button class="r-opt" data-value="patch">patch</button>
+        </p>
+        <p class="r-dec-rat">Lead, 2026-10-03: fixed once with a deep implementation behind a narrow interface; no building on refuted work and no further workarounds. The ladders and the split are retired when §5 passes the acceptance table.</p>
+      </div>
+      <div class="r-dec" data-key="topology-authority" data-choice="contour-tree-on-hex-cells" data-by="lead" data-when="2026-10-03">
+        <p class="r-dec-q">Which authority does the topology read implement?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="contour-tree-on-hex-cells">contour tree on hex cells</button>
+          <button class="r-opt" data-value="global-spline-critical-points">global-spline critical points</button>
+        </p>
+        <p class="r-dec-rat">Lead ruling, relayed by the plan session: the contour-tree authority on hex cells, no raster, no normalised flux, σ from COCOS. The field representation the read evaluates is the open decision below.</p>
+      </div>
+      <div class="r-dec" data-key="membership" data-choice="sub-cell-axis-connected" data-by="lead" data-when="2026-10-03">
+        <p class="r-dec-q">What is plasma membership?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="sub-cell-axis-connected">sub-cell and axis-connected</button>
+          <button class="r-opt" data-value="level-test-only">flux level test only</button>
+        </p>
+        <p class="r-dec-rat">Lead, 2026-10-03, on the diverted map decomposition at 6cb5b3e25: membership is decided sub-cell, on the exact clip, and only for the component connected to the axis. The flux level alone books private-flux cells as plasma.</p>
+      </div>
+      <div class="r-dec" data-key="acceptance" data-choice="joint" data-by="lead" data-when="2026-10-03">
+        <p class="r-dec-q">What is the acceptance for the new solve?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="joint">joint: residual, rows, null positions, map fidelity, compile cost</button>
+          <button class="r-opt" data-value="residual">residual alone</button>
+        </p>
+        <p class="r-dec-rat">Lead, 2026-10-03: the joint acceptance of §6. A solve can reach 1e-12 on a wrong map; the strong-1000 row did.</p>
+      </div>
+      <div class="r-dec" data-key="lanes" data-choice="astra-then-opus-review" data-by="lead" data-when="2026-10-04">
+        <p class="r-dec-q">Which lanes carry the design and the implementation?</p>
+        <p class="r-dec-rat">Lead, 2026-10-04: codex-astra (gpt-6-astra, the model the account offers) for the design and the four implementation nodes; claude-opus re-review once its window reopens; the local lane for tests, instruments and evidence. codex-terra is retired.</p>
+      </div>
+      <div class="r-dec" data-key="field-representation" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which field representation does the topology read evaluate on the hex cells?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="cellwise-polynomial">the cellwise polynomial the moments are evaluated in</button>
+          <button class="r-opt" data-value="global-tensor-spline">the global tensor spline</button>
+          <button class="r-opt" data-value="ring-quadratic">the six-point ring quadratic</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="receipts-out-of-git" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Do large receipts leave git for the GPFS evidence store?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="gpfs-with-pointer">yes: npz, gz and json above a few MB live on GPFS with a path pointer; PNG and SVG stay</button>
+          <button class="r-opt" data-value="stay-in-git">no: keep committing receipts</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-cfs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s21-nova" data-written-at="2026-10-04" data-recommends-skill="/reckon-build converged-forward-solve §1" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Dispatch §1, the design, on codex-astra, then §2 to §5 in order with their analytic oracles</h4>
+        <div class="r-fu-body"><p>§1 is one research document on the strongest lane. §2 to §5 follow in dependency order, each with its own analytic oracle and its own negative control; §6's table is the gate for every one of them, and the retirement in §6 lands last. Nothing in this plan is a patch to the existing route.</p></div>
+        <pre class="r-fu-prompt">/reckon-build converged-forward-solve §1</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

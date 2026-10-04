@@ -1,0 +1,637 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "5d3fecad4830e1cd7ae1753479059e280ff9085c",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 32515968,
+      "cached_input_tokens_cumulative": 32515968,
+      "input_tokens": 32801128,
+      "input_tokens_cumulative": 32801128,
+      "output_tokens": 53942,
+      "output_tokens_cumulative": 53942,
+      "reasoning_output_tokens": 21007,
+      "reasoning_output_tokens_cumulative": 21007
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2018,
+    "files": 56,
+    "removed": 13464
+  },
+  "clone_matches": [],
+  "commit_list_shortfall": {
+    "declared": 12,
+    "kind": "presented_commits_subset_of_manifest",
+    "message": "run 'r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped' has a passing gate presenting 9 commit(s) of the 12 its manifest declares; missing: 161ecd587d67e08d0525c113b3d5a08709bf3a53, 529536d920726d77309f99c5438f33091fd44793, 5d3fecad4830e1cd7ae1753479059e280ff9085c. The out-of-scope boundary check runs against the presented commits, so an incomplete presentation narrows it. This is a report, not a refusal — present the full list, or the boundary check may not cover the node's work",
+    "missing": [
+      "161ecd587d67e08d0525c113b3d5a08709bf3a53",
+      "529536d920726d77309f99c5438f33091fd44793",
+      "5d3fecad4830e1cd7ae1753479059e280ff9085c"
+    ],
+    "presented": 9
+  },
+  "commit_resolution": null,
+  "commits": [
+    "6e5b0f0b3c59ead9620f197a4c3c2eac5cd7f0fe",
+    "e47c2e55a8b2a452bf6b708b281f23411b5bb3cf",
+    "7acb1f041d8811d0d2208ddca4e742dc18c7f277",
+    "456455463ce7d9770dba300463d5a5fc21684c45",
+    "36930877bb865f8ace05e64e3f867c243e14de53",
+    "1a38147a6b6e148976c6d884cd1383237c8aaddf",
+    "7d29f31c48b667c8d32188f51eb09b25bb896769",
+    "78d4633f1bdbf62306ba96b4d774be1a7543a79b",
+    "dad6fc98e9bc8ffd3954f6109c21b480e7ee5dc1"
+  ],
+  "completed_at": "2026-10-04T13:29:36Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-04T12:33:02Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "limited-shadow-census.png"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_frozen_current_flux_image_gate.py tests/test_renderer_contours_inside_wall.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped/final-gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 1.0,
+    "plan": "figure-and-solver-audit",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.7947221535309286,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-07T12:14:34Z, which is after this node's 3600s horizon ending 2026-10-04T13:32:29.088660+00:00",
+    "horizon_ends_at": "2026-10-04T13:32:29.088660+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-04T12:32:28Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-07T12:14:34Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 463265,
+    "state": "quiet",
+    "utilisation_pct": 42.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-04T12:32:28Z",
+    "read_at": "2026-10-04T12:32:29Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 42.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-04T13:29:36Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped/manifest.md",
+  "member": "disposable-r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "fsa-regenerate-wall-masked-figures-scoped",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1171,
+          "cached_input_tokens": 925992,
+          "input_tokens": 927165,
+          "output_tokens": 1719,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 928884,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Continue from 5d3fecad4, the head of the stopped run r-20261004T121758666072: it regenerated the gate-b pair (161ecd587, which re-greens tests/test_frozen_current_flux_image_gate.py), the diverted-chord mismatch contours (529536d92) and the exact-clip seed panels (5d3fecad4). It was stopped because it claimed all of docs/figures. This node may write only the topic directories it is granted. Within them, regenerate every figure that the batch reports /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-*.md mark as solve-free, through the render-only route each report names, from committed receipts and persisted states, on CPU in place with JAX_PLATFORMS=cpu. Open each regenerated figure and record in /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-regenerate-wall-masked-figures-scoped.md, per figure, the path, the driver and command, and whether any contour leaves the vessel (it must not). Solve-free figures outside the granted directories (the plasma-cell-read-fidelity ones belong to S21 plans) and figures needing a solve or absent data are listed with the reason and not regenerated. No source under nova/ or benchmarks/ is edited. Gate: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_frozen_current_flux_image_gate.py tests/test_renderer_contours_inside_wall.py passes with zero added failures against the base, both arms logged.",
+    "estimated_hours": null,
+    "goal": "finish regenerating the solve-free wall-masked figures, within named topic directories only",
+    "id": "fsa-regenerate-wall-masked-figures-scoped",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-04T12:32:28Z",
+      "read_at": "2026-10-04T12:32:29Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 42.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped/manifest.md",
+    "negative_control": "",
+    "plan": "figure-and-solver-audit",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/cut-cell-current-attribution/gate-b",
+      "docs/figures/cut-cell-current-attribution/diverted-chord-response",
+      "docs/figures/cut-cell-current-attribution/exact-clip-seed",
+      "docs/figures/cut-cell-current-attribution/limited-shadow",
+      "docs/figures/cut-cell-current-attribution/positional-stiffness",
+      "docs/figures/cut-cell-current-attribution/zero-residual",
+      "docs/figures/cut-cell-current-attribution/outboard-hole",
+      "docs/figures/cut-cell-current-attribution/exact-support-floor",
+      "docs/figures/cut-cell-current-attribution/oracle-start",
+      "docs/figures/forward-solve-api/sol-ledger-census",
+      "docs/figures/uniform-cell-clip-and-coupling/xpoint-cell-rca",
+      "docs/figures/constraint-augmented-newton-krylov/shafranov",
+      "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator",
+      "docs/figures/null-identification-authority/mechanism-evidence",
+      "docs/figures/millisecond-converged-solve/program-size/cross-revision",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-regenerate-wall-masked-figures-scoped.md",
+      "docs/evidence/fragments/figure-and-solver-audit/fsa-regenerate-wall-masked-figures-scoped.html",
+      "docs/figures/figure-and-solver-audit/fsa-regenerate-wall-masked-figures-scoped"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.7946315775806503,
+      "derived": 0.25743445382969576,
+      "drain_hours": 168.0,
+      "effective_limit": 0.25743445382969576,
+      "elapsed_fraction": 0.23403132166335977,
+      "elapsed_hours": 39.317262039444444,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-04T12:32:36+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.5800000000000001,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.42,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.381024,
+      "decided_by": "window",
+      "margin": 0.337726,
+      "name": "fsa-regenerate-wall-masked-figures-scoped",
+      "score": 0.71875,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.42
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.143342,
+        "observed_at": "2026-10-04T12:32:36+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.42,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "fsa-regenerate-wall-masked-figures-scoped",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-04T12:32:36.143342+00:00",
+    "score": 0.71875,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.72,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 475.085,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1967.665,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 8,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 5,
+          "not-run": 19,
+          "passed": 102,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 51
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "no recorded account-window reading for budget group codex-sub",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 2,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "no recorded account-window reading for budget group codex-sub",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "no recorded account-window reading for budget group codex-sub",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.03,
+      "claude-haiku": 0,
+      "claude-opus": 0,
+      "clive": 0.76,
+      "codex": 0.01,
+      "codex-astra": 0.04,
+      "codex-luna": 0.01,
+      "hold": 0.15
+    },
+    "rendered_token_estimate": 1231,
+    "usage": {
+      "cost": 0.000137634,
+      "input_tokens": 3277,
+      "output_tokens": 89
+    }
+  },
+  "plan": "figure-and-solver-audit",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "dad6fc98e9bc8ffd3954f6109c21b480e7ee5dc1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "5d3fecad4830e1cd7ae1753479059e280ff9085c",
+    "reviewed_head_sha": "dad6fc98e9bc8ffd3954f6109c21b480e7ee5dc1",
+    "scores": {
+      "durability": 10,
+      "evidence": 12,
+      "fit": 14,
+      "goal_fidelity": 17,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 71
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a106e7-63cd-7f11-a3b2-d4092e54046f",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 32515968,
+    "cumulative_input_tokens": 65317096,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 74949
+  },
+  "time_budget": "60m",
+  "tool_steps": 42.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3394,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-04T13:29:39Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-04T12:46:32Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 522,
+    "worker_pid": 3465188
+  },
+  "worker_seconds": 3394,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

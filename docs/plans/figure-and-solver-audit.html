@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="101">
+<meta name="plan-version" content="102">
 <meta name="plan-modified" content="2026-10-04">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -294,16 +294,22 @@
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: extract benchmarks/frozen_current_flux_image_gate.py onto main and prove a render-only reproduction of the gate-b panels</pre>
     <p class="r-fu-outcome">Landed at f0b389834 (review 92). benchmarks/frozen_current_flux_image_gate.py was taken from 48a5764b5, the revision the gate-b receipt cites. A render-only run from the committed gate-b receipt reproduces every contour, wall path, label, null position and level in both panels. Only metadata and the current null glyphs differ. The reproductions sit under docs/figures/figure-and-solver-audit/fsa-extract-frozen-current-gate-driver/. tests/test_frozen_current_flux_image_gate.py passes 3 of 3, and a receipt with a row removed fails it. The gate-b title repair is now unblocked.</p>
     </article>
-<article class="r-fu" data-id="f-fsa-regenerate-wall-masked-figures" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-regenerate-wall-masked-figures" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-04T15:54:22+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Regenerate the committed figures whose drivers the wall-mask batches repaired</h4>
     <div class="r-fu-body"><p>The ten fsa-wall-mask batches changed source only. Each batch report under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-*.md lists, per changed driver, the committed figure paths it writes and whether regenerating them needs a solve. Regenerate them grouped by owning plan. Render-only figures go first, from their persisted receipts or states. Solve-needing figures follow, each as one H200 job per owning plan. Open every regenerated PNG and confirm that no contour leaves the vessel. Done when every listed figure is regenerated or carries a recorded reason it cannot be, such as a missing persisted state or a driver whose solve the current solver can no longer reproduce.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: regenerate the figures listed in the fsa-wall-mask batch reports through their repaired drivers</pre>
+    <p class="r-fu-outcome">Solve-free part landed at f68271587 (review 71). In total 50 figure files were regenerated through their render-only routes from committed receipts, and each was opened with no contour beyond the vessel wall. 34 came from r-20261004T123226395584. 16 came from its stopped predecessor: the gate-b pair, which re-greened the render-only reproduction test, the diverted-chord contours and the exact-clip seed panels. The rest is handed on. Figures that need a solve will be redrawn under the new solve, as part of the S21 rework acceptance work. Solve-free figures under plasma-cell-read-fidelity belong to S21's plans and were left to them. The report is at ~/.config/reckon/crew/reports/nova/s22/fsa-regenerate-wall-masked-figures-scoped.md. The regenerated receipts record absolute worktree paths, which is f-fsa-render-receipt-relative-paths.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-renderer-wall-guard-test" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-04T04:19:58+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Add the tree-wide renderer wall guard test now that the scan is clean</h4>
     <div class="r-fu-body"><p>tests/renderer_wall_scan.py reports zero unguarded scattered-field contour calls over benchmarks/ and docs/figures/ at main after the ten wall-mask batches. Add tests/test_renderer_contours_inside_wall.py, which runs the scanner over both trees and asserts an empty result, so the next renderer that omits the wall turns the suite red. Its negative control re-introduces one unguarded call in a scratch copy and must fail. Two scanner follow-ons from its reviews belong here too. A call that passes wall=None explicitly must not count as guarded. A committed test should pin a sample of the repaired drivers.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: add tests/test_renderer_contours_inside_wall.py asserting a clean wall scan over benchmarks/ and docs/figures/</pre>
     <p class="r-fu-outcome">Landed at 472f2fde9 (review 95). tests/test_renderer_contours_inside_wall.py asserts a clean wall scan over benchmarks/ and docs/figures/. An explicit wall=None now counts as unguarded. A scratch driver with its wall removed fails the guard. Review follow-on: add an in-test positive control that the scan reaches the real roots.</p>
+    </article>
+<article class="r-fu" data-id="f-fsa-render-receipt-relative-paths" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-04" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Render receipts record absolute worktree paths that stop resolving once the worktree is removed</h4>
+    <div class="r-fu-body"><p>The figures regenerated at f68271587 carry render receipts whose png, svg and receipt path fields are absolute paths into the worker's worktree. Those paths dangle once the worktree is reclaimed, so the committed evidence no longer locates its own artifacts. Make the render-only routes of the repaired drivers record project-relative paths, or the project-absolute /nova/figures/... form the reckon pages serve, and rewrite the committed receipts' path fields. Done when no committed receipt under the regenerated directories contains a path under .reckon-worktrees, and a test asserts that for every render-only route.</p></div>
+    <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: make render receipts record project-relative paths and rewrite the committed ones</pre>
     </article>
 </section>
 

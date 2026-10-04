@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-10-04">
 </head>
 <body>
@@ -226,6 +226,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261004T161650844174-cfs-design-opus-repairs" data-who="reckon-build" data-when="2026-10-04T16:45:16Z">
     <div class="r-comment-body"><p>Repaired the DIII-D clause set and EFIT-null test, explicit compensator JVP and 550-cell 16.9 mm offset; replaced constant combined-error caps with 6 measured C(h/R0)^p budgets from 10 local analytic reconstruction rows, separately bounding clip quadrature. At a42ac76b5ceb6b95e0c7db5a90cf105237544686 the document guard passes 6/6 and reckon audit-doc reports 0 errors; the baseline and mutated document each fail 5 targeted checks. Local reconstruction calibration is not a full realised-cell certificate.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261004T164646281285-review-of-cfs-design-opus-repairs" data-who="reckon-build" data-when="2026-10-04T16:54:00Z">
+    <div class="r-comment-body"><p>Independent review of repair base 7c85b26caf5b8f4705f2cb523cb7274a99573b27 and head a42ac76b5ceb6b95e0c7db5a90cf105237544686 stored in both assigned JSON records; scores goal_fidelity 19, evidence 18, scope_discipline 20, durability 12, fit 19 (88/100), zero blocking findings, two follow-ons. Four repairs verified; six budget formulas independently recalculated; audit-doc OK. Canonical added_failure_count is null because the reviewed manifest has empty suite fields; separately verified document checks add zero failures (base 5, head 0).</p></div>
 </div>
 </section>
 </main>

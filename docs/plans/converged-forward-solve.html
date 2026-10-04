@@ -4,25 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="converged-forward-solve">
-  <meta name="plan-title"     content="Converged Forward Solve — one topology read, one booking, one map, one Newton solve">
-  <meta name="plan-summary"   content="Rebuild the GS forward solve behind four pure functions, retire the NK ladders and frozen/live split, converge on exact inputs">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="converged-forward-solve">
+  <meta name="plan-title" content="Converged Forward Solve — one topology read, one booking, one map, one Newton solve">
+  <meta name="plan-summary" content="Rebuild the GS forward solve behind four pure functions, retire the NK ladders and frozen/live split, converge on exact inputs">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="48.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="critical">
-  <meta name="plan-sprint"    content="S21">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-tags"      content="equilibrium,grad-shafranov,fixed-point,topology,jax,convergence">
-  <meta name="plan-blocks"    content="single-grid-solver-cutover">
+  <meta name="plan-sprint" content="S21">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,fixed-point,topology,jax,convergence">
+  <meta name="plan-blocks" content="single-grid-solver-cutover">
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-10-04">
 </head>
 <body>
   <main class="plan-doc">
@@ -121,70 +123,75 @@
     <p>Retirement. When §5 passes the table on every row, the promotion and recovery rungs, the frozen/live split, the live-read fallback, the active-set route, the anderson and reduced-Newton routes and the chord route as a separate code path are deleted, not kept beside the new solve. <code>fixed_point.py</code>, <code>forward.py</code> and <code>forward_operator.py</code> shrink to the four functions and their receipts. Done when the deletion lands with the acceptance table green at its head and no test weakened to admit it.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="retire-not-patch" data-choice="retire" data-by="lead" data-when="2026-10-03">
-        <p class="r-dec-q">Are the Newton-Krylov promotion ladders and the frozen/live split patched or retired?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="retire">retire</button>
-          <button class="r-opt" data-value="patch">patch</button>
-        </p>
-        <p class="r-dec-rat">Lead, 2026-10-03: fixed once with a deep implementation behind a narrow interface; no building on refuted work and no further workarounds. The ladders and the split are retired when §5 passes the acceptance table.</p>
-      </div>
-      <div class="r-dec" data-key="topology-authority" data-choice="contour-tree-on-hex-cells" data-by="lead" data-when="2026-10-03">
-        <p class="r-dec-q">Which authority does the topology read implement?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="contour-tree-on-hex-cells">contour tree on hex cells</button>
-          <button class="r-opt" data-value="global-spline-critical-points">global-spline critical points</button>
-        </p>
-        <p class="r-dec-rat">Lead ruling, relayed by the plan session: the contour-tree authority on hex cells, no raster, no normalised flux, σ from COCOS. The field representation the read evaluates is the open decision below.</p>
-      </div>
-      <div class="r-dec" data-key="membership" data-choice="sub-cell-axis-connected" data-by="lead" data-when="2026-10-03">
-        <p class="r-dec-q">What is plasma membership?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="sub-cell-axis-connected">sub-cell and axis-connected</button>
-          <button class="r-opt" data-value="level-test-only">flux level test only</button>
-        </p>
-        <p class="r-dec-rat">Lead, 2026-10-03, on the diverted map decomposition at 6cb5b3e25: membership is decided sub-cell, on the exact clip, and only for the component connected to the axis. The flux level alone books private-flux cells as plasma.</p>
-      </div>
-      <div class="r-dec" data-key="acceptance" data-choice="joint" data-by="lead" data-when="2026-10-03">
-        <p class="r-dec-q">What is the acceptance for the new solve?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="joint">joint: residual, rows, null positions, map fidelity, compile cost</button>
-          <button class="r-opt" data-value="residual">residual alone</button>
-        </p>
-        <p class="r-dec-rat">Lead, 2026-10-03: the joint acceptance of §6. A solve can reach 1e-12 on a wrong map; the strong-1000 row did.</p>
-      </div>
-      <div class="r-dec" data-key="lanes" data-choice="astra-then-opus-review" data-by="lead" data-when="2026-10-04">
-        <p class="r-dec-q">Which lanes carry the design and the implementation?</p>
-        <p class="r-dec-rat">Lead, 2026-10-04: codex-astra (gpt-6-astra, the model the account offers) for the design (§1), the four implementation nodes (§2 to §5) and the acceptance and retirement node (§6); claude-opus re-review once its window reopens; the local lane for tests, instruments and evidence. codex-terra is retired.</p>
-      </div>
-      <div class="r-dec" data-key="field-representation" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which field representation does the topology read evaluate on the hex cells?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="cellwise-polynomial">the cellwise polynomial the moments are evaluated in</button>
-          <button class="r-opt" data-value="global-tensor-spline">the global tensor spline</button>
-          <button class="r-opt" data-value="ring-quadratic">the six-point ring quadratic</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="receipts-out-of-git" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Do large receipts leave git for the GPFS evidence store?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="gpfs-with-pointer">yes: npz, gz and json above a few MB live on GPFS with a path pointer; PNG and SVG stay</button>
-          <button class="r-opt" data-value="stay-in-git">no: keep committing receipts</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="retire-not-patch" data-choice="retire" data-by="lead" data-when="2026-10-03">
+    <p class="r-dec-q">Are the Newton-Krylov promotion ladders and the frozen/live split patched or retired?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="retire">retire</button>
+      <button class="r-opt" data-value="patch">patch</button>
+      </p>
+    <p class="r-dec-rat">Lead, 2026-10-03: fixed once with a deep implementation behind a narrow interface; no building on refuted work and no further workarounds. The ladders and the split are retired when §5 passes the acceptance table.</p>
+    </div>
+<div class="r-dec" data-key="topology-authority" data-choice="contour-tree-on-hex-cells" data-by="lead" data-when="2026-10-03">
+    <p class="r-dec-q">Which authority does the topology read implement?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="contour-tree-on-hex-cells">contour tree on hex cells</button>
+      <button class="r-opt" data-value="global-spline-critical-points">global-spline critical points</button>
+      </p>
+    <p class="r-dec-rat">Lead ruling, relayed by the plan session: the contour-tree authority on hex cells, no raster, no normalised flux, σ from COCOS. The field representation the read evaluates is the open decision below.</p>
+    </div>
+<div class="r-dec" data-key="membership" data-choice="sub-cell-axis-connected" data-by="lead" data-when="2026-10-03">
+    <p class="r-dec-q">What is plasma membership?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="sub-cell-axis-connected">sub-cell and axis-connected</button>
+      <button class="r-opt" data-value="level-test-only">flux level test only</button>
+      </p>
+    <p class="r-dec-rat">Lead, 2026-10-03, on the diverted map decomposition at 6cb5b3e25: membership is decided sub-cell, on the exact clip, and only for the component connected to the axis. The flux level alone books private-flux cells as plasma.</p>
+    </div>
+<div class="r-dec" data-key="acceptance" data-choice="joint" data-by="lead" data-when="2026-10-03">
+    <p class="r-dec-q">What is the acceptance for the new solve?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="joint">joint: residual, rows, null positions, map fidelity, compile cost</button>
+      <button class="r-opt" data-value="residual">residual alone</button>
+      </p>
+    <p class="r-dec-rat">Lead, 2026-10-03: the joint acceptance of §6. A solve can reach 1e-12 on a wrong map; the strong-1000 row did.</p>
+    </div>
+<div class="r-dec" data-key="lanes" data-choice="astra-then-opus-review" data-by="lead" data-when="2026-10-04">
+    <p class="r-dec-q">Which lanes carry the design and the implementation?</p>
+    <p class="r-dec-rat">Lead, 2026-10-04: codex-astra (gpt-6-astra, the model the account offers) for the design (§1), the four implementation nodes (§2 to §5) and the acceptance and retirement node (§6); claude-opus re-review once its window reopens; the local lane for tests, instruments and evidence. codex-terra is retired.</p>
+    </div>
+<div class="r-dec" data-key="field-representation" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which field representation does the topology read evaluate on the hex cells?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="cellwise-polynomial">the cellwise polynomial the moments are evaluated in</button>
+      <button class="r-opt" data-value="global-tensor-spline">the global tensor spline</button>
+      <button class="r-opt" data-value="ring-quadratic">the six-point ring quadratic</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="receipts-out-of-git" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Do large receipts leave git for the GPFS evidence store?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="gpfs-with-pointer">yes: npz, gz and json above a few MB live on GPFS with a path pointer; PNG and SVG stay</button>
+      <button class="r-opt" data-value="stay-in-git">no: keep committing receipts</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-cfs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s21-nova" data-written-at="2026-10-04" data-recommends-skill="/reckon-build converged-forward-solve §1" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Dispatch §1, the design, on codex-astra, then §2 to §5 in order with their analytic oracles</h4>
-        <div class="r-fu-body"><p>§1 is one research document on the strongest lane. §2 to §5 follow in dependency order, each with its own analytic oracle and its own negative control; §6's table is the gate for every one of them, and the retirement in §6 lands last. Nothing in this plan is a patch to the existing route.</p></div>
-        <pre class="r-fu-prompt">/reckon-build converged-forward-solve §1</pre>
-      </article>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cfs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="s21-nova" data-written-at="2026-10-04" data-recommends-skill="/reckon-build converged-forward-solve §1" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Dispatch §1, the design, on codex-astra, then §2 to §5 in order with their analytic oracles</h4>
+    <div class="r-fu-body"><p>§1 is one research document on the strongest lane. §2 to §5 follow in dependency order, each with its own analytic oracle and its own negative control; §6's table is the gate for every one of them, and the retirement in §6 lands last. Nothing in this plan is a patch to the existing route.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §1</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261004T122850765854-review-of-converged-forward-solve" data-who="reckon-build" data-when="2026-10-04T12:33:44.346Z">
+    <div class="r-comment-body"><p>Readback of nova:converged-forward-solve §1 delivered at review-of-converged-forward-solve/readback.md — intent restated, all 7 decisions and 6 section done-whens restated verbatim-faithfully, and 11 plan sentences flagged as having two or more readings; §1&#x27;s own done-when (&quot;finds no sentence with two readings&quot;) is therefore not yet met and the plan should resolve those readings before the design node dispatches.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

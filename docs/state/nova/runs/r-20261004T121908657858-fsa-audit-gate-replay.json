@@ -1,0 +1,617 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "cca66b019ffc7e8effd39f320cab34ac3d22e77a",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 28731264,
+      "cached_input_tokens_cumulative": 28731264,
+      "input_tokens": 28941489,
+      "input_tokens_cumulative": 28941489,
+      "output_tokens": 73814,
+      "output_tokens_cumulative": 73814,
+      "reasoning_output_tokens": 29663,
+      "reasoning_output_tokens_cumulative": 29663
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-04T13:17:01Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-04T12:19:35Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest payloads",
+    "override": false,
+    "role": "test",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "seed/certificate/figure",
+    "prose/driver",
+    "base/head"
+  ],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 1.0,
+    "plan": "figure-and-solver-audit",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.8048984986179895,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-07T11:44:23Z, which is after this node's 3600s horizon ending 2026-10-04T13:19:11.650062+00:00",
+    "horizon_ends_at": "2026-10-04T13:19:11.650062+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-04T12:19:10Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-07T11:44:23Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 464063,
+    "state": "quiet",
+    "utilisation_pct": 42.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-04T12:19:10Z",
+    "read_at": "2026-10-04T12:19:11Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 42.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-04T13:17:01Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T121908657858-fsa-audit-gate-replay/manifest.md",
+  "member": "disposable-r-20261004T121908657858-fsa-audit-gate-replay",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": "report-only test node; the replay report outside git is the deliverable",
+  "node": "fsa-audit-gate-replay",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1058,
+          "cached_input_tokens": 904531,
+          "input_tokens": 905591,
+          "output_tokens": 904,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 906495,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "The followup f-fsa-audit-gate-replay in docs/plans/figure-and-solver-audit.html lists the problem: promoted gate_check.command fields that are prose, scheduler summaries or source-swapping shell drivers, and an earlier replay that hit a self-imposed 20-minute cap (five processes exited 124, including a 29-test module given 56.7 s). For every promoted run in docs/state/nova/crew.json whose gate the audit at docs/evidence/archive/figure-and-solver-audit-landed.html#solver-fixed-point-newton marks unreproduced, the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-audit-gate-replay.md gives: the recorded command verbatim, whether it is an executable command or prose, and for executable pytest payloads the outcome of replaying it at the run recorded revision in a fresh CPU process (git archive of nova/, benchmarks/ and tests/ into the run directory, removed afterwards; JAX_PLATFORMS=cpu; timeout 1800 per module, never a shared cap), labelled as passed, failed with the failing ids, missing test, substitution or timeout. Historical failed or waiting run status is preserved, never upgraded to a pass from incomplete evidence. Heavy modules run in place on the fleet node within its shared 28 CPUs, at most four replays at a time. No source, plan or ledger file is edited; the report is the deliverable.",
+    "estimated_hours": null,
+    "goal": "replay the promotion gates the solver audit could not reproduce, from immutable command records, and label each outcome",
+    "id": "fsa-audit-gate-replay",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-04T12:19:10Z",
+      "read_at": "2026-10-04T12:19:11Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 42.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T121908657858-fsa-audit-gate-replay/manifest.md",
+    "negative_control": "",
+    "plan": "figure-and-solver-audit",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "test",
+    "section": "§5",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-audit-gate-replay.md"
+    ]
+  },
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.8048423519738959,
+      "derived": 0.2559780356964286,
+      "drain_hours": 168.0,
+      "effective_limit": 0.2559780356964286,
+      "elapsed_fraction": 0.2327073051785714,
+      "elapsed_hours": 39.094827269999996,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-04T12:19:15+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.5800000000000001,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.42,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.381024,
+      "decided_by": "window",
+      "margin": 0.16897600000000007,
+      "name": "fsa-audit-gate-replay",
+      "score": 0.55,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.42
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.378172,
+        "observed_at": "2026-10-04T12:19:15+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.42,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "fsa-audit-gate-replay",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-04T12:19:15.378172+00:00",
+    "score": 0.55,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.84,
+    "decision_source": "jev",
+    "effort": "xhigh",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": null,
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 362.333,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 830.493,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "xhigh",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 2,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 43
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "no recorded account-window reading for budget group codex-sub",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "no recorded account-window reading for budget group codex-sub",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "no recorded account-window reading for budget group codex-sub",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-terra",
+        "budget_reason": "no recorded account-window reading for budget group codex-sub",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-5.6-terra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0.04,
+      "clive": 0.86,
+      "codex": 0.02,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "codex-terra": 0.01,
+      "hold": 0.07
+    },
+    "rendered_token_estimate": 1318,
+    "usage": {
+      "cost": 0.000145992,
+      "input_tokens": 3476,
+      "output_tokens": 99
+    }
+  },
+  "plan": "figure-and-solver-audit",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "cca66b019ffc7e8effd39f320cab34ac3d22e77a",
+  "resume_waiver": {
+    "reason": "the report and every replay log are complete; the only blocker was the manifest commit rule for a report-only node",
+    "session_id": "01a106db-0d15-7963-ab82-c002e440707c",
+    "source": "stream"
+  },
+  "review": null,
+  "review_tier": "full",
+  "role": "test",
+  "route_mode": "explicit",
+  "run_id": "r-20261004T121908657858-fsa-audit-gate-replay",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s22-nova",
+  "session_harness": "codex",
+  "session_id": "01a106db-0d15-7963-ab82-c002e440707c",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 28731264,
+    "cumulative_input_tokens": 57672753,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 103477
+  },
+  "time_budget": "60m",
+  "tool_steps": 188.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3446,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-04T13:17:05Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-04T12:19:39Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261004T121908657858-fsa-audit-gate-replay",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 627,
+    "worker_pid": 3157639
+  },
+  "worker_seconds": 3446,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-04T13:17:01Z",
+    "session_id": "01a106db-0d15-7963-ab82-c002e440707c",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-audit-gate-replay"
+  }
+}

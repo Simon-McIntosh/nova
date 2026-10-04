@@ -23,9 +23,9 @@
   <title>Figure And Solver Audit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-04">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="97">
+<meta name="plan-version" content="98">
+<meta name="plan-modified" content="2026-10-04">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -636,6 +636,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261003T161918355337-review-of-fsa-restore-msc-figure-artifacts-compressed" data-who="reckon-build" data-when="2026-10-03T16:27:33.081Z">
     <div class="r-comment-body"><p>Reviewed run r-20261003T160921208577-fsa-restore-msc-figure-artifacts-compressed (base e1428d907, head 0fa83088d, commits 5751c065c + 0fa83088d), scoring goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 18 = 91/100, verdict pass. All six restored artifacts independently verified: three SVGs blob-identical to their s19 tips (a37d5b5d/203b2bc2/c8fd7fe9 equal a799465ff / 7d3c7e757), three .json.gz decompressing to sha256 equal to their tip-blob sha256 (4141747c=2e33f631, ed24f962=2543ab3c, 45ab6988=ce75bfea), largest committed file 30387706 B &lt; 50 MB, no raw .json in the tree, report.md repoint is the exact two-line diff, and the defect is real at base (report-referenced artifacts absent). added_failure_count 0, added_failure_ids [].</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261004T121908657858-fsa-audit-gate-replay" data-who="reckon-build" data-when="2026-10-04T13:17:01Z">
+    <div class="r-comment-body"><p>/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-audit-gate-replay.md records every ledger command and replay label; 17 after arms: 13 passed, three pre-existing failures, one timeout; no added failure attributed.</p></div>
 </div>
 </section>
   </main>

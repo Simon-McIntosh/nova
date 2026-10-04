@@ -1,11 +1,11 @@
 {
-  "driver_sha256": "61db99e7815005ac50dc28a168f885b15ae6daf2388c24cf770ee2de4f937929",
+  "driver_sha256": "0bb3c1feb42776fafa3b6441a1efb153a83d41a40eccdfc963f8cd5198dbf33c",
   "figures": {
     "zero-residual-map": {
       "figure": {
         "png_relative": "docs/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png",
         "render_source": "zero_residual_check",
-        "sha256": "91fb7d71d9a2c264d9ed7fa987f66f9a77e1c5eda1d1009c6bda14511e82ca01",
+        "sha256": "c66bc2cf3dbd256cc155d89f714503b6a3c5e476ae24a615cc65d39500353cac",
         "src": "/nova/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png"
       },
       "panels": [
@@ -107,5 +107,5 @@
     }
   },
   "schema": "nova.zero-residual-render-receipt",
-  "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e"
+  "source_revision": "5d3fecad4830e1cd7ae1753479059e280ff9085c"
 }

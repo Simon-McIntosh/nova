@@ -11,7 +11,7 @@
   "figure": {
     "png_relative": "docs/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png",
     "render_source": "zero_residual_check",
-    "sha256": "91fb7d71d9a2c264d9ed7fa987f66f9a77e1c5eda1d1009c6bda14511e82ca01",
+    "sha256": "c66bc2cf3dbd256cc155d89f714503b6a3c5e476ae24a615cc65d39500353cac",
     "src": "/nova/figures/cut-cell-current-attribution/zero-residual/panels/zero-residual-map.png"
   },
   "panels": [
@@ -115,7 +115,7 @@
       "weak-rotation-reactor-static",
       "moderate-rotation-conventional-static"
     ],
-    "source_revision": "9d62c8f4cf31bae5b105ef32e17860b5dde6877e"
+    "source_revision": "5d3fecad4830e1cd7ae1753479059e280ff9085c"
   },
   "render_receipt": "docs/figures/cut-cell-current-attribution/zero-residual/render-receipt.json",
   "rows": {

@@ -51,14 +51,14 @@
       ]
     }
   ],
-  "revision": "c054dc50fe02add3b03555a99ce66a099485dc72",
+  "revision": "5d3fecad4830e1cd7ae1753479059e280ff9085c",
   "source_receipt": "docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
   "source_receipt_sha256": "6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb",
   "translated_figure": {
     "case": null,
     "figure": "translated-40mm.png",
     "filesystem_path": "docs/figures/cut-cell-current-attribution/positional-stiffness/figures/translated-40mm.png",
-    "pixel_sha256": "091a52df11c5415b2bcef205298bb541dbd26dec7bd2cc61d4af5c864a98489c",
+    "pixel_sha256": "c55c4580cd682779a67fdcff2e5f9962ca9d252a7c7e44040336204ecad96cef",
     "poloidal_panels": [
       {
         "null_glyphs": {
@@ -176,7 +176,7 @@
       }
     ],
     "project_absolute_src": "/nova/figures/cut-cell-current-attribution/positional-stiffness/figures/translated-40mm.png",
-    "sha256": "b4515f5397cbc65adb775f0f1ea9ca030630c4672844f2afe2424575524e51b2",
+    "sha256": "c2981d167631463e47b214df284498612d53f01f011b4fbcf30361dd2e82f4b4",
     "source_receipt": "docs/figures/cut-cell-current-attribution/positional-stiffness/receipt.json",
     "source_receipt_sha256": "6e0b30e9b875ceb1ee4714d1aee8476a8ff50ba71d476f3a34828783dec223bb",
     "titles": [

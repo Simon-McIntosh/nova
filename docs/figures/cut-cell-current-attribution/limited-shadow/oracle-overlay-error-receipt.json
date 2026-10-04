@@ -4,7 +4,7 @@
   "figure": {
     "filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/oracle-overlay-error.png",
     "project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/oracle-overlay-error.png",
-    "sha256": "d06d03e68233e8a9f0ef53f2eaaaef5bdd3efc21f22df34795057965091f057a"
+    "sha256": "102cd917931c25ddc24c00533e153c5fe9c041505a81805ce209f24c3ab50af1"
   },
   "fixed_signed_difference_levels": [
     -0.1,
@@ -312,5 +312,5 @@
   "schema": "nova.limited-shadow-oracle-overlay-error",
   "skipped_exact_parts": [],
   "solve_calls": 0,
-  "source_revision": "58a12e4d6d76b9de193b0df02dbafb3aeab916fa"
+  "source_revision": "5d3fecad4830e1cd7ae1753479059e280ff9085c"
 }

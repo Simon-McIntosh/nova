@@ -7,7 +7,7 @@
   "figure": {
     "filesystem_path": "docs/figures/cut-cell-current-attribution/limited-shadow/lfs-contours-before-after.png",
     "project_absolute_src": "/nova/figures/cut-cell-current-attribution/limited-shadow/lfs-contours-before-after.png",
-    "sha256": "fd42b8591ff5d6c5d4ac48bd9fd998d7a744cd305b6f7f94b18de0de27e08814"
+    "sha256": "16f99a01960484ed1130a150984ae97aed5d982085f615b53414721083ecd611"
   },
   "omitted_weak_2500": {
     "census_carrier_count": 54,
@@ -131,5 +131,5 @@
   "schema": "nova.limited-shadow-terminal-comparison",
   "shadow_mechanism_revision": "3082be61cb6dd4a4d9cae1889993717c4e63e58c",
   "solve_calls": 0,
-  "source_revision": "02be6d3470f71c3a7b1c5beecf991f8e5a81b828"
+  "source_revision": "5d3fecad4830e1cd7ae1753479059e280ff9085c"
 }

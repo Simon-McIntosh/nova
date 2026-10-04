@@ -23,9 +23,9 @@
   <title>Figure And Solver Audit | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-03">
+<meta name="plan-modified" content="2026-10-04">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="95">
+<meta name="plan-version" content="96">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -280,10 +280,11 @@
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: inventory refs/s19-tips against main and recommend land, extract or retire for each</pre>
     <p class="r-fu-outcome">Inventoried (r-20261003T144829404370, review 95; report at ~/.config/reckon/crew/reports/nova/s22/fsa-s19-tips-inventory.md, whose addendum supersedes eight table rows). Most of the 33 tips are already ancestors of main, patch-equivalent to it, or superseded by later commits on main, so they retire. Two strand artifacts that main's own reports reference: #29 msc-compile-host-memory (compile-memory.svg) and #33 msc-solve-profile-kernel-count (solve-profile JSON and SVG files). One driver, benchmarks/frozen_current_flux_image_gate.py, exists only on eleven tips, yet the gate-b, cut-cell-coupling and first-order-coupling figures on main were drawn by it. The three outcomes are split into separate followups.</p>
     </article>
-<article class="r-fu" data-id="f-fsa-restore-msc-figure-artifacts" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-restore-msc-figure-artifacts" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-04T04:19:58+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Restore the figure artifacts that main&#x27;s millisecond-solve reports reference but main lacks</h4>
     <div class="r-fu-body"><p>docs/figures/millisecond-converged-solve/compile-memory/report.md:73 references compile-memory.svg. solve-profile/report.md:7-10 references solve-profile.json, solve-profile-300.json, solve-profile-1000.json, solve-profile-300.svg and solve-profile-1000.svg. None of those files is on main. They exist only on refs/s19-tips/msc-compile-host-memory (a799465ff) and refs/s19-tips/msc-solve-profile-kernel-count (7d3c7e757). Bring exactly those referenced artifacts onto main, taken from the tip blobs, and check that every file the two reports reference then exists.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: restore the millisecond-solve figure artifacts held only on two s19 tips</pre>
+    <p class="r-fu-outcome">Landed at d3af909e7 (review 91). compile-memory.svg and the solve-profile 300 and 1000 SVGs are restored byte for byte from their s19 tips. The three solve-profile receipts were 198.8, 82.8 and 83.0 MB raw, over the GitHub per-file limit, so they are committed gzip-compressed (30, 15 and 15 MB). Each decompresses to its tip blob. Both report checks now resolve every reference (1 of 1, 5 of 5), parse each .json.gz, and failed before the restore. An earlier attempt that committed the raw 198 MB JSON was rejected and never landed.</p>
     </article>
 <article class="r-fu" data-id="f-fsa-extract-stranded-figure-drivers" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-03T16:15:29+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Bring the frozen-current flux-image gate driver onto main so the figures it drew can be regenerated</h4>
@@ -296,10 +297,11 @@
     <div class="r-fu-body"><p>The ten fsa-wall-mask batches changed source only. Each batch report under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-*.md lists, per changed driver, the committed figure paths it writes and whether regenerating them needs a solve. Regenerate them grouped by owning plan. Render-only figures go first, from their persisted receipts or states. Solve-needing figures follow, each as one H200 job per owning plan. Open every regenerated PNG and confirm that no contour leaves the vessel. Done when every listed figure is regenerated or carries a recorded reason it cannot be, such as a missing persisted state or a driver whose solve the current solver can no longer reproduce.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: regenerate the figures listed in the fsa-wall-mask batch reports through their repaired drivers</pre>
     </article>
-<article class="r-fu" data-id="f-fsa-renderer-wall-guard-test" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-renderer-wall-guard-test" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-04T04:19:58+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Add the tree-wide renderer wall guard test now that the scan is clean</h4>
     <div class="r-fu-body"><p>tests/renderer_wall_scan.py reports zero unguarded scattered-field contour calls over benchmarks/ and docs/figures/ at main after the ten wall-mask batches. Add tests/test_renderer_contours_inside_wall.py, which runs the scanner over both trees and asserts an empty result, so the next renderer that omits the wall turns the suite red. Its negative control re-introduces one unguarded call in a scratch copy and must fail. Two scanner follow-ons from its reviews belong here too. A call that passes wall=None explicitly must not count as guarded. A committed test should pin a sample of the repaired drivers.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: add tests/test_renderer_contours_inside_wall.py asserting a clean wall scan over benchmarks/ and docs/figures/</pre>
+    <p class="r-fu-outcome">Landed at 472f2fde9 (review 95). tests/test_renderer_contours_inside_wall.py asserts a clean wall scan over benchmarks/ and docs/figures/. An explicit wall=None now counts as unguarded. A scratch driver with its wall removed fails the guard. Review follow-on: add an in-test positive control that the scan reaches the real roots.</p>
     </article>
 </section>
 

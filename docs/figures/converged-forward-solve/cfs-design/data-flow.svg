@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 520" width="1400" height="520" role="img" aria-labelledby="title description">
+<title id="title">One state, one topology read, one booking, one map</title>
+<desc id="description">A trial flux enters topology.read, then current.book, then gs.apply. solve.fixed_point evaluates the same composed residual and its tangent at one scan call site and returns another trial flux. Geometry, profile values, constraints and targets are explicit operands.</desc>
+<g fill="#171717" font-family="system-ui, sans-serif" font-size="26" text-anchor="middle">
+<text x="255" y="150" font-weight="600">topology.read</text><text x="255" y="188" font-size="23">axis, boundary, membership</text><text x="255" y="221" font-size="21">qualification + field coefficients</text>
+<text x="675" y="150" font-weight="600">current.book</text><text x="675" y="188" font-size="23">exact connected sub-cell clip</text><text x="675" y="221" font-size="21">moments + capacity verdict</text>
+<text x="1122" y="150" font-weight="600">gs.apply</text><text x="1122" y="188" font-size="23">ψ<tspan baseline-shift="sub" font-size="18">ext</tspan> + G · moments</text><text x="1122" y="221" font-size="21">value + qualification</text>
+<text x="707" y="318" font-weight="600">solve.fixed_point</text><text x="707" y="353">Newton–GMRES + one line search</text><text x="707" y="382" font-size="23">one scan call site evaluates the same residual and JVP</text>
+<text x="255" y="69">ψ trial</text><text x="462" y="162" font-size="22">read</text><text x="895" y="162" font-size="22">moments</text>
+<text x="192" y="315" font-size="23">next trial ψ</text><text x="1192" y="281" font-size="23">mapped ψ</text>
+<text x="700" y="30" font-size="23">Traced operands: geometry · coupling · profile values · constraint targets</text>
+<text x="1050" y="506" font-size="23">ψ* + per-accepted-state receipt, or a stated stop</text>
+</g><g fill="none" stroke="#333" stroke-width="1.6">
+<path d="M87 169 L95 175 L87 181 M497 169 L505 175 L497 181 M937 169 L945 175 L937 181 M1058 319 L1050 325 L1058 331 M49 183 L55 175 L61 183 M1182 464 L1190 470 L1182 476"/>
+<rect x="100" y="115" width="310" height="125"/><rect x="510" y="115" width="330" height="125"/><rect x="950" y="115" width="345" height="125"/>
+<path d="M25 175 H95 M415 175 H505 M845 175 H945"/>
+<path d="M1120 245 V325 H1050"/>
+<rect x="370" y="280" width="675" height="115"/>
+<path d="M365 335 H55 V175"/>
+<path d="M710 400 V470 H1190"/>
+</g>
+</svg>

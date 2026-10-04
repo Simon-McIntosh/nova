@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="converged-forward-solve-landed">
+  <meta name="plan-title" content="Converged Forward Solve — landed record">
+  <meta name="plan-summary" content="Cumulative outcome record for converged-forward-solve, one anchor per landed section">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-tags" content="equilibrium,grad-shafranov,fixed-point,topology,jax,convergence">
+  <title>Converged Forward Solve — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Converged Forward Solve — landed record</h1>
+  <p>One anchor per landed section of <code>converged-forward-solve</code>. Each anchor names the run, the merge, the review and the measured result.</p>
+
+  <section id="design">
+    <h2>§1 — the design: four pure functions and the inventory they replace</h2>
+    <p>Three runs on 2026-10-04, all merged. The design document is <code>docs/research/converged-forward-solve-design.html</code>.</p>
+    <ul>
+      <li><code>r-20261004T123242201996-cfs-design</code> (codex-astra), merged at <code>a9fb45dcc</code>, review 86. Wrote the document: four signatures with invariants, 17 null-finding and 23 region-finding source bindings each with a destination or a deletion, the three defect mechanisms against their evidence, and the acceptance as 10 clause tests and 26 row tests.</li>
+      <li><code>r-20261004T155210829845-cfs-design-readback-repairs</code> (codex), merged at <code>3326f6712</code>, review 77 with durability exempted as a prose document. Resolved the five two-reading sentences the local read-back found.</li>
+      <li><code>r-20261004T161650844174-cfs-design-opus-repairs</code> (codex-astra), merged at <code>0d70adb6c</code>, review 88. Resolved the two blocking findings of the first claude-opus re-review (score 70): the DIII-D clause set restated from the plan with an EFIT-null test; and the resolution-independent membership and moment caps replaced by budgets C·(h/R₀)ᵖ measured from 490 local fits of the proposed quadratic. Second claude-opus re-review: 88, no blocking finding.</li>
+    </ul>
+    <p><strong>The measurement that changed the design.</strong> The proposed field representation, the six-coefficient own-node quadratic, reconstructs the flux at third order on both analytic states, but the support it induces is case-dependent. On the limited (weak) boundary the per-cell membership error is second order: 6.5e-4 of the cell at 132 cells, 3.2e-5 at 2616. On the diverted boundary it is half order: 3.3e-2 at 132 cells, 9.4e-3 at 2616, and the two X-point samples set the whole budget while the next-worst smooth cell sits at 3.8e-3 falling to 1.2e-4 with order 2.3. The vanishing gradient at the saddle turns a third-order flux error into a half-order position error. Consequence: the saddle cell needs its own representation or its own budget, and sub-cell membership can never be held to a resolution-independent cap.</p>
+    <p><strong>Follow-ons carried into the implementation gates</strong> (from the second claude-opus review): budget the saddle-neighbourhood cells separately from smooth-boundary cells and assert the measured order is at least p; declare each constraint row's scale so the 1e-12 row clause cannot be met by choosing the scale; land versioned acceptance-binding and budget-coefficient tests with the gates; bind the document check logs into the suite fields.</p>
+    <p>Read-backs: the plan went through six local read-backs (11, 4, 3, 2, 0, 0 two-reading sentences), the design document through one (5, then 0 after repair). The design read-back loop is recorded under <code>~/.config/reckon/crew/reports/nova/s21-nova/</code>.</p>
+  </section>
+
+</main>
+</body>
+</html>

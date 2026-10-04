@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-10-04">
 </head>
 <body>
@@ -222,7 +222,10 @@
     <div class="r-comment-body"><p>Clarified five design readback ambiguities in ten replaced HTML lines; the three-pitch negative control now fails the position clause with qualification separate, and reckon audit-doc reports 0 errors.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261004T160932367109-review-2-of-cfs-design-readback-repairs" data-who="reckon-build" data-when="2026-10-04T16:15:03.136Z">
-    <div class="r-comment-body"><p>Design re-review of docs/research/converged-forward-solve-design.html at ce1deba42 stored (goal_fidelity 12, evidence 14, scope_discipline 19, durability 8, fit 17; total 70) with 2 blocking findings: the DIII-D acceptance rows contradict the plan&#x27;s §6 clause set, and the 5e-7/2e-6 per-resolution caps are 3-4 orders below what a quadratic cell fit of the log-bearing Solov&#x27;ev oracle can reach.</p></div>
+    <div class="r-comment-body"><p>Design re-review of docs/research/converged-forward-solve-design.html at ce1deba42 stored (goal_fidelity 12, evidence 14, scope_discipline 19, durability 8, fit 17; total 70) with 2 blocking findings: the DIII-D acceptance rows contradict the plan's §6 clause set, and the 5e-7/2e-6 per-resolution caps are 3-4 orders below what a quadratic cell fit of the log-bearing Solov'ev oracle can reach.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261004T161650844174-cfs-design-opus-repairs" data-who="reckon-build" data-when="2026-10-04T16:45:16Z">
+    <div class="r-comment-body"><p>Repaired the DIII-D clause set and EFIT-null test, explicit compensator JVP and 550-cell 16.9 mm offset; replaced constant combined-error caps with 6 measured C(h/R0)^p budgets from 10 local analytic reconstruction rows, separately bounding clip quadrature. At a42ac76b5ceb6b95e0c7db5a90cf105237544686 the document guard passes 6/6 and reckon audit-doc reports 0 errors; the baseline and mutated document each fail 5 targeted checks. Local reconstruction calibration is not a full realised-cell certificate.</p></div>
 </div>
 </section>
 </main>

@@ -488,6 +488,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "5b65f93790e4ede958fce70dc65192f87f775608",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 5031,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261004T171001168133-review-7-of-converged-forward-solve",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5031,
+        "path": "/tmp/reckon-crew-scratch/r-20261004T171001168133-review-7-of-converged-forward-solve"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "5b65f93790e4ede958fce70dc65192f87f775608",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-7-of-converged-forward-solve",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-04T17:32:18.582Z",
+            "session_id": "a416921e-e502-40e6-8a8d-0ae95509dfd0",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-7-of-converged-forward-solve"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session a416921e-e502-40e6-8a8d-0ae95509dfd0"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-04T17:32:18.582Z",
+      "session_id": "a416921e-e502-40e6-8a8d-0ae95509dfd0",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-7-of-converged-forward-solve"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session a416921e-e502-40e6-8a8d-0ae95509dfd0"
+  },
   "resume_remedy": {
     "command": "reckon crew resume --run r-20261004T171001168133-review-7-of-converged-forward-solve --advice continue",
     "session_id": "a416921e-e502-40e6-8a8d-0ae95509dfd0",

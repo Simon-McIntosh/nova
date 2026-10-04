@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 700" width="1400" height="700" role="img" aria-labelledby="title description">
+<title id="title">Flux level does not determine axis-connected membership</title>
+<desc id="description">Two schematic copies of a diverted region inside a vessel. The upper lobe contains the magnetic axis, the lower private lobe does not. Both satisfy the same signed flux inequality. A hex cell across the saddle contains pieces of both lobes. Correct current booking keeps only its upper, axis-connected piece; touching at the saddle does not connect the interiors.</desc>
+<g font-family="system-ui, sans-serif" fill="#171717" font-size="27" text-anchor="middle">
+<text x="350" y="42">Level test alone</text><text x="1030" y="42">Axis-connected sub-cell membership</text>
+</g>
+<g fill="none" stroke="#666" stroke-width="2">
+<path d="M180 110 Q90 200 140 410 L180 595 H520 L570 410 Q610 190 520 110 Z"/>
+<path d="M860 110 Q770 200 820 410 L860 595 H1200 L1250 410 Q1290 190 1200 110 Z"/>
+</g>
+<g fill="none" stroke="#222" stroke-width="3">
+<path d="M350 410 C70 245 180 118 350 145 C520 118 630 245 350 410 C290 465 240 520 225 595 M350 410 C410 465 460 520 475 595"/>
+<path d="M1030 410 C750 245 860 118 1030 145 C1200 118 1310 245 1030 410"/>
+</g>
+<g fill="none" stroke="#444" stroke-width="3" stroke-dasharray="9 7">
+<path d="M1030 410 C970 465 920 520 905 595 M1030 410 C1090 465 1140 520 1155 595"/>
+</g>
+<g stroke="#777" fill="none" stroke-width="1.6">
+<path d="M278 368 L350 332 L422 368 L422 452 L350 488 L278 452 Z"/>
+<path d="M958 368 L1030 332 L1102 368 L1102 452 L1030 488 L958 452 Z"/>
+</g>
+<g fill="#171717" stroke="#171717" stroke-width="2">
+<path d="M350 226 L341 243 H359 Z M1030 226 L1021 243 H1039 Z"/>
+<path d="M342 402 L358 418 M342 418 L358 402 M1022 402 L1038 418 M1022 418 L1038 402" stroke-width="4"/>
+<circle cx="350" cy="375" r="7"/><circle cx="350" cy="450" r="7"/><circle cx="1030" cy="375" r="7"/>
+<circle cx="1030" cy="450" r="7" fill="white"/>
+</g>
+<g font-family="system-ui, sans-serif" fill="#171717" font-size="25" text-anchor="middle">
+<text x="350" y="278">axis-connected core</text><text x="1030" y="278">axis-connected core</text>
+<text x="350" y="540">private flux</text><text x="1030" y="540">private flux</text>
+<text x="350" y="650">Both pieces pass σ(ψ − ψ<tspan baseline-shift="sub" font-size="18">b</tspan>) ≥ 0</text>
+<text x="1030" y="650">Lower piece: zero plasma current</text>
+<text x="700" y="393" font-size="23">one hex cell</text><text x="700" y="427" font-size="23">two components</text>
+<text x="700" y="690" font-size="23">Schematic, not a computed flux map. Contact at the saddle does not join the open interiors.</text>
+</g>
+<g fill="none" stroke="#777" stroke-width="1.4"><path d="M587 402 H430 M813 402 H950"/></g>
+</svg>

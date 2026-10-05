@@ -2802,6 +2802,65 @@ def _support_at_level(
     )
 
 
+def _curvature_derivatives(field, point, pitch):
+    """Differentiate point Hessians without differentiating sampled mesh flux.
+
+    Kernel Hessians are analytic. Central differences on a moving local stencil
+    supply their higher curvature corrections; the stationary solve and its
+    implicit tangent continue to use the analytic Hessian itself.
+    """
+    if not isinstance(field, TotalField):
+        return (
+            jax.jacfwd(lambda target: field.evaluate(target).hessian)(point),
+            jax.jacfwd(jax.jacfwd(lambda target: field.evaluate(target).hessian))(
+                point
+            ),
+        )
+    step = 0.01 * pitch
+    offsets = jnp.asarray(
+        (
+            (0.0, 0.0),
+            (1.0, 0.0),
+            (-1.0, 0.0),
+            (0.0, 1.0),
+            (0.0, -1.0),
+            (1.0, 1.0),
+            (1.0, -1.0),
+            (-1.0, 1.0),
+            (-1.0, -1.0),
+        )
+    )
+    hessians = jax.lax.map(
+        lambda offset: field.evaluate(point + step * offset).hessian, offsets
+    )
+    third = jnp.stack(
+        (
+            (hessians[1] - hessians[2]) / (2 * step),
+            (hessians[3] - hessians[4]) / (2 * step),
+        ),
+        axis=-1,
+    )
+    mixed = (hessians[5] - hessians[6] - hessians[7] + hessians[8]) / (4 * step**2)
+    fourth = jnp.stack(
+        (
+            jnp.stack(
+                ((hessians[1] - 2 * hessians[0] + hessians[2]) / step**2, mixed),
+                axis=-1,
+            ),
+            jnp.stack(
+                (mixed, (hessians[3] - 2 * hessians[0] + hessians[4]) / step**2),
+                axis=-1,
+            ),
+        ),
+        axis=-1,
+    )
+    from itertools import permutations
+
+    third = sum(jnp.transpose(third, order) for order in permutations(range(3))) / 6
+    fourth = sum(jnp.transpose(fourth, order) for order in permutations(range(4))) / 24
+    return third, fourth
+
+
 def read(field, geometry, convention, policy):
     """Read total-field nulls and the open axis-connected hex-cell interior.
 
@@ -2848,10 +2907,7 @@ def read(field, geometry, convention, policy):
 
     def normal_form(index):
         point = nulls.position[index]
-        third = jax.jacfwd(lambda target: field.evaluate(target).hessian)(point)
-        fourth = jax.jacfwd(jax.jacfwd(lambda target: field.evaluate(target).hessian))(
-            point
-        )
+        third, fourth = _curvature_derivatives(field, point, jnp.median(geometry.pitch))
         return saddle_normal_form(
             point,
             sigma * nulls.jet.hessian[index],

@@ -50,6 +50,11 @@ evaluated on the host, and every operation on them is a free function here.
 
 from __future__ import annotations
 
+from functools import wraps
+from inspect import signature
+
+import jax
+
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import multiply as paired_multiply
 from nova.biot.pairedfloat import scale as paired_scale
@@ -86,6 +91,37 @@ __all__ = [
 _BOTH_ENDS = [0.125, 0.0, -0.125]
 
 
+def _is_staged(value):
+    """Distinguish staged operands from eager differentiation and batching."""
+    while isinstance(value, jax.core.Tracer):
+        if hasattr(value, "primal"):
+            value = value.primal
+        elif hasattr(value, "batch_dim"):
+            value = value.val
+        else:
+            return value.to_concrete_value() is None
+    return False
+
+
+def _array_program(function):
+    """Reuse each static-shape helper graph across algebraic call sites."""
+    static = tuple(
+        name
+        for name in ("xp", "count", "mirrored", "trips", "coincident")
+        if name in signature(function).parameters
+    )
+    compiled = jax.jit(function, static_argnames=static)
+
+    @wraps(function)
+    def evaluate(*args, **kwargs):
+        if any(_is_staged(value) for value in jax.tree.leaves((args, kwargs))):
+            return compiled(*args, **kwargs)
+        return function(*args, **kwargs)
+
+    return evaluate
+
+
+@_array_program
 def harmonic_multiply(left: list, right: list) -> list:
     """Return the product of two harmonic series.
 
@@ -98,12 +134,21 @@ def harmonic_multiply(left: list, right: list) -> list:
     out: list = [0.0] * (len(left) + len(right) - 1)
     for index, one in enumerate(left):
         for other_index, other in enumerate(right):
-            term = 0.5 * one * other
-            out[index + other_index] = out[index + other_index] + term
-            out[abs(index - other_index)] = out[abs(index - other_index)] + term
+            rising = index + other_index
+            falling = abs(index - other_index)
+            first, second = _harmonic_pair_step(
+                out[rising],
+                out[falling],
+                one,
+                other,
+                coincident=rising == falling,
+            )
+            out[rising] = first
+            out[falling] = second
     return out
 
 
+@_array_program
 def paired_harmonic_multiply(left: list, right: list) -> list:
     if not left or not right:
         return []
@@ -119,6 +164,7 @@ def paired_harmonic_multiply(left: list, right: list) -> list:
     return out
 
 
+@_array_program
 def _paired_harmonic_add(*series: list) -> list:
     length = max((len(term) for term in series), default=0)
     if length == 0:
@@ -131,10 +177,12 @@ def _paired_harmonic_add(*series: list) -> list:
     return out
 
 
+@_array_program
 def _paired_harmonic_scale(series: list, factor) -> list:
     return [paired_multiply(coefficient, factor) for coefficient in series]
 
 
+@_array_program
 def harmonic_add(*series: list) -> list:
     """Return the sum of harmonic series."""
     length = max((len(term) for term in series), default=0)
@@ -145,11 +193,13 @@ def harmonic_add(*series: list) -> list:
     return out
 
 
+@_array_program
 def harmonic_scale(series: list, factor) -> list:
     """Return the harmonic series multiplied through by a scalar."""
     return [coefficient * factor for coefficient in series]
 
 
+@_array_program
 def range_function(bulk: list, near, far) -> tuple:
     """Return the range function ``near x + far y + x y bulk``.
 
@@ -161,11 +211,13 @@ def range_function(bulk: list, near, far) -> tuple:
     return (bulk, near, far)
 
 
+@_array_program
 def paired_range_function(bulk: list, near, far) -> tuple:
     """Return a range function whose coefficients retain paired-fp64 residues."""
     return bulk, near, far
 
 
+@_array_program
 def product(left: tuple, right: tuple) -> tuple:
     """Return the product of two range functions, end values exact.
 
@@ -192,6 +244,7 @@ def product(left: tuple, right: tuple) -> tuple:
     )
 
 
+@_array_program
 def paired_product(left: tuple, right: tuple) -> tuple:
     """Multiply paired range functions without rounding their coefficients."""
     bulk, near, far = left
@@ -223,6 +276,7 @@ def paired_product(left: tuple, right: tuple) -> tuple:
     )
 
 
+@_array_program
 def total(*terms: tuple) -> tuple:
     """Return the sum of range functions."""
     return (
@@ -232,6 +286,7 @@ def total(*terms: tuple) -> tuple:
     )
 
 
+@_array_program
 def paired_total(*terms: tuple) -> tuple:
     """Add paired range functions coefficient by coefficient."""
     return (
@@ -249,11 +304,13 @@ def _paired_sum(values) -> tuple:
     return total_value
 
 
+@_array_program
 def scaled(term: tuple, factor) -> tuple:
     """Return the range function multiplied through by a scalar."""
     return (harmonic_scale(term[0], factor), term[1] * factor, term[2] * factor)
 
 
+@_array_program
 def paired_scaled(term: tuple, factor) -> tuple:
     """Multiply a paired range function by a paired scalar."""
     return (
@@ -263,6 +320,7 @@ def paired_scaled(term: tuple, factor) -> tuple:
     )
 
 
+@_array_program
 def across_the_range(term: tuple) -> list:
     """Return the range function as one harmonic series."""
     bulk, near, far = term
@@ -272,6 +330,7 @@ def across_the_range(term: tuple) -> list:
     )
 
 
+@_array_program
 def paired_across_the_range(term: tuple) -> list:
     """Return a paired range function as paired harmonic coefficients."""
     bulk, near, far = term
@@ -285,6 +344,7 @@ def paired_across_the_range(term: tuple) -> list:
     )
 
 
+@_array_program
 def _split_at_both_ends(series: list) -> tuple:
     """Return ``(bulk, half, far)`` of a harmonic series, by double deflation.
 
@@ -299,6 +359,7 @@ def _split_at_both_ends(series: list) -> tuple:
     return harmonic_scale(bulk, -4.0), half, far
 
 
+@_array_program
 def as_range_function(series: list) -> tuple:
     """Return the harmonic series as a range function -- the inverse of
     :func:`across_the_range`.
@@ -314,6 +375,7 @@ def as_range_function(series: list) -> tuple:
     return (bulk, far - 2.0 * half, far)
 
 
+@_array_program
 def _chebyshev_integral(series: list) -> list:
     """Return the ``t``-antiderivative of a harmonic series, constant discarded.
 
@@ -336,6 +398,7 @@ def _chebyshev_integral(series: list) -> list:
     return out
 
 
+@_array_program
 def rising_integral(series: list) -> tuple:
     """Return ``integral_0^a sin 2s C(s) ds`` as a range function, ``C`` the series.
 
@@ -361,6 +424,7 @@ def rising_integral(series: list) -> tuple:
     return (bulk, -2.0 * half, 0.0 * half)
 
 
+@_array_program
 def sine_squared_times(series: list) -> tuple:
     """Return ``sin^2 phi`` times a harmonic series, as a range function.
 
@@ -372,12 +436,14 @@ def sine_squared_times(series: list) -> tuple:
     return (harmonic_scale(series, 4.0), 0.0 * series[0], 0.0 * series[0])
 
 
+@_array_program
 def paired_sine_squared_times(series: list) -> tuple:
     """Multiply a paired harmonic series by ``sin^2 phi`` exactly at both ends."""
     zero = paired_wrap(0.0 * series[0][0])
     return _paired_harmonic_scale(series, paired_wrap(4.0)), zero, zero
 
 
+@_array_program
 def paired_deflate(series: list, root):
     """Deflate a paired harmonic series at a paired root."""
     degree = len(series) - 1
@@ -409,14 +475,16 @@ def paired_deflate(series: list, root):
     )
 
 
+@_array_program
 def contract(numerator: list, moments: list):
     """Return the harmonic series contracted against a moment family."""
     total_value = 0.0
     for order, coefficient in enumerate(numerator):
-        total_value = total_value + coefficient * moments[order]
+        total_value = _product_sum_step(total_value, coefficient, moments[order])
     return total_value
 
 
+@_array_program
 def deflate(series: list, root):
     """Return ``(quotient, value)`` with ``series = (t - root) quotient + value``.
 
@@ -436,3 +504,18 @@ def deflate(series: list, root):
         quotient[order - 1] = current
     quotient[0] = series[1] + root * current - 0.5 * upper
     return quotient, series[0] + root * quotient[0] - 0.5 * current
+
+
+@_array_program
+def _harmonic_pair_step(rising, falling, one, other, *, coincident):
+    """Apply both product-to-sum contributions in their serial update order."""
+    term = 0.5 * one * other
+    rising = rising + term
+    falling = (rising if coincident else falling) + term
+    return rising, falling
+
+
+@_array_program
+def _product_sum_step(total_value, coefficient, moment):
+    """Retain the multiply then accumulate expression at each term."""
+    return total_value + coefficient * moment

@@ -1,0 +1,40 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 01:15:30 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 7 items / 2 deselected / 5 selected
+
+tests/biot/test_kernel_compile_cost.py::test_point_jet_identity SKIPPED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_arithmetic_order REFERENCE_MODULE rangefunction=/tmp/biot-reference-ii1is2q1/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-ii1is2q1/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-ii1is2q1/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-ii1is2q1/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-ii1is2q1/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-ii1is2q1/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-ii1is2q1/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-_cjkudbj/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-_cjkudbj/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-_cjkudbj/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-_cjkudbj/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-_cjkudbj/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-_cjkudbj/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-_cjkudbj/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+RECURRENCE_IDENTITY points=10000 maximum=0
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity SKIPPED
+tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference PASSED
+
+=========================== short test summary info ============================
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:235: large point identity gate requires a GPU
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:349: point batch gate uses GPU
+================= 3 passed, 2 skipped, 2 deselected in 40.44s ==================
+EXIT=0

@@ -53,6 +53,7 @@ from nova.biot.pairedfloat import value as paired_value
 from nova.biot.pairedfloat import where as paired_where
 from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.rangefunction import (
+    _array_program,
     across_the_range,
     contract,
     deflate,
@@ -349,48 +350,9 @@ class Channel:
         return contract_paired(paired_across_the_range(term), self.paired_root_moments)
 
     def _pole(self, numerator: tuple, shift, seed, family, mirrored: bool):
-        """Return ``integral numerator/((v + shift) Delta) da`` past one end.
-
-        Two routes, and which one holds depends on how far past the end the root
-        sits.  A NEAR root is the hard case and the reason for the end values: the
-        pole's own moment grows without bound as the root reaches the range, so the
-        weight on it -- the numerator's value AT that end -- must be exact in the
-        relative sense, which no series of harmonics delivers.  Taking it out
-        analytically leaves the rest of the numerator reaching the pole only through
-        ``x y/(v + shift)``, bounded by one, and a deflation of the bulk whose own
-        rounding the shift then multiplies away.
-
-        A FAR root is the easy case and the first route is the wrong one for it:
-        the terms it separates grow with the shift while their sum falls, so at a
-        shift of a hundred it has thrown away four decades.  There the pole is no
-        pole at all -- the factor varies by a fraction of itself across the range --
-        and the family's own moments, which need no exactness anywhere, are
-        contracted directly.
-        """
-        bulk, near, far = numerator
-        end, other = (far, near) if mirrored else (near, far)
-        root = (1.0 if mirrored else -1.0) * (1.0 + 2.0 * shift)
-        quotient, value = deflate(bulk, root) if bulk else ([], 0.0)
-        held = (
-            (end * (1.0 + shift) - other * shift) * seed
-            + (other - end) * self.moments[0]
-            + contract(
-                harmonic_multiply([0.5 + shift, 0.5 if mirrored else -0.5], bulk),
-                self.moments,
-            )
-            - shift
-            * (1.0 + shift)
-            * (
-                value * seed
-                + (-2.0 if mirrored else 2.0) * contract(quotient, self.moments)
-            )
-        )
-        if family is None:
-            return held
-        return self.xp.where(
-            shift <= POLE_SWITCH,
-            held,
-            contract(across_the_range(numerator), family),
+        """Contract one pole with the family's immutable moment operands."""
+        return _pole_contraction(
+            numerator, shift, seed, family, self.moments, mirrored, xp=self.xp
         )
 
     def _pole_paired(self, numerator: tuple, shift, seed, family, mirrored: bool):
@@ -518,3 +480,47 @@ class Channel:
                 paired_weight_x,
             ),
         )
+
+
+@_array_program
+def _pole_contraction(numerator, shift, seed, family, moments, mirrored, *, xp):
+    """Return ``integral numerator/((v + shift) Delta) da`` past one end.
+
+    Two routes, and which one holds depends on how far past the end the root
+    sits.  A NEAR root is the hard case and the reason for the end values: the
+    pole's own moment grows without bound as the root reaches the range, so the
+    weight on it -- the numerator's value AT that end -- must be exact in the
+    relative sense, which no series of harmonics delivers.  Taking it out
+    analytically leaves the rest of the numerator reaching the pole only through
+    ``x y/(v + shift)``, bounded by one, and a deflation of the bulk whose own
+    rounding the shift then multiplies away.
+
+    A FAR root is the easy case and the first route is the wrong one for it:
+    the terms it separates grow with the shift while their sum falls, so at a
+    shift of a hundred it has thrown away four decades.  There the pole is no
+    pole at all -- the factor varies by a fraction of itself across the range --
+    and the family's own moments, which need no exactness anywhere, are
+    contracted directly.
+    """
+    bulk, near, far = numerator
+    end, other = (far, near) if mirrored else (near, far)
+    root = (1.0 if mirrored else -1.0) * (1.0 + 2.0 * shift)
+    quotient, value = deflate(bulk, root) if bulk else ([], 0.0)
+    held = (
+        (end * (1.0 + shift) - other * shift) * seed
+        + (other - end) * moments[0]
+        + contract(
+            harmonic_multiply([0.5 + shift, 0.5 if mirrored else -0.5], bulk),
+            moments,
+        )
+        - shift
+        * (1.0 + shift)
+        * (value * seed + (-2.0 if mirrored else 2.0) * contract(quotient, moments))
+    )
+    if family is None:
+        return held
+    return xp.where(
+        shift <= POLE_SWITCH,
+        held,
+        contract(across_the_range(numerator), family),
+    )

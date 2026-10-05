@@ -1,0 +1,62 @@
+revision 61fba54638d33d3f4b902e23ef130389862d571f tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command env NOVA_KERNEL_TRUNCATE_RECURRENCE=1 JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py -k harmonic_recurrence -vv -s
+
+PROVENANCE: run began on parent 01575b6b164607271c9f1d06cfa3f64f18128646 with the candidate working-tree bytes subsequently committed as 61fba54638d33d3f4b902e23ef130389862d571f; recurrence log source differs only by formatting in the test file.
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 00:45:45 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 5 items / 4 deselected / 1 selected
+
+tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-x8j1m5lo/rangefunction.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-x8j1m5lo/elliptic.py
+REFERENCE_MODULE momentchannel=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+RECURRENCE_IDENTITY points=10000 maximum=14.247645913956273
+FAILED
+
+=================================== FAILURES ===================================
+______________________ test_harmonic_recurrence_identity _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fb564ea2780>
+
+    def test_harmonic_recurrence_identity(monkeypatch):
+        """The complete recurrence agrees with the revision-pinned arithmetic."""
+        from nova.biot import elliptic
+    
+        if os.environ.get("NOVA_KERNEL_TRUNCATE_RECURRENCE") == "1":
+            scan = elliptic._scan
+            def truncated(function, initial, values, xp, **kwargs):
+                if function.__name__ == "ascend":
+                    state, result = scan(function, initial, values[:-1], xp, **kwargs)
+                    result = jax.tree.map(
+                        lambda value: xp.concatenate((value, xp.zeros_like(value[:1]))),
+                        result,
+                    )
+                    return state, result
+                return scan(function, initial, values, xp, **kwargs)
+            monkeypatch.setattr(elliptic, "_scan", truncated)
+        parameter = np.linspace(0.99001, 0.999999, 10000)
+        with _baseline_kernel() as kernel:
+            expected = np.asarray(kernel.harmonic_moments(
+                parameter, 8, complement=1.0 - parameter, xp=np,
+            ))
+        actual = np.asarray(elliptic.harmonic_moments(
+            parameter, 8, complement=1.0 - parameter, xp=np,
+        ))
+        maximum = np.max(np.abs(actual - expected) / np.abs(expected))
+        print(f"RECURRENCE_IDENTITY points=10000 maximum={maximum:.17g}", flush=True)
+>       assert maximum <= 1e-13
+E       assert np.float64(14.247645913956273) <= 1e-13
+
+tests/biot/test_kernel_compile_cost.py:292: AssertionError
+=========================== short test summary info ============================
+FAILED tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity - assert np.float64(14.247645913956273) <= 1e-13
+======================= 1 failed, 4 deselected in 10.29s =======================
+EXIT=1

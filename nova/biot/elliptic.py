@@ -48,6 +48,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from nova.biot.rangefunction import _array_program
+
 from nova.biot.completeelliptic import (
     complete_kind,
     complete_kind_paired,
@@ -127,6 +129,7 @@ _HARMONIC_HEADROOM = 96
 POLE_HEADROOM = 32
 
 
+@_array_program
 def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp, *, signed_square=None):
     """Return ``atanh(z)/z`` or ``atan(z)/z`` with inactive inputs held.
 
@@ -165,6 +168,7 @@ def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp, *, signed_square=None
     return xp.where(xp.abs(signed_square) < 1e-4, series, transcendental)
 
 
+@_array_program
 def _complete_kind(complement: np.ndarray, xp=np) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(K, E)`` from the modulus complement ``k'^2``.
 
@@ -188,6 +192,7 @@ def _complete_kind(complement: np.ndarray, xp=np) -> tuple[np.ndarray, np.ndarra
     return complete_kind(complement, xp=xp)
 
 
+@_array_program
 def complete_pi(
     characteristic: np.ndarray,
     parameter: np.ndarray,
@@ -222,6 +227,7 @@ def complete_pi(
     return complete_pole(complement, parameter_complement, xp=xp)
 
 
+@_array_program
 def harmonic_moments(
     parameter: np.ndarray,
     count: int,
@@ -288,21 +294,29 @@ def harmonic_moments(
     ]
     for order in range(1, count - 1):
         upward.append(
-            -(
-                4.0 * order * (1.0 + held_complement) * upward[order]
-                + (2 * order - 1) * held * upward[order - 1]
-                + (-1.0) ** order * 8.0 * order * held_complement * complete_k
+            _harmonic_rising_step(
+                upward[order],
+                upward[order - 1],
+                held,
+                held_complement,
+                complete_k,
+                4.0 * order,
+                2 * order - 1,
+                (-1.0) ** order * 8.0 * order,
+                2 * order + 1,
             )
-            / ((2 * order + 1) * held)
         )
 
     ratio = xp.zeros_like(parameter)
     ratios: list[np.ndarray] = [None] * (count + _HARMONIC_HEADROOM + 1)  # type: ignore[list-item]
     for order in range(count + _HARMONIC_HEADROOM, 0, -1):
-        ratio = (
-            -(2 * order - 1)
-            * parameter
-            / ((2 * order + 1) * parameter * ratio + 4.0 * order * (1.0 + complement))
+        ratio = _harmonic_ratio_step(
+            ratio,
+            parameter,
+            complement,
+            -(2 * order - 1),
+            2 * order + 1,
+            4.0 * order,
         )
         if order <= count:
             ratios[order] = ratio
@@ -319,6 +333,7 @@ def harmonic_moments(
     ]
 
 
+@_array_program
 def harmonic_moments_paired(parameter, count: int, *, complement, xp=np):
     """Return the harmonic family with paired descent and recurrences."""
     complete_k, complete_e = complete_kind_paired(complement, xp=xp)
@@ -382,6 +397,7 @@ def harmonic_moments_paired(parameter, count: int, *, complement, xp=np):
     ]
 
 
+@_array_program
 def harmonic_pole_moments(
     shift: np.ndarray,
     seed: np.ndarray,
@@ -417,17 +433,28 @@ def harmonic_pole_moments(
     ratio = [1.0 / diagonal]
     solution = [(4.0 * sign * moments[1] - seed) / diagonal]
     for order in range(2, top + 1):
-        pivot = diagonal - ratio[-1]
-        ratio.append(1.0 / pivot)
-        solution.append((4.0 * sign * moments[order] - solution[-1]) / pivot)
+        next_ratio, next_solution = _pole_forward_step(
+            diagonal,
+            ratio[-1],
+            solution[-1],
+            moments[order],
+            4.0 * sign,
+        )
+        ratio.append(next_ratio)
+        solution.append(next_solution)
     values: list[np.ndarray] = [None] * (top + 1)  # type: ignore[list-item]
     values[top] = solution[top - 1]
     for order in range(top - 1, 0, -1):
-        values[order] = solution[order - 1] - ratio[order - 1] * values[order + 1]
+        values[order] = _pole_backward_step(
+            solution[order - 1],
+            ratio[order - 1],
+            values[order + 1],
+        )
     values[0] = seed
     return values[:count]
 
 
+@_array_program
 def harmonic_pole_moments_paired(
     shift, seed, moments, count: int, *, mirrored: bool = False
 ):
@@ -463,6 +490,7 @@ def harmonic_pole_moments_paired(
     return values[:count]
 
 
+@_array_program
 def harmonic_root_moments(
     moments: list[np.ndarray], parameter: np.ndarray, *, xp=np
 ) -> list[np.ndarray]:
@@ -483,6 +511,7 @@ def harmonic_root_moments(
     ]
 
 
+@_array_program
 def harmonic_root_moments_paired(moments, parameter):
     """Return radical moments with paired recurrence arithmetic."""
     mean = paired_subtract(paired_wrap(1.0), paired_scale(parameter, 0.5))
@@ -501,6 +530,7 @@ def harmonic_root_moments_paired(moments, parameter):
     ]
 
 
+@_array_program
 def sn_moments(
     parameter: np.ndarray, count: int, *, complement: np.ndarray | None = None
 ) -> list[np.ndarray]:
@@ -563,6 +593,7 @@ def sn_moments(
     ]
 
 
+@_array_program
 def stable_cn_moments(
     parameter: np.ndarray,
     count: int,
@@ -638,6 +669,7 @@ def stable_cn_moments(
     ]
 
 
+@_array_program
 def _shifted_family(
     shift: np.ndarray,
     leading: np.ndarray,
@@ -673,6 +705,7 @@ def _shifted_family(
     return [np.where(near, upward[order], downward[order]) for order in range(count)]
 
 
+@_array_program
 def cn_pole_moments(
     shift: np.ndarray,
     parameter: np.ndarray,
@@ -714,6 +747,7 @@ def cn_pole_moments(
     )
 
 
+@_array_program
 def cn_pole_moment(
     shift: np.ndarray,
     parameter: np.ndarray,
@@ -741,6 +775,7 @@ def cn_pole_moment(
     )
 
 
+@_array_program
 def cn_pole_moment_paired(shift, *, parameter_complement, xp=np):
     """Return the near-end pole seed with paired special-function arithmetic."""
     one_plus = paired_add(paired_wrap(1.0), shift)
@@ -750,6 +785,7 @@ def cn_pole_moment_paired(shift, *, parameter_complement, xp=np):
     )
 
 
+@_array_program
 def sn_pole_moments(
     shift: np.ndarray,
     parameter: np.ndarray,
@@ -790,6 +826,7 @@ def sn_pole_moments(
     )
 
 
+@_array_program
 def sn_pole_moment(
     shift: np.ndarray,
     parameter: np.ndarray,
@@ -805,10 +842,9 @@ def sn_pole_moment(
     reflected one.  Written as an ordinary ``Pi`` this configuration is a hugely
     negative characteristic, where the two Carlson terms are of opposite sign and
     nearly equal -- their sum falls as ``sqrt(shift)`` while each stays of order
-    ``K``, so a shift of 1e-10 used to cost five digits and needed the pole factor
-    reflected onto the other end of the range as a separate case.  The pole argument
-    removes the case: it is a sum of positives at any shift.  ``shift = 0`` returns
-    zero on the same reasoning as the complement family.
+    ``K``. A shift of 1e-10 loses five digits in that difference. The pole argument
+    avoids that cancellation: it is a sum of positives at any shift. ``shift = 0``
+    returns zero on the same reasoning as the complement family.
     """
     shift = xp.asarray(shift)
     if parameter_complement is None:
@@ -822,6 +858,7 @@ def sn_pole_moment(
     )
 
 
+@_array_program
 def sn_pole_moment_paired(shift, *, parameter_complement, xp=np):
     """Return the far-end pole seed with paired special-function arithmetic."""
     live = paired_value(shift) > 0.0
@@ -833,6 +870,7 @@ def sn_pole_moment_paired(shift, *, parameter_complement, xp=np):
     return paired_where(live, evaluated, paired_wrap(0.0 * held[0]), xp)
 
 
+@_array_program
 def pole_moments(
     characteristic: np.ndarray,
     parameter: np.ndarray,
@@ -886,6 +924,7 @@ def pole_moments(
     return [np.where(strong, upward[order], downward[order]) for order in range(count)]
 
 
+@_array_program
 def sn_cn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
     """Return ``[I1, I3, I5, ...]``, the odd Jacobi moments over a quarter period.
 
@@ -933,6 +972,7 @@ def sn_cn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
     return moments
 
 
+@_array_program
 def pole_moment(
     characteristic: np.ndarray,
     parameter: np.ndarray,
@@ -1078,3 +1118,48 @@ def pole_moment(
         0.0,
         np.where(singular, np.inf, np.where(live, finite, np.nan)),
     )
+
+
+@_array_program
+def _harmonic_rising_step(
+    current,
+    previous,
+    parameter,
+    complement,
+    seed,
+    current_weight,
+    previous_weight,
+    seed_weight,
+    divisor,
+):
+    """One harmonic recurrence with the serial expression grouping retained."""
+    return -(
+        current_weight * (1.0 + complement) * current
+        + previous_weight * parameter * previous
+        + seed_weight * complement * seed
+    ) / (divisor * parameter)
+
+
+@_array_program
+def _harmonic_ratio_step(
+    ratio, parameter, complement, numerator_weight, ratio_weight, mean_weight
+):
+    """One downward ratio recurrence, with coefficients supplied as operands."""
+    return (
+        numerator_weight
+        * parameter
+        / (ratio_weight * parameter * ratio + mean_weight * (1.0 + complement))
+    )
+
+
+@_array_program
+def _pole_forward_step(diagonal, ratio, solution, moment, weight):
+    """One ordered elimination step of the harmonic pole system."""
+    pivot = diagonal - ratio
+    return 1.0 / pivot, (weight * moment - solution) / pivot
+
+
+@_array_program
+def _pole_backward_step(solution, ratio, following):
+    """One ordered substitution step of the harmonic pole system."""
+    return solution - ratio * following

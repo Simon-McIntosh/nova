@@ -1,0 +1,72 @@
+revision 546a36f6101583eaadb2baec7b8d370b2dbfd2a8 tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/tests/biot/test_kernel_compile_cost.py -k harmonic_recurrence -vv -s
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 01:20:18 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 6 items / 5 deselected / 1 selected
+
+tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-8nwuc1zh/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-8nwuc1zh/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-8nwuc1zh/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-8nwuc1zh/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-8nwuc1zh/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-8nwuc1zh/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-8nwuc1zh/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+RECURRENCE_IDENTITY points=10000 maximum=1
+FAILED
+
+=================================== FAILURES ===================================
+______________________ test_harmonic_recurrence_identity _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fd52c2f6780>
+
+    def test_harmonic_recurrence_identity(monkeypatch):
+        """The complete recurrence agrees with the revision-pinned arithmetic."""
+        from nova.biot import elliptic
+    
+        parameter = np.linspace(0.99001, 0.999999, 10000)
+        with _baseline_kernel() as kernel:
+            expected = np.asarray(
+                kernel.harmonic_moments(
+                    parameter,
+                    8,
+                    complement=1.0 - parameter,
+                    xp=np,
+                )
+            )
+        assert np.all(np.isfinite(expected))
+        assert np.all(expected != 0.0)
+    
+        if os.environ.get("NOVA_KERNEL_TRUNCATE_RECURRENCE") == "1":
+            evaluate = elliptic.harmonic_moments
+    
+            def truncated(parameter, count, **kwargs):
+                values = evaluate(parameter, count - 1, **kwargs)
+                return values + [kwargs.get("xp", np).zeros_like(values[0])]
+    
+            monkeypatch.setattr(elliptic, "harmonic_moments", truncated)
+        actual = np.asarray(
+            elliptic.harmonic_moments(
+                parameter,
+                8,
+                complement=1.0 - parameter,
+                xp=np,
+            )
+        )
+        maximum = np.max(np.abs(actual - expected) / np.abs(expected))
+        print(f"RECURRENCE_IDENTITY points=10000 maximum={maximum:.17g}", flush=True)
+>       assert maximum <= 1e-13
+E       assert np.float64(1.0) <= 1e-13
+
+tests/biot/test_kernel_compile_cost.py:349: AssertionError
+=========================== short test summary info ============================
+FAILED tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity - assert np.float64(1.0) <= 1e-13
+======================= 1 failed, 5 deselected in 12.11s =======================
+EXIT=1

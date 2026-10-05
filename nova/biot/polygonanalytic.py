@@ -169,6 +169,7 @@ from nova.biot.pairedfloat import value as paired_value
 from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
+    _array_program,
     across_the_range,
     paired_across_the_range,
     paired_product,
@@ -234,6 +235,7 @@ def _paired_range(term: tuple) -> tuple:
     )
 
 
+@_array_program
 def _oscillatory_primitive(weight: list) -> list:
     """Return ``P`` where the zero-mean weight integrates to ``sin(2a) P``.
 
@@ -1459,6 +1461,7 @@ def _edge_field(r, z, edge, which, nodes):
 _ARCSINH_DIFFERENCE_SWITCH = np.sqrt(np.finfo(np.float64).eps)
 
 
+@_array_program
 def _near_collinear_arsinh_difference(xp, along_a, along_b, gap, length, active):
     """Return ``asinh(along_b / gap) - asinh(along_a / gap)`` stably.
 

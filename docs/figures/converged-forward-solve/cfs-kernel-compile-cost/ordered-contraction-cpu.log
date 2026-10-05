@@ -1,0 +1,133 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 00:55:25 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 36 items
+
+tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference FAILED [  2%]
+tests/test_biotrangefunction.py::test_a_series_and_its_range_function_are_the_same_function[alternating] PASSED [  5%]
+tests/test_biotrangefunction.py::test_a_series_and_its_range_function_are_the_same_function[constant] PASSED [  8%]
+tests/test_biotrangefunction.py::test_a_series_and_its_range_function_are_the_same_function[deep] PASSED [ 11%]
+tests/test_biotrangefunction.py::test_a_series_and_its_range_function_are_the_same_function[linear] PASSED [ 13%]
+tests/test_biotrangefunction.py::test_a_series_and_its_range_function_are_the_same_function[quadratic] PASSED [ 16%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_series_it_started_from[alternating] PASSED [ 19%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_series_it_started_from[constant] PASSED [ 22%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_series_it_started_from[deep] PASSED [ 25%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_series_it_started_from[linear] PASSED [ 27%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_series_it_started_from[quadratic] PASSED [ 30%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_range_function_it_started_from[alternating] PASSED [ 33%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_range_function_it_started_from[constant] PASSED [ 36%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_range_function_it_started_from[deep] PASSED [ 38%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_range_function_it_started_from[linear] PASSED [ 41%]
+tests/test_biotrangefunction.py::test_the_round_trip_returns_the_range_function_it_started_from[quadratic] PASSED [ 44%]
+tests/test_biotrangefunction.py::test_the_rising_integral_is_the_integral_it_claims_to_be[alternating] PASSED [ 47%]
+tests/test_biotrangefunction.py::test_the_rising_integral_is_the_integral_it_claims_to_be[constant] PASSED [ 50%]
+tests/test_biotrangefunction.py::test_the_rising_integral_is_the_integral_it_claims_to_be[deep] PASSED [ 52%]
+tests/test_biotrangefunction.py::test_the_rising_integral_is_the_integral_it_claims_to_be[linear] PASSED [ 55%]
+tests/test_biotrangefunction.py::test_the_rising_integral_is_the_integral_it_claims_to_be[quadratic] PASSED [ 58%]
+tests/test_biotrangefunction.py::test_the_rising_integral_vanishes_at_the_lower_limit_exactly[alternating] PASSED [ 61%]
+tests/test_biotrangefunction.py::test_the_rising_integral_vanishes_at_the_lower_limit_exactly[constant] PASSED [ 63%]
+tests/test_biotrangefunction.py::test_the_rising_integral_vanishes_at_the_lower_limit_exactly[deep] PASSED [ 66%]
+tests/test_biotrangefunction.py::test_the_rising_integral_vanishes_at_the_lower_limit_exactly[linear] PASSED [ 69%]
+tests/test_biotrangefunction.py::test_the_rising_integral_vanishes_at_the_lower_limit_exactly[quadratic] PASSED [ 72%]
+tests/test_biotrangefunction.py::test_the_rising_integral_reaches_the_whole_range_at_a_quarter_turn PASSED [ 75%]
+tests/test_biotrangefunction.py::test_the_helpers_carry_arrays_as_readily_as_scalars PASSED [ 77%]
+tests/test_biotrangefunction.py::test_deflation_reproduces_the_series_it_divided[1.0] PASSED [ 80%]
+tests/test_biotrangefunction.py::test_deflation_reproduces_the_series_it_divided[-1.0] PASSED [ 83%]
+tests/test_biotrangefunction.py::test_deflation_reproduces_the_series_it_divided[1.05] PASSED [ 86%]
+tests/test_biotrangefunction.py::test_deflation_reproduces_the_series_it_divided[-1.5] PASSED [ 88%]
+tests/test_biotrangefunction.py::test_the_deflation_is_why_a_far_root_takes_the_other_route PASSED [ 91%]
+tests/test_biotrangefunction.py::test_the_algebra_keeps_end_values_out_of_the_series PASSED [ 94%]
+tests/test_biotrangefunction.py::test_a_product_of_bounded_factors_keeps_bounded_coefficients PASSED [ 97%]
+tests/test_biotrangefunction.py::test_the_series_helpers_add_and_scale_as_functions PASSED [100%]
+
+=================================== FAILURES ===================================
+___________ test_traced_exact_section_moments_match_numpy_reference ____________
+
+    def test_traced_exact_section_moments_match_numpy_reference():
+        vertices = np.asarray(
+            [
+                [4.91, -0.10],
+                [5.08, -0.14],
+                [5.17, 0.02],
+                [5.04, 0.15],
+                [4.88, 0.08],
+            ]
+        )
+        target = np.asarray([[5.62, 0.31], [4.27, -0.46], [6.14, -0.22]])
+        expansion_centre = np.asarray([5.01, 0.025])
+        edge, weight, norm = pad_batch([vertices])
+        section_centre = _section_centroid(vertices)[:, None]
+        reflection_axis = np.asarray([np.nan])
+        reflection_partner = np.arange(len(vertices), dtype=np.int32)[:, None]
+        reflection = _horizontal_reflection(vertices)
+        assert reflection is None
+    
+        plan = TilePlan(
+            target_tile=len(target),
+            source_tile=1,
+            block=len(target),
+            n_panels=16,
+            n_nodes=48,
+        )
+        evaluate = tile_evaluator(
+            plan,
+            batched=True,
+            kernel="moments",
+            edge_count=len(vertices),
+        )
+        actual = np.asarray(
+            evaluate(
+                target[:, 0],
+                target[:, 1],
+                edge,
+                weight,
+                norm,
+                section_centre,
+                expansion_centre[:, None],
+                reflection_axis,
+                reflection_partner,
+            )
+        )[:, :, 0]
+        expected = _reference_rows(target, vertices, expansion_centre)
+    
+>       np.testing.assert_allclose(actual, expected, rtol=3.0e-10, atol=2.0e-18)
+E       AssertionError: 
+E       Not equal to tolerance rtol=3e-10, atol=2e-18
+E       
+E       Mismatched elements: 1 / 27 (3.7%)
+E       Mismatch at index:
+E        [1, 2]: 1.142605653959738e-07 (ACTUAL), 1.1426056533625514e-07 (DESIRED)
+E       Max absolute difference among violations: 5.9718655e-17
+E       Max relative difference among violations: 5.22653243e-10
+E        ACTUAL: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+E              [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+E              [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+E        DESIRED: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+E              [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+E              [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+
+tests/biot/test_traced_section_moments.py:70: AssertionError
+=========================== short test summary info ============================
+FAILED tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference - AssertionError: 
+Not equal to tolerance rtol=3e-10, atol=2e-18
+
+Mismatched elements: 1 / 27 (3.7%)
+Mismatch at index:
+ [1, 2]: 1.142605653959738e-07 (ACTUAL), 1.1426056533625514e-07 (DESIRED)
+Max absolute difference among violations: 5.9718655e-17
+Max relative difference among violations: 5.22653243e-10
+ ACTUAL: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+       [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+       [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+ DESIRED: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+       [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+       [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+======================== 1 failed, 35 passed in 30.51s =========================
+EXIT=1

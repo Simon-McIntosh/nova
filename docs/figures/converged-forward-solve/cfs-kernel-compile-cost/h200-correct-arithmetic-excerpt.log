@@ -1,0 +1,97 @@
+NOVA_LANE_START=2026-10-06T01:18:27+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281140
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=546a36f6101583eaadb2baec7b8d370b2dbfd2a8
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=600
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot -k not\ expression_bound\ and\ not\ cold_compile -vv -s --timeout=600 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Cache inventory line omitted: 1963869 characters; full log is in the run directory.]
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=546a36f6101583eaadb2baec7b8d370b2dbfd2a8
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Cache inventory line omitted: 1963869 characters; full log is in the run directory.]
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 600.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 01:18:35 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 7 items / 2 deselected / 5 selected
+
+tests/biot/test_kernel_compile_cost.py::test_point_jet_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-hbgn_2kl/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-hbgn_2kl/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-hbgn_2kl/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-hbgn_2kl/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-hbgn_2kl/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-hbgn_2kl/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-hbgn_2kl/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+IDENTITY_COMPILE arm=baseline seconds=14.0688062 executable_bytes=2912
+IDENTITY_COMPILE arm=head seconds=107.708035 executable_bytes=2912
+IDENTITY_WORST point=[6.191426454923443, -5.7103163437081985] component=0 baseline=2.5793641787249078e-06 head=2.5793641787249078e-06
+IDENTITY kind=polygon points=10000 component_maxima=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] maximum=0
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_arithmetic_order REFERENCE_MODULE rangefunction=/tmp/biot-reference-v7rp3_0o/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-v7rp3_0o/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-v7rp3_0o/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-v7rp3_0o/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-v7rp3_0o/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-v7rp3_0o/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-v7rp3_0o/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-zgup7xby/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-zgup7xby/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-zgup7xby/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-zgup7xby/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-zgup7xby/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-zgup7xby/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-zgup7xby/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+RECURRENCE_IDENTITY points=10000 maximum=0
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-b060dkrl/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-b060dkrl/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-b060dkrl/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-b060dkrl/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-b060dkrl/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-b060dkrl/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-b060dkrl/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+IDENTITY kind=filament points=10000 maximum=0
+PASSED
+tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference PASSEDCACHE_GUARD_MARKER=pre-warm-run misses=4 budget=not-enforced
+[Cache inventory line omitted: 2647 characters; full log is in the run directory.]
+
+
+================= 5 passed, 2 deselected in 177.48s (0:02:57) ==================
+GPU_DEVICE_INVENTORY=0,_NVIDIA_H200_NVL,_143771
+GPU_UTILISATION_AT_10S=0,_0
+GPU_UTILISATION_AT_30S=0,_0
+GPU_UTILISATION_AT_60S=0,_0
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-06T01:21:29+0200
+NOVA_LANE_EXIT_STATUS=0

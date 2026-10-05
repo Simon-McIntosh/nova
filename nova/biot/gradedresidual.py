@@ -45,6 +45,8 @@ from functools import lru_cache
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 
+from nova.biot.rangefunction import _array_program
+
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import multiply as paired_multiply
 from nova.biot.pairedfloat import scale as paired_scale
@@ -76,6 +78,7 @@ def _rule(nodes: int) -> tuple:
     return leggauss(nodes // 2)
 
 
+@_array_program
 def _model_integral(offset, scale, lower, upper, xp):
     """Return ``integral_lower^upper log sqrt(offset^2 + scale^2 b^2) db``.
 
@@ -105,6 +108,7 @@ def _model_integral(offset, scale, lower, upper, xp):
     return primitive(upper) - primitive(lower)
 
 
+@_array_program
 def _regularised(numerator, denominator, model, sign, xp):
     """Return ``arsinh(N/W) + sign log(model)``, bounded at the range end.
 

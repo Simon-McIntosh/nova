@@ -1,0 +1,88 @@
+revision 4d7305f684bea23f59d28702bcd6dc636fc9d166 tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/tests/biot -vv -s
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 01:46:22 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 9 items
+
+tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound REFERENCE_MODULE rangefunction=/tmp/biot-reference-o55idq6c/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-o55idq6c/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-o55idq6c/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-o55idq6c/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-o55idq6c/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-o55idq6c/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-o55idq6c/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+EQUATIONS before=78404 after=17544 ratio=4.46899225
+FAILED
+tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile SKIPPED
+tests/biot/test_kernel_compile_cost.py::test_point_jet_identity SKIPPED
+tests/biot/test_kernel_compile_cost.py::test_kernel_helpers_preserve_eager_derivatives REFERENCE_MODULE rangefunction=/tmp/biot-reference-az9gfdsm/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-az9gfdsm/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-az9gfdsm/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-az9gfdsm/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-az9gfdsm/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-az9gfdsm/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-az9gfdsm/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_arithmetic_order REFERENCE_MODULE rangefunction=/tmp/biot-reference-ppvr52hs/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-ppvr52hs/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-ppvr52hs/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-ppvr52hs/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-ppvr52hs/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-ppvr52hs/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-ppvr52hs/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-sk31z129/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-sk31z129/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-sk31z129/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-sk31z129/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-sk31z129/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-sk31z129/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-sk31z129/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+RECURRENCE_IDENTITY points=10000 maximum=0
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity SKIPPED
+tests/biot/test_kernel_compile_cost.py::test_kernel_helper_sharing_requires_staging PASSED
+tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference PASSED
+
+=================================== FAILURES ===================================
+_______________________ test_point_jet_expression_bound ________________________
+
+    def test_point_jet_expression_bound():
+        from nova.biot import polygonanalytic
+    
+        geometry = _geometry()
+        point = jnp.asarray([5.62, 0.31])
+        with _baseline_kernel() as baseline:
+            before = _unique_equations(
+                jax.make_jaxpr(jax.jit(_point_jet(baseline)))(point, geometry)
+            )
+        after = _unique_equations(
+            jax.make_jaxpr(jax.jit(_point_jet(polygonanalytic)))(point, geometry)
+        )
+        print(
+            f"EQUATIONS before={before} after={after} ratio={before / after:.9g}",
+            flush=True,
+        )
+        assert before > 50000, "the counter must see the expanded reference kernel"
+>       assert after * 10 <= before
+E       assert (17544 * 10) <= 78404
+
+tests/biot/test_kernel_compile_cost.py:178: AssertionError
+=========================== short test summary info ============================
+FAILED tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound - assert (17544 * 10) <= 78404
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:195: cold compile certificate requires a GPU
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:248: large point identity gate requires a GPU
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:378: point batch gate uses GPU
+=================== 1 failed, 5 passed, 3 skipped in 47.16s ====================
+EXIT=1

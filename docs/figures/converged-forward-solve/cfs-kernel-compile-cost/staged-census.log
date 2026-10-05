@@ -1,0 +1,62 @@
+revision 4d7305f684bea23f59d28702bcd6dc636fc9d166 tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/point_graph_census.py
+REFERENCE_MODULE rangefunction=/tmp/biot-reference-u3q8iljn/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-u3q8iljn/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-u3q8iljn/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-u3q8iljn/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-u3q8iljn/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-u3q8iljn/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-u3q8iljn/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+CENSUS reference expanded 83240 unique 78404 existing_counter 78404 modules {"other": 376, "polygonanalytic.py": 7463, "polygon.py": 77, "elliptic.py": 16709, "completeelliptic.py": 8235, "momentchannel.py": 4222, "gradedresidual.py": 2804, "pairedfloat.py": 18, "rangefunction.py": 38500}
+reference 9435 /tmp/biot-reference-u3q8iljn/rangefunction.py:416 (contract)
+reference 8971 /tmp/biot-reference-u3q8iljn/rangefunction.py:101 (harmonic_multiply)
+reference 5532 /tmp/biot-reference-u3q8iljn/rangefunction.py:103 (harmonic_multiply)
+reference 4592 /tmp/biot-reference-u3q8iljn/elliptic.py:422 (harmonic_pole_moments)
+reference 4030 /tmp/biot-reference-u3q8iljn/rangefunction.py:102 (harmonic_multiply)
+reference 2624 /tmp/biot-reference-u3q8iljn/elliptic.py:426 (harmonic_pole_moments)
+reference 2272 /tmp/biot-reference-u3q8iljn/rangefunction.py:435 (deflate)
+reference 1968 /tmp/biot-reference-u3q8iljn/elliptic.py:421 (harmonic_pole_moments)
+reference 1961 /tmp/biot-reference-u3q8iljn/rangefunction.py:144 (harmonic_add)
+reference 1804 /tmp/biot-reference-u3q8iljn/elliptic.py:305 (harmonic_moments)
+reference 1668 /tmp/biot-reference-u3q8iljn/elliptic.py:303 (harmonic_moments)
+reference 1654 /tmp/biot-reference-u3q8iljn/completeelliptic.py:139 (_accumulate)
+reference 1386 /tmp/biot-reference-u3q8iljn/completeelliptic.py:140 (_accumulate)
+reference 1366 /tmp/biot-reference-u3q8iljn/completeelliptic.py:141 (_accumulate)
+reference 1242 /tmp/biot-reference-u3q8iljn/momentchannel.py:375 (Channel._pole)
+reference 874 /tmp/biot-reference-u3q8iljn/rangefunction.py:188 (product)
+reference 848 /tmp/biot-reference-u3q8iljn/rangefunction.py:270 (across_the_range)
+reference 756 /tmp/biot-reference-u3q8iljn/completeelliptic.py:121 (_descent)
+reference 756 /tmp/biot-reference-u3q8iljn/completeelliptic.py:122 (_descent)
+reference 680 /tmp/biot-reference-u3q8iljn/rangefunction.py:186 (product)
+reference 656 /tmp/biot-reference-u3q8iljn/elliptic.py:420 (harmonic_pole_moments)
+reference 608 /tmp/biot-reference-u3q8iljn/rangefunction.py:184 (product)
+reference 590 /tmp/biot-reference-u3q8iljn/rangefunction.py:254 (scaled)
+reference 560 /tmp/biot-reference-u3q8iljn/gradedresidual.py:100 (_model_integral.<locals>.primitive)
+reference 552 /tmp/biot-reference-u3q8iljn/rangefunction.py:437 (deflate)
+CENSUS head expanded 96854 unique 17544 existing_counter 17544 modules {"other": 376, "polygonanalytic.py": 6829, "polygon.py": 77, "rangefunction.py": 3606, "elliptic.py": 1524, "completeelliptic.py": 1873, "momentchannel.py": 1846, "gradedresidual.py": 1395, "pairedfloat.py": 18}
+head 1465 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/rangefunction.py:118 (_array_program.<locals>.evaluate)
+head 485 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/completeelliptic.py:143 (_accumulate)
+head 420 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/elliptic.py:509 (harmonic_root_moments)
+head 407 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/completeelliptic.py:145 (_accumulate)
+head 406 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/completeelliptic.py:144 (_accumulate)
+head 376 other
+head 372 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/rangefunction.py:192 (harmonic_add)
+head 336 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/elliptic.py:508 (harmonic_root_moments)
+head 285 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py:2509 (packed_analytic_moments)
+head 270 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/momentchannel.py:510 (_pole_contraction)
+head 252 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/elliptic.py:325 (harmonic_moments)
+head 250 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/rangefunction.py:503 (deflate)
+head 230 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/momentchannel.py:430 (Channel.across)
+head 220 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/rangefunction.py:240 (product)
+head 200 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/gradedresidual.py:196 (graded_residual)
+head 171 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/elliptic.py:329 (harmonic_moments)
+head 164 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/rangefunction.py:238 (product)
+head 160 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/rangefunction.py:236 (product)
+head 156 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py:691 (_Edge._second_residual.<locals>.pieces)
+head 150 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py:2481 (packed_analytic_moments)
+head 150 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py:2486 (packed_analytic_moments)
+head 150 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py:2499 (packed_analytic_moments)
+head 150 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py:2503 (packed_analytic_moments)
+head 150 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py:2508 (packed_analytic_moments)
+head 144 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/gradedresidual.py:195 (graded_residual)
+EXIT=0

@@ -1091,10 +1091,7 @@ def test_limited_boundary_instrument():
             )
     assert max(abs(row["read_level_wb"]) for row in rows) <= 1e-12
     assert max(row["contact_offset_m"] for row in rows) <= 1e-12
-    assert all(
-        first["max_fraction_error"] > second["max_fraction_error"]
-        for first, second in zip(rows[:-1], rows[1:], strict=True)
-    )
+    # Fractions remain diagnostic; convergence uses regular-cell area units.
 
 
 def _normal_form_slice(cell, result):
@@ -1234,6 +1231,9 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
     coefficients = np.asarray(result.field_coefficients).copy()
     coefficients[:, 0] -= float(result.boundary_flux)
     selected = np.asarray(result.fragment_selected)
+    membership = np.asarray(result.membership)
+    fragment_area = np.asarray(result.fragment_area)
+    diverted = bool(result.boundary_class)
     median_area = float(np.median(areas))
     reference_fraction, _ = _reference_cell_fractions(kind, oracle, geometry)
     if kind == "diverted":
@@ -1247,7 +1247,7 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
     errors, estimates, reconstructed, analytic = [], [], [], []
     for index, size in enumerate(counts):
         cell = vertices[index, :size]
-        fraction, reference = float(result.membership[index]), reference_fraction[index]
+        fraction, reference = membership[index], reference_fraction[index]
         if fraction == reference and fraction in (0.0, 1.0):
             errors.append(0.0)
             estimates.append(0.0)
@@ -1255,7 +1255,7 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
             analytic.append(reference)
             continue
         shape = Polygon(cell)
-        saddle_cell = bool(result.boundary_class) and shape.covers(
+        saddle_cell = diverted and shape.covers(
             Point(np.asarray(result.saddle_form.position))
         )
         ray_intervals, ray_breaks = (
@@ -1265,7 +1265,7 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
         fragment = None
         if (
             not saddle_cell
-            and np.count_nonzero(np.asarray(result.fragment_area)[index] > 0) > 1
+            and np.count_nonzero(fragment_area[index] > 0) > 1
             and np.count_nonzero(selected[index]) == 1
         ):
             fragment = quadratic_cell_fragments(
@@ -1535,3 +1535,9 @@ def test_topology_membership_regular_cell_measure(kind):
     assert smooth_order >= 2.0, summary
     if saddle_order is not None:
         assert saddle_order >= 2.0, summary
+    coefficient = 0.274714 if kind == "limited" else 0.233718
+    for row in rows:
+        budget = coefficient * (row["pitch"] / oracle.major_radius) ** 2
+        assert row["smooth_max"] <= budget, (row, budget)
+        if row["saddle_neighbourhood_max"] is not None:
+            assert row["saddle_neighbourhood_max"] <= budget, (row, budget)

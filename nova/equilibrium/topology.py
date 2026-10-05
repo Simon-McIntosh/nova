@@ -2301,8 +2301,11 @@ class BiotMomentCoupling:
 
     @jax.jit
     def evaluate(self, point, moments):
-        value, gradient = self.value_gradient(point, moments)
-        hessian = jax.jacfwd(lambda target: self.value_gradient(target, moments)[1])(
+        def gradient_with_value(target):
+            value, gradient = self.value_gradient(target, moments)
+            return gradient, (value, gradient)
+
+        hessian, (value, gradient) = jax.jacfwd(gradient_with_value, has_aux=True)(
             point
         )
         return FieldJet(value, gradient, hessian)

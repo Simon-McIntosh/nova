@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -245,6 +245,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T192255209643" data-who="" data-when="">
     <div class="r-comment-body"><p>Order ruling, 2026-10-05, coordinator's pending the lead's confirmation. Under the median-area normalisation with every sliver retained, the §2 run measured five-rung smooth orders of 1.976 (limited) and 1.094 (diverted) and a saddle-neighbourhood order of 1.366, with limited smooth maxima 8.4e-4 down to 3.8e-5 and diverted 1.6e-3 down to 2.9e-4 across 132 to 2616 cells (fragment anchor <code>#cfs-topology-read-regular-rule</code>). The limited figure is second order within the noise of a five-point fit; the assertion is fitted order at least p minus 0.1 with the raw order reported. The diverted figures share one mechanism: the saddle neighbourhood was defined as two pitches, so as cells shrink the smooth set reaches into the region where the gradient grows linearly with distance from the X-point and a third-order flux error is a first-order position error, while the cells inside the neighbourhood not covered by the normal-form branches keep the half-order level set. Ruling: the saddle neighbourhood is a physical radius r_nf, measured per case as the distance within which the curvature-corrected normal-form branches match the analytic separatrix to the budget, and every cell inside r_nf takes its support from those branches; outside it the quadratic level set has a gradient bounded below by |H|·r_nf and converges at second order with a constant proportional to 1/r_nf. Both orders are asserted at least 1.9 under this definition; a saddle neighbourhood still below that is a representation question for the lead.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T193833538672" data-who="" data-when="">
+    <div class="r-comment-body"><p>Transport consumer ruling, 2026-10-05, from the ninth composed plan review: <code>nova/transport/coupled_window.py</code> binds <code>equilibrium.fixed_point.residual</code>, imports <code>ForwardEquilibrium</code> and <code>ForwardProfile</code> from <code>forward.py</code> and <code>TopologyClass</code> from <code>topology.py</code>, and <code>nova/transport/window_batch.py</code> imports <code>TopologyClass</code>. The transport window's own iteration is the coupled transport-equilibrium fixed point, a different map from the GS fixed point, and it stays; its equilibrium half is re-pointed onto <code>solve.fixed_point</code> through the retained <code>forward.py</code> adapter, and <code>TopologyClass</code> stays an export of <code>topology.py</code> beside <code>topology.read</code>. §6 re-points both transport modules before <code>fixed_point.py</code> is deleted, their tests are acceptance rows of the §6 node, and the import census covers the whole <code>nova</code> package, not <code>nova/equilibrium</code> alone, so no consumer of a deleted module survives silently.</p></div>
 </div>
 </section>
 </main>

@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -269,6 +269,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T204350711042" data-who="" data-when="">
     <div class="r-comment-body"><p>Moment-map derivative owner, 2026-10-05, from the thirteenth composed plan review: the derivative of the support-declared current-moment map over flux is owned today by <code>forward.py</code> (<code>current_moment_observation</code>, <code>current_moment_map</code>, <code>current_moment_jacobian</code>). <code>gs.apply</code> becomes its single owner: the §4 node carries that machinery into <code>gs.py</code> (or states why it fails the composed read-book-map contract), <code>forward.py</code>'s adapter calls the carried derivative and keeps no copy, and the §6 census checks by name that no module other than <code>gs.py</code> differentiates the current-moment map. This is the seventh cite-or-justify ruling, beside the GMRES kernel, field-null kernels, operand layouts, clip helpers, polygon moments and contour tree.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T210206264705" data-who="" data-when="">
+    <div class="r-comment-body"><p>Correction to the GMRES reuse ruling, 2026-10-05, from the fourteenth composed plan review: <code>_steepest_descent_promotion</code> in <code>fixed_point.py</code> is not an Armijo search along the Newton direction; it computes its own steepest-descent direction and scores it on a fixed scale ladder whose largest step is 1e-4. It is therefore withdrawn as a reuse candidate and retires with the ladders at §6. The line search of <code>solve.fixed_point</code> is written in <code>solve.py</code> as the design states it: backtracking on φ = ½‖F‖² along the GMRES direction, initial factor 1, shrink factor ½, fixed capacity. The single-site GMRES kernel candidates (<code>_single_site_krylov</code>, <code>_krylov_machine</code>, <code>_serve_krylov_stream</code>, <code>_krylov_outputs</code> and the Gram-Schmidt and least-squares helpers) stand as ruled.</p></div>
 </div>
 </section>
 </main>

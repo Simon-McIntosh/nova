@@ -1,0 +1,1422 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "1d02798a6bb9c34df9856c8b479a6dd33ba3ba30",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8578587,
+      "input_tokens_cumulative": 8578587,
+      "output_tokens": 50497,
+      "output_tokens_cumulative": 50497,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 268,
+    "files": 10,
+    "removed": 14
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 474
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 470
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 471
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 471
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 471
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 423,
+        "name": "recomputed_profile_moments",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 471
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1130,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1146
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1130,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1143
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1130,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1143
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 1130,
+        "name": "commensurability_summary",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1149
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1206,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1223
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1206,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1224
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 1206,
+        "name": "measure",
+        "path": "benchmarks/shafranov_combination_discriminator.py"
+      },
+      "window_line": 1221
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 782
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 782
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 779
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 779
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 782
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 782
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 753,
+        "name": "regenerate",
+        "path": "benchmarks/shafranov_pair_receipt.py"
+      },
+      "window_line": 780
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "80b1ebcb41801af6fa899ed5e5aac0a76ae42a64",
+    "52616c3065aa3bf1f2749dbf9537f27a1b24dd90"
+  ],
+  "completed_at": "2026-10-05T18:51:55.010Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-05T18:31:47Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "docs/figures/cut-cell-current-attribution/outboard-hole/preflight-receipt.json",
+    "run-baseline.sh"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-render-receipt-relative-paths /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-render-receipt-relative-paths/tests/test_render_receipt_paths.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/gate-head.log"
+  },
+  "impl_move": {
+    "at_complete": 1.0,
+    "at_dispatch": 1.0,
+    "plan": "figure-and-solver-audit",
+    "reason": "receipt hygiene; the audit plan implementation fraction is already 1",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-05T19:16:19.265944+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-05T18:31:19Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 13,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 120000,
+    "observed_at": "2026-10-05T18:31:06Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 13,
+      "aggregate_tokens_per_second": 92.79,
+      "detail": "",
+      "mean_tokens_per_second": 77.325,
+      "observed_at": "2026-10-05T18:31:06Z",
+      "runs": 1.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-05T18:51:55.010Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/manifest.md",
+  "member": "disposable-r-20261005T183118335413-fsa-render-receipt-relative-paths",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_render_receipt_paths.py::test_each_driver_helper_returns_a_project_relative_path",
+      "tests/test_render_receipt_paths.py::test_no_receipt_directory_json_records_a_worktree_path"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_sol_ledger_render.py::test_receipt_names_the_revision_it_was_solved_at"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_render_receipt_paths.py::test_each_driver_helper_returns_a_project_relative_path",
+      "tests/test_render_receipt_paths.py::test_no_receipt_directory_json_records_a_worktree_path"
+    ],
+    "declaration": "the same test at the base revision, where the four committed receipts still contain .reckon-worktrees paths, must fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/negative-control-base.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/negative-control-base.log",
+    "test_paths": [
+      "tests/test_render_receipt_paths.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsa-render-receipt-relative-paths",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 750,
+          "cached_input_tokens": 151478,
+          "input_tokens": 152230,
+          "output_tokens": 1527,
+          "reasoning_output_tokens": 119,
+          "total_tokens": 153757,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "At origin/main 1d02798a6, four committed receipts carry absolute paths under /home/ITER/mcintos/Code/.reckon-worktrees: docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json (png, svg, receipt fields, written by benchmarks/sol_ledger_current_census.py), docs/figures/cut-cell-current-attribution/outboard-hole/figure-receipt.json (two artifact paths, written by docs/figures/cut-cell-current-attribution/outboard-hole/measure.py), docs/figures/constraint-augmented-newton-krylov/shafranov/receipt.json and docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/receipt.json (a source-file path to benchmarks/mast_response_carrier_warm.py, written by benchmarks/shafranov_pair_receipt.py and benchmarks/shafranov_combination_discriminator.py). Each driver records paths relative to the repository root (for example docs/figures/... and benchmarks/...), derived from the repository root rather than the process working directory. The four committed receipts have exactly those path fields rewritten to the relative form, with no other field changed: no solve, no re-render, and the PNG and SVG files are untouched. A new test tests/test_render_receipt_paths.py asserts that no JSON file under those four directories contains the string .reckon-worktrees, and that each driver's path-recording helper returns a relative path when called from a worktree. The test passes at the head, and fails at the base, logged as the negative control. Gate: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_render_receipt_paths.py, run from the worktree with PYTHONPATH set to the worktree, logged with EXIT=. Every existing test file that imports a changed driver passes with zero added failures against the base (name them, log both arms). No source under nova/ is edited. Every uv command carries --no-sync and nothing runs uv sync. Report to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-render-receipt-relative-paths.md.",
+    "estimated_hours": null,
+    "goal": "make the four drivers whose committed receipts point into reckon worktrees record project-relative paths, and rewrite those receipts",
+    "id": "fsa-render-receipt-relative-paths",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-05T18:31:19Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 13,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 120000,
+      "observed_at": "2026-10-05T18:31:06Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 13,
+        "aggregate_tokens_per_second": 92.79,
+        "detail": "",
+        "mean_tokens_per_second": 77.325,
+        "observed_at": "2026-10-05T18:31:06Z",
+        "runs": 1.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/manifest.md",
+    "negative_control": "the same test at the base revision, where the four committed receipts still contain .reckon-worktrees paths, must fail",
+    "plan": "figure-and-solver-audit",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/sol_ledger_current_census.py",
+      "docs/figures/cut-cell-current-attribution/outboard-hole/measure.py",
+      "benchmarks/shafranov_pair_receipt.py",
+      "benchmarks/shafranov_combination_discriminator.py",
+      "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json",
+      "docs/figures/cut-cell-current-attribution/outboard-hole/figure-receipt.json",
+      "docs/figures/constraint-augmented-newton-krylov/shafranov/receipt.json",
+      "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/receipt.json",
+      "tests/test_render_receipt_paths.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-render-receipt-relative-paths.md",
+      "docs/evidence/fragments/figure-and-solver-audit/fsa-render-receipt-relative-paths.html",
+      "docs/figures/figure-and-solver-audit/fsa-render-receipt-relative-paths"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1964694.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsa-render-receipt-relative-paths",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-05T18:31:26.294229+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.62,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 480.95,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 892.553,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.06112603957175926,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-05T20:00:00Z",
+        "utilisation_pct": 76.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 5,
+          "not-run": 17,
+          "passed": 82,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 63
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 2,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.1,
+      "claude-haiku": 0.01,
+      "claude-opus": 0.01,
+      "clive": 0.66,
+      "codex": 0.02,
+      "codex-astra": 0.04,
+      "codex-luna": 0.01,
+      "hold": 0.15
+    },
+    "rendered_token_estimate": 1394,
+    "usage": {
+      "cost": 0.000144564,
+      "input_tokens": 3442,
+      "output_tokens": 89
+    }
+  },
+  "plan": "figure-and-solver-audit",
+  "plan_impl_at_dispatch": 1.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "52616c3065aa3bf1f2749dbf9537f27a1b24dd90",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "1d02798a6bb9c34df9856c8b479a6dd33ba3ba30",
+    "reviewed_head_sha": "52616c3065aa3bf1f2749dbf9537f27a1b24dd90",
+    "scores": {
+      "durability": 13,
+      "evidence": 16,
+      "fit": 16,
+      "goal_fidelity": 18,
+      "reuse": 14,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261005T183118335413-fsa-render-receipt-relative-paths",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "e8e9c831-1186-4d3d-bc6f-66f4315289c9",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 8578587,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1191.115,
+    "generated_tokens": 50497,
+    "generation_seconds": 608.516,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.8,
+    "machine_seconds": 582.599,
+    "peak_input_tokens": 179034,
+    "tokens_per_second": 82.98,
+    "wall_tokens_per_second": 42.39
+  },
+  "time_budget": "45m",
+  "tool_steps": 77.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1208,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-05T18:52:02Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-05T18:31:58Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261005T183118335413-fsa-render-receipt-relative-paths",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 10921,
+    "worker_pid": 2854088
+  },
+  "worker_seconds": 1142,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

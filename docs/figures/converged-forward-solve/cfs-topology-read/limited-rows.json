@@ -1,0 +1,53 @@
+[
+  {
+    "case": "limited",
+    "cells": 132,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.4682506027868791,
+    "max_fraction_error": 0.013716055714855346,
+    "smooth_fraction_error": 0.013716055714855346,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 6.369261673769204e-10,
+    "compile_seconds": 1.642158767208457,
+    "peak_host_rss_kib": 4471812,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  },
+  {
+    "case": "limited",
+    "cells": 300,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.30316108483265386,
+    "max_fraction_error": 0.05409656056507256,
+    "smooth_fraction_error": 0.05409656056507256,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 6.416666477607604e-10,
+    "compile_seconds": 6.553981998935342,
+    "peak_host_rss_kib": 4856932,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  },
+  {
+    "case": "limited",
+    "cells": 550,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.21931954123218017,
+    "max_fraction_error": 0.19763025371947418,
+    "smooth_fraction_error": 0.19763025371947418,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 7.474085068086687e-10,
+    "compile_seconds": 7.290215872228146,
+    "peak_host_rss_kib": 4929636,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  }
+]

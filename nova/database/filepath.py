@@ -59,6 +59,30 @@ def compute_provenance(
     )
 
 
+def repository_relative(path: str | os.PathLike) -> str:
+    """Return ``path`` relative to its containing repository root, else absolute.
+
+    The root is found from the path itself, so a path recorded from another
+    checkout of this project still resolves to the same repository-relative
+    name, and a receipt keeps locating its artifacts once the worktree that
+    produced it is reclaimed.  A path with no repository ancestor is returned
+    absolute, since it cannot be named relative to a root.
+    """
+    resolved = Path(path).resolve()
+    root = next(
+        (
+            parent
+            for parent in (resolved, *resolved.parents)
+            if (parent / ".git").exists()
+        ),
+        Path(root_dir),
+    )
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return str(resolved)
+
+
 def stardot(func):
     """Return resolved path with '.' replaced with '*'."""
 

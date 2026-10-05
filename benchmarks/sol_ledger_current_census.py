@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.text import Text
 
+from nova.database.filepath import repository_relative
 from nova.equilibrium.domain import PlasmaDomain
 from nova.jax.config import configure_dtypes
 from nova.media import poloidal
@@ -44,28 +45,6 @@ OUTPUT_DIR = ROOT / "docs" / "figures" / "forward-solve-api" / "sol-ledger-censu
 RECEIPT = OUTPUT_DIR / "sol-ledger-census.json"
 FIGURE = OUTPUT_DIR / "sol-ledger-current.png"
 RENDER_RECEIPT = OUTPUT_DIR / "sol-ledger-render.json"
-
-
-def repository_relative(path) -> str:
-    """Return ``path`` relative to its repository root, else absolute.
-
-    The root is found from the path itself, so a path recorded from another
-    checkout of this project still resolves to the same project-relative name,
-    and a receipt keeps locating its artifacts once the worktree is reclaimed.
-    """
-    resolved = Path(path).resolve()
-    root = next(
-        (
-            parent
-            for parent in (resolved, *resolved.parents)
-            if (parent / ".git").exists()
-        ),
-        ROOT,
-    )
-    try:
-        return resolved.relative_to(root).as_posix()
-    except ValueError:
-        return str(resolved)
 
 
 #: Set to 1 to render the panel with the wall call omitted, so the gate's wall

@@ -8,7 +8,7 @@ import sys
 import tempfile
 
 import nova
-from nova.database.filepath import FilePath
+from nova.database.filepath import FilePath, repository_relative
 from nova.definitions import root_dir
 from nova.utilities.importmanager import mark_import
 
@@ -157,6 +157,21 @@ def test_filepath_setter():
     filepath.filepath = "/tmp/data/file.nc"
     assert filepath.path == Path("/tmp/data")
     assert filepath.filename == "file.nc"
+
+
+def test_repository_relative_resolves_against_its_own_root():
+    target = Path(root_dir) / "nova" / "database" / "filepath.py"
+    assert repository_relative(target) == "nova/database/filepath.py"
+
+
+def test_repository_relative_prefers_the_nearest_repository_root(tmp_path):
+    """A path nested in another checkout resolves against that root, not ours."""
+    inner = tmp_path / "checkout"
+    (inner / ".git").mkdir(parents=True)
+    target = inner / "docs" / "figure.png"
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"")
+    assert repository_relative(target) == "docs/figure.png"
 
 
 if __name__ == "__main__":

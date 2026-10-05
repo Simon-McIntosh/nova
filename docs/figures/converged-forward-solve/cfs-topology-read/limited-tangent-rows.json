@@ -1,0 +1,259 @@
+[
+  {
+    "worst_cell": 122,
+    "worst_cell_area": 0.0164911048771188,
+    "median_cell_area": 0.21902965635377214,
+    "worst_coefficient": [
+      0.38655123643135625,
+      -23.43080074408968,
+      8.441052064695299,
+      -5.908513869389534,
+      7.105427357601002e-15,
+      -0.7703312691190582
+    ],
+    "worst_vertices": [
+      [
+        7.41696273067469,
+        -2.492665733331605
+      ],
+      [
+        7.45827395749632,
+        -2.378165834936531
+      ],
+      [
+        7.513945411086082,
+        -2.202922491667838
+      ],
+      [
+        7.5278762794507355,
+        -2.152937254521613
+      ],
+      [
+        7.511172867164893,
+        -2.152937254521613
+      ],
+      [
+        7.3659966345736265,
+        -2.404389865421124
+      ]
+    ],
+    "worst_centre": [
+      7.442842426724328,
+      -2.334132515343867
+    ],
+    "worst_read_fraction": 0.5764080017787747,
+    "worst_reference_fraction": 0.5752018412147444,
+    "boundary_flux": 2.2322358387255243e-14,
+    "case": "limited",
+    "cells": 132,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.4680060430739887,
+    "max_fraction_error": 0.0012061605640303341,
+    "smooth_fraction_error": 0.0012061605640303341,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 6.309635618961878e-10,
+    "compile_seconds": 1.645935719832778,
+    "peak_host_rss_kib": 4519596,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  },
+  {
+    "worst_cell": 291,
+    "worst_cell_area": 0.00037690241851962014,
+    "median_cell_area": 0.09193590476487135,
+    "worst_coefficient": [
+      -0.08630843431390056,
+      -19.035108155357307,
+      3.2465192166982995,
+      -2.761598975342821,
+      -2.1316282072803006e-14,
+      -0.4250554792678187
+    ],
+    "worst_vertices": [
+      [
+        7.691575973380429,
+        -1.414384443955661
+      ],
+      [
+        7.69956679760856,
+        -1.361442812237174
+      ],
+      [
+        7.6802884528324915,
+        -1.394833884875156
+      ]
+    ],
+    "worst_centre": [
+      7.69047707460716,
+      -1.390220380355997
+    ],
+    "worst_read_fraction": 0.3237855239170639,
+    "worst_reference_fraction": 0.32474832949881627,
+    "boundary_flux": 2.2322358387255243e-14,
+    "case": "limited",
+    "cells": 300,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.30320934148682055,
+    "max_fraction_error": 0.0009628055817523795,
+    "smooth_fraction_error": 0.0009628055817523795,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 7.192843807442766e-10,
+    "compile_seconds": 1.5333422422409058,
+    "peak_host_rss_kib": 4611784,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  },
+  {
+    "worst_cell": 545,
+    "worst_cell_area": 5.6150489576189955e-05,
+    "median_cell_area": 0.04805082947550954,
+    "worst_coefficient": [
+      0.09404992066984114,
+      -14.98464629481694,
+      0.7074491083701382,
+      -1.5013027332125546,
+      1.0658141036401503e-14,
+      -0.25575377074362393
+    ],
+    "worst_vertices": [
+      [
+        7.791689784759152,
+        -0.42859070864697546
+      ],
+      [
+        7.79263871103897,
+        -0.40879870555191583
+      ],
+      [
+        7.786450788741694,
+        -0.41951650136408697
+      ]
+    ],
+    "worst_centre": [
+      7.790259761513272,
+      -0.41896863852099275
+    ],
+    "worst_read_fraction": 0.8255342476457928,
+    "worst_reference_fraction": 0.8224803869488589,
+    "boundary_flux": 2.2322358387255243e-14,
+    "case": "limited",
+    "cells": 550,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.219204994184689,
+    "max_fraction_error": 0.003053860696933808,
+    "smooth_fraction_error": 0.003053860696933808,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 7.348947543444122e-10,
+    "compile_seconds": 1.3625123463571072,
+    "peak_host_rss_kib": 4674248,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  },
+  {
+    "worst_cell": 1068,
+    "worst_cell_area": 3.050206467625216e-06,
+    "median_cell_area": 0.02380860972651165,
+    "worst_coefficient": [
+      -0.009591936520970654,
+      -10.502670924033396,
+      0.5480407502671776,
+      -0.7891163330228892,
+      -1.7763568394002505e-14,
+      -0.1804928405554449
+    ],
+    "worst_vertices": [
+      [
+        7.790029343340131,
+        -0.4632229687111795
+      ],
+      [
+        7.7902505103362785,
+        -0.458610030946282
+      ],
+      [
+        7.788808286408044,
+        -0.46110803606587325
+      ]
+    ],
+    "worst_centre": [
+      7.789696046694818,
+      -0.4609803452411116
+    ],
+    "worst_read_fraction": 0.31360251649010956,
+    "worst_reference_fraction": 0.31497271042343367,
+    "boundary_flux": 2.2322358387255243e-14,
+    "case": "limited",
+    "cells": 1074,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.15430038796617346,
+    "max_fraction_error": 0.0013701939333241042,
+    "smooth_fraction_error": 0.0013701939333241042,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 9.662002173425931e-10,
+    "compile_seconds": 4.8215610310435295,
+    "peak_host_rss_kib": 5025476,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  },
+  {
+    "worst_cell": 2591,
+    "worst_cell_area": 0.00033913885516145825,
+    "median_cell_area": 0.009546003809844272,
+    "worst_coefficient": [
+      -0.2976987737351255,
+      -5.882964339681436,
+      -1.2774901415727205,
+      -0.2629049440499509,
+      8.881784197001252e-16,
+      -0.036518302874543274
+    ],
+    "worst_vertices": [
+      [
+        7.645373702311344,
+        1.6673229442361905
+      ],
+      [
+        7.6344307548851615,
+        1.7193697232619805
+      ],
+      [
+        7.624877617657757,
+        1.7028232042124374
+      ]
+    ],
+    "worst_centre": [
+      7.6348940249514206,
+      1.6965052905702027
+    ],
+    "worst_read_fraction": 0.08069033093387772,
+    "worst_reference_fraction": 0.08075286961079157,
+    "boundary_flux": 2.2322358387255243e-14,
+    "case": "limited",
+    "cells": 2616,
+    "valid": true,
+    "qualified": true,
+    "reason": 0,
+    "pitch": 0.09770365300153455,
+    "max_fraction_error": 6.253867691385917e-05,
+    "smooth_fraction_error": 6.253867691385917e-05,
+    "saddle_fraction_error": null,
+    "reference_quadrature_estimate": 6.542202049273701e-10,
+    "compile_seconds": 4.839419519528747,
+    "peak_host_rss_kib": 5117068,
+    "axis_error_m": 0.0,
+    "backend": "gpu",
+    "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"
+  }
+]

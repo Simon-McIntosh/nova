@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum, StrEnum
 from functools import partial
-from typing import NamedTuple
+from typing import NamedTuple, Protocol
 
 import jax
 import jax.numpy as jnp
@@ -1465,3 +1465,1639 @@ class Topology(Pytree):
         )
         aux_data = {}
         return (children, aux_data)
+
+
+class TopologyReason(IntEnum):
+    """Device-readable refusals; a finite position alone is never admission."""
+
+    OK = 0
+    CAPACITY = 1
+    SINGULAR_REPRESENTATION = 2
+    UNRESOLVED_TIE = 3
+    NO_QUALIFIED_AXIS = 4
+    SINGULAR_TANGENT = 5
+    NONFINITE_FIELD = 6
+    UNRESOLVED_COMPONENT = 7
+
+
+class FieldJet(NamedTuple):
+    """Physical total flux and its point derivatives in the declared gauge."""
+
+    value: jax.Array
+    gradient: jax.Array
+    hessian: jax.Array
+
+
+class ExteriorField(Protocol):
+    """A pytree evaluator of prescribed physical flux at arbitrary points."""
+
+    def evaluate(self, point: jax.Array) -> FieldJet:
+        """Return point value, gradient and Hessian without mesh differencing."""
+        ...
+
+
+class StationaryRead(NamedTuple):
+    """A polished point and separate primal and implicit-tangent verdicts."""
+
+    position: jax.Array
+    jet: FieldJet
+    valid: jax.Array
+    tangent_valid: jax.Array
+    reason: jax.Array
+
+
+class SaddleNormalForm(NamedTuple):
+    """Four separatrix rays with regular quadratic curvature corrections.
+
+    A ray is ``position + t*direction + t**2*curvature + t**3*cubic``.
+    Directions are counterclockwise. Opposite rays remain distinct: their
+    point contact cannot join the interiors of the two same-sign lobes.
+    """
+
+    position: jax.Array
+    direction: jax.Array
+    curvature: jax.Array
+    cubic: jax.Array
+    positive: jax.Array
+    valid: jax.Array
+    reason: jax.Array
+
+
+def _conditioned_hessian(hessian, tolerance):
+    """Test a dimensionless determinant before any inverse is evaluated."""
+    scale = jnp.max(jnp.abs(hessian))
+    scaled = hessian / jnp.where(scale > 0.0, scale, 1.0)
+    determinant = scaled[0, 0] * scaled[1, 1] - scaled[0, 1] * scaled[1, 0]
+    valid = (
+        jnp.all(jnp.isfinite(hessian))
+        & (scale > 0.0)
+        & (jnp.abs(determinant) > tolerance)
+    )
+    return valid, jnp.where(valid, hessian, jnp.eye(2, dtype=hessian.dtype))
+
+
+@partial(jax.custom_jvp, nondiff_argnums=(4,))
+def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
+    """Polish a point using analytic jets, with an implicit position tangent."""
+
+    def step(_index, position):
+        jet = field.evaluate(position)
+        valid, hessian = _conditioned_hessian(jet.hessian, tolerance)
+        correction = jnp.linalg.solve(hessian, jet.gradient)
+        length = jnp.linalg.norm(correction)
+        correction = correction * jnp.minimum(
+            1.0, pitch / jnp.where(length > 0.0, length, 1.0)
+        )
+        valid = valid & jnp.all(jnp.isfinite(correction))
+        return position - jnp.where(valid, correction, 0.0)
+
+    return jax.lax.fori_loop(0, iterations, step, seed)
+
+
+@_implicit_stationary_position.defjvp
+def _implicit_stationary_position_jvp(iterations, primals, tangents):
+    field, seed, pitch, tolerance = primals
+    field_tangent, _seed_tangent, _pitch_tangent, _tolerance_tangent = tangents
+    point = _implicit_stationary_position(field, seed, pitch, tolerance, iterations)
+    jet = field.evaluate(point)
+    valid, hessian = _conditioned_hessian(jet.hessian, tolerance)
+    gradient_tangent = jax.jvp(
+        lambda operand: operand.evaluate(point).gradient,
+        (field,),
+        (field_tangent,),
+    )[1]
+    tangent = -jnp.linalg.solve(hessian, gradient_tangent)
+    return point, jnp.where(valid, tangent, jnp.nan)
+
+
+def stationary_read(field, seed, pitch, policy):
+    """Read a null from a pytree point evaluator, never from sampled flux.
+
+    ``field.evaluate(point)`` returns a :class:`FieldJet` of the total field.
+    Its plasma term evaluates the booked current through the Biot kernels;
+    its exterior term evaluates the prescribed field at the same point.
+    The evaluator and all its numerical operands must be registered pytrees.
+    """
+    point = _implicit_stationary_position(
+        field,
+        jnp.asarray(seed),
+        pitch,
+        policy.hessian_tolerance,
+        policy.polish_iterations,
+    )
+    jet = field.evaluate(point)
+    tangent_valid, hessian = _conditioned_hessian(jet.hessian, policy.hessian_tolerance)
+    finite = jnp.all(jnp.isfinite(point)) & jnp.isfinite(jet.value)
+    finite = finite & jnp.all(jnp.isfinite(jet.gradient))
+    error = jnp.linalg.norm(jnp.linalg.solve(hessian, jet.gradient))
+    valid = finite & tangent_valid & (error <= policy.position_tolerance * pitch)
+    reason = jnp.where(
+        ~finite,
+        int(TopologyReason.NONFINITE_FIELD),
+        jnp.where(
+            ~tangent_valid,
+            int(TopologyReason.SINGULAR_TANGENT),
+            jnp.where(
+                valid, int(TopologyReason.OK), int(TopologyReason.UNRESOLVED_COMPONENT)
+            ),
+        ),
+    ).astype(jnp.int32)
+    return StationaryRead(point, jet, valid, tangent_valid, reason)
+
+
+def saddle_normal_form(
+    position, hessian, third_derivative, tolerance, fourth_derivative=None
+):
+    """Construct separatrix jets from kernel derivatives at the saddle.
+
+    For unit tangent d with d.H.d = 0, write x(t) = x0 + t*d + t**2*c.
+    Cancellation of the cubic flux term requires
+    d.H.c = -D³psi[d,d,d]/6. Choosing c normal to d fixes the parameterization.
+    No level-set root or small flux difference enters this construction.
+    """
+    hessian = jnp.asarray(hessian)
+    third = jnp.asarray(third_derivative)
+    conditioned, safe = _conditioned_hessian(hessian, tolerance)
+    eigenvalue, eigenvector = jnp.linalg.eigh(safe)
+    valid = conditioned & (eigenvalue[0] < 0.0) & (eigenvalue[1] > 0.0)
+    valid = valid & jnp.all(jnp.isfinite(third))
+    negative = jnp.where(valid, -eigenvalue[0], 1.0)
+    positive = jnp.where(valid, eigenvalue[1], 1.0)
+    first = jnp.sqrt(positive) * eigenvector[:, 0]
+    second = jnp.sqrt(negative) * eigenvector[:, 1]
+    direction = jnp.stack(
+        (first + second, first - second, -first - second, -first + second)
+    )
+    direction = direction / jnp.linalg.norm(direction, axis=1, keepdims=True)
+    direction = direction[jnp.argsort(jnp.arctan2(direction[:, 1], direction[:, 0]))]
+    normal = direction @ safe
+    cubic = jnp.einsum("ijk,ai,aj,ak->a", third, direction, direction, direction)
+    norm_squared = jnp.sum(normal * normal, axis=1)
+    curvature = -cubic[:, None] * normal / (6.0 * norm_squared[:, None])
+    fourth = (
+        jnp.zeros((2, 2, 2, 2), dtype=hessian.dtype)
+        if fourth_derivative is None
+        else jnp.asarray(fourth_derivative)
+    )
+    valid = valid & jnp.all(jnp.isfinite(fourth))
+    remainder = (
+        0.5 * jnp.einsum("ai,ij,aj->a", curvature, safe, curvature)
+        + 0.5 * jnp.einsum("ijk,ai,aj,ak->a", third, direction, direction, curvature)
+        + jnp.einsum(
+            "ijkl,ai,aj,ak,al->a", fourth, direction, direction, direction, direction
+        )
+        / 24.0
+    )
+    correction = -remainder[:, None] * normal / norm_squared[:, None]
+    sector_direction = direction + jnp.roll(direction, -1, axis=0)
+    positive_sector = (
+        jnp.einsum("ai,ij,aj->a", sector_direction, safe, sector_direction) > 0.0
+    )
+    return SaddleNormalForm(
+        jnp.asarray(position),
+        jnp.where(valid, direction, 0.0),
+        jnp.where(valid, curvature, 0.0),
+        jnp.where(valid, correction, 0.0),
+        positive_sector & valid,
+        valid,
+        jnp.where(
+            valid, int(TopologyReason.OK), int(TopologyReason.SINGULAR_REPRESENTATION)
+        ).astype(jnp.int32),
+    )
+
+
+class SaddleFragments(NamedTuple):
+    """Exact areas and edge intervals of four normal-form sectors in a cell."""
+
+    area: jax.Array
+    edge_interval: jax.Array
+    ray_parameter: jax.Array
+    valid: jax.Array
+    reason: jax.Array
+
+
+def _cross_plane(first, second):
+    return first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0]
+
+
+def _quadratic_parameters(quadratic, linear, constant):
+    """Return both real roots, with absent roots padded by infinity."""
+    scale = jnp.maximum(
+        jnp.maximum(jnp.abs(quadratic), jnp.abs(linear)), jnp.abs(constant)
+    )
+    threshold = 32.0 * jnp.finfo(jnp.asarray(quadratic).dtype).eps * scale
+    curved = jnp.abs(quadratic) > threshold
+    discriminant = linear * linear - 4.0 * quadratic * constant
+    real = discriminant >= 0.0
+    root = jnp.sqrt(jnp.where(real & curved, discriminant, 1.0))
+    q = -0.5 * (linear + jnp.where(linear >= 0.0, root, -root))
+    safe_q = jnp.where(q != 0.0, q, 1.0)
+    safe_a = jnp.where(curved, quadratic, 1.0)
+    first = q / safe_a
+    second = constant / safe_q
+    double = -linear / (2.0 * safe_a)
+    first = jnp.where(q == 0.0, double, first)
+    second = jnp.where(q == 0.0, double, second)
+    straight = jnp.abs(linear) > threshold
+    linear_root = -constant / jnp.where(straight, linear, 1.0)
+    first = jnp.where(
+        curved & real, first, jnp.where(~curved & straight, linear_root, jnp.inf)
+    )
+    second = jnp.where(curved & real, second, jnp.inf)
+    return jnp.stack((first, second), axis=-1)
+
+
+def saddle_cell_fragments(vertices, vertex_count, normal_form, tolerance):
+    """Intersect regular saddle rays with a convex cell, without flux roots.
+
+    The cell must contain the null and carry counterclockwise vertices. The
+    curved edge integral is analytic for each cubic ray; intersections
+    with the straight cell boundary solve only a geometric equation.
+    Edge intervals distinguish same-sign sectors that touch only at the null.
+    """
+    vertices = jnp.asarray(vertices) - normal_form.position
+    width = vertices.shape[0]
+    slot = jnp.arange(width)
+    following = jnp.where(slot + 1 < vertex_count, slot + 1, 0)
+    edge = vertices[following] - vertices
+    live = slot < vertex_count
+    direction = normal_form.direction
+    curvature = normal_form.curvature
+    cubic = normal_form.cubic
+    parameters = _quadratic_parameters(
+        _cross_plane(curvature[:, None, :], edge[None, :, :]),
+        _cross_plane(direction[:, None, :], edge[None, :, :]),
+        -_cross_plane(vertices[None, :, :], edge[None, :, :]),
+    )
+    finite_parameter = jnp.where(jnp.isfinite(parameters), parameters, 0.0)
+    cubic_cross = _cross_plane(cubic[:, None, :], edge[None, :, :])[..., None]
+    quadratic_cross = _cross_plane(curvature[:, None, :], edge[None, :, :])[..., None]
+    linear_cross = _cross_plane(direction[:, None, :], edge[None, :, :])[..., None]
+    constant_cross = -_cross_plane(vertices[None, :, :], edge[None, :, :])[..., None]
+
+    def intersect(_index, parameter):
+        residual = (
+            (cubic_cross * parameter + quadratic_cross) * parameter + linear_cross
+        ) * parameter + constant_cross
+        derivative = (
+            3.0 * cubic_cross * parameter + 2.0 * quadratic_cross
+        ) * parameter + linear_cross
+        return parameter - residual / jnp.where(derivative != 0.0, derivative, 1.0)
+
+    finite_parameter = jax.lax.fori_loop(0, 12, intersect, finite_parameter)
+    parameters = jnp.where(jnp.isfinite(parameters), finite_parameter, jnp.inf)
+    points = (
+        finite_parameter[..., None] * direction[:, None, None, :]
+        + finite_parameter[..., None] ** 2 * curvature[:, None, None, :]
+        + finite_parameter[..., None] ** 3 * cubic[:, None, None, :]
+    )
+    edge_length_squared = jnp.sum(edge * edge, axis=-1)
+    fraction = (
+        jnp.sum((points - vertices[None, :, None, :]) * edge[None, :, None, :], axis=-1)
+        / jnp.where(edge_length_squared > 0.0, edge_length_squared, 1.0)[None, :, None]
+    )
+    hit = (
+        live[None, :, None]
+        & jnp.isfinite(parameters)
+        & (parameters > tolerance)
+        & (fraction >= -tolerance)
+        & (fraction <= 1.0 + tolerance)
+    )
+    candidates = jnp.where(hit, parameters, jnp.inf).reshape(4, -1)
+    selected = jnp.argmin(candidates, axis=1)
+    ray_parameter = jnp.take_along_axis(candidates, selected[:, None], axis=1)[:, 0]
+    ray_valid = jnp.isfinite(ray_parameter)
+    parameter = jnp.where(ray_valid, ray_parameter, 0.0)
+    edge_index = selected // 2
+    boundary_fraction = jnp.take_along_axis(
+        fraction.reshape(4, -1), selected[:, None], axis=1
+    )[:, 0]
+    boundary_parameter = edge_index + jnp.clip(boundary_fraction, 0.0, 1.0)
+    end_parameter = jnp.roll(boundary_parameter, -1)
+    end_parameter = jnp.where(
+        end_parameter <= boundary_parameter, end_parameter + vertex_count, end_parameter
+    )
+    edge_parameter = jnp.where(
+        slot[None, :] < edge_index[:, None], slot[None, :] + vertex_count, slot[None, :]
+    )
+    lower = jnp.clip(boundary_parameter[:, None] - edge_parameter, 0.0, 1.0)
+    upper = jnp.clip(end_parameter[:, None] - edge_parameter, 0.0, 1.0)
+    present = live[None, :] & (upper > lower)
+    edge_interval = jnp.stack((lower, upper), axis=-1)
+    edge_interval = jnp.where(present[..., None], edge_interval, 0.0)
+    begin = vertices[None, :, :] + lower[..., None] * edge[None, :, :]
+    end = vertices[None, :, :] + upper[..., None] * edge[None, :, :]
+    boundary_integral = jnp.sum(
+        jnp.where(present, _cross_plane(begin, end), 0.0), axis=1
+    )
+    curve_integral = (
+        _cross_plane(direction, curvature) * parameter**3 / 3.0
+        + _cross_plane(direction, cubic) * parameter**4 / 2.0
+        + _cross_plane(curvature, cubic) * parameter**5 / 5.0
+    )
+    area = 0.5 * (boundary_integral + curve_integral - jnp.roll(curve_integral, -1))
+    full_area = 0.5 * jnp.sum(
+        jnp.where(live, _cross_plane(vertices, vertices[following]), 0.0)
+    )
+    contained = jnp.all(
+        jnp.where(live, _cross_plane(edge, -vertices) >= -tolerance, True)
+    )
+    # First exits must wind once around the cell; a folded ray is unresolved.
+    winding = jnp.sum(end_parameter - boundary_parameter)
+    valid = (
+        normal_form.valid
+        & jnp.all(ray_valid)
+        & contained
+        & (full_area > 0.0)
+        & jnp.all(area >= -tolerance * full_area)
+        & (jnp.abs(winding - vertex_count) <= tolerance * width)
+        & (jnp.abs(jnp.sum(area) - full_area) <= tolerance * full_area)
+    )
+    return SaddleFragments(
+        jnp.where(valid, jnp.maximum(area, 0.0), jnp.nan),
+        jnp.where(valid, edge_interval, 0.0),
+        ray_parameter,
+        valid,
+        jnp.where(
+            valid, int(TopologyReason.OK), int(TopologyReason.UNRESOLVED_COMPONENT)
+        ).astype(jnp.int32),
+    )
+
+
+def _cubic_parameters(cubic, quadratic, linear, constant):
+    """Three real geometric roots, padding absent roots with infinity."""
+    scale = jnp.maximum(
+        jnp.maximum(jnp.abs(cubic), jnp.abs(quadratic)),
+        jnp.maximum(jnp.abs(linear), jnp.abs(constant)),
+    )
+    curved = jnp.abs(cubic) > 64 * jnp.finfo(jnp.asarray(cubic).dtype).eps * scale
+    a = jnp.where(curved, cubic, 1.0)
+    b, c, d = quadratic / a, linear / a, constant / a
+    p = c - b * b / 3
+    q = 2 * b * b * b / 27 - b * c / 3 + d
+    discriminant = q * q / 4 + p * p * p / 27
+    multiple = discriminant <= 0
+    amplitude = 2 * jnp.sqrt(jnp.maximum(-p / 3, 0.0))
+    denominator = jnp.sqrt(jnp.maximum(-((p / 3) ** 3), 0.0))
+    angle = (
+        jnp.arccos(
+            jnp.clip(-q / (2 * jnp.where(denominator > 0, denominator, 1.0)), -1.0, 1.0)
+        )
+        / 3
+    )
+    angles = angle[..., None] - 2 * jnp.pi * jnp.arange(3) / 3
+    three = amplitude[..., None] * jnp.cos(angles) - b[..., None] / 3
+    root = (
+        jnp.cbrt(-q / 2 + jnp.sqrt(jnp.maximum(discriminant, 0.0)))
+        + jnp.cbrt(-q / 2 - jnp.sqrt(jnp.maximum(discriminant, 0.0)))
+        - b / 3
+    )
+    one = jnp.stack(
+        (root, jnp.full_like(root, jnp.inf), jnp.full_like(root, jnp.inf)), axis=-1
+    )
+    quadratic_roots = _quadratic_parameters(quadratic, linear, constant)
+    fallback = jnp.concatenate(
+        (quadratic_roots, jnp.full_like(root[..., None], jnp.inf)), axis=-1
+    )
+    return jnp.where(
+        curved[..., None], jnp.where(multiple[..., None], three, one), fallback
+    )
+
+
+def _normal_form_sectors(points, form):
+    """Geometric sidedness of the two paired curvature-corrected branches."""
+    offset = points - form.position
+    parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
+    residual = (
+        offset[..., None, :]
+        - parameter[..., None] ** 2 * form.curvature
+        - parameter[..., None] ** 3 * form.cubic
+    )
+    side = _cross_plane(form.direction, residual)
+    return (side >= 0.0) & (jnp.roll(side, -1, axis=-1) <= 0.0)
+
+
+def _normal_form_cell_fragments(vertices, vertex_count, form, tolerance):
+    """Clip global cubic branch sectors to any convex carrier cell.
+
+    Cell edges are split at geometric ray intersections. Green's theorem
+    combines those straight intervals with exact cubic-ray integrals inside
+    the cell. The null need not lie in the cell and no flux root is used.
+    """
+    width = vertices.shape[0]
+    slot = jnp.arange(width)
+    following = jnp.where(slot + 1 < vertex_count, slot + 1, 0)
+    relative = vertices - form.position
+    edges = relative[following] - relative
+    live = slot < vertex_count
+    roots = _cubic_parameters(
+        _cross_plane(form.cubic[:, None, :], edges[None, :, :]),
+        _cross_plane(form.curvature[:, None, :], edges[None, :, :]),
+        _cross_plane(form.direction[:, None, :], edges[None, :, :]),
+        -_cross_plane(relative[None, :, :], edges[None, :, :]),
+    )
+    safe = jnp.where(jnp.isfinite(roots), roots, 0.0)
+    points = (
+        safe[..., None] * form.direction[:, None, None, :]
+        + safe[..., None] ** 2 * form.curvature[:, None, None, :]
+        + safe[..., None] ** 3 * form.cubic[:, None, None, :]
+    )
+    edge_square = jnp.sum(edges * edges, axis=-1)
+    fractions = (
+        jnp.sum(
+            (points - relative[None, :, None, :]) * edges[None, :, None, :], axis=-1
+        )
+        / jnp.where(edge_square > 0, edge_square, 1.0)[None, :, None]
+    )
+    hit = (
+        live[None, :, None]
+        & jnp.isfinite(roots)
+        & (roots >= -tolerance)
+        & (fractions >= -tolerance)
+        & (fractions <= 1 + tolerance)
+    )
+    cuts = jnp.sort(
+        jnp.clip(
+            jnp.transpose(jnp.where(hit, fractions, jnp.inf), (1, 0, 2)).reshape(
+                width, 12
+            ),
+            0,
+            1,
+        ),
+        axis=-1,
+    )
+    cuts = jnp.concatenate((jnp.zeros((width, 1)), cuts, jnp.ones((width, 1))), axis=-1)
+    lower, upper = cuts[:, :-1], cuts[:, 1:]
+    middle = vertices[:, None, :] + ((lower + upper) / 2)[..., None] * edges[:, None, :]
+    centre = jnp.sum(jnp.where(live[:, None], vertices, 0.0), axis=0) / vertex_count
+    sectors = _normal_form_sectors(middle + 1e-10 * (centre - middle), form)
+    present = live[:, None] & (upper > lower)
+    intervals = jnp.where(
+        jnp.transpose(sectors, (2, 0, 1))[..., None] & present[None, :, :, None],
+        jnp.stack((lower, upper), axis=-1)[None, ...],
+        0.0,
+    )
+    first = relative[:, None, :] + lower[..., None] * edges[:, None, :]
+    last = relative[:, None, :] + upper[..., None] * edges[:, None, :]
+    boundary = jnp.einsum(
+        "eqa,eq->a", sectors * present[..., None], _cross_plane(first, last)
+    )
+    bound = 2 * jnp.max(jnp.linalg.norm(relative, axis=-1))
+    parameters = jnp.sort(
+        jnp.clip(jnp.where(hit, roots, jnp.inf).reshape(4, -1), 0, bound), axis=-1
+    )
+    parameters = jnp.concatenate(
+        (jnp.zeros((4, 1)), parameters, jnp.full((4, 1), bound)), axis=-1
+    )
+    begin, end = parameters[:, :-1], parameters[:, 1:]
+    midpoint = (begin + end) / 2
+    curve = (
+        midpoint[..., None] * form.direction[:, None, :]
+        + midpoint[..., None] ** 2 * form.curvature[:, None, :]
+        + midpoint[..., None] ** 3 * form.cubic[:, None, :]
+    )
+    inside = jnp.all(
+        jnp.where(
+            live[None, None, :],
+            _cross_plane(
+                edges[None, None, :, :],
+                curve[:, :, None, :] - relative[None, None, :, :],
+            )
+            >= -tolerance,
+            True,
+        ),
+        axis=-1,
+    )
+
+    def primitive(t):
+        return (
+            _cross_plane(form.direction, form.curvature)[:, None] * t**3 / 3
+            + _cross_plane(form.direction, form.cubic)[:, None] * t**4 / 2
+            + _cross_plane(form.curvature, form.cubic)[:, None] * t**5 / 5
+        )
+
+    curve_integral = jnp.sum(
+        jnp.where(inside & (end > begin), primitive(end) - primitive(begin), 0.0),
+        axis=1,
+    )
+    area = 0.5 * (boundary + curve_integral - jnp.roll(curve_integral, -1))
+    full_area = 0.5 * jnp.sum(
+        jnp.where(live, _cross_plane(relative, relative[following]), 0.0)
+    )
+    partitioned = jnp.all(jnp.where(present, jnp.sum(sectors, axis=-1) == 1, True))
+    valid = (
+        form.valid
+        & partitioned
+        & (full_area > 0)
+        & jnp.all(jnp.isfinite(area))
+        & jnp.all(area >= -tolerance * full_area)
+        & (jnp.abs(jnp.sum(area) - full_area) <= 64 * tolerance * full_area)
+    )
+    return SaddleFragments(
+        jnp.where(valid, jnp.maximum(area, 0.0), jnp.nan),
+        intervals,
+        jnp.max(jnp.where(hit, roots, 0.0), axis=(1, 2)),
+        valid,
+        jnp.where(
+            valid, int(TopologyReason.OK), int(TopologyReason.UNRESOLVED_COMPONENT)
+        ).astype(jnp.int32),
+    )
+
+
+class CellFragments(NamedTuple):
+    """Connected conic fragments and their open intervals on each cell edge."""
+
+    area: jax.Array
+    edge_interval: jax.Array
+    valid: jax.Array
+    required: jax.Array
+    reason: jax.Array
+    slice_breaks: jax.Array
+    slice_labels: jax.Array
+    slice_lower: jax.Array
+    slice_upper: jax.Array
+
+
+def _quadratic_value(coefficient, point):
+    x, y = point[..., 0], point[..., 1]
+    return (
+        coefficient[0]
+        + coefficient[1] * x
+        + coefficient[2] * y
+        + coefficient[3] * x * x
+        + coefficient[4] * x * y
+        + coefficient[5] * y * y
+    )
+
+
+def _vertical_polygon_interval(vertices, count, x):
+    slot = jnp.arange(vertices.shape[0])
+    following = jnp.where(slot + 1 < count, slot + 1, 0)
+    edge = vertices[following] - vertices
+    fraction = (x[..., None] - vertices[:, 0]) / jnp.where(
+        edge[:, 0] != 0.0, edge[:, 0], 1.0
+    )
+    live = (slot < count) & (edge[:, 0] != 0.0)
+    live = live & (fraction >= -1e-12) & (fraction <= 1.0 + 1e-12)
+    y = vertices[:, 1] + fraction * edge[:, 1]
+    lower = jnp.min(jnp.where(live, y, jnp.inf), axis=-1)
+    upper = jnp.max(jnp.where(live, y, -jnp.inf), axis=-1)
+    return lower, upper
+
+
+def _positive_vertical_intervals(vertices, count, coefficient, x):
+    lower, upper = _vertical_polygon_interval(vertices, count, x)
+    quadratic = jnp.broadcast_to(coefficient[5], x.shape)
+    linear = coefficient[2] + coefficient[4] * x
+    constant = coefficient[0] + coefficient[1] * x + coefficient[3] * x * x
+    roots = _quadratic_parameters(quadratic, linear, constant)
+    roots = jnp.sort(jnp.clip(roots, lower[..., None], upper[..., None]), axis=-1)
+    boundaries = jnp.concatenate((lower[..., None], roots, upper[..., None]), axis=-1)
+    bottom, top = boundaries[..., :-1], boundaries[..., 1:]
+    middle = 0.5 * (bottom + top)
+    value = (
+        quadratic[..., None] * middle**2
+        + linear[..., None] * middle
+        + constant[..., None]
+    )
+    present = (top > bottom) & (value > 0.0) & jnp.isfinite(value)
+    return bottom, top, present
+
+
+def quadratic_cell_fragments(vertices, vertex_count, coefficient, capacity=2):
+    """Decompose a quadratic superlevel set by exact algebraic slice events.
+
+    Vertical breaks include polygon corners, every conic/edge intersection,
+    and vertical tangencies. Between breaks, root order is fixed. Fragments
+    join across a break only if their limiting vertical intervals overlap in
+    positive length. Area uses a cosine-transformed Gauss rule on each strip;
+    the transform removes the square-root endpoint singularity of a conic.
+    Coordinates are cell-local, with a pitch-sized unit.
+    """
+    vertices = jnp.asarray(vertices)
+    coefficient = jnp.asarray(coefficient)
+    width = vertices.shape[0]
+    slot = jnp.arange(width)
+    following = jnp.where(slot + 1 < vertex_count, slot + 1, 0)
+    end = vertices[following]
+    edge = end - vertices
+    live = slot < vertex_count
+    first = _quadratic_value(coefficient, vertices)
+    last = _quadratic_value(coefficient, end)
+    middle = _quadratic_value(coefficient, 0.5 * (vertices + end))
+    edge_quadratic = 2.0 * (first + last - 2.0 * middle)
+    edge_linear = last - first - edge_quadratic
+    roots = _quadratic_parameters(edge_quadratic, edge_linear, first)
+    edge_root_valid = live[:, None] & (roots > 0.0) & (roots < 1.0)
+    lower_x = jnp.min(jnp.where(live, vertices[:, 0], jnp.inf))
+    upper_x = jnp.max(jnp.where(live, vertices[:, 0], -jnp.inf))
+    edge_x = (
+        vertices[:, 0, None] + jnp.where(edge_root_valid, roots, 0.0) * edge[:, 0, None]
+    )
+    vertical_tangent = _quadratic_parameters(
+        coefficient[4] ** 2 - 4 * coefficient[5] * coefficient[3],
+        2 * coefficient[2] * coefficient[4] - 4 * coefficient[5] * coefficient[1],
+        coefficient[2] ** 2 - 4 * coefficient[5] * coefficient[0],
+    )
+    breaks = jnp.sort(
+        jnp.concatenate(
+            (
+                jnp.where(live, vertices[:, 0], upper_x),
+                jnp.where(edge_root_valid, edge_x, upper_x).reshape(-1),
+                jnp.clip(vertical_tangent, lower_x, upper_x),
+            )
+        )
+    )
+    unique = jnp.concatenate((jnp.ones(1, dtype=bool), breaks[1:] > breaks[:-1]))
+    breaks = breaks[
+        jnp.nonzero(unique, size=breaks.size, fill_value=breaks.size - 1)[0]
+    ]
+    left, right = breaks[:-1], breaks[1:]
+    middle_x = 0.5 * (left + right)
+    bottom, top, present = _positive_vertical_intervals(
+        vertices, vertex_count, coefficient, middle_x
+    )
+    present = present & (right > left)[:, None]
+    strips = left.size
+    # Evaluate limiting intervals at the event itself, never a pre-saddle offset.
+    left_bottom, left_top, _ = _positive_vertical_intervals(
+        vertices, vertex_count, coefficient, left
+    )
+    right_bottom, right_top, _ = _positive_vertical_intervals(
+        vertices, vertex_count, coefficient, right
+    )
+    overlap = jnp.minimum(right_top[:-1, :, None], left_top[1:, None, :]) - jnp.maximum(
+        right_bottom[:-1, :, None], left_bottom[1:, None, :]
+    )
+    join = (overlap > 0.0) & present[:-1, :, None] & present[1:, None, :]
+    labels = jnp.where(present, jnp.arange(strips * 3).reshape(strips, 3), strips * 3)
+
+    def propagate(_index, label):
+        from_left = jnp.min(jnp.where(join, label[:-1, :, None], strips * 3), axis=1)
+        from_right = jnp.min(jnp.where(join, label[1:, None, :], strips * 3), axis=2)
+        changed = label.at[1:].min(from_left)
+        return changed.at[:-1].min(from_right)
+
+    labels = jax.lax.fori_loop(0, strips, propagate, labels)
+    flat = labels.reshape(-1)
+    is_root = (flat == jnp.arange(strips * 3)) & present.reshape(-1)
+    required = jnp.sum(is_root, dtype=jnp.int32)
+    owners = jnp.nonzero(is_root, size=capacity, fill_value=strips * 3)[0]
+    fragment = jnp.argmax(labels[..., None] == owners, axis=-1)
+    fragment = jnp.where(present, fragment, -1)
+    gauss, weight = np.polynomial.legendre.leggauss(32)
+    angle = 0.5 * jnp.pi * (jnp.asarray(gauss) + 1.0)
+    parameter = 0.5 * (1.0 - jnp.cos(angle))
+    transformed_weight = 0.25 * jnp.pi * jnp.sin(angle) * jnp.asarray(weight)
+    x = left[:, None] + (right - left)[:, None] * parameter
+    quad_lower, quad_upper, quad_present = _positive_vertical_intervals(
+        vertices, vertex_count, coefficient, x
+    )
+    strip_area = (right - left)[:, None] * jnp.sum(
+        jnp.where(quad_present, quad_upper - quad_lower, 0.0)
+        * transformed_weight[None, :, None],
+        axis=1,
+    )
+    area = jnp.sum(
+        jnp.where(
+            fragment[..., None] == jnp.arange(capacity), strip_area[..., None], 0.0
+        ),
+        axis=(0, 1),
+    )
+    # Split each authored edge at both exact conic roots.
+    root_fraction = jnp.sort(jnp.clip(roots, 0.0, 1.0), axis=-1)
+    boundary = jnp.concatenate(
+        (jnp.zeros((width, 1)), root_fraction, jnp.ones((width, 1))), axis=1
+    )
+    start, stop = boundary[:, :-1], boundary[:, 1:]
+    fraction = 0.5 * (start + stop)
+    point = vertices[:, None, :] + fraction[..., None] * edge[:, None, :]
+    edge_present = (
+        live[:, None] & (stop > start) & (_quadratic_value(coefficient, point) > 0.0)
+    )
+    # A midpoint is strictly inside an open edge interval. Move only its lookup
+    # coordinate inward to select the adjacent strip at a vertical cell edge.
+    centre = jnp.sum(jnp.where(live[:, None], vertices, 0.0), axis=0) / vertex_count
+    lookup = point + 1e-10 * (centre - point)
+    strip = jnp.clip(
+        jnp.searchsorted(breaks, lookup[..., 0], side="right") - 1, 0, strips - 1
+    )
+    lookup_lower, lookup_upper, lookup_present = _positive_vertical_intervals(
+        vertices, vertex_count, coefficient, lookup[..., 0]
+    )
+    branch = jnp.argmax(
+        lookup_present
+        & (lookup[..., 1, None] >= lookup_lower)
+        & (lookup[..., 1, None] <= lookup_upper),
+        axis=-1,
+    )
+    edge_fragment = fragment[strip, branch]
+    intervals = jnp.stack((start, stop), axis=-1)
+    intervals = jnp.where(
+        edge_present[None, ..., None]
+        & (edge_fragment[None, ..., None] == jnp.arange(capacity)[:, None, None, None]),
+        intervals[None, ...],
+        0.0,
+    )
+    valid = (required <= capacity) & jnp.all(jnp.isfinite(area))
+    return CellFragments(
+        jnp.where(valid, area, jnp.nan),
+        intervals,
+        valid,
+        required,
+        jnp.where(valid, int(TopologyReason.OK), int(TopologyReason.CAPACITY)).astype(
+            jnp.int32
+        ),
+        breaks,
+        fragment,
+        bottom,
+        top,
+    )
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class BiotMomentCoupling:
+    """Authored polygon kernels evaluated at arbitrary moving target points.
+
+    Source moments are physical integrals about ``centre``. The inverse second
+    area moment converts them to the linear source basis of the exact kernel.
+    Neither sampled target flux nor derivatives of a mesh reconstruction enter.
+    """
+
+    edge: jax.Array
+    weight: jax.Array
+    norm: jax.Array
+    centre: jax.Array
+    inverse_second_moment: jax.Array
+    reflection_axis: jax.Array
+    reflection_partner: jax.Array
+
+    @classmethod
+    def from_polygons(cls, polygons):
+        """Pack immutable source geometry outside any traced read."""
+        from nova.biot.greens import section_centroid, second_moments
+        from nova.biot.polygon import pad_batch
+        from nova.biot.polygonanalytic import _horizontal_reflection
+
+        polygons = tuple(np.asarray(polygon, dtype=np.float64) for polygon in polygons)
+        edge, weight, norm = pad_batch(polygons)
+        centre = np.stack([section_centroid(polygon) for polygon in polygons])
+        second = np.asarray([second_moments(polygon) for polygon in polygons])
+        matrix = np.stack((second[:, (0, 2)], second[:, (2, 1)]), axis=1)
+        reflection_axis = np.full(len(polygons), np.nan)
+        partner = np.broadcast_to(
+            np.arange(edge.shape[0])[:, None], weight.shape
+        ).copy()
+        for index, polygon in enumerate(polygons):
+            reflection = _horizontal_reflection(polygon)
+            if reflection is not None:
+                reflection_axis[index], vertices = reflection
+                partner[: len(polygon), index] = vertices[
+                    (np.arange(len(polygon)) + 1) % len(polygon)
+                ]
+        return cls(
+            *map(
+                jnp.asarray,
+                (
+                    edge,
+                    weight,
+                    norm,
+                    centre,
+                    np.linalg.inv(matrix),
+                    reflection_axis,
+                    partner,
+                ),
+            )
+        )
+
+    def coefficients(self, moments):
+        values = jnp.stack(tuple(moments), axis=-1)
+        first = jnp.einsum("nij,nj->ni", self.inverse_second_moment, values[:, 1:])
+        return jnp.concatenate((values[:, :1], first), axis=1)
+
+    @jax.jit
+    def value_gradient(self, point, moments):
+        from nova.biot.polygonanalytic import packed_analytic_moments
+
+        rows = packed_analytic_moments(
+            jnp,
+            jnp.broadcast_to(point[0], self.norm.shape),
+            jnp.broadcast_to(point[1], self.norm.shape),
+            self.edge,
+            self.weight,
+            self.norm,
+            self.centre.T,
+            self.centre.T,
+            self.reflection_axis,
+            self.reflection_partner,
+        )
+        coefficient = self.coefficients(moments).T
+        value = jnp.sum(jnp.stack(rows[:3]) * coefficient)
+        radial_field = jnp.sum(jnp.stack(rows[3:6]) * coefficient)
+        vertical_field = jnp.sum(jnp.stack(rows[6:]) * coefficient)
+        gradient = 2 * jnp.pi * point[0] * jnp.stack((vertical_field, -radial_field))
+        return value, gradient
+
+    @jax.jit
+    def evaluate(self, point, moments):
+        def gradient_with_value(target):
+            value, gradient = self.value_gradient(target, moments)
+            return gradient, (value, gradient)
+
+        hessian, (value, gradient) = jax.jacfwd(gradient_with_value, has_aux=True)(
+            point
+        )
+        return FieldJet(value, gradient, hessian)
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class TotalField:
+    """One booked plasma image plus an explicit differentiable exterior.
+
+    ``exterior.evaluate(point)`` supplies value, gradient and Hessian at the
+    moving target. It is a pytree of conductor geometry/current in production.
+    A closed-form fixture can supply analytic total minus the same kernel image
+    of its fixed reference moments; its derivatives are point derivatives too.
+    """
+
+    moments: object
+    coupling: BiotMomentCoupling
+    exterior: ExteriorField
+
+    def value(self, point):
+        plasma = self.coupling.value_gradient(point, self.moments)[0]
+        exterior = (
+            self.exterior.value(point)
+            if hasattr(self.exterior, "value")
+            else self.exterior.evaluate(point).value
+        )
+        return plasma + exterior
+
+    def evaluate(self, point):
+        plasma = self.coupling.evaluate(point, self.moments)
+        exterior = self.exterior.evaluate(point)
+        return jax.tree.map(jnp.add, plasma, exterior)
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class TopologyConvention:
+    """Declared signed-flux orientation, independent of an observed ordering."""
+
+    sigma_bp: jax.Array
+    current_sign: jax.Array
+
+    @classmethod
+    def from_cocos(cls, identifier, plasma_current):
+        from nova.io.cocos import convention
+
+        declared = convention(identifier)
+        if not np.isfinite(plasma_current) or plasma_current == 0:
+            raise ValueError("plasma current must be finite and nonzero")
+        return cls(jnp.asarray(declared.sigma_bp), jnp.asarray(np.sign(plasma_current)))
+
+    @property
+    def sigma(self):
+        return -self.sigma_bp * self.current_sign
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class TopologyGeometry:
+    """Hex carrier geometry and reciprocal atomic edge incidence as operands."""
+
+    vertices: jax.Array
+    vertex_count: jax.Array
+    centre: jax.Array
+    pitch: jax.Array
+    sample_points: jax.Array
+    fit_inverse: jax.Array
+    neighbour: jax.Array
+    neighbour_edge: jax.Array
+    wall_points: jax.Array
+    wall_following: jax.Array
+    wall_unit: jax.Array
+    full_area: jax.Array
+    contour_mesh: object
+    contour_sources: jax.Array
+    contour_weights: jax.Array
+    contour_sample_points: jax.Array
+
+    @classmethod
+    def from_cells(cls, cells, sampling_vertices, wall_units):
+        """Atomise authored cells and preserve each wall unit's own closure."""
+        from nova.equilibrium.separatrix_clip import AtomicCellMesh
+
+        atomic = AtomicCellMesh.from_cells(cells)
+        vertices = atomic.node_coordinates[atomic.cell_nodes]
+        counts = atomic.cell_vertex_count
+        centre = atomic.centroids
+        neighbour = np.full(atomic.cell_nodes.shape, -1, dtype=np.int32)
+        neighbour_edge = np.zeros_like(neighbour)
+        owners = {}
+        area = np.empty(len(cells))
+        for index, count in enumerate(counts):
+            polygon = vertices[index, :count]
+            following_polygon = np.roll(polygon, -1, axis=0)
+            signed_area = 0.5 * np.sum(
+                polygon[:, 0] * following_polygon[:, 1]
+                - polygon[:, 1] * following_polygon[:, 0]
+            )
+            if signed_area <= 0:
+                raise ValueError("cells must have counterclockwise nonzero area")
+            area[index] = signed_area
+            for edge_index in range(count):
+                pair = (
+                    int(atomic.cell_nodes[index, edge_index]),
+                    int(atomic.cell_nodes[index, (edge_index + 1) % count]),
+                )
+                key = tuple(sorted(pair))
+                if key in owners:
+                    peer, peer_edge = owners.pop(key)
+                    neighbour[index, edge_index] = peer
+                    neighbour_edge[index, edge_index] = peer_edge
+                    neighbour[peer, peer_edge] = index
+                    neighbour_edge[peer, peer_edge] = edge_index
+                else:
+                    owners[key] = (index, edge_index)
+        samples = np.concatenate(
+            (centre[:, None, :], np.asarray(sampling_vertices)), axis=1
+        )
+        # A wall sliver does not shrink the generator's sampling stencil.
+        pitch = np.full(len(area), np.sqrt(np.median(area)))
+        local = (samples - centre[:, None, :]) / pitch[:, None, None]
+        x, y = local[..., 0], local[..., 1]
+        design = np.stack((np.ones_like(x), x, y, x * x, x * y, y * y), axis=-1)
+        if np.any(np.linalg.cond(design) > 1e6):
+            raise ValueError("own-node field representation is singular")
+        inverse = np.linalg.pinv(design)
+        points, following, units = [], [], []
+        for unit_index, unit in enumerate(wall_units):
+            unit = np.asarray(unit, dtype=np.float64)
+            if np.array_equal(unit[0], unit[-1]):
+                unit = unit[:-1]
+            offset = len(points)
+            points.extend(unit)
+            following.extend(offset + (np.arange(len(unit)) + 1) % len(unit))
+            units.extend([unit_index] * len(unit))
+        from dataclasses import replace
+        from scipy.spatial import Delaunay
+        from nova.equilibrium.contour_tree_mesh import build_contour_mesh
+        from nova.equilibrium.wall_mask import WallUnit
+
+        # Contour mesh construction is host geometry preparation. Its array
+        # receipt and interpolation map, not a Python triangulation, cross jit.
+        tree_centres = (
+            centre if len(centre) >= 4 else np.unique(samples.reshape(-1, 2), axis=0)
+        )
+        mesh = build_contour_mesh(
+            tree_centres,
+            np.zeros(len(tree_centres)),
+            tuple(
+                WallUnit(np.asarray(u)[:, 0], np.asarray(u)[:, 1], kind="vessel")
+                for u in wall_units
+            ),
+            vertex_capacity=len(tree_centres) + len(points) + 1,
+            edge_capacity=12 * (len(tree_centres) + len(points)),
+            triangle_capacity=6 * (len(tree_centres) + len(points)),
+        )
+        occupied = np.flatnonzero(np.asarray(mesh.vertex_valid))
+        vertex_size = int(occupied[-1]) + 2
+        edge_size = max(1, int(np.sum(mesh.edge_valid)))
+        triangle_size = max(1, int(np.sum(mesh.triangle_valid)))
+        mesh = replace(
+            mesh,
+            vertex_rz=mesh.vertex_rz[:vertex_size],
+            vertex_psi=mesh.vertex_psi[:vertex_size],
+            vertex_valid=mesh.vertex_valid[:vertex_size],
+            vertex_is_wall=mesh.vertex_is_wall[:vertex_size],
+            edges=mesh.edges[:edge_size],
+            edge_valid=mesh.edge_valid[:edge_size],
+            triangles=mesh.triangles[:triangle_size],
+            triangle_valid=mesh.triangle_valid[:triangle_size],
+            vertex_capacity=vertex_size,
+            edge_capacity=edge_size,
+            triangle_capacity=triangle_size,
+        )
+        triangulation = Delaunay(tree_centres)
+        target = np.asarray(mesh.vertex_rz)
+        simplex = triangulation.find_simplex(target)
+        transform = triangulation.transform[np.maximum(simplex, 0)]
+        barycentric = np.einsum(
+            "nij,nj->ni", transform[:, :2], target - transform[:, 2]
+        )
+        barycentric = np.column_stack((barycentric, 1 - barycentric.sum(axis=1)))
+        sources = triangulation.simplices[np.maximum(simplex, 0)]
+        sources[: len(tree_centres)] = np.arange(len(tree_centres))[:, None]
+        barycentric[: len(tree_centres)] = (1.0, 0.0, 0.0)
+        barycentric[~np.asarray(mesh.vertex_valid)] = 0.0
+        return cls(
+            *map(
+                jnp.asarray,
+                (
+                    vertices,
+                    counts,
+                    centre,
+                    pitch,
+                    samples,
+                    inverse,
+                    neighbour,
+                    neighbour_edge,
+                    np.asarray(points),
+                    np.asarray(following, dtype=np.int32),
+                    np.asarray(units, dtype=np.int32),
+                    area,
+                ),
+            ),
+            mesh,
+            jnp.asarray(sources),
+            jnp.asarray(barycentric),
+            jnp.asarray(tree_centres),
+        )
+
+
+class TopologyRead(NamedTuple):
+    """One fixed-shape total-field topology and connected-support receipt."""
+
+    axis: jax.Array
+    axis_flux: jax.Array
+    x_points: jax.Array
+    x_point_flux: jax.Array
+    x_point_valid: jax.Array
+    boundary: jax.Array
+    boundary_flux: jax.Array
+    boundary_class: jax.Array
+    membership: jax.Array
+    fragment_area: jax.Array
+    fragment_component: jax.Array
+    fragment_selected: jax.Array
+    edge_interval: jax.Array
+    wall_labels: jax.Array
+    domain_labels: jax.Array
+    field_coefficients: jax.Array
+    saddle_form: SaddleNormalForm
+    qualified: jax.Array
+    valid: jax.Array
+    reason: jax.Array
+    tangent_valid: jax.Array
+    required_nulls: jax.Array
+    required_fragments: jax.Array
+    normal_form_cells: jax.Array
+    normal_form_radius: jax.Array
+    contour_tree: object
+
+
+def _inside_cells(geometry, point):
+    slot = jnp.arange(geometry.vertices.shape[1])
+    following = jnp.where(
+        slot[None, :] + 1 < geometry.vertex_count[:, None], slot[None, :] + 1, 0
+    )
+    end = jnp.take_along_axis(geometry.vertices, following[..., None], axis=1)
+    cross = _cross_plane(end - geometry.vertices, point - geometry.vertices)
+    return jnp.all(
+        jnp.where(
+            slot[None, :] < geometry.vertex_count[:, None],
+            cross >= -1e-12 * geometry.pitch[:, None] ** 2,
+            True,
+        ),
+        axis=1,
+    )
+
+
+def _point_values(field, points):
+    evaluate = (
+        field.value
+        if hasattr(field, "value")
+        else lambda point: field.evaluate(point).value
+    )
+    if isinstance(field, TotalField):
+        return jax.lax.map(evaluate, points.reshape(-1, 2), batch_size=8).reshape(
+            points.shape[:-1]
+        )
+    return jax.vmap(evaluate)(points.reshape(-1, 2)).reshape(points.shape[:-1])
+
+
+def _field_coefficients(field, geometry):
+    values = _point_values(field, geometry.sample_points)
+    return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
+
+
+def _null_census(field, geometry, coefficient, policy, tree):
+    hessian = jnp.stack(
+        (
+            jnp.stack((2 * coefficient[:, 3], coefficient[:, 4]), axis=-1),
+            jnp.stack((coefficient[:, 4], 2 * coefficient[:, 5]), axis=-1),
+        ),
+        axis=1,
+    )
+    nonsingular, safe = jax.vmap(_conditioned_hessian, in_axes=(0, None))(
+        hessian, policy.hessian_tolerance
+    )
+    offset = -jnp.linalg.solve(safe, coefficient[:, 1:3, None])[..., 0]
+    seeds = geometry.centre + geometry.pitch[:, None] * offset
+    slot = jnp.arange(geometry.vertices.shape[1])
+    following = jnp.where(
+        slot[None, :] + 1 < geometry.vertex_count[:, None], slot[None, :] + 1, 0
+    )
+    end = jnp.take_along_axis(geometry.vertices, following[..., None], axis=1)
+    contained = jnp.all(
+        jnp.where(
+            slot[None, :] < geometry.vertex_count[:, None],
+            _cross_plane(end - geometry.vertices, seeds[:, None, :] - geometry.vertices)
+            >= 0.0,
+            True,
+        ),
+        axis=1,
+    )
+    candidate = nonsingular & contained & jnp.all(jnp.isfinite(seeds), axis=1)
+    tree_points = geometry.contour_mesh.vertex_rz[tree.node_vertex]
+    distance = jnp.linalg.norm(seeds[:, None, :] - tree_points[None, :, :], axis=-1)
+    tree_critical = tree.node_valid & (tree.critical_type != 3)
+    distance = jnp.where(tree_critical[None, :], distance, jnp.inf)
+    tree_slot = jnp.argmin(distance, axis=1)
+    resolved = jnp.min(distance, axis=1) <= 2.5 * geometry.pitch
+    census_resolved = jnp.all(~candidate | resolved)
+    required = jnp.sum(candidate, dtype=jnp.int32)
+    # Stable carrier order breaks equal tree-slot rankings deterministically.
+    order = jnp.argsort(
+        jnp.where(candidate, tree_slot, tree.node_valid.size), stable=True
+    )
+    gather = order[: policy.null_capacity]
+    if policy.null_capacity > order.size:
+        gather = jnp.pad(gather, (0, policy.null_capacity - order.size))
+    if isinstance(field, TotalField):
+
+        def polish_one(arguments):
+            slot, seed, pitch = arguments
+            empty = StationaryRead(
+                jnp.zeros(2),
+                FieldJet(jnp.asarray(0.0), jnp.zeros(2), jnp.zeros((2, 2))),
+                jnp.asarray(False),
+                jnp.asarray(False),
+                jnp.asarray(int(TopologyReason.NO_QUALIFIED_AXIS), dtype=jnp.int32),
+            )
+            return jax.lax.cond(
+                slot < required,
+                lambda _: stationary_read(field, seed, pitch, policy),
+                lambda _: empty,
+                operand=None,
+            )
+
+        nulls = jax.lax.map(
+            polish_one,
+            (jnp.arange(policy.null_capacity), seeds[gather], geometry.pitch[gather]),
+        )
+    else:
+        nulls = jax.vmap(stationary_read, in_axes=(None, 0, 0, None))(
+            field, seeds[gather], geometry.pitch[gather], policy
+        )
+    live = (jnp.arange(policy.null_capacity) < required) & nulls.valid
+    inside = jax.vmap(lambda point: jnp.any(_inside_cells(geometry, point)))(
+        nulls.position
+    )
+    live = live & inside
+    separation = jnp.linalg.norm(
+        nulls.position[:, None, :] - nulls.position[None, :, :], axis=-1
+    )
+    earlier = (
+        jnp.arange(policy.null_capacity)[None, :]
+        < jnp.arange(policy.null_capacity)[:, None]
+    )
+    duplicate = jnp.any(
+        earlier
+        & live[None, :]
+        & (separation < policy.position_tolerance * jnp.min(geometry.pitch) * 8),
+        axis=1,
+    )
+    return nulls, live & ~duplicate, required, census_resolved
+
+
+def _wall_events(field, geometry, policy, sigma):
+    start = geometry.wall_points
+    edge = start[geometry.wall_following] - start
+
+    def one(first, direction):
+        def step(_index, parameter):
+            jet = field.evaluate(first + parameter * direction)
+            first_derivative = jet.gradient @ direction
+            second_derivative = direction @ jet.hessian @ direction
+            concave = sigma * second_derivative < 0.0
+            update = first_derivative / jnp.where(concave, second_derivative, 1.0)
+            return jnp.where(concave, jnp.clip(parameter - update, 0.0, 1.0), parameter)
+
+        parameter = jax.lax.fori_loop(
+            0, policy.polish_iterations, step, jnp.asarray(0.5)
+        )
+        points = first + jnp.asarray((0.0, 1.0, parameter))[:, None] * direction
+        values = _point_values(field, points)
+        selected = jnp.argmax(sigma * values)
+        return points[selected], values[selected]
+
+    if isinstance(field, TotalField):
+        return jax.lax.map(lambda pair: one(*pair), (start, edge))
+    return jax.vmap(one)(start, edge)
+
+
+def _connected_fragment_labels(area, intervals, geometry, tolerance):
+    cells, capacity = area.shape
+    edge_interval = jnp.transpose(intervals, (0, 2, 1, 3, 4))
+    peer = jnp.maximum(geometry.neighbour, 0)
+    peer_interval = edge_interval[peer, geometry.neighbour_edge]
+    peer_interval = 1.0 - peer_interval[..., ::-1]
+    overlap = jnp.minimum(
+        edge_interval[:, :, :, None, :, None, 1],
+        peer_interval[:, :, None, :, None, :, 1],
+    ) - jnp.maximum(
+        edge_interval[:, :, :, None, :, None, 0],
+        peer_interval[:, :, None, :, None, :, 0],
+    )
+    links = (
+        jnp.any(overlap > tolerance, axis=(-2, -1))
+        & (geometry.neighbour >= 0)[..., None, None]
+    )
+    sentinel = cells * capacity
+    initial = jnp.where(
+        area > 0.0, jnp.arange(sentinel).reshape(cells, capacity), sentinel
+    )
+
+    def condition(state):
+        iteration, _labels, changed = state
+        return changed & (iteration < sentinel)
+
+    def propagate(state):
+        iteration, labels, _changed = state
+        incoming = labels[peer]
+        next_label = jnp.minimum(
+            labels,
+            jnp.min(jnp.where(links, incoming[:, :, None, :], sentinel), axis=(1, 3)),
+        )
+        return iteration + 1, next_label, jnp.any(next_label != labels)
+
+    _, labels, _ = jax.lax.while_loop(
+        condition, propagate, (jnp.asarray(0), initial, jnp.asarray(True))
+    )
+    wall = jnp.any(
+        (geometry.neighbour < 0)[:, :, None, None]
+        & (edge_interval[..., 1] - edge_interval[..., 0] > tolerance),
+        axis=(1, 3),
+    )
+    return labels, wall
+
+
+def _support_at_level(
+    geometry, coefficient, sigma, level, axis, form, saddle_live, policy
+):
+    local_vertices = (geometry.vertices - geometry.centre[:, None, :]) / geometry.pitch[
+        :, None, None
+    ]
+    signed = sigma * coefficient
+    signed = signed.at[:, 0].add(-sigma * level)
+    fragments = jax.vmap(quadratic_cell_fragments, in_axes=(0, 0, 0, None))(
+        local_vertices,
+        geometry.vertex_count,
+        signed,
+        policy.fragment_capacity,
+    )
+    area = fragments.area * geometry.pitch[:, None] ** 2
+    intervals = fragments.edge_interval
+    owner = _inside_cells(geometry, form.position) & saddle_live
+    represented = saddle_live & (
+        owner
+        | (
+            jnp.linalg.norm(geometry.centre - form.position, axis=1)
+            < policy.normal_form_radius
+        )
+    )
+    saddle = jax.vmap(_normal_form_cell_fragments, in_axes=(0, 0, None, None))(
+        geometry.vertices,
+        geometry.vertex_count,
+        form,
+        policy.edge_tolerance,
+    )
+    sectors = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
+    saddle_area = saddle.area[:, sectors]
+    saddle_intervals = saddle.edge_interval[:, sectors]
+    intervals = jnp.pad(intervals, ((0, 0), (0, 0), (0, 0), (0, 10), (0, 0)))
+    saddle_intervals = jnp.pad(
+        saddle_intervals,
+        ((0, 0), (0, policy.fragment_capacity - 2), (0, 0), (0, 0), (0, 0)),
+    )
+    saddle_area = jnp.pad(saddle_area, ((0, 0), (0, policy.fragment_capacity - 2)))
+    area = jnp.where(represented[:, None], saddle_area, area)
+    intervals = jnp.where(
+        represented[:, None, None, None, None], saddle_intervals, intervals
+    )
+    labels, wall = _connected_fragment_labels(
+        area, intervals, geometry, policy.edge_tolerance
+    )
+    axis_cells = _inside_cells(geometry, axis)
+    axis_cell = jnp.argmax(axis_cells)
+    axis_local = (axis - geometry.centre[axis_cell]) / geometry.pitch[axis_cell]
+    axis_strip = jnp.clip(
+        jnp.searchsorted(fragments.slice_breaks[axis_cell], axis_local[0], side="right")
+        - 1,
+        0,
+        fragments.slice_labels.shape[1] - 1,
+    )
+    lower, upper, positive = _positive_vertical_intervals(
+        local_vertices[axis_cell],
+        geometry.vertex_count[axis_cell],
+        signed[axis_cell],
+        axis_local[0],
+    )
+    axis_interval = jnp.argmax(
+        positive & (axis_local[1] >= lower) & (axis_local[1] <= upper)
+    )
+    axis_fragment = fragments.slice_labels[axis_cell, axis_strip, axis_interval]
+    axis_label = labels[axis_cell, jnp.maximum(axis_fragment, 0)]
+    selected = (labels == axis_label) & (area > 0.0)
+    valid = jnp.all(jnp.where(represented, saddle.valid, fragments.valid))
+    valid = valid & jnp.any(axis_cells) & (axis_fragment >= 0)
+    return (
+        area,
+        intervals,
+        labels,
+        wall,
+        selected,
+        owner,
+        valid,
+        jnp.max(jnp.where(represented, 2, fragments.required)),
+    )
+
+
+def _curvature_derivatives(field, point, pitch):
+    """Differentiate point Hessians without differentiating sampled mesh flux.
+
+    Kernel Hessians are analytic. Central differences on a moving local stencil
+    supply their higher curvature corrections; the stationary solve and its
+    implicit tangent continue to use the analytic Hessian itself.
+    """
+    if not isinstance(field, TotalField):
+        return (
+            jax.jacfwd(lambda target: field.evaluate(target).hessian)(point),
+            jax.jacfwd(jax.jacfwd(lambda target: field.evaluate(target).hessian))(
+                point
+            ),
+        )
+    step = 0.01 * pitch
+    offsets = jnp.asarray(
+        (
+            (0.0, 0.0),
+            (1.0, 0.0),
+            (-1.0, 0.0),
+            (0.0, 1.0),
+            (0.0, -1.0),
+            (1.0, 1.0),
+            (1.0, -1.0),
+            (-1.0, 1.0),
+            (-1.0, -1.0),
+        )
+    )
+    hessians = jax.lax.map(
+        lambda offset: field.evaluate(point + step * offset).hessian, offsets
+    )
+    third = jnp.stack(
+        (
+            (hessians[1] - hessians[2]) / (2 * step),
+            (hessians[3] - hessians[4]) / (2 * step),
+        ),
+        axis=-1,
+    )
+    mixed = (hessians[5] - hessians[6] - hessians[7] + hessians[8]) / (4 * step**2)
+    fourth = jnp.stack(
+        (
+            jnp.stack(
+                ((hessians[1] - 2 * hessians[0] + hessians[2]) / step**2, mixed),
+                axis=-1,
+            ),
+            jnp.stack(
+                (mixed, (hessians[3] - 2 * hessians[0] + hessians[4]) / step**2),
+                axis=-1,
+            ),
+        ),
+        axis=-1,
+    )
+    from itertools import permutations
+
+    third = sum(jnp.transpose(third, order) for order in permutations(range(3))) / 6
+    fourth = sum(jnp.transpose(fourth, order) for order in permutations(range(4))) / 24
+    return third, fourth
+
+
+def read(field, geometry, convention, policy):
+    """Read total-field nulls and the open axis-connected hex-cell interior.
+
+    All numerical geometry, current and exterior data are pytree operands.
+    The own-node quadratic describes smooth cells; the saddle neighbourhood
+    uses regular point-derivative rays and their analytic area integrals.
+    Refusals retain explicit validity and integer reasons under jit and vmap.
+    """
+    if policy.fragment_capacity < 2:
+        raise ValueError("the topology read requires two fragment slots per cell")
+    from dataclasses import replace
+
+    policy = replace(
+        policy,
+        normal_form_radius=jnp.maximum(
+            policy.normal_form_radius, 1.5 * jnp.median(geometry.pitch)
+        ),
+    )
+    sigma = convention.sigma
+    coefficient = _field_coefficients(field, geometry)
+    from nova.equilibrium.contour_tree import build_contour_tree
+
+    mesh = geometry.contour_mesh
+    centre_flux = _point_values(field, geometry.contour_sample_points)
+    vertex_flux = jnp.sum(
+        centre_flux[geometry.contour_sources] * geometry.contour_weights, axis=1
+    )
+    tree = build_contour_tree(
+        vertex_flux,
+        mesh.vertex_valid,
+        mesh.vertex_is_wall,
+        mesh.edges,
+        mesh.edge_valid,
+        sigma,
+    )
+    nulls, live, required, census_resolved = _null_census(
+        field, geometry, coefficient, policy, tree
+    )
+    eigenvalues = jnp.linalg.eigvalsh(sigma * nulls.jet.hessian)
+    axes = live & jnp.all(eigenvalues < 0.0, axis=1)
+    saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
+    axis_index = jnp.argmax(axes)
+    axis, axis_flux = nulls.position[axis_index], nulls.jet.value[axis_index]
+
+    def normal_form(index):
+        point = nulls.position[index]
+        third, fourth = _curvature_derivatives(field, point, jnp.median(geometry.pitch))
+        return saddle_normal_form(
+            point,
+            sigma * nulls.jet.hessian[index],
+            sigma * third,
+            policy.hessian_tolerance,
+            sigma * fourth,
+        )
+
+    def inspect(index, admitted):
+        def evaluate_candidate(_):
+            candidate_form = normal_form(index)
+            support = _support_at_level(
+                geometry,
+                coefficient,
+                sigma,
+                nulls.jet.value[index],
+                axis,
+                candidate_form,
+                True,
+                policy,
+            )
+            area, intervals, labels, wall, selected, owner, support_valid, count = (
+                support
+            )
+            owner_index = jnp.argmax(owner)
+            private_index = jnp.where(selected[owner_index, 0], 1, 0)
+            private_label = labels[owner_index, private_index]
+            private_reaches_wall = jnp.any(wall & (labels == private_label))
+            reaches = jnp.any(owner[:, None] & selected)
+            return support_valid & reaches & private_reaches_wall
+
+        accepted = jax.lax.cond(
+            saddles[index],
+            evaluate_candidate,
+            lambda _: jnp.asarray(False),
+            operand=None,
+        )
+        return admitted.at[index].set(accepted)
+
+    candidates_admitted = jax.lax.fori_loop(
+        0, policy.null_capacity, inspect, jnp.zeros(policy.null_capacity, dtype=bool)
+    )
+    saddle_index = jnp.argmax(
+        jnp.where(candidates_admitted, sigma * nulls.jet.value, -jnp.inf)
+    )
+    saddle_point = nulls.position[saddle_index]
+    form = normal_form(saddle_index)
+    saddle_live = jnp.any(candidates_admitted)
+    wall_points, wall_flux = _wall_events(field, geometry, policy, sigma)
+    wall_index = jnp.argmax(sigma * wall_flux)
+    initial_level = jnp.where(
+        saddle_live, nulls.jet.value[saddle_index], wall_flux[wall_index]
+    )
+    initial = _support_at_level(
+        geometry, coefficient, sigma, initial_level, axis, form, saddle_live, policy
+    )
+    area, intervals, labels, wall, selected, owner, support_valid, fragment_count = (
+        initial
+    )
+    saddle_admitted = saddle_live
+    # Wall contacts in a private component cannot compete with the confined
+    # branch. Closed contact points use the component of their owning cell.
+    wall_cell = jax.vmap(lambda point: jnp.argmax(_inside_cells(geometry, point)))(
+        wall_points
+    )
+    on_core = jnp.any(selected[wall_cell], axis=1)
+    wall_score = jnp.where(~saddle_live | on_core, sigma * wall_flux, -jnp.inf)
+    wall_index = jnp.argmax(wall_score)
+    diverted = saddle_admitted & (sigma * initial_level >= wall_score[wall_index])
+    boundary = jnp.where(diverted, saddle_point, wall_points[wall_index])
+    level = jnp.where(diverted, initial_level, wall_flux[wall_index])
+    terminal = _support_at_level(
+        geometry, coefficient, sigma, level, axis, form, diverted, policy
+    )
+    area, intervals, labels, wall, selected, owner, support_valid, fragment_count = (
+        terminal
+    )
+    membership = jnp.sum(jnp.where(selected, area, 0.0), axis=1) / geometry.full_area
+    finite = jnp.all(jnp.isfinite(coefficient)) & jnp.all(jnp.isfinite(membership))
+    support_valid = support_valid & jnp.all(
+        (membership >= -policy.edge_tolerance)
+        & (membership <= 1.0 + policy.edge_tolerance)
+    )
+    membership = jnp.clip(membership, 0.0, 1.0)
+    unique_axis = jnp.sum(axes) == 1
+    equal_level = candidates_admitted & (
+        jnp.abs(nulls.jet.value - initial_level)
+        <= policy.position_tolerance
+        * jnp.maximum(jnp.abs(axis_flux - initial_level), 1e-30)
+    )
+    unambiguous = (jnp.sum(equal_level) <= 1) & unique_axis & census_resolved
+    capacity_ok = (
+        (required <= policy.null_capacity)
+        & ~tree.overflow
+        & ~jnp.asarray(mesh.overflow)
+    )
+    fit_singular_values = jnp.linalg.svd(geometry.fit_inverse, compute_uv=False)
+    representation_valid = jnp.all(jnp.isfinite(fit_singular_values)) & jnp.all(
+        fit_singular_values[:, -1]
+        > policy.hessian_tolerance * fit_singular_values[:, 0]
+    )
+    capacity_ok = capacity_ok & (fragment_count <= policy.fragment_capacity)
+    valid = finite & support_valid & capacity_ok & unambiguous & representation_valid
+    reason = jnp.where(
+        ~capacity_ok,
+        int(TopologyReason.CAPACITY),
+        jnp.where(
+            ~jnp.any(axes),
+            int(TopologyReason.NO_QUALIFIED_AXIS),
+            jnp.where(
+                ~unambiguous,
+                int(TopologyReason.UNRESOLVED_TIE),
+                jnp.where(
+                    ~finite,
+                    int(TopologyReason.NONFINITE_FIELD),
+                    jnp.where(
+                        ~support_valid,
+                        int(TopologyReason.UNRESOLVED_COMPONENT),
+                        int(TopologyReason.OK),
+                    ),
+                ),
+            ),
+        ),
+    ).astype(jnp.int32)
+    reason = jnp.where(
+        capacity_ok & ~representation_valid,
+        int(TopologyReason.SINGULAR_REPRESENTATION),
+        reason,
+    ).astype(jnp.int32)
+    qualified = valid & (~saddle_live | saddle_admitted)
+    admitted = candidates_admitted & equal_level & diverted
+    return TopologyRead(
+        axis,
+        axis_flux,
+        jnp.where(admitted[:, None], nulls.position, 0.0),
+        jnp.where(admitted, nulls.jet.value, 0.0),
+        admitted,
+        boundary,
+        level,
+        jnp.where(
+            diverted, int(TopologyClass.DIVERTED), int(TopologyClass.LIMITED)
+        ).astype(jnp.int32),
+        jnp.where(valid, membership, jnp.nan),
+        area,
+        labels,
+        selected,
+        intervals,
+        wall,
+        jnp.where(jnp.any(selected, axis=1), 1, 0),
+        coefficient,
+        form,
+        qualified,
+        valid,
+        reason,
+        jnp.all(jnp.where(live, nulls.tangent_valid, True)),
+        required,
+        fragment_count,
+        diverted
+        & (
+            _inside_cells(geometry, saddle_point)
+            | (
+                jnp.linalg.norm(geometry.centre - saddle_point, axis=1)
+                < policy.normal_form_radius
+            )
+        ),
+        jnp.where(diverted, policy.normal_form_radius, 0.0),
+        tree,
+    )

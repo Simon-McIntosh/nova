@@ -1,0 +1,70 @@
+revision=598447933a408315153a7c40c7019502d9fcb5c6 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -vv -rP --timeout 900 
+RAW_SHA256=fd9dc7f673ac1a881f5011515747368e29f626fd3faa463811e76aee93b5cbd9 RAW_PATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-tree-kernel.raw.log
+SUITE_COMPLETED=false; cancelled own job1281100 after reproduced regressions, before any kernel receipt
+NOVA_LANE_START=2026-10-05T22:23:13+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281100
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=598447933a408315153a7c40c7019502d9fcb5c6
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=900
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -vv -rP --timeout 900 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=598447933a408315153a7c40c7019502d9fcb5c6
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 900.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 22:23:33 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 32 items
+
+tests/equilibrium/test_topology_read.py::test_topology_policy_round_trip PASSED [  3%]
+tests/equilibrium/test_topology_read.py::test_stationary_position_implicit_tangent PASSED [  6%]
+tests/equilibrium/test_topology_read.py::test_saddle_curved_support_order PASSED [  9%]
+tests/equilibrium/test_topology_read.py::test_stationary_and_saddle_primitives_trace PASSED [ 12%]
+tests/equilibrium/test_topology_read.py::test_quadratic_fragments_circle_area[0.1] PASSED [ 15%]
+tests/equilibrium/test_topology_read.py::test_quadratic_fragments_circle_area[0.3] PASSED [ 18%]
+tests/equilibrium/test_topology_read.py::test_quadratic_fragments_circle_area[0.6] PASSED [ 21%]
+tests/equilibrium/test_topology_read.py::test_quadratic_fragments_saddle_touch_does_not_join PASSED [ 25%]
+tests/equilibrium/test_topology_read.py::test_traced_read_limited_quadratic FAILED [ 28%]
+tests/equilibrium/test_topology_read.py::test_closed_form_carrier_read[limited] PASSED [ 31%]
+tests/equilibrium/test_topology_read.py::test_closed_form_carrier_read[diverted] FAILED [ 34%]
+tests/equilibrium/test_topology_read.py::test_topology_shift_fails_position_clause[limited] PASSED [ 37%]
+tests/equilibrium/test_topology_read.py::test_topology_shift_fails_position_clause[diverted] FAILED [ 40%]
+tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives PASSED [ 43%]
+tests/equilibrium/test_topology_read.py::test_closed_form_resolution_probe[limited] PASSED [ 46%]
+tests/equilibrium/test_topology_read.py::test_closed_form_resolution_probe[diverted] FAILED [ 50%]
+tests/equilibrium/test_topology_read.py::test_limited_boundary_instrument PASSED [ 53%]
+tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[limited] PASSED [ 56%]
+tests/equilibrium/test_topology_read.py::test_topology_class_and_membership[diverted] FAILED [ 59%]
+tests/equilibrium/test_topology_read.py::test_normal_form_support_away_from_null PASSED [ 62%]
+tests/equilibrium/test_topology_read.py::test_normal_form_curved_cells_partition_owner_support PASSED [ 65%]
+tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited] PASSED [ 68%]
+tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted] PASSED [ 71%]
+tests/equilibrium/test_topology_read.py::test_general_saddle_census_and_capacity_refusal FAILED [ 75%]
+tests/equilibrium/test_topology_read.py::test_topology_read_traces FAILED [ 78%]
+tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-limited] slurmstepd: error: *** JOB 1281100 ON 98dci4-gpu-0003 CANCELLED AT 2026-10-05T22:39:06 ***

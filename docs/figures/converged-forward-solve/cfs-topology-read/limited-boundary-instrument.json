@@ -1,0 +1,164 @@
+[
+  {
+    "cells": 132,
+    "pitch_m": 0.4682506027868791,
+    "read_level_wb": 0.04010840152526049,
+    "analytic_boundary_flux_wb": 0.0,
+    "read_wall_unit": 0,
+    "read_wall_segment": 60,
+    "read_contact_m": [
+      7.800241677329413,
+      -0.10197316065192144
+    ],
+    "analytic_wall_unit": 0,
+    "analytic_wall_vertex": 60,
+    "analytic_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "wall_vertex_m": [
+      7.801395789307387,
+      7.611059753448785e-08
+    ],
+    "wall_vertex_offset_m": 7.611059753448785e-08,
+    "contact_offset_m": 0.1019796914478578,
+    "independent_wall_max_wb": 0.04010840152526918,
+    "independent_wall_segment": 60,
+    "independent_segment_parameter": 0.4747219321661636,
+    "independent_contact_m": [
+      7.800241677338819,
+      -0.10197315982085464
+    ],
+    "worst_cell": 122,
+    "worst_cell_centre_m": [
+      7.442642815024909,
+      -2.335627404795268
+    ],
+    "worst_cell_minus_analytic_contact_m": [
+      -0.35875297428247777,
+      -2.335627404795268
+    ],
+    "worst_read_fraction": 0.5559935725088663,
+    "worst_reference_fraction": 0.5697096282237216,
+    "inside_control": {
+      "cell": 21,
+      "read": 1.0,
+      "reference": 1.0,
+      "flux_lower_bound_wb": 3.4021153025433777
+    },
+    "outside_control": {
+      "cell": 0,
+      "read": 0.0,
+      "reference": 0.0,
+      "flux_upper_bound_wb": -9.648382559216754
+    }
+  },
+  {
+    "cells": 300,
+    "pitch_m": 0.30316108483265386,
+    "read_level_wb": 0.04010840152526049,
+    "analytic_boundary_flux_wb": 0.0,
+    "read_wall_unit": 0,
+    "read_wall_segment": 60,
+    "read_contact_m": [
+      7.800241677329413,
+      -0.10197316065192144
+    ],
+    "analytic_wall_unit": 0,
+    "analytic_wall_vertex": 60,
+    "analytic_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "wall_vertex_m": [
+      7.801395789307387,
+      7.611059753448785e-08
+    ],
+    "wall_vertex_offset_m": 7.611059753448785e-08,
+    "contact_offset_m": 0.1019796914478578,
+    "independent_wall_max_wb": 0.04010840152526918,
+    "independent_wall_segment": 60,
+    "independent_segment_parameter": 0.4747219321661636,
+    "independent_contact_m": [
+      7.800241677338819,
+      -0.10197315982085464
+    ],
+    "worst_cell": 291,
+    "worst_cell_centre_m": [
+      7.68982733017005,
+      -1.3897589379498618
+    ],
+    "worst_cell_minus_analytic_contact_m": [
+      -0.11156845913733715,
+      -1.3897589379498618
+    ],
+    "worst_read_fraction": 0.3325572639088013,
+    "worst_reference_fraction": 0.38665382447387386,
+    "inside_control": {
+      "cell": 24,
+      "read": 1.0,
+      "reference": 1.0,
+      "flux_lower_bound_wb": 0.13054515305300374
+    },
+    "outside_control": {
+      "cell": 0,
+      "read": 0.0,
+      "reference": 0.0,
+      "flux_upper_bound_wb": -9.577088620507546
+    }
+  },
+  {
+    "cells": 550,
+    "pitch_m": 0.21931954123218017,
+    "read_level_wb": 0.04010840152526049,
+    "analytic_boundary_flux_wb": 0.0,
+    "read_wall_unit": 0,
+    "read_wall_segment": 60,
+    "read_contact_m": [
+      7.800241677329413,
+      -0.10197316065192144
+    ],
+    "analytic_wall_unit": 0,
+    "analytic_wall_vertex": 60,
+    "analytic_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "wall_vertex_m": [
+      7.801395789307387,
+      7.611059753448785e-08
+    ],
+    "wall_vertex_offset_m": 7.611059753448785e-08,
+    "contact_offset_m": 0.1019796914478578,
+    "independent_wall_max_wb": 0.04010840152526918,
+    "independent_wall_segment": 60,
+    "independent_segment_parameter": 0.4747219321661636,
+    "independent_contact_m": [
+      7.800241677338819,
+      -0.10197315982085464
+    ],
+    "worst_cell": 546,
+    "worst_cell_centre_m": [
+      7.7903151435195666,
+      -0.4193905555687664
+    ],
+    "worst_cell_minus_analytic_contact_m": [
+      -0.011080645787820309,
+      -0.4193905555687664
+    ],
+    "worst_read_fraction": 0.6530425969555346,
+    "worst_reference_fraction": 0.8506728506750088,
+    "inside_control": {
+      "cell": 43,
+      "read": 1.0,
+      "reference": 1.0,
+      "flux_lower_bound_wb": 2.813814730313915
+    },
+    "outside_control": {
+      "cell": 0,
+      "read": 0.0,
+      "reference": 0.0,
+      "flux_upper_bound_wb": -9.336379504155325
+    }
+  }
+]

@@ -230,6 +230,73 @@ def default_forward_compilation_cache_root() -> Path:
 
 
 @dataclass(frozen=True, slots=True)
+class TopologyPolicy:
+    """Capacities and numerical tolerances of a total-field topology read.
+
+    Capacities determine array shapes. Tolerances are relative to local field
+    and geometry scales, so changing flux units does not change admission.
+    The normal-form radius is physical metres; zero retains the null-owning cell.
+    """
+
+    null_capacity: int = 16
+    fragment_capacity: int = 2
+    polish_iterations: int = 12
+    hessian_tolerance: float = 1.0e-10
+    position_tolerance: float = 1.0e-10
+    edge_tolerance: float = 1.0e-12
+    normal_form_radius: float = 0.0
+
+    def __post_init__(self) -> None:
+        for name in ("null_capacity", "fragment_capacity", "polish_iterations"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                raise ValueError(f"{name} must be a positive integer")
+        for name in ("hessian_tolerance", "position_tolerance", "edge_tolerance"):
+            value = getattr(self, name)
+            if not isinstance(value, jax.core.Tracer) and (
+                not np.isfinite(value) or value <= 0.0
+            ):
+                raise ValueError(f"{name} must be finite and positive")
+
+        if not isinstance(self.normal_form_radius, jax.core.Tracer) and (
+            not np.isfinite(self.normal_form_radius) or self.normal_form_radius < 0.0
+        ):
+            raise ValueError("normal_form_radius must be finite and nonnegative")
+
+    def tree_flatten(self):
+        """Keep numerical tolerances traced and array capacities static."""
+        return (
+            (
+                self.hessian_tolerance,
+                self.position_tolerance,
+                self.edge_tolerance,
+                self.normal_form_radius,
+            ),
+            (self.null_capacity, self.fragment_capacity, self.polish_iterations),
+        )
+
+    @classmethod
+    def tree_unflatten(cls, metadata, leaves):
+        """Reconstruct abstract JAX stages without host scalar validation."""
+        result = object.__new__(cls)
+        names = (
+            "null_capacity",
+            "fragment_capacity",
+            "polish_iterations",
+            "hessian_tolerance",
+            "position_tolerance",
+            "edge_tolerance",
+            "normal_form_radius",
+        )
+        for name, value in zip(names, (*metadata, *leaves), strict=True):
+            object.__setattr__(result, name, value)
+        return result
+
+
+jax.tree_util.register_pytree_node_class(TopologyPolicy)
+
+
+@dataclass(frozen=True, slots=True)
 class ForwardSolvePolicy:
     """Every resolved numerical and acceptance choice for a forward solve."""
 
@@ -251,9 +318,13 @@ class ForwardSolvePolicy:
     exact_kernels: bool = True
     cached_machine: bool = True
     compilation_cache: bool = True
+    topology: TopologyPolicy = field(default_factory=TopologyPolicy)
 
     def __post_init__(self) -> None:
         """Reject policies that cannot name a bounded numerical solve."""
+
+        if not isinstance(self.topology, TopologyPolicy):
+            raise TypeError("topology must be a TopologyPolicy")
 
         if self.route not in {
             "host",
@@ -282,7 +353,7 @@ class ForwardSolvePolicy:
             if float(getattr(self, name)) <= 0.0:
                 raise ValueError(f"{name} must be positive")
 
-    def to_dict(self) -> dict[str, JsonScalar]:
+    def to_dict(self) -> dict[str, object]:
         """Return the JSON-native policy block written into receipts."""
 
         return asdict(self)
@@ -342,7 +413,12 @@ class ForwardSolvePolicy:
             raise ValueError(
                 f"forward solve policy fields differ; missing={missing}, extra={extra}"
             )
-        return cls(**dict(payload))
+        restored = dict(payload)
+        topology = restored["topology"]
+        if not isinstance(topology, Mapping):
+            raise TypeError("topology policy must be a mapping")
+        restored["topology"] = TopologyPolicy(**dict(topology))
+        return cls(**restored)
 
 
 # This is the sole declaration of public forward-solve defaults.  Its key is
@@ -677,6 +753,7 @@ __all__ = [
     "SolveSeedProvenance",
     "SolveRoute",
     "SupportClipMode",
+    "TopologyPolicy",
     "declared_forward_solve_policy",
     "default_forward_compilation_cache_root",
     "resolve_forward_solve_policy",

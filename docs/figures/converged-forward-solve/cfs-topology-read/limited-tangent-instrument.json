@@ -1,0 +1,188 @@
+[
+  {
+    "cells": 132,
+    "requested_cells": 132,
+    "previous_realised_cells": 132,
+    "max_fraction_error": 0.0012061605640303341,
+    "read_axis_m": [
+      6.2,
+      0.0
+    ],
+    "pitch_m": 0.4680060430739887,
+    "read_level_wb": 2.2322358387255243e-14,
+    "analytic_boundary_flux_wb": 0.0,
+    "read_wall_unit": 0,
+    "read_wall_segment": 120,
+    "read_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "analytic_wall_unit": 0,
+    "analytic_wall_segment": 120,
+    "nearest_wall_vertex": 0,
+    "analytic_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "wall_vertex_m": [
+      7.801395789307387,
+      0.11294295258504541
+    ],
+    "wall_vertex_offset_m": 0.11294295258504541,
+    "contact_offset_m": 0.0,
+    "independent_wall_max_wb": 2.2322358387255243e-14,
+    "independent_wall_segment": 120,
+    "independent_segment_parameter": 0.49999999999999994,
+    "independent_contact_m": [
+      7.801395789307387,
+      -1.3877787807814457e-17
+    ],
+    "worst_cell": 122,
+    "worst_cell_centre_m": [
+      7.442842426724328,
+      -2.334132515343867
+    ],
+    "worst_cell_minus_analytic_contact_m": [
+      -0.35855336258305925,
+      -2.334132515343867
+    ],
+    "worst_read_fraction": 0.5764080017787747,
+    "worst_reference_fraction": 0.5752018412147444,
+    "inside_control": {
+      "cell": 21,
+      "read": 1.0,
+      "reference": 1.0,
+      "flux_lower_bound_wb": 3.455098417452896
+    },
+    "outside_control": {
+      "cell": 0,
+      "read": 0.0,
+      "reference": 0.0,
+      "flux_upper_bound_wb": -9.520825836915925
+    }
+  },
+  {
+    "cells": 300,
+    "requested_cells": 300,
+    "previous_realised_cells": 300,
+    "max_fraction_error": 0.0009628055817523795,
+    "read_axis_m": [
+      6.2,
+      0.0
+    ],
+    "pitch_m": 0.30320934148682055,
+    "read_level_wb": 2.2322358387255243e-14,
+    "analytic_boundary_flux_wb": 0.0,
+    "read_wall_unit": 0,
+    "read_wall_segment": 120,
+    "read_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "analytic_wall_unit": 0,
+    "analytic_wall_segment": 120,
+    "nearest_wall_vertex": 0,
+    "analytic_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "wall_vertex_m": [
+      7.801395789307387,
+      0.11294295258504541
+    ],
+    "wall_vertex_offset_m": 0.11294295258504541,
+    "contact_offset_m": 0.0,
+    "independent_wall_max_wb": 2.2322358387255243e-14,
+    "independent_wall_segment": 120,
+    "independent_segment_parameter": 0.49999999999999994,
+    "independent_contact_m": [
+      7.801395789307387,
+      -1.3877787807814457e-17
+    ],
+    "worst_cell": 291,
+    "worst_cell_centre_m": [
+      7.69047707460716,
+      -1.390220380355997
+    ],
+    "worst_cell_minus_analytic_contact_m": [
+      -0.11091871470022685,
+      -1.390220380355997
+    ],
+    "worst_read_fraction": 0.3237855239170639,
+    "worst_reference_fraction": 0.32474832949881627,
+    "inside_control": {
+      "cell": 37,
+      "read": 1.0,
+      "reference": 1.0,
+      "flux_lower_bound_wb": 4.360487590700058
+    },
+    "outside_control": {
+      "cell": 0,
+      "read": 0.0,
+      "reference": 0.0,
+      "flux_upper_bound_wb": -9.563891954799509
+    }
+  },
+  {
+    "cells": 550,
+    "requested_cells": 550,
+    "previous_realised_cells": 550,
+    "max_fraction_error": 0.003053860696933808,
+    "read_axis_m": [
+      6.2,
+      0.0
+    ],
+    "pitch_m": 0.219204994184689,
+    "read_level_wb": 2.2322358387255243e-14,
+    "analytic_boundary_flux_wb": 0.0,
+    "read_wall_unit": 0,
+    "read_wall_segment": 120,
+    "read_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "analytic_wall_unit": 0,
+    "analytic_wall_segment": 120,
+    "nearest_wall_vertex": 0,
+    "analytic_contact_m": [
+      7.801395789307387,
+      0.0
+    ],
+    "wall_vertex_m": [
+      7.801395789307387,
+      0.11294295258504541
+    ],
+    "wall_vertex_offset_m": 0.11294295258504541,
+    "contact_offset_m": 0.0,
+    "independent_wall_max_wb": 2.2322358387255243e-14,
+    "independent_wall_segment": 120,
+    "independent_segment_parameter": 0.49999999999999994,
+    "independent_contact_m": [
+      7.801395789307387,
+      -1.3877787807814457e-17
+    ],
+    "worst_cell": 545,
+    "worst_cell_centre_m": [
+      7.790259761513272,
+      -0.41896863852099275
+    ],
+    "worst_cell_minus_analytic_contact_m": [
+      -0.011136027794115044,
+      -0.41896863852099275
+    ],
+    "worst_read_fraction": 0.8255342476457928,
+    "worst_reference_fraction": 0.8224803869488589,
+    "inside_control": {
+      "cell": 43,
+      "read": 1.0,
+      "reference": 1.0,
+      "flux_lower_bound_wb": 2.8653982965770015
+    },
+    "outside_control": {
+      "cell": 0,
+      "read": 0.0,
+      "reference": 0.0,
+      "flux_upper_bound_wb": -9.255640615306008
+    }
+  }
+]

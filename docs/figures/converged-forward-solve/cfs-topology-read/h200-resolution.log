@@ -1,0 +1,296 @@
+revision=fa19609b3793a77bee0a020348871af7889dce6a tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -k closed_form_resolution -vv -rP --timeout 300 
+raw_log_sha256=85deea3517b62a2f3b8c6915394ae960c1fd53a9ff01a4a1551f01fb479d9e03
+NOVA_LANE_START=2026-10-05T19:42:14+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281058
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=fa19609b3793a77bee0a020348871af7889dce6a
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=300
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -k closed_form_resolution -vv -rP --timeout 300 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+CACHE_GUARD_PREWARM=Historical pin payload omitted; retained in raw log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-resolution.log
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=fa19609b3793a77bee0a020348871af7889dce6a
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+CACHE_GUARD_PREWARM=Historical pin payload omitted; retained in raw log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-resolution.log
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 19:42:26 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 16 items / 14 deselected / 2 selected
+
+tests/equilibrium/test_topology_read.py::test_closed_form_resolution_probe[limited] FAILED [ 50%]
+tests/equilibrium/test_topology_read.py::test_closed_form_resolution_probe[diverted] FAILED [100%]CACHE_GUARD_MARKER=pre-warm-run misses=57 budget=not-enforced
+CACHE_GUARD_RECEIPT={"cache_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "compile_seconds": 31.0, "enforced": false, "hits": 29, "marker": "pre-warm-run misses=57 budget=not-enforced", "miss_budget": null, "misses": 57, "rows": [{"cache_key": "jit_add-14124da52d1ede19f328c9135f26721be7bfffd8dd5d54616e87823a459f12eb", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_add"}, {"cache_key": "jit_add-f54441b57c73d740957de5b773ce2d5f0f859efc464319f6fdfcb86a5fea29ea", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_add"}, {"cache_key": "jit_broadcast_in_dim-3e8de69e13e951c7742b57dc855ca377a0133cfc4cad91bcb99f6e432c7e1e94", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_broadcast_in_dim-b941f81df7423174cfbaccc829178d501307a1b669891f7b3e7d549c38a0cce8", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_broadcast_in_dim"}, {"cache_key": "jit_convert_element_type-152890903a9591d37264d23b722c0781ef71edd6fad34a342dbf93b61d07ab8a", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-32c3ce0590cedda89feafa0f4a03f8cbfaed0ef67f864f707079a6524f96bf08", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-96932d5dc932bef41ec61d8daf7c0a4e3f6cf83f8dd7ceeb1f7001a31dd893f6", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-bda6570e2f2a2b182074a8435a85a3721ea648f19e83409ca741daef27fe95c3", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_divmod-6c78b92c30b686aa79a8781d4de9ca4eb287e1f0c4a9c3317777360bc927e96f", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_divmod"}, {"cache_key": "jit_dynamic_slice-1d3ad2835b087511802280b0b0713d54874b1c4a99a3947c4cc23e3a64836d84", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_dynamic_slice"}, {"cache_key": "jit_dynamic_slice-32d0c58c4361bd6c97d73a5b6e9d3628a68ff20c4855f70a6e40c00cb29b35c7", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_dynamic_slice"}, {"cache_key": "jit_dynamic_slice-36f92c1e35c4a0f19ce0ff447b2c0917beebbbbd4e7bc0204b58b18e443bcc91", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_dynamic_slice"}, {"cache_key": "jit_dynamic_slice-38c4c78acb5548f2f95d44160ecc32f5aff466fca843f0191d4d9ac73dbfacdb", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_dynamic_slice"}, {"cache_key": "jit_dynamic_slice-65f49083e8d2f00de299a3af3fc0aa853577a2d7a593b8fe36dffd6d44e44fed", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_dynamic_slice-70809fbed9c8339313a1bf3a3841bd35e75a1fed548cae6ccfc7d2e00ac667ab", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_dynamic_slice"}, {"cache_key": "jit_dynamic_slice-a914703ffc473f4dda9dbe4381d75da81ab5111fa25faed616aed24b298312f0", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_dynamic_slice"}, {"cache_key": "jit_dynamic_slice-eea31e53712d4c587b7493d533f71d72655fe7d286d55c2daca32cdda2a539d2", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_dynamic_slice"}, {"cache_key": "jit_integer_pow-5589590f3e1ad4157efe9b3cbc1be879cb065392d97b4b9ef5163c7b0b1b8c9d", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_integer_pow"}, {"cache_key": "jit_integer_pow-6ae52dbde21ff3cad5fcb9ee2d984bbc7c3e3a348cdf1d19c6d86e7c19c14424", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_integer_pow"}, {"cache_key": "jit_integer_pow-72e0fa4eb8d3ce538379a992265996b1c6b435b1ba0233bb67e18f7b63e9f7ca", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_integer_pow"}, {"cache_key": "jit_integer_pow-c5c79f857172b8e572570f043ec98f6161051931f84867d9cb65d8a6039c6be0", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_less-3880eac6db549faf046731bf9ddc2f46a3f725e15024ec13fa84c51ab34f7b63", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_less"}, {"cache_key": "jit_log-ec73b1e8dedc54f96fb0dde1cf8c48d3e6ba3bfbdcd2aa80c200a18ce39df8ab", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_log"}, {"cache_key": "jit_matmul-f2c747b31edc3189cfd1589f5d4d6e3d910f50fd2e629b6f4d4c226f7bcf3b88", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_matmul"}, {"cache_key": "jit_multiply-0fa4ae9692487984142378c04ade93cbf7074a794056e1f0d2772f502717ca61", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_multiply"}, {"cache_key": "jit_multiply-4602b6de425764bd2fa9e0461e51f53289fca4dcffa33f44b4e92a72c94b0595", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_multiply"}, {"cache_key": "jit_multiply-49fb3c8df8baae16d20af73bed1a7b0bd3fbd75331c1e4a2b8297126c0b0d957", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_multiply-8556b47fc4f597c752af03060d13905f7b7d05c963b4fa92fa585732277a6550", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_multiply"}, {"cache_key": "jit_multiply-8ea1ae4986faec34c3187f4293842b7511f1a53b64cdd4c0c9d3ebb5fbdd5646", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_multiply-9d82882b92f4ab2118981f79d6fcd56f78f3d8f74592614b35cb2993de1dd92c", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_multiply"}, {"cache_key": "jit_multiply-dd02fe9deec14549aef4c00a27847055aec0c195cd7c0847efb115d6cfdd49d3", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_multiply"}, {"cache_key": "jit_read-68c13c325d405d331da600b2c8a7454a45990fde7095a532c5a2da24700bdfee", "compile_seconds": 6.0, "hits": 0, "misses": 1, "program": "jit_read"}, {"cache_key": "jit_read-7c5c6bcab600e436e9c7ace12886869088ab13540c81a4b61103e77f46f8436d", "compile_seconds": 5.0, "hits": 0, "misses": 1, "program": "jit_read"}, {"cache_key": "jit_read-8f1822601525cd680b560a8bd7dd6cf3f6031548630d771d1c9aba8d4f239c70", "cached_compile_seconds": 10.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_read-a7ef4978257d434fa8a1df2a6de8db513ad8f53444f786797c7c0c84565c1db6", "compile_seconds": 9.0, "hits": 0, "misses": 1, "program": "jit_read"}, {"cache_key": "jit_read-c3cd95c6b6eaf0b90ceda8ee3cc65b3a7c0f90681000f9f50ec589bd72a389eb", "cached_compile_seconds": 5.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_read-dea2fb9aaf759b26b39bb2e620cdad44698ebb3f870f41586d848e5ab23d740e", "compile_seconds": 11.0, "hits": 0, "misses": 1, "program": "jit_read"}, {"cache_key": "jit_select_n-06933bc29299b0892c271d46326dfad24b323a3ada13b2ac58cf1fc055639906", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_squeeze-522858047396f57cfe03b4508eea205ee685040d6bd6edee205bb4a915f82129", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_squeeze"}, {"cache_key": "jit_squeeze-fe7718b9aa012c803b62e787f301c98124031797a1e9190aa135ad08e3da3587", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stack-c769ecff58e6cfbca9b8fdc778e947bb840841d8cdba3e7a58288ada4d97d1e5", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stack"}, {"cache_key": "jit_stage-02ed132af4850ab5859cac4f8732500320d4ddb6d83adf11af45cc0dc6da2291", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-04278de5ccd3e21eec34763ee8e9172ea4751199ba4c0f84354cb51fed61dc74", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-0a709195c47b743392bc75f13400e6f749c770034e4b5d604ddc3422bee9c1c2", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-0bc4dfc88bb4e05dbe860c1ef53c8f51b3ec2fefd4e1fde1c367032078ba8d7f", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-125e227b4ed92553a3376bdb14730220329b8f4422fa471f17d0d44d27a0dd8a", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-1449802bdaaf670bb11e2681e838f65d927ea30e39e81daa89d301330b2aa867", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-2362fb04b8b863ffb202d270ac9457e12208b9a280a83432e9315bcf13fbc07c", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-236f24e2d6d4906ee7cb84d4794ed6835fe7b528470d31b40f8a88e7c9be4ccc", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-3796b53a96396f45ee0a9ee8ea06d59432d4078cce902fac3c33ac3b2e18251f", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-3a861366e2f1c2233cbc4bfe9816bb9855118e7f3dc3eb6ef1a11d06099e8df7", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-564a39f4e3ef8d8169688b3530a55edc4a1ffa4ebc4f27279f7d587eaa9050a3", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-5bac309157d01ed164bedd6ffaee447d4b0158401af787c2dd6045b9db2be7c8", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-6d85f48c861b6fce51ce41b0165993178a3ebff0fc9331ed3da8d57a787778dc", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-6ffa407c1ba258824585ad073dc2dde41cad8c194abc144985148e13e76a51d9", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-7b653904c623163c5c3505ddb5b6bba45609d0613e821d8ac9543ff221f2fe96", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-84b99e20a0a80cbeaf86ea071787d7bdbfd25609eb24cb0dfc172cf48f0ff424", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-8536a21c1c15a0435d6e69b7434d4489828c815419429dad4e277d1d6541478a", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-86bb5031bf64389e175973ba6ace8fba30edb122fcda4b8c3db908ce2a3ce22b", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-8c0b2d8599b4394822fd7ab67174bb703a2fa90266e2b0631b1e8462a0cc3b8c", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-8ffbccf524e27b07a9040f4d1bd34d558d6ab84ce03b07910732f085550bc612", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-93710fd7310d86fa3fec3d1eb63e0428318f31107b567edbc74d0d3711e79edc", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-9459f8ec9705f487925195415a38d4ac0a3f48c67c4837e629b9d8e093755be2", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-99a32b5ed1297baed0e3252d0f05f932040734112ffcc81350aab56238aa6ec4", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-9bc83385d102fbfb4d9ec4499f83e73644703e85d47edacbde7f6820a90ed33d", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-b1caebcd72528815b89ac26d840fdce34cf000a8552e85be973c37b8dc71dd9f", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-b7f23c94f4c8a439fa755c07bb0a9be252bc97ec9ce2c816aaaedbd851e1d0d9", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-dfbae7d1ec45dfdd685ed2c6ab1217c40cac16c525669fa52d59700ae5ddeb7f", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_stage"}, {"cache_key": "jit_stage-e82e1cea39894c34fa2f9af61b13a39b4cc55532b7678c1012a795aeeaabc8cc", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-feef540d71ae47fad21674c0b0e82b6e4f10b229c86830e8b5ac75638c1f0f0e", "cached_compile_seconds": 0.0, "hits": 2, "misses": 0, "program": ""}, {"cache_key": "jit_subtract-1ce92a65cee4f81549cd554b7b2d20edc0ba1dc7f035c753339eb4c51903de8e", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_subtract"}, {"cache_key": "jit_subtract-3755d5c1be42796a592dda29240a5227c67b4caf0f72efb17670a58e688d3a66", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_subtract"}, {"cache_key": "jit_subtract-9b5cffe8e48f8c8efc51e3d3bcd67ef3477c9f2985b0ac801d8bf5da4501e807", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_subtract"}, {"cache_key": "jit_subtract-9e7d4b4ea243357de01fedcb69e0239e5cf93420777cbfb0d0abe67f6ed6066f", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_subtract"}, {"cache_key": "jit_subtract-f9e6589c18927c734823d4e52d05954077fc908828de7b0f96fcb0e77914b29e", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_subtract"}, {"cache_key": "jit_true_divide-4c45e07b7e2b7cd16f3da64c4b5cdfe3b5b41ebb1e66d48f1f36c476bee8482a", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_true_divide"}, {"cache_key": "jit_true_divide-a2c0c3f40c2eaa7570bff9d4298be959cb5bc0c54325599dd02352ea6f2548aa", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_true_divide"}, {"cache_key": "jit_unstack-2ea925c374c40c5bad723887a7c57b0bbc2515df36cb0c993f69e57674303289", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}, {"cache_key": "jit_unstack-47965d96b28b5d81604a99bea509eeb07e13ded76d62d828caedfb39d8334563", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}, {"cache_key": "jit_unstack-5d70f383abc557ed53a308bd81698fce71d9f83c47d8d528f29431682154ae21", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}, {"cache_key": "jit_unstack-663ce7ccddcef3380e63f9e9a08c82494cb857b2163dae2378ff7da0c6b49d96", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}, {"cache_key": "jit_unstack-843019654738016f852ac6822196a2f9bd3e9b6b411cb86e803a0937d6ce5f69", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}, {"cache_key": "jit_unstack-92a712f0bb801ba01704cba82b621592e2209819ae7d873bf3902b7bbe652448", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}, {"cache_key": "jit_unstack-b70ff35936ffcd66d3a98fb2902187a3ba23369933b307a9a577cb3a1bbd3c9c", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}, {"cache_key": "jit_unstack-dc8d96c01affb4932f9babaa0a9e67b85df888bc9809f01a2fff77b4c528fe67", "compile_seconds": 0.0, "hits": 0, "misses": 1, "program": "jit_unstack"}], "served_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "served_entries": 19419, "source_revision": "unknown", "unpersisted_misses": 0, "version_key": ""}
+
+
+=================================== FAILURES ===================================
+__________________ test_closed_form_resolution_probe[limited] __________________
+
+kind = 'limited'
+
+    @pytest.mark.parametrize("kind", ("limited", "diverted"))
+    def test_closed_form_resolution_probe(kind):
+        import os
+        from pathlib import Path
+        import resource
+        import time
+        from nova.equilibrium.topology import TopologyConvention, read
+    
+        oracle, field, wall, axis, saddle = _analytic_inputs(kind)
+        convention = TopologyConvention.from_cocos(17, 1.0)
+        evaluate = jax.jit(read)
+        rows = []
+        for count in (132, 300, 550, 1074, 2616):
+            geometry = _realised_hex_geometry(wall, count)
+            started = time.perf_counter()
+            executable = evaluate.lower(
+                field, geometry, convention, TopologyPolicy()
+            ).compile()
+            compile_seconds = time.perf_counter() - started
+            result = executable(field, geometry, convention, TopologyPolicy())
+            jax.block_until_ready(result)
+            reference, uncertainty = _reference_cell_fractions(kind, oracle, geometry)
+            errors = np.abs(np.asarray(result.membership) - reference)
+            distance = (
+                np.full(count, np.inf)
+                if saddle is None
+                else np.linalg.norm(np.asarray(geometry.centre) - saddle, axis=1)
+            )
+            neighbourhood = distance < 2 * np.asarray(geometry.pitch)
+            row = {
+                "case": kind,
+                "cells": count,
+                "valid": bool(result.valid),
+                "qualified": bool(result.qualified),
+                "reason": int(result.reason),
+                "pitch": float(np.median(np.asarray(geometry.pitch))),
+                "max_fraction_error": float(np.max(errors)),
+                "smooth_fraction_error": float(np.max(errors[~neighbourhood])),
+                "saddle_fraction_error": float(np.max(errors[neighbourhood]))
+                if np.any(neighbourhood)
+                else None,
+                "reference_quadrature_estimate": float(np.max(uncertainty)),
+                "compile_seconds": compile_seconds,
+                "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                "axis_error_m": float(np.linalg.norm(np.asarray(result.axis) - axis)),
+                "backend": jax.default_backend(),
+                "scope": (
+                    "closed-form evaluator and area-fraction difference; "
+                    "not kernel-backed symmetric-difference acceptance"
+                ),
+            }
+            rows.append(row)
+            print("TOPOLOGY_PROBE " + json.dumps(row), flush=True)
+            root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+            if root:
+                directory = Path(root)
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / f"{kind}-rows.json").write_text(
+                    json.dumps(rows, indent=2) + "\n"
+                )
+            if count == 550 and os.environ.get("NOVA_TOPOLOGY_FIGURE_DIR"):
+>               _render_read_panel(
+                    os.environ["NOVA_TOPOLOGY_FIGURE_DIR"],
+                    kind,
+                    field,
+                    geometry,
+                    result,
+                    wall,
+                    axis,
+                    saddle,
+                )
+
+tests/equilibrium/test_topology_read.py:749: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/equilibrium/test_topology_read.py:656: in _render_read_panel
+    poloidal.draw_wall(axes, (wall,))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+axes = <Axes: >
+radius = (array([[ 3.73931207e+00,  8.62020381e-02],
+       [ 3.74539984e+00,  2.58475042e-01],
+       [ 3.75755402e+00,  4.303...5755402e+00, -4.30353876e-01],
+       [ 3.74539984e+00, -2.58475042e-01],
+       [ 3.73931207e+00, -8.62020381e-02]]),)
+height = None
+style = InkStyle(flux_color='#3366cc', flux_linewidth=0.7, contour_color='#999999', contour_linewidth=0.35, separatrix_color='...order_plasma=2, zorder_coils=3, zorder_wall=4, zorder_separatrix=5, zorder_thomson=6, zorder_markers=6, zorder_label=7)
+close = True, units = None, kwargs = {}
+
+    def draw_wall(
+        axes: matplotlib.axes.Axes,
+        radius: Sequence[float] | None = None,
+        height: Sequence[float] | None = None,
+        style: InkStyle = DEFAULT_INK,
+        close: bool = True,
+        units=None,
+        **kwargs,
+    ) -> None:
+        """Draw every wall unit as its own polyline.
+    
+        ``units`` carries the typed wall collection. The two coordinate arguments
+        remain the compatibility spelling for one closed or open polyline. Open
+        units are dashed and are never joined to a neighbouring unit.
+        """
+        if units is None:
+            if radius is None or height is None:
+>               raise TypeError("draw_wall requires units or radius and height")
+E               TypeError: draw_wall requires units or radius and height
+
+nova/media/poloidal.py:46: TypeError
+----------------------------- Captured stdout call -----------------------------
+TOPOLOGY_PROBE {"case": "limited", "cells": 132, "valid": true, "qualified": true, "reason": 0, "pitch": 0.4682506027868791, "max_fraction_error": 0.013716055714855346, "smooth_fraction_error": 0.013716055714855346, "saddle_fraction_error": null, "reference_quadrature_estimate": 6.369261673769204e-10, "compile_seconds": 1.642158767208457, "peak_host_rss_kib": 4471812, "axis_error_m": 0.0, "backend": "gpu", "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"}
+TOPOLOGY_PROBE {"case": "limited", "cells": 300, "valid": true, "qualified": true, "reason": 0, "pitch": 0.30316108483265386, "max_fraction_error": 0.05409656056507256, "smooth_fraction_error": 0.05409656056507256, "saddle_fraction_error": null, "reference_quadrature_estimate": 6.416666477607604e-10, "compile_seconds": 6.553981998935342, "peak_host_rss_kib": 4856932, "axis_error_m": 0.0, "backend": "gpu", "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"}
+TOPOLOGY_PROBE {"case": "limited", "cells": 550, "valid": true, "qualified": true, "reason": 0, "pitch": 0.21931954123218017, "max_fraction_error": 0.19763025371947418, "smooth_fraction_error": 0.19763025371947418, "saddle_fraction_error": null, "reference_quadrature_estimate": 7.474085068086687e-10, "compile_seconds": 7.290215872228146, "peak_host_rss_kib": 4929636, "axis_error_m": 0.0, "backend": "gpu", "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"}
+_________________ test_closed_form_resolution_probe[diverted] __________________
+
+kind = 'diverted'
+
+    @pytest.mark.parametrize("kind", ("limited", "diverted"))
+    def test_closed_form_resolution_probe(kind):
+        import os
+        from pathlib import Path
+        import resource
+        import time
+        from nova.equilibrium.topology import TopologyConvention, read
+    
+        oracle, field, wall, axis, saddle = _analytic_inputs(kind)
+        convention = TopologyConvention.from_cocos(17, 1.0)
+        evaluate = jax.jit(read)
+        rows = []
+        for count in (132, 300, 550, 1074, 2616):
+            geometry = _realised_hex_geometry(wall, count)
+            started = time.perf_counter()
+            executable = evaluate.lower(
+                field, geometry, convention, TopologyPolicy()
+            ).compile()
+            compile_seconds = time.perf_counter() - started
+            result = executable(field, geometry, convention, TopologyPolicy())
+            jax.block_until_ready(result)
+            reference, uncertainty = _reference_cell_fractions(kind, oracle, geometry)
+            errors = np.abs(np.asarray(result.membership) - reference)
+            distance = (
+                np.full(count, np.inf)
+                if saddle is None
+                else np.linalg.norm(np.asarray(geometry.centre) - saddle, axis=1)
+            )
+            neighbourhood = distance < 2 * np.asarray(geometry.pitch)
+            row = {
+                "case": kind,
+                "cells": count,
+                "valid": bool(result.valid),
+                "qualified": bool(result.qualified),
+                "reason": int(result.reason),
+                "pitch": float(np.median(np.asarray(geometry.pitch))),
+                "max_fraction_error": float(np.max(errors)),
+                "smooth_fraction_error": float(np.max(errors[~neighbourhood])),
+                "saddle_fraction_error": float(np.max(errors[neighbourhood]))
+                if np.any(neighbourhood)
+                else None,
+                "reference_quadrature_estimate": float(np.max(uncertainty)),
+                "compile_seconds": compile_seconds,
+                "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                "axis_error_m": float(np.linalg.norm(np.asarray(result.axis) - axis)),
+                "backend": jax.default_backend(),
+                "scope": (
+                    "closed-form evaluator and area-fraction difference; "
+                    "not kernel-backed symmetric-difference acceptance"
+                ),
+            }
+            rows.append(row)
+            print("TOPOLOGY_PROBE " + json.dumps(row), flush=True)
+            root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+            if root:
+                directory = Path(root)
+                directory.mkdir(parents=True, exist_ok=True)
+                (directory / f"{kind}-rows.json").write_text(
+                    json.dumps(rows, indent=2) + "\n"
+                )
+            if count == 550 and os.environ.get("NOVA_TOPOLOGY_FIGURE_DIR"):
+>               _render_read_panel(
+                    os.environ["NOVA_TOPOLOGY_FIGURE_DIR"],
+                    kind,
+                    field,
+                    geometry,
+                    result,
+                    wall,
+                    axis,
+                    saddle,
+                )
+
+tests/equilibrium/test_topology_read.py:749: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/equilibrium/test_topology_read.py:656: in _render_read_panel
+    poloidal.draw_wall(axes, (wall,))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+axes = <Axes: >
+radius = (array([[ 1.33884987, -1.11455091],
+       [ 1.31362975, -1.0722386 ],
+       [ 1.28833029, -1.02997367],
+       [ 1.2....20767827],
+       [ 1.45387017, -1.2013427 ],
+       [ 1.40839225, -1.18278011],
+       [ 1.36919314, -1.15317873]]),)
+height = None
+style = InkStyle(flux_color='#3366cc', flux_linewidth=0.7, contour_color='#999999', contour_linewidth=0.35, separatrix_color='...order_plasma=2, zorder_coils=3, zorder_wall=4, zorder_separatrix=5, zorder_thomson=6, zorder_markers=6, zorder_label=7)
+close = True, units = None, kwargs = {}
+
+    def draw_wall(
+        axes: matplotlib.axes.Axes,
+        radius: Sequence[float] | None = None,
+        height: Sequence[float] | None = None,
+        style: InkStyle = DEFAULT_INK,
+        close: bool = True,
+        units=None,
+        **kwargs,
+    ) -> None:
+        """Draw every wall unit as its own polyline.
+    
+        ``units`` carries the typed wall collection. The two coordinate arguments
+        remain the compatibility spelling for one closed or open polyline. Open
+        units are dashed and are never joined to a neighbouring unit.
+        """
+        if units is None:
+            if radius is None or height is None:
+>               raise TypeError("draw_wall requires units or radius and height")
+E               TypeError: draw_wall requires units or radius and height
+
+nova/media/poloidal.py:46: TypeError
+----------------------------- Captured stdout call -----------------------------
+TOPOLOGY_PROBE {"case": "diverted", "cells": 132, "valid": true, "qualified": true, "reason": 0, "pitch": 0.15175957961348227, "max_fraction_error": 0.0022330233759945417, "smooth_fraction_error": 0.0012882761804137166, "saddle_fraction_error": 0.0022330233759945417, "reference_quadrature_estimate": 6.388500627753035e-10, "compile_seconds": 2.7328838370740414, "peak_host_rss_kib": 5018236, "axis_error_m": 2.489699886735411e-15, "backend": "gpu", "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"}
+TOPOLOGY_PROBE {"case": "diverted", "cells": 300, "valid": true, "qualified": true, "reason": 0, "pitch": 0.09851646660355665, "max_fraction_error": 0.010352256010177086, "smooth_fraction_error": 0.0009106358191839359, "saddle_fraction_error": 0.010352256010177086, "reference_quadrature_estimate": 6.007233621248597e-10, "compile_seconds": 11.733681809157133, "peak_host_rss_kib": 5215940, "axis_error_m": 1.3607487632853092e-15, "backend": "gpu", "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"}
+TOPOLOGY_PROBE {"case": "diverted", "cells": 550, "valid": true, "qualified": true, "reason": 0, "pitch": 0.07141980123478449, "max_fraction_error": 0.003021682452150398, "smooth_fraction_error": 0.0006451333941132065, "saddle_fraction_error": 0.003021682452150398, "reference_quadrature_estimate": 6.803177810773889e-10, "compile_seconds": 13.837848272174597, "peak_host_rss_kib": 5298176, "axis_error_m": 2.177751704867561e-15, "backend": "gpu", "scope": "closed-form evaluator and area-fraction difference; not kernel-backed symmetric-difference acceptance"}
+================= 2 failed, 14 deselected in 109.48s (0:01:49) =================
+GPU_DEVICE_INVENTORY=0,_NVIDIA_H200_NVL,_143771
+GPU_UTILISATION_AT_10S=0,_0
+GPU_UTILISATION_AT_30S=0,_0
+GPU_UTILISATION_AT_60S=0,_0
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-05T19:44:12+0200
+NOVA_LANE_EXIT_STATUS=1
+EXIT=1

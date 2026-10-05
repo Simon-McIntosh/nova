@@ -1,0 +1,748 @@
+[
+  {
+    "case": "diverted",
+    "cells": 132,
+    "pitch": 0.15175957961348227,
+    "median_cell_area": 0.02303097000446086,
+    "inside_control_count": 17,
+    "outside_control_count": 47,
+    "smooth_max": 0.0016130216641563324,
+    "saddle_neighbourhood_max": 0.004831185392084337,
+    "smooth_worst_cell": 21,
+    "smooth_worst_area": 0.023030970004460805,
+    "smooth_worst_fraction": 0.11466675663353992,
+    "smooth_worst_reference_fraction": 0.11558299894328584,
+    "worst_quadrature_error_regular_units": 8.954966981869489e-11,
+    "read_area_check_regular_units": 4.959865851361704e-12,
+    "slivers": [
+      {
+        "cell": 32,
+        "occupiable_area": 0.00040633184155247637,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 33,
+        "occupiable_area": 0.0007771404350651601,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 90,
+        "occupiable_area": 0.0010285436122124958,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 114,
+        "occupiable_area": 4.394061638191005e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 130,
+        "occupiable_area": 0.00013716419626765008,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 131,
+        "occupiable_area": 0.0003026328314920043,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      }
+    ]
+  },
+  {
+    "case": "diverted",
+    "cells": 300,
+    "pitch": 0.09851646660355665,
+    "median_cell_area": 0.00970549419204969,
+    "inside_control_count": 57,
+    "outside_control_count": 116,
+    "smooth_max": 0.0009876277504550475,
+    "saddle_neighbourhood_max": 0.01891850045721419,
+    "smooth_worst_cell": 82,
+    "smooth_worst_area": 0.00970549419204969,
+    "smooth_worst_fraction": 0.2768132997860402,
+    "smooth_worst_reference_fraction": 0.2765509597319126,
+    "worst_quadrature_error_regular_units": 1.1955101158039698e-10,
+    "read_area_check_regular_units": 1.0768330671595672e-11,
+    "slivers": [
+      {
+        "cell": 0,
+        "occupiable_area": 9.77059149274151e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 5,
+        "occupiable_area": 0.0003710161858574146,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 6,
+        "occupiable_area": 0.00010298993947541191,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 56,
+        "occupiable_area": 0.00027288367511046907,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 101,
+        "occupiable_area": 5.730852854157753e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 191,
+        "occupiable_area": 8.685431957311529e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 246,
+        "occupiable_area": 0.00023063723059246755,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 275,
+        "occupiable_area": 4.167224057338714e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 296,
+        "occupiable_area": 0.00024354435618501036,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 297,
+        "occupiable_area": 2.820221442170756e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 298,
+        "occupiable_area": 0.0001917640766780221,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 299,
+        "occupiable_area": 7.501335708348655e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      }
+    ]
+  },
+  {
+    "case": "diverted",
+    "cells": 550,
+    "pitch": 0.07141980123478449,
+    "median_cell_area": 0.005100788008416124,
+    "inside_control_count": 121,
+    "outside_control_count": 212,
+    "smooth_max": 0.0008156139255824147,
+    "saddle_neighbourhood_max": 0.004871491355444719,
+    "smooth_worst_cell": 153,
+    "smooth_worst_area": 0.0051007880084164015,
+    "smooth_worst_fraction": 0.09516964595473341,
+    "smooth_worst_reference_fraction": 0.09557287685736286,
+    "worst_quadrature_error_regular_units": 1.0547680956640493e-10,
+    "read_area_check_regular_units": 3.768763350443059e-11,
+    "slivers": [
+      {
+        "cell": 0,
+        "occupiable_area": 1.2993947484975232e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1,
+        "occupiable_area": 2.355177535982465e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2,
+        "occupiable_area": 1.5901176474410195e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 3,
+        "occupiable_area": 1.973762916773758e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 4,
+        "occupiable_area": 0.00020026793751543037,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 20,
+        "occupiable_area": 1.0504839649427833e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 64,
+        "occupiable_area": 1.8104438069710405e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 119,
+        "occupiable_area": 9.985703076831332e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 211,
+        "occupiable_area": 3.1574398399292214e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 243,
+        "occupiable_area": 1.0169161700268603e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 274,
+        "occupiable_area": 2.475180866379212e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 275,
+        "occupiable_area": 7.449723380403839e-07,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 335,
+        "occupiable_area": 0.00014122054502030412,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 517,
+        "occupiable_area": 0.00013800113609541143,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 532,
+        "occupiable_area": 0.00011698646117547229,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 543,
+        "occupiable_area": 2.6125359027240336e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 544,
+        "occupiable_area": 5.219347354734616e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 549,
+        "occupiable_area": 0.0001568712759106028,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      }
+    ]
+  },
+  {
+    "case": "diverted",
+    "cells": 1074,
+    "pitch": 0.05020378814176495,
+    "median_cell_area": 0.0025204203437832196,
+    "inside_control_count": 266,
+    "outside_control_count": 417,
+    "smooth_max": 0.00046669552449657794,
+    "saddle_neighbourhood_max": 0.0026730845319185115,
+    "smooth_worst_cell": 329,
+    "smooth_worst_area": 0.002520420343783303,
+    "smooth_worst_fraction": 0.13510439523094842,
+    "smooth_worst_reference_fraction": 0.13522641575543043,
+    "worst_quadrature_error_regular_units": 1.2691611763699433e-10,
+    "read_area_check_regular_units": 2.5319484064923463e-08,
+    "slivers": [
+      {
+        "cell": 0,
+        "occupiable_area": 4.582710684242208e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 11,
+        "occupiable_area": 7.656631181149343e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 12,
+        "occupiable_area": 1.0384807250879424e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 13,
+        "occupiable_area": 8.3160952918937e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 35,
+        "occupiable_area": 5.802394275056244e-07,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 160,
+        "occupiable_area": 8.950048284672718e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 542,
+        "occupiable_area": 4.0492374553391386e-07,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 667,
+        "occupiable_area": 3.982685032921651e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 779,
+        "occupiable_area": 3.3745031879917065e-08,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 780,
+        "occupiable_area": 7.712361996259354e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 939,
+        "occupiable_area": 3.082184977354352e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 992,
+        "occupiable_area": 5.935963528858057e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1036,
+        "occupiable_area": 5.451038283099674e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1067,
+        "occupiable_area": 4.64399740495447e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1073,
+        "occupiable_area": 5.8328406623231466e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      }
+    ]
+  },
+  {
+    "case": "diverted",
+    "cells": 2616,
+    "pitch": 0.03173193918821776,
+    "median_cell_area": 0.00100691596464475,
+    "inside_control_count": 506,
+    "outside_control_count": 1027,
+    "smooth_max": 0.00029351158955698346,
+    "saddle_neighbourhood_max": 0.0009121198273678234,
+    "smooth_worst_cell": 859,
+    "smooth_worst_area": 0.001006915964644639,
+    "smooth_worst_fraction": 0.08688013868065096,
+    "smooth_worst_reference_fraction": 0.08704213368416695,
+    "worst_quadrature_error_regular_units": 1.3144471930405105e-10,
+    "read_area_check_regular_units": 7.090522613495409e-12,
+    "slivers": [
+      {
+        "cell": 0,
+        "occupiable_area": 2.6198454297826634e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 23,
+        "occupiable_area": 1.6937084057033758e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 56,
+        "occupiable_area": 1.6275384714936614e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 57,
+        "occupiable_area": 3.6435993135963685e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 138,
+        "occupiable_area": 7.16885886131724e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 139,
+        "occupiable_area": 2.9539047842530586e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 235,
+        "occupiable_area": 9.579006099991183e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 714,
+        "occupiable_area": 3.9172825117672616e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 782,
+        "occupiable_area": 4.6293376174011414e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 850,
+        "occupiable_area": 3.90579894917753e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 851,
+        "occupiable_area": 1.842658194917135e-07,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1195,
+        "occupiable_area": 3.4352181586538855e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1264,
+        "occupiable_area": 2.2911987967444425e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1591,
+        "occupiable_area": 3.3597572999144454e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1772,
+        "occupiable_area": 1.9088311389636736e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1830,
+        "occupiable_area": 1.333289938454385e-07,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 1887,
+        "occupiable_area": 9.875267270587074e-11,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2150,
+        "occupiable_area": 9.801962488897864e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2198,
+        "occupiable_area": 1.9918884746727983e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2290,
+        "occupiable_area": 1.0065252049162865e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2333,
+        "occupiable_area": 1.2875203799778134e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2451,
+        "occupiable_area": 3.7448711190268824e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2572,
+        "occupiable_area": 2.6287734613550384e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2593,
+        "occupiable_area": 3.0360309992150114e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2594,
+        "occupiable_area": 1.460014934251408e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2609,
+        "occupiable_area": 4.5737355096164833e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2610,
+        "occupiable_area": 2.4182523402638267e-06,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2611,
+        "occupiable_area": 2.5291024964291253e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2612,
+        "occupiable_area": 4.8708744114202285e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2614,
+        "occupiable_area": 3.684923239823806e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      },
+      {
+        "cell": 2615,
+        "occupiable_area": 1.5011173869899919e-05,
+        "absolute_area_error": 0.0,
+        "normalised_error": 0.0,
+        "read_fraction": 0.0,
+        "analytic_fraction": 0.0
+      }
+    ]
+  }
+]

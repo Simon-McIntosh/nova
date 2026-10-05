@@ -1,0 +1,82 @@
+[
+  {
+    "cells": 132,
+    "cell": 122,
+    "cell_to_median_area": 0.07529165297361701,
+    "read_fraction": 0.5764080017787747,
+    "independent_conic_fraction": 0.5764080017787854,
+    "read_minus_conic": -1.0658141036401503e-14,
+    "independent_analytic_fraction": 0.5752018412127022,
+    "reference_fraction": 0.5752018412147444,
+    "conic_minus_analytic": 0.0012061605660831365,
+    "quadrature_estimates": [
+      5.916664789522987e-12,
+      9.08921376008561e-12
+    ],
+    "smooth_budget": 0.001565309911955519
+  },
+  {
+    "cells": 300,
+    "cell": 291,
+    "cell_to_median_area": 0.004099621573133572,
+    "read_fraction": 0.3237855239170639,
+    "independent_conic_fraction": 0.3237855239200639,
+    "read_minus_conic": -2.9999891459908667e-12,
+    "independent_analytic_fraction": 0.324748329493609,
+    "reference_fraction": 0.32474832949881627,
+    "conic_minus_analytic": -0.0009628055735451113,
+    "quadrature_estimates": [
+      1.7696171450675534e-10,
+      2.3371948281936297e-10
+    ],
+    "smooth_budget": 0.0006570260182512193
+  },
+  {
+    "cells": 550,
+    "cell": 545,
+    "cell_to_median_area": 0.001168564417911009,
+    "read_fraction": 0.8255342476457928,
+    "independent_conic_fraction": 0.8255342476532824,
+    "read_minus_conic": -7.489675546423769e-12,
+    "independent_analytic_fraction": 0.8224803869446219,
+    "reference_fraction": 0.8224803869488589,
+    "conic_minus_analytic": 0.0030538607086605385,
+    "quadrature_estimates": [
+      6.467659336008811e-10,
+      4.4890882159059606e-10
+    ],
+    "smooth_budget": 0.0003433984279015382
+  },
+  {
+    "cells": 1074,
+    "cell": 1068,
+    "cell_to_median_area": 0.00012811359011142566,
+    "read_fraction": 0.31360251649010956,
+    "independent_conic_fraction": 0.31360251641719167,
+    "read_minus_conic": 7.29178939451458e-11,
+    "independent_analytic_fraction": 0.31497271074740957,
+    "reference_fraction": 0.31497271042343367,
+    "conic_minus_analytic": -0.0013701943302178998,
+    "quadrature_estimates": [
+      2.08200039595439e-09,
+      6.827188034152826e-09
+    ],
+    "smooth_budget": 0.00017014980261209473
+  },
+  {
+    "cells": 2616,
+    "cell": 2591,
+    "cell_to_median_area": 0.03552678816362119,
+    "read_fraction": 0.08069033093387772,
+    "independent_conic_fraction": 0.0806903309339776,
+    "read_minus_conic": -9.987843885284065e-14,
+    "independent_analytic_fraction": 0.08075286960592853,
+    "reference_fraction": 0.08075286961079157,
+    "conic_minus_analytic": -6.25386719509402e-05,
+    "quadrature_estimates": [
+      1.3330392040326547e-11,
+      9.885994026240481e-12
+    ],
+    "smooth_budget": 6.822114699837564e-05
+  }
+]

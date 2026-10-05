@@ -256,12 +256,31 @@ class TopologyPolicy:
             ):
                 raise ValueError(f"{name} must be finite and positive")
 
+    def tree_flatten(self):
+        """Keep numerical tolerances traced and array capacities static."""
+        return (
+            (self.hessian_tolerance, self.position_tolerance, self.edge_tolerance),
+            (self.null_capacity, self.fragment_capacity, self.polish_iterations),
+        )
 
-jax.tree_util.register_dataclass(
-    TopologyPolicy,
-    data_fields=("hessian_tolerance", "position_tolerance", "edge_tolerance"),
-    meta_fields=("null_capacity", "fragment_capacity", "polish_iterations"),
-)
+    @classmethod
+    def tree_unflatten(cls, metadata, leaves):
+        """Reconstruct abstract JAX stages without host scalar validation."""
+        result = object.__new__(cls)
+        names = (
+            "null_capacity",
+            "fragment_capacity",
+            "polish_iterations",
+            "hessian_tolerance",
+            "position_tolerance",
+            "edge_tolerance",
+        )
+        for name, value in zip(names, (*metadata, *leaves), strict=True):
+            object.__setattr__(result, name, value)
+        return result
+
+
+jax.tree_util.register_pytree_node_class(TopologyPolicy)
 
 
 @dataclass(frozen=True, slots=True)

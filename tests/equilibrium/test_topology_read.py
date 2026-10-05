@@ -58,6 +58,10 @@ def test_topology_policy_round_trip():
     for invalid in (0.0, -1.0, np.nan, np.inf):
         with pytest.raises(ValueError):
             TopologyPolicy(hessian_tolerance=invalid)
+    executable = (
+        jax.jit(lambda value: value.hessian_tolerance).lower(policy.topology).compile()
+    )
+    assert float(executable(policy.topology)) == policy.topology.hessian_tolerance
 
 
 def test_stationary_position_implicit_tangent():

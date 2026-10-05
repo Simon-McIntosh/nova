@@ -2670,6 +2670,8 @@ def _wall_events(field, geometry, policy, sigma):
         selected = jnp.argmax(sigma * values)
         return points[selected], values[selected]
 
+    if isinstance(field, TotalField):
+        return jax.lax.map(lambda pair: one(*pair), (start, edge), batch_size=8)
     return jax.vmap(one)(start, edge)
 
 

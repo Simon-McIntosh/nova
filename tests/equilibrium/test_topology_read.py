@@ -2172,3 +2172,96 @@ def test_null_position_implicit_tangent(kind):
         np.asarray(central),
         flush=True,
     )
+
+
+def _jaxpr_equation_counts(closed):
+    """Count unique subprograms as well as their expanded call sites."""
+    seen = set()
+    unique = 0
+
+    def walk(value):
+        nonlocal unique
+        if hasattr(value, "jaxpr"):
+            return walk(value.jaxpr)
+        if hasattr(value, "eqns"):
+            fresh = id(value) not in seen
+            seen.add(id(value))
+            if fresh:
+                unique += len(value.eqns)
+            return len(value.eqns) + sum(
+                walk(parameter)
+                for equation in value.eqns
+                for parameter in equation.params.values()
+            )
+        if isinstance(value, (tuple, list)):
+            return sum(walk(item) for item in value)
+        if isinstance(value, dict):
+            return sum(walk(item) for item in value.values())
+        return 0
+
+    expanded = walk(closed)
+    return {"unique_equations": unique, "expanded_equations": expanded}
+
+
+@pytest.mark.parametrize("count", (132, 300, 550))
+def test_kernel_compile_growth(count):
+    """Measure cold tracing, lowering and native compilation independently."""
+    import os
+    from pathlib import Path
+    import resource
+    import time
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    oracle, total, wall, _, _ = _analytic_inputs("limited")
+    geometry = _realised_hex_geometry(wall, count)
+    field = _kernel_backed_field("limited", oracle, total, geometry)
+    operands = (
+        field,
+        geometry,
+        TopologyConvention.from_cocos(17, 1.0),
+        TopologyPolicy(),
+    )
+    receipt = {"cells": count, "kernel_edges": field.coupling.edge.shape[0]}
+    directory = Path(os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR", os.environ["TMPDIR"]))
+    directory.mkdir(parents=True, exist_ok=True)
+
+    def checkpoint(phase):
+        receipt["phase"] = phase
+        receipt["peak_host_rss_kib"] = resource.getrusage(
+            resource.RUSAGE_SELF
+        ).ru_maxrss
+        (directory / f"compile-growth-{count}.json").write_text(
+            json.dumps(receipt, indent=2) + "\n"
+        )
+        print("COMPILE_GROWTH " + json.dumps(receipt), flush=True)
+
+    jax.clear_caches()
+    cache_enabled = jax.config.jax_enable_compilation_cache
+    jax.config.update("jax_enable_compilation_cache", False)
+    try:
+        checkpoint("input-ready")
+        start = time.perf_counter()
+        graph = jax.make_jaxpr(read)(*operands)
+        receipt["trace_seconds"] = time.perf_counter() - start
+        receipt.update(_jaxpr_equation_counts(graph))
+        checkpoint("traced")
+        start = time.perf_counter()
+        lowered = jax.jit(read).lower(*operands)
+        receipt["lower_seconds"] = time.perf_counter() - start
+        receipt["stablehlo_bytes"] = len(lowered.as_text().encode())
+        checkpoint("lowered")
+        start = time.perf_counter()
+        executable = lowered.compile()
+        receipt["compile_seconds"] = time.perf_counter() - start
+        receipt["executable_bytes"] = (
+            executable.memory_analysis().generated_code_size_in_bytes
+        )
+        checkpoint("compiled")
+        result = executable(*operands)
+        jax.block_until_ready(result)
+        receipt["valid"] = bool(result.valid)
+        receipt["reason"] = int(result.reason)
+        checkpoint("executed")
+        assert result.valid and result.qualified
+    finally:
+        jax.config.update("jax_enable_compilation_cache", cache_enabled)

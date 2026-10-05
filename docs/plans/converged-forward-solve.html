@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -233,6 +233,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T183924356464" data-who="" data-when="">
     <div class="r-comment-body"><p>Owner ruling for the constraint row scale, 2026-10-05, from the sixth composed plan review: the per-row target, tolerance, scale and initial unknown are owned by <code>ConstraintPair</code> and surfaced by <code>ConstraintRecord</code> in <code>constraint.py</code>. §5 extends that owner rather than declaring the scale anew: the row clause (every scaled row at or below 1e-12) reads its scale from the record the row was declared with, the receipt carries that same record, and no second declaration of a row scale exists in <code>solve.py</code>. A scale chosen to pass the clause is excluded by the record being declared before the solve and recorded unchanged in the receipt.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T185257770240" data-who="" data-when="">
+    <div class="r-comment-body"><p>Two rulings recorded on the §2 run on 2026-10-05. <strong>Oracle wall.</strong> The limited analytic oracle's wall from <code>limiter_contour</code> had chord edges beside the outboard contact cutting 0.10 m into the zero-flux region, so every rung read a wall contact at 0.0401 Wb instead of zero; the §2 run's grant was widened to the fixture script and a new invariant test (every edge sampled densely, flux at most zero, zero only at the tangent contact edge, the chord construction kept as a failing control). Corrected level 2e-14 Wb, contact offset zero, realised cell counts unchanged. Receipts other plans banked against the old wall are before-arm evidence only. <strong>Membership normalisation.</strong> The per-cell membership budget C·(h/R₀)ᵖ is measured as symmetric-difference area divided by the rung's median cell area, never by the cell's own area: a wall-trimmed sliver (the worst limited cell at 550 cells has 0.12% of the median area) swings its own fraction by whole units while its absolute error is negligible to the booking, which consumes area times current density. Slivers stay in the carrier and are listed per rung in a census with absolute error and fraction. The order assertion (at least 2 on the smooth boundary, 2 for the saddle neighbourhood) applies to the normalised maxima; a smooth-boundary order below 2 after this normalisation contradicts the 490-fit probe and goes to the lead.</p></div>
 </div>
 </section>
 </main>

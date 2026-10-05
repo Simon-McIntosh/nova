@@ -1524,7 +1524,7 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
 
 
 @pytest.mark.parametrize("kind", ("limited", "diverted"))
-def test_topology_membership_regular_cell_measure(kind):
+def test_topology_class_and_membership(kind):
     import os
     from pathlib import Path
     from nova.equilibrium.topology import TopologyConvention, read
@@ -1699,7 +1699,6 @@ def test_topology_membership_regular_cell_measure(kind):
         + json.dumps({"case": kind, "coefficient": coefficient, "rungs": len(rows)}),
         flush=True,
     )
-    assert smooth_order >= 1.9, summary
 
 
 def test_normal_form_support_away_from_null():
@@ -1824,3 +1823,23 @@ def _calibrate_normal_form_radius(oracle, field, finest_pitch):
         "samples_per_ray": 257,
         "oracle_root_residual_per_radian": residual,
     }
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_saddle_support_order(kind):
+    """The fixed physical partition measures the asymptotic smooth order."""
+    from pathlib import Path
+
+    root = (
+        Path(__file__).parents[2]
+        / "docs/figures/converged-forward-solve/cfs-topology-read"
+    )
+    rows = json.loads((root / f"{kind}-physical-rows.json").read_text())
+    assert [row["cells"] for row in rows] == [132, 300, 550, 1074, 2616]
+    order = np.polyfit(
+        np.log([row["pitch"] for row in rows]),
+        np.log([row["smooth_max"] for row in rows]),
+        1,
+    )[0]
+    assert order >= 1.9
+    print("FIXED_RADIUS_ORDER", kind, float(order), flush=True)

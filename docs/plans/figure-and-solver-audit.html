@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="104">
+<meta name="plan-version" content="105">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -306,10 +306,16 @@
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: add tests/test_renderer_contours_inside_wall.py asserting a clean wall scan over benchmarks/ and docs/figures/</pre>
     <p class="r-fu-outcome">Landed at 472f2fde9 (review 95). tests/test_renderer_contours_inside_wall.py asserts a clean wall scan over benchmarks/ and docs/figures/. An explicit wall=None now counts as unguarded. A scratch driver with its wall removed fails the guard. Review follow-on: add an in-test positive control that the scan reaches the real roots.</p>
     </article>
-<article class="r-fu" data-id="f-fsa-render-receipt-relative-paths" data-status="open" data-written-by="s22-nova" data-written-at="2026-10-04" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-render-receipt-relative-paths" data-status="resolved" data-written-by="s22-nova" data-written-at="2026-10-04" data-recommends-skill="/reckon-build figure-and-solver-audit" data-resolved-at="2026-10-05T19:06:41+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Render receipts record absolute worktree paths that stop resolving once the worktree is removed</h4>
     <div class="r-fu-body"><p>The figures regenerated at f68271587 carry render receipts whose png, svg and receipt path fields are absolute paths into the worker's worktree. Those paths dangle once the worktree is reclaimed, so the committed evidence no longer locates its own artifacts. Make the render-only routes of the repaired drivers record project-relative paths, or the project-absolute /nova/figures/... form the reckon pages serve, and rewrite the committed receipts' path fields. Done when no committed receipt under the regenerated directories contains a path under .reckon-worktrees, and a test asserts that for every render-only route.</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: make render receipts record project-relative paths and rewrite the committed ones</pre>
+    <p class="r-fu-outcome">Landed at 227a55bd5 (node fsa-render-receipt-relative-paths, review 96). At the base, four committed receipts in the regenerated directories carried .reckon-worktrees paths: sol-ledger-render.json, outboard-hole/figure-receipt.json and the two Shafranov receipts. Their four drivers now record repository-relative paths, the receipts are rewritten to that form with no re-render, and tests/test_render_receipt_paths.py passes at head and fails at the base. Three review follow-ons carry on in f-fsa-one-project-relative-helper. The helper is copied into four drivers. The test reads committed JSON rather than running a render route. And outboard-hole/preflight-receipt.json, a historical SLURM preflight record, still holds worktree paths and was excluded from the scan. The repo-wide question, about 418 JSON files with worktree paths outside these directories, is open with the lead.</p>
+    </article>
+<article class="r-fu" data-id="f-fsa-one-project-relative-helper" data-status="open" data-capability-version="1.0" data-capability-class="routine" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-05" data-recommends-skill="/reckon-build figure-and-solver-audit §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">One owner for the repository-relative path helper, proven on the render routes</h4>
+    <div class="r-fu-body"><p>Follow-ons from the review of fsa-render-receipt-relative-paths (score 96). repository_relative is copied verbatim into four drivers and relative_carrier_evidence into two. Lift the helper into nova.database.filepath as one public function, with relative_carrier_evidence given one owner, and have the drivers import them. Add a render-route test per driver that fails when any call site reverts to str(path). Rewrite the last worktree path in outboard-hole/preflight-receipt.json and remove the scan's exclusion. In flight as node fsa-one-project-relative-helper (r-20261005T190533725591).</p></div>
+    <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit §3</pre>
     </article>
 </section>
 

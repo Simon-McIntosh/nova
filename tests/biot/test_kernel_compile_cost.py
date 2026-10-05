@@ -316,19 +316,13 @@ def test_harmonic_recurrence_identity(monkeypatch):
     from nova.biot import elliptic
 
     if os.environ.get("NOVA_KERNEL_TRUNCATE_RECURRENCE") == "1":
-        scan = elliptic._scan
+        evaluate = elliptic.harmonic_moments
 
-        def truncated(function, initial, values, xp, **kwargs):
-            if function.__name__ == "ascend":
-                state, result = scan(function, initial, values[:-1], xp, **kwargs)
-                result = jax.tree.map(
-                    lambda value: xp.concatenate((value, xp.zeros_like(value[:1]))),
-                    result,
-                )
-                return state, result
-            return scan(function, initial, values, xp, **kwargs)
+        def truncated(parameter, count, **kwargs):
+            values = evaluate(parameter, count - 1, **kwargs)
+            return values + [kwargs.get("xp", np).zeros_like(values[0])]
 
-        monkeypatch.setattr(elliptic, "_scan", truncated)
+        monkeypatch.setattr(elliptic, "harmonic_moments", truncated)
     parameter = np.linspace(0.99001, 0.999999, 10000)
     with _baseline_kernel() as kernel:
         expected = np.asarray(

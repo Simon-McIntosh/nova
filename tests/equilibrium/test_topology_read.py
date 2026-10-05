@@ -1969,6 +1969,7 @@ def _kernel_backed_field(kind, oracle, total, geometry):
     u, v = np.meshgrid((node + 1) / 2, (node + 1) / 2, indexing="ij")
     product = weight[:, None] * weight[None, :] / 4
     values = np.zeros((3, len(polygons)))
+    centres = np.asarray(coupling.centre)
     for index, polygon in enumerate(polygons):
         clipped = Polygon(polygon).intersection(core)
         if clipped.is_empty:
@@ -1999,7 +2000,7 @@ def _kernel_backed_field(kind, oracle, total, geometry):
                     + 2 * oracle.field_coefficient / radius
                 ) / (4e-7 * np.pi)
                 weighted = product * u * jacobian * density
-                offset = point - np.asarray(coupling.centre[index])
+                offset = point - centres[index]
                 values[0, index] += np.sum(weighted)
                 values[1, index] += np.sum(weighted * offset[..., 0])
                 values[2, index] += np.sum(weighted * offset[..., 1])
@@ -2026,6 +2027,13 @@ def test_kernel_backed_carrier_read(kind, count):
         normal_form_radius=0.054806712567833996 if saddle is not None else 0.0
     )
     convention = TopologyConvention.from_cocos(17, 1.0)
+    print(
+        "KERNEL_INPUT_READY",
+        kind,
+        count,
+        float(jnp.sum(field.moments.cell_current)),
+        flush=True,
+    )
     compiled = jax.jit(read)
     cache_enabled = jax.config.jax_enable_compilation_cache
     jax.clear_caches()
@@ -2036,10 +2044,29 @@ def test_kernel_backed_carrier_read(kind, count):
     finally:
         jax.config.update("jax_enable_compilation_cache", cache_enabled)
     compile_wall = time.perf_counter() - started
+    print("KERNEL_COMPILE_COMPLETE", kind, count, compile_wall, flush=True)
     started = time.perf_counter()
     result = executable(field, geometry, convention, policy)
     jax.block_until_ready(result)
     execution_wall = time.perf_counter() - started
+    raw_receipt = {
+        "case": kind,
+        "cells": count,
+        "phase": "read-complete",
+        "compile_wall_seconds": compile_wall,
+        "persistent_cache_enabled_during_compile": False,
+        "execute_wall_seconds": execution_wall,
+        "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+        "valid": bool(result.valid),
+        "reason": int(result.reason),
+    }
+    print("KERNEL_READ_RAW " + json.dumps(raw_receipt), flush=True)
+    directory = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+    if directory:
+        Path(directory).mkdir(parents=True, exist_ok=True)
+        (Path(directory) / f"{kind}-kernel-{count}.json").write_text(
+            json.dumps(raw_receipt, indent=2) + "\n"
+        )
     assert result.valid and result.qualified, (result.reason, result.required_nulls)
     pitch = float(np.median(geometry.pitch))
     assert np.linalg.norm(np.asarray(result.axis) - axis) < pitch
@@ -2059,6 +2086,15 @@ def test_kernel_backed_carrier_read(kind, count):
     np.testing.assert_allclose(
         result.membership, reference.membership, rtol=1e-6, atol=2e-7
     )
+    measure = _symmetric_difference_measure(kind, oracle, geometry, result)
+    near = np.asarray(result.normal_form_cells)
+    smooth_error = float(np.max(measure["normalised_error"][~near]))
+    saddle_error = (
+        float(np.max(measure["normalised_error"][near])) if near.any() else 0.0
+    )
+    coefficient = 0.274714 if kind == "limited" else 2.1805365680219544
+    budget = coefficient * (pitch / oracle.major_radius) ** 2
+    assert smooth_error <= budget and saddle_error <= budget
     # The fixed exterior must not cancel a change in the booked plasma operand.
     point = jnp.asarray(axis) + jnp.asarray((0.2 * pitch, 0.1 * pitch))
     changed = replace(field, moments=jax.tree.map(lambda x: 1.001 * x, field.moments))
@@ -2074,6 +2110,10 @@ def test_kernel_backed_carrier_read(kind, count):
         "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         "valid": bool(result.valid),
         "qualified": bool(result.qualified),
+        "phase": "checked",
+        "smooth_error_regular_units": smooth_error,
+        "normal_form_error_regular_units": saddle_error,
+        "amplitude_budget": budget,
         "maximum_fraction_difference": float(
             np.max(np.abs(np.asarray(result.membership - reference.membership)))
         ),

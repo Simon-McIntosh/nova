@@ -802,14 +802,22 @@ def _render_limited_contact(directory, oracle, wall, result, contact, worst):
     directory.mkdir(parents=True, exist_ok=True)
     figure, panels = plt.subplots(1, 2, figsize=(14, 8), dpi=100)
     boundary = np.asarray(result.boundary)
-    zoom = max(np.linalg.norm(boundary - contact) * 2.5, 0.015)
     for index, axes in enumerate(panels):
         poloidal_axes(axes)
         if index == 0:
             lower, upper = wall.min(axis=0), wall.max(axis=0)
         else:
-            lower = np.minimum(boundary, contact) - zoom
-            upper = np.maximum(boundary, contact) + zoom
+            radial_extent = abs(boundary[0] - contact[0])
+            vertical_extent = abs(boundary[1] - contact[1])
+            lower = np.minimum(boundary, contact) - (
+                2 * radial_extent,
+                0.3 * vertical_extent,
+            )
+            upper = np.maximum(boundary, contact) + (
+                2 * radial_extent,
+                0.3 * vertical_extent,
+            )
+            axes.set_aspect("auto")
         radial = np.linspace(lower[0], upper[0], 450)
         vertical = np.linspace(lower[1], upper[1], 450)
         rr, zz = np.meshgrid(radial, vertical)
@@ -853,7 +861,7 @@ def _render_limited_contact(directory, oracle, wall, result, contact, worst):
         axes.set_ylim(lower[1], upper[1])
     panels[0].text(
         0.02,
-        0.98,
+        1.10,
         "zero-flux region / larger axis",
         transform=panels[0].transAxes,
         color="#333333",
@@ -862,7 +870,7 @@ def _render_limited_contact(directory, oracle, wall, result, contact, worst):
     )
     panels[0].text(
         0.02,
-        0.92,
+        1.04,
         "wall-selected level / read axis",
         transform=panels[0].transAxes,
         color=DEFAULT_INK.flux_color,
@@ -871,8 +879,8 @@ def _render_limited_contact(directory, oracle, wall, result, contact, worst):
     )
     panels[1].text(
         0.02,
-        0.98,
-        "wall contact detail",
+        1.04,
+        "contact detail (radial scale expanded)",
         transform=panels[1].transAxes,
         color="#333333",
         fontsize=20,

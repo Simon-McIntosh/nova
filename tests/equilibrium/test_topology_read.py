@@ -1379,7 +1379,54 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
                 )
             )
 
-        breaks = np.unique(np.r_[cell[:, 0], ray_breaks])
+        # Split at analytic conic/edge events so a narrow cap cannot lie
+        # entirely between the adaptive quadrature's initial nodes.
+        from numpy.polynomial import Polynomial
+
+        conic_breaks = []
+        oracle_breaks = []
+        for first, last in zip(cell, np.roll(cell, -1, axis=0), strict=True):
+            dx, dy = (last - first) / pitch
+            xpoly = Polynomial(((first[0] - centre[0]) / pitch, dx))
+            ypoly = Polynomial(((first[1] - centre[1]) / pitch, dy))
+            edge_polynomial = (
+                coefficient[0]
+                + coefficient[1] * xpoly
+                + coefficient[2] * ypoly
+                + coefficient[3] * xpoly * xpoly
+                + coefficient[4] * xpoly * ypoly
+                + coefficient[5] * ypoly * ypoly
+            )
+            for root in edge_polynomial.roots():
+                if abs(root.imag) < 1e-9 and 0 < root.real < 1:
+                    conic_breaks.append(first[0] + root.real * (last[0] - first[0]))
+            if kind == "limited":
+                radius_poly = Polynomial((first[0], last[0] - first[0]))
+                height_poly = Polynomial((first[1], last[1] - first[1]))
+                analytic_edge = (
+                    oracle.axis_flux
+                    - 0.5
+                    * oracle.pressure_coefficient
+                    * (radius_poly**2 - oracle.major_radius**2) ** 2
+                    - oracle.field_coefficient * height_poly**2
+                )
+                for root in analytic_edge.roots():
+                    if abs(root.imag) < 1e-8 and 0 < root.real < 1:
+                        oracle_breaks.append(
+                            first[0] + root.real * (last[0] - first[0])
+                        )
+        discriminant = Polynomial(
+            (
+                coefficient[2] ** 2 - 4 * coefficient[5] * coefficient[0],
+                2 * coefficient[2] * coefficient[4]
+                - 4 * coefficient[5] * coefficient[1],
+                coefficient[4] ** 2 - 4 * coefficient[5] * coefficient[3],
+            )
+        )
+        for root in discriminant.roots():
+            if abs(root.imag) < 1e-9:
+                conic_breaks.append(centre[0] + pitch * root.real)
+        breaks = np.unique(np.r_[cell[:, 0], ray_breaks, conic_breaks, oracle_breaks])
         breaks = breaks[(breaks >= cell[:, 0].min()) & (breaks <= cell[:, 0].max())]
         integral, uncertainty = np.zeros(3), 0.0
         for first, last in zip(breaks[:-1], breaks[1:], strict=True):
@@ -1463,6 +1510,12 @@ def test_topology_membership_regular_cell_measure(kind):
             ),
             "worst_quadrature_error_regular_units": float(
                 np.max(measure["quadrature_error"]) / measure["median_area"]
+            ),
+            "read_area_check_cell": int(
+                np.argmax(
+                    np.abs(measure["read_fraction"] - np.asarray(result.membership))
+                    * np.asarray(geometry.full_area)
+                )
             ),
             "read_area_check_regular_units": float(
                 np.max(

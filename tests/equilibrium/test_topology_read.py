@@ -1843,3 +1843,292 @@ def test_saddle_support_order(kind):
     )[0]
     assert order >= 1.9
     print("FIXED_RADIUS_ORDER", kind, float(order), flush=True)
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class UnequalSaddleField:
+    asymmetry: jax.Array
+
+    def value(self, point):
+        x, z = point - jnp.asarray((2.0, 0.0))
+        return -x * x - z * z + 0.5 * z**4 + self.asymmetry * z**3
+
+    def evaluate(self, point):
+        return FieldJet(
+            self.value(point),
+            jax.grad(self.value)(point),
+            jax.hessian(self.value)(point),
+        )
+
+
+def test_general_saddle_census_and_capacity_refusal():
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    wall = np.asarray(((1.2, -1.5), (2.8, -1.5), (2.8, 1.5), (1.2, 1.5)))
+    geometry = _realised_hex_geometry(wall, 131)
+    field = UnequalSaddleField(jnp.asarray(0.08))
+    convention = TopologyConvention.from_cocos(17, 1.0)
+    result = jax.jit(read)(field, geometry, convention, TopologyPolicy())
+    assert result.valid, (result.reason, result.required_nulls)
+    assert result.qualified and result.required_nulls >= 3
+    assert np.count_nonzero(result.x_point_valid) == 1
+    roots = (-0.24 + np.asarray((-1.0, 1.0)) * np.sqrt(0.24**2 + 16.0)) / 4
+    flux = -(roots**2) + 0.5 * roots**4 + 0.08 * roots**3
+    np.testing.assert_allclose(
+        result.boundary, (2.0, roots[np.argmax(flux)]), atol=1e-8
+    )
+    refused = jax.jit(read)(
+        field, geometry, convention, TopologyPolicy(null_capacity=1)
+    )
+    assert not refused.valid and int(refused.reason) == int(TopologyReason.CAPACITY)
+    assert np.all(np.isnan(refused.membership))
+    print(
+        "CAPACITY_REFUSAL", int(refused.reason), int(refused.required_nulls), flush=True
+    )
+
+
+def test_topology_read_traces():
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    _, field, wall, _, _ = _analytic_inputs("diverted")
+    geometry = _realised_hex_geometry(wall, 132)
+    convention, policy = (
+        TopologyConvention.from_cocos(17, 1.0),
+        TopologyPolicy(normal_form_radius=0.054806712567833996),
+    )
+    fields = (field, replace(field, scale=1.01 * field.scale))
+    eager = [read(item, geometry, convention, policy) for item in fields]
+    compiled = [jax.jit(read)(item, geometry, convention, policy) for item in fields]
+    batch = jax.tree.map(lambda *values: jnp.stack(values), *fields)
+    mapped = jax.jit(jax.vmap(read, in_axes=(0, None, None, None)))(
+        batch, geometry, convention, policy
+    )
+    for index, result in enumerate(eager):
+        assert result.valid
+        for left, right, both in zip(
+            jax.tree.leaves(result),
+            jax.tree.leaves(compiled[index]),
+            jax.tree.leaves(mapped),
+            strict=True,
+        ):
+            np.testing.assert_allclose(
+                left, right, rtol=2e-12, atol=2e-12, equal_nan=True
+            )
+            np.testing.assert_allclose(
+                left, both[index], rtol=2e-12, atol=2e-12, equal_nan=True
+            )
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class AnalyticExteriorField:
+    total: ClosedFormPointField
+    coupling: object
+    reference_moments: object
+
+    def value(self, point):
+        return (
+            self.total.value(point)
+            - self.coupling.value_gradient(point, self.reference_moments)[0]
+        )
+
+    def evaluate(self, point):
+        reference = self.coupling.evaluate(point, self.reference_moments)
+        return jax.tree.map(jnp.subtract, self.total.evaluate(point), reference)
+
+
+def _kernel_backed_field(kind, oracle, total, geometry):
+    from shapely.geometry import Polygon
+    from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
+    from nova.equilibrium.topology import BiotMomentCoupling, TotalField
+
+    polygons = [
+        np.asarray(p)[: int(n)]
+        for p, n in zip(geometry.vertices, geometry.vertex_count, strict=True)
+    ]
+    coupling = BiotMomentCoupling.from_polygons(polygons)
+    if kind == "limited":
+        theta = np.linspace(0, 2 * np.pi, 4097)
+        core = Polygon(
+            np.column_stack(
+                (
+                    np.sqrt(
+                        oracle.major_radius**2
+                        + np.sqrt(2 * oracle.axis_flux / oracle.pressure_coefficient)
+                        * np.cos(theta)
+                    ),
+                    np.sqrt(oracle.axis_flux / oracle.field_coefficient)
+                    * np.sin(theta),
+                )
+            )
+        )
+    else:
+        core = Polygon(oracle.separatrix(4097))
+    node, weight = np.polynomial.legendre.leggauss(10)
+    u, v = np.meshgrid((node + 1) / 2, (node + 1) / 2, indexing="ij")
+    product = weight[:, None] * weight[None, :] / 4
+    values = np.zeros((3, len(polygons)))
+    for index, polygon in enumerate(polygons):
+        clipped = Polygon(polygon).intersection(core)
+        if clipped.is_empty:
+            continue
+        parts = (
+            list(clipped.geoms) if clipped.geom_type == "MultiPolygon" else [clipped]
+        )
+        for part in parts:
+            if part.geom_type != "Polygon":
+                continue
+            corners = np.asarray(part.exterior.coords[:-1])
+            signed = 0.5 * np.sum(
+                corners[:, 0] * np.roll(corners[:, 1], -1)
+                - corners[:, 1] * np.roll(corners[:, 0], -1)
+            )
+            if signed < 0:
+                corners = corners[::-1]
+            for j in range(1, len(corners) - 1):
+                first, second, third = corners[[0, j, j + 1]]
+                edge_a, edge_b = second - first, third - first
+                point = first + u[..., None] * (
+                    (1 - v[..., None]) * edge_a + v[..., None] * edge_b
+                )
+                jacobian = edge_a[0] * edge_b[1] - edge_a[1] * edge_b[0]
+                radius = point[..., 0]
+                density = (
+                    4 * oracle.pressure_coefficient * radius
+                    + 2 * oracle.field_coefficient / radius
+                ) / (4e-7 * np.pi)
+                weighted = product * u * jacobian * density
+                offset = point - np.asarray(coupling.centre[index])
+                values[0, index] += np.sum(weighted)
+                values[1, index] += np.sum(weighted * offset[..., 0])
+                values[2, index] += np.sum(weighted * offset[..., 1])
+    moments = ClippedCurrentMoments(*map(jnp.asarray, values))
+    assert np.count_nonzero(values[0]) > 0 and np.all(np.isfinite(values))
+    return TotalField(
+        moments, coupling, AnalyticExteriorField(total, coupling, moments)
+    )
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+@pytest.mark.parametrize("count", (1074, 2616))
+def test_kernel_backed_carrier_read(kind, count):
+    import os
+    from pathlib import Path
+    import resource
+    import time
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    oracle, total, wall, axis, saddle = _analytic_inputs(kind)
+    geometry = _realised_hex_geometry(wall, count)
+    field = _kernel_backed_field(kind, oracle, total, geometry)
+    policy = TopologyPolicy(
+        normal_form_radius=0.054806712567833996 if saddle is not None else 0.0
+    )
+    convention = TopologyConvention.from_cocos(17, 1.0)
+    compiled = jax.jit(read)
+    cache_enabled = jax.config.jax_enable_compilation_cache
+    jax.clear_caches()
+    jax.config.update("jax_enable_compilation_cache", False)
+    started = time.perf_counter()
+    try:
+        executable = compiled.lower(field, geometry, convention, policy).compile()
+    finally:
+        jax.config.update("jax_enable_compilation_cache", cache_enabled)
+    compile_wall = time.perf_counter() - started
+    started = time.perf_counter()
+    result = executable(field, geometry, convention, policy)
+    jax.block_until_ready(result)
+    execution_wall = time.perf_counter() - started
+    assert result.valid and result.qualified, (result.reason, result.required_nulls)
+    pitch = float(np.median(geometry.pitch))
+    assert np.linalg.norm(np.asarray(result.axis) - axis) < pitch
+    assert int(result.boundary_class) == int(saddle is not None)
+    if saddle is not None:
+        assert (
+            np.max(
+                np.linalg.norm(
+                    np.asarray(result.x_points)[np.asarray(result.x_point_valid)]
+                    - saddle,
+                    axis=1,
+                )
+            )
+            < pitch
+        )
+    reference = jax.jit(read)(total, geometry, convention, policy)
+    np.testing.assert_allclose(
+        result.membership, reference.membership, rtol=1e-6, atol=2e-7
+    )
+    # The fixed exterior must not cancel a change in the booked plasma operand.
+    point = jnp.asarray(axis) + jnp.asarray((0.2 * pitch, 0.1 * pitch))
+    changed = replace(field, moments=jax.tree.map(lambda x: 1.001 * x, field.moments))
+    original_value = jax.jit(lambda f, p: f.value(p))(field, point)
+    changed_value = jax.jit(lambda f, p: f.value(p))(changed, point)
+    assert abs(float(changed_value - original_value)) > 1e-9
+    receipt = {
+        "case": kind,
+        "cells": count,
+        "compile_wall_seconds": compile_wall,
+        "persistent_cache_enabled_during_compile": False,
+        "execute_wall_seconds": execution_wall,
+        "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+        "valid": bool(result.valid),
+        "qualified": bool(result.qualified),
+        "maximum_fraction_difference": float(
+            np.max(np.abs(np.asarray(result.membership - reference.membership)))
+        ),
+        "current_perturbation_flux": float(changed_value - original_value),
+    }
+    print("KERNEL_READ " + json.dumps(receipt), flush=True)
+    directory = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+    if directory:
+        Path(directory).mkdir(parents=True, exist_ok=True)
+        (Path(directory) / f"{kind}-kernel-{count}.json").write_text(
+            json.dumps(receipt, indent=2) + "\n"
+        )
+
+
+def test_singular_representation_is_traced_refusal():
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    _, field, wall, _, _ = _analytic_inputs("limited")
+    geometry = _realised_hex_geometry(wall, 132)
+    broken = replace(geometry, fit_inverse=jnp.zeros_like(geometry.fit_inverse))
+    result = jax.jit(read)(
+        field, broken, TopologyConvention.from_cocos(17, 1.0), TopologyPolicy()
+    )
+    assert not result.valid
+    assert int(result.reason) == int(TopologyReason.SINGULAR_REPRESENTATION)
+    print("REPRESENTATION_REFUSAL", int(result.reason), flush=True)
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_null_position_implicit_tangent(kind):
+    oracle, total, wall, axis, saddle = _analytic_inputs(kind)
+    geometry = _realised_hex_geometry(wall, 132)
+    field = _kernel_backed_field(kind, oracle, total, geometry)
+    seed = jnp.asarray(axis if saddle is None else saddle)
+    pitch = float(np.median(geometry.pitch))
+
+    def position(scale):
+        perturbed = replace(
+            field, moments=jax.tree.map(lambda value: scale * value, field.moments)
+        )
+        return stationary_read(perturbed, seed, pitch, TopologyPolicy()).position
+
+    evaluate = jax.jit(position)
+    primal, tangent = jax.jit(
+        lambda scale: jax.jvp(position, (scale,), (jnp.asarray(1.0),))
+    )(jnp.asarray(1.0))
+    step = 1e-4
+    central = (evaluate(1.0 + step) - evaluate(1.0 - step)) / (2 * step)
+    np.testing.assert_allclose(primal, seed, atol=1e-8)
+    np.testing.assert_allclose(tangent, central, rtol=2e-5, atol=2e-7)
+    assert np.linalg.norm(tangent) > 0
+    print(
+        "KERNEL_NULL_TANGENT",
+        kind,
+        np.asarray(tangent),
+        np.asarray(central),
+        flush=True,
+    )

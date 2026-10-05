@@ -2321,6 +2321,15 @@ class TotalField:
     coupling: BiotMomentCoupling
     exterior: ExteriorField
 
+    def value(self, point):
+        plasma = self.coupling.value_gradient(point, self.moments)[0]
+        exterior = (
+            self.exterior.value(point)
+            if hasattr(self.exterior, "value")
+            else self.exterior.evaluate(point).value
+        )
+        return plasma + exterior
+
     def evaluate(self, point):
         plasma = self.coupling.evaluate(point, self.moments)
         exterior = self.exterior.evaluate(point)
@@ -2366,6 +2375,9 @@ class TopologyGeometry:
     wall_following: jax.Array
     wall_unit: jax.Array
     full_area: jax.Array
+    contour_mesh: object
+    contour_sources: jax.Array
+    contour_weights: jax.Array
 
     @classmethod
     def from_cells(cls, cells, sampling_vertices, wall_units):
@@ -2424,6 +2436,54 @@ class TopologyGeometry:
             points.extend(unit)
             following.extend(offset + (np.arange(len(unit)) + 1) % len(unit))
             units.extend([unit_index] * len(unit))
+        from dataclasses import replace
+        from scipy.spatial import Delaunay
+        from nova.equilibrium.contour_tree_mesh import build_contour_mesh
+        from nova.equilibrium.wall_mask import WallUnit
+
+        # Contour mesh construction is host geometry preparation. Its array
+        # receipt and interpolation map, not a Python triangulation, cross jit.
+        mesh = build_contour_mesh(
+            centre,
+            np.zeros(len(centre)),
+            tuple(
+                WallUnit(np.asarray(u)[:, 0], np.asarray(u)[:, 1], kind="vessel")
+                for u in wall_units
+            ),
+            vertex_capacity=len(centre) + len(points) + 1,
+            edge_capacity=12 * (len(centre) + len(points)),
+            triangle_capacity=6 * (len(centre) + len(points)),
+        )
+        occupied = np.flatnonzero(np.asarray(mesh.vertex_valid))
+        vertex_size = int(occupied[-1]) + 2
+        edge_size = max(1, int(np.sum(mesh.edge_valid)))
+        triangle_size = max(1, int(np.sum(mesh.triangle_valid)))
+        mesh = replace(
+            mesh,
+            vertex_rz=mesh.vertex_rz[:vertex_size],
+            vertex_psi=mesh.vertex_psi[:vertex_size],
+            vertex_valid=mesh.vertex_valid[:vertex_size],
+            vertex_is_wall=mesh.vertex_is_wall[:vertex_size],
+            edges=mesh.edges[:edge_size],
+            edge_valid=mesh.edge_valid[:edge_size],
+            triangles=mesh.triangles[:triangle_size],
+            triangle_valid=mesh.triangle_valid[:triangle_size],
+            vertex_capacity=vertex_size,
+            edge_capacity=edge_size,
+            triangle_capacity=triangle_size,
+        )
+        triangulation = Delaunay(centre)
+        target = np.asarray(mesh.vertex_rz)
+        simplex = triangulation.find_simplex(target)
+        transform = triangulation.transform[np.maximum(simplex, 0)]
+        barycentric = np.einsum(
+            "nij,nj->ni", transform[:, :2], target - transform[:, 2]
+        )
+        barycentric = np.column_stack((barycentric, 1 - barycentric.sum(axis=1)))
+        sources = triangulation.simplices[np.maximum(simplex, 0)]
+        sources[: len(centre)] = np.arange(len(centre))[:, None]
+        barycentric[: len(centre)] = (1.0, 0.0, 0.0)
+        barycentric[~np.asarray(mesh.vertex_valid)] = 0.0
         return cls(
             *map(
                 jnp.asarray,
@@ -2441,7 +2501,10 @@ class TopologyGeometry:
                     np.asarray(units, dtype=np.int32),
                     area,
                 ),
-            )
+            ),
+            mesh,
+            jnp.asarray(sources),
+            jnp.asarray(barycentric),
         )
 
 
@@ -2473,6 +2536,7 @@ class TopologyRead(NamedTuple):
     required_fragments: jax.Array
     normal_form_cells: jax.Array
     normal_form_radius: jax.Array
+    contour_tree: object
 
 
 def _inside_cells(geometry, point):
@@ -2493,9 +2557,16 @@ def _inside_cells(geometry, point):
 
 
 def _point_values(field, points):
-    return jax.vmap(lambda point: field.evaluate(point).value)(
-        points.reshape(-1, 2)
-    ).reshape(points.shape[:-1])
+    evaluate = (
+        field.value
+        if hasattr(field, "value")
+        else lambda point: field.evaluate(point).value
+    )
+    if isinstance(field, TotalField):
+        return jax.lax.map(evaluate, points.reshape(-1, 2), batch_size=8).reshape(
+            points.shape[:-1]
+        )
+    return jax.vmap(evaluate)(points.reshape(-1, 2)).reshape(points.shape[:-1])
 
 
 def _field_coefficients(field, geometry):
@@ -2503,7 +2574,7 @@ def _field_coefficients(field, geometry):
     return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
 
 
-def _null_census(field, geometry, coefficient, policy):
+def _null_census(field, geometry, coefficient, policy, tree):
     hessian = jnp.stack(
         (
             jnp.stack((2 * coefficient[:, 3], coefficient[:, 4]), axis=-1),
@@ -2531,8 +2602,21 @@ def _null_census(field, geometry, coefficient, policy):
         axis=1,
     )
     candidate = nonsingular & contained & jnp.all(jnp.isfinite(seeds), axis=1)
+    tree_points = geometry.contour_mesh.vertex_rz[tree.node_vertex]
+    distance = jnp.linalg.norm(seeds[:, None, :] - tree_points[None, :, :], axis=-1)
+    tree_critical = tree.node_valid & (tree.critical_type != 3)
+    distance = jnp.where(tree_critical[None, :], distance, jnp.inf)
+    tree_slot = jnp.argmin(distance, axis=1)
+    resolved = jnp.min(distance, axis=1) <= 2.5 * geometry.pitch
+    census_resolved = jnp.all(~candidate | resolved)
     required = jnp.sum(candidate, dtype=jnp.int32)
-    gather = jnp.nonzero(candidate, size=policy.null_capacity, fill_value=0)[0]
+    # Stable carrier order breaks equal tree-slot rankings deterministically.
+    order = jnp.argsort(
+        jnp.where(candidate, tree_slot, tree.node_valid.size), stable=True
+    )
+    gather = order[: policy.null_capacity]
+    if policy.null_capacity > order.size:
+        gather = jnp.pad(gather, (0, policy.null_capacity - order.size))
     nulls = jax.vmap(stationary_read, in_axes=(None, 0, 0, None))(
         field,
         seeds[gather],
@@ -2557,7 +2641,7 @@ def _null_census(field, geometry, coefficient, policy):
         & (separation < policy.position_tolerance * jnp.min(geometry.pitch) * 8),
         axis=1,
     )
-    return nulls, live & ~duplicate, required
+    return nulls, live & ~duplicate, required, census_resolved
 
 
 def _wall_events(field, geometry, policy, sigma):
@@ -2715,34 +2799,100 @@ def read(field, geometry, convention, policy):
     """Read total-field nulls and the open axis-connected hex-cell interior.
 
     All numerical geometry, current and exterior data are pytree operands.
-    The own-node quadratic describes smooth cells; the selected saddle cell
+    The own-node quadratic describes smooth cells; the saddle neighbourhood
     uses regular point-derivative rays and their analytic area integrals.
     Refusals retain explicit validity and integer reasons under jit and vmap.
     """
     if policy.fragment_capacity < 2:
         raise ValueError("the topology read requires two fragment slots per cell")
+    from dataclasses import replace
+
+    policy = replace(
+        policy,
+        normal_form_radius=jnp.maximum(
+            policy.normal_form_radius, 1.5 * jnp.median(geometry.pitch)
+        ),
+    )
     sigma = convention.sigma
     coefficient = _field_coefficients(field, geometry)
-    nulls, live, required = _null_census(field, geometry, coefficient, policy)
+    from nova.equilibrium.contour_tree import build_contour_tree
+
+    mesh = geometry.contour_mesh
+    centre_flux = _point_values(field, geometry.centre)
+    vertex_flux = jnp.sum(
+        centre_flux[geometry.contour_sources] * geometry.contour_weights, axis=1
+    )
+    tree = build_contour_tree(
+        vertex_flux,
+        mesh.vertex_valid,
+        mesh.vertex_is_wall,
+        mesh.edges,
+        mesh.edge_valid,
+        sigma,
+    )
+    nulls, live, required, census_resolved = _null_census(
+        field, geometry, coefficient, policy, tree
+    )
     eigenvalues = jnp.linalg.eigvalsh(sigma * nulls.jet.hessian)
     axes = live & jnp.all(eigenvalues < 0.0, axis=1)
     saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
     axis_index = jnp.argmax(axes)
     axis, axis_flux = nulls.position[axis_index], nulls.jet.value[axis_index]
-    saddle_index = jnp.argmax(jnp.where(saddles, sigma * nulls.jet.value, -jnp.inf))
+
+    def normal_form(index):
+        point = nulls.position[index]
+        third = jax.jacfwd(lambda target: field.evaluate(target).hessian)(point)
+        fourth = jax.jacfwd(jax.jacfwd(lambda target: field.evaluate(target).hessian))(
+            point
+        )
+        return saddle_normal_form(
+            point,
+            sigma * nulls.jet.hessian[index],
+            sigma * third,
+            policy.hessian_tolerance,
+            sigma * fourth,
+        )
+
+    def inspect(index, admitted):
+        def evaluate_candidate(_):
+            candidate_form = normal_form(index)
+            support = _support_at_level(
+                geometry,
+                coefficient,
+                sigma,
+                nulls.jet.value[index],
+                axis,
+                candidate_form,
+                True,
+                policy,
+            )
+            area, intervals, labels, wall, selected, owner, support_valid, count = (
+                support
+            )
+            owner_index = jnp.argmax(owner)
+            private_index = jnp.where(selected[owner_index, 0], 1, 0)
+            private_label = labels[owner_index, private_index]
+            private_reaches_wall = jnp.any(wall & (labels == private_label))
+            reaches = jnp.any(owner[:, None] & selected)
+            return support_valid & reaches & private_reaches_wall
+
+        accepted = jax.lax.cond(
+            saddles[index],
+            evaluate_candidate,
+            lambda _: jnp.asarray(False),
+            operand=None,
+        )
+        return admitted.at[index].set(accepted)
+
+    candidates_admitted = jax.lax.fori_loop(
+        0, policy.null_capacity, inspect, jnp.zeros(policy.null_capacity, dtype=bool)
+    )
+    saddle_index = jnp.argmax(
+        jnp.where(candidates_admitted, sigma * nulls.jet.value, -jnp.inf)
+    )
     saddle_point = nulls.position[saddle_index]
-    third = jax.jacfwd(lambda point: field.evaluate(point).hessian)(saddle_point)
-    fourth = jax.jacfwd(jax.jacfwd(lambda point: field.evaluate(point).hessian))(
-        saddle_point
-    )
-    form = saddle_normal_form(
-        saddle_point,
-        sigma * nulls.jet.hessian[saddle_index],
-        sigma * third,
-        policy.hessian_tolerance,
-        sigma * fourth,
-    )
-    saddle_live = jnp.any(saddles)
+    form = normal_form(saddle_index)
+    saddle_live = jnp.any(candidates_admitted)
     wall_points, wall_flux = _wall_events(field, geometry, policy, sigma)
     wall_index = jnp.argmax(sigma * wall_flux)
     initial_level = jnp.where(
@@ -2754,12 +2904,7 @@ def read(field, geometry, convention, policy):
     area, intervals, labels, wall, selected, owner, support_valid, fragment_count = (
         initial
     )
-    owner_index = jnp.argmax(owner)
-    private_index = jnp.where(selected[owner_index, 0], 1, 0)
-    private_label = labels[owner_index, private_index]
-    private_reaches_wall = jnp.any(wall & (labels == private_label))
-    core_reaches_saddle = jnp.any(owner[:, None] & selected)
-    saddle_admitted = saddle_live & core_reaches_saddle & private_reaches_wall
+    saddle_admitted = saddle_live
     # Wall contacts in a private component cannot compete with the confined
     # branch. Closed contact points use the component of their owning cell.
     wall_cell = jax.vmap(lambda point: jnp.argmax(_inside_cells(geometry, point)))(
@@ -2785,12 +2930,26 @@ def read(field, geometry, convention, policy):
     )
     membership = jnp.clip(membership, 0.0, 1.0)
     unique_axis = jnp.sum(axes) == 1
-    # Multiple saddle branches require an event tree rather than a scalar
-    # ranking; refuse that unresolved census explicitly.
-    unambiguous = (jnp.sum(saddles) <= 1) & unique_axis
-    valid = finite & support_valid & (required <= policy.null_capacity) & unambiguous
+    equal_level = candidates_admitted & (
+        jnp.abs(nulls.jet.value - initial_level)
+        <= policy.position_tolerance
+        * jnp.maximum(jnp.abs(axis_flux - initial_level), 1e-30)
+    )
+    unambiguous = (jnp.sum(equal_level) <= 1) & unique_axis & census_resolved
+    capacity_ok = (
+        (required <= policy.null_capacity)
+        & ~tree.overflow
+        & ~jnp.asarray(mesh.overflow)
+    )
+    fit_singular_values = jnp.linalg.svd(geometry.fit_inverse, compute_uv=False)
+    representation_valid = jnp.all(jnp.isfinite(fit_singular_values)) & jnp.all(
+        fit_singular_values[:, -1]
+        > policy.hessian_tolerance * fit_singular_values[:, 0]
+    )
+    capacity_ok = capacity_ok & (fragment_count <= policy.fragment_capacity)
+    valid = finite & support_valid & capacity_ok & unambiguous & representation_valid
     reason = jnp.where(
-        required > policy.null_capacity,
+        ~capacity_ok,
         int(TopologyReason.CAPACITY),
         jnp.where(
             ~jnp.any(axes),
@@ -2810,13 +2969,18 @@ def read(field, geometry, convention, policy):
             ),
         ),
     ).astype(jnp.int32)
+    reason = jnp.where(
+        capacity_ok & ~representation_valid,
+        int(TopologyReason.SINGULAR_REPRESENTATION),
+        reason,
+    ).astype(jnp.int32)
     qualified = valid & (~saddle_live | saddle_admitted)
-    admitted = saddles & saddle_admitted
+    admitted = candidates_admitted & equal_level & diverted
     return TopologyRead(
         axis,
         axis_flux,
-        nulls.position,
-        nulls.jet.value,
+        jnp.where(admitted[:, None], nulls.position, 0.0),
+        jnp.where(admitted, nulls.jet.value, 0.0),
         admitted,
         boundary,
         level,
@@ -2846,5 +3010,6 @@ def read(field, geometry, convention, policy):
                 < policy.normal_form_radius
             )
         ),
-        policy.normal_form_radius,
+        jnp.where(diverted, policy.normal_form_radius, 0.0),
+        tree,
     )

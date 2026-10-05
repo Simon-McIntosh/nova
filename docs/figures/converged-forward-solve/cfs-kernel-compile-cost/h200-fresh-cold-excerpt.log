@@ -1,0 +1,65 @@
+NOVA_LANE_START=2026-10-06T01:49:01+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281151
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=4d7305f684bea23f59d28702bcd6dc636fc9d166
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=210
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile -vv -s --timeout=210 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Cache inventory line omitted from excerpt; full raw receipt retained in run directory.]
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=4d7305f684bea23f59d28702bcd6dc636fc9d166
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Cache inventory line omitted from excerpt; full raw receipt retained in run directory.]
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 210.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 01:49:11 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 1 item
+
+tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile REFERENCE_MODULE rangefunction=/tmp/biot-reference-w7cef9e1/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-w7cef9e1/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-w7cef9e1/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-w7cef9e1/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-w7cef9e1/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-w7cef9e1/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-w7cef9e1/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+COMPILE arm=baseline backend=cuda:0 seconds=11.2194146 executable_bytes=2912
+COMPILE arm=head backend=cuda:0 seconds=7.91631825 executable_bytes=2912
+PASSEDCACHE_GUARD_MARKER=pre-warm-run misses=0 budget=not-enforced
+CACHE_GUARD_RECEIPT={"cache_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "compile_seconds": 0, "enforced": false, "hits": 9, "marker": "pre-warm-run misses=0 budget=not-enforced", "miss_budget": null, "misses": 0, "rows": [{"cache_key": "jit_convert_element_type-15aad14b854f1d75f1655664baf43b6033a5887bdfb99da620ca1f1bb01b1b0f", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-15ef57d3c522403b45454f624f82480c6fc806983696ae3f8c1533cd99018317", "cached_compile_seconds": 86.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-adb0142417326b91b9a5436123e047bf0f27455c72ac88c2358f11e8390ffc1a", "cached_compile_seconds": 81.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-144fd1aeea89efa4ed31deb5ba9a1ab435ea826893759b37a9f4400ab477efbb", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-4ed8903684558a182ce80d13ec9c785bff941981af46cb670fc8b869154b1e8a", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-a08fa65949174f1d6d9f3323a68927d4a1c6a5b37375c54ae528b01ac5defdfe", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-cd1a183fdf1ca39f9d2e129e6d38aebedbec9c2a682dfc8bb068e1dc374fa55c", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-ec4408ef48e2b5183d59907d9d580d3d103731964c3f7169865fb85b6d4ad38b", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-f74c16226af33011ef21823de09db3454618ddf4e86bb5337a75b8f7a926f178", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}], "served_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "served_entries": 27117, "source_revision": "unknown", "unpersisted_misses": 0, "version_key": ""}
+
+
+============================== 1 passed in 38.59s ==============================
+GPU_DEVICE_INVENTORY=0,_NVIDIA_H200_NVL,_143771
+GPU_UTILISATION_AT_10S=0,_0
+GPU_UTILISATION_AT_30S=0,_0
+GPU_UTILISATION_AT_60S=0,_0
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-06T01:50:03+0200
+NOVA_LANE_EXIT_STATUS=0

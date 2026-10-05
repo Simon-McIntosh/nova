@@ -685,8 +685,13 @@ def _render_read_panel(
         )
         form = result.saddle_form
         origin = np.asarray(form.position)
+        vertices = np.asarray(geometry.vertices)
+        live = (
+            np.arange(vertices.shape[1])[None, :]
+            < np.asarray(geometry.vertex_count)[:, None]
+        )
         reach = 1.1 * np.max(
-            np.linalg.norm(np.asarray(geometry.vertices)[represented] - origin, axis=-1)
+            np.linalg.norm(vertices[represented[:, None] & live] - origin, axis=-1)
         )
         tree = STRtree(polygons)
         for direction, curvature, cubic in zip(

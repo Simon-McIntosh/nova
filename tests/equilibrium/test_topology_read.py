@@ -721,11 +721,11 @@ def _render_read_panel(
                 linestyle=":",
             )
         )
-        axes.text(
-            0.02,
-            0.85,
-            f"normal-form radius {physical_radius * 1000:.2f} mm",
-            transform=axes.transAxes,
+        figure.text(
+            0.06,
+            0.73,
+            f"normal-form radius\n{physical_radius * 1000:.2f} mm",
+            transform=figure.transFigure,
             color="#666666",
             fontsize=20,
             va="top",
@@ -740,20 +740,20 @@ def _render_read_panel(
         style=read_style,
         contain=(wall,),
     )
-    axes.text(
-        0.02,
-        0.97,
-        "analytic field / larger nulls",
-        transform=axes.transAxes,
+    figure.text(
+        0.06,
+        0.89,
+        "analytic field /\nlarger nulls",
+        transform=figure.transFigure,
         color="#333333",
         fontsize=20,
         va="top",
     )
-    axes.text(
-        0.02,
-        0.91,
-        "cell field / read nulls",
-        transform=axes.transAxes,
+    figure.text(
+        0.06,
+        0.81,
+        "cell field /\nread nulls",
+        transform=figure.transFigure,
         color=DEFAULT_INK.flux_color,
         fontsize=20,
         va="top",
@@ -767,8 +767,8 @@ def _render_read_panel(
         axes.annotate(
             f"measured cell {worst_cell}",
             xy=np.asarray(geometry.centre)[worst_cell],
-            xytext=(0.02, 0.10),
-            textcoords="axes fraction",
+            xytext=(0.06, 0.22),
+            textcoords="figure fraction",
             fontsize=20,
             color="#555555",
             arrowprops={"arrowstyle": "-", "color": "#555555"},

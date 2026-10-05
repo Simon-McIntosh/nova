@@ -5,14 +5,207 @@
 <meta name="plan-slug" content="cfs-topology-read"><meta name="plan-title" content="Topology read implementation checkpoint">
 <meta name="plan-summary" content="Independent wall contact confirms a fixed limiting-level mismatch in the analytic fixture; acceptance remains unmet">
 <meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="incomplete">
-<meta name="plan-commits" content="8677cd01bdeb76fb7162a74e811c19d4377058a8,146af4b57ea600d4a4025aada6fd8211eb9d7c3c,37f280c38f9df80107d90d0c1fd01eb87cfa0ab4,fa19609b3793a77bee0a020348871af7889dce6a,6a6c58600706400fb42131b87acc5c960b870d49,33f881dddcd09c34ae85744317f8a8b93b51ed52,a9db7e014d44242c878bf842b8b15a7024664880,b9c490b1ef7968f2ec1f4cd1d56ce30e468886ab,0a5beeea65dc8237d97e6448516c19f4ba8729d4,bf31213b9a2bd4a6bc3edc5ad3fad93e3d520bc8,83008ebe3da89b7a92703cb293d4876325219313,4cf7e17328781f6cec1e55513dead6b4bb817569,04032e6290b364051b95a79cf3f8f0b815b83b1a"><meta name="plan-recorded-at" content="2026-10-05">
+<meta name="plan-commits" content="8677cd01bdeb76fb7162a74e811c19d4377058a8,146af4b57ea600d4a4025aada6fd8211eb9d7c3c,37f280c38f9df80107d90d0c1fd01eb87cfa0ab4,fa19609b3793a77bee0a020348871af7889dce6a,6a6c58600706400fb42131b87acc5c960b870d49,33f881dddcd09c34ae85744317f8a8b93b51ed52,a9db7e014d44242c878bf842b8b15a7024664880,b9c490b1ef7968f2ec1f4cd1d56ce30e468886ab,0a5beeea65dc8237d97e6448516c19f4ba8729d4,bf31213b9a2bd4a6bc3edc5ad3fad93e3d520bc8,83008ebe3da89b7a92703cb293d4876325219313,4cf7e17328781f6cec1e55513dead6b4bb817569,04032e6290b364051b95a79cf3f8f0b815b83b1a,611a4b1f20bde72514f014bef8912110b1c5d4b3,6c2d97ba95aa271000653bb6ff861d04e7690280,a9d4464e58ff34f497825d4b5686d6249324f1fe,300d9de58f772e1e1dcfafa98aa8a4ad7d427a55"><meta name="plan-recorded-at" content="2026-10-05">
 <meta name="plan-tags" content="equilibrium,topology,jax,convergence">
 <title>Topology read implementation checkpoint | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
 </head><body><main class="plan-doc">
-<h1 id="cfs-topology-read">Limiter repaired; clipped-cell reconstruction exceeds the locked budgets</h1>
+<h1 id="cfs-topology-read">Membership measured in regular-cell units; five-rung order verdicts</h1>
 
-<table id="cfs-topology-read-tangent-outcome"><caption>Current outcome after the fixture correction; diagnostic passes do not certify membership</caption><thead><tr><th>Surface</th><th>Result</th></tr></thead><tbody>
+<table id="cfs-topology-read-regular-rule"><caption>Current membership rule — median-area normalization supersedes own-area budget normalization</caption><thead><tr><th>Quantity</th><th>Definition and measurement</th></tr></thead><tbody>
+<tr><td>Acceptance error</td><td>For every cell i, Eᵢ = area(Sᵢ △ Sᵢ*) / medianⱼ(Aⱼ), where Aⱼ is the nonzero occupiable cell area at the same rung. The geometric symmetric difference is integrated before division; it is not the absolute difference of two areas. The budgets C(h/R₀)ᵖ apply to this regular-cell quantity, with h=√median(A). Smooth-boundary and saddle-neighbourhood fitted orders must each be at least two.</td></tr>
+<tr><td>Fractions and slivers</td><td>The read still returns its own-cell membership fraction area(Sᵢ)/Aᵢ. It is reported beside the oracle fraction for information and is not the budget denominator. Every cell with Aᵢ &lt; 0.05 median(A) is retained and listed in the single census table below, including cells with zero plasma area. No cell is dropped or merged.</td></tr>
+<tr><td>Partition</td><td>For the diverted case, saddle neighbourhood means cell centres within two rung pitches of the analytic saddle, as in the previous probe; the smooth set is its complement. All limited cells belong to the smooth set. The true saddle cell is sliced from the read's cubic normal-form rays, not from conic level-set roots.</td></tr>
+<tr><td>Independent instrument</td><td>Adaptive vertical quadrature integrates the intersection and symmetric difference of oracle and reconstructed intervals. The oracle uses its closed-form height roots and independently supplied core. Conic coefficients and geometric cubic-ray roots describe the reconstructed support; sampled normal-form sector polygons classify intervals only, and do not supply their areas. Independent reconstructed areas are compared with the read's areas in regular-cell units. Exact interior/exterior controls and a nonzero reconstruction error are required at every rung.</td></tr>
+<tr><td>Quadrature refinement</td><td>The first limited probe stopped at its independent area-consistency check at 1074 cells (6.81e-7 regular-cell units). The limited case was rerun with explicit conic/edge, vertical-tangency and analytic-boundary edge split points. The two source receipts remain separate; the table uses the completed refined limited run and the completed original diverted run. No product read was changed.</td></tr>
+<tr><td>Historical normalization</td><td>The earlier own-area budget failures below remain as historical measurements; they are not the current acceptance rule. The circumscribed limiter repair remains in force, and earlier certificate before-arms still retain their original chord wall.</td></tr>
+</tbody></table>
+<table id="cfs-topology-read-regular-rungs"><caption>Symmetric-difference maxima divided by median cell area, at actual realised counts</caption><thead><tr><th>Case</th><th>Cells</th><th>Median area [m²]</th><th>Smooth maximum</th><th>Saddle-neighbourhood maximum</th><th>Worst smooth cell</th><th>Its read / oracle fraction</th><th>Slivers</th></tr></thead><tbody>
+<tr><td>limited</td><td>132</td><td>0.219029656354</td><td>0.000838130807639</td><td>—</td><td>93</td><td>0.6670109495 / 0.6676406337</td><td>5</td></tr>
+<tr><td>limited</td><td>300</td><td>0.0919359047649</td><td>0.000352505756197</td><td>—</td><td>188</td><td>0.6513403204 / 0.651351679</td><td>7</td></tr>
+<tr><td>limited</td><td>550</td><td>0.0480508294755</td><td>0.00018704420656</td><td>—</td><td>356</td><td>0.5395225764 / 0.539523054</td><td>22</td></tr>
+<tr><td>limited</td><td>1074</td><td>0.0238086097265</td><td>9.41951329156e-05</td><td>—</td><td>695</td><td>0.4329911785 / 0.4329960159</td><td>18</td></tr>
+<tr><td>limited</td><td>2616</td><td>0.00954600380984</td><td>3.77015501325e-05</td><td>—</td><td>1626</td><td>0.4049668651 / 0.4049685784</td><td>33</td></tr>
+<tr><td>diverted</td><td>132</td><td>0.0230309700045</td><td>0.00161302166416</td><td>0.00483118539208</td><td>21</td><td>0.1146667566 / 0.1155829989</td><td>6</td></tr>
+<tr><td>diverted</td><td>300</td><td>0.00970549419205</td><td>0.000987627750455</td><td>0.0189185004572</td><td>82</td><td>0.2768132998 / 0.2765509597</td><td>12</td></tr>
+<tr><td>diverted</td><td>550</td><td>0.00510078800842</td><td>0.000815613925582</td><td>0.00487149135544</td><td>153</td><td>0.09516964595 / 0.09557287686</td><td>18</td></tr>
+<tr><td>diverted</td><td>1074</td><td>0.00252042034378</td><td>0.000466695524497</td><td>0.00267308453192</td><td>329</td><td>0.1351043952 / 0.1352264158</td><td>15</td></tr>
+<tr><td>diverted</td><td>2616</td><td>0.00100691596464</td><td>0.000293511589557</td><td>0.000912119827368</td><td>859</td><td>0.08688013868 / 0.08704213368</td><td>31</td></tr>
+</tbody></table>
+<table id="cfs-topology-read-regular-orders"><caption>Five-rung fitted orders and the explicit stop condition</caption><thead><tr><th>Case</th><th>Smooth order</th><th>Saddle-neighbourhood order</th><th>Verdict</th></tr></thead><tbody><tr><td>limited</td><td>1.97573488726</td><td>—</td><td>STOP: smooth order below 2</td></tr><tr><td>diverted</td><td>1.09403150803</td><td>1.3663574992</td><td>STOP: smooth order below 2; saddle order below 2</td></tr></tbody></table>
+<table id="cfs-topology-read-regular-controls"><caption>Independent integration controls in regular-cell area units</caption><thead><tr><th>Case</th><th>Maximum quadrature estimate</th><th>Maximum read-area disagreement</th><th>Interior / exterior controls</th></tr></thead><tbody><tr><td>limited</td><td>6.5693771044e-11</td><td>2.65343302885e-14</td><td>Present at every rung; at least 34 full and 15 empty cells</td></tr><tr><td>diverted</td><td>1.31444719304e-10</td><td>2.53194840649e-08</td><td>Present at every rung; at least 17 full and 47 empty cells</td></tr></tbody></table>
+<p>The H200 gate log is <a href="/nova/figures/converged-forward-solve/cfs-topology-read/h200-regular-cell.log">committed with its revision and raw digest</a>; the limited refinement is in <a href="/nova/figures/converged-forward-solve/cfs-topology-read/h200-regular-cell-split.log">its separate receipt</a>. Cache receipt: 143 hits, 905 misses, 1.0 compile seconds; <code>pre-warm-run misses=905 budget=not-enforced</code>. The targeted limited refinement ran as H200 job 1281080 (1 failed in 155.38 s), with 82 cache hits, 6 misses and 0.0 reported compile seconds; the initial job 1281078 reports 2 failed, 17 deselected in 618.95 s, comprising the superseded limited integration check and the diverted smooth-order failure. Both use pre-warm mode with misses not enforced. The completed limited refinement and diverted probe fail their explicit smooth-order assertions. This remains a closed-form-field read measurement; the general contour tree and full booked-current/kernel/exterior composition have not been added. Both smooth orders are below two, so the explicit ruling stops authority work here with the five values and worst-cell panels, leaving the decision to the lead. The representation, topology authority and budget constants were not changed.</p>
+<figure id="cfs-topology-read-limited-regular-worst"><img src="/nova/figures/converged-forward-solve/cfs-topology-read/limited-poloidal-regular-worst.png" alt="limited worst smooth cell marked on shared-level analytic and reconstructed poloidal contours"><figcaption>Limited: worst smooth-cell regular-area error across the five rungs is 0.000838130807639, at 132 realised cells, cell 93. The dashed grey outline and arrow identify that cell. Grey analytic and blue reconstructed contours share levels; larger analytic and smaller read markers show both null sets. Wall unit 0 is black. nova.media painters, no axes or gridlines. This panel is an analytic-input topology diagnostic, not a GS convergence certificate. <a href="/nova/figures/converged-forward-solve/cfs-topology-read/limited-poloidal-regular-worst.svg">SVG</a>.</figcaption></figure>
+<figure id="cfs-topology-read-diverted-regular-worst"><img src="/nova/figures/converged-forward-solve/cfs-topology-read/diverted-poloidal-regular-worst.png" alt="diverted worst smooth cell marked on shared-level analytic and reconstructed poloidal contours"><figcaption>Diverted: worst smooth-cell regular-area error across the five rungs is 0.00161302166416, at 132 realised cells, cell 21. The dashed grey outline and arrow identify that cell. Grey analytic and blue reconstructed contours share levels; larger analytic and smaller read markers show both null sets. Wall unit 0 is black. nova.media painters, no axes or gridlines. This panel is an analytic-input topology diagnostic, not a GS convergence certificate. <a href="/nova/figures/converged-forward-solve/cfs-topology-read/diverted-poloidal-regular-worst.svg">SVG</a>.</figcaption></figure>
+<table id="cfs-topology-read-sliver-census"><caption>Complete sliver census: every occupiable cell below 5% of its rung median area, including empty cells</caption><thead><tr><th>Case</th><th>Cells</th><th>Cell index</th><th>Area [m²]</th><th>Area / median</th><th>Absolute symmetric difference [m²]</th><th>Error / median</th><th>Read fraction</th><th>Oracle fraction</th></tr></thead><tbody><tr><td>limited</td><td>132</td><td>0</td><td>7.23456111107e-06</td><td>3.303005279e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>132</td><td>17</td><td>0.00473002006331</td><td>0.02159534075</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>132</td><td>44</td><td>0.000903702659004</td><td>0.004125937437</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>132</td><td>60</td><td>0.00321395318065</td><td>0.01467359824</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>132</td><td>121</td><td>0.00392527512694</td><td>0.01792120388</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>300</td><td>0</td><td>4.90740184267e-07</td><td>5.337851251e-06</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>300</td><td>5</td><td>0.00183773078108</td><td>0.01998926084</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>300</td><td>91</td><td>0.00162974354398</td><td>0.01772695388</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>300</td><td>234</td><td>0.000338069355811</td><td>0.00367722879</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>300</td><td>275</td><td>3.47169913955e-05</td><td>0.0003776216864</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>300</td><td>291</td><td>0.00037690241852</td><td>0.004099621573</td><td>3.87375930925e-07</td><td>4.21354346722e-06</td><td>0.323785523917</td><td>0.324748329989</td></tr>
+<tr><td>limited</td><td>300</td><td>299</td><td>0.00312269318067</td><td>0.03396598085</td><td>2.63210849369e-06</td><td>2.86298209652e-05</td><td>0.796787940215</td><td>0.795945043286</td></tr>
+<tr><td>limited</td><td>550</td><td>0</td><td>7.27408298427e-05</td><td>0.001513830888</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>1</td><td>0.00126697156075</td><td>0.02636731924</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>2</td><td>0.0021975415572</td><td>0.04573368621</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>3</td><td>0.00192472939807</td><td>0.04005611181</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>4</td><td>0.000648487256248</td><td>0.01349585977</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>17</td><td>0.00058766726621</td><td>0.012230117</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>55</td><td>0.00171958468093</td><td>0.03578678453</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>79</td><td>0.00027394473411</td><td>0.005701144748</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>80</td><td>0.00235710564069</td><td>0.04905442146</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>163</td><td>0.00161794716266</td><td>0.03367157613</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>194</td><td>0.00213443849794</td><td>0.04442042981</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>226</td><td>0.00010141847727</td><td>0.002110649876</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>358</td><td>8.81643455717e-05</td><td>0.001834814228</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>391</td><td>0.000741574387952</td><td>0.01543312355</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>506</td><td>0.0013731385411</td><td>0.02857679162</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>507</td><td>0.00131985553447</td><td>0.02746790324</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>550</td><td>544</td><td>0.00192923058807</td><td>0.0401497874</td><td>4.48965684568e-07</td><td>9.34355742594e-06</td><td>0.415129849725</td><td>0.415135329308</td></tr>
+<tr><td>limited</td><td>550</td><td>545</td><td>5.61504895762e-05</td><td>0.001168564418</td><td>1.71475763177e-07</td><td>3.56863273846e-06</td><td>0.825534247646</td><td>0.822480387128</td></tr>
+<tr><td>limited</td><td>550</td><td>546</td><td>0.000304600626295</td><td>0.006339133572</td><td>5.15846603058e-07</td><td>1.07354359683e-05</td><td>0.97244254576</td><td>0.970749027893</td></tr>
+<tr><td>limited</td><td>550</td><td>547</td><td>0.000386858816611</td><td>0.008051033059</td><td>5.78425355401e-07</td><td>1.20377808607e-05</td><td>0.980339992789</td><td>0.978844808162</td></tr>
+<tr><td>limited</td><td>550</td><td>548</td><td>0.00020190701389</td><td>0.004201946482</td><td>3.92647885527e-07</td><td>8.17151108135e-06</td><td>0.925366860541</td><td>0.923422163931</td></tr>
+<tr><td>limited</td><td>550</td><td>549</td><td>9.23098049999e-07</td><td>1.921086608e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>9</td><td>0.00039700564895</td><td>0.01667487743</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>104</td><td>8.60395803493e-07</td><td>3.613801114e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>137</td><td>0.000985812723383</td><td>0.04140572401</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>288</td><td>0.000819917254047</td><td>0.03443784679</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>374</td><td>4.48423682187e-07</td><td>1.883451774e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>556</td><td>5.52110927643e-07</td><td>2.318954924e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>557</td><td>0.00021014405479</td><td>0.008826389159</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>832</td><td>0.000487902570956</td><td>0.02049269473</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>1020</td><td>0.000764494062542</td><td>0.03210998338</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>1047</td><td>0.000536302879233</td><td>0.02252558572</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>1074</td><td>1048</td><td>0.00113751966114</td><td>0.04777766002</td><td>1.04632242573e-07</td><td>4.39472290802e-06</td><td>0.494688894603</td><td>0.494648783612</td></tr>
+<tr><td>limited</td><td>1074</td><td>1067</td><td>0.000245147108415</td><td>0.01029657385</td><td>7.14758415724e-08</td><td>3.00210060115e-06</td><td>0.0566500182094</td><td>0.0569415812714</td></tr>
+<tr><td>limited</td><td>1074</td><td>1068</td><td>3.05020646763e-06</td><td>0.0001281135901</td><td>4.1793744098e-09</td><td>1.75540464471e-07</td><td>0.31360251649</td><td>0.314972710428</td></tr>
+<tr><td>limited</td><td>1074</td><td>1069</td><td>0.000117666703672</td><td>0.004942191292</td><td>9.35179669917e-08</td><td>3.92790541178e-06</td><td>0.885453105268</td><td>0.88465833526</td></tr>
+<tr><td>limited</td><td>1074</td><td>1070</td><td>0.000257577636424</td><td>0.01081867607</td><td>1.37786548351e-07</td><td>5.78725721214e-06</td><td>0.913735293748</td><td>0.913200361639</td></tr>
+<tr><td>limited</td><td>1074</td><td>1071</td><td>0.000274435187262</td><td>0.01152672039</td><td>1.65851802516e-07</td><td>6.96604314244e-06</td><td>0.987702973124</td><td>0.987098634431</td></tr>
+<tr><td>limited</td><td>1074</td><td>1072</td><td>0.000189801430081</td><td>0.007971966119</td><td>1.389454166e-07</td><td>5.83593154729e-06</td><td>0.973073212177</td><td>0.972341155435</td></tr>
+<tr><td>limited</td><td>1074</td><td>1073</td><td>5.8471151168e-05</td><td>0.002455882634</td><td>4.76354649331e-08</td><td>2.00076633958e-06</td><td>0.762410088278</td><td>0.761595405071</td></tr>
+<tr><td>limited</td><td>2616</td><td>0</td><td>2.31731017811e-05</td><td>0.002427518598</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>1</td><td>6.73485117086e-05</td><td>0.007055152402</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2</td><td>9.02318616565e-05</td><td>0.009452317792</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>3</td><td>5.18305727297e-05</td><td>0.005429557097</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>4</td><td>3.1732506921e-06</td><td>0.0003324166589</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>22</td><td>0.000241920154896</td><td>0.02534255797</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>23</td><td>1.36966834718e-06</td><td>0.0001434808088</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>49</td><td>0.00023437853822</td><td>0.0245525293</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>80</td><td>5.11608500986e-06</td><td>0.0005359399715</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>155</td><td>2.57197546141e-05</td><td>0.002694295448</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>400</td><td>2.34778258594e-05</td><td>0.002459440236</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>515</td><td>0.000341293460886</td><td>0.03575249578</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>516</td><td>6.21212028982e-05</td><td>0.006507561084</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>639</td><td>7.16318613669e-06</td><td>0.0007503858452</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>704</td><td>7.48490387004e-06</td><td>0.0007840876684</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>1115</td><td>0.000145440757882</td><td>0.01523577413</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>1331</td><td>0.000471904169288</td><td>0.04943473507</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>1624</td><td>0.000106922914034</td><td>0.01120080362</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>1840</td><td>0.000144575836098</td><td>0.01514516849</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>1911</td><td>0.000447819331864</td><td>0.0469117068</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>1981</td><td>0.000307499860199</td><td>0.0322124175</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2050</td><td>1.77016404201e-06</td><td>0.0001854350865</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2051</td><td>0.000441584910872</td><td>0.04625861456</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2306</td><td>6.22761680606e-05</td><td>0.006523794595</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2364</td><td>0.00034738880392</td><td>0.03639101878</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2419</td><td>4.03911606384e-08</td><td>4.231211452e-06</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2420</td><td>5.74437528833e-06</td><td>0.0006017570706</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2471</td><td>0.000282727128795</td><td>0.0296173283</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2517</td><td>5.93353750133e-07</td><td>6.215729241e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2558</td><td>7.834025606e-07</td><td>8.20660222e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>limited</td><td>2616</td><td>2591</td><td>0.000339138855161</td><td>0.03552678816</td><td>2.12092936478e-08</td><td>2.22179815452e-06</td><td>0.0806903309339</td><td>0.0807528696059</td></tr>
+<tr><td>limited</td><td>2616</td><td>2592</td><td>0.000167214730283</td><td>0.0175167257</td><td>8.35553235742e-09</td><td>8.75291119075e-07</td><td>0.29537969794</td><td>0.295429666817</td></tr>
+<tr><td>limited</td><td>2616</td><td>2615</td><td>2.34192412618e-05</td><td>0.002453303155</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>132</td><td>32</td><td>0.000406331841552</td><td>0.01764284533</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>132</td><td>33</td><td>0.000777140435065</td><td>0.0337432785</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>132</td><td>90</td><td>0.00102854361221</td><td>0.04465915296</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>132</td><td>114</td><td>4.39406163819e-05</td><td>0.001907892563</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>132</td><td>130</td><td>0.000137164196268</td><td>0.005955641306</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>132</td><td>131</td><td>0.000302632831492</td><td>0.01314025555</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>0</td><td>9.77059149274e-05</td><td>0.01006707263</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>5</td><td>0.000371016185857</td><td>0.03822743886</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>6</td><td>0.000102989939475</td><td>0.01061150905</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>56</td><td>0.00027288367511</td><td>0.02811641218</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>101</td><td>5.73085285416e-06</td><td>0.0005904751207</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>191</td><td>8.68543195731e-06</td><td>0.0008948984756</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>246</td><td>0.000230637230592</td><td>0.02376357412</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>275</td><td>4.16722405734e-05</td><td>0.004293675288</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>296</td><td>0.000243544356185</td><td>0.02509345236</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>297</td><td>2.82022144217e-05</td><td>0.002905798908</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>298</td><td>0.000191764076678</td><td>0.01975830111</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>300</td><td>299</td><td>7.50133570835e-05</td><td>0.007728958011</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>0</td><td>1.2993947485e-05</td><td>0.002547439232</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>1</td><td>2.35517753598e-05</td><td>0.004617281746</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>2</td><td>1.59011764744e-05</td><td>0.003117396067</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>3</td><td>1.97376291677e-06</td><td>0.000386952548</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>4</td><td>0.000200267937515</td><td>0.03926215659</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>20</td><td>1.05048396494e-05</td><td>0.002059454271</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>64</td><td>1.81044380697e-05</td><td>0.003549341404</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>119</td><td>9.98570307683e-05</td><td>0.01957678512</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>211</td><td>3.15743983993e-05</td><td>0.006190102068</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>243</td><td>1.01691617003e-05</td><td>0.001993645234</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>274</td><td>2.47518086638e-05</td><td>0.004852546042</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>275</td><td>7.4497233804e-07</td><td>0.000146050441</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>335</td><td>0.00014122054502</td><td>0.02768602514</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>517</td><td>0.000138001136095</td><td>0.02705486601</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>532</td><td>0.000116986461175</td><td>0.02293497808</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>543</td><td>2.61253590272e-06</td><td>0.0005121828036</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>544</td><td>5.21934735473e-05</td><td>0.01023243339</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>550</td><td>549</td><td>0.000156871275911</td><td>0.03075432181</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>0</td><td>4.58271068424e-05</td><td>0.01818232699</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>11</td><td>7.65663118115e-05</td><td>0.03037838986</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>12</td><td>1.03848072509e-05</td><td>0.004120267985</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>13</td><td>8.31609529189e-06</td><td>0.00329948745</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>35</td><td>5.80239427506e-07</td><td>0.0002302153404</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>160</td><td>8.95004828467e-05</td><td>0.03551014142</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>542</td><td>4.04923745534e-07</td><td>0.0001606572279</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>667</td><td>3.98268503292e-05</td><td>0.01580166992</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>779</td><td>3.37450318799e-08</td><td>1.33886524e-05</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>780</td><td>7.71236199626e-05</td><td>0.030599507</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>939</td><td>3.08218497735e-05</td><td>0.01222885296</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>992</td><td>5.93596352886e-05</td><td>0.02355148237</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>1036</td><td>5.4510382831e-05</td><td>0.02162749676</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>1067</td><td>4.64399740495e-05</td><td>0.0184254877</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>1074</td><td>1073</td><td>5.83284066232e-05</td><td>0.02314233289</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>0</td><td>2.61984542978e-05</td><td>0.02601851119</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>23</td><td>1.6937084057e-05</td><td>0.01682075233</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>56</td><td>1.62753847149e-06</td><td>0.001616359784</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>57</td><td>3.6435993136e-06</td><td>0.003618573388</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>138</td><td>7.16885886132e-06</td><td>0.007119619822</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>139</td><td>2.95390478425e-05</td><td>0.02933616</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>235</td><td>9.57900609999e-06</td><td>0.009513213055</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>714</td><td>3.91728251177e-05</td><td>0.03890376803</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>782</td><td>4.6293376174e-05</td><td>0.04597541185</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>850</td><td>3.90579894918e-05</td><td>0.03878972115</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>851</td><td>1.84265819492e-07</td><td>0.0001830001966</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>1195</td><td>3.43521815865e-05</td><td>0.03411623491</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>1264</td><td>2.29119879674e-05</td><td>0.02275461783</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>1591</td><td>3.35975729991e-05</td><td>0.03336680933</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>1772</td><td>1.90883113896e-05</td><td>0.01895720404</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>1830</td><td>1.33328993845e-07</td><td>0.0001324132286</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>1887</td><td>9.87526727059e-11</td><td>9.807439367e-08</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2150</td><td>9.8019624889e-06</td><td>0.009734638076</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2198</td><td>1.99188847467e-05</td><td>0.01978207263</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2290</td><td>1.00652520492e-05</td><td>0.009996119242</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2333</td><td>1.28752037998e-06</td><td>0.001278677094</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2451</td><td>3.74487111903e-05</td><td>0.03719149612</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2572</td><td>2.62877346136e-05</td><td>0.02610717829</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2593</td><td>3.03603099922e-06</td><td>0.003015178134</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2594</td><td>1.46001493425e-05</td><td>0.01449986876</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2609</td><td>4.57373550962e-05</td><td>0.04542320978</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2610</td><td>2.41825234026e-06</td><td>0.002401642665</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2611</td><td>2.52910249643e-05</td><td>0.02511731451</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2612</td><td>4.87087441142e-05</td><td>0.04837418993</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2614</td><td>3.68492323982e-05</td><td>0.03659613482</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>diverted</td><td>2616</td><td>2615</td><td>1.50111738699e-05</td><td>0.01490807018</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<table id="cfs-topology-read-tangent-outcome"><caption>Historical outcome under own-area normalization, before the median-area ruling</caption><thead><tr><th>Surface</th><th>Result</th></tr></thead><tbody>
 <tr><td>Limited level and contact</td><td>At 132, 300 and 550 cells, the read and independent wall maximum are 2.2322358387255243e-14 Wb. Contact is exactly (7.801395789307387, 0) m on wall unit 0, closing segment 120; displacement is 0. Interior/exterior controls remain exactly 1/0 in both arms. The realised counts remain 132→132, 300→300 and 550→550; none was renamed to its request.</td></tr>
 <tr><td>Enabled failure</td><td>H200 job 1281072: <code>test_limited_boundary_instrument</code> fails its decreasing-error clause: 0.001206160564, 0.000962805582, 0.003053860697. Its zero-level and contact clauses pass. <a href="/nova/figures/converged-forward-solve/cfs-topology-read/h200-tangent-wall.log">1 failed in 84.42 s; EXIT=1</a>. No tolerance was widened and the test remains enabled.</td></tr>
 <tr><td>Resolution probes and renderer</td><td>The painter now receives <code>units=(wall,)</code>. Job 1281074 reaches every realised rung for both cases: <a href="/nova/figures/converged-forward-solve/cfs-topology-read/h200-tangent-resolution.log">2 passed, 15 deselected in 213.48 s; EXIT=0</a>. These tests check validity, qualification, class and axis position; they do not assert the unmet membership budgets. Their field remains the closed-form total evaluator, not the full booked-current/kernel/exterior composition.</td></tr>

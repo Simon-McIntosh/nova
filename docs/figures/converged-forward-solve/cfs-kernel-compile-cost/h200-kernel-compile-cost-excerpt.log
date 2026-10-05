@@ -1,0 +1,141 @@
+revision 61fba54638d33d3f4b902e23ef130389862d571f tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command scripts/h200_test_lane/run.sh --log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-kernel-compile-cost.log --cores 2 --mem 64G --time 00:25:00 --env NOVA_CACHE_PREWARM_RUN=1 --wait -- tests/biot/test_kernel_compile_cost.py -k 'cold_compile or identity' -vv -s --timeout=900
+PROVENANCE: launched on parent 01575b6b164607271c9f1d06cfa3f64f18128646 with candidate product bytes subsequently committed in 61fba54638d33d3f4b902e23ef130389862d571f; test module later gained recurrence and filament checks, which this already-imported session did not run. See original COMMAND below for shell quoting.
+NOVA_LANE_START=2026-10-06T00:44:40+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281131
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=01575b6b164607271c9f1d06cfa3f64f18128646
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=900
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py -k cold_compile\ or\ identity -vv -s --timeout=900 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Long cache inventory line omitted from this excerpt: 1963869 characters; full receipt retained in run directory.]
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=01575b6b164607271c9f1d06cfa3f64f18128646
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Long cache inventory line omitted from this excerpt: 1963869 characters; full receipt retained in run directory.]
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 900.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 00:44:49 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 3 items / 1 deselected / 2 selected
+
+tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile COMPILE backend=cuda:0 seconds=53.479203 executable_bytes=13416
+FAILED
+tests/biot/test_kernel_compile_cost.py::test_point_jet_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-ik2lb82p/rangefunction.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-ik2lb82p/elliptic.py
+REFERENCE_MODULE momentchannel=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+IDENTITY_COMPILE arm=baseline seconds=124.310922 executable_bytes=2912
+IDENTITY_COMPILE arm=head seconds=66.1840253 executable_bytes=13416
+IDENTITY kind=polygon points=10000 component_maxima=[9.271873064666692e-09, 1.4292479767881019e-06, 5.3299661555054756e-08, 0.00010467739094605777, 2.0942269554104297e-06, 8.579189218545841e-07, 2.319494074635711e-07] maximum=0.00010467739094605777
+FAILEDCACHE_GUARD_MARKER=pre-warm-run misses=9 budget=not-enforced unpersisted=1
+[Long cache inventory line omitted from this excerpt: 2543 characters; full receipt retained in run directory.]
+CACHE_GUARD_PERSISTENCE=CACHE-NOT-PERSISTED misses=1
+
+
+=================================== FAILURES ===================================
+_________________________ test_point_jet_cold_compile __________________________
+
+    @pytest.mark.skipif(
+        jax.default_backend() != "gpu", reason="cold compile certificate requires a GPU"
+    )
+    def test_point_jet_cold_compile():
+        from nova.biot import polygonanalytic
+    
+        point, geometry = jnp.asarray([5.62, 0.31]), _geometry()
+        executable, elapsed, size = _compile(_point_jet(polygonanalytic), point, geometry)
+        assert np.all(np.isfinite(executable(point, geometry)))
+        print(
+            f"COMPILE backend={jax.devices()[0]} seconds={elapsed:.9g} "
+            f"executable_bytes={size}",
+            flush=True,
+        )
+>       assert size > 0
+E       assert 53.47920302115381 < 30.0
+
+tests/biot/test_kernel_compile_cost.py:201: AssertionError
+___________________________ test_point_jet_identity ____________________________
+
+    
+    @pytest.mark.skipif(
+        jax.default_backend() != "gpu", reason="large point identity gate requires a GPU"
+    )
+    def test_point_jet_identity():
+        from nova.biot import polygonanalytic
+    
+        geometry, points = _geometry(), _points()
+        jets = {}
+        with _baseline_kernel() as baseline:
+            for arm, module in (("baseline", baseline), ("head", polygonanalytic)):
+                jet = _point_jet(module)
+                started = time.perf_counter()
+                executable = (
+                    jax.jit(jax.vmap(jet, in_axes=(0, None)))
+                    .lower(jnp.asarray(points[:100]), geometry)
+                    .compile()
+                )
+                print(
+                    f"IDENTITY_COMPILE arm={arm} "
+                    f"seconds={time.perf_counter() - started:.9g} "
+                    f"executable_bytes={executable.memory_analysis().generated_code_size_in_bytes}",
+                    flush=True,
+                )
+                jets[arm] = np.concatenate(
+                    [
+                        np.asarray(executable(jnp.asarray(chunk), geometry))
+                        for chunk in np.split(points, 100)
+                    ]
+                )
+        maximum = _maximum_error(jets["head"], jets["baseline"])
+        print(
+>           f"IDENTITY kind=polygon points={len(points)} "
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            f"component_maxima={json.dumps(maximum.tolist())} "
+            f"maximum={maximum.max():.17g}",
+            flush=True,
+        )
+E       assert np.float64(0.00010467739094605777) <= 1e-13
+E        +  where np.float64(0.00010467739094605777) = <built-in method max of numpy.ndarray object at 0x7f90dd279650>()
+E        +    where <built-in method max of numpy.ndarray object at 0x7f90dd279650> = array([9.27187306e-09, 1.42924798e-06, 5.32996616e-08, 1.04677391e-04,\n       2.09422696e-06, 8.57918922e-07, 2.31949407e-07]).max
+
+tests/biot/test_kernel_compile_cost.py:258: AssertionError
+=========================== short test summary info ============================
+FAILED tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile - assert 53.47920302115381 < 30.0
+FAILED tests/biot/test_kernel_compile_cost.py::test_point_jet_identity - assert np.float64(0.00010467739094605777) <= 1e-13
+ +  where np.float64(0.00010467739094605777) = <built-in method max of numpy.ndarray object at 0x7f90dd279650>()
+ +    where <built-in method max of numpy.ndarray object at 0x7f90dd279650> = array([9.27187306e-09, 1.42924798e-06, 5.32996616e-08, 1.04677391e-04,\n       2.09422696e-06, 8.57918922e-07, 2.31949407e-07]).max
+================= 2 failed, 1 deselected in 266.46s (0:04:26) ==================
+GPU_DEVICE_INVENTORY=0,_NVIDIA_H200_NVL,_143771
+GPU_UTILISATION_AT_10S=0,_0
+GPU_UTILISATION_AT_30S=0,_0
+GPU_UTILISATION_AT_60S=0,_0
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-06T00:49:14+0200
+NOVA_LANE_EXIT_STATUS=1
+
+EXIT=1

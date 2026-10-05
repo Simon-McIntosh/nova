@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-kernel-compile-cost">
+<meta name="plan-title" content="Harmonic kernel compile-cost checkpoint">
+<meta name="plan-summary" content="Partial packed recurrence implementation; graph, cold-compile and numerical gates remain unmet">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="61fba54638d33d3f4b902e23ef130389862d571f">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="failed">
+<meta name="plan-environment" content="Shared nova virtualenv; CPU fleet 1277272 and H200 1281131">
+<title>Harmonic kernel compile-cost checkpoint | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-kernel-compile-cost-checkpoint">Harmonic kernel compile-cost checkpoint</h1>
+<table id="cfs-kernel-compile-cost-measures">
+<caption>Point jet from one booked five-edge polygon; scalar and 100-point batch compile measurements are separate shapes. Generated-code bytes are the JAX executable memory-analysis field. The candidate is not qualified.</caption>
+<thead><tr><th>Arm and shape</th><th>Unique equations</th><th>Cold compile [s]</th><th>Generated code [bytes]</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>Dispatch revision 01575b6b164607271c9f1d06cfa3f64f18128646; scalar</td><td>78404</td><td>Not measured</td><td>Not measured</td><td>Reproduced unbounded expression</td></tr>
+<tr><td>Candidate 61fba54638d33d3f4b902e23ef130389862d571f; scalar</td><td>22565</td><td>53.479203</td><td>13416</td><td>3.47458453× reduction; fails required 10× and 30 s</td></tr>
+<tr><td>Dispatch kernels; batch of 100 points</td><td>Not measured</td><td>124.310922</td><td>2912</td><td>Identity reference compiled; not the scalar compile comparison</td></tr>
+<tr><td>Candidate kernels; batch of 100 points</td><td>Not measured</td><td>66.1840253</td><td>13416</td><td>Identity arm completed and failed</td></tr>
+</tbody></table>
+<table id="cfs-kernel-compile-cost-identity">
+<caption>Numerical gates and the declared recurrence mutation</caption>
+<thead><tr><th>Check</th><th>Maximum relative error</th><th>Result</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>10000 harmonic recurrence inputs; all eight moments versus git-show baseline</td><td>0</td><td>Passed at 1e-13</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/recurrence-head.log">Head recurrence log</a></td></tr>
+<tr><td>Same recurrence with its last ascending term omitted and output slot zero-filled</td><td>14.247645913956273</td><td>Identity assertion fails; EXIT=1</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/negative-control.log">Negative control log</a></td></tr>
+<tr><td>10000 polygon point values, gradients and Hessians versus git-show baseline</td><td>0.00010467739094605777</td><td>Fails 1e-13; finite values on all 10000 points</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/h200-kernel-compile-cost-excerpt.log">H200 job 1281131 excerpt</a></td></tr>
+<tr><td>10000 filament point jets</td><td>Not measured</td><td>GPU test added; skipped on CPU and not included in the already-launched H200 session</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/after-suite.log">CPU suite log</a></td></tr>
+<tr><td>Existing section moment test</td><td>6.29452651e-10</td><td>Regression: one of 27 components fails 3e-10; absolute difference 3.3615965e-17</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/after-suite.log">Candidate suite log</a></td></tr>
+<tr><td>Polygon component maxima: value; radial/vertical gradient; row-major Hessian</td><td colspan="3"><code>[9.271873064666692e-09, 1.4292479767881019e-06, 5.3299661555054756e-08, 0.00010467739094605777, 2.0942269554104297e-06, 8.579189218545841e-07, 2.319494074635711e-07]</code></td></tr>
+</tbody></table>
+<table id="cfs-kernel-compile-cost-gates">
+<caption>Commands executed in the assigned worktree, using the shared interpreter and explicit PYTHONPATH; CPU work ran inside the existing fleet allocation</caption>
+<thead><tr><th>Gate</th><th>Command</th><th>Job</th><th>Result</th></tr></thead><tbody>
+<tr><td>Existing CPU Biot suite at dispatch</td><td><code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot -vv</code></td><td>1277272</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/baseline-suite.log">1 passed; no baseline failure ids</a></td></tr>
+<tr><td>Candidate CPU Biot suite</td><td><code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot -vv -s</code></td><td>1277272</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/after-suite.log">2 failed, 1 passed, 3 skipped; two added failures</a></td></tr>
+<tr><td>Focused representation checks</td><td><code>/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_biotrangefunction.py tests/test_biotelliptic.py -vv</code></td><td>1277272</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/representation-unit.log">295 passed, 50 warnings; before helper sharing, NumPy arithmetic unchanged</a></td></tr>
+<tr><td>H200 compile and polygon identity</td><td><code>RECKON_ALLOW_NESTED_LAUNCH=1 TMPDIR=/tmp scripts/h200_test_lane/run.sh --log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-kernel-compile-cost.log --cores 2 --mem 64G --time 00:25:00 --env NOVA_CACHE_PREWARM_RUN=1 --wait -- tests/biot/test_kernel_compile_cost.py -k 'cold_compile or identity' -vv -s --timeout=900</code></td><td>1281131</td><td>Cold test disables persistent cache; aggregate prewarm statistics are not this compile measurement. Session completed: 2 failed, 1 deselected; payload EXIT_STATUS=1. The launcher returned shell status 0 with an empty reported status; the payload receipt is authoritative.</td></tr>
+</tbody></table>
+<table id="cfs-kernel-compile-cost-follow-on">
+<caption>Review checkpoint; no plan followup or section was closed</caption>
+<thead><tr><th>Item</th><th>State</th></tr></thead><tbody>
+<tr><td>Changed product files</td><td><code>nova/biot/rangefunction.py</code>, <code>nova/biot/elliptic.py</code>; fixed-length traced scans, packed contractions and reusable helper graphs; signatures retained</td></tr>
+<tr><td>Added check</td><td><code>tests/biot/test_kernel_compile_cost.py</code>; baseline kernels loaded from git show through importlib, never substituted into production imports</td></tr>
+<tr><td>Remaining source sites</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/shared-trace-inspection.log">Source census</a>: momentchannel.py pole composition, completeelliptic.py descent/accumulation, polygonanalytic.py assembly and gradedresidual.py; outside the granted source paths</td></tr>
+<tr><td>Next action</td><td>Coordinator review of the source scope and arithmetic design. Restore cancellation-sensitive numerical agreement before qualifying the performance change. Do not promote this candidate as complete.</td></tr>
+<tr><td>Raw H200 receipt</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-kernel-compile-cost.log</code>; over 300000 bytes, retained outside the repository.</td></tr>
+</tbody></table>
+</main></body></html>

@@ -1,0 +1,145 @@
+revision 61fba54638d33d3f4b902e23ef130389862d571f tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command env JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot -vv -s
+
+PROVENANCE: run began on parent 01575b6b164607271c9f1d06cfa3f64f18128646 with the candidate working-tree bytes subsequently committed as 61fba54638d33d3f4b902e23ef130389862d571f; recurrence log source differs only by formatting in the test file.
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 00:46:25 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 6 items
+
+tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound REFERENCE_MODULE rangefunction=/tmp/biot-reference-z7btjsfr/rangefunction.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-z7btjsfr/elliptic.py
+REFERENCE_MODULE momentchannel=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+EQUATIONS before=78404 after=22565 ratio=3.47458453
+FAILED
+tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile SKIPPED
+tests/biot/test_kernel_compile_cost.py::test_point_jet_identity SKIPPED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-nkc7wq9e/rangefunction.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-nkc7wq9e/elliptic.py
+REFERENCE_MODULE momentchannel=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+RECURRENCE_IDENTITY points=10000 maximum=0
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity SKIPPED
+tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference FAILED
+
+=================================== FAILURES ===================================
+_______________________ test_point_jet_expression_bound ________________________
+
+    def test_point_jet_expression_bound():
+        from nova.biot import polygonanalytic
+    
+        geometry = _geometry()
+        point = jnp.asarray([5.62, 0.31])
+        with _baseline_kernel() as baseline:
+            before = _unique_equations(
+                jax.make_jaxpr(jax.jit(_point_jet(baseline)))(point, geometry)
+            )
+        after = _unique_equations(
+            jax.make_jaxpr(jax.jit(_point_jet(polygonanalytic)))(point, geometry)
+        )
+        print(
+            f"EQUATIONS before={before} after={after} ratio={before / after:.9g}",
+            flush=True,
+        )
+        assert before > 50000, "the counter must see the expanded reference kernel"
+>       assert after * 10 <= before
+E       assert (22565 * 10) <= 78404
+
+tests/biot/test_kernel_compile_cost.py:170: AssertionError
+___________ test_traced_exact_section_moments_match_numpy_reference ____________
+
+    def test_traced_exact_section_moments_match_numpy_reference():
+        vertices = np.asarray(
+            [
+                [4.91, -0.10],
+                [5.08, -0.14],
+                [5.17, 0.02],
+                [5.04, 0.15],
+                [4.88, 0.08],
+            ]
+        )
+        target = np.asarray([[5.62, 0.31], [4.27, -0.46], [6.14, -0.22]])
+        expansion_centre = np.asarray([5.01, 0.025])
+        edge, weight, norm = pad_batch([vertices])
+        section_centre = _section_centroid(vertices)[:, None]
+        reflection_axis = np.asarray([np.nan])
+        reflection_partner = np.arange(len(vertices), dtype=np.int32)[:, None]
+        reflection = _horizontal_reflection(vertices)
+        assert reflection is None
+    
+        plan = TilePlan(
+            target_tile=len(target),
+            source_tile=1,
+            block=len(target),
+            n_panels=16,
+            n_nodes=48,
+        )
+        evaluate = tile_evaluator(
+            plan,
+            batched=True,
+            kernel="moments",
+            edge_count=len(vertices),
+        )
+        actual = np.asarray(
+            evaluate(
+                target[:, 0],
+                target[:, 1],
+                edge,
+                weight,
+                norm,
+                section_centre,
+                expansion_centre[:, None],
+                reflection_axis,
+                reflection_partner,
+            )
+        )[:, :, 0]
+        expected = _reference_rows(target, vertices, expansion_centre)
+    
+>       np.testing.assert_allclose(actual, expected, rtol=3.0e-10, atol=2.0e-18)
+E       AssertionError: 
+E       Not equal to tolerance rtol=3e-10, atol=2e-18
+E       
+E       Mismatched elements: 1 / 27 (3.7%)
+E       Mismatch at index:
+E        [1, 1]: 5.3405073307504585e-08 (ACTUAL), 5.340507334112055e-08 (DESIRED)
+E       Max absolute difference among violations: 3.3615965e-17
+E       Max relative difference among violations: 6.29452651e-10
+E        ACTUAL: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+E              [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+E              [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+E        DESIRED: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+E              [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+E              [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+
+tests/biot/test_traced_section_moments.py:70: AssertionError
+=========================== short test summary info ============================
+FAILED tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound - assert (22565 * 10) <= 78404
+FAILED tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference - AssertionError: 
+Not equal to tolerance rtol=3e-10, atol=2e-18
+
+Mismatched elements: 1 / 27 (3.7%)
+Mismatch at index:
+ [1, 1]: 5.3405073307504585e-08 (ACTUAL), 5.340507334112055e-08 (DESIRED)
+Max absolute difference among violations: 3.3615965e-17
+Max relative difference among violations: 6.29452651e-10
+ ACTUAL: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+       [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+       [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+ DESIRED: array([[ 1.435069e-05,  1.025930e-05,  1.175127e-05],
+       [ 1.450135e-07,  5.340507e-08,  1.142606e-07],
+       [-3.111763e-07, -2.492092e-07, -2.757842e-07],...
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:187: cold compile certificate requires a GPU
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:227: large point identity gate requires a GPU
+SKIPPED [1] tests/biot/test_kernel_compile_cost.py:307: point batch gate uses GPU
+=================== 2 failed, 1 passed, 3 skipped in 43.29s ====================
+EXIT=1

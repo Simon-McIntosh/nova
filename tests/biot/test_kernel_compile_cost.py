@@ -412,3 +412,16 @@ def test_filament_point_jet_identity():
     )
     assert np.any(expected != 0.0)
     assert maximum.max() <= 1e-13
+
+
+def test_kernel_helper_sharing_requires_staging():
+    """Eager differentiation stays eager while tracing reuses helper graphs."""
+    from nova.biot.rangefunction import _array_program
+
+    @_array_program
+    def square(value):
+        return value * value
+
+    traced = jax.make_jaxpr(square)(2.0)
+    assert any(equation.primitive.name == "jit" for equation in traced.jaxpr.eqns)
+    assert jax.grad(square)(2.0) == 4.0

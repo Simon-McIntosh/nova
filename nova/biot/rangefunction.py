@@ -94,10 +94,12 @@ _BOTH_ENDS = [0.125, 0.0, -0.125]
 def _is_staged(value):
     """Distinguish staged operands from eager differentiation and batching."""
     while isinstance(value, jax.core.Tracer):
-        primal = getattr(value, "primal", getattr(value, "val", None))
-        if primal is None or primal is value:
-            return True
-        value = primal
+        if hasattr(value, "primal"):
+            value = value.primal
+        elif hasattr(value, "batch_dim"):
+            value = value.val
+        else:
+            return value.to_concrete_value() is None
     return False
 
 

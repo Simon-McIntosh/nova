@@ -23,8 +23,8 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
-<meta name="plan-modified" content="2026-10-04">
+<meta name="plan-version" content="18">
+<meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -131,22 +131,22 @@
     <p class="r-dec-q">Which lanes carry the design and the implementation?</p>
     <p class="r-dec-rat">Lead, 2026-10-04: codex-astra (gpt-6-astra, the model the account offers) for the design (§1), the four implementation nodes (§2 to §5) and the acceptance and retirement node (§6); claude-opus re-review of the design once its window reopens; the local lane for tests, instruments, evidence and read-back reviews. codex-terra is retired.</p>
     </div>
-<div class="r-dec" data-key="field-representation" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="field-representation" data-choice="cellwise-polynomial" data-by="lead" data-when="2026-10-05T15:21:47+00:00">
     <p class="r-dec-q">Which field representation does the topology read evaluate on the hex cells?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="cellwise-polynomial">the cellwise polynomial the moments are evaluated in</button>
+      <button class="r-opt chosen" data-value="cellwise-polynomial">the cellwise polynomial the moments are evaluated in</button>
       <button class="r-opt" data-value="global-tensor-spline">the global tensor spline</button>
       <button class="r-opt" data-value="ring-quadratic">the six-point ring quadratic</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead, 2026-10-05: the own-node quadratic is the field everywhere except the saddle cell, whose support comes from the null&#x27;s normal form (position and Hessian eigen-directions with curvature corrections), never from level-set roots. The null position, gradient and Hessian are evaluated from the Biot coupling kernels&#x27; own analytic derivatives of the booked current, never by differentiating the mesh flux. Reason: the null converges at the field&#x27;s order with any representation; the separatrix level set at the null does not (a flux error e moves it by sqrt(2e/|H|), measured as half-order support in the saddle cell), so the saddle cell must be built from regular quantities. A global spline would improve the saddle support by one order only.</p>
     </div>
-<div class="r-dec" data-key="receipts-out-of-git" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="receipts-out-of-git" data-choice="gpfs-with-pointer" data-by="lead" data-when="2026-10-05T15:21:47+00:00">
     <p class="r-dec-q">Do large receipts leave git for the GPFS evidence store?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="gpfs-with-pointer">yes: npz, gz and json above a few MB live on GPFS with a path pointer; PNG and SVG stay</button>
+      <button class="r-opt chosen" data-value="gpfs-with-pointer">yes: npz, gz and json above a few MB live on GPFS with a path pointer; PNG and SVG stay</button>
       <button class="r-opt" data-value="stay-in-git">no: keep committing receipts</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead, 2026-10-05: npz, gz and json receipts above a few MB live under /work/projects/imas_gpu with a path pointer in the evidence fragment; PNG and SVG stay in git; pre-commit enforces a size ceiling; existing large receipts migrate in a separate cleanup node. Reason: 1,234 of nova&#x27;s 1,312 tracked MB is docs/figures receipts, paid by every clone, worktree and archive.</p>
     </div>
 </section>
 

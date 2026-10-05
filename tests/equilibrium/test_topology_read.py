@@ -760,3 +760,279 @@ def test_closed_form_resolution_probe(kind):
         assert result.qualified, row
         assert row["axis_error_m"] <= row["pitch"]
         assert int(result.boundary_class) == int(saddle is not None)
+
+
+def _limited_wall_contact(oracle, wall):
+    """Independent stationary maxima of the analytic quartic on wall segments."""
+    from scipy.optimize import minimize_scalar
+
+    events = []
+    for index, first in enumerate(wall):
+        direction = wall[(index + 1) % len(wall)] - first
+
+        def negative_flux(parameter):
+            return -2 * np.pi * oracle.flux(*(first + parameter * direction))
+
+        optimum = minimize_scalar(
+            negative_flux,
+            bounds=(0.0, 1.0),
+            method="bounded",
+            options={"xatol": 1e-15},
+        )
+        for parameter in (0.0, 1.0, float(optimum.x)):
+            events.append(
+                (
+                    -negative_flux(parameter),
+                    index,
+                    parameter,
+                    first + parameter * direction,
+                )
+            )
+    return max(events, key=lambda event: event[0])
+
+
+def _render_limited_contact(directory, oracle, wall, result, contact, worst):
+    """Show the analytic zero contour and the wall-selected level at contact."""
+    from pathlib import Path
+    import matplotlib.pyplot as plt
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    figure, panels = plt.subplots(1, 2, figsize=(14, 8), dpi=100)
+    boundary = np.asarray(result.boundary)
+    zoom = max(np.linalg.norm(boundary - contact) * 2.5, 0.015)
+    for index, axes in enumerate(panels):
+        poloidal_axes(axes)
+        if index == 0:
+            lower, upper = wall.min(axis=0), wall.max(axis=0)
+        else:
+            lower = np.minimum(boundary, contact) - zoom
+            upper = np.maximum(boundary, contact) + zoom
+        radial = np.linspace(lower[0], upper[0], 450)
+        vertical = np.linspace(lower[1], upper[1], 450)
+        rr, zz = np.meshgrid(radial, vertical)
+        flux = 2 * np.pi * oracle.flux(rr, zz)
+        for level, color, linestyle in (
+            (0.0, "#333333", "--"),
+            (float(result.boundary_flux), DEFAULT_INK.flux_color, "-"),
+        ):
+            contours = poloidal.draw_flux_contours(
+                axes,
+                radial,
+                vertical,
+                flux,
+                np.asarray((level,)),
+                color=color,
+                linewidth=2.6,
+            )
+            if contours is not None:
+                contours.set_linestyle(linestyle)
+        poloidal.draw_wall(axes, units=(wall,))
+        axes.plot(*contact, marker="o", markersize=9, fillstyle="none", color="#333333")
+        axes.plot(*boundary, marker="+", markersize=13, color=DEFAULT_INK.flux_color)
+        if index == 0:
+            poloidal.draw_nulls(
+                axes,
+                np.asarray((oracle.major_radius, 0.0)),
+                np.empty((0, 2)),
+                style=replace(DEFAULT_INK, axis_color="#333333", axis_markersize=12),
+            )
+            poloidal.draw_nulls(
+                axes,
+                np.asarray(result.axis),
+                np.empty((0, 2)),
+                style=replace(
+                    DEFAULT_INK, axis_color=DEFAULT_INK.flux_color, axis_markersize=8
+                ),
+            )
+            polygon = np.vstack((worst, worst[0]))
+            axes.plot(*polygon.T, color="#777777", linewidth=1.2)
+        axes.set_xlim(lower[0], upper[0])
+        axes.set_ylim(lower[1], upper[1])
+    panels[0].text(
+        0.02,
+        0.98,
+        "zero-flux region / larger axis",
+        transform=panels[0].transAxes,
+        color="#333333",
+        fontsize=20,
+        va="top",
+    )
+    panels[0].text(
+        0.02,
+        0.92,
+        "wall-selected level / read axis",
+        transform=panels[0].transAxes,
+        color=DEFAULT_INK.flux_color,
+        fontsize=20,
+        va="top",
+    )
+    panels[1].text(
+        0.02,
+        0.98,
+        "wall contact detail",
+        transform=panels[1].transAxes,
+        color="#333333",
+        fontsize=20,
+        va="top",
+    )
+    for extension in ("png", "svg"):
+        figure.savefig(
+            directory / f"limited-contact-diagnostic.{extension}",
+            dpi=100,
+            facecolor="white",
+        )
+    plt.close(figure)
+
+
+def test_limited_boundary_instrument():
+    """Expose wall/region offsets independently of cell reconstruction order."""
+    import os
+    from pathlib import Path
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    oracle, field, wall, _, _ = _analytic_inputs("limited")
+    analytic_contact = np.asarray((oracle.boundary_midplane_radii()[1], 0.0))
+    analytic_vertex = int(np.argmin(np.linalg.norm(wall - analytic_contact, axis=1)))
+    independent_level, segment, parameter, independent_point = _limited_wall_contact(
+        oracle, wall
+    )
+    convention = TopologyConvention.from_cocos(17, 1.0)
+    evaluate = jax.jit(read)
+    rows = []
+    for count in (132, 300, 550):
+        geometry = _realised_hex_geometry(wall, count)
+        result = evaluate(field, geometry, convention, TopologyPolicy())
+        jax.block_until_ready(result)
+        reference, _ = _reference_cell_fractions("limited", oracle, geometry)
+        membership = np.asarray(result.membership)
+        vertices, counts = (
+            np.asarray(geometry.vertices),
+            np.asarray(geometry.vertex_count),
+        )
+        polygons = [cell[:size] for cell, size in zip(vertices, counts, strict=True)]
+        # Bounding-box extrema bound the separable quartic on the whole cell.
+        minimum, maximum = [], []
+        for polygon in polygons:
+            lower, upper = polygon.min(axis=0), polygon.max(axis=0)
+            radial = np.asarray((lower[0] ** 2, upper[0] ** 2)) - oracle.major_radius**2
+            radial_min = 0.0 if radial[0] <= 0 <= radial[1] else np.min(radial**2)
+            vertical_min = (
+                0.0 if lower[1] <= 0 <= upper[1] else min(lower[1] ** 2, upper[1] ** 2)
+            )
+            minimum.append(
+                2
+                * np.pi
+                * (
+                    oracle.axis_flux
+                    - 0.5 * oracle.pressure_coefficient * max(radial**2)
+                    - oracle.field_coefficient * max(lower[1] ** 2, upper[1] ** 2)
+                )
+            )
+            maximum.append(
+                2
+                * np.pi
+                * (
+                    oracle.axis_flux
+                    - 0.5 * oracle.pressure_coefficient * radial_min
+                    - oracle.field_coefficient * vertical_min
+                )
+            )
+        inside = np.flatnonzero(
+            (np.asarray(minimum) > max(float(result.boundary_flux), 0.0))
+            & (membership == 1.0)
+            & (reference == 1.0)
+        )
+        outside = np.flatnonzero(
+            (np.asarray(maximum) < min(float(result.boundary_flux), 0.0))
+            & (membership == 0.0)
+            & (reference == 0.0)
+        )
+        assert inside.size and outside.size, (inside, outside)
+        worst = int(np.argmax(np.abs(membership - reference)))
+        first, last = wall, np.roll(wall, -1, axis=0)
+        directions = last - first
+        projected = np.clip(
+            np.sum((np.asarray(result.boundary) - first) * directions, axis=1)
+            / np.sum(directions**2, axis=1),
+            0.0,
+            1.0,
+        )
+        read_segment = int(
+            np.argmin(
+                np.linalg.norm(
+                    first
+                    + projected[:, None] * directions
+                    - np.asarray(result.boundary),
+                    axis=1,
+                )
+            )
+        )
+        row = {
+            "cells": count,
+            "pitch_m": float(np.median(geometry.pitch)),
+            "read_level_wb": float(result.boundary_flux),
+            "analytic_boundary_flux_wb": 0.0,
+            "read_wall_unit": 0,
+            "read_wall_segment": read_segment,
+            "read_contact_m": np.asarray(result.boundary).tolist(),
+            "analytic_wall_unit": 0,
+            "analytic_wall_vertex": analytic_vertex,
+            "analytic_contact_m": analytic_contact.tolist(),
+            "wall_vertex_m": wall[analytic_vertex].tolist(),
+            "wall_vertex_offset_m": float(
+                np.linalg.norm(wall[analytic_vertex] - analytic_contact)
+            ),
+            "contact_offset_m": float(
+                np.linalg.norm(np.asarray(result.boundary) - analytic_contact)
+            ),
+            "independent_wall_max_wb": float(independent_level),
+            "independent_wall_segment": int(segment),
+            "independent_segment_parameter": float(parameter),
+            "independent_contact_m": independent_point.tolist(),
+            "worst_cell": worst,
+            "worst_cell_centre_m": np.asarray(geometry.centre)[worst].tolist(),
+            "worst_cell_minus_analytic_contact_m": (
+                np.asarray(geometry.centre)[worst] - analytic_contact
+            ).tolist(),
+            "worst_read_fraction": float(membership[worst]),
+            "worst_reference_fraction": float(reference[worst]),
+            "inside_control": {
+                "cell": int(inside[0]),
+                "read": float(membership[inside[0]]),
+                "reference": float(reference[inside[0]]),
+                "flux_lower_bound_wb": minimum[inside[0]],
+            },
+            "outside_control": {
+                "cell": int(outside[0]),
+                "read": float(membership[outside[0]]),
+                "reference": float(reference[outside[0]]),
+                "flux_upper_bound_wb": maximum[outside[0]],
+            },
+        }
+        rows.append(row)
+        print("LIMITED_BOUNDARY_INSTRUMENT " + json.dumps(row), flush=True)
+        root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+        if root:
+            Path(root).mkdir(parents=True, exist_ok=True)
+            (Path(root) / "limited-boundary-instrument.json").write_text(
+                json.dumps(rows, indent=2) + "\n"
+            )
+        np.testing.assert_allclose(
+            result.boundary_flux, independent_level, rtol=1e-9, atol=1e-12
+        )
+        assert result.valid and result.qualified
+        if count == 550 and os.environ.get("NOVA_TOPOLOGY_FIGURE_DIR"):
+            _render_limited_contact(
+                os.environ["NOVA_TOPOLOGY_FIGURE_DIR"],
+                oracle,
+                wall,
+                result,
+                analytic_contact,
+                polygons[worst],
+            )
+    assert max(row["read_level_wb"] for row in rows) == min(
+        row["read_level_wb"] for row in rows
+    )

@@ -315,14 +315,6 @@ def test_harmonic_recurrence_identity(monkeypatch):
     """The complete recurrence agrees with the revision-pinned arithmetic."""
     from nova.biot import elliptic
 
-    if os.environ.get("NOVA_KERNEL_TRUNCATE_RECURRENCE") == "1":
-        evaluate = elliptic.harmonic_moments
-
-        def truncated(parameter, count, **kwargs):
-            values = evaluate(parameter, count - 1, **kwargs)
-            return values + [kwargs.get("xp", np).zeros_like(values[0])]
-
-        monkeypatch.setattr(elliptic, "harmonic_moments", truncated)
     parameter = np.linspace(0.99001, 0.999999, 10000)
     with _baseline_kernel() as kernel:
         expected = np.asarray(
@@ -333,6 +325,17 @@ def test_harmonic_recurrence_identity(monkeypatch):
                 xp=np,
             )
         )
+    assert np.all(np.isfinite(expected))
+    assert np.all(expected != 0.0)
+
+    if os.environ.get("NOVA_KERNEL_TRUNCATE_RECURRENCE") == "1":
+        evaluate = elliptic.harmonic_moments
+
+        def truncated(parameter, count, **kwargs):
+            values = evaluate(parameter, count - 1, **kwargs)
+            return values + [kwargs.get("xp", np).zeros_like(values[0])]
+
+        monkeypatch.setattr(elliptic, "harmonic_moments", truncated)
     actual = np.asarray(
         elliptic.harmonic_moments(
             parameter,

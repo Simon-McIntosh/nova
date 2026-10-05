@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -220,7 +220,7 @@
     <div class="r-comment-body"><p>tests/test_forward_solve_request.py POLICY_FIELDS now appends "topology" after "compilation_cache" to match the nineteen-field ForwardSolvePolicy; head arm passes the target test (.FFF., 3 failed 2 passed, done when met), baseline arm 4 failed 1 passed, negative control (previous eighteen-field tuple) fails naming topology, EXIT=1</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261005T233644627926-review-of-cfs-policy-tuple" data-who="reckon-build" data-when="2026-10-05T23:45:20.128Z">
-    <div class="r-comment-body"><p>Independent review of r-20261005T232854641519-cfs-policy-tuple stored as a parsed record at the revision-keyed and plain review paths; the change (tests/test_forward_solve_request.py POLICY_FIELDS += &quot;topology&quot;) is correct and its guard demonstrably fires, but the run&#x27;s baseline arm ran a renamed scratch copy so the store&#x27;s own log reader reports 3 added failures and caps the review total at 5, recorded as a blocking finding.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261005T232854641519-cfs-policy-tuple stored as a parsed record at the revision-keyed and plain review paths; the change (tests/test_forward_solve_request.py POLICY_FIELDS += "topology") is correct and its guard demonstrably fires, but the run's baseline arm ran a renamed scratch copy so the store's own log reader reports 3 added failures and caps the review total at 5, recorded as a blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>
@@ -311,6 +311,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T232743613132" data-who="" data-when="">
     <div class="r-comment-body"><p>Citation correction, 2026-10-06, from the twenty-second composed plan review: the private current-integration copies in <code>clip_quadrature.py</code> that retire at §6 are <code>_integrate_current_points</code> and <code>_integrate_current_polynomial</code>; the earlier ruling's spelling <code>_integrate_current</code> names no symbol. The deletion gate's name check reads these two.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T234742215161" data-who="" data-when="">
+    <div class="r-comment-body"><p>Region authority disposition, 2026-10-06, from the twenty-third composed plan review: <code>nova/equilibrium/domain.py</code> (<code>classify_domains</code>, <code>axis_connected_component</code>, <code>saddle_qualified_domains</code>, <code>PlasmaDomain</code>, <code>DomainMasks</code>) is the plasma-region classification authority today and is one of the region-role modules the design inventory binds to <code>topology.read</code>. Its <code>axis_connected_component</code> is a cite-or-justify candidate for the read's axis-connected membership (the landed read builds the component on the shipped contour tree with exact sub-cell fragment containment, and its evidence states why the cell-level component was not carried). <code>domain.py</code> retires at §6 with the other region authorities, its ten importers re-pointed onto the read's qualification verdict and membership fractions, and the census clause reads: after retirement no module other than <code>topology.py</code> classifies a plasma region or selects an axis-connected component.</p></div>
 </div>
 </section>
 </main>

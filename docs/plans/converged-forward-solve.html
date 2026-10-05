@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -236,6 +236,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T185257770240" data-who="" data-when="">
     <div class="r-comment-body"><p>Two rulings recorded on the §2 run on 2026-10-05. <strong>Oracle wall.</strong> The limited analytic oracle's wall from <code>limiter_contour</code> had chord edges beside the outboard contact cutting 0.10 m into the zero-flux region, so every rung read a wall contact at 0.0401 Wb instead of zero; the §2 run's grant was widened to the fixture script and a new invariant test (every edge sampled densely, flux at most zero, zero only at the tangent contact edge, the chord construction kept as a failing control). Corrected level 2e-14 Wb, contact offset zero, realised cell counts unchanged. Receipts other plans banked against the old wall are before-arm evidence only. <strong>Membership normalisation.</strong> The per-cell membership budget C·(h/R₀)ᵖ is measured as symmetric-difference area divided by the rung's median cell area, never by the cell's own area: a wall-trimmed sliver (the worst limited cell at 550 cells has 0.12% of the median area) swings its own fraction by whole units while its absolute error is negligible to the booking, which consumes area times current density. Slivers stay in the carrier and are listed per rung in a census with absolute error and fraction. The order assertion (at least 2 on the smooth boundary, 2 for the saddle neighbourhood) applies to the normalised maxima; a smooth-boundary order below 2 after this normalisation contradicts the 490-fit probe and goes to the lead.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T185928859669" data-who="" data-when="">
+    <div class="r-comment-body"><p>Owner ruling for the contour tree, 2026-10-05, from the seventh composed plan review: the contour-tree authority §2 builds on is the existing <code>contour_tree.build_contour_tree</code> (<code>nova/equilibrium/contour_tree.py</code>) over the mesh that <code>contour_tree_mesh.build_contour_mesh</code> produces, the implementation the <code>contour-tree-topology-authority</code> plan shipped and the <code>topology-authority</code> decision names. <code>topology.read</code> is the single read that calls it; it never re-implements the tree. The §2 node either builds its general saddle census on that tree (fixed-capacity buffers, deterministic ties, the admitted saddle by component containment) or states in its evidence why the shipped tree fails the traced fixed-shape contract and what it carries into <code>topology.py</code> as private helpers instead. §6 keeps <code>contour_tree.py</code> and <code>contour_tree_mesh.py</code>; their only equilibrium caller after retirement is <code>topology.read</code>.</p></div>
 </div>
 </section>
 </main>

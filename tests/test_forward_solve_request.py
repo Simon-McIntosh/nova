@@ -42,6 +42,7 @@ POLICY_FIELDS = (
     "exact_kernels",
     "cached_machine",
     "compilation_cache",
+    "topology",
 )
 RECEIPT_FIELDS = (
     "terminal_state",

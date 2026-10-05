@@ -235,6 +235,7 @@ class TopologyPolicy:
 
     Capacities determine array shapes. Tolerances are relative to local field
     and geometry scales, so changing flux units does not change admission.
+    The normal-form radius is physical metres; zero retains the null-owning cell.
     """
 
     null_capacity: int = 16
@@ -243,6 +244,7 @@ class TopologyPolicy:
     hessian_tolerance: float = 1.0e-10
     position_tolerance: float = 1.0e-10
     edge_tolerance: float = 1.0e-12
+    normal_form_radius: float = 0.0
 
     def __post_init__(self) -> None:
         for name in ("null_capacity", "fragment_capacity", "polish_iterations"):
@@ -256,10 +258,20 @@ class TopologyPolicy:
             ):
                 raise ValueError(f"{name} must be finite and positive")
 
+        if not isinstance(self.normal_form_radius, jax.core.Tracer) and (
+            not np.isfinite(self.normal_form_radius) or self.normal_form_radius < 0.0
+        ):
+            raise ValueError("normal_form_radius must be finite and nonnegative")
+
     def tree_flatten(self):
         """Keep numerical tolerances traced and array capacities static."""
         return (
-            (self.hessian_tolerance, self.position_tolerance, self.edge_tolerance),
+            (
+                self.hessian_tolerance,
+                self.position_tolerance,
+                self.edge_tolerance,
+                self.normal_form_radius,
+            ),
             (self.null_capacity, self.fragment_capacity, self.polish_iterations),
         )
 
@@ -274,6 +286,7 @@ class TopologyPolicy:
             "hessian_tolerance",
             "position_tolerance",
             "edge_tolerance",
+            "normal_form_radius",
         )
         for name, value in zip(names, (*metadata, *leaves), strict=True):
             object.__setattr__(result, name, value)

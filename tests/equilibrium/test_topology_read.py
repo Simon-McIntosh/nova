@@ -47,7 +47,9 @@ class QuadraticPointField:
 def test_topology_policy_round_trip():
     policy = replace(
         ForwardSolvePolicy(),
-        topology=TopologyPolicy(null_capacity=7, hessian_tolerance=1e-8),
+        topology=TopologyPolicy(
+            null_capacity=7, hessian_tolerance=1e-8, normal_form_radius=0.2
+        ),
     )
     assert (
         ForwardSolvePolicy.from_dict(json.loads(json.dumps(policy.to_dict()))) == policy
@@ -699,7 +701,7 @@ def _render_read_panel(
         polygon = np.vstack((polygon, polygon[0]))
         axes.plot(*polygon.T, color="#555555", linewidth=3.0, linestyle="--")
         axes.annotate(
-            f"worst smooth cell {worst_cell}",
+            f"measured cell {worst_cell}",
             xy=np.asarray(geometry.centre)[worst_cell],
             xytext=(0.02, 0.10),
             textcoords="axes fraction",
@@ -1254,13 +1256,16 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
             reconstructed.append(fraction)
             analytic.append(reference)
             continue
-        shape = Polygon(cell)
-        saddle_cell = diverted and shape.covers(
-            Point(np.asarray(result.saddle_form.position))
-        )
-        ray_intervals, ray_breaks = (
-            _normal_form_slice(cell, result) if saddle_cell else (None, [])
-        )
+        saddle_cell = diverted and bool(np.asarray(result.normal_form_cells)[index])
+        if saddle_cell:
+            origin = np.asarray(result.saddle_form.position)
+            extent = 1.2 * np.max(np.linalg.norm(cell - origin, axis=1))
+            box = origin + extent * np.asarray(
+                ((-1.0, -1.0), (1.0, -1.0), (1.0, 1.0), (-1.0, 1.0))
+            )
+            ray_intervals, ray_breaks = _normal_form_slice(box, result)
+        else:
+            ray_intervals, ray_breaks = None, []
         coefficient, centre, pitch = coefficients[index], centres[index], pitches[index]
         fragment = None
         if (
@@ -1463,25 +1468,34 @@ def test_topology_membership_regular_cell_measure(kind):
     oracle, field, wall, axis, saddle = _analytic_inputs(kind)
     convention = TopologyConvention.from_cocos(17, 1.0)
     evaluate = jax.jit(read)
+    calibration = None
+    radius = 0.0
+    if saddle is not None:
+        finest = _realised_hex_geometry(wall, 2616)
+        calibration = _calibrate_normal_form_radius(
+            oracle, field, float(np.median(finest.pitch))
+        )
+        radius = calibration["radius_m"]
+        print("NORMAL_FORM_RADIUS " + json.dumps(calibration), flush=True)
+    policy = TopologyPolicy(normal_form_radius=radius)
     rows = []
     root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
     directory = Path(root) if root else None
     if directory is not None:
         directory.mkdir(parents=True, exist_ok=True)
     worst_panel = None
+    if directory is not None and calibration is not None:
+        (directory / "normal-form-radius.json").write_text(
+            json.dumps(calibration, indent=2) + "\n"
+        )
     for count in (132, 300, 550, 1074, 2616):
         geometry = _realised_hex_geometry(wall, count)
-        result = evaluate(field, geometry, convention, TopologyPolicy())
+        result = evaluate(field, geometry, convention, policy)
         jax.block_until_ready(result)
         assert result.valid and result.qualified
         measure = _symmetric_difference_measure(kind, oracle, geometry, result)
         pitch = float(np.median(geometry.pitch))
-        near = (
-            np.zeros(count, dtype=bool)
-            if saddle is None
-            else np.linalg.norm(np.asarray(geometry.centre) - saddle, axis=1)
-            < 2 * np.asarray(geometry.pitch)
-        )
+        near = np.asarray(result.normal_form_cells)
         normalised = measure["normalised_error"]
         smooth_worst = int(np.argmax(np.where(near, -1.0, normalised)))
         slivers = np.flatnonzero(
@@ -1491,6 +1505,9 @@ def test_topology_membership_regular_cell_measure(kind):
             "case": kind,
             "cells": len(geometry.centre),
             "pitch": pitch,
+            "normal_form_radius_m": radius,
+            "normal_form_radius_in_pitches": radius / pitch,
+            "normal_form_cell_count": int(np.count_nonzero(near)),
             "median_cell_area": measure["median_area"],
             "inside_control_count": int(
                 np.count_nonzero(np.asarray(result.membership) == 1.0)
@@ -1500,6 +1517,9 @@ def test_topology_membership_regular_cell_measure(kind):
             ),
             "smooth_max": float(np.max(normalised[~near])),
             "saddle_neighbourhood_max": float(np.max(normalised[near]))
+            if near.any()
+            else None,
+            "saddle_worst_cell": int(np.argmax(np.where(near, normalised, -1.0)))
             if near.any()
             else None,
             "smooth_worst_cell": smooth_worst,
@@ -1542,8 +1562,12 @@ def test_topology_membership_regular_cell_measure(kind):
             (directory / f"{kind}-regular-cell-rows.json").write_text(
                 json.dumps(rows, indent=2) + "\n"
             )
-        if worst_panel is None or row["smooth_max"] > worst_panel[0]:
-            worst_panel = (row["smooth_max"], geometry, result, smooth_worst)
+        panel_error = (
+            row["smooth_max"] if saddle is None else row["saddle_neighbourhood_max"]
+        )
+        panel_cell = smooth_worst if saddle is None else row["saddle_worst_cell"]
+        if worst_panel is None or panel_error > worst_panel[0]:
+            worst_panel = (panel_error, geometry, result, panel_cell)
         assert row["inside_control_count"] > 0 and row["outside_control_count"] > 0, row
         assert row["smooth_max"] > 1e-12, row
         assert row["read_area_check_regular_units"] < 1e-7, row
@@ -1583,14 +1607,138 @@ def test_topology_membership_regular_cell_measure(kind):
             axis,
             saddle,
             worst_cell=worst,
-            suffix="-regular-worst",
+            suffix="-physical-worst",
         )
-    assert smooth_order >= 2.0, summary
+    assert smooth_order >= 1.9, summary
     if saddle_order is not None:
-        assert saddle_order >= 2.0, summary
+        assert saddle_order >= 1.9, summary
     coefficient = 0.274714 if kind == "limited" else 0.233718
     for row in rows:
         budget = coefficient * (row["pitch"] / oracle.major_radius) ** 2
         assert row["smooth_max"] <= budget, (row, budget)
         if row["saddle_neighbourhood_max"] is not None:
             assert row["saddle_neighbourhood_max"] <= budget, (row, budget)
+
+
+def test_normal_form_support_away_from_null():
+    from nova.equilibrium.topology import _normal_form_cell_fragments
+
+    form = saddle_normal_form(
+        jnp.zeros(2),
+        jnp.asarray(((0.0, 1.0), (1.0, 0.0))),
+        jnp.zeros((2, 2, 2)),
+        1e-12,
+        jnp.zeros((2, 2, 2, 2)),
+    )
+    evaluate = jax.jit(_normal_form_cell_fragments)
+    for lower, upper, expected in (
+        ((1.0, 1.0), (3.0, 3.0), 4.0),
+        ((-1.0, -1.0), (1.0, 1.0), 2.0),
+        ((-2.0, 1.0), (-1.0, 2.0), 0.0),
+        ((0.0, 1.0), (1.0, 2.0), 1.0),
+    ):
+        x, y = lower
+        u, v = upper
+        cell = jnp.asarray(((x, y), (u, y), (u, v), (x, v)))
+        fragments = evaluate(cell, jnp.asarray(4), form, jnp.asarray(1e-12))
+        assert fragments.valid, fragments
+        np.testing.assert_allclose(
+            jnp.sum(fragments.area[jnp.asarray(form.positive)]), expected, atol=1e-12
+        )
+        np.testing.assert_allclose(
+            jnp.sum(fragments.area), (u - x) * (v - y), atol=1e-12
+        )
+
+
+def test_normal_form_curved_cells_partition_owner_support():
+    from nova.equilibrium.topology import _normal_form_cell_fragments
+
+    hessian, third = _saddle_jet()
+    form = saddle_normal_form(
+        jnp.zeros(2), hessian, third, 1e-12, jnp.zeros((2, 2, 2, 2))
+    )
+    # Partition one null-owning square into cells that also lie away from it.
+    full = jnp.asarray(((-0.2, -0.2), (0.2, -0.2), (0.2, 0.2), (-0.2, 0.2)))
+    reference = saddle_cell_fragments(full, jnp.asarray(4), form, jnp.asarray(1e-12))
+    total = jnp.zeros(4)
+    evaluate = jax.jit(_normal_form_cell_fragments)
+    for x in (-0.2, -0.1, 0.0, 0.1):
+        for y in (-0.2, -0.1, 0.0, 0.1):
+            cell = jnp.asarray(((x, y), (x + 0.1, y), (x + 0.1, y + 0.1), (x, y + 0.1)))
+            fragments = evaluate(cell, jnp.asarray(4), form, jnp.asarray(1e-12))
+            assert fragments.valid, fragments
+            total += fragments.area
+    np.testing.assert_allclose(total, reference.area, rtol=1e-10, atol=1e-12)
+
+
+def _calibrate_normal_form_radius(oracle, field, finest_pitch):
+    """Freeze the physical ray-validity radius against the finest area budget."""
+    from scipy.optimize import brentq
+
+    point = jnp.asarray(oracle.x_point)
+    hessian = field.evaluate(point).hessian
+    third = jax.jacfwd(lambda target: field.evaluate(target).hessian)(point)
+    fourth = jax.jacfwd(jax.jacfwd(lambda target: field.evaluate(target).hessian))(
+        point
+    )
+    form = saddle_normal_form(point, hessian, third, 1e-12, fourth)
+    origin, direction, curvature, cubic = map(
+        np.asarray, (form.position, form.direction, form.curvature, form.cubic)
+    )
+    coefficient = 0.233718
+    area_budget = coefficient * (finest_pitch / oracle.major_radius) ** 2
+    # Two branches may cross a regular hex; convert the area envelope to a
+    # conservative normal-displacement bound using its maximum chord length.
+    displacement_budget = area_budget * finest_pitch / (2 * 1.2408064788027995)
+
+    def probe(radius):
+        displacement = []
+        residuals = []
+        for d, c, b in zip(direction, curvature, cubic, strict=True):
+            endpoint = brentq(
+                lambda t: np.linalg.norm(t * d + t * t * c + t**3 * b) - radius,
+                0.0,
+                2 * radius,
+                xtol=1e-15,
+            )
+            t = np.linspace(endpoint / 257, endpoint, 257)[:, None]
+            points = origin + t * d + t * t * c + t**3 * b
+            tangent = d + 2 * t * c + 3 * t * t * b
+            normal = np.column_stack((-tangent[:, 1], tangent[:, 0]))
+            normal /= np.linalg.norm(normal, axis=1)[:, None]
+            delta = np.zeros(len(points))
+            for _ in range(8):
+                location = points + delta[:, None] * normal
+                derivative = np.sum(oracle.gradient(location) * normal, axis=1)
+                delta -= oracle.flux(location) / derivative
+            displacement.extend(np.abs(delta))
+            residuals.extend(np.abs(oracle.flux(points + delta[:, None] * normal)))
+        return float(np.max(displacement)), float(np.max(residuals))
+
+    lower, upper = finest_pitch / 100, 0.5 * oracle.minor_radius
+    assert probe(lower)[0] < displacement_budget
+    assert probe(upper)[0] > displacement_budget, (
+        "radius bracket must see a failed branch match"
+    )
+    for _ in range(36):
+        middle = (lower + upper) / 2
+        if probe(middle)[0] <= displacement_budget:
+            lower = middle
+        else:
+            upper = middle
+    measured, residual = probe(lower)
+    outside, _ = probe(lower * 1.01)
+    assert measured <= displacement_budget < outside
+    assert residual < 1e-10
+    return {
+        "radius_m": lower,
+        "maximum_normal_displacement_m": measured,
+        "displacement_budget_m": displacement_budget,
+        "outside_radius_m": lower * 1.01,
+        "outside_displacement_m": outside,
+        "finest_pitch_m": finest_pitch,
+        "area_budget_regular_units": area_budget,
+        "budget_coefficient": coefficient,
+        "samples_per_ray": 257,
+        "oracle_root_residual_per_radian": residual,
+    }

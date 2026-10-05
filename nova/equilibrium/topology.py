@@ -1824,6 +1824,186 @@ def saddle_cell_fragments(vertices, vertex_count, normal_form, tolerance):
     )
 
 
+def _cubic_parameters(cubic, quadratic, linear, constant):
+    """Three real geometric roots, padding absent roots with infinity."""
+    scale = jnp.maximum(
+        jnp.maximum(jnp.abs(cubic), jnp.abs(quadratic)),
+        jnp.maximum(jnp.abs(linear), jnp.abs(constant)),
+    )
+    curved = jnp.abs(cubic) > 64 * jnp.finfo(jnp.asarray(cubic).dtype).eps * scale
+    a = jnp.where(curved, cubic, 1.0)
+    b, c, d = quadratic / a, linear / a, constant / a
+    p = c - b * b / 3
+    q = 2 * b * b * b / 27 - b * c / 3 + d
+    discriminant = q * q / 4 + p * p * p / 27
+    multiple = discriminant <= 0
+    amplitude = 2 * jnp.sqrt(jnp.maximum(-p / 3, 0.0))
+    denominator = jnp.sqrt(jnp.maximum(-((p / 3) ** 3), 0.0))
+    angle = (
+        jnp.arccos(
+            jnp.clip(-q / (2 * jnp.where(denominator > 0, denominator, 1.0)), -1.0, 1.0)
+        )
+        / 3
+    )
+    angles = angle[..., None] - 2 * jnp.pi * jnp.arange(3) / 3
+    three = amplitude[..., None] * jnp.cos(angles) - b[..., None] / 3
+    root = (
+        jnp.cbrt(-q / 2 + jnp.sqrt(jnp.maximum(discriminant, 0.0)))
+        + jnp.cbrt(-q / 2 - jnp.sqrt(jnp.maximum(discriminant, 0.0)))
+        - b / 3
+    )
+    one = jnp.stack(
+        (root, jnp.full_like(root, jnp.inf), jnp.full_like(root, jnp.inf)), axis=-1
+    )
+    quadratic_roots = _quadratic_parameters(quadratic, linear, constant)
+    fallback = jnp.concatenate(
+        (quadratic_roots, jnp.full_like(root[..., None], jnp.inf)), axis=-1
+    )
+    return jnp.where(
+        curved[..., None], jnp.where(multiple[..., None], three, one), fallback
+    )
+
+
+def _normal_form_sectors(points, form):
+    """Geometric sidedness of the two paired curvature-corrected branches."""
+    offset = points - form.position
+    parameter = jnp.einsum("...i,ai->...a", offset, form.direction)
+    residual = (
+        offset[..., None, :]
+        - parameter[..., None] ** 2 * form.curvature
+        - parameter[..., None] ** 3 * form.cubic
+    )
+    side = _cross_plane(form.direction, residual)
+    return (side >= 0.0) & (jnp.roll(side, -1, axis=-1) <= 0.0)
+
+
+def _normal_form_cell_fragments(vertices, vertex_count, form, tolerance):
+    """Clip global cubic branch sectors to any convex carrier cell.
+
+    Cell edges are split at geometric ray intersections. Green's theorem
+    combines those straight intervals with exact cubic-ray integrals inside
+    the cell. The null need not lie in the cell and no flux root is used.
+    """
+    width = vertices.shape[0]
+    slot = jnp.arange(width)
+    following = jnp.where(slot + 1 < vertex_count, slot + 1, 0)
+    relative = vertices - form.position
+    edges = relative[following] - relative
+    live = slot < vertex_count
+    roots = _cubic_parameters(
+        _cross_plane(form.cubic[:, None, :], edges[None, :, :]),
+        _cross_plane(form.curvature[:, None, :], edges[None, :, :]),
+        _cross_plane(form.direction[:, None, :], edges[None, :, :]),
+        -_cross_plane(relative[None, :, :], edges[None, :, :]),
+    )
+    safe = jnp.where(jnp.isfinite(roots), roots, 0.0)
+    points = (
+        safe[..., None] * form.direction[:, None, None, :]
+        + safe[..., None] ** 2 * form.curvature[:, None, None, :]
+        + safe[..., None] ** 3 * form.cubic[:, None, None, :]
+    )
+    edge_square = jnp.sum(edges * edges, axis=-1)
+    fractions = (
+        jnp.sum(
+            (points - relative[None, :, None, :]) * edges[None, :, None, :], axis=-1
+        )
+        / jnp.where(edge_square > 0, edge_square, 1.0)[None, :, None]
+    )
+    hit = (
+        live[None, :, None]
+        & jnp.isfinite(roots)
+        & (roots >= -tolerance)
+        & (fractions >= -tolerance)
+        & (fractions <= 1 + tolerance)
+    )
+    cuts = jnp.sort(
+        jnp.clip(
+            jnp.transpose(jnp.where(hit, fractions, jnp.inf), (1, 0, 2)).reshape(
+                width, 12
+            ),
+            0,
+            1,
+        ),
+        axis=-1,
+    )
+    cuts = jnp.concatenate((jnp.zeros((width, 1)), cuts, jnp.ones((width, 1))), axis=-1)
+    lower, upper = cuts[:, :-1], cuts[:, 1:]
+    middle = vertices[:, None, :] + ((lower + upper) / 2)[..., None] * edges[:, None, :]
+    centre = jnp.sum(jnp.where(live[:, None], vertices, 0.0), axis=0) / vertex_count
+    sectors = _normal_form_sectors(middle + 1e-10 * (centre - middle), form)
+    present = live[:, None] & (upper > lower)
+    intervals = jnp.where(
+        jnp.transpose(sectors, (2, 0, 1))[..., None] & present[None, :, :, None],
+        jnp.stack((lower, upper), axis=-1)[None, ...],
+        0.0,
+    )
+    first = relative[:, None, :] + lower[..., None] * edges[:, None, :]
+    last = relative[:, None, :] + upper[..., None] * edges[:, None, :]
+    boundary = jnp.einsum(
+        "eqa,eq->a", sectors * present[..., None], _cross_plane(first, last)
+    )
+    bound = 2 * jnp.max(jnp.linalg.norm(relative, axis=-1))
+    parameters = jnp.sort(
+        jnp.clip(jnp.where(hit, roots, jnp.inf).reshape(4, -1), 0, bound), axis=-1
+    )
+    parameters = jnp.concatenate(
+        (jnp.zeros((4, 1)), parameters, jnp.full((4, 1), bound)), axis=-1
+    )
+    begin, end = parameters[:, :-1], parameters[:, 1:]
+    midpoint = (begin + end) / 2
+    curve = (
+        midpoint[..., None] * form.direction[:, None, :]
+        + midpoint[..., None] ** 2 * form.curvature[:, None, :]
+        + midpoint[..., None] ** 3 * form.cubic[:, None, :]
+    )
+    inside = jnp.all(
+        jnp.where(
+            live[None, None, :],
+            _cross_plane(
+                edges[None, None, :, :],
+                curve[:, :, None, :] - relative[None, None, :, :],
+            )
+            >= -tolerance,
+            True,
+        ),
+        axis=-1,
+    )
+
+    def primitive(t):
+        return (
+            _cross_plane(form.direction, form.curvature)[:, None] * t**3 / 3
+            + _cross_plane(form.direction, form.cubic)[:, None] * t**4 / 2
+            + _cross_plane(form.curvature, form.cubic)[:, None] * t**5 / 5
+        )
+
+    curve_integral = jnp.sum(
+        jnp.where(inside & (end > begin), primitive(end) - primitive(begin), 0.0),
+        axis=1,
+    )
+    area = 0.5 * (boundary + curve_integral - jnp.roll(curve_integral, -1))
+    full_area = 0.5 * jnp.sum(
+        jnp.where(live, _cross_plane(relative, relative[following]), 0.0)
+    )
+    partitioned = jnp.all(jnp.where(present, jnp.sum(sectors, axis=-1) == 1, True))
+    valid = (
+        form.valid
+        & partitioned
+        & (full_area > 0)
+        & jnp.all(jnp.isfinite(area))
+        & jnp.all(area >= -tolerance * full_area)
+        & (jnp.abs(jnp.sum(area) - full_area) <= 64 * tolerance * full_area)
+    )
+    return SaddleFragments(
+        jnp.where(valid, jnp.maximum(area, 0.0), jnp.nan),
+        intervals,
+        jnp.max(jnp.where(hit, roots, 0.0), axis=(1, 2)),
+        valid,
+        jnp.where(
+            valid, int(TopologyReason.OK), int(TopologyReason.UNRESOLVED_COMPONENT)
+        ).astype(jnp.int32),
+    )
+
+
 class CellFragments(NamedTuple):
     """Connected conic fragments and their open intervals on each cell edge."""
 
@@ -2291,6 +2471,8 @@ class TopologyRead(NamedTuple):
     tangent_valid: jax.Array
     required_nulls: jax.Array
     required_fragments: jax.Array
+    normal_form_cells: jax.Array
+    normal_form_radius: jax.Array
 
 
 def _inside_cells(geometry, point):
@@ -2465,7 +2647,14 @@ def _support_at_level(
     area = fragments.area * geometry.pitch[:, None] ** 2
     intervals = fragments.edge_interval
     owner = _inside_cells(geometry, form.position) & saddle_live
-    saddle = jax.vmap(saddle_cell_fragments, in_axes=(0, 0, None, None))(
+    represented = saddle_live & (
+        owner
+        | (
+            jnp.linalg.norm(geometry.centre - form.position, axis=1)
+            < policy.normal_form_radius
+        )
+    )
+    saddle = jax.vmap(_normal_form_cell_fragments, in_axes=(0, 0, None, None))(
         geometry.vertices,
         geometry.vertex_count,
         form,
@@ -2473,14 +2662,17 @@ def _support_at_level(
     )
     sectors = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
     saddle_area = saddle.area[:, sectors]
-    saddle_intervals = saddle.edge_interval[:, sectors, :, None, :]
+    saddle_intervals = saddle.edge_interval[:, sectors]
+    intervals = jnp.pad(intervals, ((0, 0), (0, 0), (0, 0), (0, 10), (0, 0)))
     saddle_intervals = jnp.pad(
         saddle_intervals,
-        ((0, 0), (0, policy.fragment_capacity - 2), (0, 0), (0, 2), (0, 0)),
+        ((0, 0), (0, policy.fragment_capacity - 2), (0, 0), (0, 0), (0, 0)),
     )
     saddle_area = jnp.pad(saddle_area, ((0, 0), (0, policy.fragment_capacity - 2)))
-    area = jnp.where(owner[:, None], saddle_area, area)
-    intervals = jnp.where(owner[:, None, None, None, None], saddle_intervals, intervals)
+    area = jnp.where(represented[:, None], saddle_area, area)
+    intervals = jnp.where(
+        represented[:, None, None, None, None], saddle_intervals, intervals
+    )
     labels, wall = _connected_fragment_labels(
         area, intervals, geometry, policy.edge_tolerance
     )
@@ -2505,7 +2697,7 @@ def _support_at_level(
     axis_fragment = fragments.slice_labels[axis_cell, axis_strip, axis_interval]
     axis_label = labels[axis_cell, jnp.maximum(axis_fragment, 0)]
     selected = (labels == axis_label) & (area > 0.0)
-    valid = jnp.all(jnp.where(owner, saddle.valid, fragments.valid))
+    valid = jnp.all(jnp.where(represented, saddle.valid, fragments.valid))
     valid = valid & jnp.any(axis_cells) & (axis_fragment >= 0)
     return (
         area,
@@ -2646,4 +2838,13 @@ def read(field, geometry, convention, policy):
         jnp.all(jnp.where(live, nulls.tangent_valid, True)),
         required,
         fragment_count,
+        diverted
+        & (
+            _inside_cells(geometry, saddle_point)
+            | (
+                jnp.linalg.norm(geometry.centre - saddle_point, axis=1)
+                < policy.normal_form_radius
+            )
+        ),
+        policy.normal_form_radius,
     )

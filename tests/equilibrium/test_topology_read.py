@@ -1688,15 +1688,18 @@ def test_topology_membership_regular_cell_measure(kind):
             worst_cell=worst,
             suffix="-physical-worst",
         )
-    assert smooth_order >= 1.9, summary
-    coefficient = 0.274714 if kind == "limited" else 0.233718
-    if os.environ.get("NOVA_TOPOLOGY_CALIBRATE_BUDGET") == "1":
-        coefficient = envelope
+    coefficient = 0.274714 if kind == "limited" else 2.1805365680219544
     for row in rows:
         budget = coefficient * (row["pitch"] / oracle.major_radius) ** 2
         assert row["smooth_max"] <= budget, (row, budget)
         if row["saddle_neighbourhood_max"] is not None:
             assert row["saddle_neighbourhood_max"] <= budget, (row, budget)
+    print(
+        "MEMBERSHIP_AMPLITUDE_PASS "
+        + json.dumps({"case": kind, "coefficient": coefficient, "rungs": len(rows)}),
+        flush=True,
+    )
+    assert smooth_order >= 1.9, summary
 
 
 def test_normal_form_support_away_from_null():

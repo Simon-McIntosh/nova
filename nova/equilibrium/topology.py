@@ -2276,6 +2276,7 @@ class BiotMomentCoupling:
         first = jnp.einsum("nij,nj->ni", self.inverse_second_moment, values[:, 1:])
         return jnp.concatenate((values[:, :1], first), axis=1)
 
+    @jax.jit
     def value_gradient(self, point, moments):
         from nova.biot.polygonanalytic import packed_analytic_moments
 
@@ -2298,6 +2299,7 @@ class BiotMomentCoupling:
         gradient = 2 * jnp.pi * point[0] * jnp.stack((vertical_field, -radial_field))
         return value, gradient
 
+    @jax.jit
     def evaluate(self, point, moments):
         value, gradient = self.value_gradient(point, moments)
         hessian = jax.jacfwd(lambda target: self.value_gradient(target, moments)[1])(

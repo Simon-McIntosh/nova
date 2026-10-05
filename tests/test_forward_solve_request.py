@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import FrozenInstanceError, fields
+from dataclasses import dataclass, FrozenInstanceError, fields
 import json
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
 from benchmarks.efit_forward_parity_slice import _parity_solve_request
 from nova import __version__
+from nova.biot.null import Null1D
 from nova.equilibrium.forward import PerturbedSeedPolicy
 from nova.equilibrium.solve_request import (
     ColdSeedPortfolio,
@@ -20,6 +23,8 @@ from nova.equilibrium.solve_request import (
     ForwardSolveRequest,
     ResolvedForwardSolveDefaults,
 )
+from nova.jax.config import configure_dtypes
+from tests import test_prescribed_current_solve as _prescribed_current_solve
 from tests.test_prescribed_current_solve import _profile
 
 
@@ -61,6 +66,66 @@ RECEIPT_FIELDS = (
 )
 
 
+@dataclass(frozen=True)
+class _NullTarget:
+    """Linear conductor target carrying a stationary-point locator.
+
+    The prescribing fixture builds the operator with ``object.__new__``, so its
+    targets expose only the response matrix the arithmetic touches.  The
+    production ``FluxTarget`` also owns a ``null`` locator that the operator's
+    geometry identity reads, so this stand-in carries one of the same type.
+    """
+
+    response: jax.Array
+    null: object = None
+
+    def __post_init__(self) -> None:
+        if self.null is None:
+            object.__setattr__(
+                self,
+                "null",
+                Null1D(coordinate=jnp.zeros((self.response.shape[0], 2))),
+            )
+
+    @property
+    def node_number(self) -> int:
+        return self.response.shape[0]
+
+    def external(self, current) -> jax.Array:
+        return self.response @ current
+
+
+jax.tree_util.register_pytree_node(
+    _NullTarget,
+    lambda target: ((target.response, target.null), None),
+    lambda _aux, children: _NullTarget(response=children[0], null=children[1]),
+)
+
+
+def _completed_profile(monkeypatch: pytest.MonkeyPatch):
+    """Return the shared linear fixture with the host geometry it omits.
+
+    The lightweight operator carries only the members the arithmetic touches,
+    so the area entry the geometry identity reads is absent.  Supply it
+    alongside the stationary-point locator each target now owns.
+    """
+    monkeypatch.setattr(_prescribed_current_solve, "_LinearTarget", _NullTarget)
+    configure_dtypes()
+    assert jax.config.jax_enable_x64 is True
+    profile, ordinary_response, prescribed_response = _profile()
+    operator = profile.operator
+    operator.area = jnp.zeros(operator.grid.node_number)
+    operator.cell_average_stencil = None
+    operator.cell_average_weight = None
+    operator.inside_material = None
+    operator.moment_geometry = None
+    operator.use_linear_moments = False
+    operator.wall_unit_offsets = None
+    operator.wall_unit_closed = None
+    operator.wall_unit_kinds = None
+    return profile, ordinary_response, prescribed_response
+
+
 def test_default_request_schema_resolves_from_the_installed_version_table():
     profile, _ordinary_response, _prescribed_response = _profile()
     seed = np.zeros(4)
@@ -80,8 +145,10 @@ def test_default_request_schema_resolves_from_the_installed_version_table():
         request.route = "picard"
 
 
-def test_request_path_is_bit_identical_and_defaults_round_trip_through_json():
-    profile, _ordinary_response, _prescribed_response = _profile()
+def test_request_path_is_bit_identical_and_defaults_round_trip_through_json(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    profile, _ordinary_response, _prescribed_response = _completed_profile(monkeypatch)
     seed = np.zeros(4)
     request = ForwardSolveRequest.from_defaults(
         carrier_identity="cpu-linear-carrier",
@@ -116,7 +183,7 @@ def test_request_path_is_bit_identical_and_defaults_round_trip_through_json():
 def test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch(
     monkeypatch: pytest.MonkeyPatch,
 ):
-    profile, _ordinary_response, _prescribed_response = _profile()
+    profile, _ordinary_response, _prescribed_response = _completed_profile(monkeypatch)
     portfolio_calls: list[tuple[object, ...]] = []
 
     def cold_seed_portfolio(*args, **kwargs):
@@ -164,7 +231,7 @@ def test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch(
 def test_compilation_cache_receipt_observes_reuse_not_the_request_field(
     monkeypatch: pytest.MonkeyPatch,
 ):
-    profile, _ordinary_response, _prescribed_response = _profile()
+    profile, _ordinary_response, _prescribed_response = _completed_profile(monkeypatch)
     monkeypatch.setattr(
         profile,
         "_configure_solve_compilation_cache",

@@ -653,7 +653,7 @@ def _render_read_panel(directory, kind, field, geometry, result, wall, axis, sad
         color=DEFAULT_INK.flux_color,
         linewidth=2.6,
     )
-    poloidal.draw_wall(axes, (wall,))
+    poloidal.draw_wall(axes, units=(wall,))
     reference_x = np.empty((0, 2)) if saddle is None else np.asarray(saddle)[None]
     poloidal.draw_nulls(axes, axis, reference_x, style=reference_style, contain=(wall,))
     poloidal.draw_nulls(
@@ -681,7 +681,10 @@ def _render_read_panel(directory, kind, field, geometry, result, wall, axis, sad
         fontsize=20,
         va="top",
     )
-    figure.savefig(directory / f"{kind}-poloidal.png", dpi=100, facecolor="white")
+    for extension in ("png", "svg"):
+        figure.savefig(
+            directory / f"{kind}-poloidal.{extension}", dpi=100, facecolor="white"
+        )
     plt.close(figure)
 
 
@@ -714,7 +717,19 @@ def test_closed_form_resolution_probe(kind):
             else np.linalg.norm(np.asarray(geometry.centre) - saddle, axis=1)
         )
         neighbourhood = distance < 2 * np.asarray(geometry.pitch)
+        worst = int(np.argmax(errors))
         row = {
+            "worst_cell": worst,
+            "worst_cell_area": float(geometry.full_area[worst]),
+            "median_cell_area": float(np.median(geometry.full_area)),
+            "worst_coefficient": np.asarray(result.field_coefficients)[worst].tolist(),
+            "worst_vertices": np.asarray(geometry.vertices)[
+                worst, : int(geometry.vertex_count[worst])
+            ].tolist(),
+            "worst_centre": np.asarray(geometry.centre)[worst].tolist(),
+            "worst_read_fraction": float(result.membership[worst]),
+            "worst_reference_fraction": float(reference[worst]),
+            "boundary_flux": float(result.boundary_flux),
             "case": kind,
             "cells": count,
             "valid": bool(result.valid),

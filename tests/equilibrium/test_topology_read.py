@@ -586,7 +586,18 @@ def _reference_cell_fractions(kind, oracle, geometry):
     return np.asarray(fractions), np.asarray(uncertainties)
 
 
-def _render_read_panel(directory, kind, field, geometry, result, wall, axis, saddle):
+def _render_read_panel(
+    directory,
+    kind,
+    field,
+    geometry,
+    result,
+    wall,
+    axis,
+    saddle,
+    worst_cell=None,
+    suffix="",
+):
     from pathlib import Path
     import matplotlib.pyplot as plt
     from shapely import STRtree, points
@@ -681,9 +692,26 @@ def _render_read_panel(directory, kind, field, geometry, result, wall, axis, sad
         fontsize=20,
         va="top",
     )
+    if worst_cell is not None:
+        polygon = np.asarray(geometry.vertices)[
+            worst_cell, : int(geometry.vertex_count[worst_cell])
+        ]
+        polygon = np.vstack((polygon, polygon[0]))
+        axes.plot(*polygon.T, color="#555555", linewidth=3.0, linestyle="--")
+        axes.annotate(
+            f"worst smooth cell {worst_cell}",
+            xy=np.asarray(geometry.centre)[worst_cell],
+            xytext=(0.02, 0.10),
+            textcoords="axes fraction",
+            fontsize=20,
+            color="#555555",
+            arrowprops={"arrowstyle": "-", "color": "#555555"},
+        )
     for extension in ("png", "svg"):
         figure.savefig(
-            directory / f"{kind}-poloidal.{extension}", dpi=100, facecolor="white"
+            directory / f"{kind}-poloidal{suffix}.{extension}",
+            dpi=100,
+            facecolor="white",
         )
     plt.close(figure)
 
@@ -1067,3 +1095,443 @@ def test_limited_boundary_instrument():
         first["max_fraction_error"] > second["max_fraction_error"]
         for first, second in zip(rows[:-1], rows[1:], strict=True)
     )
+
+
+def _normal_form_slice(cell, result):
+    """Slice the read's cubic rays independently of its area integration."""
+    from shapely.geometry import Point, Polygon
+
+    form = result.saddle_form
+    origin = np.asarray(form.position)
+    direction, curvature, cubic = map(
+        np.asarray, (form.direction, form.curvature, form.cubic)
+    )
+    ray_end, boundary_parameter = [], []
+
+    def cross(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    for d, c, b in zip(direction, curvature, cubic, strict=True):
+        hits = []
+        for edge_index, (first, last) in enumerate(
+            zip(cell, np.roll(cell, -1, axis=0), strict=True)
+        ):
+            edge = last - first
+            roots = np.polynomial.polynomial.polyroots(
+                (
+                    cross(origin - first, edge),
+                    cross(d, edge),
+                    cross(c, edge),
+                    cross(b, edge),
+                )
+            )
+            for root in roots:
+                if abs(root.imag) > 1e-9 or root.real <= 1e-12:
+                    continue
+                t = float(root.real)
+                point = origin + t * d + t**2 * c + t**3 * b
+                fraction = (point - first) @ edge / (edge @ edge)
+                if -1e-10 <= fraction <= 1 + 1e-10:
+                    hits.append((t, edge_index + np.clip(fraction, 0, 1)))
+        assert hits, "normal-form ray has no geometric exit"
+        t, boundary = min(hits)
+        ray_end.append(t)
+        boundary_parameter.append(boundary)
+    curves = []
+    for index, t in enumerate(ray_end):
+        parameter = np.linspace(0, t, 2049)[:, None]
+        curves.append(
+            origin
+            + parameter * direction[index]
+            + parameter**2 * curvature[index]
+            + parameter**3 * cubic[index]
+        )
+    sectors = []
+    for index in np.flatnonzero(np.asarray(form.positive)):
+        following = (index + 1) % 4
+        start, stop = boundary_parameter[index], boundary_parameter[following]
+        if stop <= start:
+            stop += len(cell)
+        corners = [
+            cell[k % len(cell)]
+            for k in range(int(np.floor(start)) + 1, int(np.ceil(stop)))
+        ]
+        boundary = np.vstack(
+            (curves[index], np.asarray(corners).reshape(-1, 2), curves[following][::-1])
+        )
+        sectors.append(Polygon(boundary))
+    breaks = [origin[0]]
+    for index, t in enumerate(ray_end):
+        breaks.extend((curves[index][-1, 0],))
+        for root in np.polynomial.polynomial.polyroots(
+            (direction[index, 0], 2 * curvature[index, 0], 3 * cubic[index, 0])
+        ):
+            if abs(root.imag) < 1e-10 and 0 < root.real < t:
+                u = root.real
+                breaks.append(
+                    origin[0]
+                    + u * direction[index, 0]
+                    + u**2 * curvature[index, 0]
+                    + u**3 * cubic[index, 0]
+                )
+
+    def intervals(radius, lower, upper, selected):
+        cuts = [lower, upper]
+        for index, maximum in enumerate(ray_end):
+            roots = np.polynomial.polynomial.polyroots(
+                (
+                    origin[0] - radius,
+                    direction[index, 0],
+                    curvature[index, 0],
+                    cubic[index, 0],
+                )
+            )
+            for root in roots:
+                if abs(root.imag) < 1e-9 and -1e-12 <= root.real <= maximum + 1e-12:
+                    t = float(root.real)
+                    z = (
+                        origin[1]
+                        + t * direction[index, 1]
+                        + t**2 * curvature[index, 1]
+                        + t**3 * cubic[index, 1]
+                    )
+                    if lower < z < upper:
+                        cuts.append(z)
+        cuts = np.unique(cuts)
+        return [
+            (a, b)
+            for a, b in zip(cuts[:-1], cuts[1:], strict=True)
+            if any(
+                live and sector.covers(Point(radius, (a + b) / 2))
+                for live, sector in zip(selected[:2], sectors, strict=True)
+            )
+        ]
+
+    return intervals, breaks
+
+
+def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-10):
+    """Integrate interval symmetric differences in regular-cell area units.
+
+    Oracle roots and core containment are independent of the reconstructed
+    field. The reconstruction is sliced from its coefficients or cubic rays;
+    production areas never enter the quadrature or its error denominator.
+    """
+    from scipy.integrate import quad_vec
+    from shapely.geometry import Point, Polygon
+    from nova.equilibrium.topology import quadratic_cell_fragments
+
+    vertices, counts, centres, pitches, areas = map(
+        np.asarray,
+        (
+            geometry.vertices,
+            geometry.vertex_count,
+            geometry.centre,
+            geometry.pitch,
+            geometry.full_area,
+        ),
+    )
+    coefficients = np.asarray(result.field_coefficients).copy()
+    coefficients[:, 0] -= float(result.boundary_flux)
+    selected = np.asarray(result.fragment_selected)
+    median_area = float(np.median(areas))
+    reference_fraction, _ = _reference_cell_fractions(kind, oracle, geometry)
+    if kind == "diverted":
+        core = Polygon(oracle.separatrix(8193))
+        lower_z, upper_z = core.bounds[1], core.bounds[3]
+        origin_z, scale_z = (lower_z + upper_z) / 2, upper_z - lower_z
+        nodes = np.polynomial.chebyshev.chebpts1(7)
+        inverse = np.linalg.inv(np.polynomial.polynomial.polyvander(nodes, 6))
+    else:
+        core = None
+    errors, estimates, reconstructed, analytic = [], [], [], []
+    for index, size in enumerate(counts):
+        cell = vertices[index, :size]
+        fraction, reference = float(result.membership[index]), reference_fraction[index]
+        if fraction == reference and fraction in (0.0, 1.0):
+            errors.append(0.0)
+            estimates.append(0.0)
+            reconstructed.append(fraction)
+            analytic.append(reference)
+            continue
+        shape = Polygon(cell)
+        saddle_cell = bool(result.boundary_class) and shape.covers(
+            Point(np.asarray(result.saddle_form.position))
+        )
+        ray_intervals, ray_breaks = (
+            _normal_form_slice(cell, result) if saddle_cell else (None, [])
+        )
+        coefficient, centre, pitch = coefficients[index], centres[index], pitches[index]
+        fragment = None
+        if (
+            not saddle_cell
+            and np.count_nonzero(np.asarray(result.fragment_area)[index] > 0) > 1
+            and np.count_nonzero(selected[index]) == 1
+        ):
+            fragment = quadratic_cell_fragments(
+                jnp.asarray((vertices[index] - centre) / pitch),
+                jnp.asarray(size),
+                jnp.asarray(coefficient),
+                2,
+            )
+            fragment = jax.tree.map(np.asarray, fragment)
+
+        def vertical(radius):
+            crossing = []
+            for first, last in zip(cell, np.roll(cell, -1, axis=0), strict=True):
+                delta = last - first
+                if delta[0] == 0:
+                    continue
+                t = (radius - first[0]) / delta[0]
+                if -1e-12 <= t <= 1 + 1e-12:
+                    crossing.append(first[1] + t * delta[1])
+            if len(crossing) < 2:
+                return np.zeros(3)
+            lower, upper = min(crossing), max(crossing)
+            if kind == "limited":
+                half = np.sqrt(
+                    max(float(oracle.flux(radius, 0)) / oracle.field_coefficient, 0)
+                )
+                oracle_intervals = (
+                    [(max(lower, -half), min(upper, half))]
+                    if min(upper, half) > max(lower, -half)
+                    else []
+                )
+            else:
+                values = oracle.flux(
+                    np.column_stack((np.full(7, radius), origin_z + scale_z * nodes))
+                )
+                polynomial = inverse @ values
+                keep = np.flatnonzero(
+                    np.abs(polynomial) > np.max(np.abs(polynomial)) * 1e-13
+                )
+                roots = np.polynomial.polynomial.polyroots(polynomial[: keep[-1] + 1])
+                roots = origin_z + scale_z * roots[np.abs(roots.imag) < 1e-8].real
+                cuts = np.unique(
+                    np.r_[lower, roots[(roots > lower) & (roots < upper)], upper]
+                )
+                oracle_intervals = [
+                    (a, b)
+                    for a, b in zip(cuts[:-1], cuts[1:], strict=True)
+                    if oracle.flux(np.asarray((radius, (a + b) / 2))) > 0
+                    and core.covers(Point(radius, (a + b) / 2))
+                ]
+            if not np.any(selected[index]):
+                read_intervals = []
+            elif saddle_cell:
+                read_intervals = ray_intervals(radius, lower, upper, selected[index])
+            else:
+                x = (radius - centre[0]) / pitch
+                polynomial = (
+                    coefficient[0] + coefficient[1] * x + coefficient[3] * x * x,
+                    coefficient[2] + coefficient[4] * x,
+                    coefficient[5],
+                )
+                roots = np.polynomial.polynomial.polyroots(polynomial)
+                roots = sorted(
+                    [float(root.real) for root in roots if abs(root.imag) < 1e-10]
+                )
+                roots = roots + [np.inf] * (2 - len(roots))
+                lo, hi = (lower - centre[1]) / pitch, (upper - centre[1]) / pitch
+                cuts = np.r_[lo, np.sort(np.clip(roots, lo, hi)), hi]
+                read_intervals = []
+                strip = (
+                    None
+                    if fragment is None
+                    else np.clip(
+                        np.searchsorted(fragment.slice_breaks, x, side="right") - 1,
+                        0,
+                        fragment.slice_labels.shape[0] - 1,
+                    )
+                )
+                for band, (a, b) in enumerate(zip(cuts[:-1], cuts[1:], strict=True)):
+                    label = (
+                        0
+                        if fragment is None
+                        else int(fragment.slice_labels[strip, band])
+                    )
+                    active = (
+                        np.any(selected[index])
+                        if fragment is None
+                        else label >= 0 and selected[index, label]
+                    )
+                    if (
+                        b > a
+                        and active
+                        and np.polynomial.polynomial.polyval((a + b) / 2, polynomial)
+                        > 0
+                    ):
+                        read_intervals.append(
+                            (centre[1] + pitch * a, centre[1] + pitch * b)
+                        )
+            read_length = sum(b - a for a, b in read_intervals)
+            oracle_length = sum(b - a for a, b in oracle_intervals)
+            overlap = sum(
+                max(0.0, min(b, d) - max(a, c))
+                for a, b in read_intervals
+                for c, d in oracle_intervals
+            )
+            return np.asarray(
+                (
+                    max(0.0, read_length + oracle_length - 2 * overlap),
+                    read_length,
+                    oracle_length,
+                )
+            )
+
+        breaks = np.unique(np.r_[cell[:, 0], ray_breaks])
+        breaks = breaks[(breaks >= cell[:, 0].min()) & (breaks <= cell[:, 0].max())]
+        integral, uncertainty = np.zeros(3), 0.0
+        for first, last in zip(breaks[:-1], breaks[1:], strict=True):
+            value, error = quad_vec(
+                vertical,
+                first,
+                last,
+                epsabs=median_area * tolerance,
+                epsrel=1e-9,
+                limit=1000,
+            )
+            integral += value
+            uncertainty += error
+        errors.append(integral[0])
+        estimates.append(uncertainty)
+        reconstructed.append(integral[1] / areas[index])
+        analytic.append(integral[2] / areas[index])
+    return {
+        "absolute_area_error": np.asarray(errors),
+        "quadrature_error": np.asarray(estimates),
+        "normalised_error": np.asarray(errors) / median_area,
+        "read_fraction": np.asarray(reconstructed),
+        "analytic_fraction": np.asarray(analytic),
+        "median_area": median_area,
+    }
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_topology_membership_regular_cell_measure(kind):
+    import os
+    from pathlib import Path
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    oracle, field, wall, axis, saddle = _analytic_inputs(kind)
+    convention = TopologyConvention.from_cocos(17, 1.0)
+    evaluate = jax.jit(read)
+    rows = []
+    root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+    directory = Path(root) if root else None
+    if directory is not None:
+        directory.mkdir(parents=True, exist_ok=True)
+    worst_panel = None
+    for count in (132, 300, 550, 1074, 2616):
+        geometry = _realised_hex_geometry(wall, count)
+        result = evaluate(field, geometry, convention, TopologyPolicy())
+        jax.block_until_ready(result)
+        assert result.valid and result.qualified
+        measure = _symmetric_difference_measure(kind, oracle, geometry, result)
+        pitch = float(np.median(geometry.pitch))
+        near = (
+            np.zeros(count, dtype=bool)
+            if saddle is None
+            else np.linalg.norm(np.asarray(geometry.centre) - saddle, axis=1)
+            < 2 * np.asarray(geometry.pitch)
+        )
+        normalised = measure["normalised_error"]
+        smooth_worst = int(np.argmax(np.where(near, -1.0, normalised)))
+        slivers = np.flatnonzero(
+            np.asarray(geometry.full_area) < 0.05 * measure["median_area"]
+        )
+        row = {
+            "case": kind,
+            "cells": len(geometry.centre),
+            "pitch": pitch,
+            "median_cell_area": measure["median_area"],
+            "inside_control_count": int(
+                np.count_nonzero(np.asarray(result.membership) == 1.0)
+            ),
+            "outside_control_count": int(
+                np.count_nonzero(np.asarray(result.membership) == 0.0)
+            ),
+            "smooth_max": float(np.max(normalised[~near])),
+            "saddle_neighbourhood_max": float(np.max(normalised[near]))
+            if near.any()
+            else None,
+            "smooth_worst_cell": smooth_worst,
+            "smooth_worst_area": float(geometry.full_area[smooth_worst]),
+            "smooth_worst_fraction": float(result.membership[smooth_worst]),
+            "smooth_worst_reference_fraction": float(
+                measure["analytic_fraction"][smooth_worst]
+            ),
+            "worst_quadrature_error_regular_units": float(
+                np.max(measure["quadrature_error"]) / measure["median_area"]
+            ),
+            "read_area_check_regular_units": float(
+                np.max(
+                    np.abs(measure["read_fraction"] - np.asarray(result.membership))
+                    * np.asarray(geometry.full_area)
+                )
+                / measure["median_area"]
+            ),
+            "slivers": [
+                {
+                    "cell": int(i),
+                    "occupiable_area": float(geometry.full_area[i]),
+                    "absolute_area_error": float(measure["absolute_area_error"][i]),
+                    "normalised_error": float(normalised[i]),
+                    "read_fraction": float(result.membership[i]),
+                    "analytic_fraction": float(measure["analytic_fraction"][i]),
+                }
+                for i in slivers
+            ],
+        }
+        rows.append(row)
+        print("REGULAR_CELL_MEMBERSHIP " + json.dumps(row), flush=True)
+        if directory is not None:
+            (directory / f"{kind}-regular-cell-rows.json").write_text(
+                json.dumps(rows, indent=2) + "\n"
+            )
+        if worst_panel is None or row["smooth_max"] > worst_panel[0]:
+            worst_panel = (row["smooth_max"], geometry, result, smooth_worst)
+        assert row["inside_control_count"] > 0 and row["outside_control_count"] > 0, row
+        assert row["smooth_max"] > 1e-12, row
+        assert row["read_area_check_regular_units"] < 1e-7, row
+    smooth_order = float(
+        np.polyfit(
+            np.log([row["pitch"] for row in rows]),
+            np.log([row["smooth_max"] for row in rows]),
+            1,
+        )[0]
+    )
+    saddle_order = (
+        None
+        if saddle is None
+        else float(
+            np.polyfit(
+                np.log([row["pitch"] for row in rows]),
+                np.log([row["saddle_neighbourhood_max"] for row in rows]),
+                1,
+            )[0]
+        )
+    )
+    summary = {"case": kind, "smooth_order": smooth_order, "saddle_order": saddle_order}
+    print("REGULAR_CELL_ORDERS " + json.dumps(summary), flush=True)
+    if directory is not None:
+        (directory / f"{kind}-regular-cell-orders.json").write_text(
+            json.dumps(summary, indent=2) + "\n"
+        )
+    if os.environ.get("NOVA_TOPOLOGY_FIGURE_DIR"):
+        _, geometry, result, worst = worst_panel
+        _render_read_panel(
+            os.environ["NOVA_TOPOLOGY_FIGURE_DIR"],
+            kind,
+            field,
+            geometry,
+            result,
+            wall,
+            axis,
+            saddle,
+            worst_cell=worst,
+            suffix="-regular-worst",
+        )
+    assert smooth_order >= 2.0, summary
+    if saddle_order is not None:
+        assert saddle_order >= 2.0, summary

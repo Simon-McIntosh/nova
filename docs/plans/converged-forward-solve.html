@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -215,6 +215,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261005T232046793998-review-of-cfs-topology-read" data-who="reckon-build" data-when="2026-10-05T23:30:38Z">
     <div class="r-comment-body"><p>Independent review of base 7c4a76cafa41f4f5a4da06af19a0f0aac3271560 through head 3d79cac6341da4519f1f2f6403c5c23a433a5c81 stored at both assigned JSON paths; 96/120, one blocking historical-order guard and four follow-ons; added_failure_count null because reviewed baseline_suite is absent.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261005T232854641519-cfs-policy-tuple" data-who="reckon-build" data-when="2026-10-05T23:42:57.656Z">
+    <div class="r-comment-body"><p>tests/test_forward_solve_request.py POLICY_FIELDS now appends &quot;topology&quot; after &quot;compilation_cache&quot; to match the nineteen-field ForwardSolvePolicy; head arm passes the target test (.FFF., 3 failed 2 passed, done when met), baseline arm 4 failed 1 passed, negative control (previous eighteen-field tuple) fails naming topology, EXIT=1</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

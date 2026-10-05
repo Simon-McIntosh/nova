@@ -979,7 +979,11 @@ def test_limited_boundary_instrument():
             )
         )
         row = {
-            "cells": count,
+            "cells": len(geometry.centre),
+            "requested_cells": count,
+            "previous_realised_cells": count,
+            "max_fraction_error": float(np.max(np.abs(membership - reference))),
+            "read_axis_m": np.asarray(result.axis).tolist(),
             "pitch_m": float(np.median(geometry.pitch)),
             "read_level_wb": float(result.boundary_flux),
             "analytic_boundary_flux_wb": 0.0,
@@ -987,7 +991,8 @@ def test_limited_boundary_instrument():
             "read_wall_segment": read_segment,
             "read_contact_m": np.asarray(result.boundary).tolist(),
             "analytic_wall_unit": 0,
-            "analytic_wall_vertex": analytic_vertex,
+            "analytic_wall_segment": int(segment),
+            "nearest_wall_vertex": analytic_vertex,
             "analytic_contact_m": analytic_contact.tolist(),
             "wall_vertex_m": wall[analytic_vertex].tolist(),
             "wall_vertex_offset_m": float(
@@ -1041,6 +1046,9 @@ def test_limited_boundary_instrument():
                 analytic_contact,
                 polygons[worst],
             )
-    assert max(row["read_level_wb"] for row in rows) == min(
-        row["read_level_wb"] for row in rows
+    assert max(abs(row["read_level_wb"]) for row in rows) <= 1e-12
+    assert max(row["contact_offset_m"] for row in rows) <= 1e-12
+    assert all(
+        first["max_fraction_error"] > second["max_fraction_error"]
+        for first, second in zip(rows[:-1], rows[1:], strict=True)
     )

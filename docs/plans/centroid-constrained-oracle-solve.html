@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-10-05">
-<meta name="plan-version" content="82">
+<meta name="plan-version" content="83">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
@@ -315,6 +315,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-s22-closure-held-behind-rework-20261005" data-who="" data-when="">
     <div class="r-comment-body"><p>Moved from S22 to S23 on 2026-10-05, when S22 closed, and now depends on converged-forward-solve. The remaining clause is all four analytic rows at 110, 300 and 1000 cells converging to the oracle-near fixed point within ten times the span floor, with the compensating amplitude tabled. That is a measurement of the new solve. Today's Newton-Krylov solver is frozen under the lead's halt and gives zero accepted promotions from the production seed. Re-run it there against the repaired limited fixture (see c-s22-limited-wall-fixture-defect-20261005). The parked worktree cco-certificate-ladder-110-300-h200-preflight (driver 831f498b8) stays until cfs-design has read it, as S21 asked. This plan leaves S23 for an active sprint once the new solve lands.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s22-unlanded-lineages-pinned-20261005" data-who="" data-when="">
+    <div class="r-comment-body"><p>Update to c-s22-closure-held-behind-rework-20261005. S21 confirmed that cfs-design has read the 110/300 rows and the 500/1000 probe, and its merged design document carries the centroid rows as acceptance rows. Both parked worktrees are therefore removed. Their unlanded, docs-only lineages are pinned as local refs in the main checkout so nothing is lost. refs/s22-tips/cco-certificate-ladder-110-300 at 831f498b8 holds the ladder driver, renderer and failed-row panels: 11 commits beyond main, the base for re-running the certificate under the new solve. refs/s22-tips/cco-receipt-row-history at 2bceaf133 holds the stopped-solve row-history receipt with its +3.64 percent first-promotion mismatch: 3 commits. Neither ref is pushed.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-run-r-20260919T065922634567-review-of-cco-flux-level-compensating-term-2" data-who="reckon-ship" data-when="2026-09-19T07:12:54.415Z">
     <div class="r-comment-body"><p>Review stored: 79/100, four findings</p></div>

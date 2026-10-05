@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="figure-and-solver-audit">
   <meta name="plan-title" content="Figure And Solver Audit — every figure re-derived, every solver commit re-read, before anything else lands">
   <meta name="plan-summary" content="Independent-lane review of the local lane&#x27;s sprint work: figures scored against the plotting rules and receipts, solver commits re-read, defects repaired.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="30.0">
   <meta name="plan-capability-version" content="1.0">
@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="107">
+<meta name="plan-version" content="108">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -312,10 +312,11 @@
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit: make render receipts record project-relative paths and rewrite the committed ones</pre>
     <p class="r-fu-outcome">Landed at 227a55bd5 (node fsa-render-receipt-relative-paths, review 96). At the base, four committed receipts in the regenerated directories carried .reckon-worktrees paths: sol-ledger-render.json, outboard-hole/figure-receipt.json and the two Shafranov receipts. Their four drivers now record repository-relative paths, the receipts are rewritten to that form with no re-render, and tests/test_render_receipt_paths.py passes at head and fails at the base. Three review follow-ons carry on in f-fsa-one-project-relative-helper. The helper is copied into four drivers. The test reads committed JSON rather than running a render route. And outboard-hole/preflight-receipt.json, a historical SLURM preflight record, still holds worktree paths and was excluded from the scan. The repo-wide question, about 418 JSON files with worktree paths outside these directories, is open with the lead.</p>
     </article>
-<article class="r-fu" data-id="f-fsa-one-project-relative-helper" data-status="open" data-capability-version="1.0" data-capability-class="routine" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-05" data-recommends-skill="/reckon-build figure-and-solver-audit §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsa-one-project-relative-helper" data-status="resolved" data-capability-version="1.0" data-capability-class="routine" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-05" data-recommends-skill="/reckon-build figure-and-solver-audit §3" data-resolved-at="2026-10-05T20:00:07+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">One owner for the repository-relative path helper, proven on the render routes</h4>
     <div class="r-fu-body"><p>Follow-ons from the review of fsa-render-receipt-relative-paths (score 96). repository_relative is copied verbatim into four drivers and relative_carrier_evidence into two. Lift the helper into nova.database.filepath as one public function, with relative_carrier_evidence given one owner, and have the drivers import them. Add a render-route test per driver that fails when any call site reverts to str(path). Rewrite the last worktree path in outboard-hole/preflight-receipt.json and remove the scan's exclusion. In flight as node fsa-one-project-relative-helper (r-20261005T190533725591).</p></div>
     <pre class="r-fu-prompt">/reckon-build figure-and-solver-audit §3</pre>
+    <p class="r-fu-outcome">Landed at 88a14b2ad (node fsa-one-project-relative-helper, review 113). repository_relative now has one owner in nova.database.filepath, with unit tests in tests/test_filepath.py, and relative_carrier_evidence has one owner in benchmarks/shafranov_pair_receipt.py. Each of the four render drivers has a render-route test that renders into a temporary root carrying a .git marker and fails if a call site reverts to str(path); that negative control is logged. The path fields of outboard-hole/preflight-receipt.json are rewritten and the scan exclusion is removed. No JSON in the four regenerated directories now holds a .reckon-worktrees path. One review follow-on is left uncovered: shafranov_pair_receipt.py:1134 and :1151 record through the shared helper but write a flux-function-fit receipt outside the scanned directories, so no render-route test covers them. That receipt falls under the repo-wide receipt-path question open with the lead. Done — no followup in this plan: the chain closes here.</p>
     </article>
 </section>
 
@@ -622,6 +623,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261005T194243336004-review-of-fsa-one-project-relative-helper" data-who="reckon-build" data-when="2026-10-05T19:58:28.646Z">
     <div class="r-comment-body"><p>Independent review of run r-20261005T190533725591 (node fsa-one-project-relative-helper, plan nova:figure-and-solver-audit §3): scored 113/120 (goal_fidelity 20, evidence 19, scope_discipline 20, durability 17, fit 18, reuse 19; verdict pass); the single-owner repository_relative helper, the per-driver render-route tests, and the preflight rewrite are verified against base 0677e2308 with the named gate independently re-run EXIT=0; one non-blocking durability follow-on (unguarded Shafranov-pair projection call sites). Records: /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261005T190533725591-fsa-one-project-relative-helper.json and its .at-45dfb495 companion.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s22-audit-shipped-20261005" data-who="" data-when="">
+    <div class="r-comment-body"><p>Shipped on 2026-10-05, when S22 closed. The done-when is met. No repair followup remains open on any plan this audit blocks; the solver repairs were handed to the solve rework (converged-forward-solve) under the lead's halt on Newton-Krylov patches. Each repair promotion cites the review anchor it closes, and the lane-fitness record was handed to reckon on 2026-09-21. The renderer wall guard (tests/test_renderer_contours_inside_wall.py) and the receipt-path test (tests/test_render_receipt_paths.py) stay on main as regression guards. One question stays open with the lead: whether about 418 committed JSON files outside the regenerated directories should have their recorded worktree paths rewritten.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20260921T124229575906-fsa-the-lane-fitness-record" data-who="reckon-ship" data-when="2026-09-21T13:01:26Z">
     <div class="r-comment-body"><p>the lane-fitness table: 55 audit review rows over 48 unique promotions classified into seven classes of work with per-lane reviewed and defective counts and provenance for every number; the local lane reads 7 of 8 record repairs, 3 of 4 mechanical refactors, 4 of 7 measurement drivers, 9 of 11 solver changes, 2 of 9 negative controls and 1 of 3 investigations defective, while the metered lanes on the same classes read 3 of 3, 2 of 3 and 5 of 6 defective, so the defect rate is a process property more than a lane property on those classes</p></div>

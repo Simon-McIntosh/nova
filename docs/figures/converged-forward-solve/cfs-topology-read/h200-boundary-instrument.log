@@ -1,4 +1,4 @@
-REVISION=33f881dddcd09c34ae85744317f8a8b93b51ed52 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_limited_boundary_instrument -vv -rP --timeout 300 
+revision=33f881dddcd09c34ae85744317f8a8b93b51ed52 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_limited_boundary_instrument -vv -rP --timeout 300 
 RAW_SHA256=f0ec8b8ab0417e2eb64096daa72712cee99bcff9d3519cef3abc8f448bb7b23b RAW_PATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-boundary-instrument.raw.log
 NOVA_LANE_START=2026-10-05T20:08:53+0200
 PLACEMENT=submit

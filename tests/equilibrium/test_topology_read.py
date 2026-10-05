@@ -458,3 +458,301 @@ def test_topology_shift_fails_position_clause(kind):
     assert displacement >= 3 * pitch * (1 - 1e-12)
     assert displacement > pitch
     assert result.qualified
+
+
+def test_biot_moment_point_derivatives():
+    from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
+    from nova.equilibrium.topology import BiotMomentCoupling
+
+    coupling = BiotMomentCoupling.from_polygons(
+        (_hexagon(0.08) + np.asarray((1.5, 0.0)),)
+    )
+    moments = ClippedCurrentMoments(
+        jnp.asarray((1000.0,)), jnp.asarray((0.2,)), jnp.asarray((-0.3,))
+    )
+    point = jnp.asarray((2.0, 0.1))
+    evaluate = jax.jit(lambda target, kernel, current: kernel.evaluate(target, current))
+    jet = evaluate(point, coupling, moments)
+    step = 1e-5
+    directions = jnp.eye(2)
+    upper = [
+        evaluate(point + step * direction, coupling, moments)
+        for direction in directions
+    ]
+    lower = [
+        evaluate(point - step * direction, coupling, moments)
+        for direction in directions
+    ]
+    gradient = np.asarray(
+        [
+            (up.value - down.value) / (2 * step)
+            for up, down in zip(upper, lower, strict=True)
+        ]
+    )
+    hessian = np.stack(
+        [
+            (up.gradient - down.gradient) / (2 * step)
+            for up, down in zip(upper, lower, strict=True)
+        ],
+        axis=1,
+    )
+    np.testing.assert_allclose(jet.gradient, gradient, rtol=5e-7, atol=1e-11)
+    np.testing.assert_allclose(jet.hessian, hessian, rtol=5e-7, atol=1e-11)
+    np.testing.assert_allclose(jet.hessian, jet.hessian.T, rtol=5e-7, atol=1e-11)
+
+
+def _reference_cell_fractions(kind, oracle, geometry):
+    """Integrate oracle vertical roots independently of the production clip."""
+    from shapely.geometry import Point, Polygon
+
+    vertices = np.asarray(geometry.vertices)
+    counts = np.asarray(geometry.vertex_count)
+    if kind == "limited":
+        angle = np.linspace(0, 2 * np.pi, 4097)
+        extent = np.sqrt(2 * oracle.axis_flux / oracle.pressure_coefficient)
+        boundary = np.column_stack(
+            (
+                np.sqrt(oracle.major_radius**2 + extent * np.cos(angle)),
+                np.sqrt(oracle.axis_flux / oracle.field_coefficient) * np.sin(angle),
+            )
+        )
+    else:
+        boundary = oracle.separatrix(4097)
+    region = Polygon(boundary)
+    node = np.polynomial.chebyshev.chebpts1(7)
+    inverse = np.linalg.inv(np.polynomial.polynomial.polyvander(node, 6))
+    z_origin = 0.5 * (np.min(boundary[:, 1]) + np.max(boundary[:, 1]))
+    z_scale = np.ptp(boundary[:, 1])
+    fractions, uncertainties = [], []
+    for cell, count in zip(vertices, counts, strict=True):
+        polygon = cell[:count]
+        shape = Polygon(polygon)
+        if shape.distance(region.boundary) > 1e-3 * np.sqrt(shape.area):
+            fractions.append(float(region.contains(shape.representative_point())))
+            uncertainties.append(0.0)
+            continue
+
+        def length(radius):
+            heights = []
+            for first, second in zip(
+                polygon, np.roll(polygon, -1, axis=0), strict=True
+            ):
+                delta = second - first
+                if delta[0] == 0:
+                    continue
+                fraction = (radius - first[0]) / delta[0]
+                if -1e-12 <= fraction <= 1 + 1e-12:
+                    heights.append(first[1] + fraction * delta[1])
+            if len(heights) < 2:
+                return 0.0
+            lower, upper = min(heights), max(heights)
+            if kind == "limited":
+                remaining = oracle.flux(radius, 0.0) / oracle.field_coefficient
+                half = np.sqrt(max(remaining, 0.0))
+                return max(0.0, min(upper, half) - max(lower, -half))
+            samples = np.column_stack((np.full(7, radius), z_origin + z_scale * node))
+            coefficient = inverse @ oracle.flux(samples)
+            keep = np.flatnonzero(
+                np.abs(coefficient) > np.max(np.abs(coefficient)) * 1e-13
+            )
+            roots = np.polynomial.polynomial.polyroots(coefficient[: keep[-1] + 1])
+            roots = z_origin + z_scale * roots[np.abs(roots.imag) < 1e-8].real
+            cuts = np.unique(
+                np.r_[lower, roots[(roots > lower) & (roots < upper)], upper]
+            )
+            total = 0.0
+            for first, last in zip(cuts[:-1], cuts[1:], strict=True):
+                midpoint = (first + last) / 2
+                if oracle.flux(np.asarray((radius, midpoint))) > 0 and region.covers(
+                    Point(radius, midpoint)
+                ):
+                    total += last - first
+            return total
+
+        breaks = np.unique(polygon[:, 0])
+        value = error = 0.0
+        for first, last in zip(breaks[:-1], breaks[1:], strict=True):
+            integral, estimate = quad(
+                length, first, last, epsabs=shape.area * 1e-10, epsrel=1e-9, limit=100
+            )
+            value += integral
+            error += estimate
+        fractions.append(value / shape.area)
+        uncertainties.append(error / shape.area)
+    return np.asarray(fractions), np.asarray(uncertainties)
+
+
+def _render_read_panel(directory, kind, field, geometry, result, wall, axis, saddle):
+    from pathlib import Path
+    import matplotlib.pyplot as plt
+    from shapely import STRtree, points
+    from shapely.geometry import Polygon
+    from nova.media import poloidal
+    from nova.media.ink import DEFAULT_INK, poloidal_axes
+
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    radial = np.linspace(wall[:, 0].min(), wall[:, 0].max(), 180)
+    vertical = np.linspace(wall[:, 1].min(), wall[:, 1].max(), 220)
+    rr, zz = np.meshgrid(radial, vertical)
+    locations = np.column_stack((rr.ravel(), zz.ravel()))
+    polygons = [
+        Polygon(np.asarray(poly)[: int(count)])
+        for poly, count in zip(geometry.vertices, geometry.vertex_count, strict=True)
+    ]
+    matches = STRtree(polygons).query(points(locations), predicate="within")
+    sampled = np.full(len(locations), np.nan)
+    index, cell = matches
+    local = (locations[index] - np.asarray(geometry.centre)[cell]) / np.asarray(
+        geometry.pitch
+    )[cell, None]
+    x, y = local.T
+    basis = np.column_stack((np.ones_like(x), x, y, x * x, x * y, y * y))
+    sampled[index] = np.sum(basis * np.asarray(result.field_coefficients)[cell], axis=1)
+    reference = np.asarray(jax.vmap(field.value)(jnp.asarray(locations))).reshape(
+        rr.shape
+    )
+    levels = np.linspace(float(result.boundary_flux), float(result.axis_flux), 10)[:-1]
+    figure, axes = plt.subplots(figsize=(14, 9), dpi=100)
+    poloidal_axes(axes)
+    reference_style = replace(
+        DEFAULT_INK,
+        axis_color="#333333",
+        xpoint_color="#333333",
+        axis_markersize=12,
+        xpoint_markersize=13,
+    )
+    read_style = replace(
+        DEFAULT_INK,
+        axis_color=DEFAULT_INK.flux_color,
+        xpoint_color=DEFAULT_INK.flux_color,
+        axis_markersize=8,
+        xpoint_markersize=9,
+    )
+    poloidal.draw_flux_contours(
+        axes,
+        radial,
+        vertical,
+        reference,
+        levels,
+        wall=(wall,),
+        color="#444444",
+        linewidth=2.6,
+    )
+    poloidal.draw_flux_contours(
+        axes,
+        radial,
+        vertical,
+        sampled.reshape(rr.shape),
+        levels,
+        wall=(wall,),
+        color=DEFAULT_INK.flux_color,
+        linewidth=2.6,
+    )
+    poloidal.draw_wall(axes, (wall,))
+    reference_x = np.empty((0, 2)) if saddle is None else np.asarray(saddle)[None]
+    poloidal.draw_nulls(axes, axis, reference_x, style=reference_style, contain=(wall,))
+    poloidal.draw_nulls(
+        axes,
+        np.asarray(result.axis),
+        np.asarray(result.x_points)[np.asarray(result.x_point_valid)],
+        style=read_style,
+        contain=(wall,),
+    )
+    axes.text(
+        0.02,
+        0.97,
+        "analytic field / larger nulls",
+        transform=axes.transAxes,
+        color="#333333",
+        fontsize=20,
+        va="top",
+    )
+    axes.text(
+        0.02,
+        0.91,
+        "cell field / read nulls",
+        transform=axes.transAxes,
+        color=DEFAULT_INK.flux_color,
+        fontsize=20,
+        va="top",
+    )
+    figure.savefig(directory / f"{kind}-poloidal.png", dpi=100, facecolor="white")
+    plt.close(figure)
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_closed_form_resolution_probe(kind):
+    import os
+    from pathlib import Path
+    import resource
+    import time
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    oracle, field, wall, axis, saddle = _analytic_inputs(kind)
+    convention = TopologyConvention.from_cocos(17, 1.0)
+    evaluate = jax.jit(read)
+    rows = []
+    for count in (132, 300, 550, 1074, 2616):
+        geometry = _realised_hex_geometry(wall, count)
+        started = time.perf_counter()
+        executable = evaluate.lower(
+            field, geometry, convention, TopologyPolicy()
+        ).compile()
+        compile_seconds = time.perf_counter() - started
+        result = executable(field, geometry, convention, TopologyPolicy())
+        jax.block_until_ready(result)
+        reference, uncertainty = _reference_cell_fractions(kind, oracle, geometry)
+        errors = np.abs(np.asarray(result.membership) - reference)
+        distance = (
+            np.full(count, np.inf)
+            if saddle is None
+            else np.linalg.norm(np.asarray(geometry.centre) - saddle, axis=1)
+        )
+        neighbourhood = distance < 2 * np.asarray(geometry.pitch)
+        row = {
+            "case": kind,
+            "cells": count,
+            "valid": bool(result.valid),
+            "qualified": bool(result.qualified),
+            "reason": int(result.reason),
+            "pitch": float(np.median(np.asarray(geometry.pitch))),
+            "max_fraction_error": float(np.max(errors)),
+            "smooth_fraction_error": float(np.max(errors[~neighbourhood])),
+            "saddle_fraction_error": float(np.max(errors[neighbourhood]))
+            if np.any(neighbourhood)
+            else None,
+            "reference_quadrature_estimate": float(np.max(uncertainty)),
+            "compile_seconds": compile_seconds,
+            "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            "axis_error_m": float(np.linalg.norm(np.asarray(result.axis) - axis)),
+            "backend": jax.default_backend(),
+            "scope": (
+                "closed-form evaluator and area-fraction difference; "
+                "not kernel-backed symmetric-difference acceptance"
+            ),
+        }
+        rows.append(row)
+        print("TOPOLOGY_PROBE " + json.dumps(row), flush=True)
+        root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+        if root:
+            directory = Path(root)
+            directory.mkdir(parents=True, exist_ok=True)
+            (directory / f"{kind}-rows.json").write_text(
+                json.dumps(rows, indent=2) + "\n"
+            )
+        if count == 550 and os.environ.get("NOVA_TOPOLOGY_FIGURE_DIR"):
+            _render_read_panel(
+                os.environ["NOVA_TOPOLOGY_FIGURE_DIR"],
+                kind,
+                field,
+                geometry,
+                result,
+                wall,
+                axis,
+                saddle,
+            )
+        assert result.valid, row
+        assert result.qualified, row
+        assert row["axis_error_m"] <= row["pitch"]
+        assert int(result.boundary_class) == int(saddle is not None)

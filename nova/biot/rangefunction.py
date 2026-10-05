@@ -158,14 +158,36 @@ def _scan(function, initial, values, xp, *, reverse=False):
 
 @partial(jax.jit, static_argnames=("xp",))
 def _multiply_packed(left, right, *, xp):
-    # Product-to-sum routing is geometry-free data, shared by every batch lane.
+    # Each lane retains the nested left-then-right accumulation order.
     rows, columns = np.indices((left.shape[0], right.shape[0]))
-    orders = np.arange(left.shape[0] + right.shape[0] - 1)
-    routing = (
-        (orders[:, None, None] == rows + columns).astype(float)
-        + (orders[:, None, None] == abs(rows - columns)).astype(float)
-    ) * 0.5
-    return xp.einsum("kij,i...,j...->k...", xp.asarray(routing), left, right)
+    shape = np.broadcast_shapes(left.shape[1:], right.shape[1:])
+    left = xp.broadcast_to(
+        left.reshape(
+            (left.shape[0],) + (1,) * (len(shape) - left.ndim + 1) + left.shape[1:]
+        ),
+        (left.shape[0],) + shape,
+    )
+    right = xp.broadcast_to(
+        right.reshape(
+            (right.shape[0],) + (1,) * (len(shape) - right.ndim + 1) + right.shape[1:]
+        ),
+        (right.shape[0],) + shape,
+    )
+    width = left.shape[0] + right.shape[0] - 1
+    orders = xp.arange(width).reshape((width,) + (1,) * len(shape))
+    initial = xp.zeros((width,) + shape, dtype=xp.result_type(left, right))
+
+    def accumulate(state, indices):
+        index, other_index = indices
+        term = 0.5 * left[index] * right[other_index]
+        state = xp.where(orders == index + other_index, state + term, state)
+        state = xp.where(orders == xp.abs(index - other_index), state + term, state)
+        return state, None
+
+    result, _ = _scan(
+        accumulate, initial, (xp.asarray(rows.ravel()), xp.asarray(columns.ravel())), xp
+    )
+    return result
 
 
 def _multiply(left, right, xp):
@@ -490,14 +512,25 @@ def _chebyshev_integral(series: list) -> list:
     if not series:
         return []
     xp = _namespace(series)
-    order = np.arange(len(series))
-    target = np.arange(len(series) + 1)[:, None]
-    weights = (target == order + 1) * np.where(order == 0, 1.0, 0.5 / (order + 1))
-    weights -= (target == order - 1) * np.where(
-        order >= 2, 0.5 / np.maximum(order - 1, 1), 0.0
-    )
-    weights[0] = 0.0
-    return _unpack(xp.einsum("ki,i...->k...", xp.asarray(weights), _pack(series, xp)))
+    packed = _pack(series, xp)
+    width = len(series) + 1
+    orders = xp.arange(width).reshape((width,) + (1,) * (packed.ndim - 1))
+    initial = xp.zeros((width,) + packed.shape[1:], dtype=packed.dtype)
+
+    def integrate(state, item):
+        order, coefficient = item
+        rising = xp.where(
+            order == 0,
+            coefficient,
+            xp.where(order == 1, 0.25 * coefficient, 0.5 * coefficient / (order + 1)),
+        )
+        state = xp.where(orders == order + 1, state + rising, state)
+        falling = 0.5 * coefficient / xp.maximum(order - 1, 1)
+        state = xp.where((order >= 2) & (orders == order - 1), state - falling, state)
+        return state, None
+
+    result, _ = _scan(integrate, initial, (xp.arange(len(series)), packed), xp)
+    return _unpack(result)
 
 
 @_array_program
@@ -589,9 +622,21 @@ def contract(numerator: list, moments: list):
     if not numerator:
         return 0.0
     xp = _namespace(numerator, moments)
-    return xp.einsum(
-        "i...,i...->...", _pack(numerator, xp), _pack(moments[: len(numerator)], xp)
+    coefficients = _pack(numerator, xp)
+    values = _pack(moments[: len(numerator)], xp)
+    shape = np.broadcast_shapes(coefficients.shape[1:], values.shape[1:])
+
+    def accumulate(total_value, term):
+        coefficient, moment = term
+        return total_value + coefficient * moment, None
+
+    result, _ = _scan(
+        accumulate,
+        xp.zeros(shape, dtype=xp.result_type(coefficients, values)),
+        (coefficients, values),
+        xp,
     )
+    return result
 
 
 @_array_program

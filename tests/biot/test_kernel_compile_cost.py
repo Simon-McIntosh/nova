@@ -37,21 +37,27 @@ def _baseline_kernel():
     """Load revision-pinned kernels without changing the production imports."""
     with tempfile.TemporaryDirectory(prefix="biot-reference-") as directory:
         replacements = {}
-        for name in ("rangefunction", "elliptic", "momentchannel", "polygonanalytic"):
-            source_path = ROOT / "nova" / "biot" / f"{name}.py"
-            if name in ("rangefunction", "elliptic"):
-                source_path = Path(directory) / f"{name}.py"
-                source_path.write_bytes(
-                    subprocess.check_output(
-                        [
-                            "git",
-                            "-C",
-                            str(ROOT),
-                            "show",
-                            f"{BASE_REVISION}:nova/biot/{name}.py",
-                        ]
-                    )
+        for name in (
+            "rangefunction",
+            "completeelliptic",
+            "elliptic",
+            "gradedresidual",
+            "momentchannel",
+            "polygonanalytic",
+            "greens",
+        ):
+            source_path = Path(directory) / f"{name}.py"
+            source_path.write_bytes(
+                subprocess.check_output(
+                    [
+                        "git",
+                        "-C",
+                        str(ROOT),
+                        "show",
+                        f"{BASE_REVISION}:nova/biot/{name}.py",
+                    ]
                 )
+            )
             module = _load(f"reference_{name}", source_path)
             for key, value in tuple(vars(module).items()):
                 origin = getattr(value, "__module__", "")
@@ -60,7 +66,9 @@ def _baseline_kernel():
             replacements[f"nova.biot.{name}"] = module
             print(f"REFERENCE_MODULE {name}={module.__file__}", flush=True)
         print(f"MEASUREMENT_CWD={Path.cwd().resolve()}", flush=True)
-        yield module
+        polygon = replacements["nova.biot.polygonanalytic"]
+        polygon._reference_modules = replacements
+        yield polygon
 
 
 def _geometry():
@@ -253,6 +261,20 @@ def test_point_jet_identity():
                     for chunk in np.split(points, 100)
                 ]
             )
+    receipt = os.environ.get("NOVA_KERNEL_IDENTITY_RECEIPT")
+    if receipt:
+        np.savez(receipt, points=points, baseline=jets["baseline"], head=jets["head"])
+    relative = np.abs(jets["head"] - jets["baseline"]) / np.maximum(
+        np.abs(jets["baseline"]),
+        np.finfo(float).tiny,
+    )
+    worst = np.unravel_index(np.argmax(relative), relative.shape)
+    print(
+        f"IDENTITY_WORST point={points[worst[0]].tolist()} "
+        f"component={worst[1]} baseline={jets['baseline'][worst]:.17g} "
+        f"head={jets['head'][worst]:.17g}",
+        flush=True,
+    )
     maximum = _maximum_error(jets["head"], jets["baseline"])
     print(
         f"IDENTITY kind=polygon points={len(points)} "
@@ -261,6 +283,32 @@ def test_point_jet_identity():
         flush=True,
     )
     assert maximum.max() <= 1e-13
+
+
+def test_harmonic_arithmetic_order():
+    """Cancellation-sensitive helpers retain the reference operation ordering."""
+    from nova.biot import rangefunction
+
+    random = np.random.default_rng(831)
+    series = [random.normal(size=1000) for _ in range(8)]
+    cases = (
+        ("harmonic_multiply", (series, series[:5])),
+        ("contract", (series, series)),
+        ("deflate", (series, random.uniform(-2, 2, 1000))),
+        ("_chebyshev_integral", (series,)),
+        ("harmonic_add", (series, series[:3])),
+    )
+    with _baseline_kernel() as baseline:
+        reference = baseline._reference_modules["nova.biot.rangefunction"]
+        for name, arguments in cases:
+            expected = getattr(reference, name)(*arguments)
+            actual = getattr(rangefunction, name)(*arguments)
+            for left, right in zip(
+                jax.tree.leaves(actual),
+                jax.tree.leaves(expected),
+                strict=True,
+            ):
+                np.testing.assert_array_equal(left, right, err_msg=name)
 
 
 def test_harmonic_recurrence_identity(monkeypatch):
@@ -306,10 +354,9 @@ def test_harmonic_recurrence_identity(monkeypatch):
 
 @pytest.mark.skipif(jax.default_backend() != "gpu", reason="point batch gate uses GPU")
 def test_filament_point_jet_identity():
-    """The filament route is outside the harmonic helpers and stays identical."""
+    """The filament jet agrees with the revision-pinned special functions."""
     from nova.biot import greens
 
-    reference = _load("reference_greens", ROOT / "nova/biot/greens.py")
     points = jnp.asarray(_points())
 
     def build(module):
@@ -332,7 +379,8 @@ def test_filament_point_jet_identity():
 
         return jax.jit(jax.vmap(jet))
 
-    with _baseline_kernel():
+    with _baseline_kernel() as baseline:
+        reference = baseline._reference_modules["nova.biot.greens"]
         expected = np.asarray(build(reference)(points))
     actual = np.asarray(build(greens)(points))
     maximum = _maximum_error(actual, expected)

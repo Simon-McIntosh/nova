@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -275,6 +275,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T211843284282" data-who="" data-when="">
     <div class="r-comment-body"><p>Line-search reuse candidates, 2026-10-05, from the fifteenth composed plan review: the backtracking machinery in <code>fixed_point.py</code> (<code>_backtracking_scores</code>, which evaluates state plus factor times step on a factor ladder and scores on a merit; <code>_select_backtracking_candidate</code>, the sufficient-decrease authority; <code>_backtracked_promotion</code>, their wrapper) is the named cite-or-justify candidate for <code>solve.fixed_point</code>'s line search on φ = ½‖F‖² along the GMRES direction. The §5 node carries the scoring and sufficient-decrease test into <code>solve.py</code> as private helpers, with the factor ladder replaced by initial factor 1 halved to fixed capacity, or states in its evidence why each fails the single-scan contract; §6 deletes <code>fixed_point.py</code> only after whatever §5 carried has moved. The withdrawal of <code>_steepest_descent_promotion</code> stands: it chooses its own direction.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T213541950241" data-who="" data-when="">
+    <div class="r-comment-body"><p>Request-surface ruling, 2026-10-05, from the sixteenth composed plan review: <code>solve_request.py</code> is the request-side owner of the route surface and is pruned at §6 with the routes it names. <code>SolveRoute</code> (six members today) collapses to the one solve, so the literal and <code>ForwardSolvePolicy.route</code> are deleted along with the route validation set and the route-specific blocks of <code>kernel_options()</code>; <code>SupportClipMode</code> collapses to the exact clip and is deleted with the chord modes; the retired plumbing fields (<code>active_set_steps</code>, <code>settled_exit</code>, <code>stagnation_stop</code>, <code>best_iterate_retention</code>, <code>continuation</code>, <code>own_mask_acceptance</code>, <code>warmup</code>, <code>step_cap</code>) leave <code>ForwardSolvePolicy</code>, which then carries the Newton and GMRES capacities, the kernel and qualification tolerances, the current pin, the exact-kernel and cache settings, <code>TopologyPolicy</code> and <code>SolvePolicy</code>. The POLICY_FIELDS test asserts the reduced tuple, and the §6 evidence states the before and after field counts as the interface-budget accounting the zero-count claim rests on.</p></div>
 </div>
 </section>
 </main>

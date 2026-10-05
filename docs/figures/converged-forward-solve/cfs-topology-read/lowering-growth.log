@@ -1,0 +1,7 @@
+REVISION=fe383cc795b70fcd67d1008f46e079490d64afc3 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -u /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/profile_lowering.py
+MODULE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/equilibrium/topology.py CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+LOWERING_ROW {"cells": 132, "trace_seconds": 18.9134568721056, "unique_equations": 184466, "expanded_equations": 1246146, "lower_seconds": 8.376868139021099, "stablehlo_bytes": 39039406, "peak_host_rss_kib": 1205940, "native_compile_attempted": false}
+LOWERING_ROW {"cells": 300, "trace_seconds": 19.58741830382496, "unique_equations": 182649, "expanded_equations": 1227426, "lower_seconds": 8.279740197584033, "stablehlo_bytes": 38786305, "peak_host_rss_kib": 1387464, "native_compile_attempted": false}
+LOWERING_ROW {"cells": 550, "trace_seconds": 23.03632976207882, "unique_equations": 212822, "expanded_equations": 1227426, "lower_seconds": 9.301351652480662, "stablehlo_bytes": 41319150, "peak_host_rss_kib": 1435496, "native_compile_attempted": false}
+PROBE_COMPLETED=true
+EXIT=0

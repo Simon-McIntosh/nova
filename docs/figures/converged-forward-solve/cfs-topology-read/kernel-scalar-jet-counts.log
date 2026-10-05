@@ -1,0 +1,5 @@
+REVISION=9875cee7f TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=CPU jax.make_jaxpr scalar-jet diagnostic through python -u -
+SOURCE_CONTENT_REVISION=c5947c2c5 DIRTY_AT_START=true
+RAW_LOG=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/kernel-scalar-jet-counts.log
+RAW_SHA256=9bb82845b691c0d7dd6e9a7fc0b2e8bd12f66b8073f264e0096361e636cefbfc
+TRACE 21.789667258039117 {"unique_equations": 184482, "expanded_equations": 1246164}

@@ -1,0 +1,53 @@
+REVISION=0058b3c6503645b649bbe96cad5784a46309dd4c TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_kernel_compile_growth tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives -vv -rA -s --timeout 900 --tb=short -x 
+RAW_LOG=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-scalar-kernel-growth.log
+RAW_SHA256=bad2f5ea007ea6beb137dd4c954894157a62d812b82bb3bf5228dff695345f0f
+NOVA_LANE_START=2026-10-06T00:16:19+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281123
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=0058b3c6503645b649bbe96cad5784a46309dd4c
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=900
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_kernel_compile_growth tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives -vv -rA -s --timeout 900 --tb=short -x 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=0058b3c6503645b649bbe96cad5784a46309dd4c
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 900.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 00:16:30 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 6 items
+
+tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132] COMPILE_GROWTH {"cells": 132, "kernel_edges": 10, "phase": "input-ready", "peak_host_rss_kib": 4417012}
+COMPILE_GROWTH {"cells": 132, "kernel_edges": 10, "phase": "traced", "peak_host_rss_kib": 4605428, "trace_seconds": 8.359972788020968, "unique_equations": 184466, "expanded_equations": 1246146}
+COMPILE_GROWTH {"cells": 132, "kernel_edges": 10, "phase": "lowered", "peak_host_rss_kib": 4776160, "trace_seconds": 8.359972788020968, "unique_equations": 184466, "expanded_equations": 1246146, "lower_seconds": 3.1077227275818586, "stablehlo_bytes": 39028132}
+slurmstepd: error: *** JOB 1281123 ON 98dci4-gpu-0003 CANCELLED AT 2026-10-06T00:23:38 ***
+SCHEDULER_STATE=CANCELLED
+SUITE_COMPLETED=false
+PAYLOAD_EXIT_STATUS=absent
+NATIVE_COMPILE_LOWER_BOUND_SECONDS=342
+OBSERVATION_UTC=2026-10-05T22:23:09Z

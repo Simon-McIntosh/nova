@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -218,6 +218,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T171941782407" data-who="" data-when="">
     <div class="r-comment-body"><p>Reuse ruling for §5 and §6, 2026-10-05, from the second composed plan review: the existing single-site GMRES kernel in <code>fixed_point.py</code> (<code>_single_site_krylov</code> with its custom vmap batching rule, <code>_krylov_machine</code>, <code>_serve_krylov_stream</code>, <code>_krylov_outputs</code> and the Gram-Schmidt and least-squares helpers, about 613 lines) and the Armijo backtracking search (<code>_steepest_descent_promotion</code>) are named reuse candidates for <code>solve.fixed_point</code>. The §5 node either carries them into <code>solve.py</code> as private helpers behind the one call site, stripped of the ladder and frozen-map plumbing, or states in its evidence why each fails the fixed-capacity scan contract. §6's deletion of <code>fixed_point.py</code> therefore deletes the routes and the ladders, never a kernel §5 still contains: whatever §5 carries over moves before §6 deletes the file, the same rule §6 already states for the geometry and polynomial helpers.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T173640998149" data-who="" data-when="">
+    <div class="r-comment-body"><p>Owner ruling for the field-null kernels, 2026-10-05, from the third composed plan review: <code>nova/biot/null.py</code> (<code>Null1D</code>, <code>Null2D</code>, <code>inside_or_near_source_cell</code>) and <code>nova/biot/fieldnull.py</code> are kernel-level field-null evaluators under <code>nova.biot</code>, not members of the equilibrium null inventory, and they are kept. They are named reuse candidates for the Biot-derivative null evaluation §2 requires (position, gradient and Hessian of the total field from the kernels' analytic derivatives): the §2 node either evaluates its nulls through them or states in its evidence why they fail the traced, fixed-shape contract. After §6 the only equilibrium caller of these kernels is <code>topology.read</code>; the inventory's retirement of <code>topology.py</code>'s old read and <code>forward_operator.py</code>'s <code>_FixedDesignNull2D</code> removes their other importers.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>The repository-relative path helper has one owner — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-one-project-relative-helper"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/gate-head.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/negative-control.log">
+
+  <h2 id="fsa-one-project-relative-helper-summary">The repository-relative path helper has one owner</h2>
+
+  <p id="fsa-one-project-relative-helper-finding">Four render drivers each carried a private copy of
+  <code>repository_relative</code>, and the four copies had drifted from the committed receipts:
+  <code>sol_ledger_current_census.py</code> relativized the paths it wrote while
+  <code>shafranov_pair_receipt.py</code> and <code>shafranov_combination_discriminator.py</code>
+  still recorded <code>str(path)</code> — an absolute worktree path — for
+  <code>filesystem_path</code> / <code>vector_filesystem_path</code>. A path recorded absolutely
+  stops locating its artifact once the worktree that produced it is reclaimed, which is exactly the
+  failure the repository-relative convention exists to prevent.</p>
+
+  <h3 id="fsa-one-project-relative-helper-change">What changed</h3>
+
+  <p id="fsa-one-project-relative-helper-owner">One public helper now lives in
+  <code>nova/database/filepath.py</code>: <code>repository_relative(path)</code> resolves the
+  nearest ancestor holding a <code>.git</code> marker and returns
+  <code>resolved.relative_to(root).as_posix()</code>, falling back to the absolute resolved path
+  when no repository ancestor exists (and to <code>root_dir</code> as the final fallback). Each of
+  the four drivers imports it and drops its copy. The shared
+  <code>relative_carrier_evidence</code> walk keeps its single owner in
+  <code>benchmarks/shafranov_pair_receipt.py</code>, because that receipt shape is a benchmark
+  convention rather than a general path concern and the sibling discriminator already imports this
+  driver for it.</p>
+
+  <p id="fsa-one-project-relative-helper-callsites">The pair and discriminator render routes now
+  record <code>repository_relative(...)</code> at every <code>filesystem_path</code> and
+  <code>vector_filesystem_path</code> call site, so a receipt written on any route is relative to
+  the repository that produced it. <code>measure.render</code> takes an optional <code>output</code>
+  directory and writes its panel, its vector companion and its figure receipt there, so the
+  render-only route can be exercised against a temporary root without a solve.</p>
+
+  <h3 id="fsa-one-project-relative-helper-tests">Checks</h3>
+
+  <p id="fsa-one-project-relative-helper-scan">The directory scan in
+  <code>tests/test_render_receipt_paths.py</code> no longer excludes non-render JSON. The historical
+  SLURM preflight record
+  <code>docs/figures/cut-cell-current-attribution/outboard-hole/preflight-receipt.json</code> has no
+  writer in the tree, so its <code>.reckon-worktrees</code> path fields were rewritten to
+  repository-relative form and every other field left unchanged; the scan now reaches it like any
+  other receipt in the four directories.</p>
+
+  <p id="fsa-one-project-relative-helper-routes">Four render-route tests call each driver's
+  solve-free render path into a temporary directory carrying its own <code>.git</code> marker, then
+  assert that every filesystem path in the written receipt is relative to that root. Reverting any
+  one call site to <code>str(path)</code> fails the corresponding route test.</p>
+
+  <h3 id="fsa-one-project-relative-helper-evidence">Evidence</h3>
+
+  <p id="fsa-one-project-relative-helper-gate">The gate command
+  (<code>JAX_PLATFORMS=cpu …/python -m pytest -p no:cacheprovider
+  tests/test_render_receipt_paths.py tests/test_filepath.py</code>) reports
+  <code>38 passed, 3 skipped</code> with <code>EXIT=0</code> at revision
+  <code>4355ebce34d5e4a190e26c7d795be08caf0e04ff</code>.</p>
+
+  <p id="fsa-one-project-relative-helper-negative">The negative control reverts the sol-ledger
+  <code>png</code> call site to <code>str(output)</code> in a scratch copy of the tree and reruns
+  the gate: <code>test_render_route_records_relative_paths_sol_ledger</code> fails on the absolute
+  path with <code>EXIT=1</code>, which is the route test catching the regression the shared helper
+  removes.</p>
+
+</article>
+</main>
+</body>
+</html>

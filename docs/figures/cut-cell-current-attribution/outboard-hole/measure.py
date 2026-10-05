@@ -11,6 +11,7 @@ import types
 
 import numpy as np
 
+from nova.database.filepath import repository_relative
 from nova.jax.config import configure_dtypes
 
 configure_dtypes()
@@ -26,28 +27,6 @@ ROOT = Path(__file__).resolve().parents[4]
 OUTPUT = Path(__file__).resolve().parent
 FIXTURE_PATH = "scripts/analytic_oracle_fixtures/measure.py"
 GATE_PATH = "tests/test_outboard_hole_census_gate.py"
-
-
-def repository_relative(path) -> str:
-    """Return ``path`` relative to its repository root, else absolute.
-
-    The root is found from the path itself, so a path recorded from another
-    checkout of this project still resolves to the same project-relative name,
-    and a receipt keeps locating its artifacts once the worktree is reclaimed.
-    """
-    resolved = Path(path).resolve()
-    root = next(
-        (
-            parent
-            for parent in (resolved, *resolved.parents)
-            if (parent / ".git").exists()
-        ),
-        ROOT,
-    )
-    try:
-        return resolved.relative_to(root).as_posix()
-    except ValueError:
-        return str(resolved)
 
 
 def _git(*args):
@@ -284,7 +263,15 @@ def controls(revision):
     )
 
 
-def render():
+def render(output=None):
+    """Draw the booked-versus-analytic panel from the persisted terminal state.
+
+    The persisted attribution and control files are read from the driver's own
+    directory; the panel, its vector companion and the figure receipt are
+    written to ``output`` when one is given, so a caller can direct the
+    render-only route at another directory without a solve.  No equilibrium is
+    solved on this path.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
@@ -294,6 +281,7 @@ def render():
     from nova.media import poloidal
     from nova.media.ink import DEFAULT_INK, poloidal_axes
 
+    output = OUTPUT if output is None else Path(output)
     data = json.loads((OUTPUT / "terminal-attribution.json").read_text())
     control = json.loads(census.CONTROL_PART.read_text())
     fields = control["render_data"]
@@ -424,19 +412,26 @@ def render():
     figure.text(0.5, 0.025, caption, ha="center", fontsize=9, linespacing=1.5)
     figure.subplots_adjust(left=0.025, right=0.975, top=0.88, bottom=0.13, wspace=0.08)
     for extension in ("png", "svg"):
-        figure.savefig(OUTPUT / f"booked-versus-analytic.{extension}", dpi=170)
+        figure.savefig(output / f"booked-versus-analytic.{extension}", dpi=170)
     plt.close(figure)
-    _write(
-        "figure-receipt.json",
-        {
-            "caption": caption,
-            "shared_flux_levels_wb": levels.tolist(),
-            "null_tallies": null_tallies,
-            "figures": [
-                repository_relative(OUTPUT / f"booked-versus-analytic.{ext}")
-                for ext in ("png", "svg")
-            ],
-        },
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "figure-receipt.json").write_text(
+        json.dumps(
+            census._strict(
+                {
+                    "caption": caption,
+                    "shared_flux_levels_wb": levels.tolist(),
+                    "null_tallies": null_tallies,
+                    "figures": [
+                        repository_relative(output / f"booked-versus-analytic.{ext}")
+                        for ext in ("png", "svg")
+                    ],
+                }
+            ),
+            indent=2,
+            allow_nan=False,
+        )
+        + "\n"
     )
     print(caption, flush=True)
 

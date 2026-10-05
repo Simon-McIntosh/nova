@@ -40,6 +40,7 @@ import numpy as np
 from scipy.interpolate import LinearNDInterpolator
 
 from benchmarks import settled_mask_stall as settled
+from nova.database.filepath import repository_relative
 from nova.equilibrium.constraint import (
     ConstraintBinding,
     ConstraintContext,
@@ -67,33 +68,14 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIRECTORY = ROOT / "docs/figures/constraint-augmented-newton-krylov/shafranov"
 
 
-def repository_relative(path) -> str:
-    """Return ``path`` relative to its repository root, else absolute.
-
-    The root is found from the path itself, so a path recorded from another
-    checkout of this project still resolves to the same project-relative name,
-    and a receipt keeps locating its artifacts once the worktree is reclaimed.
-    """
-    resolved = Path(path).resolve()
-    root = next(
-        (
-            parent
-            for parent in (resolved, *resolved.parents)
-            if (parent / ".git").exists()
-        ),
-        ROOT,
-    )
-    try:
-        return resolved.relative_to(root).as_posix()
-    except ValueError:
-        return str(resolved)
-
-
 def relative_carrier_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     """Record the carrier check command's module path project-relative.
 
     The command is ``[interpreter, carrier module, "check", ...]``: only the
     module path names a source file inside the project, so only it is rewritten.
+    The receipt shape this walks is a benchmark convention rather than a general
+    path concern, so the function lives with this driver -- the one the sibling
+    Shafranov discriminator already imports -- and not beside the path helper.
     """
     check = evidence.get("named_cache_only_check")
     command = check.get("command") if isinstance(check, dict) else None
@@ -553,7 +535,7 @@ def _render(
     figure.savefig(path, dpi=180)
     plt.close(figure)
     return {
-        "filesystem_path": str(path),
+        "filesystem_path": repository_relative(path),
         "project_absolute_src": (
             f"/nova/figures/constraint-augmented-newton-krylov/shafranov/{path.name}"
         ),
@@ -1149,7 +1131,7 @@ def _render_projection(
         figure.savefig(path, dpi=170)
         block.update(
             {
-                "filesystem_path": str(path),
+                "filesystem_path": repository_relative(path),
                 "project_absolute_src": (
                     "/nova/figures/constraint-augmented-newton-krylov/"
                     f"flux-function-fit/{path.name}"
@@ -1166,7 +1148,7 @@ def _render_projection(
     plt.close(figure)
     block.update(
         {
-            "vector_filesystem_path": str(svg_path),
+            "vector_filesystem_path": repository_relative(svg_path),
             "vector_project_absolute_src": (
                 "/nova/figures/constraint-augmented-newton-krylov/"
                 f"flux-function-fit/{svg_path.name}"

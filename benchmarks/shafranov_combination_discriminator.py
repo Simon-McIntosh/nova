@@ -61,7 +61,9 @@ from scipy.interpolate import LinearNDInterpolator
 import zarr
 
 from benchmarks import settled_mask_stall as settled
+from benchmarks.shafranov_pair_receipt import relative_carrier_evidence
 from nova.biot.greens import MU0
+from nova.database.filepath import repository_relative
 from nova.equilibrium.constraint import (
     ConstraintContext,
     ExternalShafranovConstraint,
@@ -88,44 +90,6 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIRECTORY = (
     ROOT / "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator"
 )
-
-
-def repository_relative(path) -> str:
-    """Return ``path`` relative to its repository root, else absolute.
-
-    The root is found from the path itself, so a path recorded from another
-    checkout of this project still resolves to the same project-relative name,
-    and a receipt keeps locating its artifacts once the worktree is reclaimed.
-    """
-    resolved = Path(path).resolve()
-    root = next(
-        (
-            parent
-            for parent in (resolved, *resolved.parents)
-            if (parent / ".git").exists()
-        ),
-        ROOT,
-    )
-    try:
-        return resolved.relative_to(root).as_posix()
-    except ValueError:
-        return str(resolved)
-
-
-def relative_carrier_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
-    """Record the carrier check command's module path project-relative.
-
-    The command is ``[interpreter, carrier module, "check", ...]``: only the
-    module path names a source file inside the project, so only it is rewritten.
-    """
-    check = evidence.get("named_cache_only_check")
-    command = check.get("command") if isinstance(check, dict) else None
-    if not isinstance(command, list) or len(command) < 2:
-        return evidence
-    command = list(command)
-    command[1] = repository_relative(command[1])
-    return {**evidence, "named_cache_only_check": {**check, "command": command}}
-
 
 #: Directory holding the projected flux-function fit figure the same bank rows
 #: are drawn in, whose title the row's own arms settle.
@@ -985,7 +949,7 @@ def _render_state_panel(
     plt.close(figure)
     return {
         "png": {
-            "filesystem_path": str(path),
+            "filesystem_path": repository_relative(path),
             "project_absolute_src": (
                 "/nova/figures/constraint-augmented-newton-krylov/"
                 f"shafranov-discriminator/{path.name}"
@@ -993,7 +957,7 @@ def _render_state_panel(
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         },
         "svg": {
-            "filesystem_path": str(path.with_suffix(".svg")),
+            "filesystem_path": repository_relative(path.with_suffix(".svg")),
             "project_absolute_src": (
                 "/nova/figures/constraint-augmented-newton-krylov/"
                 f"shafranov-discriminator/{path.with_suffix('.svg').name}"
@@ -1099,7 +1063,7 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
         "suptitle_widest_inches": round(suptitle_widest_inches, 4),
         "canvas_width_inches": round(canvas_width_inches, 4),
         "png": {
-            "filesystem_path": str(path),
+            "filesystem_path": repository_relative(path),
             "project_absolute_src": (
                 "/nova/figures/constraint-augmented-newton-krylov/"
                 f"shafranov-discriminator/{path.name}"
@@ -1107,7 +1071,7 @@ def _draw_panel(receipt: dict[str, Any], path: Path, *, source: str) -> dict[str
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
         },
         "svg": {
-            "filesystem_path": str(path.with_suffix(".svg")),
+            "filesystem_path": repository_relative(path.with_suffix(".svg")),
             "project_absolute_src": (
                 "/nova/figures/constraint-augmented-newton-krylov/"
                 f"shafranov-discriminator/{path.with_suffix('.svg').name}"

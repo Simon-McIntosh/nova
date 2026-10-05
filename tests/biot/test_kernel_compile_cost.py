@@ -199,10 +199,23 @@ def test_point_jet_cold_compile():
     from nova.biot import polygonanalytic
 
     point, geometry = jnp.asarray([5.62, 0.31]), _geometry()
+    with _baseline_kernel() as baseline:
+        reference, reference_elapsed, reference_size = _compile(
+            _point_jet(baseline),
+            point,
+            geometry,
+        )
+        expected = np.asarray(reference(point, geometry))
+        assert np.all(np.isfinite(expected))
+        print(
+            f"COMPILE arm=baseline backend={jax.devices()[0]} "
+            f"seconds={reference_elapsed:.9g} executable_bytes={reference_size}",
+            flush=True,
+        )
     executable, elapsed, size = _compile(_point_jet(polygonanalytic), point, geometry)
     assert np.all(np.isfinite(executable(point, geometry)))
     print(
-        f"COMPILE backend={jax.devices()[0]} seconds={elapsed:.9g} "
+        f"COMPILE arm=head backend={jax.devices()[0]} seconds={elapsed:.9g} "
         f"executable_bytes={size}",
         flush=True,
     )

@@ -23,8 +23,8 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="41">
-<meta name="plan-modified" content="2026-10-05">
+<meta name="plan-version" content="42">
+<meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
 <body>
@@ -284,6 +284,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T215423125167" data-who="" data-when="">
     <div class="r-comment-body"><p>Compile-cost finding, 2026-10-05 23:51Z, from the §2 run's first kernel-backed gate (H200 job 1281104, log <code>h200-point-hessian.log</code>): <code>test_kernel_backed_carrier_read[1074-limited]</code> spent more than 4 min 17 s in XLA compiling <code>jit_read</code> (the slow-operation alarm fired twice) and failed its 600 s bound, the diverted 1074 row failed the same way, and the 2616 row never finished before the job's one-hour limit; the served pre-warm cache was compiled for another revision, so these are cold compiles. This is a breach of the 60 s and 50 MB compile clause at the 1074 rung, before any solve. Ruling on the run: no further 1074 or 2616 kernel rows until the compile growth is measured at 132, 300 and 550 (cold wall, jaxpr equation count, executable bytes, peak host RSS) and the dominating construct is found and replaced; any Python-level loop over cells, edges, vertices, kernel pairs or wall units inside the traced read is an unroll that grows the program with the mesh and must become one vmap or one lax.scan over fixed-capacity arrays. A 2616 compile still above 60 s after that is a design question for the lead.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T221109271078" data-who="" data-when="">
+    <div class="r-comment-body"><p>Correction to the field-null owner ruling, 2026-10-06, from the eighteenth composed plan review: <code>Null2D</code>, <code>Null1D</code> and <code>FieldNull</code> in <code>nova/biot</code> locate nulls by fitting a local quadratic to flux samples on a vertex ring, so they are mesh-flux stencil fitters and pass the traced fixed-shape test while failing the rule that matters: a null is evaluated from the Biot kernels' analytic derivatives of the booked current and the exterior evaluator, never from mesh samples. They are withdrawn as reuse candidates for the §2 null evaluation; they stay in <code>nova/biot</code> for their own consumers, and after §6 <code>topology.read</code> does not call them. The disqualifier for any null-evaluation candidate is stated as: it must take the kernel derivative operands, not a flux array.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T221109271144" data-who="" data-when="">
+    <div class="r-comment-body"><p>Newton machinery reuse candidates, 2026-10-06, from the eighteenth composed plan review: <code>reduced_newton.py</code>'s <code>newton_direction</code>, <code>jacobian_request</code>, <code>residual_request</code>, <code>step_scores</code> and <code>linearized_constraint_response_matrix</code> are the cite-or-justify candidates for the Newton step, the Jacobian-vector request and the constraint-response rows of <code>solve.fixed_point</code>, under the same rule as the GMRES kernel and the backtracking helpers: carried into <code>solve.py</code> as private helpers behind the one scan call site, stripped of the reduced-coordinate route, or declined in the §5 evidence with the reason each fails the single-scan contract; <code>reduced_newton.py</code> is deleted at §6 only after that move.</p></div>
 </div>
 </section>
 </main>

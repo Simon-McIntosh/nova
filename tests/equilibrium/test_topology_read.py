@@ -2181,8 +2181,6 @@ def _jaxpr_equation_counts(closed):
 
     def walk(value):
         nonlocal unique
-        if hasattr(value, "jaxpr"):
-            return walk(value.jaxpr)
         if hasattr(value, "eqns"):
             fresh = id(value) not in seen
             seen.add(id(value))
@@ -2193,7 +2191,9 @@ def _jaxpr_equation_counts(closed):
                 for equation in value.eqns
                 for parameter in equation.params.values()
             )
-        if isinstance(value, (tuple, list)):
+        if hasattr(value, "jaxpr"):
+            return walk(value.jaxpr)
+        if isinstance(value, tuple | list):
             return sum(walk(item) for item in value)
         if isinstance(value, dict):
             return sum(walk(item) for item in value.values())

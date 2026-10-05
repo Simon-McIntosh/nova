@@ -1,0 +1,599 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "7c4a76cafa41f4f5a4da06af19a0f0aac3271560",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 2699136,
+      "cached_input_tokens_cumulative": 2699136,
+      "input_tokens": 2841344,
+      "input_tokens_cumulative": 2841344,
+      "output_tokens": 19362,
+      "output_tokens_cumulative": 19362,
+      "reasoning_output_tokens": 5498,
+      "reasoning_output_tokens_cumulative": 5498
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 30,
+    "files": 1,
+    "removed": 26
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "6ea685c39dd6791563328c35878d07cb933aee24"
+  ],
+  "completed_at": "2026-10-05T16:50:37Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-05T16:37:01Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "documentation",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon audit-doc docs/research/converged-forward-solve-design.html --project nova",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163635854835-cfs-design-saddle-rule/audit-doc.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "role-not-enforced:documentation",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.4460251046025103,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-08T14:11:28Z, which is after this node's 2700s horizon ending 2026-10-05T17:21:40.399936+00:00",
+    "horizon_ends_at": "2026-10-05T17:21:40.399936+00:00",
+    "horizon_seconds": 2700,
+    "metered": true,
+    "observed_at": "2026-10-05T16:36:38Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-08T14:11:28Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 362215,
+    "state": "quiet",
+    "utilisation_pct": 58.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-05T16:36:38Z",
+    "read_at": "2026-10-05T16:36:40Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 58.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-05T16:50:37Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163635854835-cfs-design-saddle-rule/manifest.md",
+  "member": "disposable-r-20261005T163635854835-cfs-design-saddle-rule",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cfs-design-saddle-rule",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3558,
+          "cached_input_tokens": 173924,
+          "input_tokens": 177514,
+          "output_tokens": 912,
+          "reasoning_output_tokens": 247,
+          "total_tokens": 178426,
+          "uncached_input_tokens": 32
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "The design document docs/research/converged-forward-solve-design.html states the two rules the lead locked on 2026-10-05 in the plan's field-representation decision and in section 2 of the plan, and nothing else in the document changes. Rule one: the field is the own-node quadratic everywhere except the saddle cell, whose support is built from the null's normal form (saddle position, Hessian eigen-directions and curvature corrections), never from level-set roots of the reconstructed flux. Rule two: the null position, gradient and Hessian are evaluated from the Biot coupling kernels' analytic derivatives of the booked current, never by differentiating the mesh flux. Done when: (a) the topology.read section carries a saddle-cell paragraph saying how the normal form gives the two separatrix branches through the saddle cell and how the per-cell plasma area fraction of the saddle cell and its edge-sharing neighbours is computed from those branches rather than from the quadratic's zero contour; (b) the budgets table keeps the measured half-order level-set figures as the before measurement and states the saddle-neighbourhood budget at the field's order, p equal to 2, as the acceptance; (c) the clause table carries test_saddle_support_order[analytic-row]: a five-rung probe on the diverted analytic state at 132, 300, 550, 1074 and 2616 realised cells whose saddle-cell membership error is asserted to converge at order at least 2; (d) the differentiation paragraph says the implicit-function derivative of a stationary position uses the kernel Hessian and that no derivative of the mesh flux is taken anywhere in the read; (e) the receipt-contents section says that npz, gz and json receipts above a few MB live on GPFS with a path pointer in the committed record while PNG and SVG stay in git, citing the plan decision key receipts-out-of-git; (f) the representation paragraphs cite the plan decision key field-representation; (g) `reckon audit-doc docs/research/converged-forward-solve-design.html --project nova` reports 0 errors and every edited sentence has one reading. Every uv command carries --no-sync and nothing runs uv sync.",
+    "estimated_hours": null,
+    "goal": "Bring the design document in line with the two lead-locked saddle rules: normal-form saddle support and Biot-kernel derivatives, never level-set roots or mesh-flux differentiation; plus the receipts-out-of-git decision.",
+    "id": "cfs-design-saddle-rule",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-05T16:36:38Z",
+      "read_at": "2026-10-05T16:36:40Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 58.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163635854835-cfs-design-saddle-rule/manifest.md",
+    "negative_control": "",
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "documentation",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/research/converged-forward-solve-design.html",
+      "docs/evidence/fragments/converged-forward-solve/cfs-design-saddle-rule.html",
+      "docs/figures/converged-forward-solve/cfs-design-saddle-rule"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.4459951473753034,
+      "derived": 0.4412186314442791,
+      "drain_hours": 168.0,
+      "effective_limit": 0.4412186314442791,
+      "elapsed_fraction": 0.4011078467675264,
+      "elapsed_hours": 67.38611825694444,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-05T16:36:44+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.42000000000000004,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.58,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.618976,
+      "decided_by": "window",
+      "margin": -0.06897599999999993,
+      "name": "cfs-design-saddle-rule",
+      "score": 0.55,
+      "state": "observed",
+      "verdict": "split",
+      "window_fill": 0.58
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.025725,
+        "observed_at": "2026-10-05T16:36:44+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.58,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "cfs-design-saddle-rule",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-05T16:36:44.025725+00:00",
+    "score": 0.55,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.46,
+    "decision_source": "jev",
+    "effort": "xhigh",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": null,
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 482.367,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 689.294,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "medium",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.1408809054976852,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-05T20:00:00Z",
+        "utilisation_pct": 76.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "xhigh",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 62
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "xhigh",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.01,
+      "claude-haiku": 0.01,
+      "claude-opus": 0.1,
+      "clive": 0.52,
+      "codex": 0.28,
+      "codex-astra": 0,
+      "codex-luna": 0,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 1451,
+    "usage": {
+      "cost": 0.000143262,
+      "input_tokens": 3411,
+      "output_tokens": 89
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6ea685c39dd6791563328c35878d07cb933aee24",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "7c4a76cafa41f4f5a4da06af19a0f0aac3271560",
+    "reviewed_head_sha": "6ea685c39dd6791563328c35878d07cb933aee24",
+    "scores": {
+      "durability": 8,
+      "evidence": 14,
+      "fit": 17,
+      "goal_fidelity": 17,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 96
+  },
+  "review_tier": "full",
+  "role": "documentation",
+  "route_mode": "explicit",
+  "run_id": "r-20261005T163635854835-cfs-design-saddle-rule",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a10ced-1f80-7bf3-a17f-5cb43decf881",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 2699136,
+    "cumulative_input_tokens": 5540480,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 24860
+  },
+  "time_budget": "45m",
+  "tool_steps": 65.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 816,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-05T16:50:43Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-05T16:37:06Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261005T163635854835-cfs-design-saddle-rule",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 167,
+    "worker_pid": 2414411
+  },
+  "worker_seconds": 816,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

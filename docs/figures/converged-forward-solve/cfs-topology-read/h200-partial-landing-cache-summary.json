@@ -1,0 +1,17 @@
+{
+  "cache_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05",
+  "compile_seconds": 5.0,
+  "enforced": false,
+  "hits": 2279,
+  "marker": "pre-warm-run misses=20 budget=not-enforced",
+  "miss_budget": null,
+  "misses": 20,
+  "served_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05",
+  "served_entries": 26821,
+  "source_revision": "unknown",
+  "unpersisted_misses": 0,
+  "version_key": "",
+  "row_count": 2199,
+  "lane_source_revision": "1c88579b58406157f85e1869e223a2af6235ed8e",
+  "job_id": 1281129
+}

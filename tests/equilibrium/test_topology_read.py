@@ -2204,7 +2204,7 @@ def _jaxpr_equation_counts(closed):
 
 
 @pytest.mark.parametrize("count", (132, 300, 550))
-def test_kernel_compile_growth(count):
+def test_kernel_compile_growth(count, tmp_path):
     """Measure cold tracing, lowering and native compilation independently."""
     import os
     from pathlib import Path
@@ -2222,7 +2222,7 @@ def test_kernel_compile_growth(count):
         TopologyPolicy(),
     )
     receipt = {"cells": count, "kernel_edges": field.coupling.edge.shape[0]}
-    directory = Path(os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR", os.environ["TMPDIR"]))
+    directory = Path(os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR", tmp_path))
     directory.mkdir(parents=True, exist_ok=True)
 
     def checkpoint(phase):

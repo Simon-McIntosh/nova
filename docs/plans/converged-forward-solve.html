@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -293,6 +293,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T223713223060" data-who="" data-when="">
     <div class="r-comment-body"><p>Compile barrier located and split out, 2026-10-06 (fragment anchor <code>#cfs-topology-read-kernel-scope</code>): the traced read's expanded graph is about 1.25 million equations and 39 MB of StableHLO at 132, 300 and 550 cells alike, so the cost is the Biot harmonic kernel expression, not a mesh unroll; <code>harmonic_multiply</code> and its contraction account for at least a third of the 82,248 unique point-jet equations and <code>harmonic_pole_moments</code> in <code>nova/biot/elliptic.py</code> unrolls its recurrences in Python. The seven authority controls (traces, general census and capacity refusal, singular refusal, class and membership, saddle order, compile growth) pass on the H200. The kernel repair is its own node, <code>cfs-kernel-compile-cost</code> (codex-astra), gated on 1e-13 identity against the base-revision kernels, a ten-times smaller point-jet jaxpr, a 30 s cold compile and the biot suite by delta. The §2 run closes as a partial landing: read authority, fixtures, exterior operand and two-arm acceptance land now with the kernel-backed 1074 and 2616 rows and the kernel tangents marked strict xfail; a follow-on node qualifies them on the repaired kernels, and §2 collapses only then.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T225407431727" data-who="" data-when="">
+    <div class="r-comment-body"><p>Moment producer ruling, 2026-10-06, from the twentieth composed plan review: <code>current.book</code> is the single producer of the booked current moments (net current, centroid and first moments on the axis-connected support). <code>observe_current_moments</code> and <code>MomentIntegralSupport</code> in <code>nova/equilibrium/observation.py</code> stop producing them: the observation formulae are retained as consumers that read the booking receipt, re-pointed in the §3 node, and the §6 census requires that after retirement no module other than <code>current.py</code> integrates current over a support.</p></div>
 </div>
 </section>
 </main>

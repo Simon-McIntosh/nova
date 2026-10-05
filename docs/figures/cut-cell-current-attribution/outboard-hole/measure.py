@@ -28,6 +28,28 @@ FIXTURE_PATH = "scripts/analytic_oracle_fixtures/measure.py"
 GATE_PATH = "tests/test_outboard_hole_census_gate.py"
 
 
+def repository_relative(path) -> str:
+    """Return ``path`` relative to its repository root, else absolute.
+
+    The root is found from the path itself, so a path recorded from another
+    checkout of this project still resolves to the same project-relative name,
+    and a receipt keeps locating its artifacts once the worktree is reclaimed.
+    """
+    resolved = Path(path).resolve()
+    root = next(
+        (
+            parent
+            for parent in (resolved, *resolved.parents)
+            if (parent / ".git").exists()
+        ),
+        ROOT,
+    )
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return str(resolved)
+
+
 def _git(*args):
     return subprocess.check_output(["git", "-C", str(ROOT), *args])
 
@@ -411,7 +433,8 @@ def render():
             "shared_flux_levels_wb": levels.tolist(),
             "null_tallies": null_tallies,
             "figures": [
-                str(OUTPUT / f"booked-versus-analytic.{ext}") for ext in ("png", "svg")
+                repository_relative(OUTPUT / f"booked-versus-analytic.{ext}")
+                for ext in ("png", "svg")
             ],
         },
     )

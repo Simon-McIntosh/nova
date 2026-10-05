@@ -65,6 +65,45 @@ from nova.media.sources.frame import inside_wall_units
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DIRECTORY = ROOT / "docs/figures/constraint-augmented-newton-krylov/shafranov"
+
+
+def repository_relative(path) -> str:
+    """Return ``path`` relative to its repository root, else absolute.
+
+    The root is found from the path itself, so a path recorded from another
+    checkout of this project still resolves to the same project-relative name,
+    and a receipt keeps locating its artifacts once the worktree is reclaimed.
+    """
+    resolved = Path(path).resolve()
+    root = next(
+        (
+            parent
+            for parent in (resolved, *resolved.parents)
+            if (parent / ".git").exists()
+        ),
+        ROOT,
+    )
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return str(resolved)
+
+
+def relative_carrier_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
+    """Record the carrier check command's module path project-relative.
+
+    The command is ``[interpreter, carrier module, "check", ...]``: only the
+    module path names a source file inside the project, so only it is rewritten.
+    """
+    check = evidence.get("named_cache_only_check")
+    command = check.get("command") if isinstance(check, dict) else None
+    if not isinstance(command, list) or len(command) < 2:
+        return evidence
+    command = list(command)
+    command[1] = repository_relative(command[1])
+    return {**evidence, "named_cache_only_check": {**check, "command": command}}
+
+
 #: Row tolerance on the combination, stated in the row's own physical scale.
 ROW_TOLERANCE = 1.0e-6
 #: Display raster resolution for the per-row panels.  The separatrix level
@@ -800,7 +839,7 @@ def measure(*, directory: Path, cache_root: Path | None = None) -> dict[str, Any
                 "version": cache.version_key,
             },
         },
-        "inputs": {"carrier_evidence": carrier_evidence},
+        "inputs": {"carrier_evidence": relative_carrier_evidence(carrier_evidence)},
         "rows_receipt": [],
     }
     for shot, row_index in sorted(selected):
@@ -1317,7 +1356,7 @@ def project_rows(*, directory: Path, cache_root: Path | None = None) -> dict[str
                 "version": cache.version_key,
             },
         },
-        "inputs": {"carrier_evidence": carrier_evidence},
+        "inputs": {"carrier_evidence": relative_carrier_evidence(carrier_evidence)},
         "rows_receipt": [],
     }
     for shot, row_index in sorted(selected):

@@ -230,6 +230,41 @@ def default_forward_compilation_cache_root() -> Path:
 
 
 @dataclass(frozen=True, slots=True)
+class TopologyPolicy:
+    """Capacities and numerical tolerances of a total-field topology read.
+
+    Capacities determine array shapes. Tolerances are relative to local field
+    and geometry scales, so changing flux units does not change admission.
+    """
+
+    null_capacity: int = 16
+    fragment_capacity: int = 2
+    polish_iterations: int = 12
+    hessian_tolerance: float = 1.0e-10
+    position_tolerance: float = 1.0e-10
+    edge_tolerance: float = 1.0e-12
+
+    def __post_init__(self) -> None:
+        for name in ("null_capacity", "fragment_capacity", "polish_iterations"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                raise ValueError(f"{name} must be a positive integer")
+        for name in ("hessian_tolerance", "position_tolerance", "edge_tolerance"):
+            value = getattr(self, name)
+            if not isinstance(value, jax.core.Tracer) and (
+                not np.isfinite(value) or value <= 0.0
+            ):
+                raise ValueError(f"{name} must be finite and positive")
+
+
+jax.tree_util.register_dataclass(
+    TopologyPolicy,
+    data_fields=("hessian_tolerance", "position_tolerance", "edge_tolerance"),
+    meta_fields=("null_capacity", "fragment_capacity", "polish_iterations"),
+)
+
+
+@dataclass(frozen=True, slots=True)
 class ForwardSolvePolicy:
     """Every resolved numerical and acceptance choice for a forward solve."""
 
@@ -251,9 +286,13 @@ class ForwardSolvePolicy:
     exact_kernels: bool = True
     cached_machine: bool = True
     compilation_cache: bool = True
+    topology: TopologyPolicy = field(default_factory=TopologyPolicy)
 
     def __post_init__(self) -> None:
         """Reject policies that cannot name a bounded numerical solve."""
+
+        if not isinstance(self.topology, TopologyPolicy):
+            raise TypeError("topology must be a TopologyPolicy")
 
         if self.route not in {
             "host",
@@ -282,7 +321,7 @@ class ForwardSolvePolicy:
             if float(getattr(self, name)) <= 0.0:
                 raise ValueError(f"{name} must be positive")
 
-    def to_dict(self) -> dict[str, JsonScalar]:
+    def to_dict(self) -> dict[str, object]:
         """Return the JSON-native policy block written into receipts."""
 
         return asdict(self)
@@ -342,7 +381,12 @@ class ForwardSolvePolicy:
             raise ValueError(
                 f"forward solve policy fields differ; missing={missing}, extra={extra}"
             )
-        return cls(**dict(payload))
+        restored = dict(payload)
+        topology = restored["topology"]
+        if not isinstance(topology, Mapping):
+            raise TypeError("topology policy must be a mapping")
+        restored["topology"] = TopologyPolicy(**dict(topology))
+        return cls(**restored)
 
 
 # This is the sole declaration of public forward-solve defaults.  Its key is
@@ -677,6 +721,7 @@ __all__ = [
     "SolveSeedProvenance",
     "SolveRoute",
     "SupportClipMode",
+    "TopologyPolicy",
     "declared_forward_solve_policy",
     "default_forward_compilation_cache_root",
     "resolve_forward_solve_policy",

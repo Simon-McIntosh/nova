@@ -1465,3 +1465,346 @@ class Topology(Pytree):
         )
         aux_data = {}
         return (children, aux_data)
+
+
+class TopologyReason(IntEnum):
+    """Device-readable refusals; a finite position alone is never admission."""
+
+    OK = 0
+    CAPACITY = 1
+    SINGULAR_REPRESENTATION = 2
+    UNRESOLVED_TIE = 3
+    NO_QUALIFIED_AXIS = 4
+    SINGULAR_TANGENT = 5
+    NONFINITE_FIELD = 6
+    UNRESOLVED_COMPONENT = 7
+
+
+class FieldJet(NamedTuple):
+    """Physical total flux and its point derivatives in the declared gauge."""
+
+    value: jax.Array
+    gradient: jax.Array
+    hessian: jax.Array
+
+
+class StationaryRead(NamedTuple):
+    """A polished point and separate primal and implicit-tangent verdicts."""
+
+    position: jax.Array
+    jet: FieldJet
+    valid: jax.Array
+    tangent_valid: jax.Array
+    reason: jax.Array
+
+
+class SaddleNormalForm(NamedTuple):
+    """Four separatrix rays with regular quadratic curvature corrections.
+
+    A ray is ``position + t*direction + t**2*curvature + t**3*cubic``.
+    Directions are counterclockwise. Opposite rays remain distinct: their
+    point contact cannot join the interiors of the two same-sign lobes.
+    """
+
+    position: jax.Array
+    direction: jax.Array
+    curvature: jax.Array
+    cubic: jax.Array
+    valid: jax.Array
+    reason: jax.Array
+
+
+def _conditioned_hessian(hessian, tolerance):
+    """Test a dimensionless determinant before any inverse is evaluated."""
+    scale = jnp.max(jnp.abs(hessian))
+    scaled = hessian / jnp.where(scale > 0.0, scale, 1.0)
+    determinant = scaled[0, 0] * scaled[1, 1] - scaled[0, 1] * scaled[1, 0]
+    valid = (
+        jnp.all(jnp.isfinite(hessian))
+        & (scale > 0.0)
+        & (jnp.abs(determinant) > tolerance)
+    )
+    return valid, jnp.where(valid, hessian, jnp.eye(2, dtype=hessian.dtype))
+
+
+@partial(jax.custom_jvp, nondiff_argnums=(4,))
+def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
+    """Polish a point using analytic jets, with an implicit position tangent."""
+
+    def step(_index, position):
+        jet = field.evaluate(position)
+        valid, hessian = _conditioned_hessian(jet.hessian, tolerance)
+        correction = jnp.linalg.solve(hessian, jet.gradient)
+        length = jnp.linalg.norm(correction)
+        correction = correction * jnp.minimum(
+            1.0, pitch / jnp.where(length > 0.0, length, 1.0)
+        )
+        valid = valid & jnp.all(jnp.isfinite(correction))
+        return position - jnp.where(valid, correction, 0.0)
+
+    return jax.lax.fori_loop(0, iterations, step, seed)
+
+
+@_implicit_stationary_position.defjvp
+def _implicit_stationary_position_jvp(iterations, primals, tangents):
+    field, seed, pitch, tolerance = primals
+    field_tangent, _seed_tangent, _pitch_tangent, _tolerance_tangent = tangents
+    point = _implicit_stationary_position(field, seed, pitch, tolerance, iterations)
+    jet = field.evaluate(point)
+    valid, hessian = _conditioned_hessian(jet.hessian, tolerance)
+    gradient_tangent = jax.jvp(
+        lambda operand: operand.evaluate(point).gradient,
+        (field,),
+        (field_tangent,),
+    )[1]
+    tangent = -jnp.linalg.solve(hessian, gradient_tangent)
+    return point, jnp.where(valid, tangent, jnp.nan)
+
+
+def stationary_read(field, seed, pitch, policy):
+    """Read a null from a pytree point evaluator, never from sampled flux.
+
+    ``field.evaluate(point)`` returns a :class:`FieldJet` of the total field.
+    Its plasma term evaluates the booked current through the Biot kernels;
+    its exterior term evaluates the prescribed field at the same point.
+    The evaluator and all its numerical operands must be registered pytrees.
+    """
+    point = _implicit_stationary_position(
+        field,
+        jnp.asarray(seed),
+        pitch,
+        policy.hessian_tolerance,
+        policy.polish_iterations,
+    )
+    jet = field.evaluate(point)
+    tangent_valid, hessian = _conditioned_hessian(jet.hessian, policy.hessian_tolerance)
+    finite = jnp.all(jnp.isfinite(point)) & jnp.isfinite(jet.value)
+    finite = finite & jnp.all(jnp.isfinite(jet.gradient))
+    error = jnp.linalg.norm(jnp.linalg.solve(hessian, jet.gradient))
+    valid = finite & tangent_valid & (error <= policy.position_tolerance * pitch)
+    reason = jnp.where(
+        ~finite,
+        int(TopologyReason.NONFINITE_FIELD),
+        jnp.where(
+            ~tangent_valid,
+            int(TopologyReason.SINGULAR_TANGENT),
+            jnp.where(
+                valid, int(TopologyReason.OK), int(TopologyReason.UNRESOLVED_COMPONENT)
+            ),
+        ),
+    ).astype(jnp.int32)
+    return StationaryRead(point, jet, valid, tangent_valid, reason)
+
+
+def saddle_normal_form(
+    position, hessian, third_derivative, tolerance, fourth_derivative=None
+):
+    """Construct separatrix jets from kernel derivatives at the saddle.
+
+    For unit tangent d with d.H.d = 0, write x(t) = x0 + t*d + t**2*c.
+    Cancellation of the cubic flux term requires
+    d.H.c = -D³psi[d,d,d]/6. Choosing c normal to d fixes the parameterization.
+    No level-set root or small flux difference enters this construction.
+    """
+    hessian = jnp.asarray(hessian)
+    third = jnp.asarray(third_derivative)
+    conditioned, safe = _conditioned_hessian(hessian, tolerance)
+    eigenvalue, eigenvector = jnp.linalg.eigh(safe)
+    valid = conditioned & (eigenvalue[0] < 0.0) & (eigenvalue[1] > 0.0)
+    valid = valid & jnp.all(jnp.isfinite(third))
+    negative = jnp.where(valid, -eigenvalue[0], 1.0)
+    positive = jnp.where(valid, eigenvalue[1], 1.0)
+    first = jnp.sqrt(positive) * eigenvector[:, 0]
+    second = jnp.sqrt(negative) * eigenvector[:, 1]
+    direction = jnp.stack(
+        (first + second, first - second, -first - second, -first + second)
+    )
+    direction = direction / jnp.linalg.norm(direction, axis=1, keepdims=True)
+    direction = direction[jnp.argsort(jnp.arctan2(direction[:, 1], direction[:, 0]))]
+    normal = direction @ safe
+    cubic = jnp.einsum("ijk,ai,aj,ak->a", third, direction, direction, direction)
+    norm_squared = jnp.sum(normal * normal, axis=1)
+    curvature = -cubic[:, None] * normal / (6.0 * norm_squared[:, None])
+    fourth = (
+        jnp.zeros((2, 2, 2, 2), dtype=hessian.dtype)
+        if fourth_derivative is None
+        else jnp.asarray(fourth_derivative)
+    )
+    valid = valid & jnp.all(jnp.isfinite(fourth))
+    remainder = (
+        0.5 * jnp.einsum("ai,ij,aj->a", curvature, safe, curvature)
+        + 0.5 * jnp.einsum("ijk,ai,aj,ak->a", third, direction, direction, curvature)
+        + jnp.einsum(
+            "ijkl,ai,aj,ak,al->a", fourth, direction, direction, direction, direction
+        )
+        / 24.0
+    )
+    correction = -remainder[:, None] * normal / norm_squared[:, None]
+    return SaddleNormalForm(
+        jnp.asarray(position),
+        jnp.where(valid, direction, 0.0),
+        jnp.where(valid, curvature, 0.0),
+        jnp.where(valid, correction, 0.0),
+        valid,
+        jnp.where(
+            valid, int(TopologyReason.OK), int(TopologyReason.SINGULAR_REPRESENTATION)
+        ).astype(jnp.int32),
+    )
+
+
+class SaddleFragments(NamedTuple):
+    """Exact areas and edge intervals of four normal-form sectors in a cell."""
+
+    area: jax.Array
+    edge_interval: jax.Array
+    ray_parameter: jax.Array
+    valid: jax.Array
+    reason: jax.Array
+
+
+def _cross_plane(first, second):
+    return first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0]
+
+
+def _quadratic_parameters(quadratic, linear, constant):
+    """Return both real roots, with absent roots padded by infinity."""
+    scale = jnp.maximum(
+        jnp.maximum(jnp.abs(quadratic), jnp.abs(linear)), jnp.abs(constant)
+    )
+    threshold = 32.0 * jnp.finfo(jnp.asarray(quadratic).dtype).eps * scale
+    curved = jnp.abs(quadratic) > threshold
+    discriminant = linear * linear - 4.0 * quadratic * constant
+    real = discriminant >= 0.0
+    root = jnp.sqrt(jnp.where(real & curved, discriminant, 1.0))
+    q = -0.5 * (linear + jnp.where(linear >= 0.0, root, -root))
+    safe_q = jnp.where(q != 0.0, q, 1.0)
+    safe_a = jnp.where(curved, quadratic, 1.0)
+    first = q / safe_a
+    second = constant / safe_q
+    double = -linear / (2.0 * safe_a)
+    first = jnp.where(q == 0.0, double, first)
+    second = jnp.where(q == 0.0, double, second)
+    straight = jnp.abs(linear) > threshold
+    linear_root = -constant / jnp.where(straight, linear, 1.0)
+    first = jnp.where(
+        curved & real, first, jnp.where(~curved & straight, linear_root, jnp.inf)
+    )
+    second = jnp.where(curved & real, second, jnp.inf)
+    return jnp.stack((first, second), axis=-1)
+
+
+def saddle_cell_fragments(vertices, vertex_count, normal_form, tolerance):
+    """Intersect regular saddle rays with a convex cell, without flux roots.
+
+    The cell must contain the null and carry counterclockwise vertices. The
+    curved edge integral is analytic for each cubic ray; intersections
+    with the straight cell boundary solve only a geometric equation.
+    Edge intervals distinguish same-sign sectors that touch only at the null.
+    """
+    vertices = jnp.asarray(vertices) - normal_form.position
+    width = vertices.shape[0]
+    slot = jnp.arange(width)
+    following = jnp.where(slot + 1 < vertex_count, slot + 1, 0)
+    edge = vertices[following] - vertices
+    live = slot < vertex_count
+    direction = normal_form.direction
+    curvature = normal_form.curvature
+    cubic = normal_form.cubic
+    parameters = _quadratic_parameters(
+        _cross_plane(curvature[:, None, :], edge[None, :, :]),
+        _cross_plane(direction[:, None, :], edge[None, :, :]),
+        -_cross_plane(vertices[None, :, :], edge[None, :, :]),
+    )
+    finite_parameter = jnp.where(jnp.isfinite(parameters), parameters, 0.0)
+    cubic_cross = _cross_plane(cubic[:, None, :], edge[None, :, :])[..., None]
+    quadratic_cross = _cross_plane(curvature[:, None, :], edge[None, :, :])[..., None]
+    linear_cross = _cross_plane(direction[:, None, :], edge[None, :, :])[..., None]
+    constant_cross = -_cross_plane(vertices[None, :, :], edge[None, :, :])[..., None]
+
+    def intersect(_index, parameter):
+        residual = (
+            (cubic_cross * parameter + quadratic_cross) * parameter + linear_cross
+        ) * parameter + constant_cross
+        derivative = (
+            3.0 * cubic_cross * parameter + 2.0 * quadratic_cross
+        ) * parameter + linear_cross
+        return parameter - residual / jnp.where(derivative != 0.0, derivative, 1.0)
+
+    finite_parameter = jax.lax.fori_loop(0, 12, intersect, finite_parameter)
+    parameters = jnp.where(jnp.isfinite(parameters), finite_parameter, jnp.inf)
+    points = (
+        finite_parameter[..., None] * direction[:, None, None, :]
+        + finite_parameter[..., None] ** 2 * curvature[:, None, None, :]
+        + finite_parameter[..., None] ** 3 * cubic[:, None, None, :]
+    )
+    edge_length_squared = jnp.sum(edge * edge, axis=-1)
+    fraction = (
+        jnp.sum((points - vertices[None, :, None, :]) * edge[None, :, None, :], axis=-1)
+        / jnp.where(edge_length_squared > 0.0, edge_length_squared, 1.0)[None, :, None]
+    )
+    hit = (
+        live[None, :, None]
+        & jnp.isfinite(parameters)
+        & (parameters > tolerance)
+        & (fraction >= -tolerance)
+        & (fraction <= 1.0 + tolerance)
+    )
+    candidates = jnp.where(hit, parameters, jnp.inf).reshape(4, -1)
+    selected = jnp.argmin(candidates, axis=1)
+    ray_parameter = jnp.take_along_axis(candidates, selected[:, None], axis=1)[:, 0]
+    ray_valid = jnp.isfinite(ray_parameter)
+    parameter = jnp.where(ray_valid, ray_parameter, 0.0)
+    edge_index = selected // 2
+    boundary_fraction = jnp.take_along_axis(
+        fraction.reshape(4, -1), selected[:, None], axis=1
+    )[:, 0]
+    boundary_parameter = edge_index + jnp.clip(boundary_fraction, 0.0, 1.0)
+    end_parameter = jnp.roll(boundary_parameter, -1)
+    end_parameter = jnp.where(
+        end_parameter <= boundary_parameter, end_parameter + vertex_count, end_parameter
+    )
+    edge_parameter = jnp.where(
+        slot[None, :] < edge_index[:, None], slot[None, :] + vertex_count, slot[None, :]
+    )
+    lower = jnp.clip(boundary_parameter[:, None] - edge_parameter, 0.0, 1.0)
+    upper = jnp.clip(end_parameter[:, None] - edge_parameter, 0.0, 1.0)
+    present = live[None, :] & (upper > lower)
+    edge_interval = jnp.stack((lower, upper), axis=-1)
+    edge_interval = jnp.where(present[..., None], edge_interval, 0.0)
+    begin = vertices[None, :, :] + lower[..., None] * edge[None, :, :]
+    end = vertices[None, :, :] + upper[..., None] * edge[None, :, :]
+    boundary_integral = jnp.sum(
+        jnp.where(present, _cross_plane(begin, end), 0.0), axis=1
+    )
+    curve_integral = (
+        _cross_plane(direction, curvature) * parameter**3 / 3.0
+        + _cross_plane(direction, cubic) * parameter**4 / 2.0
+        + _cross_plane(curvature, cubic) * parameter**5 / 5.0
+    )
+    area = 0.5 * (boundary_integral + curve_integral - jnp.roll(curve_integral, -1))
+    full_area = 0.5 * jnp.sum(
+        jnp.where(live, _cross_plane(vertices, vertices[following]), 0.0)
+    )
+    contained = jnp.all(
+        jnp.where(live, _cross_plane(edge, -vertices) >= -tolerance, True)
+    )
+    # First exits must wind once around the cell; a folded ray is unresolved.
+    winding = jnp.sum(end_parameter - boundary_parameter)
+    valid = (
+        normal_form.valid
+        & jnp.all(ray_valid)
+        & contained
+        & (full_area > 0.0)
+        & jnp.all(area >= -tolerance * full_area)
+        & (jnp.abs(winding - vertex_count) <= tolerance * width)
+        & (jnp.abs(jnp.sum(area) - full_area) <= tolerance * full_area)
+    )
+    return SaddleFragments(
+        jnp.where(valid, jnp.maximum(area, 0.0), jnp.nan),
+        jnp.where(valid, edge_interval, 0.0),
+        ray_parameter,
+        valid,
+        jnp.where(
+            valid, int(TopologyReason.OK), int(TopologyReason.UNRESOLVED_COMPONENT)
+        ).astype(jnp.int32),
+    )

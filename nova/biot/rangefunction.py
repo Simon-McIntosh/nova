@@ -109,7 +109,7 @@ def _array_program(function):
     """Reuse each static-shape helper graph across algebraic call sites."""
     static = tuple(
         name
-        for name in ("xp", "count", "mirrored")
+        for name in ("xp", "count", "mirrored", "trips", "coincident")
         if name in signature(function).parameters
     )
     compiled = jax.jit(function, static_argnames=static)
@@ -136,9 +136,17 @@ def harmonic_multiply(left: list, right: list) -> list:
     out: list = [0.0] * (len(left) + len(right) - 1)
     for index, one in enumerate(left):
         for other_index, other in enumerate(right):
-            term = 0.5 * one * other
-            out[index + other_index] = out[index + other_index] + term
-            out[abs(index - other_index)] = out[abs(index - other_index)] + term
+            rising = index + other_index
+            falling = abs(index - other_index)
+            first, second = _harmonic_pair_step(
+                out[rising],
+                out[falling],
+                one,
+                other,
+                coincident=rising == falling,
+            )
+            out[rising] = first
+            out[falling] = second
     return out
 
 
@@ -474,7 +482,7 @@ def contract(numerator: list, moments: list):
     """Return the harmonic series contracted against a moment family."""
     total_value = 0.0
     for order, coefficient in enumerate(numerator):
-        total_value = total_value + coefficient * moments[order]
+        total_value = _product_sum_step(total_value, coefficient, moments[order])
     return total_value
 
 
@@ -498,3 +506,18 @@ def deflate(series: list, root):
         quotient[order - 1] = current
     quotient[0] = series[1] + root * current - 0.5 * upper
     return quotient, series[0] + root * quotient[0] - 0.5 * current
+
+
+@_array_program
+def _harmonic_pair_step(rising, falling, one, other, *, coincident):
+    """Apply both product-to-sum contributions in their serial update order."""
+    term = 0.5 * one * other
+    rising = rising + term
+    falling = (rising if coincident else falling) + term
+    return rising, falling
+
+
+@_array_program
+def _product_sum_step(total_value, coefficient, moment):
+    """Retain the multiply then accumulate expression at each term."""
+    return total_value + coefficient * moment

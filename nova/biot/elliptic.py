@@ -294,21 +294,29 @@ def harmonic_moments(
     ]
     for order in range(1, count - 1):
         upward.append(
-            -(
-                4.0 * order * (1.0 + held_complement) * upward[order]
-                + (2 * order - 1) * held * upward[order - 1]
-                + (-1.0) ** order * 8.0 * order * held_complement * complete_k
+            _harmonic_rising_step(
+                upward[order],
+                upward[order - 1],
+                held,
+                held_complement,
+                complete_k,
+                4.0 * order,
+                2 * order - 1,
+                (-1.0) ** order * 8.0 * order,
+                2 * order + 1,
             )
-            / ((2 * order + 1) * held)
         )
 
     ratio = xp.zeros_like(parameter)
     ratios: list[np.ndarray] = [None] * (count + _HARMONIC_HEADROOM + 1)  # type: ignore[list-item]
     for order in range(count + _HARMONIC_HEADROOM, 0, -1):
-        ratio = (
-            -(2 * order - 1)
-            * parameter
-            / ((2 * order + 1) * parameter * ratio + 4.0 * order * (1.0 + complement))
+        ratio = _harmonic_ratio_step(
+            ratio,
+            parameter,
+            complement,
+            -(2 * order - 1),
+            2 * order + 1,
+            4.0 * order,
         )
         if order <= count:
             ratios[order] = ratio
@@ -425,13 +433,23 @@ def harmonic_pole_moments(
     ratio = [1.0 / diagonal]
     solution = [(4.0 * sign * moments[1] - seed) / diagonal]
     for order in range(2, top + 1):
-        pivot = diagonal - ratio[-1]
-        ratio.append(1.0 / pivot)
-        solution.append((4.0 * sign * moments[order] - solution[-1]) / pivot)
+        next_ratio, next_solution = _pole_forward_step(
+            diagonal,
+            ratio[-1],
+            solution[-1],
+            moments[order],
+            4.0 * sign,
+        )
+        ratio.append(next_ratio)
+        solution.append(next_solution)
     values: list[np.ndarray] = [None] * (top + 1)  # type: ignore[list-item]
     values[top] = solution[top - 1]
     for order in range(top - 1, 0, -1):
-        values[order] = solution[order - 1] - ratio[order - 1] * values[order + 1]
+        values[order] = _pole_backward_step(
+            solution[order - 1],
+            ratio[order - 1],
+            values[order + 1],
+        )
     values[0] = seed
     return values[:count]
 
@@ -1100,3 +1118,48 @@ def pole_moment(
         0.0,
         np.where(singular, np.inf, np.where(live, finite, np.nan)),
     )
+
+
+@_array_program
+def _harmonic_rising_step(
+    current,
+    previous,
+    parameter,
+    complement,
+    seed,
+    current_weight,
+    previous_weight,
+    seed_weight,
+    divisor,
+):
+    """One harmonic recurrence with the serial expression grouping retained."""
+    return -(
+        current_weight * (1.0 + complement) * current
+        + previous_weight * parameter * previous
+        + seed_weight * complement * seed
+    ) / (divisor * parameter)
+
+
+@_array_program
+def _harmonic_ratio_step(
+    ratio, parameter, complement, numerator_weight, ratio_weight, mean_weight
+):
+    """One downward ratio recurrence, with coefficients supplied as operands."""
+    return (
+        numerator_weight
+        * parameter
+        / (ratio_weight * parameter * ratio + mean_weight * (1.0 + complement))
+    )
+
+
+@_array_program
+def _pole_forward_step(diagonal, ratio, solution, moment, weight):
+    """One ordered elimination step of the harmonic pole system."""
+    pivot = diagonal - ratio
+    return 1.0 / pivot, (weight * moment - solution) / pivot
+
+
+@_array_program
+def _pole_backward_step(solution, ratio, following):
+    """One ordered substitution step of the harmonic pole system."""
+    return solution - ratio * following

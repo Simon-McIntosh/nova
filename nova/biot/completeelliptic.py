@@ -62,6 +62,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from nova.biot.rangefunction import _array_program
+
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import divide as paired_divide
 from nova.biot.pairedfloat import multiply as paired_multiply
@@ -91,6 +93,7 @@ TRIPS = 14
 _HALF_PI = 0.5 * np.pi
 
 
+@_array_program
 def _descent(complement, xp, trips: int = TRIPS):
     """Return the descent's radicals in order, and its final arithmetic sum.
 
@@ -123,6 +126,7 @@ def _descent(complement, xp, trips: int = TRIPS):
     return radicals, arithmetic
 
 
+@_array_program
 def _accumulate(radicals, arithmetic, pole, cosine_weight, sine_weight, xp):
     """Return ``cel`` from a descent, for one pole and one pair of weights.
 
@@ -147,6 +151,7 @@ def _accumulate(radicals, arithmetic, pole, cosine_weight, sine_weight, xp):
     )
 
 
+@_array_program
 def _descent_paired(complement, xp, trips: int = TRIPS):
     reachable = paired_value(complement) > 0.0
     held = paired_where(reachable, complement, paired_wrap(1.0), xp)
@@ -162,6 +167,7 @@ def _descent_paired(complement, xp, trips: int = TRIPS):
     return radicals, arithmetic
 
 
+@_array_program
 def _accumulate_paired(radicals, arithmetic, pole, cosine_weight, sine_weight, xp):
     pole_root = paired_square_root(pole, xp)
     cosine_part = paired_wrap(cosine_weight + xp.zeros_like(arithmetic[0]))
@@ -187,6 +193,7 @@ def _accumulate_paired(radicals, arithmetic, pole, cosine_weight, sine_weight, x
     return paired_divide(numerator, denominator)
 
 
+@_array_program
 def _finite_part(pole, cosine_weight, sine_weight, xp):
     """Return ``cel`` less its divergence, for a modulus complement of zero.
 
@@ -229,6 +236,7 @@ def _finite_part(pole, cosine_weight, sine_weight, xp):
     return coefficient * elementary
 
 
+@_array_program
 def complete_kind(complement, *, xp=np, trips: int = TRIPS):
     """Return ``(K, E)`` from the modulus complement ``k'^2``.
 
@@ -252,6 +260,7 @@ def complete_kind(complement, *, xp=np, trips: int = TRIPS):
     )
 
 
+@_array_program
 def complete_kind_paired(complement, *, xp=np, trips: int = TRIPS):
     """Return paired first- and second-kind values from a paired complement."""
     reachable = paired_value(complement) > 0.0
@@ -266,6 +275,7 @@ def complete_kind_paired(complement, *, xp=np, trips: int = TRIPS):
     )
 
 
+@_array_program
 def complete_pole(pole, complement, *, xp=np, trips: int = TRIPS):
     """Return ``integral_0^(pi/2) da/((cos^2 a + p sin^2 a) sqrt(1 - k^2 sin^2 a))``.
 
@@ -296,6 +306,7 @@ def complete_pole(pole, complement, *, xp=np, trips: int = TRIPS):
     return xp.where(live, value, 0.0)
 
 
+@_array_program
 def complete_pole_paired(pole, complement, *, xp=np, trips: int = TRIPS):
     """Return the complete pole integral with paired descent arithmetic."""
     live = paired_value(pole) > 0.0

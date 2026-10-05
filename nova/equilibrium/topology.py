@@ -2378,6 +2378,7 @@ class TopologyGeometry:
     contour_mesh: object
     contour_sources: jax.Array
     contour_weights: jax.Array
+    contour_sample_points: jax.Array
 
     @classmethod
     def from_cells(cls, cells, sampling_vertices, wall_units):
@@ -2443,16 +2444,19 @@ class TopologyGeometry:
 
         # Contour mesh construction is host geometry preparation. Its array
         # receipt and interpolation map, not a Python triangulation, cross jit.
+        tree_centres = (
+            centre if len(centre) >= 4 else np.unique(samples.reshape(-1, 2), axis=0)
+        )
         mesh = build_contour_mesh(
-            centre,
-            np.zeros(len(centre)),
+            tree_centres,
+            np.zeros(len(tree_centres)),
             tuple(
                 WallUnit(np.asarray(u)[:, 0], np.asarray(u)[:, 1], kind="vessel")
                 for u in wall_units
             ),
-            vertex_capacity=len(centre) + len(points) + 1,
-            edge_capacity=12 * (len(centre) + len(points)),
-            triangle_capacity=6 * (len(centre) + len(points)),
+            vertex_capacity=len(tree_centres) + len(points) + 1,
+            edge_capacity=12 * (len(tree_centres) + len(points)),
+            triangle_capacity=6 * (len(tree_centres) + len(points)),
         )
         occupied = np.flatnonzero(np.asarray(mesh.vertex_valid))
         vertex_size = int(occupied[-1]) + 2
@@ -2472,7 +2476,7 @@ class TopologyGeometry:
             edge_capacity=edge_size,
             triangle_capacity=triangle_size,
         )
-        triangulation = Delaunay(centre)
+        triangulation = Delaunay(tree_centres)
         target = np.asarray(mesh.vertex_rz)
         simplex = triangulation.find_simplex(target)
         transform = triangulation.transform[np.maximum(simplex, 0)]
@@ -2481,8 +2485,8 @@ class TopologyGeometry:
         )
         barycentric = np.column_stack((barycentric, 1 - barycentric.sum(axis=1)))
         sources = triangulation.simplices[np.maximum(simplex, 0)]
-        sources[: len(centre)] = np.arange(len(centre))[:, None]
-        barycentric[: len(centre)] = (1.0, 0.0, 0.0)
+        sources[: len(tree_centres)] = np.arange(len(tree_centres))[:, None]
+        barycentric[: len(tree_centres)] = (1.0, 0.0, 0.0)
         barycentric[~np.asarray(mesh.vertex_valid)] = 0.0
         return cls(
             *map(
@@ -2505,6 +2509,7 @@ class TopologyGeometry:
             mesh,
             jnp.asarray(sources),
             jnp.asarray(barycentric),
+            jnp.asarray(tree_centres),
         )
 
 
@@ -2791,7 +2796,7 @@ def _support_at_level(
         selected,
         owner,
         valid,
-        jnp.max(fragments.required),
+        jnp.max(jnp.where(represented, 2, fragments.required)),
     )
 
 
@@ -2818,7 +2823,7 @@ def read(field, geometry, convention, policy):
     from nova.equilibrium.contour_tree import build_contour_tree
 
     mesh = geometry.contour_mesh
-    centre_flux = _point_values(field, geometry.centre)
+    centre_flux = _point_values(field, geometry.contour_sample_points)
     vertex_flux = jnp.sum(
         centre_flux[geometry.contour_sources] * geometry.contour_weights, axis=1
     )

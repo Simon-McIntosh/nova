@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
-<meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="112">
+<meta name="plan-modified" content="2026-10-06">
+<meta name="plan-version" content="113">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
 </head>
@@ -556,6 +556,11 @@
     <h4 class="r-fu-title">Make the newton_krylov ForwardProfile.solve traceable under jax.jit and jax.vmap again</h4>
     <div class="r-fu-body"><p>Reported by S22 (run r-20261003T143133299349, mulw-gate-frame-solver-evolution, H200 job 1280640). The DIII-D gate-frame driver runs <code>jax.jit(solve).lower(...).compile()</code>. At head <code>a42dc665</code> it fails during lowering on frame 44, at <code>nova/equilibrium/forward.py:1977</code>: <code>if route == "newton_krylov" and not bool(np.asarray(history.converged)):</code>. <code>history.converged</code> is a tracer there, so <code>bool()</code> throws. The line came in with <code>224a3b967</code> (fix: compile live fallback separately, 2026-10-02, merged with the frozen-Newton lineage at <code>db580bec8</code>). The same driver ran end to end at <code>00f8b6ba</code> (job 1280450).</p><p>A traced solve is part of the contract. <code>benchmarks/fixed_point_route.py:357</code> and <code>benchmarks/efit_reproduction_gate.py:400</code> jit the solve, and <code>benchmarks/forward_solve_throughput.py:462</code> and <code>:517</code> jit and vmap it. No test traces a newton_krylov profile solve, which is how this slipped.</p><p>Repair:</p><ul><li>When <code>history.converged</code> is a tracer, choose between the frozen history and the live-fallback history with <code>lax.cond</code>.</li><li>Keep the host branch on the eager path only, which preserves 224a3b967's separate CPU compile there.</li><li>Add a regression test that traces <code>jax.jit(profile.solve)</code> and <code>jax.vmap</code> over a newton_krylov solve. It must fail at <code>a42dc665</code>, and give eager-equal terminal states after the fix.</li></ul><p>forward.py is held by fsri-operator-geometry-as-operands; dispatch when that node releases it.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §1</pre>
+    </article>
+<article class="r-fu" data-id="f-fsri-lane-launcher-exit-status-is-swallowed" data-status="open" data-written-by="s21-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The H200 lane launcher returns exit 0 with an empty status while the payload wrote EXIT_STATUS=1</h4>
+    <div class="r-fu-body"><p>Measured 2026-10-06 by the <code>cfs-kernel-compile-cost</code> run (r-20261005T223546294421, H200 job 1281131): <code>scripts/h200_test_lane/run.sh --wait</code> returned exit 0 and an empty status line while its log recorded <code>payload 2 failed, 1 deselected, EXIT_STATUS=1</code>. A launcher that reports success for a failed payload makes every gate that trusts its exit code a fail-open guard. Repair under §4, the lane section: the launcher's exit status with <code>--wait</code> is the payload's and the status line names it; a launcher test drives it with a payload that exits 1 and asserts the launcher exits 1 (the negative control) beside a payload that exits 0 and asserts 0, both logs committed. Scope: <code>scripts/h200_test_lane/run.sh</code> and <code>scripts/nova_lane/run.sh</code>, one small node on the codex lane, every uv command with <code>--no-sync</code>.</p></div>
+    <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

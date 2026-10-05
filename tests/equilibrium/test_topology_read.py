@@ -656,16 +656,75 @@ def _render_read_panel(
         color="#444444",
         linewidth=2.6,
     )
+    physical_radius = float(result.normal_form_radius)
     poloidal.draw_flux_contours(
         axes,
         radial,
         vertical,
         sampled.reshape(rr.shape),
-        levels,
+        levels[1:] if physical_radius > 0 else levels,
         wall=(wall,),
         color=DEFAULT_INK.flux_color,
         linewidth=2.6,
     )
+    if physical_radius > 0:
+        from matplotlib.patches import Circle
+
+        represented = np.asarray(result.normal_form_cells)
+        boundary_values = sampled.copy()
+        boundary_values[index[represented[cell]]] = np.nan
+        poloidal.draw_flux_contours(
+            axes,
+            radial,
+            vertical,
+            boundary_values.reshape(rr.shape),
+            levels[:1],
+            wall=(wall,),
+            color=DEFAULT_INK.flux_color,
+            linewidth=2.6,
+        )
+        form = result.saddle_form
+        origin = np.asarray(form.position)
+        reach = 1.1 * np.max(
+            np.linalg.norm(np.asarray(geometry.vertices)[represented] - origin, axis=-1)
+        )
+        tree = STRtree(polygons)
+        for direction, curvature, cubic in zip(
+            form.direction, form.curvature, form.cubic, strict=True
+        ):
+            parameter = np.linspace(0, reach, 1025)[:, None]
+            curve = (
+                origin
+                + parameter * np.asarray(direction)
+                + parameter**2 * np.asarray(curvature)
+                + parameter**3 * np.asarray(cubic)
+            )
+            hit_point, hit_cell = tree.query(points(curve), predicate="within")
+            active = np.zeros(len(curve), dtype=bool)
+            active[hit_point[represented[hit_cell]]] = True
+            curve[~active] = np.nan
+            axes.plot(
+                *curve.T, color=DEFAULT_INK.flux_color, linewidth=3.0, linestyle="--"
+            )
+        axes.add_patch(
+            Circle(
+                origin,
+                physical_radius,
+                fill=False,
+                edgecolor="#666666",
+                linewidth=1.2,
+                linestyle=":",
+            )
+        )
+        axes.text(
+            0.02,
+            0.85,
+            f"normal-form radius {physical_radius * 1000:.2f} mm",
+            transform=axes.transAxes,
+            color="#666666",
+            fontsize=20,
+            va="top",
+        )
     poloidal.draw_wall(axes, units=(wall,))
     reference_x = np.empty((0, 2)) if saddle is None else np.asarray(saddle)[None]
     poloidal.draw_nulls(axes, axis, reference_x, style=reference_style, contain=(wall,))

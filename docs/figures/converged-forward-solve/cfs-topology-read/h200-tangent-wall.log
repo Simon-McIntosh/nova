@@ -1,0 +1,224 @@
+revision=83008ebe3da89b7a92703cb293d4876325219313 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_limited_boundary_instrument -vv -rP --timeout 300 
+RAW_SHA256=d82a0c85132c5773095ee03dbc2719903ccc649617044233ad966d036b03776f RAW_PATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-tangent-wall.raw.log
+NOVA_LANE_START=2026-10-05T20:32:14+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281072
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=83008ebe3da89b7a92703cb293d4876325219313
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=300
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_limited_boundary_instrument -vv -rP --timeout 300 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=83008ebe3da89b7a92703cb293d4876325219313
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 20:32:54 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 1 item
+
+tests/equilibrium/test_topology_read.py::test_limited_boundary_instrument FAILED [100%]CACHE_GUARD_MARKER=pre-warm-run misses=1 budget=not-enforced
+CACHE_GUARD_RECEIPT={"cache_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "compile_seconds": 4.0, "enforced": false, "hits": 32, "marker": "pre-warm-run misses=1 budget=not-enforced", "miss_budget": null, "misses": 1, "rows": [{"cache_key": "jit_broadcast_in_dim-3e8de69e13e951c7742b57dc855ca377a0133cfc4cad91bcb99f6e432c7e1e94", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-32c3ce0590cedda89feafa0f4a03f8cbfaed0ef67f864f707079a6524f96bf08", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-96932d5dc932bef41ec61d8daf7c0a4e3f6cf83f8dd7ceeb1f7001a31dd893f6", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-bda6570e2f2a2b182074a8435a85a3721ea648f19e83409ca741daef27fe95c3", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_read-501d40eedcb6f41a3829378f7c5711849f91525636d73ec4780ebdcc8dce2a19", "compile_seconds": 4.0, "hits": 0, "misses": 1, "program": "jit_read"}, {"cache_key": "jit_read-7c5c6bcab600e436e9c7ace12886869088ab13540c81a4b61103e77f46f8436d", "cached_compile_seconds": 5.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_read-c3cd95c6b6eaf0b90ceda8ee3cc65b3a7c0f90681000f9f50ec589bd72a389eb", "cached_compile_seconds": 5.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-04278de5ccd3e21eec34763ee8e9172ea4751199ba4c0f84354cb51fed61dc74", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-0bc4dfc88bb4e05dbe860c1ef53c8f51b3ec2fefd4e1fde1c367032078ba8d7f", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-125e227b4ed92553a3376bdb14730220329b8f4422fa471f17d0d44d27a0dd8a", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-1449802bdaaf670bb11e2681e838f65d927ea30e39e81daa89d301330b2aa867", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-2362fb04b8b863ffb202d270ac9457e12208b9a280a83432e9315bcf13fbc07c", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-3796b53a96396f45ee0a9ee8ea06d59432d4078cce902fac3c33ac3b2e18251f", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-3a861366e2f1c2233cbc4bfe9816bb9855118e7f3dc3eb6ef1a11d06099e8df7", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-564a39f4e3ef8d8169688b3530a55edc4a1ffa4ebc4f27279f7d587eaa9050a3", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-5bac309157d01ed164bedd6ffaee447d4b0158401af787c2dd6045b9db2be7c8", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-6d85f48c861b6fce51ce41b0165993178a3ebff0fc9331ed3da8d57a787778dc", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-6ffa407c1ba258824585ad073dc2dde41cad8c194abc144985148e13e76a51d9", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-7b653904c623163c5c3505ddb5b6bba45609d0613e821d8ac9543ff221f2fe96", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-84b99e20a0a80cbeaf86ea071787d7bdbfd25609eb24cb0dfc172cf48f0ff424", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-86bb5031bf64389e175973ba6ace8fba30edb122fcda4b8c3db908ce2a3ce22b", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-8c0b2d8599b4394822fd7ab67174bb703a2fa90266e2b0631b1e8462a0cc3b8c", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-8ffbccf524e27b07a9040f4d1bd34d558d6ab84ce03b07910732f085550bc612", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-93710fd7310d86fa3fec3d1eb63e0428318f31107b567edbc74d0d3711e79edc", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-9459f8ec9705f487925195415a38d4ac0a3f48c67c4837e629b9d8e093755be2", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-99a32b5ed1297baed0e3252d0f05f932040734112ffcc81350aab56238aa6ec4", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-9bc83385d102fbfb4d9ec4499f83e73644703e85d47edacbde7f6820a90ed33d", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-b1caebcd72528815b89ac26d840fdce34cf000a8552e85be973c37b8dc71dd9f", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-b7f23c94f4c8a439fa755c07bb0a9be252bc97ec9ce2c816aaaedbd851e1d0d9", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-dfbae7d1ec45dfdd685ed2c6ab1217c40cac16c525669fa52d59700ae5ddeb7f", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-e82e1cea39894c34fa2f9af61b13a39b4cc55532b7678c1012a795aeeaabc8cc", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-feef540d71ae47fad21674c0b0e82b6e4f10b229c86830e8b5ac75638c1f0f0e", "cached_compile_seconds": 0.0, "hits": 2, "misses": 0, "program": ""}], "served_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "served_entries": 19420, "source_revision": "unknown", "unpersisted_misses": 0, "version_key": ""}
+
+
+=================================== FAILURES ===================================
+_______________________ test_limited_boundary_instrument _______________________
+
+    def test_limited_boundary_instrument():
+        """Expose wall/region offsets independently of cell reconstruction order."""
+        import os
+        from pathlib import Path
+        from nova.equilibrium.topology import TopologyConvention, read
+    
+        oracle, field, wall, _, _ = _analytic_inputs("limited")
+        analytic_contact = np.asarray((oracle.boundary_midplane_radii()[1], 0.0))
+        analytic_vertex = int(np.argmin(np.linalg.norm(wall - analytic_contact, axis=1)))
+        independent_level, segment, parameter, independent_point = _limited_wall_contact(
+            oracle, wall
+        )
+        convention = TopologyConvention.from_cocos(17, 1.0)
+        evaluate = jax.jit(read)
+        rows = []
+        for count in (132, 300, 550):
+            geometry = _realised_hex_geometry(wall, count)
+            result = evaluate(field, geometry, convention, TopologyPolicy())
+            jax.block_until_ready(result)
+            reference, _ = _reference_cell_fractions("limited", oracle, geometry)
+            membership = np.asarray(result.membership)
+            vertices, counts = (
+                np.asarray(geometry.vertices),
+                np.asarray(geometry.vertex_count),
+            )
+            polygons = [cell[:size] for cell, size in zip(vertices, counts, strict=True)]
+            # Bounding-box extrema bound the separable quartic on the whole cell.
+            minimum, maximum = [], []
+            for polygon in polygons:
+                lower, upper = polygon.min(axis=0), polygon.max(axis=0)
+                radial = np.asarray((lower[0] ** 2, upper[0] ** 2)) - oracle.major_radius**2
+                radial_min = 0.0 if radial[0] <= 0 <= radial[1] else np.min(radial**2)
+                vertical_min = (
+                    0.0 if lower[1] <= 0 <= upper[1] else min(lower[1] ** 2, upper[1] ** 2)
+                )
+                minimum.append(
+                    2
+                    * np.pi
+                    * (
+                        oracle.axis_flux
+                        - 0.5 * oracle.pressure_coefficient * max(radial**2)
+                        - oracle.field_coefficient * max(lower[1] ** 2, upper[1] ** 2)
+                    )
+                )
+                maximum.append(
+                    2
+                    * np.pi
+                    * (
+                        oracle.axis_flux
+                        - 0.5 * oracle.pressure_coefficient * radial_min
+                        - oracle.field_coefficient * vertical_min
+                    )
+                )
+            inside = np.flatnonzero(
+                (np.asarray(minimum) > max(float(result.boundary_flux), 0.0))
+                & (membership == 1.0)
+                & (reference == 1.0)
+            )
+            outside = np.flatnonzero(
+                (np.asarray(maximum) < min(float(result.boundary_flux), 0.0))
+                & (membership == 0.0)
+                & (reference == 0.0)
+            )
+            assert inside.size and outside.size, (inside, outside)
+            worst = int(np.argmax(np.abs(membership - reference)))
+            first, last = wall, np.roll(wall, -1, axis=0)
+            directions = last - first
+            projected = np.clip(
+                np.sum((np.asarray(result.boundary) - first) * directions, axis=1)
+                / np.sum(directions**2, axis=1),
+                0.0,
+                1.0,
+            )
+            read_segment = int(
+                np.argmin(
+                    np.linalg.norm(
+                        first
+                        + projected[:, None] * directions
+                        - np.asarray(result.boundary),
+                        axis=1,
+                    )
+                )
+            )
+            row = {
+                "cells": len(geometry.centre),
+                "requested_cells": count,
+                "previous_realised_cells": count,
+                "max_fraction_error": float(np.max(np.abs(membership - reference))),
+                "read_axis_m": np.asarray(result.axis).tolist(),
+                "pitch_m": float(np.median(geometry.pitch)),
+                "read_level_wb": float(result.boundary_flux),
+                "analytic_boundary_flux_wb": 0.0,
+                "read_wall_unit": 0,
+                "read_wall_segment": read_segment,
+                "read_contact_m": np.asarray(result.boundary).tolist(),
+                "analytic_wall_unit": 0,
+                "analytic_wall_segment": int(segment),
+                "nearest_wall_vertex": analytic_vertex,
+                "analytic_contact_m": analytic_contact.tolist(),
+                "wall_vertex_m": wall[analytic_vertex].tolist(),
+                "wall_vertex_offset_m": float(
+                    np.linalg.norm(wall[analytic_vertex] - analytic_contact)
+                ),
+                "contact_offset_m": float(
+                    np.linalg.norm(np.asarray(result.boundary) - analytic_contact)
+                ),
+                "independent_wall_max_wb": float(independent_level),
+                "independent_wall_segment": int(segment),
+                "independent_segment_parameter": float(parameter),
+                "independent_contact_m": independent_point.tolist(),
+                "worst_cell": worst,
+                "worst_cell_centre_m": np.asarray(geometry.centre)[worst].tolist(),
+                "worst_cell_minus_analytic_contact_m": (
+                    np.asarray(geometry.centre)[worst] - analytic_contact
+                ).tolist(),
+                "worst_read_fraction": float(membership[worst]),
+                "worst_reference_fraction": float(reference[worst]),
+                "inside_control": {
+                    "cell": int(inside[0]),
+                    "read": float(membership[inside[0]]),
+                    "reference": float(reference[inside[0]]),
+                    "flux_lower_bound_wb": minimum[inside[0]],
+                },
+                "outside_control": {
+                    "cell": int(outside[0]),
+                    "read": float(membership[outside[0]]),
+                    "reference": float(reference[outside[0]]),
+                    "flux_upper_bound_wb": maximum[outside[0]],
+                },
+            }
+            rows.append(row)
+            print("LIMITED_BOUNDARY_INSTRUMENT " + json.dumps(row), flush=True)
+            root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
+            if root:
+                Path(root).mkdir(parents=True, exist_ok=True)
+                (Path(root) / "limited-boundary-instrument.json").write_text(
+                    json.dumps(rows, indent=2) + "\n"
+                )
+            np.testing.assert_allclose(
+                result.boundary_flux, independent_level, rtol=1e-9, atol=1e-12
+            )
+            assert result.valid and result.qualified
+            if count == 550 and os.environ.get("NOVA_TOPOLOGY_FIGURE_DIR"):
+                _render_limited_contact(
+                    os.environ["NOVA_TOPOLOGY_FIGURE_DIR"],
+                    oracle,
+                    wall,
+                    result,
+                    analytic_contact,
+                    polygons[worst],
+                )
+        assert max(abs(row["read_level_wb"]) for row in rows) <= 1e-12
+        assert max(row["contact_offset_m"] for row in rows) <= 1e-12
+>       assert all(
+            first["max_fraction_error"] > second["max_fraction_error"]
+            for first, second in zip(rows[:-1], rows[1:], strict=True)
+        )
+E       assert False
+E        +  where False = all(<generator object test_limited_boundary_instrument.<locals>.<genexpr> at 0x7f7139bd25e0>)
+
+tests/equilibrium/test_topology_read.py:1051: AssertionError
+----------------------------- Captured stdout call -----------------------------
+LIMITED_BOUNDARY_INSTRUMENT {"cells": 132, "requested_cells": 132, "previous_realised_cells": 132, "max_fraction_error": 0.0012061605640303341, "read_axis_m": [6.2, 0.0], "pitch_m": 0.4680060430739887, "read_level_wb": 2.2322358387255243e-14, "analytic_boundary_flux_wb": 0.0, "read_wall_unit": 0, "read_wall_segment": 120, "read_contact_m": [7.801395789307387, 0.0], "analytic_wall_unit": 0, "analytic_wall_segment": 120, "nearest_wall_vertex": 0, "analytic_contact_m": [7.801395789307387, 0.0], "wall_vertex_m": [7.801395789307387, 0.11294295258504541], "wall_vertex_offset_m": 0.11294295258504541, "contact_offset_m": 0.0, "independent_wall_max_wb": 2.2322358387255243e-14, "independent_wall_segment": 120, "independent_segment_parameter": 0.49999999999999994, "independent_contact_m": [7.801395789307387, -1.3877787807814457e-17], "worst_cell": 122, "worst_cell_centre_m": [7.442842426724328, -2.334132515343867], "worst_cell_minus_analytic_contact_m": [-0.35855336258305925, -2.334132515343867], "worst_read_fraction": 0.5764080017787747, "worst_reference_fraction": 0.5752018412147444, "inside_control": {"cell": 21, "read": 1.0, "reference": 1.0, "flux_lower_bound_wb": 3.455098417452896}, "outside_control": {"cell": 0, "read": 0.0, "reference": 0.0, "flux_upper_bound_wb": -9.520825836915925}}
+LIMITED_BOUNDARY_INSTRUMENT {"cells": 300, "requested_cells": 300, "previous_realised_cells": 300, "max_fraction_error": 0.0009628055817523795, "read_axis_m": [6.2, 0.0], "pitch_m": 0.30320934148682055, "read_level_wb": 2.2322358387255243e-14, "analytic_boundary_flux_wb": 0.0, "read_wall_unit": 0, "read_wall_segment": 120, "read_contact_m": [7.801395789307387, 0.0], "analytic_wall_unit": 0, "analytic_wall_segment": 120, "nearest_wall_vertex": 0, "analytic_contact_m": [7.801395789307387, 0.0], "wall_vertex_m": [7.801395789307387, 0.11294295258504541], "wall_vertex_offset_m": 0.11294295258504541, "contact_offset_m": 0.0, "independent_wall_max_wb": 2.2322358387255243e-14, "independent_wall_segment": 120, "independent_segment_parameter": 0.49999999999999994, "independent_contact_m": [7.801395789307387, -1.3877787807814457e-17], "worst_cell": 291, "worst_cell_centre_m": [7.69047707460716, -1.390220380355997], "worst_cell_minus_analytic_contact_m": [-0.11091871470022685, -1.390220380355997], "worst_read_fraction": 0.3237855239170639, "worst_reference_fraction": 0.32474832949881627, "inside_control": {"cell": 37, "read": 1.0, "reference": 1.0, "flux_lower_bound_wb": 4.360487590700058}, "outside_control": {"cell": 0, "read": 0.0, "reference": 0.0, "flux_upper_bound_wb": -9.563891954799509}}
+LIMITED_BOUNDARY_INSTRUMENT {"cells": 550, "requested_cells": 550, "previous_realised_cells": 550, "max_fraction_error": 0.003053860696933808, "read_axis_m": [6.2, 0.0], "pitch_m": 0.219204994184689, "read_level_wb": 2.2322358387255243e-14, "analytic_boundary_flux_wb": 0.0, "read_wall_unit": 0, "read_wall_segment": 120, "read_contact_m": [7.801395789307387, 0.0], "analytic_wall_unit": 0, "analytic_wall_segment": 120, "nearest_wall_vertex": 0, "analytic_contact_m": [7.801395789307387, 0.0], "wall_vertex_m": [7.801395789307387, 0.11294295258504541], "wall_vertex_offset_m": 0.11294295258504541, "contact_offset_m": 0.0, "independent_wall_max_wb": 2.2322358387255243e-14, "independent_wall_segment": 120, "independent_segment_parameter": 0.49999999999999994, "independent_contact_m": [7.801395789307387, -1.3877787807814457e-17], "worst_cell": 545, "worst_cell_centre_m": [7.790259761513272, -0.41896863852099275], "worst_cell_minus_analytic_contact_m": [-0.011136027794115044, -0.41896863852099275], "worst_read_fraction": 0.8255342476457928, "worst_reference_fraction": 0.8224803869488589, "inside_control": {"cell": 43, "read": 1.0, "reference": 1.0, "flux_lower_bound_wb": 2.8653982965770015}, "outside_control": {"cell": 0, "read": 0.0, "reference": 0.0, "flux_upper_bound_wb": -9.255640615306008}}
+========================= 1 failed in 84.42s (0:01:24) =========================
+GPU_DEVICE_INVENTORY=0,_NVIDIA_H200_NVL,_143771
+GPU_UTILISATION_AT_10S=0,_0
+GPU_UTILISATION_AT_30S=0,_0
+GPU_UTILISATION_AT_60S=0,_0
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-05T20:33:58+0200
+NOVA_LANE_EXIT_STATUS=1
+EXIT=1

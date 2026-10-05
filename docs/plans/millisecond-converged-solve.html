@@ -8,7 +8,7 @@
 <meta name="plan-slug" content="millisecond-converged-solve">
 <meta name="plan-title" content="Millisecond converged solve — one certified solve at order 1 ms">
 <meta name="plan-summary" content="Carry the measured H200 decomposition to its end state: a single converged, certificate-accurate GS solve at order 1 ms per member on real bank mixes.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="superseded">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="24.0">
 <meta name="plan-capability-version" content="1.0">
@@ -22,14 +22,14 @@
 <title>Millisecond converged solve | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-04">
+<meta name="plan-modified" content="2026-10-05">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="acfefa64,72ae8431,4972a4d9,610b04ce,e8fcaa4c,f63a64a4,a18b738c,63ef993e,f5bf49ae,aa344960,29978ede,93857669,0efbf123,0102026a,c811b21f,c5e1498a,5fa527da,7e8c1b61,1b56a7c7,f5b413b2,e1e1e563,2ff80029,b5326487,974181fd,273ff747,7aef0963">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-informs" content="forward-solve-api">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;}">
 <meta name="plan-graph-handle" content="millisecond">
-<meta name="plan-version" content="166">
+<meta name="plan-version" content="167">
 </head>
 <body>
 <main class="plan-doc">
@@ -811,6 +811,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261003T145538011744-review-of-msc-diverted-oracle-census-regeneration" data-who="reckon-build" data-when="2026-10-03T15:08:43.569Z">
     <div class="r-comment-body"><p>review-of-msc-diverted-oracle-census-regeneration attached an independent review to run r-20261003T143012212849-msc-diverted-oracle-census-regeneration, reading base a42dc665c -&gt; head 287ab83aa and scoring goal_fidelity 19 / evidence 17 / scope_discipline 20 / durability 17 / fit 19 (total 92, verdict pass), with added_failure_count 0 and three follow-on findings.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s22-closure-superseded-20261005" data-who="" data-when="">
+    <div class="r-comment-body"><p>Closed as superseded on 2026-10-05, when S22 closed. Every followup is resolved. Those still outstanding on 2026-10-03 went to the solve rework (converged-forward-solve, design node cfs-design in S21) under the lead's halt on Newton-Krylov patches. What this plan landed stays on main: the width-1 receipt, the cached slice executable and the H200 decomposition. The certified end state is measured on the new solve, not here: certificate-passing solves at order 1 ms per member on real bank mixes. That plan also measures the compile-identity and CUDA-graph questions and the 151 GB cold-compile host-RSS bound, through its compile-cost gate.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

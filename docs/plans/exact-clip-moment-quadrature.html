@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="exact-clip-moment-quadrature">
   <meta name="plan-title" content="Exact-clip moment quadrature — integrate the clipped-cell current at the order the coupling supports">
   <meta name="plan-summary" content="Replace the 196,480-point fan quadrature per cut cell with polygon-exact moment integration matched to the second-order coupling.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="superseded">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,12 +23,12 @@
   <title>Exact-clip moment quadrature | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-04">
+<meta name="plan-modified" content="2026-10-05">
 <meta name="plan-blocks" content="gs-absolute-accuracy-gates">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="88">
+<meta name="plan-version" content="89">
 </head>
 <body>
   <main class="plan-doc">
@@ -469,6 +469,9 @@ matrix. Record: <a href="/nova/evidence/archive/exact-clip-moment-quadrature-lan
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census" data-who="reckon-build" data-when="2026-10-02T19:00:25.636Z">
     <div class="r-comment-body"><p>Independent review of r-20261002T170335406068-ecq-production-diverted-one-arc-census stored at reviewed_base_sha f863867a8e6151993e851f55ea54d85ac8ec4064 and reviewed_head_sha d7e48acc0a8a8bdcaff42615b4e56a4294bc960f; scores goal_fidelity 19, evidence 17, scope_discipline 20, durability 16, fit 19 (total 91), verdict pass, with three non-blocking follow-on findings (dead raised-bound differencing arm, wedge-margin headline versus support margin, no double-null production row).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-s22-closure-superseded-20261005" data-who="" data-when="">
+    <div class="r-comment-body"><p>Closed as superseded on 2026-10-05, when S22 closed. Every followup is resolved. What this plan landed stays on main: polygon-exact clipped-cell moments and the per-layout vertex-capacity bound with its refusals on the clip receipt. The rest of the acceptance belongs to the solve rework (converged-forward-solve, design node cfs-design in S21), under the lead's halt on Newton-Krylov patches. That covers a capacity refusal that stops the solve rather than emptying a support (f-ecq-overflow-refusal-consumption) and the exact-clip rows re-solving to their fixed points. Both are measured on the new solve, not on today's solver.</p></div>
 </div>
 </section>
 </main>

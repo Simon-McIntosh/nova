@@ -8,7 +8,7 @@
 <meta name="plan-slug" content="multi-unit-limiter-wall">
 <meta name="plan-title" content="Multi-unit limiter wall — a first wall made of several units, read losslessly, contained as an occupiable region, referenced not copied">
 <meta name="plan-summary" content="Read, contain, anchor, shadow, paint and reference the first wall as typed limiter units, with one closed ring as the bit-identical degenerate case.">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="superseded">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="24.0">
 <meta name="plan-capability-version" content="1.0">
@@ -24,8 +24,8 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-impl" content="0.97">
-<meta name="plan-version" content="40">
-<meta name="plan-modified" content="2026-10-04">
+<meta name="plan-version" content="41">
+<meta name="plan-modified" content="2026-10-05">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
@@ -242,6 +242,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260922T213442363529-review-of-mulw-wall-units-panel-axis-off-and-distinct" data-who="reckon-ship" data-when="2026-09-22T22:02:17.249Z">
     <div class="r-comment-body"><p>review 92</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s22-closure-superseded-20261005" data-who="" data-when="">
+    <div class="r-comment-body"><p>Closed as superseded on 2026-10-05, when S22 closed. Every followup is resolved. What this plan landed stays on main: typed limiter-unit readers, occupiable-region containment, anchors and shadows, painters, and the DIII-D gate-frame evolution at 2661c5a97. Every frame's residual fell by an order of magnitude or more from the artifact revision to current source, yet none converged. The traced newton_krylov form does not lower at current source. The converged gate frames on the multi-unit wall are acceptance rows of the solve rework (converged-forward-solve, design node cfs-design in S21) and are measured on the new solve, not on today's solver.</p></div>
 </div>
 </section>
 </main>

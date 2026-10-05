@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="constraint-augmented-newton-krylov">
   <meta name="plan-title" content="Constraint-augmented Newton–Krylov — diagnostic placement authority wired into the forward solve">
   <meta name="plan-summary" content="Wireable constraint-plus-compensating-unknown pairs in the forward Newton–Krylov solve: magnetics centroid, Thomson edge crossings, Shafranov shift.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="superseded">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="18.0">
   <meta name="plan-capability-version" content="1.0">
@@ -22,8 +22,8 @@
   <title>Constraint-augmented Newton–Krylov | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-04">
-<meta name="plan-version" content="118">
+<meta name="plan-modified" content="2026-10-05">
+<meta name="plan-version" content="119">
 <meta name="plan-impl" content="0.96">
 <meta name="plan-commits" content="00ef0610,506c9fa9,eb77480b,e7d90cc8,84b23ee6,0081c3e9,4264668e,595cdd0f,6b9c4f25,989d561c,a283f243,5dd6b790,04ea37b0">
 <meta name="plan-artifacts" content="docs/evidence/archive/constraint-augmented-newton-krylov-landed.html,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json,docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.png,nova/equilibrium/constraint.py,benchmarks/constraint_centroid_receipt.py,tests/test_wall_null_flux_tangent.py,nova/geometry/select.py,tests/test_wall_polish_continuity.py,benchmarks/constraint_shape_receipt.py,tests/test_shape_constraints.py,docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png,docs/figures/constraint-augmented-newton-krylov/shape-control/two-arms.json,docs/figures/constraint-augmented-newton-krylov/shape-control/vertical-shift.json,docs/figures/constraint-augmented-newton-krylov/shape-control/elongation-raise.json,docs/figures/constraint-augmented-newton-krylov/shape-control/converged.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.json,docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png">
@@ -684,6 +684,9 @@ number and residual.</p>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261003T172538229907-review-of-cank-shafranov-strip-title-and-separatrix-finish" data-who="reckon-build" data-when="2026-10-03T17:51:33.547Z">
     <div class="r-comment-body"><p>independent review of run r-20261003T165535484392 stored as a parsed record scoring goal_fidelity 18, evidence 16, scope_discipline 19, durability 16, fit 17 (total 86, pass), reviewed_base_sha 89f181b1e, reviewed_head_sha 910204312, added_failure_count 0</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-s22-closure-superseded-20261005" data-who="" data-when="">
+    <div class="r-comment-body"><p>Closed as superseded on 2026-10-05, when S22 closed. Every followup is resolved. What this plan landed stays on main: the imposed constraint interface, the centroid row, the eliminated mode and the reduced-route compensator ceiling with its admission test (tmp_path receipt, 1aad89fe3). The committed compensator-bound receipt remains the record of writer revision d884fe594. Today's solver gives 54.65 A there, not 40.86 A. With Newton-Krylov patches halted, the constraint rows are re-posed and re-measured in the solve rework (converged-forward-solve, design node cfs-design in S21), not here.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20260923T003137764402-review-of-cna-edge-contours-print-exponent-errors" data-who="reckon-ship" data-when="2026-09-23T01:37:08.211Z">
     <div class="r-comment-body"><p>review stored</p></div>

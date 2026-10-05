@@ -1,0 +1,64 @@
+REVISION=6546771e2e97b715c77e8065ab5cad2193f08da3 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=recorded below
+RAW_LOG=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-point-hessian.log
+RAW_SHA256=884b26397654cefcdbdb23da73abf45f86ab8a87932638af2ef3d56ac58bacff
+ELISION=historical CACHE_GUARD_PREWARM JSON only
+NOVA_LANE_START=2026-10-05T22:51:00+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281104
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=6546771e2e97b715c77e8065ab5cad2193f08da3
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=600
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read tests/equilibrium/test_topology_read.py::test_null_position_implicit_tangent tests/equilibrium/test_topology_read.py::test_topology_class_and_membership tests/equilibrium/test_topology_read.py::test_saddle_support_order tests/equilibrium/test_topology_read.py::test_topology_shift_fails_position_clause tests/equilibrium/test_topology_read.py::test_topology_read_traces tests/equilibrium/test_topology_read.py::test_general_saddle_census_and_capacity_refusal tests/equilibrium/test_topology_read.py::test_singular_representation_is_traced_refusal tests/equilibrium/test_topology_read.py::test_traced_read_limited_quadratic -vv -rP -s --timeout 600 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=6546771e2e97b715c77e8065ab5cad2193f08da3
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 600.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 22:51:12 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 16 items
+
+tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-limited] KERNEL_INPUT_READY limited 1074 16314766.960401453
+E1005 23:15:42.727439  987529 slow_operation_alarm.cc:73] 
+********************************
+[Compiling module jit_read for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E1005 23:18:00.115363  953088 slow_operation_alarm.cc:140] The operation took 4m17.388073477s
+
+********************************
+[Compiling module jit_read for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+FAILED
+tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[1074-diverted] KERNEL_INPUT_READY diverted 1074 37174.6452374937
+FAILED
+tests/equilibrium/test_topology_read.py::test_kernel_backed_carrier_read[2616-limited] KERNEL_INPUT_READY limited 2616 16314766.960401455
+slurmstepd: error: *** JOB 1281104 ON 98dci4-gpu-0003 CANCELLED AT 2026-10-05T23:51:21 DUE TO TIME LIMIT ***
+SCHEDULER_STATE=TIMEOUT
+SUITE_COMPLETED=false
+PAYLOAD_EXIT_STATUS=absent
+KERNEL_RECEIPTS=0

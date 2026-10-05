@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -254,6 +254,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T195633433417" data-who="" data-when="">
     <div class="r-comment-body"><p>Outcome of the physical-radius ruling, 2026-10-05 (fragment anchor <code>#cfs-topology-read-physical-rule</code>): with r_nf = 0.0548 m calibrated against the analytic normal displacement, the five-rung smooth orders are 1.976 (limited) and 2.131 (diverted), both passing; the normal-form region's maxima are 1.8e-5 down to 5.9e-6 regular-cell units, two to three decades below the smooth maxima, and flat, because a fixed physical radius carries a fixed cubic-truncation floor by construction. Ruling, coordinator's pending the lead: the normal-form region is held to an amplitude clause (its maximum at or below the smooth budget C·(h/R₀)² at every rung) with its fitted order reported for information, not asserted; the diverted smooth constant is frozen from this arm after the 300-cell maximum (0.0189, likely a saddle-adjacent cell outside r_nf where r_nf is 0.56 pitch) is explained, widening the neighbourhood to max(r_nf, 1.5 pitches) if that is the mechanism. The representation lock stands unchanged.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T201233050826" data-who="" data-when="">
+    <div class="r-comment-body"><p>Second clip-builder ruling, 2026-10-05, from the eleventh composed plan review: <code>forward_operator.py</code> carries its own exact-clip support and level builder (<code>_ExactClipLevel</code> with <code>_polished_level_root</code>, <code>_implicit_level_root</code>, <code>_implicit_traced_level_arc</code> and <code>_substitute_chord_cell_supports</code>) beside <code>clip_quadrature.py</code>'s. It is named here as part of the support partition §3 subsumes: <code>current.book</code> is the one clip, the level root and traced level arc move under it only if the §3 node's evidence shows the contour-tree read does not already supply the level geometry (it does supply the boundary level and the fragment edges, so the expectation is that none of it is carried), and §6 retires the builder with the chord route. The import census requires that after retirement <code>current.py</code> is the only module that clips a cell against a flux level.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T201233050894" data-who="" data-when="">
+    <div class="r-comment-body"><p>Two-arm acceptance, 2026-10-05, closing the order question (fragment anchor <code>#cfs-topology-read-envelope-rule</code>): a neighbourhood that moves with the pitch (max(r_nf, 1.5 pitches)) puts the worst smooth cell 1.7 to 2.0 pitches from the X-point at every rung, where the gradient scales with the pitch, so its smooth set is first order by construction (0.90 measured) while every amplitude lies inside the budget frozen from that arm (C = 2.18 diverted, 0.2747 limited); the fixed physical radius makes the smooth set second order (2.13 diverted, 1.976 limited) but leaves saddle-adjacent cells outside it at coarse rungs. The read uses the moving floor; the amplitude clause is the acceptance for both regions at every rung; the order clause is measured on the fixed-radius arm as the asymptotic statement. No representation question remains open.</p></div>
 </div>
 </section>
 </main>

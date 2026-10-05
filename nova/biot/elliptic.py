@@ -46,6 +46,10 @@ assembly but obvious against a reference integral.
 
 from __future__ import annotations
 
+from functools import partial
+
+import jax
+import jax.numpy as jnp
 import numpy as np
 
 from nova.biot.completeelliptic import (
@@ -62,6 +66,16 @@ from nova.biot.pairedfloat import subtract as paired_subtract
 from nova.biot.pairedfloat import value as paired_value
 from nova.biot.pairedfloat import where as paired_where
 from nova.biot.pairedfloat import wrap as paired_wrap
+
+from nova.biot.rangefunction import (
+    _array_program,
+    _namespace,
+    _pack,
+    _pack_pairs,
+    _scan,
+    _unpack,
+    _unpack_pairs,
+)
 
 __all__ = [
     "cn_pole_moment",
@@ -127,6 +141,7 @@ _HARMONIC_HEADROOM = 96
 POLE_HEADROOM = 32
 
 
+@_array_program
 def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp, *, signed_square=None):
     """Return ``atanh(z)/z`` or ``atan(z)/z`` with inactive inputs held.
 
@@ -159,12 +174,17 @@ def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp, *, signed_square=None
     )
     series = xp.ones_like(signed_square)
     power = xp.ones_like(signed_square)
-    for order in range(1, 8):
+
+    def term(state, order):
+        power, series = state
         power = power * signed_square
-        series = series + power / (2 * order + 1)
+        return (power, series + power / (2 * order + 1)), None
+
+    (_, series), _ = _scan(term, (power, series), xp.arange(1, 8), xp)
     return xp.where(xp.abs(signed_square) < 1e-4, series, transcendental)
 
 
+@_array_program
 def _complete_kind(complement: np.ndarray, xp=np) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(K, E)`` from the modulus complement ``k'^2``.
 
@@ -188,6 +208,7 @@ def _complete_kind(complement: np.ndarray, xp=np) -> tuple[np.ndarray, np.ndarra
     return complete_kind(complement, xp=xp)
 
 
+@_array_program
 def complete_pi(
     characteristic: np.ndarray,
     parameter: np.ndarray,
@@ -222,6 +243,7 @@ def complete_pi(
     return complete_pole(complement, parameter_complement, xp=xp)
 
 
+@_array_program
 def harmonic_moments(
     parameter: np.ndarray,
     count: int,
@@ -273,115 +295,159 @@ def harmonic_moments(
     ``complement`` supplies ``k'^2``; see :func:`_complete_kind` for why it must be
     given rather than formed, and for the finite-part convention at ``k'^2 = 0``.
     """
+    function = (
+        _harmonic_moments_packed if xp is jnp else _harmonic_moments_packed.__wrapped__
+    )
+    return _unpack(function(parameter, count, complement=complement, xp=xp))
+
+
+@partial(jax.jit, static_argnames=("count", "xp"))
+def _harmonic_moments_packed(parameter, count, *, complement, xp):
     parameter = xp.asarray(parameter)
     if complement is None:
         complement = 1.0 - parameter
     complement = xp.asarray(complement) + xp.zeros_like(parameter)
     complete_k, complete_e = _complete_kind(complement, xp)
     degenerate = parameter > _HARMONIC_SWITCH
-
     held = xp.where(degenerate, parameter, 1.0)
     held_complement = xp.where(degenerate, complement, 0.0)
-    upward = [
-        xp.zeros_like(parameter),
-        2.0 * (complete_e - held_complement * complete_k) / held,
-    ]
-    for order in range(1, count - 1):
-        upward.append(
-            -(
-                4.0 * order * (1.0 + held_complement) * upward[order]
-                + (2 * order - 1) * held * upward[order - 1]
-                + (-1.0) ** order * 8.0 * order * held_complement * complete_k
-            )
-            / ((2 * order + 1) * held)
-        )
+    zero = xp.zeros_like(parameter)
+    first = 2.0 * (complete_e - held_complement * complete_k) / held
 
-    ratio = xp.zeros_like(parameter)
-    ratios: list[np.ndarray] = [None] * (count + _HARMONIC_HEADROOM + 1)  # type: ignore[list-item]
-    for order in range(count + _HARMONIC_HEADROOM, 0, -1):
+    def ascend(state, order):
+        previous, current = state
+        value = -(
+            4.0 * order * (1.0 + held_complement) * current
+            + (2 * order - 1) * held * previous
+            + (-1.0) ** order * 8.0 * order * held_complement * complete_k
+        ) / ((2 * order + 1) * held)
+        return (current, value), value
+
+    if count > 2:
+        _, tail = _scan(ascend, (zero, first), xp.arange(1, count - 1), xp)
+        upward = xp.concatenate((xp.stack((zero, first)), tail))
+    else:
+        upward = xp.stack((zero, first))[:count]
+
+    def descend(ratio, order):
         ratio = (
             -(2 * order - 1)
             * parameter
             / ((2 * order + 1) * parameter * ratio + 4.0 * order * (1.0 + complement))
         )
-        if order <= count:
-            ratios[order] = ratio
-    downward = [complete_k]
-    for order in range(1, count):
-        downward.append(downward[order - 1] * ratios[order])
-    return [
-        xp.where(
-            degenerate,
-            upward[order] + (-1.0) ** order * complete_k,
-            downward[order],
-        )
-        for order in range(count)
-    ]
+        return ratio, ratio
+
+    _, ratios = _scan(
+        descend, zero, xp.arange(1, count + _HARMONIC_HEADROOM + 1), xp, reverse=True
+    )
+
+    def accumulate(previous, ratio):
+        value = previous * ratio
+        return value, value
+
+    if count > 1:
+        _, tail = _scan(accumulate, complete_k, ratios[: count - 1], xp)
+        downward = xp.concatenate((complete_k[None], tail))
+    else:
+        downward = complete_k[None]
+    parity = xp.asarray((-1.0) ** np.arange(count)).reshape(
+        (count,) + (1,) * parameter.ndim
+    )
+    return xp.where(degenerate, upward + parity * complete_k, downward)
 
 
+@_array_program
 def harmonic_moments_paired(parameter, count: int, *, complement, xp=np):
     """Return the harmonic family with paired descent and recurrences."""
+    function = (
+        _harmonic_moments_paired_packed
+        if xp is jnp
+        else _harmonic_moments_paired_packed.__wrapped__
+    )
+    return _unpack_pairs(function(parameter, count, complement=complement, xp=xp))
+
+
+@partial(jax.jit, static_argnames=("count", "xp"))
+def _harmonic_moments_paired_packed(parameter, count, *, complement, xp):
     complete_k, complete_e = complete_kind_paired(complement, xp=xp)
     degenerate = paired_value(parameter) > _HARMONIC_SWITCH
     one = paired_wrap(xp.ones_like(parameter[0]))
     zero = paired_wrap(xp.zeros_like(parameter[0]))
     held = paired_where(degenerate, parameter, one, xp)
     held_complement = paired_where(degenerate, complement, zero, xp)
-    upward = [
-        zero,
-        paired_divide(
-            paired_scale(
-                paired_subtract(
-                    complete_e, paired_multiply(held_complement, complete_k)
-                ),
-                2.0,
-            ),
-            held,
+    first = paired_divide(
+        paired_scale(
+            paired_subtract(complete_e, paired_multiply(held_complement, complete_k)),
+            2.0,
         ),
-    ]
-    for order in range(1, count - 1):
+        held,
+    )
+
+    def ascend(state, order):
+        previous, current = state
         numerator = paired_add(
             paired_add(
                 paired_scale(
-                    paired_multiply(paired_add(one, held_complement), upward[order]),
+                    paired_multiply(paired_add(one, held_complement), current),
                     4.0 * order,
                 ),
-                paired_scale(paired_multiply(held, upward[order - 1]), 2 * order - 1),
+                paired_scale(paired_multiply(held, previous), 2 * order - 1),
             ),
             paired_scale(
                 paired_multiply(held_complement, complete_k),
                 (-1.0) ** order * 8.0 * order,
             ),
         )
-        upward.append(
-            paired_scale(paired_divide(numerator, held), -1.0 / (2 * order + 1))
+        value = paired_scale(paired_divide(numerator, held), -1.0 / (2 * order + 1))
+        return (current, value), value
+
+    if count > 2:
+        _, tail = _scan(ascend, (zero, first), xp.arange(1, count - 1), xp)
+        upward = tuple(
+            xp.concatenate((xp.stack((z, f)), t))
+            for z, f, t in zip(zero, first, tail, strict=True)
+        )
+    else:
+        upward = tuple(
+            xp.stack((z, f))[:count] for z, f in zip(zero, first, strict=True)
         )
 
-    ratio = zero
-    ratios = [None] * (count + _HARMONIC_HEADROOM + 1)
-    for order in range(count + _HARMONIC_HEADROOM, 0, -1):
+    def descend(ratio, order):
         numerator = paired_scale(parameter, -(2 * order - 1))
         denominator = paired_add(
             paired_scale(paired_multiply(parameter, ratio), 2 * order + 1),
             paired_scale(paired_add(one, complement), 4.0 * order),
         )
-        ratio = paired_divide(numerator, denominator)
-        if order <= count:
-            ratios[order] = ratio
-    downward = [complete_k]
-    for order in range(1, count):
-        downward.append(paired_multiply(downward[order - 1], ratios[order]))
-    return [
-        paired_where(
-            degenerate,
-            paired_add(upward[order], paired_scale(complete_k, (-1.0) ** order)),
-            downward[order],
-            xp,
+        value = paired_divide(numerator, denominator)
+        return value, value
+
+    _, ratios = _scan(
+        descend, zero, xp.arange(1, count + _HARMONIC_HEADROOM + 1), xp, reverse=True
+    )
+
+    def accumulate(previous, ratio):
+        value = paired_multiply(previous, ratio)
+        return value, value
+
+    if count > 1:
+        _, tail = _scan(
+            accumulate, complete_k, tuple(value[: count - 1] for value in ratios), xp
         )
-        for order in range(count)
-    ]
+        downward = tuple(
+            xp.concatenate((first[None], rest))
+            for first, rest in zip(complete_k, tail, strict=True)
+        )
+    else:
+        downward = tuple(value[None] for value in complete_k)
+    parity = xp.asarray((-1.0) ** np.arange(count)).reshape(
+        (count,) + (1,) * parameter[0].ndim
+    )
+    return paired_where(
+        degenerate, paired_add(upward, paired_scale(complete_k, parity)), downward, xp
+    )
 
 
+@_array_program
 def harmonic_pole_moments(
     shift: np.ndarray,
     seed: np.ndarray,
@@ -411,58 +477,124 @@ def harmonic_pole_moments(
     reasonable distance past the range; for a root ON the range end the family is
     dominated by its seed anyway and the caller takes it out exactly instead.
     """
+    xp = _namespace(shift, seed, moments)
+    function = _harmonic_pole_packed if xp is jnp else _harmonic_pole_packed.__wrapped__
+    return _unpack(
+        function(shift, seed, _pack(moments, xp), count, mirrored=mirrored, xp=xp)
+    )
+
+
+@partial(jax.jit, static_argnames=("count", "mirrored", "xp"))
+def _harmonic_pole_packed(shift, seed, moments, count, *, mirrored, xp):
     sign = -1.0 if mirrored else 1.0
     diagonal = sign * (2.0 + 4.0 * shift)
     top = count + POLE_HEADROOM
-    ratio = [1.0 / diagonal]
-    solution = [(4.0 * sign * moments[1] - seed) / diagonal]
-    for order in range(2, top + 1):
-        pivot = diagonal - ratio[-1]
-        ratio.append(1.0 / pivot)
-        solution.append((4.0 * sign * moments[order] - solution[-1]) / pivot)
-    values: list[np.ndarray] = [None] * (top + 1)  # type: ignore[list-item]
-    values[top] = solution[top - 1]
-    for order in range(top - 1, 0, -1):
-        values[order] = solution[order - 1] - ratio[order - 1] * values[order + 1]
-    values[0] = seed
-    return values[:count]
+    ratio = 1.0 / diagonal
+    solution = (4.0 * sign * moments[1] - seed) / diagonal
+    ratio = ratio + xp.zeros_like(solution)
+
+    def forward(state, moment):
+        ratio, solution = state
+        pivot = diagonal - ratio
+        value = (1.0 / pivot, (4.0 * sign * moment - solution) / pivot)
+        return value, value
+
+    (_, last), (ratios, solutions) = _scan(
+        forward, (ratio, solution), moments[2 : top + 1], xp
+    )
+    ratios = xp.concatenate((ratio[None], ratios))
+    solutions = xp.concatenate((solution[None], solutions))
+
+    def backward(next_value, row):
+        ratio, solution = row
+        value = solution - ratio * next_value
+        return value, value
+
+    _, values = _scan(backward, last, (ratios[:-1], solutions[:-1]), xp, reverse=True)
+    return xp.concatenate(
+        (xp.broadcast_to(seed, last.shape)[None], values, last[None])
+    )[:count]
 
 
+@_array_program
 def harmonic_pole_moments_paired(
     shift, seed, moments, count: int, *, mirrored: bool = False
 ):
     """Return the diagonally solved pole family as paired values."""
+    xp = _namespace(shift, seed, moments)
+    function = (
+        _harmonic_pole_paired_packed
+        if xp is jnp
+        else _harmonic_pole_paired_packed.__wrapped__
+    )
+    return _unpack_pairs(
+        function(shift, seed, _pack_pairs(moments, xp), count, mirrored=mirrored, xp=xp)
+    )
+
+
+@partial(jax.jit, static_argnames=("count", "mirrored", "xp"))
+def _harmonic_pole_paired_packed(shift, seed, moments, count, *, mirrored, xp):
     sign = -1.0 if mirrored else 1.0
     diagonal = paired_scale(
         paired_add(paired_wrap(2.0), paired_scale(shift, 4.0)), sign
     )
     top = count + POLE_HEADROOM
-    ratio = [paired_divide(paired_wrap(1.0), diagonal)]
-    solution = [
-        paired_divide(
-            paired_subtract(paired_scale(moments[1], 4.0 * sign), seed),
-            diagonal,
-        )
-    ]
-    for order in range(2, top + 1):
-        pivot = paired_subtract(diagonal, ratio[-1])
-        ratio.append(paired_divide(paired_wrap(1.0), pivot))
-        solution.append(
+    ratio = paired_divide(paired_wrap(1.0), diagonal)
+    solution = paired_divide(
+        paired_subtract(
+            paired_scale(tuple(value[1] for value in moments), 4.0 * sign), seed
+        ),
+        diagonal,
+    )
+    ratio = tuple(value + xp.zeros_like(solution[0]) for value in ratio)
+
+    def forward(state, moment):
+        ratio, solution = state
+        pivot = paired_subtract(diagonal, ratio)
+        value = (
+            paired_divide(paired_wrap(1.0), pivot),
             paired_divide(
-                paired_subtract(paired_scale(moments[order], 4.0 * sign), solution[-1]),
-                pivot,
-            )
+                paired_subtract(paired_scale(moment, 4.0 * sign), solution), pivot
+            ),
         )
-    values = [None] * (top + 1)
-    values[top] = solution[top - 1]
-    for order in range(top - 1, 0, -1):
-        values[order] = paired_subtract(
-            solution[order - 1], paired_multiply(ratio[order - 1], values[order + 1])
-        )
-    values[0] = seed
-    return values[:count]
+        return value, value
+
+    (_, last), (ratios, solutions) = _scan(
+        forward, (ratio, solution), tuple(value[2 : top + 1] for value in moments), xp
+    )
+    ratios = tuple(
+        xp.concatenate((first[None], rest))
+        for first, rest in zip(ratio, ratios, strict=True)
+    )
+    solutions = tuple(
+        xp.concatenate((first[None], rest))
+        for first, rest in zip(solution, solutions, strict=True)
+    )
+
+    def backward(next_value, row):
+        ratio, solution = row
+        value = paired_subtract(solution, paired_multiply(ratio, next_value))
+        return value, value
+
+    _, values = _scan(
+        backward,
+        last,
+        (
+            tuple(value[:-1] for value in ratios),
+            tuple(value[:-1] for value in solutions),
+        ),
+        xp,
+        reverse=True,
+    )
+    return tuple(
+        xp.concatenate((xp.broadcast_to(first, end.shape)[None], middle, end[None]))[
+            :count
+        ]
+        for first, middle, end in zip(seed, values, last, strict=True)
+    )
 
 
+@_array_program
 def harmonic_root_moments(
     moments: list[np.ndarray], parameter: np.ndarray, *, xp=np
 ) -> list[np.ndarray]:
@@ -475,30 +607,33 @@ def harmonic_root_moments(
     past the last root moment wanted.
     """
     parameter = xp.asarray(parameter)
-    mean = 1.0 - 0.5 * parameter
-    return [
-        mean * moments[order]
-        + 0.25 * parameter * (moments[order + 1] + moments[abs(order - 1)])
-        for order in range(len(moments) - 1)
-    ]
+    packed = _pack(moments, xp)
+    previous = packed[xp.asarray(abs(np.arange(len(moments) - 1) - 1))]
+    values = (1.0 - 0.5 * parameter) * packed[:-1] + 0.25 * parameter * (
+        packed[1:] + previous
+    )
+    return _unpack(values)
 
 
+@_array_program
 def harmonic_root_moments_paired(moments, parameter):
     """Return radical moments with paired recurrence arithmetic."""
+    xp = _namespace(moments, parameter)
+    packed = _pack_pairs(moments, xp)
+    current = tuple(value[:-1] for value in packed)
+    following = tuple(value[1:] for value in packed)
+    previous = tuple(
+        value[xp.asarray(abs(np.arange(len(moments) - 1) - 1))] for value in packed
+    )
     mean = paired_subtract(paired_wrap(1.0), paired_scale(parameter, 0.5))
-    return [
+    return _unpack_pairs(
         paired_add(
-            paired_multiply(mean, moments[order]),
+            paired_multiply(mean, current),
             paired_scale(
-                paired_multiply(
-                    parameter,
-                    paired_add(moments[order + 1], moments[abs(order - 1)]),
-                ),
-                0.25,
+                paired_multiply(parameter, paired_add(following, previous)), 0.25
             ),
         )
-        for order in range(len(moments) - 1)
-    ]
+    )
 
 
 def sn_moments(
@@ -714,6 +849,7 @@ def cn_pole_moments(
     )
 
 
+@_array_program
 def cn_pole_moment(
     shift: np.ndarray,
     parameter: np.ndarray,
@@ -741,6 +877,7 @@ def cn_pole_moment(
     )
 
 
+@_array_program
 def cn_pole_moment_paired(shift, *, parameter_complement, xp=np):
     """Return the near-end pole seed with paired special-function arithmetic."""
     one_plus = paired_add(paired_wrap(1.0), shift)
@@ -790,6 +927,7 @@ def sn_pole_moments(
     )
 
 
+@_array_program
 def sn_pole_moment(
     shift: np.ndarray,
     parameter: np.ndarray,
@@ -805,10 +943,9 @@ def sn_pole_moment(
     reflected one.  Written as an ordinary ``Pi`` this configuration is a hugely
     negative characteristic, where the two Carlson terms are of opposite sign and
     nearly equal -- their sum falls as ``sqrt(shift)`` while each stays of order
-    ``K``, so a shift of 1e-10 used to cost five digits and needed the pole factor
-    reflected onto the other end of the range as a separate case.  The pole argument
-    removes the case: it is a sum of positives at any shift.  ``shift = 0`` returns
-    zero on the same reasoning as the complement family.
+    ``K``. A shift of 1e-10 loses five digits in that difference. The pole argument
+    avoids that cancellation: it is a sum of positives at any shift. ``shift = 0``
+    returns zero on the same reasoning as the complement family.
     """
     shift = xp.asarray(shift)
     if parameter_complement is None:
@@ -822,6 +959,7 @@ def sn_pole_moment(
     )
 
 
+@_array_program
 def sn_pole_moment_paired(shift, *, parameter_complement, xp=np):
     """Return the far-end pole seed with paired special-function arithmetic."""
     live = paired_value(shift) > 0.0

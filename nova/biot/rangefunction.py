@@ -50,6 +50,13 @@ evaluated on the host, and every operation on them is a free function here.
 
 from __future__ import annotations
 
+from functools import partial, wraps
+from inspect import signature
+
+import jax
+import jax.numpy as jnp
+import numpy as np
+
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import multiply as paired_multiply
 from nova.biot.pairedfloat import scale as paired_scale
@@ -86,6 +93,88 @@ __all__ = [
 _BOTH_ENDS = [0.125, 0.0, -0.125]
 
 
+def _namespace(*values):
+    """Select the array namespace without inspecting traced values."""
+    return (
+        jnp
+        if any(
+            isinstance(value, (jax.Array, jax.core.Tracer))
+            for value in jax.tree.leaves(values)
+        )
+        else np
+    )
+
+
+def _array_program(function):
+    """Reuse each static-shape helper graph across algebraic call sites."""
+    static = tuple(
+        name
+        for name in ("xp", "count", "mirrored")
+        if name in signature(function).parameters
+    )
+    compiled = jax.jit(function, static_argnames=static)
+
+    @wraps(function)
+    def evaluate(*args, **kwargs):
+        if _namespace(args, kwargs) is jnp:
+            return compiled(*args, **kwargs)
+        return function(*args, **kwargs)
+
+    return evaluate
+
+
+def _pack(values, xp):
+    return xp.stack(xp.broadcast_arrays(*values))
+
+
+def _unpack(values):
+    return list(values)
+
+
+def _pack_pairs(values, xp):
+    return tuple(_pack([value[index] for value in values], xp) for index in (0, 1))
+
+
+def _unpack_pairs(values):
+    return list(zip(*values, strict=True))
+
+
+def _scan(function, initial, values, xp, *, reverse=False):
+    """One bounded recurrence on device, with the same ordered host arithmetic."""
+    if xp is jnp:
+        return jax.lax.scan(function, initial, values, reverse=reverse)
+    length = len(jax.tree.leaves(values)[0])
+    outputs = []
+    state = initial
+    for index in range(length - 1, -1, -1) if reverse else range(length):
+        state, output = function(
+            state, jax.tree.map(lambda value: value[index], values)
+        )
+        outputs.append(output)
+    if reverse:
+        outputs.reverse()
+    return state, jax.tree.map(lambda *items: np.stack(items), *outputs)
+
+
+@partial(jax.jit, static_argnames=("xp",))
+def _multiply_packed(left, right, *, xp):
+    # Product-to-sum routing is geometry-free data, shared by every batch lane.
+    rows, columns = np.indices((left.shape[0], right.shape[0]))
+    orders = np.arange(left.shape[0] + right.shape[0] - 1)
+    routing = (
+        (orders[:, None, None] == rows + columns).astype(float)
+        + (orders[:, None, None] == abs(rows - columns)).astype(float)
+    ) * 0.5
+    return xp.einsum("kij,i...,j...->k...", xp.asarray(routing), left, right)
+
+
+def _multiply(left, right, xp):
+    if xp is jnp:
+        return _multiply_packed(left, right, xp=xp)
+    return _multiply_packed.__wrapped__(left, right, xp=xp)
+
+
+@_array_program
 def harmonic_multiply(left: list, right: list) -> list:
     """Return the product of two harmonic series.
 
@@ -95,59 +184,117 @@ def harmonic_multiply(left: list, right: list) -> list:
     """
     if not left or not right:
         return []
-    out: list = [0.0] * (len(left) + len(right) - 1)
-    for index, one in enumerate(left):
-        for other_index, other in enumerate(right):
-            term = 0.5 * one * other
-            out[index + other_index] = out[index + other_index] + term
-            out[abs(index - other_index)] = out[abs(index - other_index)] + term
-    return out
+    xp = _namespace(left, right)
+    return _unpack(_multiply(_pack(left, xp), _pack(right, xp), xp))
 
 
+@_array_program
 def paired_harmonic_multiply(left: list, right: list) -> list:
     if not left or not right:
         return []
-    zero = paired_wrap(0.0 * left[0][0] * right[0][0])
-    out = [zero] * (len(left) + len(right) - 1)
-    for index, one in enumerate(left):
-        for other_index, other in enumerate(right):
-            term = paired_scale(paired_multiply(one, other), 0.5)
-            out[index + other_index] = paired_add(out[index + other_index], term)
-            out[abs(index - other_index)] = paired_add(
-                out[abs(index - other_index)], term
+    xp = _namespace(left, right)
+    high = xp.broadcast_arrays(*(value[0] for value in left + right))
+    low = xp.broadcast_arrays(*(value[1] for value in left + right))
+    left_high, left_low = xp.stack(high[: len(left)]), xp.stack(low[: len(left)])
+    right_high, right_low = xp.stack(high[len(left) :]), xp.stack(low[len(left) :])
+    rows, columns = np.indices((len(left), len(right)))
+    terms = paired_scale(
+        paired_multiply(
+            (left_high[:, None], left_low[:, None]),
+            (right_high[None, :], right_low[None, :]),
+        ),
+        0.5,
+    )
+    shape = (len(left) + len(right) - 1,) + terms[0].shape[2:]
+    zero = paired_wrap(xp.zeros(shape, dtype=terms[0].dtype))
+    orders = xp.arange(shape[0]).reshape((-1,) + (1,) * (len(shape) - 1))
+
+    def accumulate(state, item):
+        term_high, term_low, rising, falling = item
+        term = term_high, term_low
+        for index in (rising, falling):
+            added = paired_add(state, term)
+            state = tuple(
+                xp.where(orders == index, value, prior)
+                for value, prior in zip(added, state, strict=True)
             )
-    return out
+        return state, None
+
+    result, _ = _scan(
+        accumulate,
+        zero,
+        (
+            terms[0].reshape((-1,) + shape[1:]),
+            terms[1].reshape((-1,) + shape[1:]),
+            xp.asarray((rows + columns).ravel()),
+            xp.asarray(abs(rows - columns).ravel()),
+        ),
+        xp,
+    )
+    return _unpack_pairs(result)
 
 
+@_array_program
 def _paired_harmonic_add(*series: list) -> list:
     length = max((len(term) for term in series), default=0)
     if length == 0:
         return []
+    xp = _namespace(series)
     exemplar = next(term[0] for term in series if term)
-    out = [paired_wrap(0.0 * exemplar[0])] * length
-    for term in series:
-        for index, coefficient in enumerate(term):
-            out[index] = paired_add(out[index], coefficient)
-    return out
+    zero = paired_wrap(0.0 * exemplar[0])
+    high, low = _pack_pairs(
+        [value for term in series for value in term + [zero] * (length - len(term))], xp
+    )
+    high = high.reshape((len(series), length) + high.shape[1:])
+    low = low.reshape((len(series), length) + low.shape[1:])
+
+    def add(state, term):
+        return paired_add(state, term), None
+
+    initial = paired_wrap(xp.zeros_like(high[0]))
+    result, _ = _scan(add, initial, (high, low), xp)
+    return _unpack_pairs(result)
 
 
+@_array_program
 def _paired_harmonic_scale(series: list, factor) -> list:
-    return [paired_multiply(coefficient, factor) for coefficient in series]
+    if not series:
+        return []
+    xp = _namespace(series, factor)
+    # Broadcast coefficients before adding the leading term axis.
+    high = xp.broadcast_arrays(*(value[0] for value in series), factor[0])
+    low = xp.broadcast_arrays(*(value[1] for value in series), factor[1])
+    return _unpack_pairs(
+        paired_multiply((xp.stack(high[:-1]), xp.stack(low[:-1])), factor)
+    )
 
 
+@_array_program
 def harmonic_add(*series: list) -> list:
     """Return the sum of harmonic series."""
     length = max((len(term) for term in series), default=0)
-    out: list = [0.0] * length
-    for term in series:
-        for index, coefficient in enumerate(term):
-            out[index] = out[index] + coefficient
-    return out
+    if length == 0:
+        return []
+    xp = _namespace(series)
+    packed = _pack(
+        [value for term in series for value in term + [0.0] * (length - len(term))], xp
+    )
+    packed = packed.reshape((len(series), length) + packed.shape[1:])
+
+    def add(state, term):
+        return state + term, None
+
+    result, _ = _scan(add, xp.zeros_like(packed[0]), packed, xp)
+    return _unpack(result)
 
 
+@_array_program
 def harmonic_scale(series: list, factor) -> list:
     """Return the harmonic series multiplied through by a scalar."""
-    return [coefficient * factor for coefficient in series]
+    if not series:
+        return []
+    xp = _namespace(series, factor)
+    return _unpack(_pack(xp.broadcast_arrays(*series, factor)[:-1], xp) * factor)
 
 
 def range_function(bulk: list, near, far) -> tuple:
@@ -166,6 +313,7 @@ def paired_range_function(bulk: list, near, far) -> tuple:
     return bulk, near, far
 
 
+@_array_program
 def product(left: tuple, right: tuple) -> tuple:
     """Return the product of two range functions, end values exact.
 
@@ -192,6 +340,7 @@ def product(left: tuple, right: tuple) -> tuple:
     )
 
 
+@_array_program
 def paired_product(left: tuple, right: tuple) -> tuple:
     """Multiply paired range functions without rounding their coefficients."""
     bulk, near, far = left
@@ -223,6 +372,7 @@ def paired_product(left: tuple, right: tuple) -> tuple:
     )
 
 
+@_array_program
 def total(*terms: tuple) -> tuple:
     """Return the sum of range functions."""
     return (
@@ -232,6 +382,7 @@ def total(*terms: tuple) -> tuple:
     )
 
 
+@_array_program
 def paired_total(*terms: tuple) -> tuple:
     """Add paired range functions coefficient by coefficient."""
     return (
@@ -242,18 +393,27 @@ def paired_total(*terms: tuple) -> tuple:
 
 
 def _paired_sum(values) -> tuple:
-    values = iter(values)
-    total_value = next(values)
-    for value in values:
-        total_value = paired_add(total_value, value)
-    return total_value
+    values = list(values)
+    xp = _namespace(values)
+
+    def add(state, value):
+        return paired_add(state, value), None
+
+    result, _ = (
+        _scan(add, values[0], _pack_pairs(values[1:], xp), xp)
+        if len(values) > 1
+        else (values[0], None)
+    )
+    return result
 
 
+@_array_program
 def scaled(term: tuple, factor) -> tuple:
     """Return the range function multiplied through by a scalar."""
     return (harmonic_scale(term[0], factor), term[1] * factor, term[2] * factor)
 
 
+@_array_program
 def paired_scaled(term: tuple, factor) -> tuple:
     """Multiply a paired range function by a paired scalar."""
     return (
@@ -263,6 +423,7 @@ def paired_scaled(term: tuple, factor) -> tuple:
     )
 
 
+@_array_program
 def across_the_range(term: tuple) -> list:
     """Return the range function as one harmonic series."""
     bulk, near, far = term
@@ -272,6 +433,7 @@ def across_the_range(term: tuple) -> list:
     )
 
 
+@_array_program
 def paired_across_the_range(term: tuple) -> list:
     """Return a paired range function as paired harmonic coefficients."""
     bulk, near, far = term
@@ -285,6 +447,7 @@ def paired_across_the_range(term: tuple) -> list:
     )
 
 
+@_array_program
 def _split_at_both_ends(series: list) -> tuple:
     """Return ``(bulk, half, far)`` of a harmonic series, by double deflation.
 
@@ -299,6 +462,7 @@ def _split_at_both_ends(series: list) -> tuple:
     return harmonic_scale(bulk, -4.0), half, far
 
 
+@_array_program
 def as_range_function(series: list) -> tuple:
     """Return the harmonic series as a range function -- the inverse of
     :func:`across_the_range`.
@@ -314,6 +478,7 @@ def as_range_function(series: list) -> tuple:
     return (bulk, far - 2.0 * half, far)
 
 
+@_array_program
 def _chebyshev_integral(series: list) -> list:
     """Return the ``t``-antiderivative of a harmonic series, constant discarded.
 
@@ -324,18 +489,18 @@ def _chebyshev_integral(series: list) -> list:
     """
     if not series:
         return []
-    out: list = [0.0 * series[0]] * (len(series) + 1)
-    for order, coefficient in enumerate(series):
-        if order == 0:
-            out[1] = out[1] + coefficient
-        elif order == 1:
-            out[2] = out[2] + 0.25 * coefficient
-        else:
-            out[order + 1] = out[order + 1] + 0.5 * coefficient / (order + 1)
-            out[order - 1] = out[order - 1] - 0.5 * coefficient / (order - 1)
-    return out
+    xp = _namespace(series)
+    order = np.arange(len(series))
+    target = np.arange(len(series) + 1)[:, None]
+    weights = (target == order + 1) * np.where(order == 0, 1.0, 0.5 / (order + 1))
+    weights -= (target == order - 1) * np.where(
+        order >= 2, 0.5 / np.maximum(order - 1, 1), 0.0
+    )
+    weights[0] = 0.0
+    return _unpack(xp.einsum("ki,i...->k...", xp.asarray(weights), _pack(series, xp)))
 
 
+@_array_program
 def rising_integral(series: list) -> tuple:
     """Return ``integral_0^a sin 2s C(s) ds`` as a range function, ``C`` the series.
 
@@ -361,6 +526,7 @@ def rising_integral(series: list) -> tuple:
     return (bulk, -2.0 * half, 0.0 * half)
 
 
+@_array_program
 def sine_squared_times(series: list) -> tuple:
     """Return ``sin^2 phi`` times a harmonic series, as a range function.
 
@@ -372,51 +538,63 @@ def sine_squared_times(series: list) -> tuple:
     return (harmonic_scale(series, 4.0), 0.0 * series[0], 0.0 * series[0])
 
 
+@_array_program
 def paired_sine_squared_times(series: list) -> tuple:
     """Multiply a paired harmonic series by ``sin^2 phi`` exactly at both ends."""
     zero = paired_wrap(0.0 * series[0][0])
     return _paired_harmonic_scale(series, paired_wrap(4.0)), zero, zero
 
 
+@_array_program
 def paired_deflate(series: list, root):
     """Deflate a paired harmonic series at a paired root."""
     degree = len(series) - 1
     if degree < 1:
         return [], (series[0] if series else paired_wrap(0.0))
-    zero = paired_wrap(0.0 * series[0][0])
-    quotient = [zero] * degree
-    upper = zero
-    current = zero
-    for order in range(degree, 1, -1):
-        current, upper = (
-            paired_subtract(
-                paired_add(
-                    paired_scale(series[order], 2.0),
-                    paired_scale(paired_multiply(root, current), 2.0),
-                ),
-                upper,
+    xp = _namespace(series, root)
+    high = xp.stack(xp.broadcast_arrays(*(value[0] for value in series), root[0])[:-1])
+    low = xp.stack(xp.broadcast_arrays(*(value[1] for value in series), root[1])[:-1])
+    zero = paired_wrap(xp.zeros_like(high[0] + root[0]))
+
+    def descend(state, coefficient):
+        current, upper = state
+        value = paired_subtract(
+            paired_add(
+                paired_scale(coefficient, 2.0),
+                paired_scale(paired_multiply(root, current), 2.0),
             ),
-            current,
+            upper,
         )
-        quotient[order - 1] = current
-    quotient[0] = paired_subtract(
-        paired_add(series[1], paired_multiply(root, current)),
-        paired_scale(upper, 0.5),
+        return (value, current), value
+
+    (current, upper), tail = (
+        _scan(descend, (zero, zero), (high[2:], low[2:]), xp, reverse=True)
+        if degree > 1
+        else ((zero, zero), (high[:0], low[:0]))
     )
-    return quotient, paired_subtract(
-        paired_add(series[0], paired_multiply(root, quotient[0])),
+    leading = paired_subtract(
+        paired_add(series[1], paired_multiply(root, current)), paired_scale(upper, 0.5)
+    )
+    quotient = [leading] + _unpack_pairs(tail)
+    value = paired_subtract(
+        paired_add(series[0], paired_multiply(root, leading)),
         paired_scale(current, 0.5),
     )
+    return quotient, value
 
 
+@_array_program
 def contract(numerator: list, moments: list):
     """Return the harmonic series contracted against a moment family."""
-    total_value = 0.0
-    for order, coefficient in enumerate(numerator):
-        total_value = total_value + coefficient * moments[order]
-    return total_value
+    if not numerator:
+        return 0.0
+    xp = _namespace(numerator, moments)
+    return xp.einsum(
+        "i...,i...->...", _pack(numerator, xp), _pack(moments[: len(numerator)], xp)
+    )
 
 
+@_array_program
 def deflate(series: list, root):
     """Return ``(quotient, value)`` with ``series = (t - root) quotient + value``.
 
@@ -428,11 +606,19 @@ def deflate(series: list, root):
     degree = len(series) - 1
     if degree < 1:
         return [], (series[0] if series else 0.0)
-    quotient: list = [0.0] * degree
-    upper = 0.0
-    current = 0.0
-    for order in range(degree, 1, -1):
-        current, upper = 2.0 * series[order] + 2.0 * root * current - upper, current
-        quotient[order - 1] = current
-    quotient[0] = series[1] + root * current - 0.5 * upper
-    return quotient, series[0] + root * quotient[0] - 0.5 * current
+    xp = _namespace(series, root)
+    packed = _pack(xp.broadcast_arrays(*series, root)[:-1], xp)
+    zero = xp.zeros_like(packed[0] + root)
+
+    def descend(state, coefficient):
+        current, upper = state
+        value = 2.0 * coefficient + 2.0 * root * current - upper
+        return (value, current), value
+
+    (current, upper), tail = (
+        _scan(descend, (zero, zero), packed[2:], xp, reverse=True)
+        if degree > 1
+        else ((zero, zero), packed[:0])
+    )
+    leading = series[1] + root * current - 0.5 * upper
+    return [leading] + _unpack(tail), series[0] + root * leading - 0.5 * current

@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -215,6 +215,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T171941782407" data-who="" data-when="">
+    <div class="r-comment-body"><p>Reuse ruling for §5 and §6, 2026-10-05, from the second composed plan review: the existing single-site GMRES kernel in <code>fixed_point.py</code> (<code>_single_site_krylov</code> with its custom vmap batching rule, <code>_krylov_machine</code>, <code>_serve_krylov_stream</code>, <code>_krylov_outputs</code> and the Gram-Schmidt and least-squares helpers, about 613 lines) and the Armijo backtracking search (<code>_steepest_descent_promotion</code>) are named reuse candidates for <code>solve.fixed_point</code>. The §5 node either carries them into <code>solve.py</code> as private helpers behind the one call site, stripped of the ladder and frozen-map plumbing, or states in its evidence why each fails the fixed-capacity scan contract. §6's deletion of <code>fixed_point.py</code> therefore deletes the routes and the ladders, never a kernel §5 still contains: whatever §5 carries over moves before §6 deletes the file, the same rule §6 already states for the geometry and polynomial helpers.</p></div>
 </div>
 </section>
 </main>

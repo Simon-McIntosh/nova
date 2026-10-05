@@ -1,0 +1,39 @@
+revision=745304f0a428da76608973dcebc5a70b50a9f2c1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/probe_tree.py
+HOST_MESH limited overflow False vertices 300
+MESH_TRACE_REFUSAL TracerArrayConversionError The numpy.ndarray conversion method __array__() was called on traced array with shape float64[300]
+TREE limited overflow False
+{"node": 0, "type": 1, "vertex": 3, "point": [3.767657730267232, 0.06905836332346386], "flux": -8.469257941722411}
+{"node": 1, "type": 0, "vertex": 5, "point": [3.8015029919860317, 0.7128704352624913], "flux": -9.181682805757204}
+{"node": 2, "type": 1, "vertex": 16, "point": [4.021861303386083, 1.5008818439521974], "flux": -7.982888552042558}
+{"node": 3, "type": 0, "vertex": 31, "point": [4.326054265340295, 2.2845676386773848], "flux": -8.82233438859176}
+{"node": 4, "type": 1, "vertex": 32, "point": [4.571760228772616, -2.639485387372465], "flux": -7.463814399238938}
+{"node": 5, "type": 0, "vertex": 50, "point": [4.87268225550437, -3.083394536282004], "flux": -8.152337100990335}
+{"node": 6, "type": 1, "vertex": 115, "point": [5.6429848523478725, -3.606089157850143], "flux": -4.491945362222099}
+{"node": 7, "type": 0, "vertex": 139, "point": [5.910844040540874, -3.7227398884778546], "flux": -4.681677890697212}
+{"node": 8, "type": 2, "vertex": 174, "point": [6.175391991430986, -0.09155531923614074], "flux": 49.89920804686752}
+{"node": 9, "type": 1, "vertex": 211, "point": [6.661914368586275, -3.5676806548509896], "flux": -2.61362892316056}
+{"node": 10, "type": 1, "vertex": 233, "point": [6.706399276688971, 3.451330143829428], "flux": -0.2037218364832812}
+{"node": 11, "type": 0, "vertex": 234, "point": [6.924279852347055, -3.364651623403204], "flux": -2.6596453502518815}
+{"node": 12, "type": 0, "vertex": 255, "point": [6.941989745442633, 3.266900257809819], "flux": -0.6314320072727175}
+{"node": 13, "type": 1, "vertex": 256, "point": [7.182815584129452, -2.956632564180442], "flux": -0.9300669919183867}
+{"node": 14, "type": 1, "vertex": 274, "point": [7.2215988973684535, 2.8008426809433793], "flux": 1.0354693292977923}
+{"node": 15, "type": 0, "vertex": 275, "point": [7.401943513401532, -2.5310644891170337], "flux": -1.2968330849007097}
+{"node": 16, "type": 0, "vertex": 290, "point": [7.456355897897902, 2.3063276264376986], "flux": 0.20146638506148157}
+{"node": 17, "type": 3, "vertex": 300, "point": [0.0, 0.0], "flux": -69.06909263349851}
+HOST_MESH diverted overflow False vertices 300
+MESH_TRACE_REFUSAL TracerArrayConversionError The numpy.ndarray conversion method __array__() was called on traced array with shape float64[300]
+TREE diverted overflow False
+{"node": 0, "type": 0, "vertex": 4, "point": [0.9745239719173335, 0.14678123790665035], "flux": -0.016786645884675707}
+{"node": 1, "type": 1, "vertex": 7, "point": [1.0509373650336247, -0.5283148654338741], "flux": -0.013219997293658872}
+{"node": 2, "type": 0, "vertex": 20, "point": [1.1514664915382757, -0.7824360682817217], "flux": -0.01477697172657308}
+{"node": 3, "type": 1, "vertex": 36, "point": [1.135373480705537, 0.8724027888533705], "flux": -0.009639092976502242}
+{"node": 4, "type": 0, "vertex": 56, "point": [1.2309824247538927, 1.0045224891468978], "flux": -0.01000093571375641}
+{"node": 5, "type": 1, "vertex": 78, "point": [1.3156561235520432, 1.0580680163755043], "flux": -0.00980331299905525}
+{"node": 6, "type": 2, "vertex": 102, "point": [1.4801500119565554, -1.1904905647754076], "flux": 0.005082430657056464}
+{"node": 7, "type": 1, "vertex": 104, "point": [1.4762333699298509, -1.0164810644360616], "flux": -0.00017881167746039428}
+{"node": 8, "type": 2, "vertex": 181, "point": [1.7512730774983714, 0.09507867998158717], "flux": 0.03557940682735003}
+{"node": 9, "type": 0, "vertex": 246, "point": [2.086459192501479, -0.7091953837729832], "flux": -0.03698384695114143}
+{"node": 10, "type": 1, "vertex": 288, "point": [2.3517174452122047, -0.3616720751924584], "flux": -0.03619237736918396}
+{"node": 11, "type": 3, "vertex": 300, "point": [0.0, 0.0], "flux": -1.0440913574076107}
+PROBE_COMPLETE
+EXIT=0

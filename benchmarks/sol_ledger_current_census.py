@@ -45,6 +45,29 @@ RECEIPT = OUTPUT_DIR / "sol-ledger-census.json"
 FIGURE = OUTPUT_DIR / "sol-ledger-current.png"
 RENDER_RECEIPT = OUTPUT_DIR / "sol-ledger-render.json"
 
+
+def repository_relative(path) -> str:
+    """Return ``path`` relative to its repository root, else absolute.
+
+    The root is found from the path itself, so a path recorded from another
+    checkout of this project still resolves to the same project-relative name,
+    and a receipt keeps locating its artifacts once the worktree is reclaimed.
+    """
+    resolved = Path(path).resolve()
+    root = next(
+        (
+            parent
+            for parent in (resolved, *resolved.parents)
+            if (parent / ".git").exists()
+        ),
+        ROOT,
+    )
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return str(resolved)
+
+
 #: Set to 1 to render the panel with the wall call omitted, so the gate's wall
 #: assertion is exercised against a panel this change can actually produce
 #: without the wall: the negative control, never a production path.
@@ -474,8 +497,8 @@ def _draw_panel(render, output):
         "other_x_points_drawn": int(tally["other_x_points_drawn"]),
         "x_points_dropped_outside_wall": int(tally["x_points_dropped_outside_wall"]),
         "title": title,
-        "png": str(output),
-        "svg": str(vector),
+        "png": repository_relative(output),
+        "svg": repository_relative(vector),
     }
 
 
@@ -491,7 +514,7 @@ def render_from_receipt(receipt_path=RECEIPT, output=FIGURE, metrics_path=None):
     if render is None:
         raise ValueError(f"{receipt_path} carries no render payload")
     metrics = _draw_panel(render, Path(output))
-    metrics["receipt"] = str(receipt_path)
+    metrics["receipt"] = repository_relative(receipt_path)
     target = Path(metrics_path) if metrics_path else RENDER_RECEIPT
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(metrics, indent=2) + "\n")

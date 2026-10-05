@@ -1,0 +1,19 @@
+revision=6546771e2e97b715c77e8065ab5cad2193f08da3 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_topology_shift_fails_position_clause -vv --timeout 180
+RAW_SHA256=852461d912cdf2fd69be99d080fd43616d90e39044b9fa3ae5c912f2bbb6f4d7 RAW_PATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/position-head-current.log.raw
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 180.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 22:52:23 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 2 items
+
+tests/equilibrium/test_topology_read.py::test_topology_shift_fails_position_clause[limited] PASSED [ 50%]
+tests/equilibrium/test_topology_read.py::test_topology_shift_fails_position_clause[diverted] PASSED [100%]
+
+============================== 2 passed in 36.26s ==============================
+EXIT=0

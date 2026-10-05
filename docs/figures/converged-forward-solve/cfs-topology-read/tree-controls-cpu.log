@@ -1,0 +1,148 @@
+revision=8b0b06a19 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -k "general_saddle_census or topology_read_traces" -vv -rP --timeout 240
+SOURCE_STATE=uncommitted contour-tree integration before canonical padded-null repair
+RAW_SHA256=c87a1e69ee1888b3ee2333762698ffc6f903c25430b6c7aaa9192fc5f732eb68 RAW_PATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/tree-controls-cpu.log.raw
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 240.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 22:16:17 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 25 items / 23 deselected / 2 selected
+
+tests/equilibrium/test_topology_read.py::test_general_saddle_census_and_capacity_refusal FAILED [ 50%]
+tests/equilibrium/test_topology_read.py::test_topology_read_traces FAILED [100%]
+
+=================================== FAILURES ===================================
+_______________ test_general_saddle_census_and_capacity_refusal ________________
+
+    def test_general_saddle_census_and_capacity_refusal():
+        from nova.equilibrium.topology import TopologyConvention, read
+    
+        wall = np.asarray(((1.2, -1.5), (2.8, -1.5), (2.8, 1.5), (1.2, 1.5)))
+>       geometry = _realised_hex_geometry(wall, 132)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/equilibrium/test_topology_read.py:1869: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+wall = array([[ 1.2, -1.5],
+       [ 2.8, -1.5],
+       [ 2.8,  1.5],
+       [ 1.2,  1.5]])
+target = 132
+
+    def _realised_hex_geometry(wall, target):
+        from shapely.geometry import Polygon
+        from nova.equilibrium.topology import TopologyGeometry
+    
+        vessel = Polygon(wall)
+        origin = np.asarray(vessel.centroid.coords[0])
+        bounds = np.asarray(vessel.bounds)
+    
+        def generate(radius, return_polygons=False):
+            lower = np.floor((bounds[:2] - origin) / (1.5 * radius)).astype(int) - 3
+            upper = np.ceil((bounds[2:] - origin) / (1.5 * radius)).astype(int) + 3
+            cells, sampling = [], []
+            offset = _hexagon(radius)
+            for radial in range(lower[0], upper[0] + 1):
+                for vertical in range(2 * lower[1], 2 * upper[1] + 1):
+                    centre = origin + radius * np.asarray(
+                        (
+                            1.5 * (radial + 0.137),
+                            np.sqrt(3) * (vertical + 0.5 * (radial % 2) + 0.219),
+                        )
+                    )
+                    polygon = Polygon(centre + offset).intersection(vessel)
+                    if polygon.is_empty or polygon.area < 1e-14 * radius**2:
+                        continue
+                    if polygon.geom_type != "Polygon":
+                        raise AssertionError(
+                            "carrier cell has disconnected vessel intersection"
+                        )
+                    cells.append(polygon)
+                    sampling.append(centre + offset)
+            if not return_polygons:
+                return len(cells)
+            polygons = []
+            for polygon in cells:
+                points = np.asarray(polygon.exterior.coords[:-1])
+                signed = np.sum(
+                    points[:, 0] * np.roll(points[:, 1], -1)
+                    - points[:, 1] * np.roll(points[:, 0], -1)
+                )
+                polygons.append(points if signed > 0 else points[::-1])
+            return TopologyGeometry.from_cells(
+                tuple(polygons), np.asarray(sampling), (wall,)
+            )
+    
+        estimate = np.sqrt(vessel.area / target / (3 * np.sqrt(3) / 2))
+        low, high = 0.5 * estimate, 2 * estimate
+        for _ in range(60):
+            radius = 0.5 * (low + high)
+            count = generate(radius)
+            if count == target:
+                return generate(radius, True)
+            if count > target:
+                low = radius
+            else:
+                high = radius
+>       raise AssertionError(f"could not realise {target} cells; reached {count}")
+E       AssertionError: could not realise 132 cells; reached 131
+
+tests/equilibrium/test_topology_read.py:410: AssertionError
+__________________________ test_topology_read_traces ___________________________
+
+    def test_topology_read_traces():
+        from nova.equilibrium.topology import TopologyConvention, read
+    
+        _, field, wall, _, _ = _analytic_inputs("diverted")
+        geometry = _realised_hex_geometry(wall, 132)
+        convention, policy = (
+            TopologyConvention.from_cocos(17, 1.0),
+            TopologyPolicy(normal_form_radius=0.054806712567833996),
+        )
+        fields = (field, replace(field, scale=1.01 * field.scale))
+        eager = [read(item, geometry, convention, policy) for item in fields]
+        compiled = [jax.jit(read)(item, geometry, convention, policy) for item in fields]
+        batch = jax.tree.map(lambda *values: jnp.stack(values), *fields)
+        mapped = jax.jit(jax.vmap(read, in_axes=(0, None, None, None)))(
+            batch, geometry, convention, policy
+        )
+        for index, result in enumerate(eager):
+            assert result.valid
+            for left, right, both in zip(
+                jax.tree.leaves(result),
+                jax.tree.leaves(compiled[index]),
+                jax.tree.leaves(mapped),
+                strict=True,
+            ):
+                np.testing.assert_allclose(
+                    left, right, rtol=2e-12, atol=2e-12, equal_nan=True
+                )
+>               np.testing.assert_allclose(
+                    left, both[index], rtol=2e-12, atol=2e-12, equal_nan=True
+                )
+E               AssertionError: 
+E               Not equal to tolerance rtol=2e-12, atol=2e-12
+E               
+E               Mismatched elements: 1 / 16 (6.25%)
+E               Mismatch at index:
+E                [6]: 14258.78846313972 (ACTUAL), 14258.788463107092 (DESIRED)
+E               Max absolute difference among violations: 3.26272129e-08
+E               Max relative difference among violations: 2.28821776e-12
+E                ACTUAL: array([-1.942890e-16,  3.587432e-02, -3.086121e-02, -3.086121e-02,
+E                      -3.086121e-02, -2.359224e-16,  1.425879e+04, -2.955952e-02,
+E                      -2.955952e-02, -2.458713e-02,           nan,           nan,
+E                                nan,           nan,           nan,  3.333910e+03])
+E                DESIRED: array([-2.775558e-17,  3.587432e-02, -3.086121e-02, -3.086121e-02,
+E                      -3.086121e-02, -1.526557e-16,  1.425879e+04, -2.955952e-02,
+E                      -2.955952e-02, -2.458713e-02,           nan,           nan,
+E                                nan,           nan,           nan,  3.333910e+03])
+
+tests/equilibrium/test_topology_read.py:1918: AssertionError
+================= 2 failed, 23 deselected in 128.86s (0:02:08) =================
+EXIT=1

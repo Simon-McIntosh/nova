@@ -1,0 +1,22 @@
+revision=8b0b06a19 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -k "closed_form_carrier_read or saddle_support_order" -vv --timeout 180
+SOURCE_STATE=uncommitted contour-tree integration before rank/capacity guard additions
+RAW_SHA256=f359315523fd994d343798a29dbe0cd86d8f81e5220f691effce2d8f6456d5c3 RAW_PATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/tree-read-cpu.log.raw
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 180.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 22:14:25 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 23 items / 19 deselected / 4 selected
+
+tests/equilibrium/test_topology_read.py::test_closed_form_carrier_read[limited] PASSED [ 25%]
+tests/equilibrium/test_topology_read.py::test_closed_form_carrier_read[diverted] PASSED [ 50%]
+tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited] PASSED [ 75%]
+tests/equilibrium/test_topology_read.py::test_saddle_support_order[diverted] PASSED [100%]
+
+====================== 4 passed, 19 deselected in 37.43s =======================
+EXIT=0

@@ -54,8 +54,6 @@ from functools import wraps
 from inspect import signature
 
 import jax
-import jax.numpy as jnp
-import numpy as np
 
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import multiply as paired_multiply
@@ -93,16 +91,14 @@ __all__ = [
 _BOTH_ENDS = [0.125, 0.0, -0.125]
 
 
-def _namespace(*values):
-    """Select the array namespace without inspecting traced values."""
-    return (
-        jnp
-        if any(
-            isinstance(value, jax.Array | jax.core.Tracer)
-            for value in jax.tree.leaves(values)
-        )
-        else np
-    )
+def _is_staged(value):
+    """Distinguish staged operands from eager differentiation and batching."""
+    while isinstance(value, jax.core.Tracer):
+        primal = getattr(value, "primal", getattr(value, "val", None))
+        if primal is None or primal is value:
+            return True
+        value = primal
+    return False
 
 
 def _array_program(function):
@@ -116,7 +112,7 @@ def _array_program(function):
 
     @wraps(function)
     def evaluate(*args, **kwargs):
-        if _namespace(args, kwargs) is jnp:
+        if any(_is_staged(value) for value in jax.tree.leaves((args, kwargs))):
             return compiled(*args, **kwargs)
         return function(*args, **kwargs)
 

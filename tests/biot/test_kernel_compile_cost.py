@@ -298,6 +298,19 @@ def test_point_jet_identity():
     assert maximum.max() <= 1e-13
 
 
+def test_kernel_helpers_preserve_eager_derivatives():
+    """Graph reuse does not change the arithmetic of unstaged differentiation."""
+    from nova.biot.completeelliptic import complete_kind
+
+    with _baseline_kernel() as baseline:
+        reference = baseline._reference_modules["nova.biot.completeelliptic"]
+        for complement in (0.9, 0.5, 1e-3, 1e-6, 1e-8):
+            value = jnp.asarray(complement, dtype=jnp.float64)
+            expected = jax.grad(lambda c: reference.complete_kind(c, xp=jnp)[1])(value)
+            actual = jax.grad(lambda c: complete_kind(c, xp=jnp)[1])(value)
+            np.testing.assert_array_equal(actual, expected)
+
+
 def test_harmonic_arithmetic_order():
     """Cancellation-sensitive helpers retain the reference operation ordering."""
     from nova.biot import rangefunction

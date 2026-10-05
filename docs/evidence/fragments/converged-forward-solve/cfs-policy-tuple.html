@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-policy-tuple"><meta name="plan-title" content="ForwardSolvePolicy tuple assertion: topology field">
+<meta name="plan-summary" content="The exact POLICY_FIELDS tuple assertion now matches the nineteen-field ForwardSolvePolicy, adding topology after compilation_cache.">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="complete">
+<meta name="plan-recorded-at" content="2026-10-05">
+<meta name="plan-tags" content="equilibrium,forward-solve,schema">
+<title>ForwardSolvePolicy tuple assertion: topology field | nova</title>
+</head><body><main class="plan-doc">
+<h1 id="cfs-policy-tuple">ForwardSolvePolicy tuple assertion: topology field</h1>
+<p id="cfs-policy-tuple-landing">The exact-tuple assertion in <code>tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table</code> now names the policy fields <code>ForwardSolvePolicy</code> carries. The <code>topology: TopologyPolicy</code> field was appended after <code>compilation_cache</code>, so <code>"topology"</code> is appended to the <code>POLICY_FIELDS</code> tuple in the same position; nothing else in the file changed and no product source changed. Measured on the worktree at <code>bf4151447</code>: the head arm passes the target test (<code>.FFF.</code>, target test first), 3 failed 2 passed, with the three failures being pre-existing <code>_LinearTarget has no attribute 'null'</code> errors in the forward solve runtime outside this node's scope. The baseline arm (committed file, eighteen-field tuple) is 4 failed 1 passed, so this change removes exactly one failure and adds none. The negative control, a scratch copy carrying the previous eighteen-field tuple, fails with <code>AssertionError</code> reporting the actual tuple "contains one more item: 'topology'", <code>EXIT=1</code>.</p>
+</main></body></html>

@@ -1,0 +1,154 @@
+NOVA_LANE_START=2026-10-06T01:46:35+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281148
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=4d7305f684bea23f59d28702bcd6dc636fc9d166
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=240
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py::test_point_jet_identity tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity tests/biot/test_kernel_compile_cost.py::test_kernel_helpers_preserve_eager_derivatives tests/biot/test_kernel_compile_cost.py::test_kernel_helper_sharing_requires_staging tests/biot/test_kernel_compile_cost.py::test_harmonic_arithmetic_order tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity tests/biot/test_traced_section_moments.py tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile -vv -s --timeout=240 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Cache inventory line omitted from excerpt; full raw receipt retained in run directory.]
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=4d7305f684bea23f59d28702bcd6dc636fc9d166
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+[Cache inventory line omitted from excerpt; full raw receipt retained in run directory.]
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 240.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 01:46:46 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 9 items
+
+tests/biot/test_kernel_compile_cost.py::test_point_jet_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-ilqg83t9/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-ilqg83t9/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-ilqg83t9/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-ilqg83t9/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-ilqg83t9/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-ilqg83t9/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-ilqg83t9/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+IDENTITY_COMPILE arm=baseline seconds=14.1490358 executable_bytes=2912
+IDENTITY_COMPILE arm=head seconds=9.08661237 executable_bytes=2912
+IDENTITY_WORST point=[6.191426454923443, -5.7103163437081985] component=0 baseline=2.5793641787249078e-06 head=2.5793641787249078e-06
+IDENTITY kind=polygon points=10000 component_maxima=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] maximum=0
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-8shuhnj0/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-8shuhnj0/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-8shuhnj0/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-8shuhnj0/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-8shuhnj0/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-8shuhnj0/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-8shuhnj0/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+IDENTITY kind=filament points=10000 maximum=0
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_kernel_helpers_preserve_eager_derivatives REFERENCE_MODULE rangefunction=/tmp/biot-reference-bsliwhvk/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-bsliwhvk/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-bsliwhvk/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-bsliwhvk/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-bsliwhvk/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-bsliwhvk/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-bsliwhvk/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_kernel_helper_sharing_requires_staging PASSED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_arithmetic_order REFERENCE_MODULE rangefunction=/tmp/biot-reference-odc_pxpo/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-odc_pxpo/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-odc_pxpo/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-odc_pxpo/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-odc_pxpo/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-odc_pxpo/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-odc_pxpo/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PASSED
+tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-2zaqlktw/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-2zaqlktw/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-2zaqlktw/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-2zaqlktw/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-2zaqlktw/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-2zaqlktw/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-2zaqlktw/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+RECURRENCE_IDENTITY points=10000 maximum=0
+PASSED
+tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference PASSED
+tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound REFERENCE_MODULE rangefunction=/tmp/biot-reference-scjemb2e/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-scjemb2e/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-scjemb2e/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-scjemb2e/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-scjemb2e/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-scjemb2e/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-scjemb2e/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+EQUATIONS before=78404 after=17544 ratio=4.46899225
+FAILED
+tests/biot/test_kernel_compile_cost.py::test_point_jet_cold_compile REFERENCE_MODULE rangefunction=/tmp/biot-reference-ee6co956/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-ee6co956/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-ee6co956/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-ee6co956/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-ee6co956/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-ee6co956/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-ee6co956/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+COMPILE arm=baseline backend=cuda:0 seconds=11.2934615 executable_bytes=2912
+COMPILE arm=head backend=cuda:0 seconds=7.82114282 executable_bytes=2912
+PASSEDCACHE_GUARD_MARKER=pre-warm-run misses=0 budget=not-enforced
+CACHE_GUARD_RECEIPT={"cache_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "compile_seconds": 0, "enforced": false, "hits": 44, "marker": "pre-warm-run misses=0 budget=not-enforced", "miss_budget": null, "misses": 0, "rows": [{"cache_key": "jit__lambda-36d9db850afa2ddd052367510ea53f4f04495a24d9d3a6ec6c6b0939289a9e5d", "cached_compile_seconds": 33.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit__where-206666eddf033eca2beff3c16cbdde7bfabc6f1bf9d126b85a80be204b3cc5b3", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit__where-ecbf9b47c84018a93717ff475b818b77b1f64e5ae3abd14861964a3d8ee8f831", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_add-108381f14563304a0be954e86205933dcd382704bd34f43ebb45c5ac993d98a2", "cached_compile_seconds": 0.0, "hits": 3, "misses": 0, "program": ""}, {"cache_key": "jit_add-3fb4d1903c671e3dc6b2fc3f32c9b9185fdc39403a8de2358751cc404b544e38", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_add-42af15fdf65ae81757a2cfd9e24fadab2e7313835f63f1e1f8edb92fb192cc9d", "cached_compile_seconds": 0.0, "hits": 3, "misses": 0, "program": ""}, {"cache_key": "jit_add-b4247251098b16c9d810561a963d2521bbc1dd97cd9899cc310bf29bf5a83fea", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-15aad14b854f1d75f1655664baf43b6033a5887bdfb99da620ca1f1bb01b1b0f", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_convert_element_type-bda6570e2f2a2b182074a8435a85a3721ea648f19e83409ca741daef27fe95c3", "cached_compile_seconds": 0.0, "hits": 2, "misses": 0, "program": ""}, {"cache_key": "jit_div-09928928aebc8ebacd40d7c8f32b82f1f5318f3338823691b9a7da234354045e", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_equal-7e5ebb1db0fdf8464f29e1712da066267e5cfbf23a5f65f53672c9c9f7eeea18", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_greater-0f962edcd930ea76316480adaf1c1d089e4a9e4d683811a021f63638d61f80db", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-110fd8e652bb505f741581f872b9610000bb3d904ce5fb1a9b4894a13a265f51", "cached_compile_seconds": 113.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-15ef57d3c522403b45454f624f82480c6fc806983696ae3f8c1533cd99018317", "cached_compile_seconds": 86.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-adb0142417326b91b9a5436123e047bf0f27455c72ac88c2358f11e8390ffc1a", "cached_compile_seconds": 81.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-bb66c9d835c68e06d09a0b8441a47f42951cd2604676214614886ea9d3745762", "cached_compile_seconds": 3.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-d501c57c7fa81d0a3c830759ed90553fde86802f1d0e45756919c3d1318a017f", "cached_compile_seconds": 3.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_jet-fdd3d04204239bef93b567cb6b44be78c383d81b323bcccca7354dd718633e1f", "cached_compile_seconds": 105.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_mul-5e6eaf9d928f6f02d87d0e5fe864dcbb5c5f54110d8331e29ae8a0639d53b70c", "cached_compile_seconds": 0.0, "hits": 2, "misses": 0, "program": ""}, {"cache_key": "jit_multiply-8ea1ae4986faec34c3187f4293842b7511f1a53b64cdd4c0c9d3ebb5fbdd5646", "cached_compile_seconds": 0.0, "hits": 3, "misses": 0, "program": ""}, {"cache_key": "jit_multiply-a591dec3be266ff62ed1236a06a0b147beb336f5e8ea5a8da06489adf94b7bc4", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_neg-5dfd78eb6c9d6948410b851e773f155a789af11f519184b4eea9695a95249a04", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_sqrt-b45c3ce38f20eca091173580794e1d072bfb2665a86314a82efe7535d56d1aea", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_sqrt-ea7e80142ac10afcb353f37b3a0ed7b6a11774bafdbc6e11a6ed6547968d51e3", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-144fd1aeea89efa4ed31deb5ba9a1ab435ea826893759b37a9f4400ab477efbb", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-4ed8903684558a182ce80d13ec9c785bff941981af46cb670fc8b869154b1e8a", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-a08fa65949174f1d6d9f3323a68927d4a1c6a5b37375c54ae528b01ac5defdfe", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-cd1a183fdf1ca39f9d2e129e6d38aebedbec9c2a682dfc8bb068e1dc374fa55c", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-d789d7d3ecb8e2f7e552627713c93b76443819cfffaf69a5cca466f6ce27f8b0", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-ec4408ef48e2b5183d59907d9d580d3d103731964c3f7169865fb85b6d4ad38b", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-ef5a22a9f50625f34dc8d8225b149871f3968eb009478ff0fffefbc2a225aca3", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_stage-f74c16226af33011ef21823de09db3454618ddf4e86bb5337a75b8f7a926f178", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_true_divide-20ff38acac0749f1cd803936f2d16da59fbb646a52b47654dc3ad0c0e9ea1826", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_true_divide-523d0e866140d3b7e714eebd09dbd34930c0dfe27dea0a109f99e74eecd8e8b0", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_true_divide-99af5445adaf54a171cc96163b5e388f3efde04c296200741c19965927a47b27", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}, {"cache_key": "jit_true_divide-a940a712dffc299c7dcd3458bbfd889ebe8950393462e02702a98da13400a913", "cached_compile_seconds": 0.0, "hits": 1, "misses": 0, "program": ""}], "served_directory": "/home/ITER/mcintos/.cache/nova/production-forward", "served_entries": 8959, "source_revision": "unknown", "unpersisted_misses": 0, "version_key": ""}
+
+
+=================================== FAILURES ===================================
+_______________________ test_point_jet_expression_bound ________________________
+
+    def test_point_jet_expression_bound():
+        from nova.biot import polygonanalytic
+    
+        geometry = _geometry()
+        point = jnp.asarray([5.62, 0.31])
+        with _baseline_kernel() as baseline:
+            before = _unique_equations(
+                jax.make_jaxpr(jax.jit(_point_jet(baseline)))(point, geometry)
+            )
+        after = _unique_equations(
+            jax.make_jaxpr(jax.jit(_point_jet(polygonanalytic)))(point, geometry)
+        )
+        print(
+            f"EQUATIONS before={before} after={after} ratio={before / after:.9g}",
+            flush=True,
+        )
+        assert before > 50000, "the counter must see the expanded reference kernel"
+>       assert after * 10 <= before
+E       assert (17544 * 10) <= 78404
+
+tests/biot/test_kernel_compile_cost.py:178: AssertionError
+=========================== short test summary info ============================
+FAILED tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound - assert (17544 * 10) <= 78404
+==================== 1 failed, 8 passed in 75.96s (0:01:15) ====================
+GPU_DEVICE_INVENTORY=0,_NVIDIA_H200_NVL,_143771
+GPU_UTILISATION_AT_10S=0,_0
+GPU_UTILISATION_AT_30S=0,_0
+GPU_UTILISATION_AT_60S=0,_0
+EXIT_STATUS=1
+NOVA_LANE_END=2026-10-06T01:47:59+0200
+NOVA_LANE_EXIT_STATUS=1

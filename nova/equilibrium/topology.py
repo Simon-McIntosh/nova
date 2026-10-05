@@ -2901,7 +2901,8 @@ def read(field, geometry, convention, policy):
     policy = replace(
         policy,
         normal_form_radius=jnp.maximum(
-            policy.normal_form_radius, 1.5 * jnp.median(geometry.pitch)
+            policy.normal_form_radius,
+            policy.normal_form_pitch_floor * jnp.median(geometry.pitch),
         ),
     )
     sigma = convention.sigma

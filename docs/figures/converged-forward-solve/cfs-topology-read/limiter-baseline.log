@@ -1,0 +1,66 @@
+revision=0a5beeea65dc8237d97e6448516c19f4ba8729d4 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=PYTHONPATH=$PWD JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_analytic_oracle_limiter_wall.py -k 'static and 121 or chord_wall' -vv -rP
+working_tree_state=uncommitted test, original fixture
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 20:28:12 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 10 items / 8 deselected / 2 selected
+
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[static-121] FAILED [ 50%]
+tests/test_analytic_oracle_limiter_wall.py::test_chord_wall_fails_whole_edge_invariant PASSED [100%]
+
+=================================== FAILURES ===================================
+___________ test_limiter_wall_confines_zero_flux_region[static-121] ____________
+
+kind = 'static', points = 121
+
+    @pytest.mark.parametrize("points", (9, 31, 121))
+    @pytest.mark.parametrize("kind", ("static", "weak", "moderate"))
+    def test_limiter_wall_confines_zero_flux_region(kind, points):
+        references = reference_cases()
+        case = references[
+            "moderate-rotation-conventional"
+            if kind == "moderate"
+            else "weak-rotation-reactor"
+        ]
+        if kind == "static":
+            case = case.static_limit()
+        builder = (
+            _chord_wall
+            if os.environ.get("NOVA_LIMITER_CHORD_MUTATION") == "1"
+            else limiter_contour
+        )
+        wall = builder(case, points=points)
+        assert wall.shape == (points, 2)
+>       _assert_confined(case, wall)
+
+tests/test_analytic_oracle_limiter_wall.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+case = RotatingEquilibrium(name='weak-rotation-reactor-static', major_radius=6.2, axis_flux=7.948312735215507, pressure_coeff...86, axis_temperature=1.6021766339999998e-15, boundary_temperature=3.204353268e-17, mean_particle_mass=3.3435837768e-27)
+wall = array([[ 3.73931207e+00,  8.62020381e-02],
+       [ 3.74539984e+00,  2.58475042e-01],
+       [ 3.75755402e+00,  4.3035....75755402e+00, -4.30353876e-01],
+       [ 3.74539984e+00, -2.58475042e-01],
+       [ 3.73931207e+00, -8.62020381e-02]])
+
+    def _assert_confined(case, wall):
+        samples, flux = _edge_flux(case, wall)
+        maximum = float(flux.max())
+>       assert maximum <= 1e-12, f"wall enters plasma: maximum={maximum:.17g} Wb"
+E       AssertionError: wall enters plasma: maximum=0.040107798606867806 Wb
+E       assert 0.040107798606867806 <= 1e-12
+
+tests/test_analytic_oracle_limiter_wall.py:46: AssertionError
+==================================== PASSES ====================================
+__________________ test_chord_wall_fails_whole_edge_invariant __________________
+----------------------------- Captured stdout call -----------------------------
+CHORD_REFUSAL maximum_wb=0.040107798606867806
+================== 1 failed, 1 passed, 8 deselected in 42.69s ==================
+EXIT=1

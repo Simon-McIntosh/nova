@@ -1,0 +1,58 @@
+revision=0a5beeea65dc8237d97e6448516c19f4ba8729d4 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=PYTHONPATH=$PWD JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_analytic_oracle_limiter_wall.py -vv -rP
+working_tree_state=uncommitted fixture/test changes subsequently committed
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 300.0s
+timeout method: signal
+timeout func_only: False
+collecting ... 20:29:31 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+collected 10 items
+
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[static-9] PASSED [ 10%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[static-31] PASSED [ 20%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[static-121] PASSED [ 30%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[weak-9] PASSED [ 40%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[weak-31] PASSED [ 50%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[weak-121] PASSED [ 60%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[moderate-9] PASSED [ 70%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[moderate-31] PASSED [ 80%]
+tests/test_analytic_oracle_limiter_wall.py::test_limiter_wall_confines_zero_flux_region[moderate-121] PASSED [ 90%]
+tests/test_analytic_oracle_limiter_wall.py::test_chord_wall_fails_whole_edge_invariant PASSED [100%]
+
+==================================== PASSES ====================================
+____________ test_limiter_wall_confines_zero_flux_region[static-9] _____________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=9 maximum_wb=2.2322358387255237e-14 contact_edge=8
+____________ test_limiter_wall_confines_zero_flux_region[static-31] ____________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=31 maximum_wb=2.2322358387255243e-14 contact_edge=30
+___________ test_limiter_wall_confines_zero_flux_region[static-121] ____________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=121 maximum_wb=2.2322358387255243e-14 contact_edge=120
+_____________ test_limiter_wall_confines_zero_flux_region[weak-9] ______________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=9 maximum_wb=0 contact_edge=8
+_____________ test_limiter_wall_confines_zero_flux_region[weak-31] _____________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=31 maximum_wb=-1.4546093351526393e-29 contact_edge=30
+____________ test_limiter_wall_confines_zero_flux_region[weak-121] _____________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=121 maximum_wb=0 contact_edge=120
+___________ test_limiter_wall_confines_zero_flux_region[moderate-9] ____________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=9 maximum_wb=-1.5322306990225098e-31 contact_edge=8
+___________ test_limiter_wall_confines_zero_flux_region[moderate-31] ___________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=31 maximum_wb=0 contact_edge=30
+__________ test_limiter_wall_confines_zero_flux_region[moderate-121] ___________
+----------------------------- Captured stdout call -----------------------------
+LIMITER_INVARIANT points=121 maximum_wb=0 contact_edge=120
+__________________ test_chord_wall_fails_whole_edge_invariant __________________
+----------------------------- Captured stdout call -----------------------------
+CHORD_REFUSAL maximum_wb=0.040107798606867806
+============================= 10 passed in 18.87s ==============================
+EXIT=0

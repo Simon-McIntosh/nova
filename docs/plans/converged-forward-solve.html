@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-05">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -278,6 +278,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T213541950241" data-who="" data-when="">
     <div class="r-comment-body"><p>Request-surface ruling, 2026-10-05, from the sixteenth composed plan review: <code>solve_request.py</code> is the request-side owner of the route surface and is pruned at §6 with the routes it names. <code>SolveRoute</code> (six members today) collapses to the one solve, so the literal and <code>ForwardSolvePolicy.route</code> are deleted along with the route validation set and the route-specific blocks of <code>kernel_options()</code>; <code>SupportClipMode</code> collapses to the exact clip and is deleted with the chord modes; the retired plumbing fields (<code>active_set_steps</code>, <code>settled_exit</code>, <code>stagnation_stop</code>, <code>best_iterate_retention</code>, <code>continuation</code>, <code>own_mask_acceptance</code>, <code>warmup</code>, <code>step_cap</code>) leave <code>ForwardSolvePolicy</code>, which then carries the Newton and GMRES capacities, the kernel and qualification tolerances, the current pin, the exact-kernel and cache settings, <code>TopologyPolicy</code> and <code>SolvePolicy</code>. The POLICY_FIELDS test asserts the reduced tuple, and the §6 evidence states the before and after field counts as the interface-budget accounting the zero-count claim rests on.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261005T215033852475" data-who="" data-when="">
+    <div class="r-comment-body"><p>Census-as-gate ruling, 2026-10-05, from the seventeenth composed plan review, which found importers of the deleted modules outside every consumer set named so far: <code>nova/imas/mast_parity_chain.py</code> imports <code>newton_krylov</code>, <code>nova/biot/boundary.py</code> imports <code>ForwardFluxOperator</code>, <code>nova/equilibrium/steering_frames.py</code> reads <code>fixed_point.active_set_iterations</code>, and 177 files under <code>benchmarks/</code> bind <code>fixed_point</code>, <code>reduced_newton</code> or <code>forward_operator</code>. The §6 census is therefore the deletion gate, run before any file is removed, over <code>nova</code>, <code>apps</code>, <code>benchmarks</code>, <code>scripts</code> and <code>tests</code>, by import and by attribute, with every importer listed in the §6 evidence. Package and app consumers are re-pointed onto the new seam (these three now join the labeller, the transport window and <code>shape_inverse.py</code>). Benchmarks follow one policy: a benchmark whose measurement this plan supersedes is deleted, its banked receipts kept as before-arm evidence where they already live; a benchmark a live plan still exercises is re-pointed; none survives binding a deleted module. The node states the counts in each class before and after.</p></div>
 </div>
 </section>
 </main>

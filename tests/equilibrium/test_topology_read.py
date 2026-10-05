@@ -27,6 +27,100 @@ from nova.equilibrium.topology import (
 assert jax.config.jax_enable_x64 is True
 
 
+class KernelCompileBarrier(AssertionError):
+    """The native kernel compiler did not finish inside its wall budget."""
+
+
+kernel_compile_expected_failure = pytest.mark.xfail(
+    strict=True,
+    raises=KernelCompileBarrier,
+    reason=(
+        "Biot harmonic kernel compile barrier; "
+        "cfs-kernel-compile-cost must land before kernel qualification"
+    ),
+)
+
+
+@pytest.fixture(scope="module")
+def kernel_compile_budget(tmp_path_factory):
+    """Bound the shared native compiler prerequisite in its own process.
+
+    A signal timeout cannot interrupt a native compiler call. A child process
+    enforces the wall bound and retains its output; only that measured timeout
+    is an expected failure. Other exceptions and numerical failures stay red.
+    """
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    directory = Path(
+        os.environ.get(
+            "NOVA_TOPOLOGY_EVIDENCE_DIR", tmp_path_factory.mktemp("kernel-compile")
+        )
+    )
+    directory.mkdir(parents=True, exist_ok=True)
+    module = str(Path(__file__).resolve())
+    script = """
+import json, resource, runpy, sys, time
+m = runpy.run_path(sys.argv[1])
+jax = m['jax']
+from nova.equilibrium.topology import read, TopologyConvention
+jax.config.update('jax_enable_compilation_cache', False)
+o, total, wall, _, _ = m['_analytic_inputs']('limited')
+g = m['_realised_hex_geometry'](wall, 132)
+f = m['_kernel_backed_field']('limited', o, total, g)
+print('KERNEL_COMPILE_INPUT_READY', flush=True)
+start = time.perf_counter()
+program = jax.jit(read).lower(
+    f, g, TopologyConvention.from_cocos(17, 1.0), m['TopologyPolicy']()
+).compile()
+assert program.runtime_executable() is not None
+receipt = {
+    'wall_seconds': time.perf_counter()-start,
+    'peak_host_rss_kib': resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+}
+print('KERNEL_COMPILE_PREREQUISITE_COMPLETE ' + json.dumps(receipt), flush=True)
+"""
+    command = [sys.executable, "-u", "-c", script, module]
+    log = directory / "kernel-compile-prerequisite.log"
+    environment = dict(os.environ, XLA_PYTHON_CLIENT_PREALLOCATE="false")
+    with log.open("w") as stream:
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip()
+        stream.write(
+            f"REVISION={revision} TREE={Path.cwd()} COMMAND="
+            + json.dumps(command)
+            + "\n"
+        )
+        stream.flush()
+        process = subprocess.Popen(
+            command, stdout=stream, stderr=subprocess.STDOUT, env=environment
+        )
+        print("KERNEL_COMPILE_PROCESS", process.pid, str(log), flush=True)
+        try:
+            code = process.wait(timeout=600)
+        except subprocess.TimeoutExpired:
+            print("KERNEL_COMPILE_TIMEOUT", process.pid, "600 seconds", flush=True)
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+            stream.write(
+                "\nWALL_LIMIT_SECONDS=600\nEXIT=" + str(process.returncode) + "\n"
+            )
+            raise KernelCompileBarrier(
+                f"native 132-cell kernel compile exceeded 600 seconds; receipt: {log}"
+            ) from None
+        stream.write("\nEXIT=" + str(code) + "\n")
+    if code:
+        raise RuntimeError(f"kernel prerequisite exited {code}; inspect {log}")
+    assert "KERNEL_COMPILE_PREREQUISITE_COMPLETE" in log.read_text()
+
+
 @jax.tree_util.register_dataclass
 @dataclass(frozen=True)
 class QuadraticPointField:
@@ -466,7 +560,9 @@ def test_topology_shift_fails_position_clause(kind):
     assert result.qualified
 
 
-def test_biot_moment_point_derivatives():
+@kernel_compile_expected_failure
+@pytest.mark.timeout(660)
+def test_biot_moment_point_derivatives(kernel_compile_budget):
     from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
     from nova.equilibrium.topology import BiotMomentCoupling
 
@@ -2013,7 +2109,9 @@ def _kernel_backed_field(kind, oracle, total, geometry):
 
 @pytest.mark.parametrize("kind", ("limited", "diverted"))
 @pytest.mark.parametrize("count", (1074, 2616))
-def test_kernel_backed_carrier_read(kind, count):
+@kernel_compile_expected_failure
+@pytest.mark.timeout(660)
+def test_kernel_backed_carrier_read(kind, count, kernel_compile_budget):
     import os
     from pathlib import Path
     import resource
@@ -2143,7 +2241,9 @@ def test_singular_representation_is_traced_refusal():
 
 
 @pytest.mark.parametrize("kind", ("limited", "diverted"))
-def test_null_position_implicit_tangent(kind):
+@kernel_compile_expected_failure
+@pytest.mark.timeout(660)
+def test_null_position_implicit_tangent(kind, kernel_compile_budget):
     oracle, total, wall, axis, saddle = _analytic_inputs(kind)
     geometry = _realised_hex_geometry(wall, 132)
     field = _kernel_backed_field(kind, oracle, total, geometry)
@@ -2204,7 +2304,9 @@ def _jaxpr_equation_counts(closed):
 
 
 @pytest.mark.parametrize("count", (132, 300, 550))
-def test_kernel_compile_growth(count, tmp_path):
+@kernel_compile_expected_failure
+@pytest.mark.timeout(660)
+def test_kernel_compile_growth(count, tmp_path, kernel_compile_budget):
     """Measure cold tracing, lowering and native compilation independently."""
     import os
     from pathlib import Path

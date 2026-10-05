@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-evidence-for" content="figure-and-solver-audit">
+<title>Render receipts record project-relative paths — landing record</title>
+</head>
+<body>
+<main>
+<article class="landing" data-node="fsa-render-receipt-relative-paths"
+         data-test-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/gate-head.log"
+         data-negative-control-log="/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/negative-control-base.log">
+
+  <h2 id="fsa-render-receipt-relative-paths-title">Render receipts record project-relative paths</h2>
+
+  <p id="fsa-render-receipt-relative-paths-summary">Four render drivers wrote their artifact
+  paths as absolute paths under the worker's worktree, so the committed receipts stopped
+  locating their figures once the worktree was reclaimed. Each driver now resolves a recorded
+  path against its own repository root and writes the project-relative form
+  (<code>repository_relative</code>), and the four committed receipts' path fields were
+  rewritten to that form: <code>sol-ledger-render.json</code> (png, svg, receipt),
+  <code>outboard-hole/figure-receipt.json</code> (two figure paths), and the two Shafranov
+  receipts (the carrier check command's module path). No solve ran, no figure was re-rendered,
+  and the PNG and SVG files are untouched.</p>
+
+  <p id="fsa-render-receipt-relative-paths-gate">Gate
+  <code>tests/test_render_receipt_paths.py</code> passes at the head (3 passed) and fails at the
+  base revision, where the four committed receipts still carry <code>.reckon-worktrees</code>
+  paths (<code>EXIT=1</code>, two failing ids). Every existing test file that imports a changed
+  driver passes with zero added failures: head 55 passed, base 54 passed / 1 failed, the base
+  failure being the scratch extraction's missing <code>.git</code> rather than a code
+  difference.</p>
+
+</article>
+</main>
+</body>
+</html>

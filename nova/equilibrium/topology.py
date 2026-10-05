@@ -2627,12 +2627,32 @@ def _null_census(field, geometry, coefficient, policy, tree):
     gather = order[: policy.null_capacity]
     if policy.null_capacity > order.size:
         gather = jnp.pad(gather, (0, policy.null_capacity - order.size))
-    nulls = jax.vmap(stationary_read, in_axes=(None, 0, 0, None))(
-        field,
-        seeds[gather],
-        geometry.pitch[gather],
-        policy,
-    )
+    if isinstance(field, TotalField):
+
+        def polish_one(arguments):
+            slot, seed, pitch = arguments
+            empty = StationaryRead(
+                jnp.zeros(2),
+                FieldJet(jnp.asarray(0.0), jnp.zeros(2), jnp.zeros((2, 2))),
+                jnp.asarray(False),
+                jnp.asarray(False),
+                jnp.asarray(int(TopologyReason.NO_QUALIFIED_AXIS), dtype=jnp.int32),
+            )
+            return jax.lax.cond(
+                slot < required,
+                lambda _: stationary_read(field, seed, pitch, policy),
+                lambda _: empty,
+                operand=None,
+            )
+
+        nulls = jax.lax.map(
+            polish_one,
+            (jnp.arange(policy.null_capacity), seeds[gather], geometry.pitch[gather]),
+        )
+    else:
+        nulls = jax.vmap(stationary_read, in_axes=(None, 0, 0, None))(
+            field, seeds[gather], geometry.pitch[gather], policy
+        )
     live = (jnp.arange(policy.null_capacity) < required) & nulls.valid
     inside = jax.vmap(lambda point: jnp.any(_inside_cells(geometry, point)))(
         nulls.position
@@ -2676,7 +2696,7 @@ def _wall_events(field, geometry, policy, sigma):
         return points[selected], values[selected]
 
     if isinstance(field, TotalField):
-        return jax.lax.map(lambda pair: one(*pair), (start, edge), batch_size=8)
+        return jax.lax.map(lambda pair: one(*pair), (start, edge))
     return jax.vmap(one)(start, edge)
 
 

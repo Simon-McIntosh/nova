@@ -198,22 +198,39 @@ def limiter_contour(
     points: int = WALL_POINT_COUNT,
     clearance: float = 0.12,
 ) -> np.ndarray:
-    """Return a wall outside the plasma with one exact outboard tangency."""
+    """Circumscribe the boundary with offset tangent lines and one contact edge.
+
+    Intersecting adjacent supporting lines keeps the polygon edges outside the
+    curved plasma, including the short vertical edge at the outboard contact.
+    The clearance offsets supporting lines rather than their intersection
+    vertices, so no straight chord cuts through the zero-flux region.
+    """
     if points < 9 or points % 2 == 0:
         raise ValueError("the limiter needs an odd point count of at least nine")
+    if not np.isfinite(clearance) or clearance < 0:
+        raise ValueError("limiter clearance must be finite and nonnegative")
     inboard, outboard = case.boundary_midplane_radii()
-    centre = 0.5 * (inboard + outboard)
-    half_width = 0.5 * (outboard - inboard)
-    angle = 2.0 * np.pi * (np.arange(points) + 0.5) / points
-    radius = centre - half_width * np.cos(angle)
+    angle = 2.0 * np.pi * np.arange(points) / points
+    radius = 0.5 * (inboard + outboard) + 0.5 * (outboard - inboard) * np.cos(angle)
     height = np.sign(np.sin(angle)) * np.sqrt(
         np.clip(case.flux(radius, 0.0) / case.field_coefficient, 0.0, None)
     )
-    offset = 1.0 + clearance * 0.5 * (1.0 + np.cos(angle))
-    return np.c_[
-        case.major_radius + offset * (radius - case.major_radius),
-        offset * height,
-    ]
+    height[0] = 0.0
+    boundary = np.column_stack((radius, height))
+    normal = -np.column_stack(case.flux_gradient(radius, height))
+    normal /= np.linalg.norm(normal, axis=1, keepdims=True)
+    normal[0] = (1.0, 0.0)
+    displacement = boundary - np.asarray((case.major_radius, 0.0))
+    offset = clearance * 0.5 * (1.0 - np.cos(angle))
+    support = np.sum(normal * boundary, axis=1) + offset * np.sum(
+        normal * displacement, axis=1
+    )
+    support[0] = outboard
+    following = np.roll(np.arange(points), -1)
+    return np.linalg.solve(
+        np.stack((normal, normal[following]), axis=1),
+        np.stack((support, support[following]), axis=1)[..., None],
+    )[..., 0]
 
 
 def offset_wall(

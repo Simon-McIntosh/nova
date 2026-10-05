@@ -6,7 +6,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="converged-forward-solve-kernel-compile-cost">
 <meta name="plan-title" content="Harmonic kernel compile-cost checkpoint">
-<meta name="plan-summary" content="Partial packed recurrence implementation; graph, cold-compile and numerical gates remain unmet">
+<meta name="plan-summary" content="Numerical identity restored with reusable unrolled arithmetic; scan derivative ordering and performance qualification remain open">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-commits" content="61fba54638d33d3f4b902e23ef130389862d571f,c829ddc5ae47314b4a76a1d78aff034bb7e21fb7">
 <meta name="plan-recorded-at" content="2026-10-06">
@@ -16,9 +16,23 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 </head><body><main class="plan-doc">
-<h1 id="cfs-kernel-compile-cost-checkpoint">Harmonic kernel compile-cost checkpoint</h1>
+<h1 id="cfs-kernel-compile-cost-checkpoint">Kernel correctness restored; performance qualification pending</h1>
+<table id="cfs-kernel-compile-cost-correctness">
+<caption>Current correctness checkpoint at 546a36f6101583eaadb2baec7b8d370b2dbfd2a8; oracle mutation isolation at 703a9675ff449e0542ccbcb680b5e8b903699509. The unrolled arithmetic is retained behind reusable helper calls. Earlier failed candidates remain below as history.</caption>
+<thead><tr><th>Gate</th><th>Measure</th><th>Verdict / receipt</th></tr></thead><tbody>
+<tr><td>10000 polygon jets on H200 1281140</td><td>All seven component maxima 0; 70000 finite components</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/h200-correct-arithmetic-excerpt.log">Passed at 1e-13</a></td></tr>
+<tr><td>10000 filament jets on H200 1281140</td><td>All component maxima 0</td><td>Passed at 1e-13, same receipt</td></tr>
+<tr><td>Biot correctness tests on H200</td><td>5 passed, 2 performance tests deselected; payload EXIT_STATUS=0</td><td>Includes the existing section-moment test; zero added correctness failures</td></tr>
+<tr><td>Biot correctness tests on CPU</td><td>3 passed, 2 GPU-only skips, 2 performance tests deselected</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/restored-correctness-cpu.log">CPU fleet 1277272</a></td></tr>
+<tr><td>Declared one-term-truncated recurrence</td><td>Maximum relative error 1.0; finite nonzero independent reference; EXIT=1</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/isolated-oracle-negative.log">Correct refusal</a></td></tr>
+<tr><td>Candidate rejected: scan with inlined helpers</td><td>Hessian maximum 2.8997323493584024e-06</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/h200-helper-inlining.log">H200 1281137</a>; unchanged unrolled arithmetic plus helper reuse gives maximum 0 in the same job</td></tr>
+<tr><td>Candidate rejected: scan fully unrolled during lowering</td><td>Hessian maximum 2.8997323493584024e-06</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/h200-scan-lowering-identity.log">H200 1281139</a>; restoring backend unrolling does not restore the original differentiated expression</td></tr>
+<tr><td>Host paired arithmetic and section moments</td><td>Every maximum absolute difference 0</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/paired-host-identity.log">Independent pinned-reference comparison</a></td></tr>
+<tr><td>H200 correctness command</td><td colspan="2"><code>RECKON_ALLOW_NESTED_LAUNCH=1 TMPDIR=/tmp scripts/h200_test_lane/run.sh --log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-correct-arithmetic.log --cores 2 --mem 64G --time 00:12:00 --env NOVA_CACHE_PREWARM_RUN=1 --env NOVA_KERNEL_IDENTITY_RECEIPT=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/correct-arithmetic-jets.npz --wait -- tests/biot -k 'not expression_bound and not cold_compile' -vv -s --timeout=600</code></td></tr>
+<tr><td>Launcher finding retained, not repaired</td><td colspan="2"><code>scripts/h200_test_lane/run.sh</code> returned shell exit 0 and an empty reported status for job 1281131 while its payload wrote <code>EXIT_STATUS=1</code>. The launcher is outside this grant; the coordinator owns the follow-on.</td></tr>
+</tbody></table>
 <table id="cfs-kernel-compile-cost-measures">
-<caption>Point jet from one booked five-edge polygon; scalar and 100-point batch compile measurements are separate shapes. Generated-code bytes are the JAX executable memory-analysis field. The candidate is not qualified.</caption>
+<caption>Initial failed checkpoint: point jet from one booked five-edge polygon; scalar and 100-point batch compile measurements are separate shapes. Generated-code bytes are the JAX executable memory-analysis field. The candidate is not qualified.</caption>
 <thead><tr><th>Arm and shape</th><th>Unique equations</th><th>Cold compile [s]</th><th>Generated code [bytes]</th><th>Verdict</th></tr></thead><tbody>
 <tr><td>Dispatch revision 01575b6b164607271c9f1d06cfa3f64f18128646; scalar</td><td>78404</td><td>Not measured</td><td>Not measured</td><td>Reproduced unbounded expression</td></tr>
 <tr><td>Candidate 61fba54638d33d3f4b902e23ef130389862d571f; scalar</td><td>22565</td><td>53.479203</td><td>13416</td><td>3.47458453× reduction; fails required 10× and 30 s</td></tr>

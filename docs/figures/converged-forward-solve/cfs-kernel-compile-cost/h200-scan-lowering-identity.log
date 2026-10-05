@@ -1,0 +1,27 @@
+NOVA_LANE_START=2026-10-06T01:14:48+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281139
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=bc4b2921c73318f79055b61f99f69a3c333b2157
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=script
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/arithmetic_lowering_probe.py 
+REFERENCE /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/identity-reference.npz sha256 d0eb6e0a30651a101dfaf4985614fe67c8a3246be7f09abfb3a351fedaa9f93a base 01575b6b164607271c9f1d06cfa3f64f18128646
+REFERENCE_MODULE rangefunction=/tmp/biot-reference-d71q62_9/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-d71q62_9/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-d71q62_9/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-d71q62_9/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-d71q62_9/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-d71q62_9/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-d71q62_9/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+IDENTITY scan_unrolled component_maxima [0.0, 0.0, 0.0, 2.8997323493584024e-06, 1.9354587804260585e-07, 2.6234995331811376e-07, 1.2212865586081636e-07] maximum 2.8997323493584024e-06
+EXIT=0
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-06T01:17:03+0200
+NOVA_LANE_EXIT_STATUS=0

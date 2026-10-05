@@ -1,0 +1,13 @@
+REFERENCE_MODULE rangefunction=/tmp/biot-reference-2uhq1zoa/rangefunction.py
+REFERENCE_MODULE completeelliptic=/tmp/biot-reference-2uhq1zoa/completeelliptic.py
+REFERENCE_MODULE elliptic=/tmp/biot-reference-2uhq1zoa/elliptic.py
+REFERENCE_MODULE gradedresidual=/tmp/biot-reference-2uhq1zoa/gradedresidual.py
+REFERENCE_MODULE momentchannel=/tmp/biot-reference-2uhq1zoa/momentchannel.py
+REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-2uhq1zoa/polygonanalytic.py
+REFERENCE_MODULE greens=/tmp/biot-reference-2uhq1zoa/greens.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+paired_harmonic_multiply 0.0
+_paired_harmonic_add 0.0
+paired_deflate 0.0
+polygon_analytic_flux_moments 0.0
+polygon_analytic_field_moments 0.0

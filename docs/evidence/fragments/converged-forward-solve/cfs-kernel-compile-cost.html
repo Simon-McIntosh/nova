@@ -8,7 +8,7 @@
 <meta name="plan-title" content="Harmonic kernel compile-cost checkpoint">
 <meta name="plan-summary" content="Partial packed recurrence implementation; graph, cold-compile and numerical gates remain unmet">
 <meta name="plan-evidence-for" content="converged-forward-solve">
-<meta name="plan-commits" content="61fba54638d33d3f4b902e23ef130389862d571f">
+<meta name="plan-commits" content="61fba54638d33d3f4b902e23ef130389862d571f,c829ddc5ae47314b4a76a1d78aff034bb7e21fb7">
 <meta name="plan-recorded-at" content="2026-10-06">
 <meta name="plan-verdict" content="failed">
 <meta name="plan-environment" content="Shared nova virtualenv; CPU fleet 1277272 and H200 1281131">
@@ -51,5 +51,16 @@
 <tr><td>Remaining source sites</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/shared-trace-inspection.log">Source census</a>: momentchannel.py pole composition, completeelliptic.py descent/accumulation, polygonanalytic.py assembly and gradedresidual.py; outside the granted source paths</td></tr>
 <tr><td>Next action</td><td>Coordinator review of the source scope and arithmetic design. Restore cancellation-sensitive numerical agreement before qualifying the performance change. Do not promote this candidate as complete.</td></tr>
 <tr><td>Raw H200 receipt</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-kernel-compile-cost.log</code>; over 300000 bytes, retained outside the repository.</td></tr>
+</tbody></table>
+<table id="cfs-kernel-compile-cost-ordered-arithmetic">
+<caption>Correctness-first resumed checkpoint: serial reductions restored in c829ddc5ae47314b4a76a1d78aff034bb7e21fb7. Source scope now also includes momentchannel.py, completeelliptic.py, polygonanalytic.py and gradedresidual.py. No performance gate has been repeated.</caption>
+<thead><tr><th>Arm</th><th>Value / analytic gradient maximum relative error</th><th>Hessian maximum relative error</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>NumPy serial helper and packed-row operation order</td><td>0; exact array equality</td><td>Not differentiated in this host diagnostic</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/operation-order-host.log">Host operation order</a>; <a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/ordered-host-tests.log">2 regression tests passed</a></td></tr>
+<tr><td>Both scanned modules; 10000 points, H200 1281133</td><td>0 / 0</td><td>2.8997323493584024e-06</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/h200-identity-discriminator.log">Four-arm identity discriminator</a></td></tr>
+<tr><td>Only range helpers restructured; 10000 points</td><td>0 / 0</td><td>2.8997323493584024e-06</td><td>Same job and reference arrays</td></tr>
+<tr><td>Only elliptic recurrences restructured; 10000 points</td><td>0 / 0</td><td>2.6152718071741242e-06</td><td>Same job and reference arrays</td></tr>
+<tr><td>Existing compiled section-moment test</td><td>5.22653243e-10 relative in one component; 5.9718655e-17 absolute</td><td>Not a Hessian gate</td><td><a href="/nova/figures/converged-forward-solve/cfs-kernel-compile-cost/ordered-contraction-cpu.log">1 failed, 35 passed</a></td></tr>
+<tr><td>Worst full-jet discrepancy</td><td colspan="2">At [22.63834736533205, 9.382494433979158], radial Hessian baseline 7.656611209609316e-13 versus 7.656633411732527e-13; all 70000 reference components finite and nonzero. The derivative remains unqualified despite exact primal values.</td><td>Arrays retained in the run directory, outside the repository size limit</td></tr>
+<tr><td>Next correctness discriminator</td><td colspan="2">Separate helper inlining from scan restructuring; compare to the same pinned reference before selecting another source change.</td><td>Running; no numerical or performance claim yet</td></tr>
 </tbody></table>
 </main></body></html>

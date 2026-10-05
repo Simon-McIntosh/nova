@@ -2,7 +2,7 @@
 
 # Configure precision before importing modules with array-valued defaults.
 # ruff: noqa: E402
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field as dataclass_field, replace
 import json
 
 from nova.jax.config import configure_dtypes
@@ -198,3 +198,263 @@ def test_stationary_and_saddle_primitives_trace():
     refused = saddle_normal_form(jnp.zeros(2), jnp.eye(2), third, 1e-10)
     assert not refused.valid
     assert refused.reason == TopologyReason.SINGULAR_REPRESENTATION
+
+
+@pytest.mark.parametrize("radius", (0.1, 0.3, 0.6))
+def test_quadratic_fragments_circle_area(radius):
+    from nova.equilibrium.topology import quadratic_cell_fragments
+
+    vertices = jnp.asarray(((-1.0, -1.0), (1.0, -1.0), (1.0, 1.0), (-1.0, 1.0)))
+    coefficient = jnp.asarray((radius**2, 0.0, 0.0, -1.0, 0.0, -1.0))
+    result = jax.jit(quadratic_cell_fragments)(vertices, 4, coefficient)
+    assert result.valid
+    assert result.required == 1
+    np.testing.assert_allclose(result.area.sum(), np.pi * radius**2, rtol=2e-12)
+
+
+def test_quadratic_fragments_saddle_touch_does_not_join():
+    from nova.equilibrium.topology import quadratic_cell_fragments
+
+    vertices = jnp.asarray(((-1.0, -1.0), (1.0, -1.0), (1.0, 1.0), (-1.0, 1.0)))
+    coefficient = jnp.asarray((0.0, 0.0, 0.0, 1.0, 0.0, -1.0))
+    result = jax.jit(quadratic_cell_fragments)(vertices, 4, coefficient)
+    assert result.valid
+    assert result.required == 2
+    np.testing.assert_allclose(result.area, (1.0, 1.0), rtol=2e-12)
+    refused = quadratic_cell_fragments(vertices, 4, coefficient, capacity=1)
+    assert not refused.valid
+    assert refused.reason == TopologyReason.CAPACITY
+    assert np.isnan(refused.area).all()
+
+
+def test_traced_read_limited_quadratic():
+    from nova.equilibrium.topology import TopologyConvention, TopologyGeometry, read
+
+    vertices = _hexagon(0.5) + np.asarray((2.0, 0.0))
+    geometry = TopologyGeometry.from_cells((vertices,), vertices[None], (vertices,))
+    field = QuadraticPointField(jnp.asarray((2.0, 0.0)), -2 * jnp.eye(2))
+    result = jax.jit(read)(
+        field, geometry, TopologyConvention.from_cocos(17, 1.0), TopologyPolicy()
+    )
+    assert result.valid, result.reason
+    assert result.qualified
+    assert result.boundary_class == 0
+    assert not np.any(result.x_point_valid)
+    np.testing.assert_allclose(result.axis, (2.0, 0.0), atol=1e-13)
+    np.testing.assert_allclose(result.membership, np.pi / (2 * np.sqrt(3)), rtol=1e-10)
+
+
+@jax.tree_util.register_dataclass
+@dataclass(frozen=True)
+class ClosedFormPointField:
+    """Independent closed-form total field for read-algorithm qualification."""
+
+    coefficient: jax.Array
+    radius: jax.Array
+    scale: jax.Array
+    source_parameter: jax.Array
+    shift: jax.Array
+    kind: str = dataclass_field(metadata={"static": True})
+
+    def value(self, point):
+        x, y = (point - self.shift) / self.radius
+        if self.kind == "limited":
+            axis, pressure, vertical = self.coefficient
+            return (
+                2
+                * jnp.pi
+                * (
+                    axis
+                    - 0.5 * pressure * (point[0] ** 2 - self.radius**2) ** 2
+                    - vertical * (point[1] - self.shift[1]) ** 2
+                )
+            )
+        log_x = jnp.log(x)
+        x2, y2 = x * x, y * y
+        x4, y4 = x2 * x2, y2 * y2
+        x6, y6 = x4 * x2, y4 * y2
+        basis = jnp.stack(
+            (
+                jnp.ones_like(x),
+                x2,
+                y2 - x2 * log_x,
+                x4 - 4 * x2 * y2,
+                2 * y4 - 9 * y2 * x2 + 3 * x4 * log_x - 12 * x2 * y2 * log_x,
+                x6 - 12 * x4 * y2 + 8 * x2 * y4,
+                8 * y6
+                - 140 * y4 * x2
+                + 75 * y2 * x4
+                - 15 * x6 * log_x
+                + 180 * x4 * y2 * log_x
+                - 120 * x2 * y4 * log_x,
+                y,
+                y * x2,
+                y**3 - 3 * y * x2 * log_x,
+                3 * y * x4 - 4 * y**3 * x2,
+                8 * y**5 - 45 * y * x4 - 80 * y**3 * x2 * log_x + 60 * y * x4 * log_x,
+            )
+        )
+        particular = x4 / 8 + self.source_parameter * (0.5 * x2 * log_x - x4 / 8)
+        return 2 * jnp.pi * self.scale * (particular + basis @ self.coefficient)
+
+    def evaluate(self, point):
+        return FieldJet(
+            self.value(point),
+            jax.grad(self.value)(point),
+            jax.hessian(self.value)(point),
+        )
+
+
+def _analytic_inputs(kind):
+    from nova.equilibrium.analytic_single_null import cerfon_freidberg_single_null
+    from scripts.analytic_oracle_fixtures.measure import limiter_contour, offset_wall
+    from tests.rotating_equilibrium_references import reference_cases
+
+    if kind == "limited":
+        oracle = reference_cases()["weak-rotation-reactor"].static_limit()
+        field = ClosedFormPointField(
+            jnp.asarray(
+                (
+                    oracle.axis_flux,
+                    oracle.pressure_coefficient,
+                    oracle.field_coefficient,
+                )
+            ),
+            jnp.asarray(oracle.major_radius),
+            jnp.asarray(1.0),
+            jnp.asarray(0.0),
+            jnp.zeros(2),
+            kind,
+        )
+        wall = limiter_contour(oracle)
+        axis = np.asarray((oracle.major_radius, 0.0))
+        saddle = None
+    else:
+        oracle = cerfon_freidberg_single_null()
+        field = ClosedFormPointField(
+            jnp.asarray(oracle.coefficients),
+            jnp.asarray(oracle.major_radius),
+            jnp.asarray(oracle.flux_scale_per_radian_wb),
+            jnp.asarray(oracle.source_parameter),
+            jnp.zeros(2),
+            kind,
+        )
+        wall = offset_wall(
+            oracle.separatrix(1441), clearance=0.35 * oracle.minor_radius
+        )
+        axis, saddle = oracle.magnetic_axis, oracle.x_point
+    return oracle, field, wall, axis, saddle
+
+
+def _realised_hex_geometry(wall, target):
+    from shapely.geometry import Polygon
+    from nova.equilibrium.topology import TopologyGeometry
+
+    vessel = Polygon(wall)
+    origin = np.asarray(vessel.centroid.coords[0])
+    bounds = np.asarray(vessel.bounds)
+
+    def generate(radius, return_polygons=False):
+        lower = np.floor((bounds[:2] - origin) / (1.5 * radius)).astype(int) - 3
+        upper = np.ceil((bounds[2:] - origin) / (1.5 * radius)).astype(int) + 3
+        cells, sampling = [], []
+        offset = _hexagon(radius)
+        for radial in range(lower[0], upper[0] + 1):
+            for vertical in range(2 * lower[1], 2 * upper[1] + 1):
+                centre = origin + radius * np.asarray(
+                    (
+                        1.5 * (radial + 0.137),
+                        np.sqrt(3) * (vertical + 0.5 * (radial % 2) + 0.219),
+                    )
+                )
+                polygon = Polygon(centre + offset).intersection(vessel)
+                if polygon.is_empty or polygon.area < 1e-14 * radius**2:
+                    continue
+                if polygon.geom_type != "Polygon":
+                    raise AssertionError(
+                        "carrier cell has disconnected vessel intersection"
+                    )
+                cells.append(polygon)
+                sampling.append(centre + offset)
+        if not return_polygons:
+            return len(cells)
+        polygons = []
+        for polygon in cells:
+            points = np.asarray(polygon.exterior.coords[:-1])
+            signed = np.sum(
+                points[:, 0] * np.roll(points[:, 1], -1)
+                - points[:, 1] * np.roll(points[:, 0], -1)
+            )
+            polygons.append(points if signed > 0 else points[::-1])
+        return TopologyGeometry.from_cells(
+            tuple(polygons), np.asarray(sampling), (wall,)
+        )
+
+    estimate = np.sqrt(vessel.area / target / (3 * np.sqrt(3) / 2))
+    low, high = 0.5 * estimate, 2 * estimate
+    for _ in range(60):
+        radius = 0.5 * (low + high)
+        count = generate(radius)
+        if count == target:
+            return generate(radius, True)
+        if count > target:
+            low = radius
+        else:
+            high = radius
+    raise AssertionError(f"could not realise {target} cells; reached {count}")
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_closed_form_carrier_read(kind):
+    import time
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    oracle, field, wall, axis, saddle = _analytic_inputs(kind)
+    geometry = _realised_hex_geometry(wall, 132)
+    started = time.perf_counter()
+    result = jax.jit(read)(
+        field, geometry, TopologyConvention.from_cocos(17, 1.0), TopologyPolicy()
+    )
+    jax.block_until_ready(result)
+    pitch = float(np.sqrt(np.median(np.asarray(geometry.full_area))))
+    print(
+        f"CLOSED_FORM_READ kind={kind} cells={len(geometry.centre)} "
+        f"valid={bool(result.valid)} qualified={bool(result.qualified)} "
+        f"reason={int(result.reason)} axis={np.asarray(result.axis).tolist()} "
+        f"membership_min={float(jnp.nanmin(result.membership))} "
+        f"membership_max={float(jnp.nanmax(result.membership))} "
+        f"compile_and_run_seconds={time.perf_counter() - started}"
+    )
+    assert result.valid, result.reason
+    assert result.qualified
+    np.testing.assert_allclose(result.axis, axis, atol=pitch)
+    assert int(result.boundary_class) == int(saddle is not None)
+    if saddle is not None:
+        points = np.asarray(result.x_points)[np.asarray(result.x_point_valid)]
+        assert len(points) == 1
+        assert np.linalg.norm(points[0] - saddle) <= pitch
+    assert np.all(np.asarray(result.membership) >= 0.0)
+    assert np.all(np.asarray(result.membership) <= 1.0 + 1e-12)
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_topology_shift_fails_position_clause(kind):
+    import os
+    from nova.equilibrium.topology import TopologyConvention, read
+
+    _oracle, field, wall, axis, _saddle = _analytic_inputs(kind)
+    geometry = _realised_hex_geometry(wall, 132)
+    pitch = float(np.median(np.asarray(geometry.pitch)))
+    shifted = replace(field, shift=jnp.asarray((0.0, 3 * pitch)))
+    convention = TopologyConvention.from_cocos(17, 1.0)
+    evaluate = jax.jit(read)
+    head = (
+        shifted if os.environ.get("NOVA_TOPOLOGY_POSITION_MUTATION") == "1" else field
+    )
+    result = evaluate(head, geometry, convention, TopologyPolicy())
+    assert np.linalg.norm(np.asarray(result.axis) - axis) <= pitch
+    shifted_result = evaluate(shifted, geometry, convention, TopologyPolicy())
+    displacement = np.linalg.norm(np.asarray(shifted_result.axis) - axis)
+    assert displacement >= 3 * pitch * (1 - 1e-12)
+    assert displacement > pitch
+    assert result.qualified

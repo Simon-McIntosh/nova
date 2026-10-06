@@ -1,0 +1,804 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 3778236,
+      "input_tokens_cumulative": 3778236,
+      "output_tokens": 18034,
+      "output_tokens_cumulative": 18034,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 501,
+    "files": 10,
+    "removed": 578
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 395,
+        "name": "_truncated",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 295,
+        "name": "_truncated",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "window_line": 295
+    },
+    {
+      "existing_function": {
+        "line": 302,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 355,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "window_line": 355
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 355,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "window_line": 355
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 302,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "window_line": 302
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 302,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "window_line": 302
+    },
+    {
+      "existing_function": {
+        "line": 438,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 326,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "window_line": 326
+    },
+    {
+      "existing_function": {
+        "line": 295,
+        "name": "_truncated",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 395,
+        "name": "_truncated",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 395
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 420,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 420
+    },
+    {
+      "existing_function": {
+        "line": 302,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 420,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 420
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 438,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 438
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "4554bb6f4870fb70d07a5619f3f5e4ed640271a1",
+    "58a811d7d8ce1afe501c11823011a77ddf29a296",
+    "ccb46cfab60782964e8a18b903a0474ddb77e65c",
+    "5562b520709767221cd9a42c949b1df17ffb06a6",
+    "baa697669cc43e57c08f9ccf33b454f06177df50"
+  ],
+  "completed_at": "2026-10-06T08:43:59.751Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T06:53:20Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash -c 'for m in test_elliptic_tangent_recurrences test_range_tangent_recurrences test_vertex_edge_tangent_recurrences test_kernel_compile_cost test_traced_section_moments; do GIT_DIR=/home/ITER/mcintos/Code/nova/.git TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-tangent-helper-home /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-tangent-helper-home/tests/biot/$m.py --basetemp=/tmp/cfs-suite2/bt/head-$m -m '\"'\"'not slow'\"'\"' --tb=line -rfEs -q; done'",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T065301705492-cfs-tangent-helper-home/logs/suite2-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-06T07:53:03.554386+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-06T06:53:03Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 10,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 14,
+    "mean_context": 120000,
+    "observed_at": "2026-10-06T06:52:53Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 10,
+      "aggregate_tokens_per_second": 147.218,
+      "detail": "",
+      "mean_tokens_per_second": 81.788,
+      "observed_at": "2026-10-06T06:52:53Z",
+      "runs": 1.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T08:43:59.751Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T065301705492-cfs-tangent-helper-home/manifest.md",
+  "member": "disposable-r-20261006T065301705492-cfs-tangent-helper-home",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[cn_pole_moment]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[complete_kind]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[complete_pole]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[finite_part]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_moments]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_pole_moments]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_pole_moments_mirrored]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_root_moments]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[sn_pole_moment]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[across_the_range]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[contract]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[deflate]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_add]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_multiply]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_scale]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[paired_range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[product]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[rising_integral]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[scaled]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[sine_squared_times]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[total]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[across]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[factorise]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[graded_residual]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[model_integral]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction_mirrored]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[regularised]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[cn_pole_moment]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[complete_kind]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[complete_pole]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[finite_part]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_moments]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_pole_moments]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_pole_moments_mirrored]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_root_moments]",
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_matches_base_jvp[sn_pole_moment]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[across_the_range]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[contract]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[deflate]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_add]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_multiply]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_scale]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[paired_range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[product]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[rising_integral]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[scaled]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[sine_squared_times]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[total]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[across]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[factorise]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[graded_residual]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[model_integral]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction_mirrored]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[regularised]"
+    ],
+    "declaration": "with NOVA_TANGENT_TRUNCATION=1 every identity row in the three tangent test modules still fails",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T065301705492-cfs-tangent-helper-home/logs/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T065301705492-cfs-tangent-helper-home/logs/negative-control.log",
+    "test_paths": [
+      "tests/biot/tangent_identity.py",
+      "tests/biot/test_elliptic_tangent_recurrences.py",
+      "tests/biot/test_range_tangent_recurrences.py",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-tangent-helper-home",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1539,
+          "cached_input_tokens": 331574,
+          "input_tokens": 333115,
+          "output_tokens": 689,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 333804,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Give the private tangent helpers of the Biot point jet one home, with no change to any tangent value. The independent review of run r-20261006T041805209709 found the helpers duplicated: _tangent_sum, _product_tangent and _scale_tangent are defined in both nova/biot/rangefunction.py and nova/biot/completeelliptic.py, and nova/biot/momentchannel.py defines _deflate_tangent, _contract_tangent and _harmonic_multiply_tangent beside the rangefunction tangents of the same names; the three test modules tests/biot/test_elliptic_tangent_recurrences.py, tests/biot/test_range_tangent_recurrences.py and tests/biot/test_vertex_edge_tangent_recurrences.py each carry their own base-module loader, identity row and cold-compile helper. _quotient_tangent is declared in nova/biot/gradedresidual.py, nova/biot/momentchannel.py and nova/biot/completeelliptic.py, and _product_tangent in gradedresidual.py as well. rangefunction.py is the lowest of these modules (completeelliptic, elliptic, gradedresidual and momentchannel import it), so it is the home. Done when: (1) each helper is defined once, in nova/biot/rangefunction.py, and every other module imports it from there with no re-export and no wrapper; where a momentchannel helper is not the same computation as its rangefunction namesake, state the difference in the fragment and rename the momentchannel one by what it computes instead of merging it; (2) the shared test machinery (base code loaded through importlib from git show at a given revision under a different module name, the 10,000-sample identity row, the truncation control switch, the fresh cache-disabled cold-compile measurement, which records the expanded equation count of both programs beside the wall and asserts the wall ratio on the median of seven fresh processes per arm, because a fastest-of-three ratio on a primal near 0.07 s was measured at 2.44 to 3.23 across repeats of one row) lives once in tests/biot/tangent_identity.py and the three modules use it; (3) every compile row in the three modules passes under the median-of-seven measurement in two separate runs, with no loosened bound and no absolute floor, and any row whose median ratio exceeds 2.7 is reported in the fragment by name; every tangent output is bit-identical before and after on fixed seeds, asserted in the three modules' identity rows against the base revision, and every identity, coverage, control and compile row in the three modules passes, the compile ratios recorded beside the values the landed fragments report; (4) negative control: with NOVA_TANGENT_TRUNCATION=1 every identity row in all three modules still fails, so the shared helper has not disabled the control; (5) tests/biot passes by delta against the base in per-module fresh processes, both arms carrying the repository root conftest; (6) an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html with plan-evidence-for converged-forward-solve, reckon audit-doc 0 errors. Gates run on compute, never the login node: in place when the shell has SLURM_JOB_ID set, otherwise one srun job on all_debug, with TMPDIR=/tmp, JAX_PLATFORMS=cpu and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree (orientation_worktree in the manifest), never uv on a compute node. Any wait is declared exactly as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, never a string and never exit:0. Every login-node uv command carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. Run `filepath relativize` over the fragment before committing if the command exists in the tree. No public signature changes. Commit with conventional subjects and bodies at every step and write the manifest before every job wait; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Give the private tangent helpers of the Biot point jet one home in rangefunction.py with every tangent value unchanged",
+    "id": "cfs-tangent-helper-home",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-06T06:53:03Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 10,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 14,
+      "mean_context": 120000,
+      "observed_at": "2026-10-06T06:52:53Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 10,
+        "aggregate_tokens_per_second": 147.218,
+        "detail": "",
+        "mean_tokens_per_second": 81.788,
+        "observed_at": "2026-10-06T06:52:53Z",
+        "runs": 1.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T065301705492-cfs-tangent-helper-home/manifest.md",
+    "negative_control": "with NOVA_TANGENT_TRUNCATION=1 every identity row in the three tangent test modules still fails",
+    "plan": "converged-forward-solve",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/rangefunction.py",
+      "nova/biot/completeelliptic.py",
+      "nova/biot/momentchannel.py",
+      "nova/biot/gradedresidual.py",
+      "tests/biot/tangent_identity.py",
+      "tests/biot/test_elliptic_tangent_recurrences.py",
+      "tests/biot/test_range_tangent_recurrences.py",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html",
+      "docs/figures/converged-forward-solve/cfs-tangent-helper-home"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2953923.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cfs-tangent-helper-home",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T06:53:06.257821+00:00",
+    "score": 0.6625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.6,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 388.516,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 679.895,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 4.962887684513889,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 63.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 4.962887684513889,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 2,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 67.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 25,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 32
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 17,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.04,
+      "claude-haiku": 0,
+      "claude-opus": 0.12,
+      "clive": 0.66,
+      "codex": 0.04,
+      "codex-astra": 0.06,
+      "codex-luna": 0,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 1902,
+    "usage": {
+      "cost": 0.000167076,
+      "input_tokens": 3978,
+      "output_tokens": 89
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "baa697669cc43e57c08f9ccf33b454f06177df50",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "5562b520709767221cd9a42c949b1df17ffb06a6",
+    "reviewed_head_sha": "baa697669cc43e57c08f9ccf33b454f06177df50",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 17
+    },
+    "status": "parsed",
+    "total": 112
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T065301705492-cfs-tangent-helper-home",
+  "scope_acceptances": [
+    {
+      "path": "nova/biot/elliptic.py",
+      "reason": "the homing moves the shared helpers out of completeelliptic, so elliptic must import them from rangefunction; no value changes"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "6f2913dc-2122-4ef8-a716-0652d725f72f",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 33300835,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 449.201,
+    "generated_tokens": 192030,
+    "generation_seconds": 185.991,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 82.4,
+    "machine_seconds": 263.21,
+    "peak_input_tokens": 189595,
+    "tokens_per_second": 1032.47,
+    "wall_tokens_per_second": 427.49
+  },
+  "time_budget": "60m",
+  "tool_steps": 140.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 6639,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T08:44:02Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T08:36:26Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T065301705492-cfs-tangent-helper-home",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 34744,
+    "worker_pid": 1452452
+  },
+  "worker_seconds": 6601,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

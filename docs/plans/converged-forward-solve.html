@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="75">
+<meta name="plan-version" content="76">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -396,6 +396,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261006T023137302757" data-who="" data-when="">
     <div class="r-comment-body"><p>Implementing the <code>kernel-loop-representation</code> lock, 2026-10-06. The first node (<code>cfs-kernel-derivative-rules</code>, claude-opus) stopped before any source change with a scoping measurement that sharpens the plan of attack without changing the decision: at 132 cells the read traces 1,373,538 expanded equations from 30 inlined kernel traces (20 primal <code>value_gradient</code>, 10 <code>jacfwd</code> <code>evaluate</code>); one primal point kernel compiles cold on CPU in 23.5 s at 1.87 GB, while a single-direction jvp of its field rows does not compile in 420 s, so a hand-written tangent is the right direction; and nova/biot has no analytic polygon second-derivative kernel, so the rule is derived through four families. Split, staged: <code>cfs-read-shared-kernel</code> (one kernel trace per read stage, identity to 1e-13, cold compile measured on the H200 together with the point kernel's primal against its jvp) and <code>cfs-elliptic-tangent-recurrences</code> (tangents of the elliptic and harmonic-moment recurrences as their own recurrences, 1e-13 against jax.jvp of the base) are in flight on claude-opus; the range-product and vertex-edge residual families follow once the elliptic node proves the tangent contract, and a final node wraps the point jet in custom_jvp and measures the read against the clause.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T040756322830" data-who="" data-when="">
+    <div class="r-comment-body"><p>Host solver routes, 2026-10-06, from the composed plan review: <code>forward.py</code> carries three host-side solver routes behind <code>SolveRoute</code> that the retirement list did not name: <code>_solve_host</code>, <code>_solve_host_krylov</code> (which calls <code>scipy.optimize.newton_krylov</code>) and <code>_solve_augmented_constraints</code>. They are deleted at §6 with the route literal they serve, and because the census runs by import and attribute name it does not see method definitions, so the §6 evidence also enumerates every solve method left in <code>forward.py</code> by name and shows that only the request and receipt adapter remains. Reuse note for §2's derivative rules: <code>nova/biot/greens.py</code> already carries a hand-written <code>custom_jvp</code> (<code>attach_product_tangent</code>) in the same kernel subsystem, the house idiom the point-jet wrap node follows.</p></div>
 </div>
 </section>
 </main>

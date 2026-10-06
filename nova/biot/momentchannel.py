@@ -524,3 +524,231 @@ def _pole_contraction(numerator, shift, seed, family, moments, mirrored, *, xp):
         held,
         contract(across_the_range(numerator), family),
     )
+
+
+def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
+    """Return the tangent of ``numerator/denominator`` by the quotient rule."""
+    return d_numerator / denominator - d_denominator * numerator / (
+        denominator * denominator
+    )
+
+
+def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
+    """Return :func:`factorise` and its tangent in closed form.
+
+    Every branch the factorisation selects is held by the same masks the primal
+    selects with, so the tangent of a branch not taken never reaches the result.
+    """
+    bulk, near, far = denominator
+    d_bulk, d_near, d_far = d_denominator
+    leading = bulk[0] if bulk else 0.0 * near
+    d_leading = d_bulk[0] if bulk else 0.0 * d_near
+    curved = leading != 0.0
+    held_leading = xp.where(curved, leading, 1.0)
+    d_held_leading = xp.where(curved, d_leading, 0.0)
+    offset = near / held_leading
+    d_offset = _quotient_tangent(near, d_near, held_leading, d_held_leading)
+    ratio = far / held_leading
+    d_ratio = _quotient_tangent(far, d_far, held_leading, d_held_leading)
+    pivot = 1.0 + ratio - offset
+    d_pivot = d_ratio - d_offset
+    radical = pivot * pivot + 4.0 * offset
+    root = xp.sqrt(radical)
+    d_root = (2.0 * pivot * d_pivot + 4.0 * d_offset) * (0.5 / root)
+    lower = pivot + root
+    curved_y = 2.0 * offset / lower
+    d_curved_y = _quotient_tangent(
+        2.0 * offset, 2.0 * d_offset, lower, d_pivot + d_root
+    )
+    shift_y = xp.where(curved, curved_y, 0.0)
+    d_shift_y = xp.where(curved, d_curved_y, 0.0)
+    scaled = held_leading * (1.0 + shift_y)
+    d_scaled = d_held_leading * (1.0 + shift_y) + held_leading * d_shift_y
+    shift_x = xp.where(curved, far / scaled, 0.0)
+    d_shift_x = xp.where(curved, _quotient_tangent(far, d_far, scaled, d_scaled), 0.0)
+
+    rising = (~curved) & (far > near)
+    falling = (~curved) & (far < near)
+    gap = xp.where(curved, 1.0, xp.where(rising, far - near, near - far))
+    d_gap = xp.where(curved, 0.0, xp.where(rising, d_far - d_near, d_near - d_far))
+    live_gap = gap != 0.0
+    held_gap = xp.where(live_gap, gap, 1.0)
+    d_held_gap = xp.where(live_gap, d_gap, 0.0)
+    shift_y = xp.where(rising, near / held_gap, shift_y)
+    d_shift_y = xp.where(
+        rising, _quotient_tangent(near, d_near, held_gap, d_held_gap), d_shift_y
+    )
+    shift_x = xp.where(falling, far / held_gap, shift_x)
+    d_shift_x = xp.where(
+        falling, _quotient_tangent(far, d_far, held_gap, d_held_gap), d_shift_x
+    )
+    live_y = curved | rising
+    live_x = curved | falling
+
+    total = 1.0 + shift_y + shift_x
+    divisor = xp.where(curved, held_leading * total, held_gap)
+    d_divisor = xp.where(
+        curved,
+        d_held_leading * total + held_leading * (d_shift_y + d_shift_x),
+        d_held_gap,
+    )
+    inverse = 1.0 / divisor
+    d_inverse = _quotient_tangent(1.0, 0.0, divisor, d_divisor)
+    live_near = near != 0.0
+    held_near = xp.where(live_near, near, 1.0)
+    d_held_near = xp.where(live_near, d_near, 0.0)
+    primal = (
+        xp.where(live_y, inverse, 0.0),
+        xp.where(live_x, inverse, 0.0),
+        xp.where(live_y | live_x, 0.0, 1.0 / held_near),
+        xp.where(live_y, shift_y, 1.0),
+        xp.where(live_x, shift_x, 1.0),
+    )
+    tangent = (
+        xp.where(live_y, d_inverse, 0.0),
+        xp.where(live_x, d_inverse, 0.0),
+        xp.where(
+            live_y | live_x, 0.0, _quotient_tangent(1.0, 0.0, held_near, d_held_near)
+        ),
+        xp.where(live_y, d_shift_y, 0.0),
+        xp.where(live_x, d_shift_x, 0.0),
+    )
+    return primal, tangent
+
+
+def _deflate_step_tangent(coefficient, d_coefficient, root, d_root, current, d_current, upper, d_upper):
+    """Return one downward Clenshaw step of :func:`deflate` and its tangent."""
+    return (
+        2.0 * coefficient + 2.0 * root * current - upper,
+        2.0 * d_coefficient + 2.0 * (d_root * current + root * d_current) - d_upper,
+    )
+
+
+def _deflate_tangent(series: list, d_series: list, root, d_root):
+    """Return :func:`deflate` and its tangent as the same downward recurrence."""
+    degree = len(series) - 1
+    if degree < 1:
+        return ([], series[0] if series else 0.0), ([], d_series[0] if series else 0.0)
+    quotient: list = [0.0] * degree
+    d_quotient: list = [0.0] * degree
+    upper = d_upper = current = d_current = 0.0
+    for order in range(degree, 1, -1):
+        (current, d_next), upper, d_upper = (
+            _deflate_step_tangent(
+                series[order], d_series[order], root, d_root,
+                current, d_current, upper, d_upper,
+            ),
+            current,
+            d_current,
+        )  # fmt: skip
+        d_current = d_next
+        quotient[order - 1] = current
+        d_quotient[order - 1] = d_current
+    quotient[0] = series[1] + root * current - 0.5 * upper
+    d_quotient[0] = d_series[1] + (d_root * current + root * d_current) - 0.5 * d_upper
+    value = series[0] + root * quotient[0] - 0.5 * current
+    d_value = d_series[0] + (d_root * quotient[0] + root * d_quotient[0]) - 0.5 * d_current
+    return (quotient, value), (d_quotient, d_value)
+
+
+def _contract_tangent(numerator, d_numerator, moments, d_moments):
+    """Return the tangent of :func:`contract` by its own product-sum recurrence."""
+    total = 0.0
+    for order, coefficient in enumerate(numerator):
+        total = (
+            total
+            + d_numerator[order] * moments[order]
+            + coefficient * d_moments[order]
+        )
+    return total
+
+
+def _harmonic_multiply_tangent(left, d_left, right, d_right):
+    """Return the tangent of :func:`harmonic_multiply` by the product rule."""
+    if not left or not right:
+        return []
+    out: list = [0.0] * (len(left) + len(right) - 1)
+    for index, one in enumerate(left):
+        for other_index, other in enumerate(right):
+            term = 0.5 * (d_left[index] * other + one * d_right[other_index])
+            out[index + other_index] = out[index + other_index] + term
+            out[abs(index - other_index)] = out[abs(index - other_index)] + term
+    return out
+
+
+def _across_the_range_tangent(d_term: tuple) -> list:
+    """Return the tangent of :func:`across_the_range`, which is linear."""
+    d_bulk, d_near, d_far = d_term
+    ends = [0.5 * (d_near + d_far), 0.5 * (d_far - d_near)]
+    both = [0.125, 0.0, -0.125]
+    product = _harmonic_multiply_tangent(
+        both, [0.0] * len(both), d_bulk, d_bulk
+    ) if d_bulk else []
+    length = max(len(ends), len(product))
+    out: list = [0.0] * length
+    for series in (ends, product):
+        for index, coefficient in enumerate(series):
+            out[index] = out[index] + coefficient
+    return out
+
+
+def _pole_contraction_tangent(
+    numerator, d_numerator, shift, d_shift, seed, d_seed, family, d_family,
+    moments, d_moments, mirrored, *, xp,
+):  # fmt: skip
+    """Return :func:`_pole_contraction` and its tangent.
+
+    The deflation's tangent is the deflation's own downward recurrence and every
+    contraction's tangent is its product rule, so nothing is differentiated
+    through the primal program.
+    """
+    bulk, near, far = numerator
+    d_bulk, d_near, d_far = d_numerator
+    end, other = (far, near) if mirrored else (near, far)
+    d_end, d_other = (d_far, d_near) if mirrored else (d_near, d_far)
+    sign = 1.0 if mirrored else -1.0
+    root = sign * (1.0 + 2.0 * shift)
+    d_root = sign * (2.0 * d_shift)
+    if bulk:
+        (quotient, value), (d_quotient, d_value) = _deflate_tangent(
+            bulk, d_bulk, root, d_root
+        )
+    else:
+        quotient, value, d_quotient, d_value = [], 0.0, [], 0.0
+    half = [0.5 + shift, 0.5 if mirrored else -0.5]
+    d_half = [d_shift, 0.0]
+    weighted = harmonic_multiply(half, bulk)
+    d_weighted = _harmonic_multiply_tangent(half, d_half, bulk, d_bulk)
+    lever = end * (1.0 + shift) - other * shift
+    d_lever = d_end * (1.0 + shift) + end * d_shift - (d_other * shift + other * d_shift)
+    factor = -2.0 if mirrored else 2.0
+    deflated = value * seed + factor * contract(quotient, moments)
+    d_deflated = d_value * seed + value * d_seed + factor * _contract_tangent(
+        quotient, d_quotient, moments, d_moments
+    )
+    product = shift * (1.0 + shift)
+    d_product = d_shift * (1.0 + shift) + shift * d_shift
+    held = (
+        lever * seed
+        + (other - end) * moments[0]
+        + contract(weighted, moments)
+        - product * deflated
+    )
+    d_held = (
+        d_lever * seed
+        + lever * d_seed
+        + ((d_other - d_end) * moments[0] + (other - end) * d_moments[0])
+        + _contract_tangent(weighted, d_weighted, moments, d_moments)
+        - (d_product * deflated + product * d_deflated)
+    )
+    if family is None:
+        return held, d_held
+    series = across_the_range(numerator)
+    d_series = _across_the_range_tangent(d_numerator)
+    near_root = shift <= POLE_SWITCH
+    return (
+        xp.where(near_root, held, contract(series, family)),
+        xp.where(
+            near_root, d_held, _contract_tangent(series, d_series, family, d_family)
+        ),
+    )

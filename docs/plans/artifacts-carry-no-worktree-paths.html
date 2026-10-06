@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="53">
+<meta name="plan-version" content="54">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
@@ -153,6 +153,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261006T123517546258-review-of-acnwp-hook-worktree-root" data-who="reckon-build" data-when="2026-10-06T12:47:05.339Z">
     <div class="r-comment-body"><p>Review of node acnwp-hook-worktree-root stored for run r-20261006T121908599145 (base 1c023858f, head a8ec8e507): 6 dimensions scored 19/18/20/18/19/, total 113/120, 0 blocking findings and 1 follow-on; the hook root-resolution fix is correct and independently confirmed (a hook-like GIT_DIR makes the base `git -C &lt;hooks-dir&gt; rev-parse --show-toplevel` return the hooks dir, the negative-control error path, while the new pure-path formula yields the worktree root whose symlinked .venv resolves).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261006T113551108285-acnwp-guard-follow-ons" data-who="reckon-build" data-when="2026-10-06T12:39:41.069Z">
+    <div class="r-comment-body"><p>53663defc docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html</p></div>
 </div>
 </section>
 </main>

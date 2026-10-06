@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -233,6 +233,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261005T235953077826-review-of-cfs-kernel-compile-cost" data-who="reckon-build" data-when="2026-10-06T00:06:43Z">
     <div class="r-comment-body"><p>Independent review of 01575b6b164607271c9f1d06cfa3f64f18128646 through 63d55f70394b976e62cd63e19bbfb8174da57ecd stored at both assigned JSON paths; scores 14/8/20/14/18/20 (94/120), changes requested because the claimed cold compile used persistent-cache hits; added_failure_count=0 and added_failure_ids=[] from the reviewed run own completed logs.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261005T163955173721-cfs-topology-read" data-who="reckon-build" data-when="2026-10-06T00:07:57Z">
+    <div class="r-comment-body"><p>Read authority partial landing plus repaired live order acceptance at /nova/evidence/fragments/converged-forward-solve/cfs-topology-read.html#cfs-topology-read-current-order; acted fca1879a505 in93895112d596e328a6d88b5d8f2070df3d732367. Current fixed-radius orders1.9757348873 limited/2.1308648956 diverted pass1.9; same limited test fails0.9110244173 under reconstruction mutation; answering-commit reversal fails both current-read probes. H2001281145 all8repository checks passed; H2001281154 repaired controls2passed236.75s EXIT_STATUS0. Original kernel qualification follow-on remains.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

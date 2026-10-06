@@ -1,0 +1,2898 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 12,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "7c4a76cafa41f4f5a4da06af19a0f0aac3271560",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 98257920,
+      "cached_input_tokens_cumulative": 98257920,
+      "input_tokens": 100856567,
+      "input_tokens_cumulative": 100856567,
+      "output_tokens": 525492,
+      "output_tokens_cumulative": 525492,
+      "reasoning_output_tokens": 276455,
+      "reasoning_output_tokens_cumulative": 276455
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 149383,
+    "files": 127,
+    "removed": 13
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 291
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 284,
+        "name": "tree_unflatten",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 353
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 329,
+        "name": "__post_init__",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 336
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 676,
+        "name": "from_dict",
+        "path": "nova/equilibrium/solve_request.py"
+      },
+      "window_line": 680
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "_square_stencils",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 286,
+        "name": "_square_stencils",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 288
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 573
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 573
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 573
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 573
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 573
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 560,
+        "name": "_machine_arrays",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 562
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1292,
+        "name": "measure_fixture",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1386
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1292,
+        "name": "measure_fixture",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1438
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1292,
+        "name": "measure_fixture",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1455
+    },
+    {
+      "existing_function": {
+        "line": 224,
+        "name": "measure",
+        "path": "tests/test_factor_ladder_extension.py"
+      },
+      "run_function": {
+        "line": 1292,
+        "name": "measure_fixture",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1368
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1505,
+        "name": "measure",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1535
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1505,
+        "name": "measure",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1538
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 1505,
+        "name": "measure",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1539
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 1505,
+        "name": "measure",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1552
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 1505,
+        "name": "measure",
+        "path": "scripts/analytic_oracle_fixtures/measure.py"
+      },
+      "window_line": 1553
+    },
+    {
+      "existing_function": {
+        "line": 1980,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 407,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 407
+    },
+    {
+      "existing_function": {
+        "line": 889,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 694,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 696
+    },
+    {
+      "existing_function": {
+        "line": 1629,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 694,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 696
+    },
+    {
+      "existing_function": {
+        "line": 694,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 889,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 963
+    },
+    {
+      "existing_function": {
+        "line": 1629,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 889,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 961
+    },
+    {
+      "existing_function": {
+        "line": 694,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1629,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1788
+    },
+    {
+      "existing_function": {
+        "line": 889,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1629,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1786
+    },
+    {
+      "existing_function": {
+        "line": 407,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1980,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1980
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "8677cd01bdeb76fb7162a74e811c19d4377058a8",
+    "146af4b57ea600d4a4025aada6fd8211eb9d7c3c",
+    "37f280c38f9df80107d90d0c1fd01eb87cfa0ab4",
+    "fa19609b3793a77bee0a020348871af7889dce6a",
+    "6a6c58600706400fb42131b87acc5c960b870d49",
+    "33f881dddcd09c34ae85744317f8a8b93b51ed52",
+    "a9db7e014d44242c878bf842b8b15a7024664880",
+    "b9c490b1ef7968f2ec1f4cd1d56ce30e468886ab",
+    "0a5beeea65dc8237d97e6448516c19f4ba8729d4",
+    "bf31213b9a2bd4a6bc3edc5ad3fad93e3d520bc8",
+    "83008ebe3da89b7a92703cb293d4876325219313",
+    "4cf7e17328781f6cec1e55513dead6b4bb817569",
+    "04032e6290b364051b95a79cf3f8f0b815b83b1a",
+    "611a4b1f20bde72514f014bef8912110b1c5d4b3",
+    "6c2d97ba95aa271000653bb6ff861d04e7690280",
+    "a9d4464e58ff34f497825d4b5686d6249324f1fe",
+    "300d9de58f772e1e1dcfafa98aa8a4ad7d427a55",
+    "2d36e659384e5ae77aa8f36f00992ceaf42cd186",
+    "520fbf6b9341ac25c0bef038f44e728b94708b55",
+    "b2b23f76457c25037b7bd514c4f948bbdd1fbed8",
+    "e68a369155143e85a9bc5fc06fa1630e5e54c98c",
+    "1155e313da83a3a3ba3c688e170f3948c8be8164",
+    "a10bc4ae6728aade0348f322a12b38c46d71f3f5",
+    "745304f0a428da76608973dcebc5a70b50a9f2c1",
+    "929d4c789ecadf030cbe841469adcee7065d5994",
+    "e397db9fb1f66e95a7018f3500cf4ada9831d500",
+    "c3dc8239f01f66be0c40385464798888836586af",
+    "8b0b06a19b65b3edf42659005ab81ccced938fe5",
+    "598447933a408315153a7c40c7019502d9fcb5c6",
+    "9ff65097f289398953da91cb9dfb1b1e66d90f3f",
+    "26bf672a1d402fe0ef31763f91231325cfe10043",
+    "c525768a34e5779ceb316abe2a82991a8b62e694",
+    "6546771e2e97b715c77e8065ab5cad2193f08da3",
+    "1daa1f607b1ca00b91a1c439431bd7d3a3e0f761",
+    "b923469adab9b0a229f9f86cfbefd78905a794ee",
+    "1b749932bfe9c57dd4d79e1ac71de81beaa12b33",
+    "57bd232cf235adbda0dfc74da8d69d3e5a628a27",
+    "6e1d79f05182879abcdef02f0fb39da27630f50a",
+    "c63eceb953be5e172f6fe8b07fb3ef2ff8c09c22",
+    "116ab7246c23bd9800af516c7aabc4441ba2994f",
+    "4b1a431cae36aa5e8f053b2fe4d1af2d0e2e5474",
+    "9875cee7f67cfe1c60a9d490c3cb06bf47e439bb",
+    "c5947c2c5766bd2e09c60b1465357edc6f227b10",
+    "0058b3c6503645b649bbe96cad5784a46309dd4c",
+    "fe383cc795b70fcd67d1008f46e079490d64afc3",
+    "4cf635f27485723070c3aa41409f7e17fd2b4319",
+    "ca787071c976c2ff792e6777d24aeaaa3a41e149",
+    "4b6ab61c82ed4e14ab81d2d151e100212fdf818f",
+    "1c88579b58406157f85e1869e223a2af6235ed8e",
+    "a406601d6d59fe9126fa091de75d95f7cf9af675",
+    "10e4557a6b3589adb800b1c431c4603370866a49",
+    "750019773e39156bbbb85a3868b9d646b4aab485",
+    "3d79cac6341da4519f1f2f6403c5c23a433a5c81",
+    "93895112d596e328a6d88b5d8f2070df3d732367",
+    "ce705747393f8f97d0530f66a63b5f2357011c44",
+    "7b91c7290290d6a7e8dfd26955f8caedea84b931",
+    "0536466499b0b88b1b1b748f8f722d604f6c7fef",
+    "a95f55c17765217088b6b0b266174f1ca3f177eb"
+  ],
+  "completed_at": "2026-10-06T00:07:57Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-05T16:40:17Z",
+  "disposition": "still-working",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "owns1074/2616",
+    "compile/executable/RSS",
+    "tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table;",
+    "fixture/test"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -vv -rxX -s --timeout 600 --tb=short",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-partial-landing.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-astra",
+    "burn_multiple": 1.4448398576512456,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-astra' is projected to exhaust at 2026-10-08T14:15:54Z, which is after this node's 3600s horizon ending 2026-10-05T17:39:58.289063+00:00",
+    "horizon_ends_at": "2026-10-05T17:39:58.289063+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-05T16:39:57Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-08T14:15:54Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 362016,
+    "state": "quiet",
+    "utilisation_pct": 58.0
+  },
+  "lane_declaration": {
+    "backend": "codex-astra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-05T16:39:57Z",
+    "read_at": "2026-10-05T16:39:58Z",
+    "resolved_backend": "codex-astra",
+    "utilisation_pct": 58.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T00:07:57Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/manifest.md",
+  "member": "disposable-r-20261005T163955173721-cfs-topology-read",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited]"
+    ],
+    "declaration": "test_topology_shift_fails_position_clause[analytic-row]: the analytic flux translated vertically by three pitches against the fixed wall and mesh must place the read's nulls at least three pitches from the unshifted analytic positions and fail the one-pitch clause",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/order-mutation-red.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/order-mutation-red.log",
+    "test_paths": [
+      "tests/equilibrium/test_topology_read.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-topology-read",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1122,
+          "cached_input_tokens": 202969,
+          "input_tokens": 204123,
+          "output_tokens": 1195,
+          "reasoning_output_tokens": 397,
+          "total_tokens": 205318,
+          "uncached_input_tokens": 32
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Implement topology.read, the single topology authority of plan converged-forward-solve section 2, following the design document docs/research/converged-forward-solve-design.html (sections \"Topology: one field and one axis-connected component\", the per-resolution budgets table and the interface-tests table) and the plan's locked decisions topology-authority, membership, field-representation and acceptance. Replace Topology.read and read_with_connectivity in nova/equilibrium/topology.py in place with one pure traced function whose operands are the booked current's Biot coupling to the hex carrier, the wall units, the convention (sigma from COCOS, never from an observed flux ordering) and a TopologyPolicy carried by ForwardSolvePolicy in nova/equilibrium/solve_request.py (extended, not duplicated); its result is one fixed-shape TopologyRead pytree as the design's data table names it. The field is the own-node six-coefficient quadratic everywhere except the saddle cell, whose support is built from the null's normal form (position, Hessian eigen-directions, curvature corrections), never from level-set roots; the null position, gradient and Hessian are evaluated from the Biot coupling kernels' analytic derivatives of the booked current, never by differentiating the mesh flux. Membership is the per-cell plasma area fraction in [0, 1] from the exact clip of the axis-connected component; fragments join only across shared-edge intervals of nonzero extent, a saddle touch does not join interiors, and a private-flux fragment in the same cell as a core fragment is excluded. Refusals (capacity excess, singular representation, unresolved ties, no qualified axis) travel as a traced validity bit and integer reason code, never as a plausible read. Callers of the replaced functions inside nova/equilibrium are re-pointed at topology.read in this node so the package imports and the existing fast suite collects; routes the design inventory marks for deletion at section 6 are left in place and untouched. Done when, on the weak-rotation limited analytic state and the diverted single-null analytic state at 132, 300, 550, 1074 and 2616 realised cells, a new test module tests/equilibrium/test_topology_read.py passes these rows and the log of the run is committed as evidence: test_topology_class_and_membership[analytic-row] (axis and every admitted X-point within one pitch of the analytic position; per-cell area fraction within the design budget C*(h/R0)^p for that case, saddle-neighbourhood cells budgeted separately from smooth-boundary cells, fitted order asserted at least p; limited reported as limited and diverted as diverted; qualification verdict a separate output); test_saddle_support_order[analytic-row] (five-rung probe on the diverted state, saddle-cell membership error converging at order at least 2, which the half-order level-set measurement in the design does not reach); test_null_position_implicit_tangent[analytic-row] (JVP of the null position through the implicit function theorem on grad psi = 0 with the kernel Hessian agrees with central differences; a singular Hessian gives an explicit tangent refusal); test_topology_shift_fails_position_clause[analytic-row] as the negative control (analytic flux translated vertically by three pitches against the fixed wall and mesh: the read's nulls sit at least three pitches from the unshifted analytic positions and the one-pitch clause fails, while the unshifted arm qualifies); and test_topology_read_traces (jax.jit and jax.vmap over a batch of two flux states trace and return results identical to the eager read). Record in the evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-topology-read.html the per-rung membership errors and fitted orders for both cases in an HTML table, the compile wall and peak host RSS of the traced read at 2616 cells, the five-rung saddle probe, and one line-contour poloidal panel per case at 550 cells drawn with the nova.media painters (solved nulls and analytic nulls in their own styles, the wall units, no axes or gridlines) saved under docs/figures/converged-forward-solve/cfs-topology-read/ and cited with project-absolute src; the fragment carries plan-evidence-for converged-forward-solve and reckon audit-doc reports 0 errors. Receipts above a few MB (npz, gz, json) live under /work/projects/imas_gpu/sophelio/nova-receipts/converged-forward-solve/cfs-topology-read/ with the path recorded in the fragment; PNG and SVG stay in git. The gate runs on compute, never on the login node: first on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log <absolute log> --wait -- tests/equilibrium/test_topology_read.py -vv, falling back to --partition=titan only when a real betelgeuse submission is still pending on a resource or configuration reason, and the manifest names the job id, the platform printed in the log header and the cache guard rows. Every uv command carries --no-sync and nothing runs uv sync; on a compute node uv is not invoked at all, the shared environment's interpreter runs directly with PYTHONPATH set to the worktree. configure_dtypes() is called before any array is built and jax_enable_x64 is asserted True in the test module. Commit with a conventional subject and a body; the manifest's commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Implement topology.read as the single traced topology authority: contour tree on the hex cells, axis-connected sub-cell membership, normal-form saddle cell with Biot-kernel derivatives, qualification verdict and traced refusals, gated on both analytic states at five rungs on the H200.",
+    "id": "cfs-topology-read",
+    "lane_declaration": {
+      "backend": "codex-astra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-05T16:39:57Z",
+      "read_at": "2026-10-05T16:39:58Z",
+      "resolved_backend": "codex-astra",
+      "utilisation_pct": 58.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/manifest.md",
+    "negative_control": "test_topology_shift_fails_position_clause[analytic-row]: the analytic flux translated vertically by three pitches against the fixed wall and mesh must place the read's nulls at least three pitches from the unshifted analytic positions and fail the one-pitch clause",
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex-astra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/topology.py",
+      "nova/equilibrium/solve_request.py",
+      "tests/equilibrium/test_topology_read.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-topology-read.html",
+      "docs/figures/converged-forward-solve/cfs-topology-read"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3538193.0,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.4448164691312049,
+      "derived": 0.44157857667807543,
+      "drain_hours": 168.0,
+      "effective_limit": 0.44157857667807543,
+      "elapsed_fraction": 0.4014350697073413,
+      "elapsed_hours": 67.44109171083333,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-05T16:40:01+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.42000000000000004,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.58,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.618976,
+      "decided_by": "window",
+      "margin": 0.04352400000000001,
+      "name": "cfs-topology-read",
+      "score": 0.6625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.58
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.930159,
+        "observed_at": "2026-10-05T16:40:01+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.58,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-astra",
+    "member": "codex",
+    "node": "cfs-topology-read",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-05T16:40:01.930159+00:00",
+    "score": 0.6625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.52,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 479.732,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2789.498,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 0.13861408733796296,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-05T20:00:00Z",
+        "utilisation_pct": 76.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 24,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 73
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": null,
+        "burn_multiple": 1.4446875067301883,
+        "congestion": null,
+        "days_to_reset": 4.189702050300926,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.4416179949143519,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": null,
+        "burn_multiple": 1.4446875067301883,
+        "congestion": null,
+        "days_to_reset": 4.189702050300926,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 15,
+          "unknown": 0
+        },
+        "pace_allowance": 0.4416179949143519,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": null,
+        "burn_multiple": 1.4446875067301883,
+        "congestion": null,
+        "days_to_reset": 4.189702050300926,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.4416179949143519,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.01,
+      "claude-haiku": 0,
+      "claude-opus": 0.1,
+      "clive": 0.58,
+      "codex": 0.1,
+      "codex-astra": 0.17,
+      "codex-luna": 0.01,
+      "hold": 0.03
+    },
+    "rendered_token_estimate": 2319,
+    "usage": {
+      "cost": 0.000187488,
+      "input_tokens": 4464,
+      "output_tokens": 89
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a95f55c17765217088b6b0b266174f1ca3f177eb",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "3d79cac6341da4519f1f2f6403c5c23a433a5c81",
+    "reviewed_head_sha": "a95f55c17765217088b6b0b266174f1ca3f177eb",
+    "scores": {
+      "durability": 19,
+      "evidence": 17,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 116
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261005T163955173721-cfs-topology-read",
+  "scope_acceptances": [
+    {
+      "path": "scripts/analytic_oracle_fixtures/measure.py",
+      "reason": "coordinator-widened: the limited oracle wall repair"
+    },
+    {
+      "path": "tests/test_analytic_oracle_limiter_wall.py",
+      "reason": "coordinator-widened: the wall invariant test"
+    }
+  ],
+  "scope_changed": true,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a10cf0-1c9c-7933-9e76-ef420862ad84",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 98257920,
+    "cumulative_input_tokens": 199114487,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 801947
+  },
+  "time_budget": "60m",
+  "tool_steps": 31.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 26860,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 12,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T00:08:01Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-05T23:30:54Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261005T163955173721-cfs-topology-read",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2489,
+    "worker_pid": 3399897
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-tangent-helper-home">
+<meta name="plan-title" content="One home for the point jet's tangent helpers">
+<meta name="plan-summary" content="The point jet's shared tangent helpers now have one definition each in rangefunction.py; completeelliptic, elliptic, gradedresidual and momentchannel import them and carry no copy. No tangent value changes. Every identity row passes and every truncation row still fails.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="4554bb6f4,58a811d7d">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="pending">
+<meta name="plan-environment" content="Shared nova virtualenv; CPU identity and negative-control rows in place on fleet job 1277272">
+<title>One home for the point jet's tangent helpers | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/nova/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-tangent-helper-home-record">One home for the point jet's tangent helpers</h1>
+<p id="cfs-tangent-helper-home-summary">Every shared tangent helper the Biot point jet's jaxpr reaches now has one definition in <code>nova/biot/rangefunction.py</code>, and <code>completeelliptic</code>, <code>elliptic</code>, <code>gradedresidual</code> and <code>momentchannel</code> import them rather than carrying local copies. A tangent is then written in one place and read in one place, and the modules cannot drift apart. The arithmetic order each helper forms is unchanged, so no tangent value changes: every identity row agrees with <code>jax.jvp</code> of the base revision, every truncation row still fails against it, and every primal half is bit-identical.</p>
+<p id="cfs-tangent-helper-home-homed">The helpers homed in <code>rangefunction.py</code> are <code>_tangent_sum</code>, <code>_tangent_difference</code>, <code>_product_tangent</code>, <code>_quotient_tangent</code>, <code>_scale_tangent</code>, <code>_deflate_step_tangent</code>, <code>_deflate_tangent</code>, <code>_contract_tangent</code>, <code>_harmonic_multiply_tangent</code> and <code>_across_the_range_tangent</code>, each defined exactly once there. The four importing modules were checked for a duplicate definition and carry none.</p>
+<p id="cfs-tangent-helper-home-difference">One helper is a genuinely different computation and was not merged. The momentchannel <code>_across_the_range_tangent</code> took only the input tangents <code>(d_bulk, d_near, d_far)</code> and returned the output tangents alone, because the map is linear; the rangefunction namesake takes the primal term beside the tangent and returns both. Rather than merge a tangent-only map into a primal-and-tangent one, the momentchannel helper was renamed <code>_across_the_range_differential</code>, by what it computes, and its two call sites follow. The momentchannel <code>_deflate_tangent</code>, <code>_contract_tangent</code> and <code>_harmonic_multiply_tangent</code> are the same computation as their rangefunction namesakes and differ only in whether the primal returns beside the tangent; they were merged, and the call sites now take the pair.</p>
+<h2 id="cfs-tangent-helper-home-identity-heading">Identity and truncation rows</h2>
+<table id="cfs-tangent-helper-home-rows">
+<caption>Hand-written tangents against jax.jvp of the base revision on 10,000 samples per function, and with one recurrence term dropped. Rows run in place on fleet job 1277272 with JAX_PLATFORMS=cpu from the shared virtualenv; the head arm is the module default, the control arm sets NOVA_TANGENT_TRUNCATION=1. The exact-bound modules hold the tangent to 1e-13, the elliptic module to 0 for its unrolled tangents and to 1e-9 for its scanned ones.</caption>
+<thead><tr><th>module</th><th>rows</th><th>head identity rows</th><th>head truncation rows</th><th>control identity rows failing</th></tr></thead>
+<tbody>
+<tr><td>test_range_tangent_recurrences</td><td>13</td><td>13 pass</td><td>13 pass</td><td>13 of 13</td></tr>
+<tr><td>test_elliptic_tangent_recurrences</td><td>9</td><td>9 pass</td><td>9 pass</td><td>9 of 9</td></tr>
+<tr><td>test_vertex_edge_tangent_recurrences</td><td>7</td><td>7 pass</td><td>7 pass</td><td>7 of 7</td></tr>
+</tbody></table>
+<p id="cfs-tangent-helper-home-identity">The head arm is 74 passed in 113 s (<code>logs/identity-final.log</code>). Each row asserts the primal half is exactly the base primal and the tangent half is within its bound, and the truncation row asserts the same bound is broken once the recurrence loses one term. The packages' public functions are separately asserted equal to the base revision's on the shared sample.</p>
+<p id="cfs-tangent-helper-home-control">The negative control, the declared mutation "with NOVA_TANGENT_TRUNCATION=1 every identity row in the three tangent test modules still fails", ran as one arm over all three modules: 29 identity rows, all 29 failing, <code>CONTROL_EXIT=1</code>, log <code>logs/negative-control.log</code>. The failure ids are the <code>test_tangent_matches_base_jvp</code> rows the head arm passes; the truncation rows pass in both arms, as they should. So the shared helper has not disabled the control.</p>
+<h2 id="cfs-tangent-helper-home-compile-heading">Compile rows</h2>
+<p id="cfs-tangent-helper-home-compile">The cold-compile gate measures each case's tangent program against its primal in fresh, cache-disabled processes, seven per arm, and reports the median wall with the expanded equation count beside it. It had not completed within the node's time fence when this fragment was written, so its rows are outstanding and the compile ratio is not yet asserted here; the run in progress is <code>logs/compile-run-1.log</code>. A second confirmatory run and the per-module tests/biot delta against the base revision are likewise outstanding, and are the node's follow-ons.</p>
+<p id="cfs-tangent-helper-home-finish">The merge itself is complete and verified by the identity, truncation and control rows above: the helpers are homed once, the one non-identical helper is renamed by what it computes, no tangent value changes, and the truncation control still bites.</p>
+</main></body></html>

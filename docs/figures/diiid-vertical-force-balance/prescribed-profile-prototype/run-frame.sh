@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -euo pipefail
 
-readonly WORKTREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/dvf-prescribed-profile-prototype
+readonly WORKTREE=${repository_root}
 readonly OUTPUT=${WORKTREE}/docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype
 
 export TMPDIR=/tmp

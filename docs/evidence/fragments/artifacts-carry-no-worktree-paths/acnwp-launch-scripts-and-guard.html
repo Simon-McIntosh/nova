@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="artifacts-carry-no-worktree-paths">
+  <title>Launch-script run-time roots and the commit guard | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="acnwp-launch-scripts-and-guard-summary">§3 — run-time roots, the residual data files, and the guard</h2>
+    <p>Node <code>acnwp-launch-scripts-and-guard</code> makes the launch scripts
+    resolve their repository root at run time, repairs the residual data files
+    the §2 rule could not map, and adds a repository test and a read-only
+    pre-commit hook that together reject any new worktree path.</p>
+
+    <h2 id="acnwp-launch-scripts-and-guard-scripts">Run-time roots in the launch scripts</h2>
+    <p>Each launch script that used the worktree path as a <code>cd</code> target
+    or output root now resolves it from its own location. Shell and
+    <code>sbatch</code> scripts use the realpath-first idiom
+    <code>script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"</code> then
+    <code>repository_root="$(git -C "$(dirname "${script_path}")" rev-parse
+    --show-toplevel)"</code>; the four Python launch scripts resolve the root
+    with <code>git rev-parse --show-toplevel</code> from
+    <code>Path(__file__).resolve().parent</code>. Files where the path was only
+    a comment or an echoed banner went through <code>filepath relativize</code>.
+    <code>benchmarks/backend_divergence_forensics.py</code> and
+    <code>benchmarks/pure_arm_comparison_figure.py</code> import
+    <code>WORKTREE_ROOT</code> from <code>nova.database.filepath</code> instead
+    of spelling the root. 58 shell and <code>sbatch</code> scripts plus 4 Python
+    scripts carry a run-time root; a probe evaluated each root line from this
+    worktree and every one (62/62) printed this worktree's toplevel.</p>
+
+    <h2 id="acnwp-launch-scripts-and-guard-residual">The five residual data files</h2>
+    <p>The two <code>figure-and-solver-audit</code> fragments and
+    <code>replan-2026-09-24/thin-interfaces.md</code> were reworded to describe
+    worktree paths without spelling the root. The truncated path in
+    <code>cpu-compile-abort-landed.html</code> and the space-broken path in
+    <code>figure-and-solver-audit-landed.html</code> were hand-repaired to
+    repository-relative form, changing nothing else.</p>
+
+    <h2 id="acnwp-launch-scripts-and-guard-guard">The repository test and the commit hook</h2>
+    <ul>
+      <li><code>tests/test_artifacts_carry_no_worktree_paths.py</code> enumerates
+      every tracked file with <code>git ls-files</code>, reads the working tree,
+      and asserts <code>worktree_path_offenders</code> returns nothing, naming
+      each offender. Its reader mirrors <code>git grep -I</code> (a NUL byte in
+      the opening block reads as binary), so the test and the census share one
+      reach. A positive control asserts the scan reaches a file in every
+      top-level directory.</li>
+      <li><code>scripts/git-hooks/pre-commit</code> is an executable two-line
+      shell shim that runs the project interpreter on
+      <code>nova.database.scripts</code> with <code>relativize --check</code>,
+      <code>PYTHONPATH</code> set to the hook's own checkout root resolved with
+      the same realpath-first idiom. The <code>--check</code> mode reads the
+      staged files from the index and exits nonzero naming each offender; no
+      file is modified. <code>core.hooksPath</code> is not set.</li>
+    </ul>
+    <p>Census at head now lists only
+    <code>nova/database/filepath.py</code> (which defines the pattern and is
+    exempt). The new guard test fails at the dispatch base, listing the launch
+    scripts as offenders. In a checkout carrying the hook, staging a file that
+    names a worktree path makes the hook exit nonzero; after
+    <code>filepath relativize</code> it exits 0.</p>
+  </main>
+</body>
+</html>

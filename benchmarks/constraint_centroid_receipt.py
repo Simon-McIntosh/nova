@@ -35,14 +35,26 @@ from nova.jax.config import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(Path(__file__).resolve().parent),
+            "rev-parse",
+            "--show-toplevel",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+)
 DEFAULT_OUTPUT = (
     ROOT / "docs/figures/constraint-augmented-newton-krylov/centroid/two-rows.json"
 )
-DEFAULT_PROTOTYPE = Path(
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/"
-    "s19-relaunch/scr-vertical-position-constraint-prototype/docs/figures/"
-    "solver-convergence-regression/vertical-mode/constraint/four-rows.json"
+DEFAULT_PROTOTYPE = (
+    ROOT / "docs/figures/solver-convergence-regression/vertical-mode/constraint/"
+    "four-rows.json"
 )
 SELECTION_OUTPUT = (
     ROOT

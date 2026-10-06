@@ -1,10 +1,13 @@
 #!/bin/bash
 # One CPU allocation: the width-16 vmapped cost of the batching rule and of
 # the carry-selecting exit loop, each beside the per-site base in its process.
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -u
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 export TMPDIR=/tmp JAX_PLATFORMS=cpu
-W=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit
+W=${repository_root}
 cd "$W" || exit 1
 export PYTHONPATH="$W"
 D=$W/docs/figures/forward-solver-route-integrity/single-site-krylov

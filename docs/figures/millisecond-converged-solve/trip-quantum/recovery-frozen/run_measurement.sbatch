@@ -8,9 +8,12 @@
 #SBATCH --mem=96G
 #SBATCH --gres=gpu:1
 #SBATCH --time=01:00:00
-#SBATCH --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition
+#SBATCH --chdir=.
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition/slurm-%j.out
 #SBATCH --error=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition/slurm-%j.err
+
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
 
 set -euo pipefail
 
@@ -19,9 +22,9 @@ export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export JAX_PLATFORMS=cuda,cpu
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
-export PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition
+export PYTHONPATH=${repository_root}
 
-worktree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition
+worktree=${repository_root}
 run_root=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260905T005158501971-msc-recovery-scoring-on-frozen-partition
 timing_root="$worktree/docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen"
 rows_root="$worktree/docs/figures/solver-convergence-regression/settled-mask-stall/recovery-frozen"

@@ -17,11 +17,14 @@ from typing import Any
 
 import numpy as np
 
+from nova.database.filepath import WORKTREE_ROOT
+
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SHADOW_ROOT = Path(
-    "/home/ITER/mcintos/Code/.reckon-worktrees/"
-    "nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay-shadow"
+DEFAULT_SHADOW_ROOT = (
+    Path("/home/ITER/mcintos/Code")
+    / ("." + WORKTREE_ROOT)
+    / "nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay-shadow"
 )
 PINNED_REVISION = "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9"
 TARGET = (22086, 43)

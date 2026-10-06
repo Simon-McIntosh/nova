@@ -1,7 +1,10 @@
 #!/bin/bash
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -u
 export TMPDIR=/tmp JAX_PLATFORMS=cpu
-export PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine
+export PYTHONPATH=${repository_root}
 cd "$PYTHONPATH" || exit 1
 OUT="$PYTHONPATH/docs/figures/forward-solver-route-integrity/operator-machine"
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python

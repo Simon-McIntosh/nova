@@ -15,11 +15,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import BoundaryNorm, ListedColormap, TwoSlopeNorm
 
+from nova.database.filepath import WORKTREE_ROOT
+
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PINNED_ROOT = Path(
-    "/home/ITER/mcintos/Code/.reckon-worktrees/"
-    "nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
+DEFAULT_PINNED_ROOT = (
+    Path("/home/ITER/mcintos/Code")
+    / ("." + WORKTREE_ROOT)
+    / "nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
 )
 BASELINE_CACHE = (
     ROOT / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"

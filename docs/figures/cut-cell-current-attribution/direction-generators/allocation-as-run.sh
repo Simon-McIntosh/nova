@@ -5,12 +5,15 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/allocation.log
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -uo pipefail
-export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed
+export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=${repository_root}
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1
 export PYTHONDONTWRITEBYTECODE=1
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
-cd /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed
+cd ${repository_root}
 printf 'revision=%s tree=%s command=%s\n' "$(git rev-parse HEAD)" "$PWD" "two fresh measure.py processes: --cells 110 and --cells 300"
 failed=0
 for cells in 110 300; do

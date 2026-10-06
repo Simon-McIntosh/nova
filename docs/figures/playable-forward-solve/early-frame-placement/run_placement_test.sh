@@ -4,12 +4,15 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --job-name=pfs-early-placement
-#SBATCH --output=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-early-frame-placement-test/docs/figures/playable-forward-solve/early-frame-placement/job.log
-#SBATCH --error=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-early-frame-placement-test/docs/figures/playable-forward-solve/early-frame-placement/job.log
+#SBATCH --output=docs/figures/playable-forward-solve/early-frame-placement/job.log
+#SBATCH --error=docs/figures/playable-forward-solve/early-frame-placement/job.log
+
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
 
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cpu
-W=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-early-frame-placement-test
+W=${repository_root}
 cd "$W"
 PYTHONPATH="$W" /home/ITER/mcintos/Code/nova/.venv/bin/python -u \
   benchmarks/early_frame_placement_test.py \

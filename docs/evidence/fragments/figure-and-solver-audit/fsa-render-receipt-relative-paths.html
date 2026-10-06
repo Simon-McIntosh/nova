@@ -27,7 +27,7 @@
 
   <p id="fsa-render-receipt-relative-paths-gate">Gate
   <code>tests/test_render_receipt_paths.py</code> passes at the head (3 passed) and fails at the
-  base revision, where the four committed receipts still carry <code>.reckon-worktrees</code>
+  base revision, where the four committed receipts still carry worktree
   paths (<code>EXIT=1</code>, two failing ids). Every existing test file that imports a changed
   driver passes with zero added failures: head 55 passed, base 54 passed / 1 failed, the base
   failure being the scratch extraction's missing <code>.git</code> rather than a code

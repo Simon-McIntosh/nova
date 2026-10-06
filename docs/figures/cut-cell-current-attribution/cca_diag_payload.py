@@ -8,6 +8,7 @@ reports only as a relative moment error.
 """
 
 import json
+import subprocess
 from pathlib import Path
 
 import jax
@@ -25,11 +26,21 @@ from nova.media.ink import DEFAULT_INK, poloidal_axes
 configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
-OUTPUT = Path(
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/"
-    "s19-codex-20260916/cca-production-clip-takes-the-typed-saddle/"
-    "docs/figures/cut-cell-current-attribution/xpoint-cell"
+ROOT = Path(
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(Path(__file__).resolve().parent),
+            "rev-parse",
+            "--show-toplevel",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
 )
+OUTPUT = ROOT / "docs/figures/cut-cell-current-attribution/xpoint-cell"
 
 
 def shoelace(vertices):

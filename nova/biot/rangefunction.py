@@ -53,7 +53,12 @@ from __future__ import annotations
 from functools import wraps
 from inspect import signature
 
-import jax
+try:
+    import jax
+except ModuleNotFoundError as error:
+    if error.name != "jax":
+        raise
+    jax = None
 
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import multiply as paired_multiply
@@ -93,6 +98,8 @@ _BOTH_ENDS = [0.125, 0.0, -0.125]
 
 def _is_staged(value):
     """Distinguish staged operands from eager differentiation and batching."""
+    if jax is None:
+        return False
     while isinstance(value, jax.core.Tracer):
         if hasattr(value, "primal"):
             value = value.primal
@@ -105,6 +112,8 @@ def _is_staged(value):
 
 def _array_program(function):
     """Reuse each static-shape helper graph across algebraic call sites."""
+    if jax is None:
+        return function
     static = tuple(
         name
         for name in ("xp", "count", "mirrored", "trips", "coincident")

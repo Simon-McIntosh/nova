@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-kernel-cold-compile-correction">
+<meta name="plan-title" content="Kernel cold-compile correction">
+<meta name="plan-summary" content="Fresh-process cache-disabled H200 measurements replace cache-hit compile claims">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="corrected">
+<title>Kernel cold-compile correction | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-kernel-cold-compile-correction">Kernel cold-compile correction</h1>
+<p id="cfs-kernel-cold-compile-correction-record">The landing fragment now records that its 11.2194146 s baseline and 7.91631825 s landed-kernel figures were cache hits with stored compilation costs of 81 s and 86 s. Fresh-process H200 measurements with the persistent cache disabled before JAX import were 83.8920958 s and 83.6310465 s in the full module gate; both were observed backend compile misses and generated 2912 executable-code bytes. The 30 s landed-kernel bound is retained as a strict expected failure. A warmed-cache control exposes the hit and rejects its wall as cold.</p>
+</main></body></html>

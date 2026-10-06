@@ -1,0 +1,690 @@
+{
+  "agent": {
+    "alias": "opus 5.5",
+    "backend": "claude-opus",
+    "effort": "high",
+    "launch": "cli",
+    "model": "claude-opus-5-5",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "claude-opus",
+  "base_sha": "e74d8fce12601e372d91572aba1b5602f2d7df55",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": 10.188928800000006,
+    "cost_usd_cumulative": 10.188928800000006,
+    "detail": "backend reports utilisation and reset time",
+    "headroom": "known",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": "seven_day",
+    "refusal": false,
+    "resets_at": "2026-10-11T06:00:00Z",
+    "surpassed_threshold": null,
+    "threshold_status": "allowed_warning",
+    "tokens": {
+      "cache_creation_input_tokens": 37510,
+      "cache_creation_input_tokens_cumulative": 37510,
+      "cache_read_input_tokens": 8171599,
+      "cache_read_input_tokens_cumulative": 8171599,
+      "fallback_credit": null,
+      "inference_geo": "not_available",
+      "input_tokens": 56,
+      "input_tokens_cumulative": 56,
+      "output_tokens": 24045,
+      "output_tokens_cumulative": 24045,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": 67.0
+  },
+  "changed_lines": {
+    "added": 1117,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_base_modules",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 64,
+        "name": "_base_modules",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 68
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_relative",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 353,
+        "name": "_relative",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 353
+    },
+    {
+      "existing_function": {
+        "line": 312,
+        "name": "_truncated",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 427,
+        "name": "_truncated",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 427
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 448,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 448
+    },
+    {
+      "existing_function": {
+        "line": 517,
+        "name": "_cold_compile",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 549,
+        "name": "_cold_compile",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 549
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "8a8c2d6127f4759f548ea7f0779e6c0ffead043e",
+    "2baf47c372a26793814ba089dc968ac989946c91",
+    "e82290330f8e43408e1b4ee012ab3a48119d58ad",
+    "bc4779f38d9685ee2b17ff39f4d4e52e3df6b19b",
+    "14642612d662a36be38ff00353c94ff79dc6f49d",
+    "f09950bec5fca62706525ef3eb7ff853d9296b6e",
+    "9e8332d986921b0dd07af8c8df00636aa9760aae",
+    "c95e3e68090707333c617183bb7d81e042047480",
+    "553c9fadff23c9a85994323e4f22ac08a8b5e2fe",
+    "ea273e8596194aff1de7c1f713d06bf5964dfd19",
+    "a1f33791daa5d87101049674b2c867224fea717d",
+    "37a6fb7ad10f93c781183bd33ce3f9364c12b231"
+  ],
+  "completed_at": "2026-10-06T06:28:46.229Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T04:18:52Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "_Edge.terms",
+    "Channel.split",
+    "rangefunction.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "cd /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-vertex-edge-tangent-recurrences && PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-vertex-edge-tangent-recurrences TMPDIR=/tmp JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --basetemp=/tmp/vetr-final-head-test_elliptic_tangent_recurrences /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-vertex-edge-tangent-recurrences/tests/biot/test_elliptic_tangent_recurrences.py -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences/final-head-test_elliptic_tangent_recurrences.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "claude-opus",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'claude-opus'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-06T05:18:33.391198+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-06T04:06:15.081Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-11T06:00:00Z",
+    "seconds_until_reset": 438086,
+    "state": "quiet",
+    "utilisation_pct": 61.0
+  },
+  "lane_declaration": {
+    "backend": "claude-opus",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-06T04:06:15.081Z",
+    "read_at": "2026-10-06T04:18:33Z",
+    "resolved_backend": "claude-opus",
+    "utilisation_pct": 61.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T06:28:46.229Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences/manifest.md",
+  "member": "disposable-r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[across]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[factorise]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[graded_residual]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[model_integral]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction_mirrored]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[regularised]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[across]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[factorise]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[graded_residual]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[model_integral]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[pole_contraction_mirrored]",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_matches_base_jvp[regularised]"
+    ],
+    "declaration": "each vertex or edge residual tangent with its recurrence truncated by one term fails the identity against jax.jvp of the base, maximum printed",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences/negative-control.log",
+    "test_paths": [
+      "tests/biot/test_vertex_edge_tangent_recurrences.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-vertex-edge-tangent-recurrences",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1946,
+          "cached_input_tokens": 918730,
+          "input_tokens": 920678,
+          "output_tokens": 1151,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 921829,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Write the tangent of every function the Biot point jet differentiates in nova/biot/polygonanalytic.py, nova/biot/gradedresidual.py and nova/biot/momentchannel.py: the vertex and edge residual terms, the arsinh residuals, the incomplete moments, the graded residual quadrature and the moment-channel pole contractions the point jet reaches (enumerate them first from the jaxpr of packed_analytic_moments, including _Vertex and _Edge terms, arsinh_terms, flux_moment_residuals, graded_residual, Channel.split, Channel.across and _pole_contraction), as its own recurrence, closed form or fixed-capacity scan, under the lead's locked decisions kernel-loop-representation = custom-derivative-rules and tangent-identity-tolerance = scan-tangents-1e-9 on converged-forward-solve. The elliptic family already landed this way (run r-20261006T022907188945, tests/biot/test_elliptic_tangent_recurrences.py and nova/biot/elliptic.py are the pattern to follow and reuse): exact hand-written tangents where they compile within three times the primal, fixed-capacity scan tangents held to 1e-9 relative where the exact form does not. Done when: (1) for each such function F a private tangent function returns the same structure jax.jvp(F) returns with respect to all floating inputs, without calling jax.jvp, jax.grad or jax.jacfwd on F, reusing the elliptic tangents for any elliptic call inside F; (2) identity: on 10,000 random inputs spanning the full domain the jet uses, with no masking of near-singular inputs (a target beside a source edge is reached by nulls inside the plasma; where the base jax.jvp itself is not finite there, compare against a reference evaluated in higher precision and say so), each tangent agrees with jax.jvp of the base to relative 1e-13 for exact forms and 1e-9 for scan forms, maxima printed, the fraction of samples covered printed and required to be 100 percent; (3) negative control: each tangent with its recurrence or series truncated by one term fails that identity, maximum printed; (4) cold compile of each tangent at or below three times its primal in fresh cache-disabled CPU processes on all_debug, in one job, wall and expanded equations recorded; (5) the primal outputs bit-identical to the base, asserted, and tests/biot plus the elliptic tests pass by delta in per-module fresh processes; (6) a test module tests/biot/test_vertex_edge_tangent_recurrences.py holding the identity, control, coverage and compile rows, and an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-vertex-edge-tangent-recurrences.html with plan-evidence-for converged-forward-solve, reckon audit-doc 0 errors. The custom_jvp wrapping of the point jet is a later node; this node does not wrap. Gates run on compute, never the login node: CPU work on all_debug with srun (TMPDIR=/tmp, JAX_PLATFORMS=cpu, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree, orientation_worktree in the manifest, never uv on a compute node), or in place when the shell has SLURM_JOB_ID set. Every cold compile runs in a fresh subprocess with the persistent compilation cache disabled in the environment before jax is imported. Any wait is declared exactly as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, never a string and never exit:0. Every login-node uv command carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. Base-revision code is loaded through importlib from git show at the run orientation_base_sha under a different module name, never copied into the tree. No public signature changes. Commit with conventional subjects and bodies at every step and write the manifest before every job wait; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Write the tangent of every polygon vertex and edge residual term the Biot point jet differentiates, identical to jax.jvp of the base within the locked tolerances over the full near-singular domain and compiling within three times the primal.",
+    "id": "cfs-vertex-edge-tangent-recurrences",
+    "lane_declaration": {
+      "backend": "claude-opus",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-06T04:06:15.081Z",
+      "read_at": "2026-10-06T04:18:33Z",
+      "resolved_backend": "claude-opus",
+      "utilisation_pct": 61.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences/manifest.md",
+    "negative_control": "each vertex or edge residual tangent with its recurrence truncated by one term fails the identity against jax.jvp of the base, maximum printed",
+    "plan": "converged-forward-solve",
+    "requested_backend": "claude-opus",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/polygonanalytic.py",
+      "nova/biot/gradedresidual.py",
+      "nova/biot/momentchannel.py",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-vertex-edge-tangent-recurrences.html",
+      "docs/figures/converged-forward-solve/cfs-vertex-edge-tangent-recurrences"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1457444.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "claude-opus",
+    "member": null,
+    "node": "cfs-vertex-edge-tangent-recurrences",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T04:18:36.920013+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.63,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 373.671,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 667.256,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 5.070146926412037,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 2,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 61.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 3,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 25,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 33
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 17,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.01,
+      "claude-haiku": 0,
+      "claude-opus": 0.09,
+      "clive": 0.68,
+      "codex": 0.06,
+      "codex-astra": 0.08,
+      "codex-luna": 0,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 1905,
+    "usage": {
+      "cost": 0.00016611,
+      "input_tokens": 3955,
+      "output_tokens": 89
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "37a6fb7ad10f93c781183bd33ce3f9364c12b231",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "553c9fadff23c9a85994323e4f22ac08a8b5e2fe",
+    "reviewed_head_sha": "37a6fb7ad10f93c781183bd33ce3f9364c12b231",
+    "scores": {
+      "durability": 19,
+      "evidence": 15,
+      "fit": 18,
+      "goal_fidelity": 10,
+      "reuse": 13,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 95
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "c74e51b5-3b42-4a89-8c37-97d2c24c627d",
+  "session_model": "claude-opus-5-5",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 25425684,
+    "cumulative_input_tokens": 25724504,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+    "elapsed_seconds": 3144.643,
+    "generated_tokens": 135710,
+    "generation_seconds": 843.358,
+    "input_budget_tokens": 1000000,
+    "input_utilisation_pct": 30.9,
+    "machine_seconds": 2301.285,
+    "peak_input_tokens": 309030,
+    "tokens_per_second": 160.92,
+    "wall_tokens_per_second": 43.16
+  },
+  "time_budget": "60m",
+  "tool_steps": 76.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 7794,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T06:28:56Z",
+    "last_record_type": "system",
+    "launched_at": "2026-10-06T05:36:16Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1508,
+    "worker_pid": 484493
+  },
+  "worker_seconds": 7759,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

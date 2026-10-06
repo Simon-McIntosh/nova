@@ -1,0 +1,69 @@
+revision=7b91c7290290d6a7e8dfd26955f8caedea84b931 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/test_order_repair_controls.py -vv -s --timeout=1400 --tb=short 
+RAW_LOG=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-order-controls.log
+RAW_SHA256=ff4a2a3d537e13c0a43f5b77363c6de16981ab6d9b82f2b9049c1653a0252e85
+NOVA_LANE_START=2026-10-06T01:58:56+0200
+PLACEMENT=submit
+RUNG=h200
+SLURM_JOB_ID=1281154
+SLURM_JOB_PARTITION=betelgeuse
+SOURCE_REVISION=7b91c7290290d6a7e8dfd26955f8caedea84b931
+REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
+PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+JAX_PLATFORMS=cuda,cpu
+TMPDIR=/tmp
+MODE=pytest
+PYTEST_TIMEOUT=1400
+COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/test_order_repair_controls.py -vv -s --timeout=1400 --tb=short 
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+HISTORICAL_PREWARM_ARRAY: preserved in RAW_LOG
+PINNED_REVISION=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce
+PINNED_REVISION_MISMATCH pinned=eb565ed4cd2cf248c1996df5b6171b9e22bd9fce serving=7b91c7290290d6a7e8dfd26955f8caedea84b931
+the served directory was compiled for another revision, so a miss is a pin problem rather than a timing result
+CACHE_GUARD_DIRECTORY=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
+CACHE_GUARD_SERVED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_CACHE_ENABLED=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05
+CACHE_GUARD_VERSION_KEY=
+CACHE_GUARD_MISS_BUDGET=not-enforced
+HISTORICAL_PREWARM_ARRAY: preserved in RAW_LOG
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+timeout: 1400.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 2 items
+
+../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/test_order_repair_controls.py::test_order_breaking_mutation_is_rejected MUTATION_RECEIPT=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/order-mutation-red.log
+FIXED_RADIUS_ORDER limited 0.911024417297566
+FAILED
+FAILED tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited] - AssertionError: smooth reconstruction order 0.911024417297566 is below 1.9: [{'case': 'limited', 'cells': 132, 'pitch': 0.4680060430739887, 'calibrated_radius_m': 0.0, 'normal_form_radius_m': 0.0, 'normal_form_radius_in_pitches': 0.0, 'normal_form_cell_count': 0, 'median_cell_area': 0.21902965635377214, 'inside_control_count': 34, 'outside_control_count': 15, 'smooth_max': 0.03344377741608014, 'saddle_neighbourh ... [long assertion representation preserved in RAW_LOG]
+EXIT=1
+PASSED
+../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/test_order_repair_controls.py::test_answering_commit_reversal_is_rejected patching file nova/equilibrium/solve_request.py
+patching file nova/equilibrium/topology.py
+patching file tests/equilibrium/test_topology_read.py
+REVERSED_COMMIT=93895112d596e328a6d88b5d8f2070df3d732367 RECEIPT=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/order-answer-reversal-red.log
+PASSEDCACHE_GUARD_MARKER=pre-warm-run misses=0 budget=not-enforced
+CACHE_GUARD_RECEIPT_SUMMARY={"cache_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "compile_seconds": 0, "enforced": false, "hits": 0, "marker": "pre-warm-run misses=0 budget=not-enforced", "miss_budget": null, "misses": 0, "served_directory": "/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation/runtime-7b315420b55b91bffb05", "served_entries": 27150, "source_revision": "unknown", "unpersisted_misses": 0, "version_key": "", "row_count": 0, "lane_source_revision": "7b91c7290290d6a7e8dfd26955f8caedea84b931", "job_id": 1281154}
+CACHE_GUARD_ROWS=[]
+
+
+======================== 2 passed in 236.75s (0:03:56) =========================
+GPU_DEVICE_INVENTORY=0,_NVIDIA_H200_NVL,_143771
+GPU_UTILISATION_AT_10S=0,_0
+GPU_UTILISATION_AT_30S=0,_0
+GPU_UTILISATION_AT_60S=0,_0
+EXIT_STATUS=0
+NOVA_LANE_END=2026-10-06T02:02:57+0200
+NOVA_LANE_EXIT_STATUS=0
+SUITE_COMPLETED=true
+EXIT=0

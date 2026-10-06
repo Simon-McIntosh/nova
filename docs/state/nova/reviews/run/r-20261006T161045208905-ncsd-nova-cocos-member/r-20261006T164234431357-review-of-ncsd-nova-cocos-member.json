@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "521b2046a7b30445a6ad5a417e573da2e9d9322e",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/imas/mast_solve_inputs.py",
+    "nova/equilibrium/topology.py",
+    "nova/io/sourcemap.py",
+    "nova/equilibrium/contour_tree.py",
+    "nova/io/cocos.py (re-export consumed by imas-ambix)"
+  ],
+  "completed_at": "2026-10-06T16:53:25.109Z",
+  "dispatched_at": "2026-10-06T16:42:52Z",
+  "findings": [
+    {
+      "file": "nova/io/cocos.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the re-export shim, the one path imas-ambix still consumes, has no test asserting its names or the done-when's nova.io.cocos.transform_factor is nova_cocos.transform_factor identity; removing a name from its __all__ would pass every COCOS test suite green."
+    },
+    {
+      "file": "docs/evidence/fragments/cocos-standalone-distribution/ncsd-nova-cocos-member.html",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "the wheel Requires-Python/Requires-Dist, the clean-venv-3.12 value and the re-export identity are recorded only as table rows here and in the manifest, with no standalone gate log on disk, so a reader cannot reconcile those three done-when elements against a command transcript."
+    },
+    {
+      "file": "packages/nova-cocos/pyproject.toml",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "the member pyproject ends without a trailing newline, which the repository's ruff/format convention supplies; a style defect only."
+    }
+  ],
+  "head_log_revision": "b85115a12b30a459cad765a26982a04e14d2c33f",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call sites import the landed change",
+    "diff": "read commit by commit against 521b2046a; 54414ccb8 moves the module unchanged and wires the workspace, b85115a12 adds only the evidence fragment.",
+    "done_when": "the done-when names a compound gate (wheel METADATA, py3.12 venv install, re-export identity, five COCOS-covering test modules no added failures, imas-ambix lock --dry-run); the test arms and ambix lock are logged, the build/venv/identity elements are recorded only in the manifest.",
+    "goal": "the goal is to make the COCOS factor algebra installable as the workspace member nova-cocos; packages/nova-cocos/src/nova_cocos/__init__.py lands it.",
+    "manifest": "read; it states 105 passed in both arms, records the wheel METADATA, the py3.12 venv value -1.0, the identity True and the ambix uv lock --dry-run exit 0, and names its four log paths.",
+    "write_paths": "read the manifest's declared paths and the diffstat: every changed path is inside the declared set, nothing extra."
+  },
+  "justifications": {
+    "durability": "tests/test_io_cocos.py fails on a mutation of nova_cocos (negative-control.log EXIT=1, 8 FAILED), but nova/io/cocos.py:1 re-exports with no test asserting it, so dropping a name there passes the whole suite.",
+    "evidence": "base-arm.log and head-arm.log record 105 passed EXIT=0 in each arm, but the wheel-METADATA, clean-venv-3.12 and re-export-identity elements of the done-when are recorded only as manifest/evidence-fragment values with no standalone gate log.",
+    "fit": "packages/nova-cocos/pyproject.toml mirrors the root hatchling/hatch-vcs shape and the src layout follows the idiom; the only blemish is a missing trailing newline at packages/nova-cocos/pyproject.toml:47.",
+    "goal_fidelity": "packages/nova-cocos/src/nova_cocos/__init__.py is byte-identical to the base nova/io/cocos.py and pyproject.toml declares members = [\"packages/nova-cocos\"], which is exactly the goal's installable member.",
+    "reuse": "a repository search by capability found no other owner of transform_factor or ConventionTransform; the change relocates the module rather than forking it, and nova/scripts/identify_source_cocos.py remains the independent audit table the plan keeps by design.",
+    "scope_discipline": "every path in git diff 521b2046a b85115a12 (14 files) is inside the node's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to make the COCOS factor algebra installable as the workspace member nova-cocos; packages/nova-cocos/src/nova_cocos/__init__.py lands it.\nVERDICT done_when: the done-when names a compound gate (wheel METADATA, py3.12 venv install, re-export identity, five COCOS-covering test modules no added failures, imas-ambix lock --dry-run); the test arms and ambix lock are logged, the build/venv/identity elements are recorded only in the manifest.\nVERDICT write_paths: read the manifest's declared paths and the diffstat: every changed path is inside the declared set, nothing extra.\nVERDICT manifest: read; it states 105 passed in both arms, records the wheel METADATA, the py3.12 venv value -1.0, the identity True and the ambix uv lock --dry-run exit 0, and names its four log paths.\nVERDICT diff: read commit by commit against 521b2046a; 54414ccb8 moves the module unchanged and wires the workspace, b85115a12 adds only the evidence fragment.\nCALL_SITES: nova/imas/mast_solve_inputs.py, nova/equilibrium/topology.py, nova/io/sourcemap.py, nova/equilibrium/contour_tree.py, nova/io/cocos.py (re-export consumed by imas-ambix)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: packages/nova-cocos/src/nova_cocos/__init__.py is byte-identical to the base nova/io/cocos.py and pyproject.toml declares members = [\"packages/nova-cocos\"], which is exactly the goal's installable member.\nSCORE evidence: 17\nJUSTIFICATION evidence: base-arm.log and head-arm.log record 105 passed EXIT=0 in each arm, but the wheel-METADATA, clean-venv-3.12 and re-export-identity elements of the done-when are recorded only as manifest values with no standalone gate log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff 521b2046a b85115a12 (14 files) is inside the node's declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_io_cocos.py fails on a mutation of nova_cocos (negative-control.log EXIT=1, 8 FAILED), but nova/io/cocos.py:1 re-exports with no test asserting it.\nSCORE fit: 18\nJUSTIFICATION fit: packages/nova-cocos/pyproject.toml mirrors the root hatchling/hatch-vcs shape and the src layout follows the idiom; the only blemish is a missing trailing newline at packages/nova-cocos/pyproject.toml:47.\nSCORE reuse: 20\nJUSTIFICATION reuse: a repository search by capability found no other owner of transform_factor or ConventionTransform; the change relocates the module rather than forking it.\nFINDING nova/io/cocos.py:1 follow-on: the re-export shim, the one path imas-ambix still consumes, has no test asserting its names or the done-when's nova.io.cocos.transform_factor is nova_cocos.transform_factor identity; removing a name from its __all__ would pass every COCOS test suite green.\nFINDING docs/evidence/fragments/cocos-standalone-distribution/ncsd-nova-cocos-member.html:0 follow-on: the wheel Requires-Python/Requires-Dist, the clean-venv-3.12 value and the re-export identity are recorded only as table rows here and in the manifest, with no standalone gate log on disk.\nFINDING packages/nova-cocos/pyproject.toml:47 follow-on: the member pyproject ends without a trailing newline, which the repository's format convention supplies.",
+  "review_run_id": "r-20261006T164234431357-review-of-ncsd-nova-cocos-member",
+  "reviewed_base_sha": "521b2046a7b30445a6ad5a417e573da2e9d9322e",
+  "reviewed_head_sha": "b85115a12b30a459cad765a26982a04e14d2c33f",
+  "reviewed_run_id": "r-20261006T161045208905-ncsd-nova-cocos-member",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T16:50:09+00:00",
+  "total": 108
+}

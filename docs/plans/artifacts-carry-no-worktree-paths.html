@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="22">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -112,10 +112,11 @@
     path split across two lines by a log's line wrap. Any spelling it cannot map is listed with
     its file and line in the node's report, under its report path, and left unchanged rather
     than guessed.</p>
-    <p>The <code>docs/figures/converged-forward-solve</code> topic is held out of this node
-    because S21's live runs write there. Its 74 logs are rewritten in the §3 node once S21
-    reports those directories quiet.</p>
-    <p><strong>Done when:</strong> no data file outside the held topic contains the pattern. A
+    <p>The <code>docs/figures/converged-forward-solve</code> topic was held while S21's live runs
+    wrote there. S21 reported those directories quiet on 2026-10-06, before this node
+    dispatched, and keeps its writes out of them until this node lands, so their 74 logs are
+    rewritten here with the rest.</p>
+    <p><strong>Done when:</strong> no data file contains the pattern. A
     check script re-applies the function to each rewritten file as it stood at the node's
     dispatch base and asserts that the result equals the committed bytes, which makes the
     rewrite reviewable as a mechanical transform. Every rewritten JSON file still parses.
@@ -131,20 +132,26 @@
     <p>Each launch script in the census taken at the node's dispatch base is read and handled in
     one of two ways. Where the worktree
     path is a <code>cd</code> target, an output root or any other path the script uses, the
-    script derives its repository root at run time from its own location. In shell that is one
-    line, <code>ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"</code>;
-    <code>BASH_SOURCE</code> rather than <code>$0</code> makes a sourced script resolve its own
-    file, not its caller. A Python launch script that already imports nova uses the existing
-    root owner, <code>nova.definitions.root_dir</code>; one that does not runs the same
-    <code>git rev-parse --show-toplevel</code> from its own directory. The resolved root is the toplevel of whichever
+    script derives its repository root at run time from its own location. It uses the idiom
+    nova's launchers already settle on in <code>scripts/nova_lane/run.sh</code>,
+    <code>scripts/playable_server/run.sh</code> and
+    <code>scripts/regenerate_solovev_certificate.sh</code>: first resolve the script's own path
+    with <code>script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"</code>, then
+    <code>repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"</code>.
+    Resolving the path first keeps a script invoked through a relative path, or one that changes
+    directory before that line, on its own file. <code>BASH_SOURCE</code> rather than
+    <code>$0</code> makes a sourced script resolve its own file, not its caller's. A Python launch
+    script runs <code>git rev-parse --show-toplevel</code> from
+    <code>Path(__file__).resolve().parent</code>. It does not use
+    <code>nova.definitions.root_dir</code>, which is fixed at import time to whichever tree nova
+    was imported from. Through the shared environment's editable install, that is the canonical
+    checkout even when the script runs in a worktree. The resolved root is the toplevel of whichever
     checkout the script runs in, a worktree or the canonical checkout, and output directories
     are written beneath it. Where the worktree path appears only in a comment or an echoed
     banner, the script file is passed through the §2 function instead. Paths to the canonical
     checkout, such as the shared environment at <code>/home/ITER/mcintos/Code/nova/.venv</code>,
     stay as they are.</p>
-    <p>The same node rewrites the 74 held <code>docs/figures/converged-forward-solve</code> logs
-    with the §2 script, once S21 has reported those directories quiet, and lands the §4
-    guard.</p>
+    <p>The same node lands the §4 guard.</p>
     <p><strong>Done when:</strong> no launch script contains the pattern. Every changed shell
     script passes <code>bash -n</code>, and every changed Python script compiles under the
     project interpreter. For each script given a run-time root, a probe evaluates its root line
@@ -192,7 +199,7 @@
     wherever they record one. The guard covers the writers nobody has fixed yet, and captured
     stdout, where a traceback prints whatever path the process ran under.</p>
     <p><strong>Done when:</strong> the test passes on the merged head and fails at the node's
-    dispatch base, where the launch scripts and the held logs still carry the pattern, logged as
+    dispatch base, where the launch scripts still carry the pattern, logged as
     the negative control. In a scratch repository, the hook rejects a staged file containing a
     worktree path and accepts it once the script has rewritten it, both logged. The default
     pytest lane collects the test.</p>

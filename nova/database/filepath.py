@@ -1,11 +1,12 @@
 """Manage file data access for frame and biot instances."""
 
 from __future__ import annotations
-from collections.abc import Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from functools import wraps
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import re
 import sys
 from typing import Literal
 
@@ -16,6 +17,118 @@ import xxhash
 
 import nova
 from nova.definitions import root_dir
+
+
+WORKTREE_ROOT = "reckon-worktrees"
+"""Directory name at the head of every reckon worktree layout.
+
+Both worktree roots carry it: the preferred ``.reckon-worktrees`` beside the
+repository and the legacy ``.cache/reckon-worktrees`` under the temporary
+directory. Every other module imports this name instead of spelling the
+pattern.
+"""
+
+WORKTREE_PATH_EXEMPTIONS = (
+    "docs/plans",
+    "docs/state",
+    "docs/research",
+    "nova/database/filepath.py",
+)
+"""Repository paths whose worktree-path mentions are recorded provenance.
+
+``docs/state`` is reckon's run ledger, which reports where a run executed;
+``docs/plans`` and ``docs/research`` are edited only through reckon's tools and
+discuss the pattern as a subject; this module holds the rule and its constants.
+The commit check and the repository test both skip exactly these paths.
+"""
+
+_WORKTREE_PROJECT = re.compile(r"nova-[0-9a-f]+")
+_WORKTREE_PATH = re.compile(
+    r"[A-Za-z0-9._~/\-]*" + WORKTREE_ROOT + r"(?:/[A-Za-z0-9._~/\-]*)?"
+)
+
+
+def _map_nova_worktree(segments: list[str]) -> str | None:
+    """Return the repository-relative name for worktree layout ``segments``.
+
+    ``segments`` begins at the project directory beneath the worktree root:
+    ``<project>/<session>/<node>/<rest>``.  A complete node worktree maps to
+    ``<rest>``, a bare worktree root maps to ``.``, and a layout the matcher
+    cannot complete -- an incomplete path or a path under another repository's
+    worktree -- returns ``None`` so the caller reports it unmapped.
+    """
+    if len(segments) < 3:
+        return None
+    if _WORKTREE_PROJECT.fullmatch(segments[0]) is None:
+        return None
+    if not segments[1] or not segments[2]:
+        return None
+    rest = segments[3:]
+    if any(segment == "" for segment in rest):
+        return None
+    return "/".join(rest) if rest else "."
+
+
+def relativize_worktree_paths(text: str) -> tuple[str, list[str]]:
+    """Rewrite nova worktree paths in ``text`` to repository-relative names.
+
+    Returns the rewritten text together with the list of worktree-path spans
+    left unmapped.  A path under a ``nova-<hash>`` worktree,
+    ``.reckon-worktrees/nova-<hash>/<session>/<node>/<rest>``, is replaced by
+    the bare string ``<rest>``, and a bare worktree root by ``.``.  A path
+    under another repository's worktree, or one whose layout cannot be
+    completed (a truncated path, a path split across two lines), is reported
+    in the unmapped list and left unchanged.  Every other byte, and every line
+    ending, is preserved.
+    """
+    unmapped: list[str] = []
+    pieces: list[str] = []
+    cursor = 0
+    for match in _WORKTREE_PATH.finditer(text):
+        raw = match.group(0)
+        head = raw.index(WORKTREE_ROOT)
+        if head and raw[head - 1] not in "/.":
+            unmapped.append(raw)
+            continue
+        tail = raw[head + len(WORKTREE_ROOT) :]
+        segments = tail.lstrip("/").split("/") if tail else []
+        mapped = _map_nova_worktree(segments)
+        if mapped is None:
+            unmapped.append(raw)
+            continue
+        pieces.append(text[cursor : match.start()])
+        pieces.append(mapped)
+        cursor = match.end()
+    pieces.append(text[cursor:])
+    return "".join(pieces), unmapped
+
+
+def _is_worktree_path_exempt(path: str) -> bool:
+    """Return whether ``path`` is outside the worktree-path guard's reach."""
+    normalized = PurePosixPath(path).as_posix()
+    return any(
+        normalized == exempt or normalized.startswith(exempt + "/")
+        for exempt in WORKTREE_PATH_EXEMPTIONS
+    )
+
+
+def worktree_path_offenders(
+    paths: Iterable[str | os.PathLike],
+    read: Callable[[str | os.PathLike], str],
+) -> list[str | os.PathLike]:
+    """Return each non-exempt path whose contents name a worktree.
+
+    ``read`` maps a path to its text.  Paths under
+    :data:`WORKTREE_PATH_EXEMPTIONS` are skipped, so the one scanning decision
+    serves both the commit-time check and the repository-wide test.
+    """
+    offenders: list[str | os.PathLike] = []
+    for path in paths:
+        if _is_worktree_path_exempt(str(path)):
+            continue
+        if WORKTREE_ROOT in read(path):
+            offenders.append(path)
+    return offenders
 
 
 def compute_provenance(
@@ -65,9 +178,16 @@ def repository_relative(path: str | os.PathLike) -> str:
     The root is found from the path itself, so a path recorded from another
     checkout of this project still resolves to the same repository-relative
     name, and a receipt keeps locating its artifacts once the worktree that
-    produced it is reclaimed.  A path with no repository ancestor is returned
-    absolute, since it cannot be named relative to a root.
+    produced it is reclaimed.  A path under a reckon worktree is rewritten
+    lexically through :func:`relativize_worktree_paths`, since the worktree it
+    names has been removed and no ``.git`` marker remains to find.  A path with
+    no repository ancestor is returned absolute, since it cannot be named
+    relative to a root.
     """
+    text = str(path)
+    rewritten, _ = relativize_worktree_paths(text)
+    if rewritten != text:
+        return rewritten
     resolved = Path(path).resolve()
     root = next(
         (

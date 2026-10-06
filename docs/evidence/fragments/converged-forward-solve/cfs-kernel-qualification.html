@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-kernel-qualification">
+<meta name="plan-title" content="Kernel-backed topology compile stop record">
+<meta name="plan-summary" content="All three cold topology rows exceed the 900-second process bound; expanded kernel calls dominate the graph">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-commits" content="3b38b8b7e1498a92d63f16474fb61135834e39da,92e95f4e942bb0df31d54604edc6846e3067e8cb,354831de03d1517e88ba2d6b63f8b34279fcd9b3,e9cfc712b66e7654c1ee666e86e29803b7ce0903,93d4e801e832195d90df799577e013c7450ac0db,badfcc61ba74fb87219c13cd55977c4493821968">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="not-qualified">
+<meta name="plan-environment" content="H200 jobs 1281162 and 1281166; two allocated CPUs and 64 GiB per job; shared nova environment">
+<title>Kernel-backed topology compile stop record | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-kernel-qualification-record">Kernel-backed topology compile stop record</h1>
+<table id="cfs-kernel-qualification-measurements">
+<caption>Limited kernel-backed topology read on the repaired kernels. Times following the lowering checkpoint are observed until termination, not completed compile walls. Unavailable measurements are not zero.</caption>
+<thead><tr><th>Measurement</th><th>132 cells</th><th>300 cells</th><th>550 cells</th></tr></thead><tbody>
+<tr><th scope="row">Trace [s]</th><td>3.881713</td><td>3.900171</td><td>4.281969</td></tr>
+<tr><th scope="row">Lower [s]</th><td>1.667450</td><td>1.588873</td><td>1.818654</td></tr>
+<tr><th scope="row">Unique equations</th><td>59182</td><td>57596</td><td>66377</td></tr>
+<tr><th scope="row">Expanded equations</th><td>1518527</td><td>1499787</td><td>1499787</td></tr>
+<tr><th scope="row">StableHLO [bytes]</th><td>10646957</td><td>10436118</td><td>11408846</td></tr>
+<tr><th scope="row">Padded polygon edge slots</th><td>10</td><td>9</td><td>9</td></tr>
+<tr><th scope="row">Cold native compile</th><td>Unfinished at the 900 s whole-row bound</td><td>Unfinished at the 900 s whole-row bound</td><td>Unfinished at the 900 s whole-row bound</td></tr>
+<tr><th scope="row">Elapsed from lower checkpoint to termination [s]</th><td>879.929</td><td>879.095</td><td>876.503</td></tr>
+<tr><th scope="row">Executable [bytes]</th><td>Unavailable: no executable returned</td><td>Unavailable: no executable returned</td><td>Unavailable: no executable returned</td></tr>
+<tr><th scope="row">Native compile peak host RSS</th><td>Unavailable: child did not emit a post-compile receipt</td><td>Unavailable: child did not emit a post-compile receipt</td><td>Unavailable: child did not emit a post-compile receipt</td></tr>
+<tr><th scope="row">Pre-compile RSS checkpoint [KiB]</th><td>4346700</td><td>4346700</td><td>4346700</td></tr>
+<tr><th scope="row">Cache enabled before imports</th><td>False</td><td>False</td><td>False</td></tr>
+<tr><th scope="row">Child termination</th><td>WALL_LIMIT_SECONDS=900; EXIT=-15</td><td>WALL_LIMIT_SECONDS=900; EXIT=-15</td><td>WALL_LIMIT_SECONDS=900; EXIT=-15</td></tr>
+<tr><th scope="row">Expanded equations under value_gradient</th><td>1505690</td><td>1486950</td><td>1486950</td></tr>
+<tr><th scope="row">Qualification decision</th><td colspan="3">The cold compile clause is breached at every rung before any solve. This node closes as the stop record under the 2026-10-06 ruling. No 1074/2616 rows or implicit kernel null tangents ran; all their expected-failure markers remain strict. The shared reason is: Cold Biot harmonic kernel compilation exceeds the per-test wall bound. Numerical qualification is not claimed.</td></tr>
+<tr><th scope="row">Fitted graph growth</th><td colspan="3">Log-log least squares over 132, 300 and 550 cells: unique = 40190.63191 N^0.07389218; expanded = 1584933.64953 N^-0.00906937; StableHLO bytes = 8434867.16016 N^0.04425850. Static expanded call sites exclude loop trip counts and array extents. Padding differs, so these are descriptive fits, not asymptotic claims. All native walls are censored: a native-compile growth exponent cannot be fitted.</td></tr>
+<tr><th scope="row">Dominating construct</th><td colspan="3">At 550 cells, BiotMomentCoupling.value_gradient contains 1486950 of 1499787 expanded equations (99.14%). The named kernel helpers contribute harmonic_multiply: 448810 expanded equations; _pole_contraction: 443920; _harmonic_pair_step: 392910. These helper counts are identical at all three measured rungs; value_gradient accounts for 99.15% at 132 cells and 99.14% at 300 cells. These inclusive nested counts overlap and must not be summed. The static kernel expansion remains near 1.5 million equations even on the smallest mesh; no representation rewrite was made.</td></tr>
+<tr><th scope="row">Memory instrument check</th><td colspan="3">The uniform 4346700 KiB values are the last pre-compile checkpoints, not complete compiler peaks. Scheduler samples see memory known present during native compilation; final batch MaxRSS is 25978708 KiB (cold ladder) and 25561232 KiB (warmup). These batch-level peaks do not establish each child peak or certify the full compile memory clause.</td></tr>
+<tr><th scope="row">Cold ladder gate</th><td colspan="3">Job 1281162: scheduler state FAILED, elapsed 00:45:41; 3 failed in 2735.07s (0:45:35); payload EXIT_STATUS=1 and scheduler exit 1:0. All three child logs record WALL_LIMIT_SECONDS=900 and EXIT=-15. --runxfail exposes the three measured KernelCompileBarrier failures. Each fresh process starts with JAX_ENABLE_COMPILATION_CACHE=false; configure_dtypes precedes arrays and x64 is asserted. No executable-size or numerical result is inferred from missing output.</td></tr>
+<tr><th scope="row">Full-topology cache control</th><td colspan="3">Job 1281166: 1 failed in 926.69s (0:15:26), EXIT=1. With cache enabled and a fresh warmup directory, the 132-cell warmup itself exceeded 900 s. Cache-hit refusal control: NOT RUN. The warmed probe was never reached. This is recorded as not run under the stop-record ruling, never as passed.</td></tr>
+<tr><th scope="row">Separate corrected point-jet control</th><td colspan="3">The sibling correction already records one persistent jit_jet hit with stored compile_seconds=81 and refuses it with AssertionError: cache hit: wall is not cold; test_point_jet_cold_compile fails, EXIT=1. Its log is /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T000840521420-cfs-kernel-cold-compile-correction/warmed-cache-final-negative.log. It was read, not rerun or substituted for the unproved topology control.</td></tr>
+<tr><th scope="row">Cold launcher command</th><td colspan="3">env TMPDIR=/tmp RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --cores 2 --mem 64G --time 00:49:00 --env NOVA_CACHE_PREWARM_RUN=1 --env NOVA_TOPOLOGY_EVIDENCE_DIR=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/cold --log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/h200-topology-cold.log --wait -- tests/equilibrium/test_topology_read.py::test_kernel_compile_growth --runxfail -vv -s</td></tr>
+<tr><th scope="row">Warmup launcher command</th><td colspan="3">env TMPDIR=/tmp RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --cores 2 --mem 64G --time 00:18:00 --env NOVA_CACHE_PREWARM_RUN=1 --env NOVA_TOPOLOGY_WARM_CACHE_CONTROL=1 --env NOVA_TOPOLOGY_EVIDENCE_DIR=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/warm --log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/h200-topology-warm-refusal.log --wait -- &#x27;tests/equilibrium/test_topology_read.py::test_kernel_compile_growth[132]&#x27; --runxfail -vv -s</td></tr>
+<tr><th scope="row">Source and receipt provenance</th><td colspan="3">Gate source revision 92e95f4e942bb0df31d54604edc6846e3067e8cb; test blob a86b2559c895a1f00f04365564c074fe76e49ea4 remained unchanged throughout. Child logs print the imported module /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-qualification/nova/equilibrium/topology.py and cwd /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-qualification. Run root /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification contains cold/compile-growth-{132,300,550}.json, child logs, timeout-summary.json, graph-growth-fit.json, host-memory-samples.log, scheduler-accounting.log and both full gate logs. Files above 300000 bytes remain there.</td></tr>
+<tr><th scope="row">Decision carried forward</th><td colspan="3">The representation of the differentiated kernel loop while preserving 1e-13 numerical identity is the lead’s decision. The 1074 and 2616 rows and implicit kernel null tangents stay strict expected failures until that decision is taken. No larger row runs from this node. Unmeasured executable sizes and exact child compile peaks remain unavailable; the cache-hit refusal control remains not run. These are retained limits of the completed stop record, not pending work in this node. The launcher also reports a blank exit status and shell success for a failing payload; the payload and scheduler records above are authoritative.</td></tr>
+</tbody></table>
+</main></body></html>

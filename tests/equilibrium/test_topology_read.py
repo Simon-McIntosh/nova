@@ -34,10 +34,7 @@ class KernelCompileBarrier(AssertionError):
 kernel_compile_expected_failure = pytest.mark.xfail(
     strict=True,
     raises=KernelCompileBarrier,
-    reason=(
-        "Biot harmonic kernel compile barrier; "
-        "cfs-kernel-compile-cost must land before kernel qualification"
-    ),
+    reason="Cold Biot harmonic kernel compilation exceeds the per-test wall bound",
 )
 
 
@@ -90,7 +87,7 @@ print('KERNEL_COMPILE_PREREQUISITE_COMPLETE ' + json.dumps(receipt), flush=True)
             ["git", "rev-parse", "HEAD"], text=True
         ).strip()
         stream.write(
-            f"REVISION={revision} TREE={Path.cwd()} COMMAND="
+            f"revision={revision} tree={Path.cwd()} command="
             + json.dumps(command)
             + "\n"
         )
@@ -2330,10 +2327,120 @@ def _jaxpr_equation_counts(closed):
     return {"unique_equations": unique, "expanded_equations": expanded}
 
 
+def _jaxpr_construct_counts(closed):
+    """Attribute expanded equations to each named nested call site."""
+    from collections import Counter
+
+    names = Counter()
+    primitives = Counter()
+
+    def walk(value):
+        if hasattr(value, "eqns"):
+            total = len(value.eqns)
+            for equation in value.eqns:
+                primitives[equation.primitive.name] += 1
+                nested = sum(walk(item) for item in equation.params.values())
+                if nested:
+                    name = str(equation.params.get("name", equation.primitive.name))
+                    names[name] += nested
+                total += nested
+            return total
+        if hasattr(value, "jaxpr"):
+            return walk(value.jaxpr)
+        if isinstance(value, dict):
+            return sum(walk(item) for item in value.values())
+        if isinstance(value, tuple | list):
+            return sum(walk(item) for item in value)
+        return 0
+
+    walk(closed)
+    return {
+        "nested_call_equations": names.most_common(20),
+        "expanded_primitives": primitives.most_common(20),
+    }
+
+
 @pytest.mark.parametrize("count", (132, 300, 550))
 @kernel_compile_expected_failure
-@pytest.mark.timeout(660)
-def test_kernel_compile_growth(count, tmp_path, kernel_compile_budget):
+@pytest.mark.timeout(930)
+def test_kernel_compile_growth(count, tmp_path):
+    """Measure each cold topology compile in a fresh, wall-bounded process."""
+    _isolated_kernel_compile(count, tmp_path)
+
+
+def _isolated_kernel_compile(count, tmp_path):
+    import os
+    from pathlib import Path
+    import subprocess
+    import sys
+
+    directory = Path(os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR", tmp_path))
+    directory.mkdir(parents=True, exist_ok=True)
+    script = """
+import runpy, sys
+m = runpy.run_path(sys.argv[1])
+m['_measure_kernel_compile_growth'](int(sys.argv[2]), sys.argv[3])
+"""
+    command = [
+        sys.executable,
+        "-u",
+        "-c",
+        script,
+        str(Path(__file__).resolve()),
+        str(count),
+        str(directory),
+    ]
+    environment = dict(
+        os.environ,
+        JAX_ENABLE_COMPILATION_CACHE="false",
+        XLA_PYTHON_CLIENT_PREALLOCATE="false",
+    )
+    mutation = os.environ.get("NOVA_TOPOLOGY_WARM_CACHE_CONTROL") == "1"
+    if mutation:
+        environment.update(
+            JAX_ENABLE_COMPILATION_CACHE="true",
+            JAX_COMPILATION_CACHE_DIR=str(tmp_path / "warm-cache"),
+            JAX_PERSISTENT_CACHE_MIN_COMPILE_TIME_SECS="0",
+            JAX_PERSISTENT_CACHE_MIN_ENTRY_SIZE_BYTES="0",
+        )
+    for arm in ("warmup", "probe") if mutation else ("cold",):
+        environment["NOVA_TOPOLOGY_COMPILE_ARM"] = arm
+        log = directory / f"compile-growth-{count}-{arm}.log"
+        revision = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True
+        ).strip()
+        with log.open("w") as stream:
+            stream.write(
+                f"revision={revision} tree={Path.cwd()} command={json.dumps(command)}\n"
+            )
+            stream.flush()
+            process = subprocess.Popen(
+                command, stdout=stream, stderr=subprocess.STDOUT, env=environment
+            )
+            try:
+                code = process.wait(timeout=900)
+            except subprocess.TimeoutExpired:
+                print(
+                    f"KERNEL_COMPILE_TIMEOUT pid={process.pid} cells={count} log={log}",
+                    flush=True,
+                )
+                process.terminate()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+                stream.write(f"\nWALL_LIMIT_SECONDS=900\nEXIT={process.returncode}\n")
+                raise KernelCompileBarrier(
+                    f"native {count}-cell kernel compile exceeded 900 seconds; "
+                    f"receipt: {log}"
+                ) from None
+            stream.write(f"\nEXIT={code}\n")
+        print(log.read_text(), flush=True)
+        assert code == 0, f"kernel compile {arm} refused: {log}"
+
+
+def _measure_kernel_compile_growth(count, tmp_path):
     """Measure cold tracing, lowering and native compilation independently."""
     import os
     from pathlib import Path
@@ -2341,6 +2448,27 @@ def test_kernel_compile_growth(count, tmp_path, kernel_compile_budget):
     import time
     from nova.equilibrium.topology import TopologyConvention, read
 
+    from jax._src import compilation_cache
+    from nova.equilibrium import topology
+
+    print(
+        f"MEASUREMENT_MODULE={topology.__file__} "
+        f"MEASUREMENT_CWD={Path.cwd().resolve()}",
+        flush=True,
+    )
+    assert jax.config.jax_enable_x64 is True
+    assert jax.default_backend() == "gpu"
+    hits = []
+    cache_get = compilation_cache.get_executable_and_time
+
+    def observe_hit(key, *args, **kwargs):
+        value = cache_get(key, *args, **kwargs)
+        if value[0] is not None:
+            hits.append({"key": key, "stored_compile_seconds": value[1]})
+            print("PERSISTENT_CACHE_HIT " + json.dumps(hits[-1]), flush=True)
+        return value
+
+    compilation_cache.get_executable_and_time = observe_hit
     oracle, total, wall, _, _ = _analytic_inputs("limited")
     geometry = _realised_hex_geometry(wall, count)
     field = _kernel_backed_field("limited", oracle, total, geometry)
@@ -2350,7 +2478,14 @@ def test_kernel_compile_growth(count, tmp_path, kernel_compile_budget):
         TopologyConvention.from_cocos(17, 1.0),
         TopologyPolicy(),
     )
-    receipt = {"cells": count, "kernel_edges": field.coupling.edge.shape[0]}
+    receipt = {
+        "cells": count,
+        "kernel_edges": field.coupling.edge.shape[0],
+        "backend": str(jax.devices()[0]),
+        "cache_enabled_at_start": bool(jax.config.jax_enable_compilation_cache),
+        "arm": os.environ.get("NOVA_TOPOLOGY_COMPILE_ARM", "cold"),
+    }
+    hits.clear()
     directory = Path(os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR", tmp_path))
     directory.mkdir(parents=True, exist_ok=True)
 
@@ -2366,13 +2501,13 @@ def test_kernel_compile_growth(count, tmp_path, kernel_compile_budget):
 
     jax.clear_caches()
     cache_enabled = jax.config.jax_enable_compilation_cache
-    jax.config.update("jax_enable_compilation_cache", False)
     try:
         checkpoint("input-ready")
         start = time.perf_counter()
         graph = jax.make_jaxpr(read)(*operands)
         receipt["trace_seconds"] = time.perf_counter() - start
         receipt.update(_jaxpr_equation_counts(graph))
+        receipt.update(_jaxpr_construct_counts(graph))
         checkpoint("traced")
         start = time.perf_counter()
         lowered = jax.jit(read).lower(*operands)
@@ -2382,10 +2517,16 @@ def test_kernel_compile_growth(count, tmp_path, kernel_compile_budget):
         start = time.perf_counter()
         executable = lowered.compile()
         receipt["compile_seconds"] = time.perf_counter() - start
+        receipt["cold_compile_wall_seconds"] = (
+            receipt["lower_seconds"] + receipt["compile_seconds"]
+        )
+        receipt["persistent_cache_hits"] = hits
+        receipt["cold_verified"] = not hits
         receipt["executable_bytes"] = (
             executable.memory_analysis().generated_code_size_in_bytes
         )
         checkpoint("compiled")
+        assert not hits, "persistent cache hit: refusing to call this wall cold"
         result = executable(*operands)
         jax.block_until_ready(result)
         receipt["valid"] = bool(result.valid)

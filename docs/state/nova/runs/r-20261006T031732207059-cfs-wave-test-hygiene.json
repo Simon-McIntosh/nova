@@ -1,0 +1,3889 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8607385,
+      "input_tokens_cumulative": 8607385,
+      "output_tokens": 64352,
+      "output_tokens_cumulative": 64352,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 31,
+    "files": 3,
+    "removed": 14
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "_draw",
+        "path": "tests/test_solovev_certificate_render.py"
+      },
+      "run_function": {
+        "line": 2160,
+        "name": "_render_persisted_row",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2174
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "run_function": {
+        "line": 2598,
+        "name": "_validate_row",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2612
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 2765,
+        "name": "_schema",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2778
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2938
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 2843,
+        "name": "_aggregate_partial",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 2925
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 3010,
+        "name": "_aggregate",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3068
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "measured",
+        "path": "tests/test_exact_clip_memory.py"
+      },
+      "run_function": {
+        "line": 3010,
+        "name": "_aggregate",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3085
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3537
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3537
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3537
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3537
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3537
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 3529,
+        "name": "_compiled_memory_fields",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3533
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_the_document_covers_every_measured_kind",
+        "path": "tests/calibrate/test_correction_instances.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "pulse_record",
+        "path": "tests/calibrate/test_sweep.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_committed_receipt_reports_qualified_relations_and_failed_closure",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_diiid_tiers_carry_fit_once_values_and_relation_uncertainty",
+        "path": "tests/imas/test_diiid_current.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_committed_receipt_banks_full_grid_fits_and_contours",
+        "path": "tests/imas/test_diiid_grid_residual_current_regression.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_a_pair_with_stage_evidence_on_both_sides_is_compared",
+        "path": "tests/test_bank_drift_support_audit.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 423,
+        "name": "test_structured_reduced_basis_matches_the_diagonal_reduction",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 67,
+        "name": "test_coarse_mesh_criteria_equal_peer_geometric_means",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_three_spacing_refresh_values",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_ohmic_circuit_connections_wire_supply_to_recorded_scale_coils",
+        "path": "tests/test_diiid_pf_active_circuits.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 382,
+        "name": "test_named_arm_failure_retains_twelve_row_census",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 236,
+        "name": "test_flood_seed_outside_vessel_carries_position_and_grid_index",
+        "path": "tests/test_equilibrium_moment.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 663,
+        "name": "test_shot_log_entry_carries_per_shot_rates",
+        "path": "tests/test_labeller_parallel.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 676,
+        "name": "test_cumulative_log_entry_carries_aggregate_and_per_device_rates",
+        "path": "tests/test_labeller_parallel.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "_slice_record",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_ledger_round_trips_through_canonical_json",
+        "path": "tests/test_mast_evidence.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 75,
+        "name": "verdict",
+        "path": "tests/test_mast_flux_loop_gains.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_attribute_places_efit_and_names_the_closing_reading",
+        "path": "tests/test_shafranov_combination_discriminator.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_control_points_build_the_bounding_box_from_the_shape_figures",
+        "path": "tests/test_shape_constraints.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_marker_census_report_tables_both_counts_and_the_decision",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3596
+    },
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "_plot_record",
+        "path": "tests/test_topology_visual_generator.py"
+      },
+      "run_function": {
+        "line": 3578,
+        "name": "_hlo_array_records",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3590
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3656
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3656
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3656
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3657
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3654
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3656
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3656
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 3640,
+        "name": "_array_signature_summary",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3655
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_the_document_covers_every_measured_kind",
+        "path": "tests/calibrate/test_correction_instances.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "pulse_record",
+        "path": "tests/calibrate/test_sweep.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 50,
+        "name": "test_committed_receipt_reports_qualified_relations_and_failed_closure",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_diiid_tiers_carry_fit_once_values_and_relation_uncertainty",
+        "path": "tests/imas/test_diiid_current.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_committed_receipt_banks_full_grid_fits_and_contours",
+        "path": "tests/imas/test_diiid_grid_residual_current_regression.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_a_pair_with_stage_evidence_on_both_sides_is_compared",
+        "path": "tests/test_bank_drift_support_audit.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 423,
+        "name": "test_structured_reduced_basis_matches_the_diagonal_reduction",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 67,
+        "name": "test_coarse_mesh_criteria_equal_peer_geometric_means",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_three_spacing_refresh_values",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 179,
+        "name": "test_ohmic_circuit_connections_wire_supply_to_recorded_scale_coils",
+        "path": "tests/test_diiid_pf_active_circuits.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 382,
+        "name": "test_named_arm_failure_retains_twelve_row_census",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 236,
+        "name": "test_flood_seed_outside_vessel_carries_position_and_grid_index",
+        "path": "tests/test_equilibrium_moment.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 663,
+        "name": "test_shot_log_entry_carries_per_shot_rates",
+        "path": "tests/test_labeller_parallel.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 676,
+        "name": "test_cumulative_log_entry_carries_aggregate_and_per_device_rates",
+        "path": "tests/test_labeller_parallel.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 63,
+        "name": "_slice_record",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 173,
+        "name": "test_ledger_round_trips_through_canonical_json",
+        "path": "tests/test_mast_evidence.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 75,
+        "name": "verdict",
+        "path": "tests/test_mast_flux_loop_gains.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 113,
+        "name": "test_attribute_places_efit_and_names_the_closing_reading",
+        "path": "tests/test_shafranov_combination_discriminator.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 372,
+        "name": "test_control_points_build_the_bounding_box_from_the_shape_figures",
+        "path": "tests/test_shape_constraints.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 548,
+        "name": "test_marker_census_report_tables_both_counts_and_the_decision",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3706
+    },
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "_plot_record",
+        "path": "tests/test_topology_visual_generator.py"
+      },
+      "run_function": {
+        "line": 3689,
+        "name": "_largest_hlo_arrays",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3700
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 3917,
+        "name": "_measure_solve_memory_scaling",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3973
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 3917,
+        "name": "_measure_solve_memory_scaling",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 3973
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 4009,
+        "name": "_write_memory_identification_report",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 4095
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 4009,
+        "name": "_write_memory_identification_report",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 4095
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 4009,
+        "name": "_write_memory_identification_report",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 4053
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 4009,
+        "name": "_write_memory_identification_report",
+        "path": "benchmarks/solovev_certificate.py"
+      },
+      "window_line": 4095
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_beta_p_plus_half_internal_inductance_matches_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 575,
+        "name": "_contour_combination",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "window_line": 587
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 622,
+        "name": "test_grid_imaged_biot_field_converges_to_the_volume_definition",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "window_line": 699
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "357e8231c4872ce7be6487eafc67afbb2dc8ae45",
+    "79b08252726938a494227fcaf369b2982d9935e6"
+  ],
+  "completed_at": "2026-10-06T03:53:09.584Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T03:18:12Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/test_certificate_pin.py::test_pinned_certificate_refuses_unqualified_production_rows",
+    "head/base",
+    "1.58",
+    "/"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "python -m pytest -p no:cacheprovider tests/test_equilibrium_diagnostics.py tests/test_certificate_gate_live.py tests/test_certificate_pin.py",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T031732207059-cfs-wave-test-hygiene/hygiene-gate-after.log"
+  },
+  "impl_move": {
+    "at_complete": 0.16666666666666666,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "a test hygiene repair beside the section 2 landing; no section advances",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-06T04:02:36.113683+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-06T03:17:36Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 26,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 140000,
+    "observed_at": "2026-10-06T03:17:10Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 26,
+      "aggregate_tokens_per_second": 115.779,
+      "detail": "",
+      "mean_tokens_per_second": 96.483,
+      "observed_at": "2026-10-06T03:17:10Z",
+      "runs": 1.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T03:53:09.584Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T031732207059-cfs-wave-test-hygiene/manifest.md",
+  "member": "disposable-r-20261006T031732207059-cfs-wave-test-hygiene",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_hygiene_negative_control.py::test_rerender_leaves_the_tracked_weak_rotation_panel_unchanged"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_certificate_pin.py::test_pinned_certificate_refuses_unqualified_production_rows",
+      "tests/test_certificate_pin.py::test_pinned_certificate_retains_its_census_and_render_integrity"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_hygiene_negative_control.py::test_rerender_leaves_the_tracked_weak_rotation_panel_unchanged"
+    ],
+    "declaration": "the unrepaired renderer, run once in a scratch copy, dirties the tracked weak-rotation 300-cell PNG",
+    "head_failure_ids": [
+      "tests/test_certificate_pin.py::test_pinned_certificate_refuses_unqualified_production_rows"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T031732207059-cfs-wave-test-hygiene/hygiene-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T031732207059-cfs-wave-test-hygiene/hygiene-negative-control.log",
+    "test_paths": [
+      "tests/test_certificate_gate_live.py",
+      "tests/test_equilibrium_diagnostics.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-wave-test-hygiene",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3469,
+          "cached_input_tokens": 851567,
+          "input_tokens": 855038,
+          "output_tokens": 1818,
+          "reasoning_output_tokens": 120,
+          "total_tokens": 856856,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Stop two tests writing into tracked figure files and settle one timeout, from the wave integration measurement (report /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001835698222-cfs-wave-integration-suite/report.md). (1) tests/test_equilibrium_diagnostics.py::test_grid_imaged_biot_field_converges_to_the_volume_definition writes docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json through RECEIPT_PATH.write_text; it writes into tmp_path instead, and asserts against the committed receipt read-only if it compares with it. (2) tests/test_certificate_gate_live.py::test_rerendered_part_receipt_is_not_a_live_certificate_row patches PART_ROOT and FIGURE_ROOT but benchmarks/solovev_certificate.py _render_persisted_row resolves the persisted figure.filesystem_path against the repository ROOT, so it rewrites the tracked weak-rotation 300-cell PNG and SVG and breaks tests/test_certificate_pin.py when the two run in one session; make the renderer honour the figure root the caller supplies (or the test patch ROOT as well), so the test writes only under tmp_path. (3) Done when, after running both modules and tests/test_certificate_pin.py in one process, git status of the worktree shows no tracked file changed, and the pin test passes; the negative control is the unrepaired renderer run once in a scratch copy showing the tracked PNG dirtied. (4) tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux timed out at 600 s at head (base 409.7 s) while deserialising a cached CPU executable, with 12 modules running at once; rerun it alone at head and at base in fresh processes on compute with the persistent cache disabled and record both walls; if the head wall is within 20 percent of the base wall alone, report it as a measurement-concurrency artefact; otherwise report the head program change it implicates, with the jaxpr equation counts at both revisions, and change nothing. Every check runs on compute or in place on the existing fleet allocation when the shell has SLURM_JOB_ID set, never as a heavy job on the login node; a single test module that finishes in seconds may run on the login node with JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH set to the run worktree (orientation_worktree in the manifest) uv run --no-sync pytest -p no:cacheprovider. Run each test module in its own fresh process, capture each run to one log under the run directory, and name every log in the manifest. Every uv command carries --no-sync and nothing runs uv sync. Judge by delta against the base revision (orientation_base_sha) for the same modules, and record baseline_suite and after_suite with module-qualified failure ids. Commit with conventional subjects and bodies; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Stop two tests writing into tracked figure files, so the certificate pin test is stable in one session, and settle whether the raster receipt timeout is a concurrency artefact.",
+    "id": "cfs-wave-test-hygiene",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-06T03:17:36Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 26,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 140000,
+      "observed_at": "2026-10-06T03:17:10Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 26,
+        "aggregate_tokens_per_second": 115.779,
+        "detail": "",
+        "mean_tokens_per_second": 96.483,
+        "observed_at": "2026-10-06T03:17:10Z",
+        "runs": 1.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T031732207059-cfs-wave-test-hygiene/manifest.md",
+    "negative_control": "the unrepaired renderer, run once in a scratch copy, dirties the tracked weak-rotation 300-cell PNG",
+    "plan": "converged-forward-solve",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_equilibrium_diagnostics.py",
+      "tests/test_certificate_gate_live.py",
+      "benchmarks/solovev_certificate.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-wave-test-hygiene.html",
+      "docs/figures/converged-forward-solve/cfs-wave-test-hygiene"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1458154.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cfs-wave-test-hygiene",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T03:17:44.952517+00:00",
+    "score": 0.6625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.61,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 450.461,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1309.212,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 5.112211651921297,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 2,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 59.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 3,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 24,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 52
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 17,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.01,
+      "claude-haiku": 0,
+      "claude-opus": 0.07,
+      "clive": 0.67,
+      "codex": 0.11,
+      "codex-astra": 0.08,
+      "codex-luna": 0.01,
+      "hold": 0.05
+    },
+    "rendered_token_estimate": 1611,
+    "usage": {
+      "cost": 0.000152124,
+      "input_tokens": 3622,
+      "output_tokens": 89
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "79b08252726938a494227fcaf369b2982d9935e6",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+    "reviewed_head_sha": "79b08252726938a494227fcaf369b2982d9935e6",
+    "scores": {
+      "durability": 10,
+      "evidence": 13,
+      "fit": 16,
+      "goal_fidelity": 14,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T031732207059-cfs-wave-test-hygiene",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "903ebb40-3705-463a-ba68-2f0faee0734e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 8805141,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2079.757,
+    "generated_tokens": 72029,
+    "generation_seconds": 986.116,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.4,
+    "machine_seconds": 1093.641,
+    "peak_input_tokens": 196456,
+    "tokens_per_second": 73.04,
+    "wall_tokens_per_second": 34.63
+  },
+  "time_budget": "45m",
+  "tool_steps": 82.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2097,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T03:53:13Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T03:18:24Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T031732207059-cfs-wave-test-hygiene",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 14598,
+    "worker_pid": 4090778
+  },
+  "worker_seconds": 2041,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

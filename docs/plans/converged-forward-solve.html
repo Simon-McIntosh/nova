@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="62">
+<meta name="plan-version" content="63">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -147,6 +147,15 @@
       <button class="r-opt" data-value="stay-in-git">no: keep committing receipts</button>
       </p>
     <p class="r-dec-rat">Lead, 2026-10-05: npz, gz and json receipts above a few MB live under /work/projects/imas_gpu with a path pointer in the evidence fragment; PNG and SVG stay in git; pre-commit enforces a size ceiling; existing large receipts migrate in a separate cleanup node. Reason: 1,234 of nova&#x27;s 1,312 tracked MB is docs/figures receipts, paid by every clone, worktree and archive.</p>
+    </div>
+<div class="r-dec" data-key="kernel-loop-representation" data-choice="" data-by="s21-nova" data-when="2026-10-06">
+    <p class="r-dec-q">How the differentiated Biot harmonic kernel loop is represented so the traced read meets the compile clause at 1e-13</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="custom-derivative-rules">Custom derivative rules on the kernel point jet: the derivative of each harmonic recurrence written as its own recurrence (custom_jvp), so autodiff stops unrolling the differentiated loop, holding the 1e-13 identity against the base kernels</button>
+      <button class="r-opt" data-value="fixed-capacity-scan">Fixed-capacity scans for the recurrences: tried by the kernel node and rejected because the differentiated arithmetic moved beyond 1e-13; admissible only with a reordering-free scan body proven identical</button>
+      <button class="r-opt" data-value="relax-the-clause">Relax the identity tolerance or the compile clause: forbidden by the locked acceptance and field-representation decisions without the lead</button>
+      </p>
+    <p class="r-dec-rat"></p>
     </div>
 </section>
 

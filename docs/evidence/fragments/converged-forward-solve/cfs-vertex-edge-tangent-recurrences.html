@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-vertex-edge-tangent-recurrences">
+<meta name="plan-title" content="Moment-channel and graded-residual tangents (vertex and edge terms outstanding)">
+<meta name="plan-summary" content="Private tangents of seven moment-channel and graded-residual functions match jax.jvp of the base. Five match bit for bit, and the largest difference is 6.6e-15, over 10,000 unmasked samples each. Every truncation fails, the primal is bit-identical, and every tangent compiles within three times its primal. The polygon vertex and edge term tangents are not yet written.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="8a8c2d612,2baf47c37,e82290330,bc4779f38,14642612d,f09950bec">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="Shared nova virtualenv; CPU identity and cold-compile rows in place on fleet job 1277272 (98dci4-clu-2018), JAX_PLATFORMS=cpu">
+<title>Moment-channel and graded-residual tangents | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-vertex-edge-tangent-recurrences-record">Moment-channel and graded-residual tangents</h1>
+<p id="cfs-vertex-edge-tangent-recurrences-summary">This record covers seven functions. In <code>nova.biot.momentchannel</code>: <code>factorise</code>, <code>_pole_contraction</code> at both ends of the range, and <code>Channel.across</code>. In <code>nova.biot.gradedresidual</code>: <code>graded_residual</code>, <code>_regularised</code> and <code>_model_integral</code>. Each now has a private tangent that returns the structure <code>jax.jvp</code> returns, with respect to all of its floating inputs. None of them calls <code>jax.jvp</code>, <code>jax.grad</code> or <code>jax.jacfwd</code>. Each is a closed form or an unrolled recurrence: the Clenshaw deflation inside the pole contraction carries its tangent as its own downward recurrence. Every elementary rule is applied in the order <code>jax.jvp</code> applies it, so terms whose two halves cancel round identically. No primal line changed: the two modules gain 0 deleted and 429 added lines.</p>
+<table id="cfs-vertex-edge-tangent-recurrences-rows">
+<caption>Each tangent against jax.jvp of the base revision, e74d8fce loaded through git show under its own module name, on 10,000 samples per function with none masked: covered fraction 1.000 in every row. The truncated column drops one term from each tangent's recurrence or product rule. Cold CPU compiles take the fastest of three fresh processes per arm, with the persistent cache off and zero cache hits. All runs were in place on job 1277272.</caption>
+<thead><tr><th>function</th><th>identity max</th><th>bound</th><th>truncated max</th><th>primal compile [s]</th><th>tangent compile [s]</th><th>jax.jvp compile [s]</th><th>tangent / primal</th></tr></thead>
+<tbody>
+<tr><td>factorise</td><td>0.000e+00</td><td>1e-13</td><td>inf</td><td>0.080</td><td>0.210</td><td>0.205</td><td>2.61</td></tr>
+<tr><td>_pole_contraction, near end</td><td>6.620e-15</td><td>1e-13</td><td>8.241e+01</td><td>0.154</td><td>0.348</td><td>0.334</td><td>2.27</td></tr>
+<tr><td>_pole_contraction, far end</td><td>8.987e-16</td><td>1e-13</td><td>1.985e+04</td><td>0.148</td><td>0.345</td><td>0.330</td><td>2.33</td></tr>
+<tr><td>Channel.across</td><td>4.381e-16</td><td>1e-13</td><td>3.455e+02</td><td>0.265</td><td>0.717</td><td>0.705</td><td>2.71</td></tr>
+<tr><td>_model_integral</td><td>0.000e+00</td><td>1e-13</td><td>2.033e+03</td><td>0.050</td><td>0.080</td><td>0.080</td><td>1.58</td></tr>
+<tr><td>_regularised</td><td>0.000e+00</td><td>1e-13</td><td>1.745e+03</td><td>0.045</td><td>0.092</td><td>0.085</td><td>2.05</td></tr>
+<tr><td>graded_residual</td><td>0.000e+00</td><td>1e-13</td><td>3.551e+03</td><td>0.172</td><td>0.498</td><td>0.700</td><td>2.90</td></tr>
+</tbody></table>
+<p id="cfs-vertex-edge-tangent-recurrences-domain">The domains span what the jet reaches. Factorisations take <code>x y</code> coefficients from 1e-12 to 1e6, with 10 percent exactly zero for a vertical edge. Their end values run over the same decades, and 5 percent of them are equal, the level-target case. A negative coefficient is excluded because it gives negative shifts, which the jet never forms; there the base primal itself loses every digit. Pole shifts run from 1e-9 to 1e12, including zero, the exact switch value and samples within 1e-3 of it, and the ceiling. Graded panels cover a target on a corner, level with a corner, or on its radius, plus finite arcs. Where the base <code>jax.jvp</code> is not finite (0.42 percent of factorise samples, at a zero end value, and 1.00 percent of graded-residual samples, at a 1e-300 radius), the tangent is non-finite in the same way and the row counts that as agreement. Those samples were not checked against a higher-precision reference.</p>
+<p id="cfs-vertex-edge-tangent-recurrences-control">For the negative control, <code>NOVA_TANGENT_TRUNCATION=1</code> drops one term from each tangent inside the identity rows. All seven identity rows then fail the 1e-13 bound, with maxima from 82 to infinity.</p>
+<p id="cfs-vertex-edge-tangent-recurrences-outstanding">Not done in this record: the <code>polygonanalytic</code> vertex and edge terms (<code>_Vertex.arsinh_terms</code>, <code>_Vertex.flux_moment_residuals</code>, <code>_first_residual</code>, <code>_Edge.terms</code> and <code>_second_residual</code>), <code>Channel.split</code> with its seeds and families, and the enumeration of the <code>packed_analytic_moments</code> jaxpr. The graded-residual tangent takes a <code>pieces_tangent</code> callable, so the vertex and edge residuals reuse it once their integrands' tangents are written.</p>
+</main></body></html>

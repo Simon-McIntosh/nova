@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="53">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -226,7 +226,10 @@
     <div class="r-comment-body"><p>The forward solve request doubles in tests/test_forward_solve_request.py now carry the stationary-point locator and operator area entry the geometry identity reads, via a local Null1D-bearing target double and a _completed_profile helper; the gate at committed revision 9b0f196bf reports 5 passed (EXIT=0), against the base-revision negative control's 3 failed / 2 passed.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261005T234854289435-review-of-cfs-request-seam-doubles" data-who="reckon-build" data-when="2026-10-05T23:58:30.322Z">
-    <div class="r-comment-body"><p>Independent review of r-20261005T233707152029-cfs-request-seam-doubles stored as a parsed record at the revision-keyed and plain review paths; the change (tests/test_forward_solve_request.py carrying the Null1D stationary-point locator and the operator area entry the geometry identity reads) is correct and reproduced at head 14aa0591 with 5 passed, EXIT=0, against the base-revision negative control&#x27;s 3 failed / 2 passed; approved, with the run&#x27;s baseline arm recording a renamed scratch copy (ids not reconcilable id-for-id by the store reader, latent only) recorded as a follow-on.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261005T233707152029-cfs-request-seam-doubles stored as a parsed record at the revision-keyed and plain review paths; the change (tests/test_forward_solve_request.py carrying the Null1D stationary-point locator and the operator area entry the geometry identity reads) is correct and reproduced at head 14aa0591 with 5 passed, EXIT=0, against the base-revision negative control's 3 failed / 2 passed; approved, with the run's baseline arm recording a renamed scratch copy (ids not reconcilable id-for-id by the store reader, latent only) recorded as a follow-on.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261005T223546294421-cfs-kernel-compile-cost" data-who="reckon-build" data-when="2026-10-05T23:57:43Z">
+    <div class="r-comment-body"><p>Accepted correctness-preserving landing: polygon and filament 10000-point jet identity maxima 0, repaired section moments, 342 kernel tests pass; unique equations 78404 to 17544 (4.46899225x), live budget 20000. Fresh-process cold baseline 11.2194146 s / landed 7.91631825 s, 2912 generated-code bytes both; H200 whole-module landing gate 1281153 has 8 passed and 1 strict xfail. Fixed-capacity arithmetic and actual topology-read compile measurement carried to follow-ons. Evidence: docs/evidence/fragments/converged-forward-solve/cfs-kernel-compile-cost.html#cfs-kernel-compile-cost-landing.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

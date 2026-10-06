@@ -67,8 +67,12 @@
     <code>--cached</code> (the commit check). <code>-a</code> treats binary
     files as searchable, so a committed binary that carries the root name is a
     candidate. Only the candidates are passed to
-    <code>worktree_path_offenders</code>, the single scanning decision, with a
-    reader that decodes each candidate's bytes with
+    <code>worktree_path_offenders</code>, the single scanning decision. The
+    content is read by the reader that matches where the candidates came from:
+    <code>worktree_path_text</code> reads the working-tree file for the
+    repository test, and <code>worktree_path_index_text</code> reads the staged
+    blob (<code>git show :path</code>) for the commit check, because the staged
+    blob -- not the working copy -- is what a commit records. Both decode with
     <code>errors="replace"</code> instead of returning <code>""</code> for
     binary content. This retires <code>_staged_files</code> and
     <code>_staged_text</code> in <code>nova/database/scripts.py</code> and
@@ -80,18 +84,33 @@
     search run from the wrong directory, without git, or after pattern drift
     fails loudly rather than reading as a clean tree. The predicate's offending
     branch is already covered at
-    <code>tests/test_filepath.py:263</code>; the node adds tests only for the
-    binary reader and for both forms of the candidate search.</p>
+    <code>tests/test_filepath.py:263</code>; the node adds tests for the binary
+    readers, for both forms of the candidate search, and for the index reader's
+    divergence from the working-tree reader.</p>
+
+    <h2 id="acnwp-guard-follow-ons-index-reader">The commit check reads the index</h2>
+    <p>A review found the first form of the check still decided from the wrong
+    content: the candidates came from the index (<code>--cached</code>) but
+    <code>_worktree_path_text</code> read the working-tree file, so a file
+    staged while it named a worktree path and then edited in the working tree
+    without restaging passed the hook while the index blob still named the
+    root. <code>worktree_path_index_text</code> reads the staged blob and
+    <code>relativize --check</code> passes it into
+    <code>worktree_path_offenders</code>; the working-tree reader stays for the
+    repository test. Both readers are public, because
+    <code>nova/database/scripts.py</code> and the guard test import them across
+    modules. A test stages a file naming a worktree path, rewrites the working
+    copy without restaging, and asserts the index reader reports it while the
+    working-tree reader does not.</p>
 
     <h2 id="acnwp-guard-follow-ons-gates">Gates and negative controls</h2>
     <ul>
       <li><strong>Gate (a).</strong> From the worktree with
       <code>PYTHONPATH</code> set to it, <code>pytest
       tests/test_artifacts_carry_no_worktree_paths.py tests/test_filepath.py</code>
-      passes: 44 passed, 3 skipped, EXIT=0 (<code>gate_a.log</code>). The guard
-      file alone reports 1 passed in 4.63 s of pytest time (8.58 s including
-      the <code>uv run</code> wrapper), under the ten-second bar
-      (<code>guard_alone.log</code>).</li>
+      passes: 46 passed, 3 skipped, EXIT=0 (<code>gate_a.log</code>). The guard
+      file alone reports 1 passed in 4.07 s of pytest time, under the
+      ten-second bar (<code>guard_alone.log</code>).</li>
       <li><strong>Negative control b1.</strong> A scratch git tree carrying a
       binary file that names a worktree path makes the guard test fail naming
       <code>artifact.bin</code>: <code>FAILED</code>, EXIT=1
@@ -107,6 +126,12 @@
       forced to return nothing, the guard test fails on its positive control
       (<code>the candidate search returned nothing it is known to hold ...:
       candidates=[]</code>), EXIT=1 (<code>negctl_b3.log</code>).</li>
+      <li><strong>Negative control d.</strong> A file staged while it named a
+      worktree path, then rewritten in the working tree without restaging: the
+      pre-fix check at <code>dc944c415</code> reports clean (EXIT=0) while the
+      fixed check reports <code>receipt.json</code> (EXIT=1), and the new
+      divergence test errors against the pre-fix modules on the missing
+      <code>worktree_path_index_text</code> (<code>negctl_d.log</code>).</li>
     </ul>
 
     <h2 id="acnwp-guard-follow-ons-existing-tests">Existing test files that import a changed module</h2>
@@ -122,11 +147,15 @@
 
     <p>No figure is warranted for this node: the change is a guard, two
     argument signatures and a record sentence, with no spatial or plotted
-    relationship to show. Surface accounting: two public definitions are added
-    to <code>nova/database/filepath.py</code>, the dump helper and the
-    candidate search; the shared reader is a module-private helper
-    (<code>_worktree_path_text</code>) so the count matches the plan, and the
-    search retires the three private enumerations named above.</p>
+    relationship to show. Surface accounting: the plan's §6 refinement names
+    two public definitions -- the dump helper and the candidate search. The
+    node adds a third and fourth public definition to
+    <code>nova/database/filepath.py</code>, the two content readers
+    <code>worktree_path_text</code> (working tree) and
+    <code>worktree_path_index_text</code> (staged blob), because
+    <code>nova/database/scripts.py</code> and the guard test import them across
+    modules and a private name imported across modules is the defect the review
+    named. The search retires the three private enumerations named above.</p>
   </main>
 </body>
 </html>

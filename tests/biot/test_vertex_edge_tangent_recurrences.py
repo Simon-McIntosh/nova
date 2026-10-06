@@ -47,6 +47,10 @@ BULK = 7
 MOMENTS = 12
 FAMILY = 10
 NODES = 128
+# A program this small compiles in a tenth of a second, where scheduler noise is
+# a multiple of the difference between arms, so each arm keeps the fastest of
+# this many fresh, cache-disabled processes.
+COMPILE_REPEATS = 3
 
 
 def _load(name, path):
@@ -508,7 +512,13 @@ def _cold_compile(name, arm):
 @pytest.mark.slow
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
-    rows = {arm: _cold_compile(name, arm) for arm in ("primal", "tangent", "jvp")}
+    rows = {
+        arm: min(
+            (_cold_compile(name, arm) for _ in range(COMPILE_REPEATS)),
+            key=lambda row: row["compile_seconds"],
+        )
+        for arm in ("primal", "tangent", "jvp")
+    }
     for arm, row in rows.items():
         print(f"COMPILE {name} {arm} seconds={row['compile_seconds']:.3f} "
               f"equations={row['equations']} hits={row['cache_hits']}")  # fmt: skip

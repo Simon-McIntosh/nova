@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-range-tangent-recurrences">
+<meta name="plan-title" content="Range-function tangent recurrences">
+<meta name="plan-summary" content="Private tangents of the 13 range-function operations in nova/biot/rangefunction.py agree with jax.jvp of the base exactly (maximum 0 on 10,000 unmasked samples each) and compile within 2.6 times their primal. Every truncation fails and every primal is bit-identical.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="a86bc1900,a8a1a2362">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="passed">
+<meta name="plan-environment" content="Shared nova virtualenv; every row run in place on fleet job 1277272 (CPU, JAX_PLATFORMS=cpu); cold compiles in fresh cache-disabled subprocesses">
+<title>Range-function tangent recurrences | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-range-tangent-recurrences-record">Range-function tangent recurrences</h1>
+<p id="cfs-range-tangent-recurrences-summary">The jaxpr of <code>packed_analytic_moments</code> on the five-sided test section reaches these named programs from <code>nova/biot/rangefunction.py</code>: <code>harmonic_multiply</code>, <code>harmonic_add</code>, <code>harmonic_scale</code>, <code>range_function</code>, <code>paired_range_function</code>, <code>product</code>, <code>total</code>, <code>scaled</code>, <code>across_the_range</code>, <code>sine_squared_times</code>, <code>deflate</code> and <code>contract</code>, plus the two inner steps <code>_harmonic_pair_step</code> and <code>_product_sum_step</code>. It reaches no other paired form, and not <code>rising_integral</code>, which is covered anyway because it is built from the same recurrences. Each has a private tangent returning the <code>(primal, tangent)</code> structure <code>jax.jvp</code> returns, and none calls <code>jax.jvp</code>, <code>jax.grad</code> or <code>jax.jacfwd</code>. The point jet reaches no elliptic call inside these operations, so no elliptic tangent is reused. The primal functions are untouched.</p>
+<p id="cfs-range-tangent-recurrences-form">Every operation is polynomial in its coefficients, so each tangent is the same loop carried once more with the product rule applied term by term, in the order and arrangement <code>jax.jvp</code> uses. A known-zero tangent, such as the constant harmonic basis of the two ends, is <code>None</code> and its term is left out, as <code>jax.jvp</code> leaves it out. Each loop body is its own staged program, so its compiled body is shared across call sites. All 13 are unrolled exact forms: none needed a scan, because the exact form already compiles within three times its primal (the tangent of <code>harmonic_moments</code>, which did not, belongs to the elliptic family). The wrapping of the point jet in a custom derivative is a later step and is not done here.</p>
+<table id="cfs-range-tangent-recurrences-rows">
+<caption>Tangent identity against jax.jvp of the base revision on 10,000 unmasked samples per operation (coefficient magnitudes spread over sixty decades, the first 100 samples exact zeros), the same identity with one recurrence term dropped, the declared truncation applied to the identity rows themselves, and cold CPU compile in fresh processes with the persistent cache off and zero cache hits. Bound 1e-13 for every row; the base jvp was finite on every sample, so no sample was excluded and none needed a higher-precision reference. Calls is the number of staged calls in the jaxpr of the point moments. Equations are tangent / primal.</caption>
+<thead><tr><th>operation</th><th>calls in jet</th><th>identity max</th><th>covered [%]</th><th>truncated max</th><th>declared mutation max</th><th>primal compile [s]</th><th>tangent compile [s]</th><th>jax.jvp compile [s]</th><th>tangent / primal</th><th>equations</th></tr></thead>
+<tbody>
+<tr><td>harmonic_multiply</td><td>443</td><td>0</td><td>100</td><td>1.7e+03</td><td>1.7e+03</td><td>0.109</td><td>0.229</td><td>0.188</td><td>2.10</td><td>548 / 223</td></tr>
+<tr><td>harmonic_add</td><td>245</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.056</td><td>0.055</td><td>0.061</td><td>0.98</td><td>27 / 17</td></tr>
+<tr><td>harmonic_scale</td><td>76</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.046</td><td>0.058</td><td>0.058</td><td>1.26</td><td>26 / 7</td></tr>
+<tr><td>range_function</td><td>40</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.010</td><td>0.013</td><td>0.012</td><td>1.30</td><td>1 / 1</td></tr>
+<tr><td>paired_range_function</td><td>4</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.010</td><td>0.011</td><td>0.011</td><td>1.10</td><td>1 / 1</td></tr>
+<tr><td>product</td><td>101</td><td>0</td><td>100</td><td>2.0e+03</td><td>2.0e+03</td><td>0.131</td><td>0.341</td><td>0.363</td><td>2.60</td><td>862 / 405</td></tr>
+<tr><td>total</td><td>49</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.057</td><td>0.062</td><td>0.058</td><td>1.09</td><td>37 / 23</td></tr>
+<tr><td>scaled</td><td>61</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.049</td><td>0.059</td><td>0.058</td><td>1.20</td><td>35 / 10</td></tr>
+<tr><td>across_the_range</td><td>107</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.074</td><td>0.091</td><td>0.121</td><td>1.23</td><td>241 / 133</td></tr>
+<tr><td>sine_squared_times</td><td>15</td><td>0</td><td>100</td><td>1.0e+00</td><td>1.0e+00</td><td>0.045</td><td>0.049</td><td>0.049</td><td>1.09</td><td>31 / 16</td></tr>
+<tr><td>deflate</td><td>46</td><td>0</td><td>100</td><td>5.6e+03</td><td>5.6e+03</td><td>0.059</td><td>0.085</td><td>0.168</td><td>1.44</td><td>125 / 49</td></tr>
+<tr><td>contract</td><td>184</td><td>0</td><td>100</td><td>3.4e+03</td><td>3.4e+03</td><td>0.172</td><td>0.343</td><td>0.354</td><td>1.99</td><td>210 / 80</td></tr>
+<tr><td>rising_integral</td><td>0</td><td>0</td><td>100</td><td>9.0e+04</td><td>9.0e+04</td><td>0.127</td><td>0.310</td><td>0.191</td><td>2.44</td><td>348 / 179</td></tr>
+</tbody></table>
+<p id="cfs-range-tangent-recurrences-instrument">The identity maximum is exactly 0 on every row, which is a claim about the instrument before it is a claim about the tangents. Each tangent reproduces the base jvp bit for bit because it evaluates the same elementary operations in the same order. The truncation rows show the comparison can see a difference: dropping the second factor's tangent term from the pair step, the last coefficient from a series tangent, or the carried-over order from the deflation, gives maxima from 1 to 9e4 on all 13 rows. The primal half of each tangent equals the base function's output exactly, asserted for every leaf by the bit-identity rows.</p>
+<p id="cfs-range-tangent-recurrences-compile">The largest compile ratio is <code>product</code> at 2.60, then <code>rising_integral</code> at 2.45 and <code>harmonic_multiply</code> at 2.10. The one-equation rows (<code>range_function</code>, <code>paired_range_function</code>) compile in about 10 ms, so their ratios are timer noise, not a measurement. The compiles ran in place on the fleet allocation rather than in a separate <code>all_debug</code> job, each in its own subprocess with <code>JAX_ENABLE_COMPILATION_CACHE=false</code>. Each tangent compiles in between 0.5 and 1.6 times the time of <code>jax.jvp</code> of the base, so a differentiated jet's cost lies in its many call sites, not in any one tangent.</p>
+<p id="cfs-range-tangent-recurrences-control">The negative control sets <code>NOVA_TANGENT_TRUNCATION=1</code>, which applies the one-term truncation inside the identity rows. All 13 identity rows then fail against the 1e-13 bound.</p>
+</main></body></html>

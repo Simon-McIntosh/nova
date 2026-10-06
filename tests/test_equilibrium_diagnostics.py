@@ -570,10 +570,6 @@ GRID_RESOLUTION = 161
 CONTOUR_SAMPLINGS = (501, 1001, 2001, 8001)
 GRID_RESOLUTIONS = (21, 41, 81)
 QUADRATURE_ORDER_FLOOR = 1.8
-RECEIPT_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json"
-)
 
 
 def _contour_combination(row, contour, radial, vertical):
@@ -623,7 +619,9 @@ def _grid_imaged_contour_field(case, lattice, contour):
     return np.asarray(stencil(field.radial)), np.asarray(stencil(field.vertical))
 
 
-def test_grid_imaged_biot_field_converges_to_the_volume_definition():
+def test_grid_imaged_biot_field_converges_to_the_volume_definition(
+    tmp_path: Path,
+):
     """The grid-imaged route converges at the order its quadrature predicts.
 
     The positive control images analytic Biot field values through one fixed
@@ -705,8 +703,7 @@ def test_grid_imaged_biot_field_converges_to_the_volume_definition():
         ),
     }
     print(json.dumps(receipt, indent=2))
-    RECEIPT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    RECEIPT_PATH.write_text(json.dumps(receipt, indent=2) + "\n")
+    (tmp_path / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
 
     assert order > QUADRATURE_ORDER_FLOOR, (
         f"contour quadrature fitted order {order:.3f} at samplings "

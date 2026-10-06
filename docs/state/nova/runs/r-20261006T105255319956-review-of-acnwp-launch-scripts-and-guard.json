@@ -497,6 +497,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "a04e8ff81190a1131a4b75742f220001fc533b34",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": true,
+    "process_stopped_pid": 1954873,
+    "scratch_bytes": 38593,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261006T105255319956-review-of-acnwp-launch-scripts-and-guard",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 38593,
+        "path": "/tmp/reckon-crew-scratch/r-20261006T105255319956-review-of-acnwp-launch-scripts-and-guard"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-acnwp-launch-scripts-and-guard",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

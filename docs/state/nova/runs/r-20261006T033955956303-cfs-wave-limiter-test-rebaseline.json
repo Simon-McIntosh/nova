@@ -1,0 +1,486 @@
+{
+  "agent": {
+    "alias": "sonnet 5.5",
+    "backend": "claude",
+    "effort": "high",
+    "launch": "cli",
+    "model": "claude-sonnet-5-5",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "claude",
+  "base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": 3.2650046,
+    "cost_usd_cumulative": 3.2650046,
+    "detail": "backend reports utilisation and reset time",
+    "headroom": "known",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": "seven_day",
+    "refusal": false,
+    "resets_at": "2026-10-11T06:00:00Z",
+    "surpassed_threshold": null,
+    "threshold_status": "allowed_warning",
+    "tokens": {
+      "cache_creation_input_tokens": 186526,
+      "cache_creation_input_tokens_cumulative": 186526,
+      "cache_read_input_tokens": 9973673,
+      "cache_read_input_tokens_cumulative": 9973673,
+      "fallback_credit": null,
+      "inference_geo": "not_available",
+      "input_tokens": 138,
+      "input_tokens_cumulative": 138,
+      "output_tokens": 52389,
+      "output_tokens_cumulative": 52389,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": 62.0
+  },
+  "changed_lines": {
+    "added": 77,
+    "files": 3,
+    "removed": 16
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "test_coarse_diverted_exact_field_admits_axis_and_saddle",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "run_function": {
+        "line": 396,
+        "name": "test_forward_census_exact_diverted_oracle",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 412
+    },
+    {
+      "existing_function": {
+        "line": 154,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 144
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 144
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 154,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 159
+    },
+    {
+      "existing_function": {
+        "line": 204,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 154,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 159
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 209
+    },
+    {
+      "existing_function": {
+        "line": 154,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 204,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 209
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "3056ab2e24799636ffe06cbf42b04d341c2ea7e1",
+    "9ca9dfd12ee0ee806ff993cd06e403698fc86aab"
+  ],
+  "completed_at": "2026-10-06T04:21:27.249Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T03:40:36Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "benchmarks/limiter_read_resolution_audit.py",
+    "benchmarks/wall_at_cell_pitch.py",
+    "n-1)//2",
+    "scripts/analytic_oracle_fixtures",
+    "5.4k"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wave-limiter-test-rebaseline uv run --no-sync pytest -p no:cacheprovider tests/test_topology_limiter_contact.py -v",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline/logs/after_suite_combined.log"
+  },
+  "impl_move": {
+    "at_complete": 0.16666666666666666,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "a test rebaseline beside the section 2 landing; no section advances",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "claude",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'claude'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-06T04:40:00.105914+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T10:09:47.079Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-04T06:00:00Z",
+    "seconds_until_reset": 0,
+    "state": "quiet",
+    "utilisation_pct": 94.0
+  },
+  "lane_declaration": {
+    "backend": "claude",
+    "headroom": "unknown",
+    "metered": true,
+    "observed_at": "2026-10-02T10:09:47.079Z",
+    "read_at": "2026-10-06T03:40:00Z",
+    "resolved_backend": "claude",
+    "utilisation_pct": 94.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T04:21:27.249Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline/manifest.md",
+  "member": "disposable-r-20261006T033955956303-cfs-wave-limiter-test-rebaseline",
+  "negative_control": {
+    "added_failure_ids": [
+      "::test_limiter_contact_is_spline_authored_at_analytic_tangency",
+      "::test_weak_position_error_is_second_order_between_241_and_481"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_first_moment_centroid_row.py::test_analytic_first_moment_centroid_has_derived_tolerance",
+      "tests/test_first_moment_centroid_row.py::test_certificate_pair_carries_analytic_first_moment_tolerance",
+      "tests/test_forward_census.py::test_forward_census_exact_diverted_oracle",
+      "tests/test_topology_limiter_contact.py::test_limiter_contact_is_spline_authored_at_analytic_tangency",
+      "tests/test_topology_limiter_contact.py::test_weak_position_error_is_second_order_between_241_and_481"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "::test_limiter_contact_is_spline_authored_at_analytic_tangency",
+      "::test_weak_position_error_is_second_order_between_241_and_481"
+    ],
+    "declaration": "the old index-based tangency helper, run once against the repaired wall in a scratch copy, reads the inboard vertex and fails the sub-micrometre contact assertion",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline/logs/negative_control_old_index.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline/logs/negative_control_old_index.log",
+    "test_paths": [
+      "tests/test_first_moment_centroid_row.py",
+      "tests/test_forward_census.py",
+      "tests/test_topology_limiter_contact.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-wave-limiter-test-rebaseline",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1170,
+          "cached_input_tokens": 864452,
+          "input_tokens": 865624,
+          "output_tokens": 712,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 866336,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Bring the tests that still encode the old intruding limiter wall into agreement with the repaired fixture, keeping every physical claim they make. The wave integration measurement (report /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001835698222-cfs-wave-integration-suite/report.md) attributes five added failures to the limiter repair bf31213b9 in scripts/analytic_oracle_fixtures/measure.py: tests/test_topology_limiter_contact.py::test_limiter_contact_is_spline_authored_at_analytic_tangency and ::test_weak_position_error_is_second_order_between_241_and_481 (contact misses the test-derived tangency by 4.06 m), tests/test_first_moment_centroid_row.py::test_analytic_first_moment_centroid_has_derived_tolerance and ::test_certificate_pair_carries_analytic_first_moment_tolerance (derived tolerance 2.28e-4 against a 1e-4 bound), and tests/test_forward_census.py::test_forward_census_exact_diverted_oracle (341 cells against 342). The contact failure is an index convention: _designed_tangency reads wall[(n-1)//2], the outboard vertex of the old construction, but the repaired limiter_contour starts its supporting lines at the outboard contact, so that index now reads the inboard side (R 3.738 m against the contact at 7.8014 m), and the contact is the midpoint of a short vertical edge rather than a vertex. Done when: (1) scripts/analytic_oracle_fixtures is held by a peer run and is not in this grant, so the fixture does not change here: each consumer finds the designed contact geometrically from the wall it is given (the midpoint of the wall edge at maximum major radius that crosses the midplane, which is the tangent contact edge of the repaired construction), through one small helper in the test module that owns the contact assertions, never by a vertex index; grep every consumer of limiter_contour and of the wall index convention under tests/, benchmarks/ and scripts/ (at least tests/test_topology_limiter_contact.py, tests/equilibrium/test_topology_read.py, tests/test_analytic_oracle_limiter_wall.py, tests/imas/test_diiid_vessel_hex_mesh.py, tests/imas/test_diiid_passive.py and the limiter benchmarks) and state for each whether it is affected; the invariant test tests/test_analytic_oracle_limiter_wall.py keeps passing with its chord control failing; (2) the contact tests pass with their sub-micrometre tangency and second-order convergence claims intact, measured against the designed contact, never with a loosened bound; (3) for the first-moment tolerance and the 341-cell census, establish from the fixture why the derived values moved (the old wall clipped the analytic plasma, so a changed region is expected), recompute the expectation from the analytic state and the repaired wall, and change a pinned number only with that derivation written in the test's docstring and in the manifest; if a derived quantity moved for a reason other than the wall no longer clipping the plasma, stop and report it; (4) no change to nova/ source or to scripts/analytic_oracle_fixtures; if the clean fix needs the fixture to expose its designed contact, record that under follow_ons for after the peer run lands. If tests/equilibrium/test_topology_read.py needs a change, report it instead, because another run holds it. Every check runs on compute or in place on the existing fleet allocation when the shell has SLURM_JOB_ID set, never as a heavy job on the login node; a single test module that finishes in seconds may run on the login node with JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH set to the run worktree (orientation_worktree in the manifest) uv run --no-sync pytest -p no:cacheprovider. Run each test module in its own fresh process, capture each run to one log under the run directory, and name every log in the manifest. Every uv command carries --no-sync and nothing runs uv sync. Judge by delta against the base revision (orientation_base_sha) for the same modules, and record baseline_suite and after_suite with module-qualified failure ids. Commit with conventional subjects and bodies; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Bring the five tests that encode the old intruding limiter wall into agreement with the repaired fixture, keeping their physical claims: find the designed contact geometrically rather than by vertex index, and derive every moved number.",
+    "id": "cfs-wave-limiter-test-rebaseline",
+    "lane_declaration": {
+      "backend": "claude",
+      "headroom": "unknown",
+      "metered": true,
+      "observed_at": "2026-10-02T10:09:47.079Z",
+      "read_at": "2026-10-06T03:40:00Z",
+      "resolved_backend": "claude",
+      "utilisation_pct": 94.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline/manifest.md",
+    "negative_control": "the old index-based tangency helper, run once against the repaired wall in a scratch copy, reads the inboard vertex and fails the sub-micrometre contact assertion",
+    "plan": "converged-forward-solve",
+    "requested_backend": "claude",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_topology_limiter_contact.py",
+      "tests/test_first_moment_centroid_row.py",
+      "tests/test_forward_census.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-wave-limiter-test-rebaseline.html",
+      "docs/figures/converged-forward-solve/cfs-wave-limiter-test-rebaseline"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "claude",
+    "member": null,
+    "node": "cfs-wave-limiter-test-rebaseline",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T03:40:09.916465+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5004.319,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9ca9dfd12ee0ee806ff993cd06e403698fc86aab",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+    "reviewed_head_sha": "9ca9dfd12ee0ee806ff993cd06e403698fc86aab",
+    "scores": {
+      "durability": 15,
+      "evidence": 15,
+      "fit": 18,
+      "goal_fidelity": 15,
+      "reuse": 17,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 100
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T033955956303-cfs-wave-limiter-test-rebaseline",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "d82a1066-516f-4c21-87bf-487b6e746a07",
+  "session_model": "claude-sonnet-5-5",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 9973673,
+    "cumulative_input_tokens": 10160337,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+    "elapsed_seconds": 2424.594,
+    "generated_tokens": 52389,
+    "generation_seconds": 434.169,
+    "input_budget_tokens": 1000000,
+    "input_utilisation_pct": 19.7,
+    "machine_seconds": 1990.425,
+    "peak_input_tokens": 197094,
+    "tokens_per_second": 120.66,
+    "wall_tokens_per_second": 21.61
+  },
+  "time_budget": "60m",
+  "tool_steps": 73.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2451,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T04:21:31Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T03:40:54Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T033955956303-cfs-wave-limiter-test-rebaseline",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 503,
+    "worker_pid": 4174122
+  },
+  "worker_seconds": 2389,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

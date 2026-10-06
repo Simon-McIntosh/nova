@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="80">
+<meta name="plan-version" content="81">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -287,7 +287,10 @@
     <div class="r-comment-body"><p>Private tangents of the 15 elliptic helpers the point jet reaches all compile within three times their primal in one cold-compile all_debug job (harmonic_moments 1.49x, down from 41.6x; worst cn_pole_moment 2.97x); scanned tangents (complete_kind, harmonic_moments, harmonic_pole_moments and mirrored, under the lead's 2026-10-06 ruling) match jax.jvp of the base to at most 1.09e-10 against a 1e-9 bound, the unrolled rest exactly, every one-term truncation fails, and the primal is bit-identical to the base.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T040642346894-review-of-cfs-elliptic-tangent-recurrences" data-who="reckon-build" data-when="2026-10-06T04:17:59.078Z">
-    <div class="r-comment-body"><p>Independent review of r-20261006T022907188945-cfs-elliptic-tangent-recurrences at head 8794c425e scores all six dimensions in 0..20 (goal_fidelity 18, evidence 14, scope_discipline 19, durability 19, fit 19, reuse 16; total 105), records the reviewed pair de54856c..8794c425e and derives added_failure_count 0 with no added ids from the reviewed run&#x27;s own base and head suite logs, with four follow-on findings and no blocking ones.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261006T022907188945-cfs-elliptic-tangent-recurrences at head 8794c425e scores all six dimensions in 0..20 (goal_fidelity 18, evidence 14, scope_discipline 19, durability 19, fit 19, reuse 16; total 105), records the reviewed pair de54856c..8794c425e and derives added_failure_count 0 with no added ids from the reviewed run's own base and head suite logs, with four follow-on findings and no blocking ones.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T033955956303-cfs-wave-limiter-test-rebaseline" data-who="reckon-build" data-when="2026-10-06T04:21:27.249Z">
+    <div class="r-comment-body"><p>Five tests that encoded the old intruding wall now agree with the circumscribing wall: the contact is found from the wall geometry (midpoint of the max-R midplane-crossing edge, 7.80139579 m, sub-1e-12 m agreement), the first-moment residual (2.28e-4) is bounded relative to the 6.3e-3 centre-only error, and the diverted fine rung pins 341 cells; 9 + 3 + 11 passed at head against 2 + 2 + 1 failing at base.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

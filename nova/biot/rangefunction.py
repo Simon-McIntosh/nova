@@ -528,3 +528,363 @@ def _harmonic_pair_step(rising, falling, one, other, *, coincident):
 def _product_sum_step(total_value, coefficient, moment):
     """Retain the multiply then accumulate expression at each term."""
     return total_value + coefficient * moment
+
+
+# Tangents of the operations above, each ``(primal, tangent)`` in the structure
+# ``jax.jvp`` gives for the function it is named after.  Every operation here is
+# polynomial in its coefficients, so a tangent is the same recurrence carried
+# once more with the product rule applied term by term -- written in the order
+# and arrangement ``jax.jvp`` uses, because a tangent coefficient is often a
+# cancellation of terms far larger than itself and two arrangements that differ
+# by an ulp per term would differ in the leading digits of the result.
+# ``None`` is a tangent known to be zero (a constant such as the harmonic basis
+# of the two ends), and its term is left out rather than added as zero, as
+# ``jax.jvp`` leaves it out.  A series' tangent is a list of the same length.
+# Unrolled forms are used throughout: the loops are over the short static
+# lengths the reductions carry, and each step is its own staged program so its
+# compiled body is shared across every call site.
+
+
+def _tangent_sum(*tangents):
+    """Return the sum of the tangents that are present, or ``None``."""
+    present = [tangent for tangent in tangents if tangent is not None]
+    if not present:
+        return None
+    total_value = present[0]
+    for tangent in present[1:]:
+        total_value = total_value + tangent
+    return total_value
+
+
+def _tangent_difference(d_left, d_right):
+    """Return the tangent of ``left - right``."""
+    if d_right is None:
+        return d_left
+    if d_left is None:
+        return -d_right
+    return d_left - d_right
+
+
+def _product_tangent(left, d_left, right, d_right):
+    """Return the tangent of ``left * right`` by the product rule."""
+    return _tangent_sum(
+        None if d_left is None else d_left * right,
+        None if d_right is None else left * d_right,
+    )
+
+
+def _scale_tangent(factor, tangent):
+    """Return the tangent of ``factor * value`` for a constant factor."""
+    return None if tangent is None else factor * tangent
+
+
+def _series_tangent(series: list, tangent) -> list:
+    """Return a series' tangent as a list of its length."""
+    return [None] * len(series) if tangent is None else list(tangent)
+
+
+@_array_program
+def _harmonic_pair_step_tangent(
+    d_rising, d_falling, one, d_one, other, d_other, *, coincident
+):
+    """Return the tangent of :func:`_harmonic_pair_step`'s two accumulators."""
+    d_term = _product_tangent(0.5 * one, _scale_tangent(0.5, d_one), other, d_other)
+    d_rising = _tangent_sum(d_rising, d_term)
+    d_falling = _tangent_sum(d_rising if coincident else d_falling, d_term)
+    return d_rising, d_falling
+
+
+@_array_program
+def _harmonic_multiply_tangent(left: list, d_left, right: list, d_right):
+    """Return :func:`harmonic_multiply` and its tangent in both factors."""
+    value = harmonic_multiply(left, right)
+    if not left or not right:
+        return value, []
+    d_left = _series_tangent(left, d_left)
+    d_right = _series_tangent(right, d_right)
+    d_out: list = [None] * (len(left) + len(right) - 1)
+    for index, one in enumerate(left):
+        for other_index, other in enumerate(right):
+            rising = index + other_index
+            falling = abs(index - other_index)
+            d_out[rising], d_out[falling] = _harmonic_pair_step_tangent(
+                d_out[rising],
+                d_out[falling],
+                one,
+                d_left[index],
+                other,
+                d_right[other_index],
+                coincident=rising == falling,
+            )
+    return value, d_out
+
+
+@_array_program
+def _harmonic_sum_tangent(series: tuple, d_series: tuple):
+    """Return :func:`harmonic_add` of the series and its tangent."""
+    value = harmonic_add(*series)
+    d_out: list = [None] * len(value)
+    for term, d_term in zip(series, d_series, strict=True):
+        d_term = _series_tangent(term, d_term)
+        for index in range(len(term)):
+            d_out[index] = _tangent_sum(d_out[index], d_term[index])
+    return value, d_out
+
+
+@_array_program
+def _harmonic_scale_tangent(series: list, d_series, factor, d_factor):
+    """Return :func:`harmonic_scale` and its tangent in series and factor."""
+    d_series = _series_tangent(series, d_series)
+    return harmonic_scale(series, factor), [
+        _product_tangent(coefficient, d_coefficient, factor, d_factor)
+        for coefficient, d_coefficient in zip(series, d_series, strict=True)
+    ]
+
+
+@_array_program
+def _range_function_tangent(bulk: list, d_bulk, near, d_near, far, d_far):
+    """Return :func:`range_function` and its tangent, which is the identity."""
+    return (bulk, near, far), (d_bulk, d_near, d_far)
+
+
+@_array_program
+def _paired_range_function_tangent(bulk: list, d_bulk, near, d_near, far, d_far):
+    """Return :func:`paired_range_function` and its tangent, the identity."""
+    return (bulk, near, far), (d_bulk, d_near, d_far)
+
+
+def _ends_series_tangent(near, d_near, far, d_far):
+    """Return the two-term series ``[(near + far)/2, (far - near)/2]`` and tangent."""
+    return (
+        [0.5 * (near + far), 0.5 * (far - near)],
+        [
+            _scale_tangent(0.5, _tangent_sum(d_near, d_far)),
+            _scale_tangent(0.5, _tangent_difference(d_far, d_near)),
+        ],
+    )
+
+
+@_array_program
+def _product_range_tangent(left: tuple, d_left: tuple, right: tuple, d_right: tuple):
+    """Return :func:`product` and its tangent in both range functions."""
+    bulk, near, far = left
+    d_bulk, d_near, d_far = d_left
+    other_bulk, other_near, other_far = right
+    d_other_bulk, d_other_near, d_other_far = d_right
+    cross, d_cross = _harmonic_multiply_tangent(bulk, d_bulk, other_bulk, d_other_bulk)
+    both, d_both = _harmonic_multiply_tangent(_BOTH_ENDS, None, cross, d_cross)
+    ends, d_ends = _ends_series_tangent(near, d_near, far, d_far)
+    other_ends, d_other_ends = _ends_series_tangent(
+        other_near, d_other_near, other_far, d_other_far
+    )
+    onto_other, d_onto_other = _harmonic_multiply_tangent(
+        ends, d_ends, other_bulk, d_other_bulk
+    )
+    onto_bulk, d_onto_bulk = _harmonic_multiply_tangent(
+        other_ends, d_other_ends, bulk, d_bulk
+    )
+    gap = near - far
+    other_gap = other_near - other_far
+    d_gap = _tangent_difference(d_near, d_far)
+    d_other_gap = _tangent_difference(d_other_near, d_other_far)
+    constant = -gap * other_gap
+    d_constant = _product_tangent(
+        -gap, None if d_gap is None else -d_gap, other_gap, d_other_gap
+    )
+    series, d_series = _harmonic_sum_tangent(
+        (both, onto_other, onto_bulk, [constant]),
+        (d_both, d_onto_other, d_onto_bulk, [d_constant]),
+    )
+    return (series, near * other_near, far * other_far), (
+        d_series,
+        _product_tangent(near, d_near, other_near, d_other_near),
+        _product_tangent(far, d_far, other_far, d_other_far),
+    )
+
+
+@_array_program
+def _total_tangent(terms: tuple, d_terms: tuple):
+    """Return :func:`total` of the range functions and its tangent."""
+    series, d_series = _harmonic_sum_tangent(
+        tuple(term[0] for term in terms), tuple(term[0] for term in d_terms)
+    )
+    return (
+        (series, sum(term[1] for term in terms), sum(term[2] for term in terms)),
+        (
+            d_series,
+            _tangent_sum(*[term[1] for term in d_terms]),
+            _tangent_sum(*[term[2] for term in d_terms]),
+        ),
+    )
+
+
+@_array_program
+def _scaled_tangent(term: tuple, d_term: tuple, factor, d_factor):
+    """Return :func:`scaled` and its tangent in the range function and factor."""
+    series, d_series = _harmonic_scale_tangent(term[0], d_term[0], factor, d_factor)
+    return (series, term[1] * factor, term[2] * factor), (
+        d_series,
+        _product_tangent(term[1], d_term[1], factor, d_factor),
+        _product_tangent(term[2], d_term[2], factor, d_factor),
+    )
+
+
+@_array_program
+def _across_the_range_tangent(term: tuple, d_term: tuple):
+    """Return :func:`across_the_range` and its tangent."""
+    bulk, near, far = term
+    d_bulk, d_near, d_far = d_term
+    ends, d_ends = _ends_series_tangent(near, d_near, far, d_far)
+    spread, d_spread = _harmonic_multiply_tangent(_BOTH_ENDS, None, bulk, d_bulk)
+    return _harmonic_sum_tangent((ends, spread), (d_ends, d_spread))
+
+
+@_array_program
+def _sine_squared_times_tangent(series: list, d_series):
+    """Return :func:`sine_squared_times` and its tangent."""
+    bulk, d_bulk = _harmonic_scale_tangent(series, d_series, 4.0, None)
+    d_first = _series_tangent(series, d_series)[0]
+    return (bulk, 0.0 * series[0], 0.0 * series[0]), (
+        d_bulk,
+        _scale_tangent(0.0, d_first),
+        _scale_tangent(0.0, d_first),
+    )
+
+
+@_array_program
+def _deflate_step_tangent(
+    coefficient, d_coefficient, root, d_root, current, d_current, upper, d_upper
+):
+    """Return one downward step of :func:`deflate` and its tangent."""
+    pull = 2.0 * root
+    d_pull = _scale_tangent(2.0, d_root)
+    value = 2.0 * coefficient + pull * current - upper
+    d_value = _tangent_difference(
+        _tangent_sum(
+            _scale_tangent(2.0, d_coefficient),
+            _product_tangent(pull, d_pull, current, d_current),
+        ),
+        d_upper,
+    )
+    return value, d_value
+
+
+@_array_program
+def _deflate_tangent(series: list, d_series, root, d_root):
+    """Return :func:`deflate` and its tangent in the series and the root.
+
+    The downward recursion is differentiated step by step, from the same start
+    and over the same orders, so the tangent is the same synthetic division
+    applied to the tangent series with the root's own tangent entering each step.
+    """
+    degree = len(series) - 1
+    d_series = _series_tangent(series, d_series)
+    if degree < 1:
+        return ([], series[0] if series else 0.0), ([], d_series[0] if series else None)
+    quotient: list = [0.0] * degree
+    d_quotient: list = [None] * degree
+    upper, d_upper = 0.0, None
+    current, d_current = 0.0, None
+    for order in range(degree, 1, -1):
+        (current, d_current), (upper, d_upper) = (
+            _deflate_step_tangent(
+                series[order],
+                d_series[order],
+                root,
+                d_root,
+                current,
+                d_current,
+                upper,
+                d_upper,
+            ),
+            (current, d_current),
+        )
+        quotient[order - 1] = current
+        d_quotient[order - 1] = d_current
+    quotient[0] = series[1] + root * current - 0.5 * upper
+    d_quotient[0] = _tangent_difference(
+        _tangent_sum(d_series[1], _product_tangent(root, d_root, current, d_current)),
+        _scale_tangent(0.5, d_upper),
+    )
+    remainder = series[0] + root * quotient[0] - 0.5 * current
+    d_remainder = _tangent_difference(
+        _tangent_sum(
+            d_series[0], _product_tangent(root, d_root, quotient[0], d_quotient[0])
+        ),
+        _scale_tangent(0.5, d_current),
+    )
+    return (quotient, remainder), (d_quotient, d_remainder)
+
+
+@_array_program
+def _product_sum_step_tangent(
+    d_total_value, coefficient, d_coefficient, moment, d_moment
+):
+    """Return the tangent of :func:`_product_sum_step`'s accumulator."""
+    return _tangent_sum(
+        d_total_value, _product_tangent(coefficient, d_coefficient, moment, d_moment)
+    )
+
+
+@_array_program
+def _contract_tangent(numerator: list, d_numerator, moments: list, d_moments):
+    """Return :func:`contract` and its tangent in the numerator and moments."""
+    d_numerator = _series_tangent(numerator, d_numerator)
+    d_moments = _series_tangent(moments, d_moments)
+    d_total_value = None
+    for order, coefficient in enumerate(numerator):
+        d_total_value = _product_sum_step_tangent(
+            d_total_value,
+            coefficient,
+            d_numerator[order],
+            moments[order],
+            d_moments[order],
+        )
+    return contract(numerator, moments), d_total_value
+
+
+@_array_program
+def _chebyshev_integral_tangent(series: list, d_series):
+    """Return :func:`_chebyshev_integral` and its tangent."""
+    d_series = _series_tangent(series, d_series)
+    value = _chebyshev_integral(series)
+    if not series:
+        return value, []
+    d_out: list = [_scale_tangent(0.0, d_series[0])] * (len(series) + 1)
+    for order, d_coefficient in enumerate(d_series):
+        if order == 0:
+            d_out[1] = _tangent_sum(d_out[1], d_coefficient)
+        elif order == 1:
+            d_out[2] = _tangent_sum(d_out[2], _scale_tangent(0.25, d_coefficient))
+        else:
+            d_out[order + 1] = _tangent_sum(
+                d_out[order + 1],
+                None if d_coefficient is None else (0.5 * d_coefficient) / (order + 1),
+            )
+            d_out[order - 1] = _tangent_difference(
+                d_out[order - 1],
+                None if d_coefficient is None else (0.5 * d_coefficient) / (order - 1),
+            )
+    return value, d_out
+
+
+@_array_program
+def _split_at_both_ends_tangent(series: list, d_series):
+    """Return :func:`_split_at_both_ends` and its tangent."""
+    (quotient, far), (d_quotient, d_far) = _deflate_tangent(series, d_series, 1.0, None)
+    (bulk, half), (d_bulk, d_half) = _deflate_tangent(quotient, d_quotient, -1.0, None)
+    scaled_bulk, d_scaled = _harmonic_scale_tangent(bulk, d_bulk, -4.0, None)
+    return (scaled_bulk, half, far), (d_scaled, d_half, d_far)
+
+
+@_array_program
+def _rising_integral_tangent(series: list, d_series):
+    """Return :func:`rising_integral` and its tangent."""
+    integral, d_integral = _chebyshev_integral_tangent(series, d_series)
+    halved, d_halved = _harmonic_scale_tangent(integral, d_integral, -0.5, None)
+    (bulk, half, _), (d_bulk, d_half, _) = _split_at_both_ends_tangent(halved, d_halved)
+    return (bulk, -2.0 * half, 0.0 * half), (
+        d_bulk,
+        _scale_tangent(-2.0, d_half),
+        _scale_tangent(0.0, d_half),
+    )

@@ -142,7 +142,10 @@ def test_topology_policy_round_trip():
     policy = replace(
         ForwardSolvePolicy(),
         topology=TopologyPolicy(
-            null_capacity=7, hessian_tolerance=1e-8, normal_form_radius=0.2
+            null_capacity=7,
+            hessian_tolerance=1e-8,
+            normal_form_radius=0.2,
+            normal_form_pitch_floor=0.0,
         ),
     )
     assert (
@@ -154,6 +157,10 @@ def test_topology_policy_round_trip():
     for invalid in (0.0, -1.0, np.nan, np.inf):
         with pytest.raises(ValueError):
             TopologyPolicy(hessian_tolerance=invalid)
+    for invalid in (-1.0, np.nan, np.inf):
+        with pytest.raises(ValueError):
+            TopologyPolicy(normal_form_pitch_floor=invalid)
+    assert TopologyPolicy().normal_form_pitch_floor == 1.5
     executable = (
         jax.jit(lambda value: value.hessian_tolerance).lower(policy.topology).compile()
     )
@@ -1619,8 +1626,7 @@ def _symmetric_difference_measure(kind, oracle, geometry, result, tolerance=2e-1
     }
 
 
-@pytest.mark.parametrize("kind", ("limited", "diverted"))
-def test_topology_class_and_membership(kind):
+def _measure_membership(kind, *, pitch_floor=1.5, receipt_name="regular-cell"):
     import os
     from pathlib import Path
     from nova.equilibrium.topology import TopologyConvention, read
@@ -1637,7 +1643,9 @@ def test_topology_class_and_membership(kind):
         )
         radius = calibration["radius_m"]
         print("NORMAL_FORM_RADIUS " + json.dumps(calibration), flush=True)
-    policy = TopologyPolicy(normal_form_radius=radius)
+    policy = TopologyPolicy(
+        normal_form_radius=radius, normal_form_pitch_floor=pitch_floor
+    )
     rows = []
     root = os.environ.get("NOVA_TOPOLOGY_EVIDENCE_DIR")
     directory = Path(root) if root else None
@@ -1651,7 +1659,7 @@ def test_topology_class_and_membership(kind):
     for count in (132, 300, 550, 1074, 2616):
         geometry = _realised_hex_geometry(wall, count)
         effective_radius = (
-            max(radius, 1.5 * float(np.median(geometry.pitch)))
+            max(radius, pitch_floor * float(np.median(geometry.pitch)))
             if saddle is not None
             else 0.0
         )
@@ -1659,6 +1667,9 @@ def test_topology_class_and_membership(kind):
         result = evaluate(field, geometry, convention, rung_policy)
         jax.block_until_ready(result)
         assert result.valid and result.qualified
+        np.testing.assert_allclose(
+            result.normal_form_radius, effective_radius, atol=1e-14
+        )
         measure = _symmetric_difference_measure(kind, oracle, geometry, result)
         pitch = float(np.median(geometry.pitch))
         near = np.asarray(result.normal_form_cells)
@@ -1726,7 +1737,7 @@ def test_topology_class_and_membership(kind):
         rows.append(row)
         print("REGULAR_CELL_MEMBERSHIP " + json.dumps(row), flush=True)
         if directory is not None:
-            (directory / f"{kind}-regular-cell-rows.json").write_text(
+            (directory / f"{kind}-{receipt_name}-rows.json").write_text(
                 json.dumps(rows, indent=2) + "\n"
             )
         panel_error = (
@@ -1767,7 +1778,7 @@ def test_topology_class_and_membership(kind):
     }
     print("REGULAR_CELL_ORDERS " + json.dumps(summary), flush=True)
     if directory is not None:
-        (directory / f"{kind}-regular-cell-orders.json").write_text(
+        (directory / f"{kind}-{receipt_name}-orders.json").write_text(
             json.dumps(summary, indent=2) + "\n"
         )
     if os.environ.get("NOVA_TOPOLOGY_FIGURE_DIR"):
@@ -1784,6 +1795,12 @@ def test_topology_class_and_membership(kind):
             worst_cell=worst,
             suffix="-physical-worst",
         )
+    return rows, summary, oracle
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_topology_class_and_membership(kind):
+    rows, _, oracle = _measure_membership(kind)
     coefficient = 0.274714 if kind == "limited" else 2.1805365680219544
     for row in rows:
         budget = coefficient * (row["pitch"] / oracle.major_radius) ** 2
@@ -1923,22 +1940,32 @@ def _calibrate_normal_form_radius(oracle, field, finest_pitch):
 
 @pytest.mark.parametrize("kind", ("limited", "diverted"))
 def test_saddle_support_order(kind):
-    """The fixed physical partition measures the asymptotic smooth order."""
-    from pathlib import Path
-
-    root = (
-        Path(__file__).parents[2]
-        / "docs/figures/converged-forward-solve/cfs-topology-read"
+    """Fit current reads at fixed physical radius, independently of banked rows."""
+    rows, summary, _ = _measure_membership(
+        kind, pitch_floor=0.0, receipt_name="fixed-radius-current"
     )
-    rows = json.loads((root / f"{kind}-physical-rows.json").read_text())
     assert [row["cells"] for row in rows] == [132, 300, 550, 1074, 2616]
-    order = np.polyfit(
-        np.log([row["pitch"] for row in rows]),
-        np.log([row["smooth_max"] for row in rows]),
-        1,
-    )[0]
-    assert order >= 1.9
-    print("FIXED_RADIUS_ORDER", kind, float(order), flush=True)
+    assert len({row["normal_form_radius_m"] for row in rows}) == 1
+    order = summary["smooth_order"]
+    print("FIXED_RADIUS_ORDER", kind, order, flush=True)
+    assert order >= 1.9, f"smooth reconstruction order {order} is below 1.9: {rows}"
+
+
+@pytest.mark.parametrize("kind", ("limited", "diverted"))
+def test_saddle_order_evaluates_current_read(kind, monkeypatch):
+    """A disabled current read cannot be hidden by historical order receipts."""
+    from nova.equilibrium import topology
+
+    class ReadCalled(Exception):
+        pass
+
+    def refuse(*args, **kwargs):
+        raise ReadCalled("current read reached")
+
+    jax.clear_caches()
+    monkeypatch.setattr(topology, "read", refuse)
+    with pytest.raises(ReadCalled, match="current read reached"):
+        test_saddle_support_order(kind)
 
 
 @jax.tree_util.register_dataclass

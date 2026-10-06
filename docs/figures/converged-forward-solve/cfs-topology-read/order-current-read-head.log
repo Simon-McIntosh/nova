@@ -1,0 +1,23 @@
+revision=93895112d596e328a6d88b5d8f2070df3d732367 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=["/home/ITER/mcintos/Code/nova/.venv/bin/python", "-m", "pytest", "-p", "no:cacheprovider", "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py", "-vv", "-s", "--tb=short", "--timeout=1200"]
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
+rootdir: /home/ITER/mcintos
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+timeout: 1200.0s
+timeout method: signal
+timeout func_only: False
+collecting ... collected 2 items
+
+../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py::test_order_uses_current_read[limited] MEASUREMENT_MODULE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/equilibrium/topology.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+PASSED
+../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py::test_order_uses_current_read[diverted] MEASUREMENT_MODULE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/equilibrium/topology.py
+MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+NORMAL_FORM_RADIUS {"radius_m": 0.054806712567833996, "maximum_normal_displacement_m": 1.0412382334788027e-06, "displacement_budget_m": 1.0412382422448233e-06, "outside_radius_m": 0.05535477969351234, "outside_displacement_m": 1.083929830982108e-06, "finest_pitch_m": 0.03173193918821776, "area_budget_regular_units": 8.143058319198677e-05, "budget_coefficient": 0.233718, "samples_per_ray": 257, "oracle_root_residual_per_radian": 1.6123645260196994e-16}
+PASSED
+
+============================== 2 passed in 28.49s ==============================
+
+SUITE_COMPLETED=true
+EXIT=0

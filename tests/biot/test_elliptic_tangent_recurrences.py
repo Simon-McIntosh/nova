@@ -333,26 +333,27 @@ def _bound(name):
     return SCANNED_TOLERANCE if name in SCANNED else 0.0
 
 
-def _resolved(name, expected):
-    """Return the samples on which the base ``jax.jvp`` resolves the tangent.
+# Below this complement the second kind's tangent is a cancellation of terms of
+# order ``1/k'^2`` and ``jax.jvp`` of the base itself misses the classical
+# derivative by more than the scanned bound; there the scanned tangent is held
+# instead to be no less accurate than the base against that derivative.
+RESOLVED_COMPLEMENT = 1e-7
 
-    The second kind's tangent at a small complement is a cancellation of terms
-    of order ``1/k'^2`` down to one of order ``log(1/k')``, so ``jax.jvp`` of the
-    descent returns round-off there, not a derivative; only a tangent with
-    bit-identical arithmetic can follow it.  Those samples are the ones whose
-    base tangent misses the classical ``dE/dk'^2 = (K - E)/(2 k^2)`` by more than
-    the scanned bound, and they are excluded from the scanned identity and
-    counted.  Every other family resolves on the whole domain.
-    """
-    if name != "complete_kind":
-        return None
+
+def _classical_second_kind(name, expected):
+    """Return the complement, ``dE/dk'^2 = (K - E)/(2 k^2)`` times the tangent."""
     complement = np.asarray(CASES[name][3][0])
     d_complement = np.asarray(CASES[name][4][0])
     first, second = (np.asarray(value) for value in expected[0])
-    classical = d_complement * (first - second) / (2.0 * (1.0 - complement))
-    base = np.asarray(expected[1][1])
-    scale = np.where(classical == 0.0, 1.0, np.abs(classical))
-    return (complement > 0.0) & (np.abs(base - classical) / scale <= SCANNED_TOLERANCE)
+    return complement, d_complement * (first - second) / (2.0 * (1.0 - complement))
+
+
+def _resolved(name, expected):
+    """Return the samples on which ``jax.jvp`` of the base resolves the tangent."""
+    if name != "complete_kind":
+        return None
+    complement, _ = _classical_second_kind(name, expected)
+    return complement >= RESOLVED_COMPLEMENT
 
 
 def _masked(tree, mask):
@@ -387,6 +388,16 @@ def test_tangent_matches_base_jvp(name):
           f"unresolved_samples={excluded} whole_domain_max={whole:.3e}")  # fmt: skip
     assert primal == 0.0
     assert tangent <= _bound(name)
+    if name == "complete_kind":
+        complement, classical = _classical_second_kind(name, expected)
+        below = (complement > 0.0) & (complement < RESOLVED_COMPLEMENT)
+        scale = np.where(classical == 0.0, 1.0, np.abs(classical))
+        scanned = np.abs(np.asarray(got[1][1]) - classical) / scale
+        base = np.abs(np.asarray(expected[1][1]) - classical) / scale
+        print(f"CLASSICAL {name} below={RESOLVED_COMPLEMENT:g} "
+              f"scanned_max={scanned[below].max():.3e} "
+              f"base_jvp_max={base[below].max():.3e}")  # fmt: skip
+        assert scanned[below].max() <= 2.0 * base[below].max() + SCANNED_TOLERANCE
 
 
 def tangent_of(name):

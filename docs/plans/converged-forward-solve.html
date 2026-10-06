@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="71">
+<meta name="plan-version" content="72">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -263,6 +263,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T015404732285-cfs-kernel-derivative-rules" data-who="reckon-build" data-when="2026-10-06T02:19:38.455Z">
     <div class="r-comment-body"><p>Not landed; the custom-derivative-rule implementation exceeds a 60-minute node. Measured at f574e2817: the 132-cell kernel-backed read traces 1,373,538 expanded equations from 30 inlined kernel traces (20 value_gradient, 10 jacfwd evaluate). Cold CPU compile is 23.5 s for the primal value_gradient point kernel, while a single-direction jvp of its field rows does not finish in 420 s.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T001835698222-cfs-wave-integration-suite" data-who="reckon-build" data-when="2026-10-06T03:03:43Z">
+    <div class="r-comment-body"><p>Report-only measurement delivered: base 562 modules/158 failure IDs, head 566 modules/131 failure IDs; 9 added, 32 removed, 2 unmeasured after repeated SIGABRT; repo clean and no commit. Promotion blocked solely by commit-citation audit.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

@@ -46,6 +46,7 @@ from benchmarks.solovev_certificate import (
     _exact_state,
     _production_seed,
 )
+from nova.database.filepath import relativize_cprofile_dump
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium import fixed_point, reduced_newton
 from nova.equilibrium.forward_operator import ForwardFluxOperator
@@ -1089,6 +1090,7 @@ def _profile_cached_entry(
     profiler.disable()
     call_seconds = perf_counter() - started
     profiler.dump_stats(profile_path)
+    relativize_cprofile_dump(profile_path)
     stats = pstats.Stats(profiler).strip_dirs().sort_stats("cumulative")
     with text_path.open("w", encoding="utf-8") as stream:
         stats.stream = stream

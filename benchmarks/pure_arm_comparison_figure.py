@@ -15,21 +15,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import BoundaryNorm, ListedColormap, TwoSlopeNorm
 
-from nova.database.filepath import WORKTREE_ROOT
-
-
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PINNED_ROOT = (
-    Path("/home/ITER/mcintos/Code")
-    / ("." + WORKTREE_ROOT)
-    / "nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay"
-)
 BASELINE_CACHE = (
     ROOT / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
-)
-PINNED_CACHE = (
-    DEFAULT_PINNED_ROOT
-    / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
 )
 HEAD_RECEIPT = (
     ROOT / "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json"
@@ -419,7 +407,17 @@ def render(comparison: Path, residuals: Path, pinned_cache: Path) -> dict[str, o
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pinned-cache", type=Path, default=PINNED_CACHE)
+    parser.add_argument(
+        "--pinned-cache",
+        type=Path,
+        required=True,
+        help=(
+            "path to docs/figures/topology-visual-corroboration/"
+            "mast-topology-operands.npz inside a checkout of this repository at "
+            "the pinned revision; supply an existing worktree or clone, not a "
+            "removed one"
+        ),
+    )
     parser.add_argument("--comparison", type=Path, default=DEFAULT_COMPARISON)
     parser.add_argument("--residuals", type=Path, default=DEFAULT_RESIDUALS)
     arguments = parser.parse_args()

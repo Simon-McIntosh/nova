@@ -12,12 +12,16 @@ from nova.database.filepath import (
     WORKTREE_PATH_EXEMPTIONS,
     WORKTREE_ROOT,
     FilePath,
+    _worktree_path_text,
     relativize_worktree_paths,
     repository_relative,
+    worktree_path_candidates,
     worktree_path_offenders,
 )
 from nova.definitions import root_dir
 from nova.utilities.importmanager import mark_import
+
+ROOT = Path(__file__).resolve().parents[1]
 
 HOSTNAME = "sdcc-login04.iter.org"
 
@@ -268,6 +272,27 @@ def test_worktree_path_offenders_skips_the_exemption_set():
     offenders = worktree_path_offenders(contents, contents.__getitem__)
     assert offenders == ["docs/figures/x/a.json"]
     assert len(WORKTREE_PATH_EXEMPTIONS) == 4
+
+
+def test_worktree_path_text_decodes_a_binary_file():
+    """A reader returns decoded text, not '' -- a binary offender is visible."""
+    with tempfile.TemporaryDirectory() as directory:
+        Path(directory, "artifact.bin").write_bytes(
+            b"\x00\xff" + WORKTREE_ROOT.encode() + b"/nova-abc/s/n/x\x00"
+        )
+        text = _worktree_path_text(directory, "artifact.bin")
+    assert text != ""
+    assert WORKTREE_ROOT in text
+
+
+def test_worktree_path_candidates_search_the_working_tree():
+    candidates = worktree_path_candidates(ROOT)
+    assert "nova/database/filepath.py" in candidates
+
+
+def test_worktree_path_candidates_search_the_index():
+    candidates = worktree_path_candidates(ROOT, cached=True)
+    assert "nova/database/filepath.py" in candidates
 
 
 if __name__ == "__main__":

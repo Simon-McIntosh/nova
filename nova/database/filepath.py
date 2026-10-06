@@ -4,9 +4,11 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from functools import wraps
+import marshal
 import os
 from pathlib import Path, PurePosixPath
 import re
+import subprocess
 import sys
 from typing import Literal
 
@@ -129,6 +131,85 @@ def worktree_path_offenders(
         if WORKTREE_ROOT in read(path):
             offenders.append(path)
     return offenders
+
+
+def worktree_path_candidates(
+    root: str | os.PathLike,
+    *,
+    cached: bool = False,
+) -> list[str]:
+    """Return tracked paths whose contents name a worktree root.
+
+    ``git grep`` enumerates the candidates, so a scan is a search rather than a
+    full read of every tracked file and binary files are covered (``-a``). The
+    working tree is searched by default and the index with ``cached``, so the
+    commit-time check and the repository-wide test share one enumeration. This
+    function makes no scanning decision of its own: the caller passes the result
+    to :func:`worktree_path_offenders`.
+    """
+    command = ["git", "-C", str(root), "grep", "--no-color", "-l", "-a", "-F"]
+    if cached:
+        command.append("--cached")
+    command += ["-e", WORKTREE_ROOT]
+    completed = subprocess.run(command, capture_output=True, check=False)
+    if completed.returncode not in (0, 1):
+        raise RuntimeError(
+            "worktree-path candidate search failed: "
+            + completed.stderr.decode("utf-8", errors="replace").strip()
+        )
+    return [
+        name
+        for name in completed.stdout.decode("utf-8", errors="replace").splitlines()
+        if name
+    ]
+
+
+def _worktree_path_text(root: str | os.PathLike, path: str | os.PathLike) -> str:
+    """Return a tracked path's bytes decoded, replacing undecodable bytes.
+
+    The reader the candidate search's callers pass to
+    :func:`worktree_path_offenders`. Binary artifacts are read rather than
+    skipped, so a committed binary file that carries a worktree root is reported
+    instead of reading as text-free.
+    """
+    return (Path(root) / path).read_bytes().decode("utf-8", errors="replace")
+
+
+def relativize_cprofile_dump(path: str | os.PathLike) -> list[str]:
+    """Rewrite every recorded file path in a cProfile dump, in place.
+
+    A cProfile dump stores each frame's file path verbatim, so a profile written
+    from a worktree embeds that worktree's path. Each recorded path is rewritten
+    through :func:`relativize_worktree_paths` and the dump is written back in the
+    format :meth:`cProfile.Profile.dump_stats` produced -- a marshal of the
+    stats mapping, wrapped or bare. Returns the spans the rewrite left unmapped.
+    """
+    with open(path, "rb") as stream:
+        dump = marshal.load(stream)
+    wrapped = isinstance(dump, dict) and isinstance(dump.get("stats"), dict)
+    stats = dump["stats"] if wrapped else dump
+    unmapped: list[str] = []
+
+    def _path_key(key):
+        filename, line, name = key
+        mapped, spans = relativize_worktree_paths(filename)
+        unmapped.extend(spans)
+        return (mapped, line, name)
+
+    rewritten: dict = {}
+    for key, value in stats.items():
+        primitive, calls, self_time, cumulative, callers = value
+        rewritten[_path_key(key)] = (
+            primitive,
+            calls,
+            self_time,
+            cumulative,
+            {_path_key(caller): counts for caller, counts in callers.items()},
+        )
+    result = {**dump, "stats": rewritten} if wrapped else rewritten
+    with open(path, "wb") as stream:
+        marshal.dump(result, stream)
+    return unmapped
 
 
 def compute_provenance(

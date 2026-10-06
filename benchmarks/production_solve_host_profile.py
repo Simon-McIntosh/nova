@@ -37,6 +37,7 @@ import numpy as np
 
 from benchmarks import efit_forward_parity_slice as parity
 from benchmarks.receipt_raster_check import _profile_and_seed
+from nova.database.filepath import relativize_cprofile_dump
 from nova.equilibrium import fixed_point
 from nova.equilibrium.topology import TopologyClass
 from nova.jax.config import configure_dtypes, configure_persistent_compilation_cache
@@ -412,6 +413,7 @@ def measure(
     profiler.disable()
     stats_path.parent.mkdir(parents=True, exist_ok=True)
     profiler.dump_stats(str(stats_path))
+    relativize_cprofile_dump(stats_path)
     _write_stats_text(stats_path, stats_text_path)
     rows = _stat_rows(stats_path)
     trips = summary["active_set_trips"]

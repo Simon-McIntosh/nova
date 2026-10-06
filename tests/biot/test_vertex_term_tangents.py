@@ -423,7 +423,7 @@ def test_tangent_matches_base_jvp(name):
 
 _REFERENCE_PROBE = r"""
 import json, sys
-from multiprocessing import Pool
+from multiprocessing import get_context
 import mpmath as mp
 mp.mp.dps = 50
 def radial(args):
@@ -445,7 +445,7 @@ def radial(args):
     value = mp.quad(lambda a: parts(a, 0), points)
     slope = mp.quad(lambda a: parts(a, 1), points)
     return float(4 * r * value), float(4 * dr * value + 4 * r * slope)
-with Pool(8) as pool:
+with get_context("fork").Pool(8) as pool:
     print(json.dumps(pool.map(radial, json.load(sys.stdin))))
 """
 

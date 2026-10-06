@@ -532,6 +532,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "ec7fef7528aa412a08ee027a35dc0c0ba98df748",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261006T001835698222-cfs-wave-integration-suite",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261006T001835698222-cfs-wave-integration-suite"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "ec7fef7528aa412a08ee027a35dc0c0ba98df748",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wave-integration-suite",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-06T03:03:43Z",
+            "session_id": "01a10e94-06c8-7a10-b9de-74648e0eb64a",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wave-integration-suite"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a10e94-06c8-7a10-b9de-74648e0eb64a"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "the measurement is complete and its report, per-module junit and comparison live in the run directory; the only blocker was the commit audit on a report-only test role, so no further turn of this session is needed",
     "session_id": "01a10e94-06c8-7a10-b9de-74648e0eb64a",

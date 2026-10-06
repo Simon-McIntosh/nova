@@ -17,15 +17,7 @@ from typing import Any
 
 import numpy as np
 
-from nova.database.filepath import WORKTREE_ROOT
-
-
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SHADOW_ROOT = (
-    Path("/home/ITER/mcintos/Code")
-    / ("." + WORKTREE_ROOT)
-    / "nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay-shadow"
-)
 PINNED_REVISION = "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9"
 TARGET = (22086, 43)
 BANK_RECEIPT = (
@@ -917,7 +909,16 @@ def _parse_args() -> argparse.Namespace:
     subparsers = parser.add_subparsers(dest="command", required=True)
     capture_parser = subparsers.add_parser("capture")
     capture_parser.add_argument("--backend", choices=("cpu", "gpu"), required=True)
-    capture_parser.add_argument("--shadow-root", type=Path, default=DEFAULT_SHADOW_ROOT)
+    capture_parser.add_argument(
+        "--shadow-root",
+        type=Path,
+        required=True,
+        help=(
+            "path to a checkout of this repository at the pinned revision; "
+            "the capture imports the solver from this tree, so supply a "
+            "worktree or clone that resolves it, not a removed one"
+        ),
+    )
     capture_parser.add_argument("--output", type=Path, required=True)
     compile_parser = subparsers.add_parser("compile")
     compile_parser.add_argument("--cpu", type=Path, required=True)

@@ -1,7 +1,5 @@
 """Manage user generated data."""
 
-import subprocess
-
 import click
 import shutil
 from pathlib import Path
@@ -9,6 +7,8 @@ from pathlib import Path
 from nova.database.filepath import (
     FilePath,
     relativize_worktree_paths,
+    worktree_path_candidates,
+    worktree_path_index_text,
     worktree_path_offenders,
 )
 
@@ -34,30 +34,12 @@ def clear(ctx):
         shutil.rmtree(ctx.obj.path)
 
 
-def _staged_files():
-    """Return the paths staged in the index, one entry per file."""
-    result = subprocess.run(
-        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z"],
-        capture_output=True,
-        check=True,
-    )
-    return [name for name in result.stdout.decode("utf-8").split("\0") if name]
-
-
-def _staged_text(path):
-    """Return the staged (index) content of ``path``."""
-    result = subprocess.run(
-        ["git", "show", f":{path}"], capture_output=True, check=False
-    )
-    return result.stdout.decode("utf-8", errors="replace")
-
-
 @filepath.command
 @click.option(
     "--check",
     "check",
     is_flag=True,
-    help="Check the staged files only; exit nonzero naming each offender.",
+    help="Check the index only; exit nonzero naming each offender.",
 )
 @click.argument("files", nargs=-1, type=click.Path(exists=True, dir_okay=False))
 def relativize(files, check):
@@ -65,12 +47,16 @@ def relativize(files, check):
 
     Each file is rewritten in place, preserving every byte outside the matched
     spans.  Each file changed and each worktree-path span left unmapped is
-    printed.  With ``--check`` the staged files are inspected instead and no
-    file is modified: each staged file outside the exemptions that names a
+    printed.  With ``--check`` the index is searched instead and no file is
+    modified: each index entry outside the exemptions whose content names a
     worktree path is reported as an offender and the command exits nonzero.
     """
     if check:
-        offenders = worktree_path_offenders(_staged_files(), _staged_text)
+        root = Path(__file__).resolve().parents[2]
+        candidates = worktree_path_candidates(root, cached=True)
+        offenders = worktree_path_offenders(
+            candidates, lambda path: worktree_path_index_text(root, path)
+        )
         for path in offenders:
             click.echo(
                 f"{path}: names a worktree path; "

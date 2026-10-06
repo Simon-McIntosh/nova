@@ -517,6 +517,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "f574e28174c30f012858fa0b5a5bcfbd4663946d",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 625,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261006T015404732285-cfs-kernel-derivative-rules",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 625,
+        "path": "/tmp/reckon-crew-scratch/r-20261006T015404732285-cfs-kernel-derivative-rules"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "f574e28174c30f012858fa0b5a5bcfbd4663946d",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-derivative-rules",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-06T02:19:38.455Z",
+            "session_id": "fb889d93-4a20-44ad-9366-969fd989e5a2",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-derivative-rules"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session fb889d93-4a20-44ad-9366-969fd989e5a2"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-06T02:19:38.455Z",
+      "session_id": "fb889d93-4a20-44ad-9366-969fd989e5a2",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-derivative-rules"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session fb889d93-4a20-44ad-9366-969fd989e5a2"
+  },
   "resume_waiver": {
     "reason": "the session's work was a scoping measurement whose probes and figures live in its run directory and are cited by path in the successor briefs; its task is split into new nodes with their own done-when, so continuing this session would carry a superseded brief",
     "session_id": "fb889d93-4a20-44ad-9366-969fd989e5a2",

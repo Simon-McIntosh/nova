@@ -2131,6 +2131,41 @@ def _kernel_backed_field(kind, oracle, total, geometry):
     )
 
 
+def test_kernel_backed_read_traces_each_stage_once(monkeypatch):
+    """Each stage of the read inlines each kernel term exactly once.
+
+    The analytic fixture carries two kernel terms, the booked plasma and the
+    exterior's reference image. Two value stages (sampled flux and wall
+    values) and three jet stages (null polish, curvature stencil and wall
+    search) therefore trace four value and six jet kernels.
+    """
+    from collections import Counter
+
+    from nova.equilibrium.topology import (
+        BiotMomentCoupling,
+        TopologyConvention,
+        read,
+    )
+
+    calls = Counter()
+    for name in ("value_gradient", "evaluate"):
+        method = getattr(BiotMomentCoupling, name).__wrapped__
+
+        def counted(self, *args, _method=method, _name=name):
+            calls[_name] += 1
+            return _method(self, *args)
+
+        monkeypatch.setattr(BiotMomentCoupling, name, counted)
+    oracle, total, wall, _, _ = _analytic_inputs("limited")
+    geometry = _realised_hex_geometry(wall, 132)
+    field = _kernel_backed_field("limited", oracle, total, geometry)
+    jax.make_jaxpr(read)(
+        field, geometry, TopologyConvention.from_cocos(17, 1.0), TopologyPolicy()
+    )
+    value_only = calls["value_gradient"] - calls["evaluate"]
+    assert (value_only, calls["evaluate"]) == (4, 6), dict(calls)
+
+
 @pytest.mark.parametrize("kind", ("limited", "diverted"))
 @pytest.mark.parametrize("count", (1074, 2616))
 @kernel_compile_expected_failure

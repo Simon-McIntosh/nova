@@ -1,0 +1,965 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "a04e8ff81190a1131a4b75742f220001fc533b34",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 16744646,
+      "input_tokens_cumulative": 16744646,
+      "output_tokens": 97960,
+      "output_tokens_cumulative": 97960,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 522,
+    "files": 74,
+    "removed": 159
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 60,
+        "name": "_evidence_inputs",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 570,
+        "name": "capture",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 605
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_publication_artifact_records_are_stable_and_strict",
+        "path": "tests/test_diiid_forward_gs_match.py"
+      },
+      "run_function": {
+        "line": 570,
+        "name": "capture",
+        "path": "benchmarks/backend_divergence_forensics.py"
+      },
+      "window_line": 605
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_vertical_centroid_reports_physical_circuit_compensation",
+        "path": "tests/test_vertical_position_constraint.py"
+      },
+      "run_function": {
+        "line": 95,
+        "name": "_p6_pair",
+        "path": "benchmarks/constraint_centroid_receipt.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "_pair",
+        "path": "tests/test_constraint_response_matrix.py"
+      },
+      "run_function": {
+        "line": 576,
+        "name": "smoke_converged_selection",
+        "path": "benchmarks/constraint_centroid_receipt.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "_centroid_pair",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 576,
+        "name": "smoke_converged_selection",
+        "path": "benchmarks/constraint_centroid_receipt.py"
+      },
+      "window_line": 588
+    },
+    {
+      "existing_function": {
+        "line": 425,
+        "name": "test_centroid_and_named_boundary_flux_rows_converge_together",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 576,
+        "name": "smoke_converged_selection",
+        "path": "benchmarks/constraint_centroid_receipt.py"
+      },
+      "window_line": 588
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "render_wall_height_safety_evidence",
+        "path": "tests/test_wall_height_exclusion.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "render",
+        "path": "benchmarks/pure_arm_comparison_figure.py"
+      },
+      "window_line": 181
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 355,
+        "name": "fig_static_flux",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 397
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 355,
+        "name": "fig_static_flux",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 397
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 355,
+        "name": "fig_static_flux",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 397
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 355,
+        "name": "fig_static_flux",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 397
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "fig_parity",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 1011
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "fig_parity",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 1011
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "fig_parity",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 1011
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 945,
+        "name": "fig_parity",
+        "path": "nova/scripts/render_misfit_figures.py"
+      },
+      "window_line": 1011
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "fb17b44c9717169806b6cd7106be4010bc68b39b"
+  ],
+  "completed_at": "2026-10-06T10:51:15.116Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T10:09:01Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync pytest -p no:cacheprovider -q tests/test_artifacts_carry_no_worktree_paths.py tests/test_filepath.py tests/test_render_receipt_paths.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/logs/gate-head-pytest.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "artifacts-carry-no-worktree-paths",
+    "reason": "no-impl-recorded-at-dispatch",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-06T11:08:42.686026+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-06T10:08:42Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 6,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 6,
+    "mean_context": 128000,
+    "observed_at": "2026-10-06T10:08:36Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 6,
+      "aggregate_tokens_per_second": 562.795,
+      "detail": "",
+      "mean_tokens_per_second": 45.387,
+      "observed_at": "2026-10-06T10:08:36Z",
+      "runs": 12.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T10:51:15.116Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/manifest.md",
+  "member": "disposable-r-20261006T100839563604-acnwp-launch-scripts-and-guard",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_artifacts_carry_no_worktree_paths.py::test_no_tracked_file_names_a_worktree_path"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_artifacts_carry_no_worktree_paths.py::test_no_tracked_file_names_a_worktree_path"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_artifacts_carry_no_worktree_paths.py::test_no_tracked_file_names_a_worktree_path"
+    ],
+    "declaration": "the new guard test fails at the dispatch base, listing the launch scripts as offenders",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/logs/negative-control-guard-at-base.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/logs/negative-control-guard-at-base.log",
+    "test_paths": [
+      "tests/test_artifacts_carry_no_worktree_paths.py",
+      "tests/test_filepath.py",
+      "tests/test_render_receipt_paths.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "acnwp-launch-scripts-and-guard",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 811,
+          "cached_input_tokens": 741552,
+          "input_tokens": 742365,
+          "output_tokens": 374,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 742739,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "Read plan artifacts-carry-no-worktree-paths sections 1, 3, 4 and 5 first, and the landed section 2 record; section 3 and 4 are the specification and this text restates only their measures. At the dispatch base 6277209bc the census `git grep -l -I 'reckon-worktrees' HEAD -- . ':!docs/plans' ':!docs/state' ':!docs/research'` lists 71 files: 66 launch scripts (.sh, .sbatch, .py), five data files the section 2 rule left unmapped, and nova/database/filepath.py, which is exempt. (1) Each launch script is read: where the worktree path is one the script uses, it resolves its repository root at run time with the realpath-first idiom of scripts/nova_lane/run.sh in shell, or git rev-parse --show-toplevel run from Path(__file__).resolve().parent in Python; where the path is only a comment or echoed banner, the file goes through `filepath relativize`. benchmarks/backend_divergence_forensics.py and benchmarks/pure_arm_comparison_figure.py import WORKTREE_ROOT from nova.database.filepath instead of spelling the root. (2) The five unmapped data files: reword the two docs/evidence/fragments/figure-and-solver-audit fragments and docs/evidence/replan-2026-09-24/thin-interfaces.md so they describe worktree paths without spelling the root, and repair by hand the truncated path in docs/evidence/archive/cpu-compile-abort-landed.html and the space-broken path in docs/evidence/archive/figure-and-solver-audit-landed.html to repository-relative form, changing nothing else in those records. (3) Add a --check mode to the relativize subcommand in nova/database/scripts.py that reads the staged files from the index and exits nonzero naming each offender returned by worktree_path_offenders. Add tests/test_artifacts_carry_no_worktree_paths.py, which lists tracked files with git ls-files, passes them to worktree_path_offenders with a working-tree reader, fails naming each offender, and has a positive control proving it reaches a file in every top-level directory. Delete test_no_receipt_directory_json_records_a_worktree_path, test_the_scan_reaches_every_receipt, _scanned_json and RECEIPT_DIRECTORIES from tests/test_render_receipt_paths.py and keep its render-route tests. Add scripts/git-hooks/pre-commit, an executable two-line shell shim that runs the project interpreter on nova.database.scripts with relativize --check and PYTHONPATH set to the hook's own checkout root, resolved with the realpath-first idiom. Do not set core.hooksPath and do not edit AGENTS.md; the coordinator does both after landing. Gate, each logged with EXIT=: (a) the census command at head lists only nova/database/filepath.py. (b) `JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_artifacts_carry_no_worktree_paths.py tests/test_filepath.py tests/test_render_receipt_paths.py` passes, run from the worktree with PYTHONPATH set to the worktree. (c) bash -n passes on every changed shell script and py_compile on every changed Python file. (d) For each script given a run-time root, a probe evaluates its root lines from this worktree and prints a value equal to this worktree's toplevel. (e) In a scratch git repository carrying a copy of the hook, staging a file that contains a nova worktree path makes the hook exit nonzero, and after `filepath relativize` on that file the hook exits 0. Negative control, logged: the guard test fails at the dispatch base with the launch scripts listed as offenders. Every existing test file that imports a changed module passes with zero added failures against the base; name them and log both arms in separate files, one arm per file. No script is executed against a solver or a SLURM partition. Every uv command carries --no-sync and nothing runs uv sync. Report to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s27/acnwp-launch-scripts-and-guard.md.",
+    "estimated_hours": 1.0,
+    "goal": "every launch script resolves its root at run time, the residual files are fixed, and a repository test and a read-only commit hook reject any new worktree path",
+    "id": "acnwp-launch-scripts-and-guard",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-06T10:08:42Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 6,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 6,
+      "mean_context": 128000,
+      "observed_at": "2026-10-06T10:08:36Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 6,
+        "aggregate_tokens_per_second": 562.795,
+        "detail": "",
+        "mean_tokens_per_second": 45.387,
+        "observed_at": "2026-10-06T10:08:36Z",
+        "runs": 12.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/manifest.md",
+    "negative_control": "the new guard test fails at the dispatch base, listing the launch scripts as offenders",
+    "plan": "artifacts-carry-no-worktree-paths",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/figures/cut-cell-current-attribution/census-after-bank-repair",
+      "docs/figures/cut-cell-current-attribution/continuous-support",
+      "docs/figures/cut-cell-current-attribution/direction-generators",
+      "docs/figures/cut-cell-current-attribution/diverted-chord-response",
+      "docs/figures/cut-cell-current-attribution/exact-bank-capacity",
+      "docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair",
+      "docs/figures/cut-cell-current-attribution/exact-moment-stages",
+      "docs/figures/cut-cell-current-attribution/exact-support-floor",
+      "docs/figures/cut-cell-current-attribution/merit-model",
+      "docs/figures/cut-cell-current-attribution/outboard-hole",
+      "docs/figures/diiid-vertical-force-balance/prescribed-profile-prototype",
+      "docs/figures/diiid-vertical-force-balance/two-field-gate",
+      "docs/figures/figure-and-solver-audit/low-state-amplitude-nan",
+      "docs/figures/forward-solve-api/coil-edit-nonconvergence",
+      "docs/figures/forward-solver-route-integrity/explicit-requests",
+      "docs/figures/forward-solver-route-integrity/operator-machine",
+      "docs/figures/forward-solver-route-integrity/operator-sharing",
+      "docs/figures/forward-solver-route-integrity/recovery-ladders",
+      "docs/figures/forward-solver-route-integrity/reduced-newton-abort",
+      "docs/figures/forward-solver-route-integrity/single-site-krylov",
+      "docs/figures/millisecond-converged-solve/frozen-partition",
+      "docs/figures/millisecond-converged-solve/profile-args",
+      "docs/figures/millisecond-converged-solve/request-set",
+      "docs/figures/millisecond-converged-solve/traced-exterior",
+      "docs/figures/millisecond-converged-solve/trip-quantum/host-profile",
+      "docs/figures/millisecond-converged-solve/trip-quantum/late-trips",
+      "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen",
+      "docs/figures/multi-unit-limiter-wall/gate-frame-solver-evolution",
+      "docs/figures/plasma-cell-read-fidelity/first-step",
+      "docs/figures/plasma-cell-read-fidelity/map-fidelity",
+      "docs/figures/playable-forward-solve/early-frame-placement",
+      "docs/figures/polish-support-performance/candidate-2",
+      "docs/figures/polish-support-performance/shared-spline",
+      "docs/figures/cut-cell-current-attribution/cca_diag_payload.py",
+      "docs/figures/topology-visual-corroboration/mast-22086-pinned-regeneration.sbatch",
+      "docs/evidence/archive",
+      "docs/evidence/fragments/figure-and-solver-audit",
+      "docs/evidence/replan-2026-09-24",
+      "benchmarks/backend_divergence_forensics.py",
+      "benchmarks/constraint_centroid_receipt.py",
+      "benchmarks/pure_arm_comparison_figure.py",
+      "nova/database/filepath.py",
+      "nova/database/scripts.py",
+      "nova/scripts/render_misfit_figures.py",
+      "scripts/git-hooks/pre-commit",
+      "scripts/run_amplitude_census.sh",
+      "tests/test_artifacts_carry_no_worktree_paths.py",
+      "tests/test_filepath.py",
+      "tests/test_render_receipt_paths.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s27/acnwp-launch-scripts-and-guard.md",
+      "docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-launch-scripts-and-guard.html",
+      "docs/figures/artifacts-carry-no-worktree-paths/acnwp-launch-scripts-and-guard"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2917601.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "acnwp-launch-scripts-and-guard",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T10:08:46.587909+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.62,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 413.574,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 685.83,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 4.826956588703704,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 63.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 4.826956588703704,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 67.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 14,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 5,
+          "not-run": 17,
+          "passed": 87,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 10
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 2,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.14,
+      "claude-haiku": 0.01,
+      "claude-opus": 0.03,
+      "clive": 0.66,
+      "codex": 0.03,
+      "codex-astra": 0.02,
+      "codex-luna": 0,
+      "hold": 0.11
+    },
+    "rendered_token_estimate": 1863,
+    "usage": {
+      "cost": 0.000165228,
+      "input_tokens": 3934,
+      "output_tokens": 89
+    }
+  },
+  "plan": "artifacts-carry-no-worktree-paths",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "fb17b44c9717169806b6cd7106be4010bc68b39b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "a04e8ff81190a1131a4b75742f220001fc533b34",
+    "reviewed_head_sha": "fb17b44c9717169806b6cd7106be4010bc68b39b",
+    "scores": {
+      "durability": 17,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 111
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T100839563604-acnwp-launch-scripts-and-guard",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "a74345dd-cc03-4b06-b60a-2ba4b6cc182a",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 16941932,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2518.472,
+    "generated_tokens": 104916,
+    "generation_seconds": 1803.821,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.2,
+    "machine_seconds": 714.651,
+    "peak_input_tokens": 195986,
+    "tokens_per_second": 58.16,
+    "wall_tokens_per_second": 41.66
+  },
+  "time_budget": "60m",
+  "tool_steps": 122.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2534,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T10:51:18Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T10:09:11Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T100839563604-acnwp-launch-scripts-and-guard",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 21742,
+    "worker_pid": 1784886
+  },
+  "worker_seconds": 2481,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

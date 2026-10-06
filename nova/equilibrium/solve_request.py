@@ -329,7 +329,9 @@ class ForwardSolvePolicy:
     def __post_init__(self) -> None:
         """Reject policies that cannot name a bounded numerical solve."""
 
-        if not isinstance(self.topology, TopologyPolicy):
+        if isinstance(self.topology, Mapping):
+            object.__setattr__(self, "topology", TopologyPolicy(**dict(self.topology)))
+        elif not isinstance(self.topology, TopologyPolicy):
             raise TypeError("topology must be a TopologyPolicy")
 
         if self.route not in {

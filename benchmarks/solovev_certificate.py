@@ -1993,23 +1993,26 @@ ANALYTIC_INK_COLOR = "#3366cc"
 SOLVED_INK_COLOR = "#cc7722"
 
 
-def _figure_receipts(path: Path) -> dict[str, Any]:
+def _figure_receipts(path: Path, *, logical: str | None = None) -> dict[str, Any]:
     """Compose a panel's receipt from the two files the renderer just wrote.
 
     The digests are read back off disk rather than carried in memory, so a
-    missing or unreadable panel fails here instead of being receipted.
+    missing or unreadable panel fails here instead of being receipted.  A
+    caller rendering outside the repository tree passes ``logical``, the
+    repository-relative path the panel keeps as its identity.
     """
 
     vector = path.with_suffix(".svg")
     for candidate in (path, vector):
         if not candidate.resolve().is_file():
             raise RuntimeError(f"rendered panel is missing: {candidate}")
-    source = f"/nova/{path.relative_to(ROOT / 'docs')}"
+    logical_path = Path(logical) if logical is not None else path.relative_to(ROOT)
+    source = f"/nova/{logical_path.relative_to('docs')}"
     return {
-        "filesystem_path": str(path.relative_to(ROOT)),
+        "filesystem_path": str(logical_path),
         "project_absolute_src": source,
         "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-        "vector_filesystem_path": str(vector.relative_to(ROOT)),
+        "vector_filesystem_path": str(logical_path.with_suffix(".svg")),
         "vector_project_absolute_src": source.removesuffix(".png") + ".svg",
         "vector_sha256": hashlib.sha256(vector.read_bytes()).hexdigest(),
     }
@@ -2161,8 +2164,10 @@ def _render_persisted_row(
 
     data = row["render_data"]
     _validate_render_data(data)
+    logical = row["figure"]["filesystem_path"]
     if path is None:
-        path = ROOT / row["figure"]["filesystem_path"]
+        path = FIGURE_ROOT / Path(logical).name
+    path.parent.mkdir(parents=True, exist_ok=True)
     errors = {name: np.asarray(data["error_fields"][name]) for name in NORM_FIELDS}
     started = perf_counter()
     figure = _plot(
@@ -2184,7 +2189,7 @@ def _render_persisted_row(
     plt.close(figure)
     row["stage_wall_seconds"]["figure_render"] = perf_counter() - started
     row["figure"] = {
-        **_figure_receipts(path),
+        **_figure_receipts(path, logical=logical),
         "render_source": "persisted_part_receipt",
     }
     return row

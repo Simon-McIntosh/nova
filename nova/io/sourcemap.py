@@ -19,7 +19,7 @@ The conversion is three named factors, never one opaque number:
     else.
 ``convention_factor``
     derived from the source and target conventions by
-    :mod:`~nova.io.cocos`, never written down.
+    :mod:`~nova_cocos`, never written down.
 
 Keeping them apart is what makes a wrong one findable.  A unit error is a power of
 ten, a channel error is a turn count, and a convention error is a sign or a 2*pi;
@@ -49,7 +49,7 @@ from nova.imas.machine_evidence import (
     require_int,
     require_string,
 )
-from nova.io.cocos import TRANSFORMATIONS, convention_transform
+from nova_cocos import TRANSFORMATIONS, convention_transform
 from nova.io.ingest import PROVISIONAL_NAMESPACE
 from nova.io.standardname import StandardNameResolver
 

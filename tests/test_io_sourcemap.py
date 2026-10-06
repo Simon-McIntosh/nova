@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 
 from nova.imas.machine_evidence import FieldEvidence
-from nova.io.cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
+from nova_cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
 from nova.io.ingest import PROVISIONAL_NAMESPACE
 from nova.io.sourcemap import (
     ACCEPTED,

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cocos-standalone-distribution">
+<meta name="plan-title" content="COCOS algebra as the installable workspace member nova-cocos">
+<meta name="plan-summary" content="The factor table moves to a pure-Python workspace member installable on Python 3.12 with no runtime dependencies; nova imports nova_cocos and keeps a re-export path">
+<meta name="plan-evidence-for" content="cocos-standalone-distribution">
+<meta name="plan-verifies" content="cocos-standalone-distribution#s1">
+<meta name="plan-commits" content="54414ccb8fb84c0b901552b5c165ac848be97d4e">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="measured">
+<title>nova-cocos workspace member | nova</title>
+<link rel="stylesheet" id="ncsd-nova-cocos-member-style" href="/_shared/foundation.css">
+</head><body><main class="plan-doc">
+<section id="ncsd-nova-cocos-member">
+<h1 id="ncsd-nova-cocos-member-heading">COCOS algebra as the installable workspace member nova-cocos</h1>
+<table id="ncsd-nova-cocos-member-measurements">
+<caption>Gate measurements for revision 54414ccb8, the commit that adds packages/nova-cocos.</caption>
+<thead><tr><th scope="col">Measure</th><th scope="col">Result</th></tr></thead><tbody>
+<tr><th scope="row">Member wheel Requires-Python</th><td>&gt;=3.12</td></tr>
+<tr><th scope="row">Member wheel Requires-Dist</th><td>none (empty; no runtime dependencies)</td></tr>
+<tr><th scope="row">Member Version vs root Version at the commit</th><td>equal: 0.11.0.post10057+g54414ccb8</td></tr>
+<tr><th scope="row">nova_cocos.transform_factor('psi_like', source=11, target=17) in a clean uv venv --python 3.12</th><td>-1.0 on Python 3.12.11, equal to the base module's value</td></tr>
+<tr><th scope="row">nova.io.cocos.transform_factor is nova_cocos.transform_factor</th><td>True</td></tr>
+<tr><th scope="row">Public names importable from nova_cocos</th><td>all sixteen (CONVENTION_DIGITS, the six transformation constants, TRANSFORMATIONS, ConventionError, Convention, convention, identify_convention, conventions, ConventionTransform, convention_transform, transform_factor)</td></tr>
+<tr><th scope="row">COCOS test modules, head arm</th><td>105 passed, EXIT=0 (tests/test_io_cocos.py, tests/test_transport_cocos.py, tests/test_contour_tree_conventions.py, tests/test_io_sourcemap.py, tests/test_mast_solve_inputs.py)</td></tr>
+<tr><th scope="row">COCOS test modules, base arm at 521b2046a</th><td>105 passed, EXIT=0; zero failures added</td></tr>
+<tr><th scope="row">imas-ambix resolution</th><td>uv lock --dry-run exits 0 on a scratch copy whose nova-stella source points at this worktree; output adds nova-cocos (dynamic)</td></tr>
+</tbody></table>
+<p id="ncsd-nova-cocos-member-scaffolding">The imas-ambix resolution scratch needs a README.md copy and SETUPTOOLS_SCM_PRETEND_VERSION because imas-ambix's own hatch-vcs metadata build has no git repository in the scratch; those two additions are scaffolding, not a change to nova. Run root <code>logs/ambix-resolve.log</code> in the crew run records both.</p>
+</section>
+</main></body></html>

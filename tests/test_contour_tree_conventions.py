@@ -11,7 +11,7 @@ from nova.equilibrium.contour_tree import (
     FluxCurrentSignError,
     sigma_for_state,
 )
-from nova.io.cocos import convention, transform_factor
+from nova_cocos import convention, transform_factor
 from nova.jax.config import configure_dtypes
 
 _CARRIER_SIZE = 81

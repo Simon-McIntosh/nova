@@ -90,7 +90,7 @@ from nova.imas.mast_vacuum_cohort import (
     probe_channels,
     read_shot_waveforms,
 )
-from nova.io.cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
+from nova_cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
 from nova.io.sourcemap import (
     ACCEPTED,
     BlockedSignal,

@@ -2366,7 +2366,7 @@ class TopologyConvention:
 
     @classmethod
     def from_cocos(cls, identifier, plasma_current):
-        from nova.io.cocos import convention
+        from nova_cocos import convention
 
         declared = convention(identifier)
         if not np.isfinite(plasma_current) or plasma_current == 0:

@@ -10,7 +10,7 @@ from dataclasses import dataclass, replace
 import numpy as np
 import pytest
 
-from nova.io.cocos import convention
+from nova_cocos import convention
 from nova.transport import torax_geometry_from_fsa
 
 

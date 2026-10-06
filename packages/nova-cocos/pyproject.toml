@@ -1,0 +1,47 @@
+[project]
+name = "nova-cocos"
+dynamic = ["version"]
+description = "COCOS coordinate conventions and the factor carrying a quantity between two"
+license = { text = "ITER GIP" }
+requires-python = ">=3.12"
+authors = [{ name = "Simon McIntosh", email = "simon.mcintosh@iter.org" }]
+keywords = ["COCOS", "equilibrium", "convention", "plasma", "Sauter-Medvedev"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: Other/Proprietary License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+urls.Homepage = "https://github.com/Simon-McIntosh/nova"
+urls.Repository = "https://github.com/Simon-McIntosh/nova"
+# No runtime dependencies: the algebra uses only the standard library, which is
+# what lets a slim Python 3.12 engine install the factor table on its own.
+dependencies = []
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+# One version number for the workspace: the member reads this repository's git
+# tags through the same owner and scheme as the root, so the two cannot drift.
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = "../.."
+version_scheme = "post-release"
+# only numeric release tags carry versions; skip marker tags like v1-assembly-baseline
+git_describe_command = [
+  "git",
+  "describe",
+  "--dirty",
+  "--tags",
+  "--long",
+  "--match",
+  "[0-9]*.[0-9]*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nova_cocos"]

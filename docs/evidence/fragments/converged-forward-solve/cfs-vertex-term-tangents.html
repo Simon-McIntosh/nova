@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-vertex-term-tangents"><meta name="plan-title" content="Tangents of the polygon-analytic corner terms">
+<meta name="plan-summary" content="Hand-written tangents of the _Vertex construction, its first residual integral, arsinh_terms, against_first_arsinh, flux_moment_residuals and horizontal_flux_line_moments, checked against jax.jvp of the base revision.">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="partial">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-tags" content="biot,tangents,custom-derivative-rules">
+<title>Tangents of the polygon-analytic corner terms | nova</title>
+</head><body><main class="plan-doc">
+<h1 id="cfs-vertex-term-tangents">Tangents of the polygon-analytic corner terms</h1>
+<p id="cfs-vertex-term-tangents-landing">Private tangents now exist for every corner quantity the point jet differentiates in <code>nova/biot/polygonanalytic.py</code>: <code>_vertex_tangent</code> (the <code>_Vertex</code> construction: geometry, modulus and complement, harmonic and root moment stacks, the ring denominator's split with both pole seeds and families), <code>_first_residual_tangent</code>, <code>_arsinh_terms_tangent</code>, <code>_against_first_arsinh_tangent</code>, <code>_flux_moment_residuals_tangent</code> and <code>_horizontal_flux_line_moments_tangent</code>. Each is composed from the landed elliptic, moment-channel, graded-residual and range-function tangents with no <code>jax.jvp</code>, <code>jax.grad</code> or <code>jax.jacfwd</code> of the base, and returns the primal method's own result beside a tangent of the same structure. The <code>corner_part</code> closures are host-only NumPy paths of <code>polygon_analytic_greens</code>, <code>polygon_analytic_flux_moments</code> and <code>_central_field_moments_direct</code>; the packed jet builds its <code>_Vertex</code> inline, so <code>_vertex_tangent</code> is the tangent of that construction and no closure-specific tangent was written.</p>
+<h2 id="cfs-vertex-term-tangents-census">What the jet reaches</h2>
+<p id="cfs-vertex-term-tangents-census-note">Staged calls in the jaxpr of <code>packed_analytic_moments</code> for the two source kinds the jet takes, a section with no horizontal edge and one whose horizontal edges are dropped (log: <code>jaxpr-census.log</code> in the run directory). <code>_Vertex</code> methods are not staged and inline into these calls. The tangent column is a name lookup across <code>nova.biot</code>; a name imported into <code>polygonanalytic</code> is listed under that module, and <code>product</code>'s range-function tangent is <code>rangefunction._product_range_tangent</code>.</p>
+<table id="cfs-vertex-term-tangents-census-table"><thead><tr><th>function</th><th>module</th><th>calls, polygon</th><th>calls, rectangle</th><th>private tangent</th></tr></thead><tbody>
+<tr><td><code>_harmonic_pair_step</code></td><td><code>nova.biot.rangefunction</code></td><td>2795</td><td>2795</td><td><code>nova.biot.rangefunction._harmonic_pair_step_tangent</code></td></tr>
+<tr><td><code>_product_sum_step</code></td><td><code>nova.biot.rangefunction</code></td><td>1205</td><td>1205</td><td><code>nova.biot.rangefunction._product_sum_step_tangent</code></td></tr>
+<tr><td><code>_where</code></td><td><code>(jax/lax)</code></td><td>588</td><td>548</td><td><code>none</code></td></tr>
+<tr><td><code>harmonic_multiply</code></td><td><code>nova.biot.rangefunction</code></td><td>443</td><td>443</td><td><code>nova.biot.rangefunction._harmonic_multiply_tangent</code></td></tr>
+<tr><td><code>_pole_forward_step</code></td><td><code>nova.biot.elliptic</code></td><td>328</td><td>328</td><td><code>nova.biot.elliptic._pole_forward_step_tangent</code></td></tr>
+<tr><td><code>_pole_backward_step</code></td><td><code>nova.biot.elliptic</code></td><td>328</td><td>328</td><td><code>nova.biot.elliptic._pole_backward_step_tangent</code></td></tr>
+<tr><td><code>harmonic_add</code></td><td><code>nova.biot.rangefunction</code></td><td>245</td><td>245</td><td><code>none</code></td></tr>
+<tr><td><code>contract</code></td><td><code>nova.biot.rangefunction</code></td><td>184</td><td>184</td><td><code>nova.biot.rangefunction._contract_tangent</code></td></tr>
+<tr><td><code>_harmonic_ratio_step</code></td><td><code>nova.biot.elliptic</code></td><td>139</td><td>139</td><td><code>nova.biot.elliptic._harmonic_ratio_step_tangent</code></td></tr>
+<tr><td><code>across_the_range</code></td><td><code>nova.biot.rangefunction</code></td><td>107</td><td>107</td><td><code>nova.biot.polygonanalytic._across_the_range_tangent</code></td></tr>
+<tr><td><code>product</code></td><td><code>nova.biot.rangefunction</code></td><td>101</td><td>101</td><td><code>nova.biot.elliptic._product_tangent</code></td></tr>
+<tr><td><code>harmonic_scale</code></td><td><code>nova.biot.rangefunction</code></td><td>76</td><td>76</td><td><code>nova.biot.rangefunction._harmonic_scale_tangent</code></td></tr>
+<tr><td><code>scaled</code></td><td><code>nova.biot.rangefunction</code></td><td>61</td><td>61</td><td><code>nova.biot.polygonanalytic._scaled_tangent</code></td></tr>
+<tr><td><code>total</code></td><td><code>nova.biot.rangefunction</code></td><td>49</td><td>49</td><td><code>nova.biot.polygonanalytic._total_tangent</code></td></tr>
+<tr><td><code>_pole_contraction</code></td><td><code>nova.biot.momentchannel</code></td><td>46</td><td>46</td><td><code>nova.biot.momentchannel._pole_contraction_tangent</code></td></tr>
+<tr><td><code>deflate</code></td><td><code>nova.biot.rangefunction</code></td><td>46</td><td>46</td><td><code>nova.biot.rangefunction._deflate_tangent</code></td></tr>
+<tr><td><code>_harmonic_rising_step</code></td><td><code>nova.biot.elliptic</code></td><td>41</td><td>41</td><td><code>nova.biot.elliptic._harmonic_rising_step_tangent</code></td></tr>
+<tr><td><code>range_function</code></td><td><code>nova.biot.rangefunction</code></td><td>40</td><td>40</td><td><code>nova.biot.rangefunction._range_function_tangent</code></td></tr>
+<tr><td><code>hypot</code></td><td><code>(jax/lax)</code></td><td>30</td><td>24</td><td><code>none</code></td></tr>
+<tr><td><code>sine_squared_times</code></td><td><code>nova.biot.rangefunction</code></td><td>15</td><td>15</td><td><code>nova.biot.polygonanalytic._sine_squared_times_tangent</code></td></tr>
+<tr><td><code>_accumulate</code></td><td><code>nova.biot.completeelliptic</code></td><td>10</td><td>10</td><td><code>nova.biot.completeelliptic._accumulate_tangent</code></td></tr>
+<tr><td><code>_oscillatory_primitive</code></td><td><code>nova.biot.polygonanalytic</code></td><td>10</td><td>10</td><td><code>linear: applied to the tangent series</code></td></tr>
+<tr><td><code>_descent</code></td><td><code>nova.biot.completeelliptic</code></td><td>9</td><td>9</td><td><code>nova.biot.completeelliptic._descent_tangent</code></td></tr>
+<tr><td><code>complete_pole</code></td><td><code>nova.biot.completeelliptic</code></td><td>8</td><td>8</td><td><code>nova.biot.elliptic._complete_pole_tangent</code></td></tr>
+<tr><td><code>_finite_part</code></td><td><code>nova.biot.completeelliptic</code></td><td>8</td><td>8</td><td><code>nova.biot.completeelliptic._finite_part_tangent</code></td></tr>
+<tr><td><code>harmonic_pole_moments</code></td><td><code>nova.biot.elliptic</code></td><td>8</td><td>8</td><td><code>nova.biot.polygonanalytic._harmonic_pole_moments_tangent</code></td></tr>
+<tr><td><code>clip</code></td><td><code>(jax/lax)</code></td><td>8</td><td>8</td><td><code>nova.biot.gradedresidual._clip_tangent</code></td></tr>
+<tr><td><code>_regularised</code></td><td><code>nova.biot.gradedresidual</code></td><td>8</td><td>8</td><td><code>nova.biot.gradedresidual._regularised_tangent</code></td></tr>
+<tr><td><code>_model_integral</code></td><td><code>nova.biot.gradedresidual</code></td><td>8</td><td>8</td><td><code>nova.biot.gradedresidual._model_integral_tangent</code></td></tr>
+<tr><td><code>_near_collinear_arsinh_difference</code></td><td><code>nova.biot.polygonanalytic</code></td><td>5</td><td>4</td><td><code>none</code></td></tr>
+<tr><td><code>cn_pole_moment</code></td><td><code>nova.biot.elliptic</code></td><td>4</td><td>4</td><td><code>nova.biot.polygonanalytic._cn_pole_moment_tangent</code></td></tr>
+<tr><td><code>sn_pole_moment</code></td><td><code>nova.biot.elliptic</code></td><td>4</td><td>4</td><td><code>nova.biot.polygonanalytic._sn_pole_moment_tangent</code></td></tr>
+<tr><td><code>paired_range_function</code></td><td><code>nova.biot.rangefunction</code></td><td>4</td><td>4</td><td><code>nova.biot.rangefunction._paired_range_function_tangent</code></td></tr>
+<tr><td><code>_roll_static</code></td><td><code>(jax/lax)</code></td><td>2</td><td>2</td><td><code>none</code></td></tr>
+<tr><td><code>signbit</code></td><td><code>(jax/lax)</code></td><td>1</td><td>1</td><td><code>none</code></td></tr>
+<tr><td><code>harmonic_moments</code></td><td><code>nova.biot.elliptic</code></td><td>1</td><td>1</td><td><code>nova.biot.polygonanalytic._harmonic_moments_tangent</code></td></tr>
+<tr><td><code>_complete_kind</code></td><td><code>nova.biot.elliptic</code></td><td>1</td><td>1</td><td><code>nova.biot.elliptic._complete_kind_tangent</code></td></tr>
+<tr><td><code>complete_kind</code></td><td><code>nova.biot.completeelliptic</code></td><td>1</td><td>1</td><td><code>nova.biot.elliptic._complete_kind_tangent</code></td></tr>
+<tr><td><code>harmonic_root_moments</code></td><td><code>nova.biot.elliptic</code></td><td>1</td><td>1</td><td><code>nova.biot.polygonanalytic._harmonic_root_moments_tangent</code></td></tr>
+<tr><td><code>take_along_axis</code></td><td><code>(jax/lax)</code></td><td>1</td><td>1</td><td><code>none</code></td></tr>
+</tbody></table>
+<h2 id="cfs-vertex-term-tangents-identity">Identity, control and compile</h2>
+<p id="cfs-vertex-term-tangents-identity-result">On 10&nbsp;000 corner geometries and targets (corners and targets a centimetre to twenty metres in radius over forty metres of height; 4&nbsp;000 targets beside a corner down to a picometre, 600 level with it, 600 on its radius, 1&nbsp;500 beside an edge leaving it; no sample masked; the base <code>jax.jvp</code> finite on every sample), each tangent's primal half is bit-identical to the base revision's primal compiled in the same program. Each series (a moment stack, a pole family, a harmonic bulk) is measured normwise against its own largest order, and the root moments against the moment tangents they are formed from, because the base revision's own moment stack differs by 2.9e-8 between two compiled programs at its top order and a root-moment tangent cancels from <code>1e8</code> to <code>1e-8</code> beside a corner. The construction tangent agrees to 1.86e-11 with 100&nbsp;percent covered at the scan bound 1e-9. <code>arsinh_terms</code> does not yet meet the measure: 1.87e-6 at worst, 98.50&nbsp;percent covered, every one of the 149 failing samples in the radial component for a target within about 1e-9&nbsp;m of the corner; which instrument is off there is unresolved, and the next step is an mpmath reference on those samples. The rows for <code>against_first_arsinh</code>, <code>flux_moment_residuals</code> and <code>horizontal_flux_line_moments</code> were still running when the time budget ran out (<code>head-identity.log</code> in the run directory).</p>
+<p id="cfs-vertex-term-tangents-control">Negative control: with the right factor's term dropped from the corner product rule (<code>NOVA_TANGENT_TRUNCATION=1</code>), the construction fails at 2.82e12 and <code>arsinh_terms</code> at 1.63e6, with 0&nbsp;percent covered (<code>negative-control.log</code>).</p>
+<p id="cfs-vertex-term-tangents-compile">Cold compile, fastest of three fresh cache-disabled processes, tangent over primal: construction 2.31 (13&nbsp;864 against 4&nbsp;840 expanded equations), <code>arsinh_terms</code> 1.74, <code>against_first_arsinh</code> 2.21, <code>flux_moment_residuals</code> 2.37, <code>horizontal_flux_line_moments</code> 1.88, all at or below three (<code>compile-arsinh.log</code>, <code>compile-all.log</code>).</p>
+</main></body></html>

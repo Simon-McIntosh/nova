@@ -1,0 +1,4207 @@
+{
+  "lane_source_revision": "93895112d596e328a6d88b5d8f2070df3d732367",
+  "job_id": 1281145,
+  "row_offset": 600,
+  "rows": [
+    {
+      "cache_key": "jit_broadcast_in_dim-7998b24c04a7652f22aa68fe1ee2eca33638b6a63286707f869f62738be04d00",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-7a6b83204802319f980b47945febec5bd5bc3bd3fcd7528fb6e66c21505e06dd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-7b1d3a3a001ff820af1790cd8b0a9b43850333ba3a45542453e7ae8612a1f898",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-7bcfaf0c9f6f6a6a62075b5537c0b95c09c01c362ef2ec7d9558c5239d0a93aa",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-7e8392065fbf37689b7394665990b5c2ea4d802045a357862b096abec65ab51c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-7ec49d9189a300a73239ed6732eace0d0124b1bda25ca5a9ff58b9748b6cc82e",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-80c971111b6aa125e111c14489dd129e86ef3b4ffba3f76a43a1eaa2c73f5299",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-81b2b5df11123a31314e051180c591d29a0372ff96d7d6713541e49423d350e3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-822d8510ee0c8e2f190b5532ebc7506eaf38e076b188097b39585340e1bd6358",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-82b855fea4d7ca4cb8df96b4d2a38f4adbb71fbc3149ebe8c07856e7c4a8b002",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8344f2c47c5d4926054d9cc6012cc6e2a2271ca089e5deef3c7eb345ed8c1177",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-843b73d784f1303c4585c7ae69731ec9463670beed33f1e1c9267b2a95601d35",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-84721aa35e92c4c218dbc28a4160bde3bb9f887767250f800038977e8136fe18",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-84bada2a609d9720ee532548a7748d0ceaeeb06d063e2f4adad5f0dea9fb7f11",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8567ba26282b462521a3d1b72247fdde343c036aecbfe95c5e2dc9d60c694d9d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-86dc1d7c820f7d1b20d645672941e8b09096ce7e139866bf78ce057b6fac6e4f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8aa35b27540275ac3ce26090e12de7fdeaa8cbb2ece66b54b658ad4bcff2e0e8",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8b39930cc7b375d43b43185d18a0fd65746c323c197fcf1b8ff20125963e6e07",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8cd41874215012d3db234e2332cf59cc92a4bc33d9b1214d5b6c741ead7fda80",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8d13a1f1f086508ae05c7f5e5cc0c6261f8632c8a181dada1d7f402c475dd4e2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8dbb157a4fc4a7ca0eafec5b83f7501ccca9a6a5fe9f3bb929964f4bc0b04192",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8f1faad742a84a12ffceef3b1f590389ffde818f8b4fce4c25dd87e52558080c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-8fc0c86c11ea5228bd792b1e0853000be4fd0e326b6d5fa6d6437acd4c36ebaf",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-90e8cde88cef3a6a3d0cc9463865ba3790081f96d2dbfaf658266d7e5a867baa",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-917bfc0c1e2069872b2e0ebe0764f2b16a7ff7ccaa1378af277fecf27604831d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9191ee1c3183276de97ed7504a5fc4077caa95cf60d6a6abc05e0e5a09564fbf",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-95697b0c617a3a349a62263f3bf643c7defec396315aff92e5084af32caa732c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-962b34065c6093e90a68a86eea0966fefc481841a8ca32d3dca68176cab207d3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-96df89254a8e1a5d0912f00aee30ede73c848a2628681f03e4e2e5a51d0fcbcd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-97b99c29415e3e3981dbff73830ebc5650dd6f26467ceb29b67b8b3c6080d144",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-996a61a251b2c8d1479089e121def6066cffbff03a51cdcec45a4a1d04fda1c7",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-99f61879de14490b3e10e0ecb767a3c537145cfd6f8189dba7698148ea74f199",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9aa6bccad80cdeb7cff2ae6b783cd29d6e7cd8de54ba574f90e7a1e2d7c67d68",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9ba0229467a6d25a3acbd01341c3ae7818564f9ca5d180a255b8f775571f4926",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9bb12251673ac5fe8fdd04cc78245337763bec671675cc0799d42dfc8a5fbf13",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9c647fbc256edaa416946d7e519f7f68ae9ab74f6cc4a15d59e533d35184f694",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9ca9b9ec0b8f348eab2a457c6750fffbdc9be1229de8e05c54000c4b30705806",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9d26caf7d1826a45326658d6f0dc6907072338f6e657b0003b1e193b3429bf8b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9dbdced86c13f600965a1dd8763d0271a7e5ad812e99152bab326e7d4d5bae67",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-9fc63b89995cd51fe288e3385b1304956f49f8b8f3e0ea1a1758a97dd310a287",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a2895d7c9d50335216e39b954115cc1a8d8776bbbab761abaee0356f04e7ba14",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a2a3e253a29dad63fae6ca935c8a8f2f46ac73e49365a131f8fad1d71e8b2ecd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a2be68872038e95313c7bd2128298198b9bd128ef80c2f9121e1d692cc77502f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a421ca224d3ef64669c9f5a6e8dad426907a646596f463b10453c096ae6c0973",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a457f52703a37f7fc55f9f909701cb7d301bb6509552b5bdaabc562df69feaf3",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a4adbd646176ea5d99512b3701aced67022cf45db53744c56878c3ae7ba47586",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a50e4b2ab66157ffe18b59458e031458b1232790c461b97042aef8b4a32cb4fc",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a55a73009bb2dc4821bc55040d6659175e66cad9b9191318b8d6819810c56adb",
+      "cached_compile_seconds": 0.0,
+      "hits": 4,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a5e7bd2f6de15c299e2a4eaccb6321a2e2cfb46e70df9957b208f796345df848",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a78fd81e9a3aaf8122d2c7a3c069e8a514d00e1c427d8a7763d5702c2118e211",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a7a9fd2e8cc7ebe5ecedd035264f3e9ba8fbd5bfde05f0a86da684bedce20b6a",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a8271fa3b4d17320ab073d469c8dfadc91efdf0f8fe9b273ccfaba223f217666",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a8492f77c8967127dcb1dec82071382368fde1ebdc19338f6b9a417a27e1f173",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-a8a852803fb2c619d4fd47d2dacac6afa3e04a5bd96a5fefe8f9389c6a61a607",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-aae5a7964c6c4b4bcf89e991c8a5355798e9cebab31e6cf7322f647dca718a74",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ac35c54779867533e7646c539a0419d5e4ec5bb99e1ef6ce605ba077bacc5b09",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-af3fe2be39421bb876dbc107ce0fddf8efe95ec5bac00dbbba9d9d2b9865655b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b173ad39bc8850d2322340ce6fcadff627f349fe28e47a5a5ff7c7828274440b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b1c506ac3ba3cf50e9e4af94cf84b606837a5d5ac8decd7924a20f6e773a04d6",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b212eb2e1ef84c5501edd827c32c47df3eb2e680d022ff01b6ee73be6980ebfa",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b2240556e6b572efeca3f30bdfbd5ff4add4f4cd103f7906dbf63d3f9ec0d55f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b2480086f008c94f253cbe1f578d1e8cd64e6a9c6e9cae45aea94719b630d57b",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b36e722261ff29a70f1e904094ec1900dd20aefa5cc0ac936b6fcb1edb102ac4",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b417a42eb17c4f4d3de1ffd8e8d9619550d37fe4f9e9f5102bec982c9d23c68d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b4f94ab1f1dcdcfe9f978a64623d0a731e188b2b1e1f18caa54c7f05301b82d2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b851240ebe8002e0bb5384afc381b433db06775dd6c76d0c8f1e56793554961e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b8733b158e6f568145d48a3ae720ef358790e392e03212d2043b9bf29e636de1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b93a6aa67dfd04e0895d00e7a4881ba964b92596543dd6045d9e7de91a2a5dee",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b98e447f0b2ba94eb100bad5c9b42d2c3d1e20e451acdbcd088745e0bcdc6b90",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b9b81974705fa7664cfcfd995249cb96cf905e86dd95a5fd0834fe3bb32d74d9",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-b9c6b4a16ffb767835677e647c979b895606d685aeee5ae648c73c66adf1ce3c",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-bc4b6c09ff3966c390dd9d29caaec98ddf9b9bc47b583216f8e527db83835003",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-bc9536d3ffe9e9e693f4967128ae548fc481d245ae31c5a30ed4cb0094467a5b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-bca0a94814e88b7ca2be79f115e2b1888aeca6efe87ae5f982b8b60dea63898e",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-bce3b3d8d2ceeb1253739006e5907d87cd3de988e77d4538808adc9bd49483d2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-bfa694970bb985e3ed69cb08b5a764e2fdb8982b708674ffa5458900d221dd2f",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-c0d44475f993dafa196933a0df4d6bd59f11f9df5e44003aaf38c77b56639d4a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-c0d73dac5ff8118063550bccba630c7c9e71a7ea001fcfc8c9bd44786adee29e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-c19bd2cea2ceac84b28ced37845e7bfefe58d7beae354e40820376d73f4e651b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-c2715dc8a36443e72a8c22ba98f5600a8765235f1551d32def8fe906bb21e901",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-c306c5cc6fda09bef7d0d3110c9ffa88304ae4b4317a03cd8e5b8939143f96ff",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-c812cf389e03ba087b650eccf52b895fbb518a18b91140d6009dedddb2c3dc1b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ca9346fe51f225b545e9880f6736ce9fc361ddc2968b798a23a0db25e7e09559",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-cb3f80acc95fe2316db4e01d08d6d82624787ebedec485c201b5ddc338c3f8cb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-cfa9c3ec71d32ebf34b82a5958f2576e11089cd1a3b564676094e00eac488dd3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-d229374ddbf36dcb442bed94341826363bbbc92a3eb22670c2b3be1b9d769a1f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-d35a242cce2be9bfe2014eabf67fd78953e2afce9863e1457d1417214fcc0115",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-d389b5dec76566f64ecdd0d2a84e689b13ec68b207f4a3de31011c52dfaebad0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-d47f0b4d5f53f2fc946c52c59c8bfff193210972e6102f2680d9f5c63820a582",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-d6400aed9d943edd182bee86b4d7bf9fb9151d51407b1cb8b8c8efe967f5e559",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-d9092298a2b5ff3e9951b255b2ce0410ea1be2452298bf306e3d787aea6ed0c7",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-dccb5acefef05f61003d4e7522efeb752225bca79c81c43c286bcad47db0e629",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-dfe4e1bd054ca10df4001aed831cb8bf57a78c867a61ddbaaa91a78f96a563bb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e163d4aadf0033bc657b5d469fd8a2af09122668ae4b61bd75bc87a3809f1190",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e1a79b6853e46e15c8496cb489f9b357e90b79734d62739ee84c1d9b048c9aeb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e302a7956152c94be1523080e29610a49311427afe23cd019bb248b20df61993",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e32ee98b39ab13b2ad11077beffdc9a9ecbb5492a02a9bb83ab92726e8fb19f3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e3eb6771e96277e350a9ecad6eff0bb002c351c2face34c028fc0852d02947c3",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e5f70f9478a8bd0528df8144ee600eca247b6cd75258b06830d07a24cc098fb0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e6c550ed562f4fe513c6b2d0cffdb252355707b65b11f112dd83e5f06bbd2a69",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e7c498239c3bbdee4b5a59f1517a5c8f9050459e336a37c68c3dd9af2aeb1cdc",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e8d9efb568b0a45d7fc286d69f7b3098aea3d8d8a68a6767428c7852f7fccc0f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-e9bc61e1cfd3841f0b56d2cbc2c9ca77b74845b89a65d04675480f170d8b3e43",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ea5d361b0347f0c93c1cccb3667dec73162dd025788bdcc1431d3989ac753015",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-eb4acc923a13495fd36ebdc8ebfaa012f0b278fc8e022bc2222cd458fc95c6c3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ec35edb942574cde8537aa01e4c072c2b557d2eaa83f1550b4e90f881a47d914",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-edef5ea1fdd97a96b01ff5484b6900e77240f5f27479cb0d7348d3f55cb7cdcf",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ee358487a6a8e85a76408f56e386d8f9e946300fc31c44217c09d269d5633606",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f0c1391cc515f3b4ce7a33a1aaa471179cc7a065d4d26099f23496ece79ce765",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f195c29febad5b3543e46f0c20259a4c2f9a1f28a35ad64b7b61da06981cdac0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f25c87b94ab69fe3c0d94e4b803588460c8716bdeb68f5ff853e20ec31508985",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f2cb7b51c35440e75523ccc2a9d6c0534063b3574dd00316d07ed3e96e144892",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f3d86cce6ffba87b850ec2b51f855536ac14d1ca322d5796519ac3c2c705cdb0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f56bc4218084b34b6b753dee84503669d035c692f40043c3e09e0f39653f565c",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f5c61522a05af643a951a6d2464d3bdae130010bf9f2e229271c31bd66c73ef7",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f7201974f0ec8f84cb4d196c11f3cfb35b97cd5c1e27cfb1b84facba466aca9d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f87485af3c9948d6cc468d110417a211c633df8a4bf210ede7c952ba0ac8a045",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f8e392adaa1e4c9386a6a24c5c4fd4dd89f0e9edfe9757545da2aa256dcb03c0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-f9f10f412c9c3b312debcb82f9029a4d1ab704d126412d221f2f8c8d9b34b51a",
+      "cached_compile_seconds": 0.0,
+      "hits": 4,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-fa06a05fb0897ee406395ee1ad7ebb877b4a46e9a75c2b03313a64af5a2dea68",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-fbf436d3ec176d0eed7b35ecd07a328190c9e50107d89fbe8663acc871568e06",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ff3c2389965494af98c780ff4ec0531212fa600ccafd43b093065e812e685b9b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ffc086480760dc87c2f42d3402e26449f28b5b2ccb55e834933b5c5db4e80f47",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_broadcast_in_dim-ffeb55853e9eefc63628ea22f57767e512347444dfbb517886c59e53a81bb29f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_build_contour_tree-25d34f1b92f35ca4bf91581a6c7a1e2b3be11d3ea285558119cb261fdf89d80c",
+      "cached_compile_seconds": 2.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cbrt-b1c6959a75d1c4909387d77fb2e5c0196226d8f5d0e25128f53e5dafbd20d17f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-04e80a6f30c3ce95e60a38cc3884d1c3edd6408f14c8b7f2da6e3e9c9f92a67e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-0a8b6eb9c7295cc7cb5d27ce5b0d9529d2795f7d725678e05a798995819189f0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-0fc87d085a225030e66f347ec46c3b236b236dc293f97a35fb939791f44e5510",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-170d31a78b829f22e0cb257e0b39fd9e2665eb6a55048afa33a6799f4ed3f50c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-19b6f83f8b71678c1df7836ff5a0040b663e103a05be6b5c3d41d5d94243714b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-3e3e00f99fe7b09e25f47880ef84646730262fb6adff31eaa959f83dda230ed3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-41cf1d956b836bb1594d568a96f7556dc2915ee186274189e020d85c0cc65c27",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-48d80dfe36856f2a32421b910e8a1476e78600d1ef14d3c7050b31c755010914",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-5092caf134b4efab906f89019e92e538482999f08ab7171922d65d16c18484a0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-71ec873d0fd098995811a795ff9e3e3bd5a6e17fa6aa1ffcb00bd39cc1dfb7f0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-78e0db22e87e01da40e24939ff67e7c20541ed2db4577147e6005894b997a889",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-7bb2a1391abdfaa4194731d782683881027ca155163e336b8c6ceae302f8ef14",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-7e5088f20a22eb7058b7aaae1318c159c4967c6f341437ec8eb3f84087336a97",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-7faa3c5550c9f9ccb4543a354c514282aa8b2408320330efef25e7b86b4383de",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-841339048f7df31a93058cd7cb90770f63165bbb3bd715c212c8d5b8556c6254",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-87149ce5f8546ed68837aa2c11ff253dd7b692a8225a1846976b2f004c8effcf",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-9238f6680cfc42255728445a5ce7c427e5e30242a5aadb65266a9ddae4010646",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-97ef1b58c3a50c42e4a15d6d18396494664d1996353ae363148bf558093f99c8",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-9fb4e95b24c0e90db6b5ea956ec4c44a53b8c112f2fad93583a5d1eeef29bc77",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-aa35c68cac6f75569b6dcdc66857a64032336e4718c9a5975c3be7399582e9ff",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-c1953e47a89d4a9c0fed036f400f801ae17453ae0fd6a00ec93479753ad62073",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-c5524ab017dbd9645927772f91a1b1e428fa2ad443d65304042677c592d99bf7",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-c83630784361528f92d28749bf4baa0607c0b51e3c0c28910738f28eaaad9e34",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-ca077cdabf41087c40de247dee78a93c2504398f67749b2f516c7ca079df3ea0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-ca985d6d678603f3781f69e31efbb122f6d32c8e49f4878b972f36fd24341927",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-d3183f482f70acc8e51deb65dc30eb459f418c77359bb077c8d748817fc28b66",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-e2ad8b440c8e99f8bfb76ccd279ccb8594780bd8090aafaae111bca985daca50",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-e8244b19899dd3f984142f447becbdfc79ccc5f1e7b2505760373b5a53213768",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-ed39d2aebbf810b9cf8d7a1fe60977e222bffcd4081ecadb8cfaef060c9ee225",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_clip-f75b754c571b3c4f73d4cf52017fa19be718d494e1c3465e0f11788a5b953ddd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-0136c4efa4dee1d29cb21e585a051f3f12836bdfcd06daf345c629353ff0b438",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-02b63d14a46c7f5d0ee0e17f2ef9ec67ed6cfa0acc982c55704980b01f3b8122",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-06b87883e02bd6b85c08842cbec14922715e57b15a0c1029d76c2698a40a0612",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-0dd03003030b440f0690c58aed30910d29b43b533e69ec6bb7c52f7ce03b85c4",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-1b1d6218b221ba24b92243fa51f7c7ccc42db66b8e02764bae60acb9593203c1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-1f5819ec6ac8b07246d6b3d5baa73a97f4293445dc8f6e711174da078aad49d9",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-20abe2be2124b1be7b28eef617d57d4fba0abfe344a380c53284cbca3a097340",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-299a08af9c664b6631d0f6a6d0550fdf96b4eaaca2ebc629f1c4be3dc12ee2cd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-2b0bc94626468d3da8dd43f18dcc47831bbd5a164a626752bf413a6d0dda893a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-2ee84b1a53c3b8812387c32635097514ab5f0031b13b5d68e7cda8687c46cc83",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-2f6e98e5ea42de9730687d5077b4bad8ba67c69d3f5e4a248735a586453674e2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-303cad4e5822b8bd2d6db4fc44096bc4f5ca0c6951dc3ba4ce98df68bbeb0124",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-434aaeb7a3f32df057c5276aeb680507da58552d2c624d453ca15f12744b6f2e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-49cf5cdfa2057c59a448e22d83d54fbdf0cd6090df07b949fdcbbf31393efbef",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-51ee1a0b985b93a86987a5ab13c401f640e986f16295c7689f34f0a701a80f18",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-54ba613466f75dca608a8420c424634707ccaa1313b1f305b5c356eea28eea6d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-674b63d52a2d979b82cebdb941c71664b149a7478694e20de7b44cf65a6d3ee0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-6a5ebfb0eb7b4052a22505eae250c8600029448440343a741b082d4698e24a51",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-811bd239e824e64f66f9dea6056ee9e35209a9ebf205a7a24728fbcb833fca43",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-85904144554ed95a038a1085e0245515fc8ad5a05a20faa02d6691a142c933de",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-c3b07a609381c35683b90aeadc149554edf25719d085ccec06998192319b9da8",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-cbde458049bd18f2d4d0a99f18e50cd461b97afcf342dbf9928a4912280c7521",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-cfe3899b71a95a08aa36b5aa73f98d6b236824b2205cdfa98bfc5af0f056e3e0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-de2b516abb3fbd3ae0808b3ead26104e40aeff78430eaedfaad2a03b611ea73a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-e094c8ee68f77970d6dd1bb3db9ec6f19545654e8c44053710271a257e3858d6",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-f3b399c9322d3b99e0cf9bb98a3b06951bd72b0992f5a299e087751e502e5ff3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-f662b31c987bb7d82114240da50b83f7ed9d9bddb0a9fb6a3597a698a437a5f0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_concatenate-f91a91a713793cefbbedfb8cfe55d1d0e5b4e5fe38c004d3b45ec6d3c578176d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-0da4353faeea05d369b1acb443d06e4e0d951b22ae51bfb7504cd82824acdef2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-0f2b35889ee816615c8cde50ec6c0e4e85331c9b35e8d85c8d9d3b7255de0445",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-1502b77e82b64ee3ed9d9a3993695f08aaa049c87b0ffd8f4efc0eb18b99903d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-152890903a9591d37264d23b722c0781ef71edd6fad34a342dbf93b61d07ab8a",
+      "cached_compile_seconds": 0.0,
+      "hits": 4,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-15aad14b854f1d75f1655664baf43b6033a5887bdfb99da620ca1f1bb01b1b0f",
+      "cached_compile_seconds": 0.0,
+      "hits": 4,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-1bae7f03045a2ec2957b503525a771d69d1a63cc0fa697ceee1ea71206353e9f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-1d41dd3c1ab52477e00593fad32bae871188d2401510cb8e90234aea16e85b31",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-2ab8b1897f1f1578c1b608d7cebbbce81838d5282c897ae5a8371efef2ce375a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-2c189ea7290acdf99096f05653f8881e20266e724a4c66b108b4260e2eca7c60",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-2c3e3609261889f4f807c9fc33372feb7819e66fc10964db02214611437a3e84",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-32c3ce0590cedda89feafa0f4a03f8cbfaed0ef67f864f707079a6524f96bf08",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-3599de7626ab2db3080a44250e372468f6ac5767b8ff475b902488b7724423b1",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-3a67c1ad068793ba590f9b2fb842800d89a60ca61de94b20d41fc0c11ad6c1e8",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-3dd36bc2947351b437f03d6783e71262dffc89c0a669b01f4d39f49d602bcfc7",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-3f81a12e38eeabca9f1435e0776d429bba1c7ec10225325a2328390eb7fb342d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-45b08883210de01035318427d68fefe53743563183a97106c75358fa82132a78",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-6528d64653cf7e706b5ea4643891562143eb0329dbd768a3329de9e75f69d199",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-6c5d35ab0d8ba02e894ef79cc6b64b6c76e7f95bd52d878a7ddb5d720b4a7cca",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-722c07527a2944403f41192a61374a7c415cb61c8b1a3980e05c26c672070694",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-859961a2dcdfadc867ee94ed1933ae7cd7387e1a658bb43aebecad201b21d121",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-909b80c18a7f885e23d325fc9c27ea3659b20cdd529563d0708c6c8026ae1bdc",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-96932d5dc932bef41ec61d8daf7c0a4e3f6cf83f8dd7ceeb1f7001a31dd893f6",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-98da25e50b3361f8b475478c9142868215372ab010ed4ce191e9ca0632512de5",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-9c017c8dfe086e87ab33ca1c89c2402e0ee82c7f1aa5dec3ef8ba61270e5660d",
+      "cached_compile_seconds": 0.0,
+      "hits": 4,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-ae24e1b59c4ea5ef9760b0cb982fc154c6fb2b5661290c4a79c606fbb1adc671",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-b74fef81d508925da434c7e8b2ebc8fbef13069f92feb8e93dd71b95a21c64b2",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-b9387d32bb62a486fbf018e8cef10add44d1b23892dd67f7e0ca62b4fb62fbe9",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-bda6570e2f2a2b182074a8435a85a3721ea648f19e83409ca741daef27fe95c3",
+      "cached_compile_seconds": 0.0,
+      "hits": 5,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-bf800814bfe1a76face3b7add3502d03e588b2297d50000313c883e8f43b2e89",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-ca8eac75ae4a73ec4d069dff5c732d0bfb7f932deab133bb77034e44eed0ea27",
+      "cached_compile_seconds": 0.0,
+      "hits": 4,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-d2e401a0424b03d515cf22ea368579c0d47d2b7dba817bc41b4db76bd3c17e09",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-d8b74b4cdf6cff26ab4c25c18365207f3d3415b2dda3b293ac385c4e2930887f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-daf13c51548f65778388387e13d894c1dd9784824f7c4a4b172740bf41ab4e28",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_convert_element_type-fb22788477a502593fa3fe0e98bd78d9e9fc4d86199d45aaa7b1cf05f379bd1d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cos-2ee906789eeae4db3347285c16404786f0e435b0d92447c5801b98f290a91fc6",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cos-5eb6fba0e9e093e451070bafcd22cb3541fe7dbc56263f9346116cdfbdbb6985",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cos-b9a36348cc606366996c4da4839ccac533b6689037b94146488ef176dcf79d59",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-108455e43e4d0e79144404aed018b3f535bd3e75073484a77f0549f15d9a8284",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-18f352faa5fc18d8817f735411ba482884845ff25f5fb6efa1eff8d665c40171",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-1a06eeb44210d560eb98e7a79c8d68ba212b7fd54fedbf058631019d17eb25a6",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-26329133c98ee543e4d486ab99450f607b1c8283601e8b83683f13a7ad53a639",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-271d88ca41385c998989e6f9441f74c008b242f4fb8983a219ab40700f24226a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-812dc7ce329cf28fb92af566d13b6e6d3e51e407ade346d879e501108872026e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-8374a2f0fa3fc54233d876024ef8ddec74a3602ac8070d0e167f3622331e2239",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-9ebdf788613033e3baee3b080bad5bc42be99605d63450ddf2e687a292110ce0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-c32d9d127f6a4fc3e20c4c7883418a3c2c66ebe33d051719417dc51816386272",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-cb513cd8a5faf694033db65f55b72f4bbc6a564d2a934d985d11179f5e4a0c37",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-f05f2e6127a1927d716af2eeaf2657c666fa3b1ff7e10783166eab8761853c77",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_cumsum-f2539ae03322fd189eee7a8e4df726090d08f2e2c7a2a82637ef65c71f2ebce1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-03a5281b028222032322cc8a4d4fcb58f322c309442f36fcef2c13c9db4fb795",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-09928928aebc8ebacd40d7c8f32b82f1f5318f3338823691b9a7da234354045e",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-0d4937adb9da53ee1d58f4dba1e2c2574329e23d3d31f066b56a37e4a1578767",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-20c8c98a5d59b72f62af20200482188008107cf7b2f7af7e34c8445cd4a6cefc",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-22a45c4b8da4f4b8fd52bda805cdcd9ddf141b244e5c30de58e0a92f6745525e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-4601e2e2134b5b4e4f7271ce0d8d4640154077dfc0a5394ac88eb9bdc0bacf36",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-461835c350dc4f12653d1784ceb71aec69885d28f535c3b81bc0a646aced1ef5",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-5306cb962fb28109897408be14e8e126c8f0972670c5450b65c0413dba5aed6c",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-5d80d8660488b9f593f4911aa6d829de19fd041eb85d450c1b72ac89a869bd48",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-660586a0cb5b2ecc415da2a9de3ac7de24b9cc1114681d05fc4e17cb15283eaf",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-6c88fa5b26667058735c9fc5f36aba8dfb793284072d6f68aabd3ac658ea10f3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-88d175f9e3e9188c6f439dfcf13c5683e8715378897ab929825f59e5c7b1b7b8",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-dd2d5598c680dd44668ebee0e6f0ada9e1ce36738ff302aef30734d9e80a72ad",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-f039b576aea306d2bb8ab65ae8bc32ffb8f50155257b33a8df8223c6917b3736",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_div-f60fcf8e45430394738cc8c05c3b6ccf8c89d3d2bcb459013ef13a6d900238f5",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dot_general-085a023b36e7e32823baffaa556199aa62ce279b2cf304eade592155b27b3c06",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dot_general-c02c87f34cb2c35556188d25fcb6fc0eb5d4bdee5b8a52b425707c0b5d1b1d75",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-010f381cb4ae154bd0516cfa8625937637d630e9014533f4de423c7a50ec03cd",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-0178471a83bea583d71a330f65fb638af087d9ad74262047dfbf4fc61f4fa276",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-042d2d44c7bca15b051b26b38c8b44cd555dc6f74c566d894d6c28b3d1adeaeb",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-05220e523c8770e536887f5eecab97b6109dc10d58e42bd9c5418e6d4d99094b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-06b37c608f321e3a5105313eba2d4560279de03655ed999c810b8fbffd32beb7",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-0fe4c5e78ac016c1de7d322dd5d9098f9cc3246a6d3e157429e4f7f7674f2d8a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-120c2793664ae524756eefda756316c5f1b9c65ab92cee133c3bb3f29e4806ff",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-12c849c7d4c2f37373f72aca602da3249567414a51ff6f761e42b9e36fd5a839",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-131b282c8b6140c845ddf3441bd601477a2ef5bfe44fe98cda97a29b521e5437",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-15d89d72b6a164fe12ed98ecc223da7f454319a1ef97ef4a9933e8d8829721e1",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-16ae97071c500f9219be008ef319cd0cea90f79ed9bfba77c966e30df7dbbc45",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-171c7b963eadc5b8724f3e28efb0af9eaa46456cd345ace86a8f03e5ef03cb8a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-185a2a04da2f323561bf676838fbe9c38aea1729cf6f72b1d32ae6bd4062bcdb",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-1ba3e5375bfedee46aee3b09b81cc300f5564b82883b646327f22a1e0bd65b42",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-1cc3fa07c4ad990952c602eb6e27631e19bde2bbdf783d1e54978b6b645cb6eb",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-1d7f9d8aa3a5d629350515fab3bb550a241cd6c30a2bc237e5cd3c982c8256cd",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-1f6d916122f14e3828e3ba15cb7398b75b49a5ad6be9bb01cb622b27bdf175b5",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-216dd6c8169976e2c8113dc4b3d09ffd9ca321a4216637d07ad2b43a7ef73837",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-274afe542c7148369630b6a0bf4bd3fb5eed5e353af0d138ff964977e662b7d2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-27bbfb9b72a711936846d7effa058dd81c3208d74097f7b72958129cd14c7143",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-286b63dd7bcd8cf36eb1c47d1683d0629a2efcc623af9ef57cdbc7a046895389",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-2b7e78341fb548fe6229e04af783b756c347bc15c36f6861c844b7f89d27dea6",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-2d9149c51383bd0e292c9abce3ad5b72ae4e315a224b6fd728a724b3f387d776",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-30010c0583df3686a278a9ec7fdbd7cf79fe2722084b48b9a7ac496dee1069ac",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-30242be2e2e0481c87d93e40d36848b0d912a103eb4bbc02ac84cd5cb0584619",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-30e20cbebbc36bbd40514ece01b6cd2b922ae39f7979dab7ceefbf7fec2aba83",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-30fb3aa8107d8638e443b516d101b1627198c3bf5a042a0bf9fe9fa935557b9c",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-3580d38c330ed45aeb93c5543aecf8136d08d25cdf8d47725e379e9e2183495b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-39755b1554872f34b0ffbdbc23b9b17c587bcafe38d13d21fcc6dbe355b77d51",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-39f527baa70c69794ef76bd0a20e17ddd8ea20f809fa2a144d92e7e9cbcb21f5",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-3b848446bc1b062be2c3216b47557102375e94b2fec71eacaca2ac5416f28a7e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-3c0101e6741ae0720d77ff0fdb01f98bee72ad0013a0c40b7e752b5eb2000bfa",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-3d45c6780bedbcc862210877792d2745d968631e5ab0abdefc1614d62ff9e6dd",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-3f5680a367be226e16d2273200a934c1adf0d284fac9cdfec384e41f09e6f26a",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-3f7fde879ada0e3d5eac88f8eab7f5ce264f83bc1b7cca66b3c97ff17fa1bb98",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-3f993263e0984d871f841605b3d6151f8d8c0f11faa5f43bdf3b33fcfe19b165",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-41899e2d78f0eabcfff21b01668956bb2fbeeda6c154d46fa0ba2b606739b5c3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-452927945262690d4309691f614dbf23227b53528e55cb30ae1b6129be079c9b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-45ab5edb6a62b702ae1763d3d31d7b16b291545b178ffd55a5d9779954163641",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-48984af051dbaf652692e29dea301a98fd625e477a73f403942b02885ab7ffcb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-49f3550ddbf904139b41e586f85fe7299e40e300e2f8b05aa80cc42e4b45def2",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-4acddc8cb47aab078a6c614b8bd13b81a7a4fc316630785496517ed31284f450",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-4be819e766de7d845c953b4a8dbbf2907e940e17260039a821ff40dd2cfccbd2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-4c50d7f393bce41afd0adb4894caf153670d088d639a7ce9b6fa9bfc83a5d845",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-4d03d421c073d6e22f18807c6d5882aea946720f8b722667d9403fdb7f2a109f",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-4dd44f2d78c042ec1eaa046bce87edb14dc90450a59e1d580f8ae5893bf78935",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-508b019567a19ed6304fccd630dd69f3bf0f69ceae1b5efb8ef2888bdce9d4c8",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-5250a3f66a1126861fe58a21fa7bc804db7b37dce359eb410680fcb89d4f89b1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-528a0c778b987c019e7b7d49786c879923e0070e2f65df526e16ea4d841f0dfb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-5b262c5a2eb1343ec2961e9df6c102f9b21116eee8805bea27c137e29438f517",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-5b2ebfaefde16a0d6eeece22615636d770a19a9fbd5c24ca73891af9eb5beacf",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-5d0c44a88e1d06895d8ef33e1e67ad9e50785f47b40f1c161937f92d471e9037",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-5dee363a5ef8c75d9b89b8f3d011ff10147d28566c6b0888601574ee6a590954",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-6146e5b1370048b0410c9aa9ca4b87474e4748ba301f109e727eeeb86c9f8af5",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-626a26901dd12e1d17634d0e271fbb986a3b1ddfbf8ad8531c93b62715e114d3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-65f49083e8d2f00de299a3af3fc0aa853577a2d7a593b8fe36dffd6d44e44fed",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-67f4ca1f2f36f12eb5ab926ab55752fa4444995489e7c349b23697185e450622",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-68cfa564eef0b67a5b3599fbb86fae2f68b36541cca621d9786ea4904c4473f1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-6cfe006f37f3da0f567dab2978c47478e14c5709aed122e904be0cb822bcd399",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-6d1053f556103aa6ea2155d87ea82ed4be0af188cdc189fb164269720c345878",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-70407b564357f64bc09302c3b4fd55f8fc660b3cb95330961bb5c851ab89d327",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-72574fe2a78f9ac01858e8c12c493d3c26ea525752987b44ce869b4aab952cb5",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-731254b03584d441ac5eac72ae6ea1f3c9d37c6fcba2da32102f5d6d2a096321",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-75010eef29fa17c09ac0ac8564676332a08175166c0ca4601fcb7d8e7a099df6",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-754d5b0301b3e75cf502cc8c098c9f1ff4d36ef03b4c74d1bb328237997e294b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-75a7ce92524248c90d1d26b2f4c4178e12699da4a71e20efa96ff402ed078c33",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-764e63d6109544e52cf1b54c23ac8c37e9f0b9b9a50d2272e0eefc33a4dacfdd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-7ba3dd36bc94e34a533132d6cd79cdf8e94593d601d4922d36561709bcee3c70",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-7c06dd5299fdd7b45d16f06d8275ed0918ef5c13504e4f99d1d5caf5c7775bc0",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-7c8bc3c156e1c9c196f793ea741498c952d9eacd2ecf170e40d153cdbd19da70",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-7d8a62301b3aca2e4a9d23ea15314a7ea44cfb050f7d7a97595ced2bdab66858",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-7e9eebdebd38c0da232e1f9cd73a0cd20f1cbe96a31e150554188e61fefe046f",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-7ef34aca959596911232f6d247baae1ed9ba5f8b8d1b0dda025bd7b8f0e43060",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-7f8d7593eb7616a7cdcfb3872d700fa2b88956fbe75c5775ebfe21c5ccf7f534",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-801871a18ee94d1684526c3d8727305b9eb0175def9ab46a8c77642cb06cb192",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-80f8fe302c744b30266467f21f9def1cb4446e5e76d24ab6c5f897ff778da3b6",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-81e940e5f5d232f8cadc9c37c9c56288973e0651c2cef1c164c936bbb7a73125",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-83b37bf99acb1ebd3ec6dba6c90a2e01984619dce5bff52cf1c585d42986e753",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-84e5467ca96ac34344bc5a8c00d8aee18f79955c5ff18b1fe0717424e7a7044b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-885c7756abebd4af9fdd6060a18e2cf58754e72fd931544fc2645db8c52e387c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-886871dabdc02a873388501d61314f455e701bf77a29abef3069fad52f4f2084",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-8ffa0f6bb06b3d405ccb6b7fda620f1486ae3b3b8baee904dd238e89949b30b7",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9070d514ac5be7de3778dc705d9760fe0a71108b2f7af0a26910f64d98bcfe9d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-92a43b797451a109810a7981f1cc72bc52ec1f79c83d8c285436a42286cb8782",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-95d81f26b08c387a091c2a2429531dbcf5d0b2003f96f11b98f982dd5bee6961",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9640622fcb8b0a1ff6442868875bee874e299181d1d6b5738be6509034b11bda",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9740d593f46ea95b4f5a6f1462530a31170f9649ee2a107df08c11fc3fe1896b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9765ce8b310acbc6aea76af562695505f8f1f90e596d841e4ae675700eb2afcb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-98cbeab8f5c4053ec956b4d5dab56666677590b147120019b39911c75d73571d",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9997a5ff4419e67a3e7e2af0fcd24e7fd168d61c46e8251e5ffddc618441d71c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9a15a966b90400c53e7afaea733e4a5263765b812ddcebaf4336d6f03e11554a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9d87b18b5ee257a7b8f11aa0a255bbc3023bcfa132ef2582d3af3520b6a71718",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9e6a3df9b26eb12a8be46d2c6498100f5050046af31efbd6ddfa10fe3df19b24",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-9f195c2f1e71a8522c75a53a4a80be6eb87a669f43c1c656836e42a454a55bcc",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a0b4af44f7a4aaa2cd4fde6633f333f058310e383a2fcb6dd43e51dd582522af",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a0d20bd43be41f61d3c2b46ce740a992becf150326ebf8be991dc03530073773",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a1a7b25c0b27b7890cb418bb43f646429d67f757ab6c94172e5b3a86e1d4f6db",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a4181369b2f90f24ddf24f62a9b1fb7f0c0b8b2886eb92673b1689a34c7c710f",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a47f9462b3a26f8050f88452c7884db76d4fed1267369735ccfd1a33775bc63d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a489f149a603e65ef9564ea1b571e8e146714d5180187dcaa92375c9f6737029",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a559e6b5b9c1489352971e64bb0064d997b6bdd20e9ee14fa60544687ac031a2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a81d0617ca256cc8eeed28b3ce32850bd056f6bf763bf45b9a63a42e97b492cb",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-a870976a13abb58f2b41b508f9c19c199b1c25011991e24adb39e8beffb5e8ad",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-abdf7ee5c929420c6be0995052578b78e8b8b20c43fca55457e3f248e645d578",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-ad7020e51bb580a7cac4305e73d28a82e19b7a146d55f02288b0414075a0c81d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-adf69b9ecce3376770ef386cf81cc4b68840ca8648087f47127ff9acd39c848a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-af84f90cc75af32f98bccec6f186b597ebbfdb6f68d7bbce4b990637946d5cb9",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-b21fc3cea6b72ee313c1f60a56fe94c9a1243075ef3540ae5e1888b72e1baca3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-b84459c27db24c70ca4f4a5885a2ad79c249b50b98cefd3b4cafa1a2edf064bc",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-b8baf2163711c73747727c81aa12de13b4495047512358c1aac76fb0df1df29b",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-b9ce4fc3ff47fe719a3281021377a7f790581338ea297fbfe5d995bdf4e8893d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-bbe4ee4412c4b70b353462ba14cdd0fd4ff4842bcb9dc894c6617746692949ce",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-bc6a8b075c872231c709ae3123afa16e0bd9034d930d12b781428ac896cd55a0",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-bd323de3e275c94c1a7e9f707c8acb145cf26a5e1dab181f2c19f9675ccaf347",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-bd449f9082b8801e9268776fb0540e436c7107ed02d0a89e5e9b5006c3535b70",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-beaf388e3e9251a2ba223d02a33f2a805754902cdca165bf8d34213a32f588f7",
+      "cached_compile_seconds": 11.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-bfc5ac02f1f5960b15dcaf8d20f5bb0af89eb670664a961ad9cbe1116e8e0654",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-c003384f0ae542513138a89abb73546b7e9d7dce38047cb788c06d95b974a3d6",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-c3541d67939684ab822431963fe4e2531e7c917cede90231f7fc96ae224caa91",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-c374503f4a3188a1d350ed9c89c617480325bff3247f2f8ddebb529679dddae0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-c873019091f84cf3e5c2440219eeeaea9d81841543d917f389bd7ab718a0ab51",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-c9b328ccb7f50d1dfdc6cc9d722ef609333af6969847db0f66915c16dfaa3d91",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-cb56c21373eaf9675baa277e91c2bca7188ceb0de72906928a38c20f7f6d7c39",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-cbec9f29ff6a307521a9dfa40db9ffe4dc2184d4fcdce9b93f09a7ea6405914e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-cc6fb6312511d4211f62592224a513ea620834790242f83001478ec48643d410",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-d1eddfdfb0ec8b7de3673a9178c817e2c809c990689c19788fe0e049250ca8e6",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-d476ad74de6df7867c0810ddec558b9521e731b7400d0c6f38b0a7b749e3626d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-d6a074b4b1357a899053e5ae5eb310b35d2e9a2e0cd24411ae8215d943148162",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-d6ff28fd7d74f1169b11ae1d30f622122751e21710f695e021da4e4bb0dd332d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-d9cb17a076d54f3939ec5a6f2a258b15ef42f8a52a09acd89644766ddcab5a16",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-daafe2c6b3f5e1ef90e70a03919efe860bc43cf9674fe5a1d9a99a98781e0db2",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-dca8695e5b1998d413f0dcfb6b2c8722d187a1556f737c58a5f9ea32a182bc1c",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-de2d570e534d9e3e662b68f481947dcd5d37cbab4a090055afaca839647a6523",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-de9d442ef7dfd44113be3836cb68d93c3b726fcb8e700e263a7e4a530f188f5e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-df08ed04f0f2cf3c21ce816cc8ceb88e3bd2d0361bc441b1d3dd2c6876db5729",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-dfe39aa0f4d375502368154dc89ba81af098435effaaa615f0ff68d59ada727c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-e2b7222729330899491689d8f29ac74aa92984cc64031a9a751739e4743dca20",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-e33b7c352f0471b5944faf16e4bb079ca34c2f15395433d8c491acdb80c42eb0",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-e3c83bc110eec297253386a481a66416388743444d35bbbda606c0d739766867",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-eaa9c1dd53e8fcf443144023782763cdd3ef88f216e53b10504e6364d31d67b0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-eb3943727b77e7bef954bb4d6b94b920dfd978bf4ed14f5fcbe406a339060a87",
+      "cached_compile_seconds": 0.0,
+      "hits": 3,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-ec3cf879cb5eac4e0d2b22a7c65ea524335a92781c835f7f0d809ce3bdae6f3d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-ec7b91b0c0af16d60a1cb925ea6eff4515c359b368435720453233933df4118c",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-ef70d3e64f32c3f545bfb8dbd0e9e83e1e23044252510d0fb5a1ddecfedbbe29",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-eff0b27f8c9d9e336f2835b6b5d1dbef04a54657996b004f92299b73cdd8c938",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-f1521d4e496dd0d73ea59254ca581dbd0d924ad9598e8af36140ec301e652c90",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-f27696385f11812a6d3d30894e63bb5a175063bd1ae70a423eb1d40b72926804",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-f4fcbe0cf6c70aace8d98980c4941a448db92a3fd00d36ae9cf1f79a600e8823",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-f78cad4c4dc36c89cdde0f7f250ed9ed878c11cc77a719072d107b6e438ee2a2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-f87faa70ec6eca5aa0a709d587b6e943aa60c733774afece0717cf7ad9b46b8a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-f8992de715e1b26d865881a8eab194618b7318554dcdf0d168aa1fd37e9af36f",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-fb093391f7c25d325b21d4070627ae6bef407445150c21e7167fd84d41edce86",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_dynamic_slice-ffb4bccbbb87b365cdb6e391796d32cf2a423f409c1d754461b980bfad232872",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_eigh-778589d60d04f1093400103c0c4e3f9c4dc7a5480ed5dfda4bf8500890b60527",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_eigvalsh-2545e0afba4716136db4dbbc7d0c115462e37d81ed8444dec56401eca73fd17b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-03cd7ee3cfb061f8b34e2b918bba9aa4d2cff7d37c80acd678b3cef597f58203",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-18abcba32108eedc09c45857aac2a8f66607ea490bae07a0e810e5566b1c270e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-1a71e9d9c798aac28eafafcd99f0fdf0277826c9d9eb38f1900bd9e3703ee5d7",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-23dd6c29416bd1640eef359b171ce752191b44d54b147c517007e5c9652e8aba",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-25819062e79504c839c3ed30d30d3866ce25959655bfc9de46108002fb90c357",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-2600272985c588feaa86d15c29b1470923ee31afb174cb4d9be9cf17b711565d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-26d14ddae1143da14f65763d071998577b1e0897ad54e6d0c0e36e513df3d670",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-2b65f857f94233b67a6d5cfb87a9ab72c4eee4ece75e4d2d9b4ee8acae5b385c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-3e1224532fef6f0376d904f6499218695790c50e0f98e204434190d600ebabd8",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-4467776f9bdd88d966c85ea1bf289a25be59b223cb81a60e0b4f9b4da71c99bb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-46f5ccb1af070c960193a0473a88d7ab8d9e4e897f93cf6f96ec7964209480aa",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-557780426ece151e07d8063aeea870e2921e56480fe586d42a1bc275da757840",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-6db10d992144a8a67a37c2beaac8ba059d53e820740043e8e7f0e0a45b750534",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-766b656067fd12ed35d4d51d30aa5311546c0cc078af931e5572a1a839a2d30c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-782adae44302a39fc222615f330ee32e3cf0cfe45824159f25897eb6f1594117",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-7e960cd0d324edc4924e3b90d0d84b4a2486b4757e218676e2de37734cb1c9ba",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-83b105dd39823aa49cc457b1c44b15da35911b1ce9d06e9305f6a5e6193d419f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-8a1b144ae2f1699995840096ad6099741915e0829df850b51f5d8727acbdc5cf",
+      "cached_compile_seconds": 0.0,
+      "hits": 7,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-9bbf6e20da46e3f5d4430aef52560a6306bc165c1f625a66c053a3b1f2f6614e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-9bc4e52c054e5967c3323e60804b78a36b0c3affede89c5fc16f42fbcd3af1f1",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-ab4363b23a550abc95a92c5282d5d88e352595558231a1ff9b55f8df4612bef3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-b37327e01c0d867d2d60e24267a9b5eac08bdd173d76fe6da26d632fdae3bddc",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-b7a62f2275c0e2dcb83dbc1a5794cbb8526294d44014923c408d0fa72756f671",
+      "cached_compile_seconds": 0.0,
+      "hits": 6,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-bcf1d4b8bfa8ce70a5b9ef7ae903bd4b4a195e91e9dd1442f0b6a597a76e817a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-bee04de57886d92bf9877b67dd9b37680af00efe1c660b1d2594a9c2d6a944c1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-c9a663573a65433cd6e6b4fd203825052a4652af04c14c8ecdc4d65e5687774d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-cfc91c794f7d22e9b4ef6708075d633fa478869a04bbb1fbdd3471b4b21fd16d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-d270cf77ad3b3b4c23f365b1c0646fa84946146c97428ad3622ab42b3a2df11b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-ed066aa265f4a750de8fe358699a9329420450a9b768b8c940b9ed373c7e7b0f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-f29ed0bf2ce65c7989ab7170d634a0b5cf29d0b2fb64ee08c393c2291d56053b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_equal-f7457e0b937b5bdf79e70717fa28eabddf9b889e4889ffd8b9305d7882888807",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_floor_divide-2822ce709616efd0d470158221d3191de3d7dc3f9be6b9d4ff30cdbc5fea2579",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_floor_divide-637a9a4434bee69aa5516ae4718a912793e32d2abc87bc4a59153d642dcbeffc",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_floor_divide-6391beeff82229537d4ca1d3f817c5abe7364e73dbcf8228d3550f4fe4f84094",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_floor_divide-b1802c2b35e5be19e9f73047d3848dacd8206ee70f252a5b7cd07c533a41e77a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_floor_divide-d3cf9bb2697ea35f49c3a20bb7e8591d63e7801f3e7e711362a5aeaa6d2f367f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-2e670606ead1f332dc08797a4cb7414fabdefd90648b6212edd7fb02f28f98ba",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-3009be81127611bab0be34f57c59cba9365b9bafd0c88a6a1d4eb334bb986eba",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-36e138ff6dff6e6826f6ad0ba5c7a42b77558e2cd7e041480bafe7e676882868",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-38b9da2d14b6e880476200b31db63b3196f2a0a20e77d29000f73c9a280bbc25",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-5702e2e7ff0089417589fc8917194506f3c5a7d4645f33a8743f90c89c82cf13",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-5a3ab778a0d2bfd4c847328c0e6c8cff9bb916d380228b20f2c3c4b6117a2d2f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-5d87ba1faf2f5714cc4ffa4edba1539190b1c6c5bc4c4ec70625afe0dd378162",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-6bb8f6b453959a86edb8606537215e9c3e056e31ffee969fb59d16ffd655d679",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-6f7e5381c7aa8e4ba63ea571a1b8738aed81b7b669e518626f2635258d9c2509",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-756d7a44f633f7e4315207cca1c8d76f5dd99f8f1944eaa7da6b93dda695dc7e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-7e7f9fdd7476abfa21eae624eefbee33ddb06e5bc1630c30955aa196d681df52",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-862db2b75af32b64f2d51d76fa488973f264a46d757d76b3c6615fa14dd838be",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-8f6e8b31d297f66f9849de8e8fd44a47340ee43dfb5eb399496650fd7d98225d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-b6414ba7600e01d947e2ce8ac429e280c9e954185b5a8c2553a9f679a1c1d037",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-cc5d57d00fb0ea7fd226f17ef5b59c2f8fe0bd58efe39a91fc4cf1328227dfb7",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-d104dab1bf4dd9f25bd8fed559223f1e03326f4065bb8af9cd55d2775477aeee",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-e31cded4ae3ee2e6225d2ccea35b4cbfd241244dc509858ba041cb6b52e2341a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-e9e8cb4caf3520275d7d01002984e233a461fe4c090f9f0a9cfddb3bac863b7e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-efcd3ecb091666bbab44874a02ef3572228539041709f99123123342ae69ec65",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-f3fad4fadda19b1d6f9012cc67ba392b3bd36eab30bdd4b14454158652b76ba3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_gather-fb463ce3ba83dd48decbff7979644ed1e13cbb912aca19b69bb7ee6972318f4d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-022a973b077d839417c4e679b339576e21d4d55bdcc1ed54aa274d868b65416c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-0cff3acf8db612256208f39069c95cfa514599b007aaa0896d536a2dd27efe88",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-0d175ae64c2ab3b405602f9a1f7c9a52a9591f748be98750f6c3723718a5a9c2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-0eb5b4e64287766b529faa54a255c1307343eac431676df66707a9a4a4d1d1a0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-165bde186a4c2a2652f1bce09e10012018c60af505b4da8ed6db8fd72653ae57",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-177f2b012f39ddfa7b4b6fefe4e546aa6502739e8463d0fe9955208dadcc77f2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-1eba47f79c3e558e637540873005d980d23e4e54e9de3a04c21111ed32138835",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-1f011fff09de921fbe997bf2ffe89a78685ddf60f70988e06c59086fc931039f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-21ba9114c821773377c655af8a26f3f241c27b8451749f65a9c9a48e6cf9a4f5",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-270b1f1dbc782e916fff5df419dbda62789eab37533bc60046bc2bbfd5bbdfdb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-2a8976aa1a4e7b8783edf9cd112ed38c62cbe091999596ade183b47dbaa3f71d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-2b4828e141911fd1b722206586878b8c16976a508bee4e894c4a57ac8f9bd5a1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-2ce589c0905685c27d3691d88ef908c651b162902e3de50cd4ec490c3a1b50cb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-2e8f94f2a6fdecafb91d77b92ccff4e044246a846399a94dc28724d3c03e5f55",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-3af8c39d240cc6014406e73570c84ace7ddb5856d7acc146d1fbb53af00caa49",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-49c13b4ccae5e40d969c4c2f3b5e62baa55e57530cc9a2044d2badd83d1acbbd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-4bdc2e63034e590c2801bc6769c1121e115f5783a98de75685200f46b739fb7e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-4e588928a69baeb1f497ca56e2b1533a7b6b427cec8894323d1a377f49ea1d8d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-507d136cf430569c564f14abfa38f83920fd4d77aefcd5031f12aa6064f3e001",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-50802fe01d150e716862575e6a446aade02a478d63cd9b3ab341b1aae0a844cf",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-5836c78bdbd5a6eff072e5e4ddffb6b56bc6bbeca4c3b4503b70d1c51674d359",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-592db9833001696cd69b0951c3726ce076d77b2f0ad7800ac6276100eb6f4328",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-5d66f9162f7d77b148905fc3668fab87a2d51d55ce4700db880bd4d01f0a4adf",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-62394f7e7ab1070c21aa1c0894b96bb9f2955d7e85f1dccf3227318d62b5f5f4",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-62d3907c6846b9f9756baad3dd3ffa1fc091822a693a7b27e42a1d8e07b52279",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-67e2e074f12f49ce639ce1a2bd9aa6338f0306721b67f6701a20e011600ab109",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-6c9eb2919ffff9cdc78621c11e9fb68e1194838146717eee99c03c444ccd8638",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-7011810763e04fb50755c2e66eba56896eb1c79b35db042ce64dfcbbbf55a0e9",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-7351373159a84a7e78804725e67ae92d6f2d12bf12f1ea99afbaeeba3de30357",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-9660e515b72082aceaa5883be718ed350ac4f7d7df5a52899de7184b2a9b4461",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-98700a3609e0bdb8c22b79dfc5cbba0d59fd7203a5677ceb678baba34dd78f14",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-a64031edb8f64fc86dd3c57fa13cc4c000d99f668a1cbcc4850c9652ffa595c7",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-a77f4fe0f972fc67915d10e4444ba275dc83d000bca21ccc7c3afcb154e40afd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-ab7cc2f6862001141a7b014906613dccd7b62cdccdd29949bb26a2ff255ab124",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-af3f82d9c628f4e0cb987d476b9fca2c626dc336471257ea70ec8d149240b8cb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-afdc689fe0835998d001c81ec616c959203942bb8209dc584759e6f3a0fb2875",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-b297590c7e7f25e9499a3ffdded7f19a9170ca3f1862105124de29b83850e669",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-b5a5c6cbfb21114fc7e6c1b1e3a5e2a12caa87fb94f59531695efc2cccaa5691",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-b77bf361b41db0456b237fe1159c4dd1b339ccaf181d5f4e86234313e7bd78d0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-b8e4c49a6a4bf9092a2a5257ae51965c9c134ec56a434b26c03812e5594cb7b5",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-b9d01aeec9cc2c92161f893de52ca199b9b021a8664cb887bc5799cc4c216999",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-c092761bd6e655467950a36bf39a23f01512ab43dfb9bdef54347e7024d5149e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-c13496a41a182930b5f14bf69b9e3357e691907cc7225e9062902b1acb75298c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-c1d4b8551601d5fbd5693ecc048301655669fcc20dcc3432c659874c6cf3749b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-c33efb43049402957ae149ee7c507683c34aeac0b6e8759dcdbda04aa81049bb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-c4439a95b614e96f5a41d2be8e3ff57e15cac3eaed5af17dffdca046eba74196",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-cbeda002af87d78ce90d658f244ace41074d82c913d4c9ba3f0775c7a84916c0",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-cf8278286bff36e88f4581091144c4f2bc19490f8f5526dd18ca65193736b76b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-d87a6a49de0297c22ba7bb0af3041504783f8bd05964a6d8185dcfbd47348984",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-dbb751ed7fcb35e458d368e832d2e88e463fc2967c6eb42bd164f7c2cd149926",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-de9111490bdb3ec755f979cfe1c3843f5bccf0f945750ea989d86dfcaf76a527",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-e02cbe78089ef8c9a1dbe353837f405ff361144574ba413a4c1533ab74752e0b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-e26dafaebb0aa5381b35da511a5aa2c6fc0c4a17cdd3c58cd5b79539c158908b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-e550279495aa345cbf5b6a68f7d72c8678248e12ce2de95afeaa832cc6ab4a5b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-e6d7ffb257828c0a9f6303334c924891b67a676460718a0a4301ca7dfda19e2a",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-ec1f12fe8d340540734365c52d89b854298fa63c2e253912f8c2303711676857",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-fc202ee9f32b32113df36529615d1a4bebdaa0e544b96cfe716e8c68eb0fa331",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater-fc491ba05bb43192e3f6662db04c5595f0578de1b3d3b1734f480b87fa775b08",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-07e8102df409ca87325206200cedbacb3ea0ac25b22a9392eb34857861b44263",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-0833d5cedd21aa50867112c19ee4712c8d8e275442c95da135571fc719ddde2f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-088c86ad50854c441206fc029d45962c33f6380c549b7de1a789e1f6d842f577",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-1cb53376e511a915410bea08e7a79f1b9a5eda319a030e547e31edc7a10a36ca",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-237e7e3048eab1b0bce980007a7f570f623383c0abe4e842f423344e4deed3b4",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-292e602247ac037326fdb9517039ac58221747070b56f309f2edce40b0454156",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-36809951451df64217c12328afcd77de2866c9947a41f1c295bed2aac9f7615a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-39df97903c63c1bbe00debfdcce44b8a850fc7899195dcbedaea7c481d7cd04c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-3f3769677b55f37524f5bafe464e9fa0e8c442fc117c4f427cd79af16260fe8f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-49612d6e84bafe8b6d0a2c589bd82c9978e2bca6d9c6e43ccfddc2bddee0cdc8",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-61a2e73d3ff97204160c40c21d19dced14bb31a72a5734b16e6a2a8d0ad2ec1f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-6433a9fffb00e83061fe2338235cb574e5885d203cc2b1d78aa5c394b9a405ec",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-6597b938e3e01dbf27c9a97dd79bd7ef812a83ae1dab6a4959332170f5969550",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-72777328d974eddde8e711ae729fc9898b69d70d2e7a354320179014e3ed54b6",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-73daf0261b0e31e4bd2ea866c7bbae6de2cba283ee04258cff41a337987b5f9a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-773690590fcdc01a2cca17968d146c8d593f61ac9ca7d3c978c458bcc99a8260",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-78b1347e83b1eff2234859de97eb7e043d8f2bfd40c323cc781bfa43397f961c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-80e04abcabcf0e78a4c5c92c9c0735a73e2cc37f497d963c817440e194951072",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-85b7d4f2d9200871ac0978e04e5eb205dd49633b04dcbf2de81074fa0b5865ed",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-8ace04f3acf7c203d7ea008f81f963c5acf3a35f823a2d3fc80feb6e4cb41581",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-8bf3571d123ea633391b597b6169433c33cdbf5c1e9666c23cd18a856be18499",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-97bb5c596a55de0bfdd18be0b71b8ef799cc79a2c478a00b22de15934ab56190",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-a50534a20f68baeaad4783c5b890377476499dad0a40442ede3145f8d40d3075",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-a51c400daf1a47416a615d18d76ffbc865a1a228f7e252e983bf7cf16a46f3ad",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-a5690acb91e72cfe454268d01a8824a86b73feece1677255d095eb14fcc97c9a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-a611e4d54336df57f57e8436d038b141eb4b1a25813ef006433f04178e4fb23a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-aaaee9ddfd7e56a7d8579f4c3e25530fa6c98ef69c5a5be6cfb343c5a9dd3b63",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-abf8ad838c292267f7e3ae536c61e3ba423eecba7da714b9343d6046c73b6828",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-b1b6793ff48ef59b4de41408757c1e801fc134cbecac909059abb2b7ae70da2c",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-b38fe2a7957605ea3751f5470a5115989a1ee0f90acc111a5d797c82051605a2",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-b3b8bb54001b4672e130d118918f69011df08690916b47fa4e8b129399c5d2ba",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-b72596d0816c5d4d67dccfe21791a937b8bc1416d473259008b5e6a28a999516",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-b7b341fb62a62a2b3bd99818590e6f6194824fa4dacce467514d1ae6681fce7a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-b8bd2ab8f03b91cf2e07a5cdbc8c9e4d8bf10bc472f23575766f9386d843b945",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-ba732aba204565683beed46583c12ed08d6839f79d4d45b404783be88ed32094",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-bc44e9c51a625beeb049fb14b521a0b9440e94143d95594df64be6f3b4a1d5da",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-c30d31dd232e30261ab5cf2b4663bb6ae1a0fb16f1a4721ba6cf40a19f352d13",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-ca1fcfd6fb729ba9ccf7d05b02151014e24d60d1dfa3dde6fbb9e5c0dadcaf3a",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-d5450d9401357e15660b9b1c2b26f1b7e59abbcc16a72223feaca565c18c5b00",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-d8ff8f6ef4777665f90426bc55283a898bd89c6e131cef3b73b48e60015a1473",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-dae8ab5f81172460f494fd51806de7accc11d5594a7d3a87ba4b12fb1477d204",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-dc55306c1379dbe1aa27bd7ca8b01f9eb624fc74932b001fcc9202f0a5097da3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-dd6bc51e4afc683602aa4f2dec011c723c8464593ea39fdc41df627eaced59db",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-eb81caf8457ae2465f129b55c90cb5f3f4ec165678dd7519c00d176b55ea2852",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_greater_equal-ed8ad8713ca936f317563c84f761f7a33b08a9689943a5004202af07cd7bbc6f",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-076b564298f6ce19fa1b3f375a2f0e43866d56427f4157306f33550938cb4ab3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-0de8632478b0c22ceaca3ee36c426d26a9de8f1bbd697e67a7cbbcbc3342205d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-144e33258a281d8339dde7b3143e550e98f2170bf25f52f6d6c4499b905b1c04",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-19e60d532d59979bd6627bf0faae92d56aa056320d181b7c0b2dce1f9445cf72",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-1fa9f4b80375e44ea5674388a0008e9f935b871c1fc66045e0831bdf1078761c",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-3066a10c001ce85c1e666d39b8da2d5d27e3f9c4808dcb8e85b694d1eecc48c1",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-3668765fb67935a5922cc4ac2edba80d3f0e87a7612bb795b6b466ded5e35e66",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-3a704b190b1f64805b96e1ae00a1ca514ab086d0dd2bccef55b58fcd8d239518",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-3cf9f29b4bfb0eb0c3351df49e5cc46f2a1ad6a2ef05ddb44953fafc2c310211",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-45ab6855855b2250b3645d4a2db28fa4fe8001204a4101392d77873696f68c0b",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-53b9094c92f69b956540c5a788ddfa4bdca77caa3c4f816c06edff1723e5c079",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-546774a8319be95598522c2835b170ec300aa613acad8b6e58f684b930a218cb",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-5a48ad908da347537818e67de05dbe49d966c8dbf21b57599f653de49ca9e658",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-5cd0643d79bcaf45e9e1555465c780c86d4eefcfe222e1f052f2282b44e9743d",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-61cd5a17db32f427771d08c97f2679b92aa7da8a4b8dde1c84c836f9cea0b838",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-6334e1951192cb5f24a9820529f4713e5448a0bfb19d02c2cfcca0d8d99f4976",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-641331e5be4f9afec5ca8bd00731d1900323ae08ddbf22a435f0cdac108726cd",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-65064db9f1429c5630d0551984cb9e368bb51bd13dff0ee107a463a052d2066e",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-6b803cce3cffdf15d4dee20cc8fc00c27e1732633bb17a033013970964559782",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-6c8e98c5918a27cab74ad986234f3c07d8210c6777d2b67c37a1218a3bb54113",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-73fc6c3513f0acb8852cf475c7cfae4ed2775897bd35a50dff2ef5d4dfa26143",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-773480d756ffb9bf18d594c122482f226a7facecc0f93ba55e773b9f335606eb",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-79c9950c6e36963f009d13c099f8b156ac35b32ca7b724e8b242e3cac874b0ef",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-85b3ecaa8f0c0f30ac4949847ab0eaf4c8eb90e16afa3bc8299683afe6a39d05",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-8b3af869368ff12d0f1f9f057c3578dc468f1dfad1d0eb4c6b89c5b3d69f234d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-8b927caa32998c6a621575c0ec8d29076e0bd133f0bd96f9c72f533bdd6bbf82",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-910ea86b97c865f3b136907a4f088dbd84a05a14ac95cc5732cbdc9e1a7a9971",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-94d1fed8d96dc76d21181d5cd9a1b1a7f485dbcbe592f2044e2c80a964f68b65",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-a69f1e22f377845aa5cde9416bc6db3994584b283cfd6a86c76200d802362892",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-ba57042edb8936094c95a2d8d80ac385666b252537ca28f661ca58a43745a5d3",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-c5c79f857172b8e572570f043ec98f6161051931f84867d9cb65d8a6039c6be0",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-c994e34f45046684ed55914f62ee4878bcf9894ef71ff0b792ba4135c246c172",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-cca62aac33339bc3489d8176ffd774c789eb584b346d66f5d386a4b04e9d3607",
+      "cached_compile_seconds": 0.0,
+      "hits": 2,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-d2c05d0e22a4acf25ecf6d04531bd2536c992ce6968514dc5999b8382bb6209d",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    },
+    {
+      "cache_key": "jit_integer_pow-d406e1dff08e3e9d5500a80d0ec8cfcda053ff55ed36534b984b69009e5cc022",
+      "cached_compile_seconds": 0.0,
+      "hits": 1,
+      "misses": 0,
+      "program": ""
+    }
+  ]
+}

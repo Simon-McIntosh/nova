@@ -268,6 +268,20 @@ disk and uncounted; one added PNG took it to 510. So an animation that should
 be findable by browsing needs a still companion beside it.
 `nova.media.gif.write_contact_sheet` builds one from the frames already
 rendered, and `nova.media.gif.animate` writes it when passed `contact_sheet`.
+
+### Large receipts live on GPFS, not in git (binding, lead 2026-10-05)
+
+Measured 2026-10-03: nova's tracked tree is 1,312 MB, of which `docs/figures`
+is 1,234 MB (459 MB json, 253 MB npz, 204 MB png, 168 MB gz) against 7 MB of
+code under `nova/`, so every worktree, archive and baseline arm pays 1.2 GB of
+committed evidence to test 7 MB of source. The rule: npz, gz and json receipts
+above a few MB are written under the GPFS evidence root resolved through
+`nova/database/filepath.py` (under `/work/projects/imas_gpu`), and the evidence
+fragment records the resolved path as its pointer. PNG and SVG stay in git, so
+the Figures index still lists them. A pre-commit size ceiling refuses larger
+files; existing receipts migrate in a separate cleanup node rather than in
+passing. The decision and its rationale are recorded on
+`docs/plans/converged-forward-solve.html` (decision `receipts-out-of-git`).
 Name figures with hyphens to match the served convention
 (`mast-21978-efit-pulse.gif` beside `mast-21978-efit-pulse-frames.png`).
 

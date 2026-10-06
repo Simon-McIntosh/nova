@@ -26,8 +26,8 @@
   <title>Contour-tree topology authority | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-03">
-<meta name="plan-version" content="57">
+<meta name="plan-modified" content="2026-10-06">
+<meta name="plan-version" content="58">
 </head>
 <body>
   <main class="plan-doc">
@@ -319,10 +319,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ctta-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ctta-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-fd" data-written-at="2026-10-01" data-recommends-skill="" data-resolved-at="2026-10-06T01:07:34+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Land §1 and §2, then lock the field representation before §3</h4>
     <div class="r-fu-body"><p>§1 and §2 need no smooth field and can run first. §2's brute-force check is the positive control for the tree. Lock <code>field-representation-on-hex-cells</code> from §2's fixtures before §3 is dispatched, because §3 and §4's saddle level sets depend on it.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority §1</pre>
+    <p class="r-fu-outcome">§1 and §2 landed under this plan. field-representation-on-hex-cells is settled by the lead's 2026-10-05 ruling on converged-forward-solve (cellwise polynomial: the own-node quadratic everywhere except the saddle cell, whose support comes from the null's normal form, with null position, gradient and Hessian from the Biot kernels' analytic derivatives of the booked current). §3 to §5 are built as converged-forward-solve §2, the topology read, which carries this plan's definitions, fixtures and done-whens.</p>
     </article>
 <article class="r-fu" data-id="f-ctta-tree-edge-invariant" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="nova-s21" data-written-at="2026-10-02" data-recommends-skill="/reckon-build contour-tree-topology-authority" data-resolved-at="2026-10-02T09:06:13+00:00" data-resolved-by="nova-s21">
     <h4 class="r-fu-title">The landed tree fails its own invariant on every certificate mesh</h4>
@@ -368,6 +369,11 @@
     <h4 class="r-fu-title">Promote the parallel union-find sweep into nova for batched use</h4>
     <div class="r-fu-body"><p>The placement measurement (merged fb9337c3a, benchmarks/contour_tree_sweep_placement.py) found a benchmark-only parallel union-find formulation, which pointer-jumps the full parent table at each visit, fastest for batched fields on the H200: 0.407 s at 8 fields and 0.461 s at 64, against 1.793 s and 14.484 s serial on CPU. Move it into nova/equilibrium/contour_tree.py as a batched sweep beside the serial one, which stays the single-field path. Gate it on the committed --compare mode: bit-identical receipts against the serial sweep on the twelve certificate rungs and both MAST carriers, built from carrier arrays persisted from one backend. Add tests for a saturated vertex, an isolated vertex and repeated edges. Report compile and execute walls at batches 8 and 64 on the H200.</p></div>
     <pre class="r-fu-prompt">/reckon-build contour-tree-topology-authority</pre>
+    </article>
+<article class="r-fu" data-id="f-ctta-sections-3-5-build-under-cfs" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-fd" data-written-at="2026-10-06" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Pointer: §3, §4 and §5 are implemented as converged-forward-solve §2</h4>
+    <div class="r-fu-body"><p>Lead directive 2026-10-03: the topology read is one of four pure functions behind the narrow interface of converged-forward-solve. That plan's §2 implements this plan's §3 (critical-point geometry on the cellwise polynomial), §4 (primary selection, regions, class and margin in webers) and §5 (consumers cut over, raster read deleted), against the fixtures and done-whens written here. This plan closes when converged-forward-solve §2 lands with those done-whens met; nothing is dispatched from here.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

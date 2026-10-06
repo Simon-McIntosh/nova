@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
   <meta name="reckon-type" content="plan">
-  <meta name="plan-slug" content="forward-solver-route-integrity">
+  <meta name="plan-slug" content="forward-solver-route-integrity-newton-krylov-third-repair-locked">
+  <meta name="plan-archived" content="1">
   <meta name="plan-title" content="Forward solver route integrity — every accelerated route reaches the shared fixed point, in a program that fits">
   <meta name="plan-summary" content="Restore the Newton-Krylov route, bound the solve executable, carry every evaluation through one traced state machine, and make the pre-warm cover the lane.">
   <meta name="plan-status" content="active">
@@ -26,7 +27,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-version" content="116">
+<meta name="plan-version" content="115">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
 </head>
@@ -408,11 +409,11 @@
       </p>
     <p class="r-dec-rat">The interim that moved the single-null 500 row by 2.2e-3 and produced a non-finite residual is the measured cost of a tolerance; the certificate is the exact pin and stays the gate.</p>
     </div>
-<div class="r-dec" data-key="newton-krylov-third-repair" data-choice="" data-by="Simon McIntosh" data-when="2026-10-01T20:40:50+00:00">
+<div class="r-dec" data-key="newton-krylov-third-repair" data-choice="live-warmup-frozen-newton" data-by="Simon McIntosh" data-when="2026-10-01T20:40:50+00:00">
     <p class="r-dec-q">Which design does the third Newton-Krylov route repair implement?</p>
     <p class="r-dec-ctx">The codex node r-20260919T090428129698 stopped at the two-attempt fence. Attempt one (label-aware partition promotion with label identity) reached NoQualifiedAxisError in job 1273977. Attempt two (every topology and domain read kept live, committed as bed0155b) passed its focused refusal test but the exact route test timed out at 59:25 in job 1273996 on all_debug, so the live-map route is correct where measured and too slow to gate. Six commits (1b54057a, 4992bcc3, bff52fa8, bebd067e, bed0155b, 8e0f3bbc) sit unmerged in the run worktree; the run stays blocked so its session remains resumable. Coordinator recommendation: live-warmup-frozen-newton, because the route before dd7d8286 warmed on the live map and froze the partition for Newton, which is the behaviour the regression lost, and it costs one partition read per solve where the live route re-reads every step (the 5.9x cost the support re-read showed on the bank); a widened fence accepts a slower solver on a millisecond plan. Lead to confirm before the codex reset at 2026-09-21T05:57Z.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="live-warmup-frozen-newton">live topology reads through the picard warmup, then a frozen Newton partition taken from the warmed state</button>
+      <button class="r-opt chosen" data-value="live-warmup-frozen-newton">live topology reads through the picard warmup, then a frozen Newton partition taken from the warmed state</button>
       <button class="r-opt" data-value="admission-aware-rollback">keep every read live and add admission-aware outer rollback and damping so the Newton steps that lose the equilibrium are refused</button>
       <button class="r-opt" data-value="widened-fence">keep the live-map route as committed and widen the performance fence for the route test</button>
       </p>
@@ -431,11 +432,10 @@
     <div class="r-fu-body"><p>§1 is in flight on the codex lane (run r-20260919T090428129698, dispatched from the parent plan; its landing is recorded here). §4 is small and unblocks honest lane timing for §2 and §3. §3 is the critical-risk section and takes the strongest capability class available.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §1</pre>
     </article>
-<article class="r-fu" data-id="f-fsri-002-section-2-first" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="lead" data-written-at="2026-09-20" data-recommends-skill="/reckon-build forward-solver-route-integrity section 2" data-resolved-at="2026-10-06T01:08:49+00:00" data-resolved-by="Simon McIntosh">
+<article class="r-fu" data-id="f-fsri-002-section-2-first" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="lead" data-written-at="2026-09-20" data-recommends-skill="/reckon-build forward-solver-route-integrity section 2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Section 2 first: the solve never loops, and compiles to under 50 MB</h4>
     <div class="r-fu-body"><p>Supersedes the ordering in the earlier followup. Deliver section 2 ahead of everything else on this plan, on the strongest lane available, under the lead's constraint that the solve never loops and is designed as efficient maps. The first node takes the trips: trips and Newton steps as scan or while_loop with fixed telemetry slots and the read evaluated once per trip, proven by the serialized executable bytes of the 300-cell weak certificate row before and after, and by a bit-identical terminal state on that row. The executable-size gate beside the memory gate lands in a follow-on node once the certificate driver file is free, because an interim node on the compile-abort plan holds it.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity section 2</pre>
-    <p class="r-fu-outcome">Superseded by converged-forward-solve: §2's program-size and never-loops requirements are carried into that plan's §5 and its §6 acceptance (one program per mesh shape, executable under 50 MB, compile wall recorded).</p>
     </article>
 <article class="r-fu" data-id="f-fsri-audit-land-scan-pin" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="solver test-pins review (codex sol)" data-written-at="2026-09-21" data-recommends-skill="/reckon-build forward-solver-route-integrity" data-resolved-at="2026-10-05T23:29:39+00:00" data-resolved-by="s21-nova">
     <h4 class="r-fu-title">Update the loop inventory for the scan route</h4>
@@ -460,11 +460,10 @@
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
     <p class="r-fu-outcome">Decided by the lead 2026-09-22: option (a), one more attempt, routed to the claude-opus lane at claude-opus-5-5, whose flight config was updated and probed the same evening. The attempt is split into two nodes. First, attribute the reduced-Newton exit-134 abort and the suite-only failure of test_ladder_scoring_evaluates_one_map_per_accepted_step on the committed design state at 8dbc6cbb. This node also confirms that the lane serves through the crew surface. Second, whole-solve request scheduling on that design state against the unchanged ceilings 203,078 and 204,531. The parked run r-20260922T103934949557 keeps its worktree as the base.</p>
     </article>
-<article class="r-fu" data-id="f-fsri-s3-fourth-attempt-on-opus" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="2026-10-06T01:08:49+00:00" data-resolved-by="Simon McIntosh">
+<article class="r-fu" data-id="f-fsri-s3-fourth-attempt-on-opus" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-22" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Fourth §3 attempt on claude-opus 5.5: attribute the exit-134 abort, then whole-solve request scheduling</h4>
     <div class="r-fu-body">Lead decision 2026-09-22 on f-fsri-s3-decide-after-three-attempts. Base: the committed design state at 8dbc6cbb (worktree fsri-one-traced-operator-state-machine). Node 1 (investigate): attribute the SIGABRT exit 134 in tests/test_reduced_newton.py at test_threshold_one_reproduces_the_refusal_only_policy, which appears at base and candidate alike, and the candidate-only in-suite failure of test_ladder_scoring_evaluates_one_map_per_accepted_step, which passes alone. Node 2 (implement): whole-solve explicit request scheduling so that distinct caller streams share one operator body, gated by the existing refusals, 300 cells at or under 203,078 instructions and 1000 cells at or under 204,531, with zero added failures in tests/test_fixed_point.py and tests/test_reduced_newton.py in fresh processes, and the 532,366-instruction per-request control as the negative control. Both nodes run on the claude-opus backend.</div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §3</pre>
-    <p class="r-fu-outcome">Superseded by converged-forward-solve §4 and §5: the one traced operator state machine is gs.apply with its JVP and the single fixed-point solve, built on codex-astra with a claude-opus re-review per that plan's lanes decision; no fourth attempt on the old routes.</p>
     </article>
 <article class="r-fu" data-id="f-fsri-clear-jax-caches-between-reduced-newton-tests" data-status="open" data-written-by="reckon-ship" data-written-at="2026-09-23" data-recommends-skill="/reckon-build forward-solver-route-integrity §3" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Clear JAX caches after each reduced-Newton test so one process never reaches the map-count ceiling</h4>
@@ -564,11 +563,6 @@
     <h4 class="r-fu-title">The H200 lane launcher returns exit 0 with an empty status while the payload wrote EXIT_STATUS=1</h4>
     <div class="r-fu-body"><p>Measured 2026-10-06 by the <code>cfs-kernel-compile-cost</code> run (r-20261005T223546294421, H200 job 1281131): <code>scripts/h200_test_lane/run.sh --wait</code> returned exit 0 and an empty status line while its log recorded <code>payload 2 failed, 1 deselected, EXIT_STATUS=1</code>. A launcher that reports success for a failed payload makes every gate that trusts its exit code a fail-open guard. Repair under §4, the lane section: the launcher's exit status with <code>--wait</code> is the payload's and the status line names it; a launcher test drives it with a payload that exits 1 and asserts the launcher exits 1 (the negative control) beside a payload that exits 0 and asserts 0, both logs committed. Scope: <code>scripts/h200_test_lane/run.sh</code> and <code>scripts/nova_lane/run.sh</code>, one small node on the codex lane, every uv command with <code>--no-sync</code>.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §4</pre>
-    </article>
-<article class="r-fu" data-id="f-fsri-newton-lock-reopened" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="nova-fd" data-written-at="2026-10-06" data-recommends-skill="/reckon-build converged-forward-solve §5" data-resolved-at="" data-resolved-by="">
-    <h4 class="r-fu-title">Pointer: newton-krylov-third-repair is reopened; the solve is rebuilt as converged-forward-solve §5</h4>
-    <div class="r-fu-body"><p>The lead locked newton-krylov-third-repair to live-warmup-frozen-newton on 2026-10-01 and reopened it on 2026-10-06 under the 2026-10-03 directive (decision retire-not-patch on converged-forward-solve): the ladders, the frozen/live split and the extra routes are retired, not patched. The locked state is snapshotted at docs/plans/archive/forward-solver-route-integrity-newton-krylov-third-repair-locked.html. The six commits at 8e0f3bbc are not landed. The replacement is one Newton-GMRES at one call site in a scan, on the Jacobian of the live map with topology held for one step, with the constraint-row clause in its stop test and a per-promotion history on the receipt.</p></div>
-    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §5</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

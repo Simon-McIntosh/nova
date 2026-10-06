@@ -15,10 +15,10 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-sprint" content="S21">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-10-02">
+<meta name="plan-modified" content="2026-10-06">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -111,6 +111,11 @@
 Done when: the report lists each coupling with files, line counts, refactor and done-when, and each refactor is owned by a live plan followup.</div>
     <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan</pre>
     <p class="r-fu-outcome">Landed at f24792a21: thin-interfaces.md lists every coupling with files, line counts, refactor and done-when (review 18/18/20/19/19). Owned refactors stay on forward-solve-api, forward-solver-route-integrity and cut-cell-current-attribution; the four unowned nova couplings are now §5 nodes on this plan, and the crew-state mirror is reckon's.</p>
+    </article>
+<article class="r-fu" data-id="f-replan-receipts-out-of-git" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="nova-fd" data-written-at="2026-10-06" data-recommends-skill="/reckon-build nova-portfolio-replan §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Move the committed large receipts to the GPFS evidence store and enforce the size ceiling</h4>
+    <div class="r-fu-body"><p>Lead policy 2026-10-05 (decision receipts-out-of-git on converged-forward-solve): npz, gz and json receipts above a few MB live under /work/projects/imas_gpu with a path pointer in the evidence fragment; PNG and SVG stay in git; a pre-commit size ceiling refuses larger files. Measured by S21: nova's tracked tree is 1,312 MB, of which docs/figures is 1,234 MB (459 MB json, 253 MB npz, 204 MB png, 168 MB gz) against 7 MB of nova/ code, so every worktree and baseline arm pays 1.2 GB to test 7 MB. This node owns the migration: move the existing receipts (the 71.5 MB report.json of f-cca-slim-committed-attribution-receipts first), rewrite each citing fragment to the pointer, add the pre-commit check, and record the before and after tree size.</p><p><strong>Done when:</strong> no tracked file under docs/figures exceeds the ceiling, every moved receipt is reachable from its fragment's pointer, the pre-commit check refuses a test file above the ceiling (negative control), and a fresh worktree's size is recorded beside the 1,312 MB before.</p></div>
+    <pre class="r-fu-prompt">/reckon-build nova-portfolio-replan §4</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

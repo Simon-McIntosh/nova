@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="artifacts-carry-no-worktree-paths">
   <meta name="plan-title" content="Artifacts Carry No Worktree Paths">
   <meta name="plan-summary" content="Rewrite the 1,100-odd committed artifacts that point into reckon worktrees, and guard so no artifact can reference a worktree again.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="4.5">
   <meta name="plan-capability-version" content="1.0">
@@ -23,9 +23,9 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -102,9 +102,12 @@
 
     
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s6">§6 — Close the guard&#x27;s blind spots</h2>
-<section data-reckon="section" data-id="s6" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
-<p>The review of the §3/§4 landing found four gaps, and this section closes them.</p><ul><li><strong>Binary files.</strong> The census and the guard both skip them, so <code>docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats</code>, a cProfile dump, still embeds worktree paths unseen. Its producer, <code>benchmarks/production_solve_host_profile.py</code>, writes absolute frame paths on every run through <code>profiler.dump_stats</code>, so repairing the committed dump alone would let the next run re-introduce the defect. Add one helper beside the rule in <code>nova/database/filepath.py</code> that loads a cProfile dump, rewrites each recorded file path through <code>relativize_worktree_paths</code>, and writes it back in the same format. The producer calls it right after <code>dump_stats</code>, and the committed dump is repaired with the same helper. The guard's reader must return a binary file's text decoded with replacement rather than an empty string, so a binary file that carries the root name is reported.</li><li><strong>Benchmark defaults.</strong> <code>DEFAULT_SHADOW_ROOT</code> in <code>benchmarks/backend_divergence_forensics.py</code> and <code>DEFAULT_PINNED_ROOT</code> in <code>benchmarks/pure_arm_comparison_figure.py</code> are built from the constant, so no literal remains, but they still resolve to a removed worktree. Make each root a required argument, and say in the help text where to obtain one.</li><li><strong>A record that contradicts itself.</strong> In <code>docs/evidence/archive/figure-and-solver-audit-landed.html</code>, the hand-repaired coil-edit receipt sentence still calls its now-relative path absolute. Reword that clause and change nothing else.</li><li><strong>A slow scan.</strong> <code>tests/test_artifacts_carry_no_worktree_paths.py</code> reads every tracked file in full: 34 s for its two tests, against the seconds §4 promised. Give the owner module, <code>nova/database/filepath.py</code>, one candidate search: <code>git grep -l -a -F</code> on <code>WORKTREE_ROOT</code>, over the working tree for the test and with <code>--cached</code> over the index for the commit check, so binary files are covered and the hook and the test share one enumeration. Only those candidates go to <code>worktree_path_offenders</code>, and the predicate stays the one decision. The committed tests also exercise the predicate's offending branch directly: a non-exempt path whose reader returns the root name is returned as an offender, and an exempt one is not. An empty candidate list must not read as a clean tree: a search run from the wrong directory, without git, or after pattern drift would return nothing. So the test asserts first that the candidate search returns <code>nova/database/filepath.py</code>, the exempt module that always holds the root name, before it accepts an empty offender list.</li></ul><p><strong>Done when:</strong> the guard test fails on a scratch tracked binary file carrying a worktree path, and the hook refuses the same file staged, both logged. The test also fails when the candidate search returns nothing, logged as a second negative control. The pstats file loads with no worktree path left in it. Neither benchmark default names a worktree. The record reads consistently. The guard test runs in under ten seconds, logged.</p>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed at 6ccfb2bff and e8655e6f5. One candidate search covers binary files, the commit check reads the index, the dump producers relativize their output, two benchmark roots are required arguments, and the hook resolves its checkout inside linked worktrees. The guard test runs in 4 s. <a href="s6">full record</a></p>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -120,10 +123,11 @@
     <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §3</pre>
     <p class="r-fu-outcome">Landed at f9b2219ad (review 111); hook enabled and documented at bdfde9844. The four review follow-ons continue in section 6 (f-acnwp-guard-follow-ons).</p>
     </article>
-<article class="r-fu" data-id="f-acnwp-guard-follow-ons" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-acnwp-guard-follow-ons" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §6" data-resolved-at="2026-10-06T12:54:51+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Close the guard&#x27;s blind spots: binary artifacts, defaults into removed worktrees, and the slow scan</h4>
     <div class="r-fu-body"><p>Section 6 covers the four follow-ons from the review of the §3/§4 landing: the binary cProfile dump, the two benchmark defaults that resolve to a removed worktree, the self-contradicting record sentence, and the slow full-tree guard scan.</p></div>
     <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §6</pre>
+    <p class="r-fu-outcome">Landed at 6ccfb2bff (re-review 113) with the hook repair at e8655e6f5 (review 113); core.hooksPath re-enabled. Done — no followup in this plan: the chain closes here.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

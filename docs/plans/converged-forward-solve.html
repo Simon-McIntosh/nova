@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -453,6 +453,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s21-read-compile-after-sharing" data-who="s21-nova" data-when="2026-10-06T06:12:00Z">
     <div class="r-comment-body"><p><strong>Read compile after kernel sharing (cfs-read-shared-kernel, merged 2c1823ef8).</strong> Tracing each kernel term once per read stage takes the 132-cell read from 30 kernel traces and 1.37 million expanded equations to 16 and 0.75 million, every TopologyRead leaf matching the base to 4.4e-15. The H200 cold read compile falls from over 900 s to 628 to 640 s at 132, 300 and 550 cells, flat in cell count. That is still ten times the 60 s clause, and value_gradient carries about 809 thousand of the 821 thousand equations the H200 census counts.</p><p>What the clause will take, as measured: the point jet's one-direction jvp compiles in 71.1 s against a 21.9 s primal on the H200, so custom derivative rules alone remove the autodiff unrolling but leave one kernel copy per stage. The read still traces the kernel in three jet stages (polish, curvature stencil, wall search) and two value stages, and the analytic fixture's exterior traces a second copy of the plasma kernel that a production conductor exterior would not. Qualification therefore needs the custom_jvp point jet and one shared jet evaluation per read; the compile-growth rows now assert the 60 s clause as strict expected failures, so they turn red the moment it is met. The 50 MB branch of that clause reads generated code size (about 14 KB) rather than the serialized executable (about 36 MB) and is repaired in the wrap node.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s21-gs-apply-ambix-scout" data-who="s21-nova" data-when="2026-10-06T06:35:00Z">
+    <div class="r-comment-body"><p><strong>Prior-art search of the coupled repository for gs.apply.</strong> imas-ambix holds one forward Grad-Shafranov operator, <code>imas_ambix/gs/operator.py</code>, with <code>residual.py</code> and <code>grounding.py</code> beside it. It is not reused, because it is a different object: a geometry-only linear map from known coil currents and an inferred current basis on a limiter-masked grid to sensor readings, prediction = G_pf I_pf + G_plasma c_plasma + G_passive c_passive. It is built from SciPy filament Green's functions in NumPy, imports nothing from nova, and its own docstring leaves solving to its caller. gs.apply is the nonlinear map psi = psi_ext + G J(psi) on the hex carrier with the booked current, traced in JAX, so no column, kernel or signature of the ambix map serves it. The dependency runs the other way: ambix consumes nova's forwards and conditions their inputs. This closes design review reuse_search-1 on plan version 93.</p></div>
 </div>
 </section>
 </main>

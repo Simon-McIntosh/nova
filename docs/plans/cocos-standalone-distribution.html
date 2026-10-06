@@ -21,7 +21,7 @@
 <meta name="plan-capability-reasoning" content="standard">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="moderate">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-10-07">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;}">
 </head>
@@ -53,6 +53,11 @@
     <div class="r-fu-body"><p>Waits on imas-ambix jt60sa-facility-mint §2, which switches ambix's three remaining importers.</p></div>
     <pre class="r-fu-prompt">/reckon-build cocos-standalone-distribution §2</pre>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261006T161045208905-ncsd-nova-cocos-member" data-who="reckon-build" data-when="2026-10-06T16:41:06.484Z">
+    <div class="r-comment-body"><p>nova-cocos is a uv workspace member (packages/nova-cocos, import nova_cocos) with Requires-Python &gt;=3.12, no Requires-Dist and version 0.11.0.post10057+g54414ccb8 equal to the root build; a clean uv venv --python 3.12 prints -1.0 for transform_factor(&#x27;psi_like&#x27;, source=11, target=17) equal to the base module and nova.io.cocos.transform_factor is nova_cocos.transform_factor; the five COCOS test modules pass 105 in both arms (0 added); uv lock --dry-run exits 0 for imas-ambix against this worktree.</p></div>
+</div>
 </section>
 </main>
 </body>

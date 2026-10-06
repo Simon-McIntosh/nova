@@ -19,6 +19,17 @@
   <h1>Converged Forward Solve — landed record</h1>
   <p>One anchor per landed section of <code>converged-forward-solve</code>. Each anchor names the run, the merge, the review and the measured result.</p>
 
+  <section id="topology-read">
+    <h2>§2 — topology.read, partial landing</h2>
+    <p>Run <code>r-20261005T163955173721-cfs-topology-read</code> (codex-astra, twelve attempts over seven and a half hours, 58 commits), merged at <code>3f9edf73a</code> and <code>3ef5c19c1</code>, re-review 116 with no blocking finding; promoted 2026-10-06 with the scope widened to the limited oracle fixture and its invariant test. Fragment: <code>docs/evidence/fragments/converged-forward-solve/cfs-topology-read.html</code>.</p>
+    <ul>
+      <li><strong>Landed.</strong> <code>topology.read</code> as the single traced authority beside the existing class: general fixed-capacity null census on the shipped contour tree (<code>build_contour_tree</code> over a mesh built once from concrete geometry), axis-connected sub-cell membership with normal-form saddle support inside a physical radius with a 1.5-pitch floor, an explicit exterior field operand (value, gradient, Hessian at moving points), traced refusals, <code>TopologyPolicy</code> carried by <code>ForwardSolvePolicy</code>.</li>
+      <li><strong>Fixture repair.</strong> The limited oracle wall intruded 0.10 m into the plasma (contact read at 0.0401 Wb instead of zero); <code>limiter_contour</code> now circumscribes the boundary with one tangent contact edge, with an invariant test whose chord construction fails as the control. Realised cell counts unchanged; every earlier limited receipt is before-arm evidence.</li>
+      <li><strong>Acceptance.</strong> Two arms: the read uses the moving floor and meets the amplitude budget at every rung (C = 0.2747 limited, 2.18 diverted, in regular-cell units with all 167 slivers retained); the order clause is measured on the fixed-radius arm from current reads, 1.976 limited and 2.131 diverted, with a reconstruction mutation failing at 0.911. Final whole-module H200 job 1281129: 25 passed, 10 strict expected failures, exit 0.</li>
+      <li><strong>Carried.</strong> The kernel-backed 1074 and 2616 rows and the kernel null tangents are strict expected failures from the kernel compile barrier (the traced read's graph is about 1.25 million expanded equations at any cell count, the Biot harmonic kernel expression); owned by <code>cfs-kernel-compile-cost</code> (landed, identity exact, with its compile claim corrected by <code>cfs-kernel-cold-compile-correction</code>) and <code>cfs-kernel-qualification</code>. The section collapses when those rows qualify.</li>
+    </ul>
+  </section>
+
   <section id="design">
     <h2>§1 — the design: four pure functions and the inventory they replace</h2>
     <p>Three runs on 2026-10-04, all merged. The design document is <code>docs/research/converged-forward-solve-design.html</code>.</p>

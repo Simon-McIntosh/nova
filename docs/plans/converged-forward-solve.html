@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -335,6 +335,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261006T001034032743" data-who="" data-when="">
     <div class="r-comment-body"><p>Correction, 2026-10-06, appended rather than edited. The kernel landing <code>cfs-kernel-compile-cost</code> (merged at <code>3c0b5aefa</code>, ledger outcome stating a cold compile of 7.9 s against 11.2 s) was promoted by the coordinator before its independent review was read; that review's blocking finding is right: the test disabled the compilation cache only after setup had initialised cache use, and <code>h200-fresh-cold.log</code> records both arms as cache hits with stored compile costs of 86 s and 81 s. The true cold compile of the point jet is therefore about 80 s, not under 30 s, and the under-30-second clause is not met. What stands from that landing: bit-exact identity on 10,000 points for both source kinds, the repaired section moments, 342 kernel tests, and the 78,404 to 17,544 unique-equation reduction with its live 20,000 budget. The correction is measured by <code>cfs-kernel-cold-compile-correction</code> (fresh subprocess, cache disabled before JAX initialises, both arms, appended to the kernel fragment), and the read-level compile clause is measured by <code>cfs-kernel-qualification</code> once the §2 run's claim on its test module is released.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T001741738392" data-who="" data-when="">
+    <div class="r-comment-body"><p>Partial landing promoted, 2026-10-06: run <code>r-20261005T163955173721-cfs-topology-read</code>, 58 commits merged at <code>3f9edf73a</code> and <code>3ef5c19c1</code>, re-review 116 with no blocking finding after the order-acceptance repair (live fixed-radius arm from current reads, mutation fails at 0.911). Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#topology-read">landed record, topology-read anchor</a>. The section stays open until <code>cfs-kernel-qualification</code> (in flight on codex-astra) qualifies the kernel-backed 1074 and 2616 rows and the kernel tangents on the repaired kernels, or reports the dominating construct for the lead. The wave's integration suite at the merged head is dispatched as its own node.</p></div>
 </div>
 </section>
 </main>

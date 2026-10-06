@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="68">
+<meta name="plan-version" content="69">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -374,6 +374,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261006T015152317898" data-who="" data-when="">
     <div class="r-comment-body"><p>Region census, transport consumer, 2026-10-06, from the composed plan review filed under s22: <code>nova/equilibrium/flux_surface_extraction.py</code> selects an axis-connected core by a raster flood fill on normalised flux (<code>_axis_connected_core</code>, around line 1908), consumed by <code>nova/transport/current_diffusion.py</code>. That is the raster, normalised-flux region read the locked <code>topology-authority</code> decision rules out, so it is a region authority under the §6 census: its transport consumer is re-pointed onto <code>topology.read</code>'s membership fractions and qualification verdict, and <code>_axis_connected_core</code> is deleted with the other region authorities. The census clause stays absolute; this module joins the re-point list beside the labeller, the transport window and <code>shape_inverse.py</code>. Also routed here by the plan session's answers on contour-tree-topology-authority and null-identification-authority, for §2 and §6 to weigh: <code>nova/imas/contour_tree_layout.py</code> for DD emission of the read, <code>nova/imas/pulsedesign.py:488</code> as the writer of boundary type and psi, <code>nova/equilibrium/forward.py:292</code> as the existing wall-contact geometry, <code>connectivity_boundary.py:169</code> <code>_points_inside_polygon</code> for the deletion list, and <code>_fixed_design_read</code> in <code>forward_operator.py</code> at eleven call sites, all of which the §6 census enumerates by name before deletion.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T021141702213" data-who="" data-when="">
+    <div class="r-comment-body"><p>Exterior field owner, 2026-10-06, from the composed plan review filed under s22: <code>ForwardFluxOperator.external</code> (<code>forward_operator.py</code>, around line 3038) owns exterior-flux evaluation today (conductor targets on grid, wall and sample, plus the prescribed field) and is deleted with the class at §6. Its successor has one owner: the <code>ExteriorField</code> operand the §2 read already takes (value, gradient and Hessian at moving points), whose production implementation is the conductor-to-point Biot coupling with its analytic derivatives plus the prescribed field. <code>gs.apply</code> consumes that same operand for ψ_ext on the mesh rather than carrying a second exterior path, and the read consumes it at the nulls; <code>external</code>'s conductor and prescribed-field logic is the cite-or-justify candidate carried into it. The §6 census checks by name that no module other than the exterior operand evaluates conductor flux for the forward solve.</p></div>
 </div>
 </section>
 </main>

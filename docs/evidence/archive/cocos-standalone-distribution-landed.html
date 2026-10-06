@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="cocos-standalone-distribution-landed">
+  <meta name="plan-title" content="COCOS Without Nova: a Standalone nova-cocos Distribution — landed record">
+  <meta name="plan-summary" content="Closure synthesis for COCOS Without Nova: a Standalone nova-cocos Distribution: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="cocos-standalone-distribution">
+  <meta name="plan-verdict" content="qualified">
+  <title>COCOS Without Nova: a Standalone nova-cocos Distribution — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>COCOS Without Nova: a Standalone nova-cocos Distribution — landed record</h1>
+  <p>Closure synthesis for COCOS Without Nova: a Standalone nova-cocos Distribution: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="s1">
+    <h2>§1 — nova-cocos as a workspace member</h2>
+    <p>Two nodes, because nova's 522 kB <code>uv.lock</code> overflowed the local lane's context beside the source files. The first, <code>ncsd-nova-cocos-member</code> (commits <code>54414ccb8</code>, <code>b85115a12</code>), moved the module and switched nova's four source and five test importers. The second, <code>ncsd-nova-cocos-lock</code> (commits <code>4b3d1a90f</code>, <code>8876ea263</code>), regenerated the lock on that commit, adding nova-cocos and changing no other package version. Both merged together at <code>9829c310c</code>, so main never carried a stale lock.</p><ul><li>Wheel <code>nova_cocos-0.11.0.post10057+g54414ccb8</code>: Requires-Python &gt;=3.12, no Requires-Dist, Version equal to the root build.</li><li>Clean <code>uv venv --python 3.12</code>: <code>transform_factor('psi_like', source=11, target=17)</code> is -1.0, as before.</li><li><code>nova.io.cocos.transform_factor is nova_cocos.transform_factor</code>.</li><li>COCOS tests 105 passed at base <code>521b2046a</code> and at head; the negated-factor control failed 8.</li><li>Independent reviews scored the member run 20/17/20/13/18/20 and the lock run 20/18/20/12/20/20 (goal, evidence, scope, durability, fit, reuse), with 0 added failures.</li></ul><p>After the merge, nova's and imas-ambix's shared environments were synced with <code>uv sync --inexact</code> so that <code>nova_cocos</code> imports, and imas-ambix's <code>uv.lock</code> gained nova-cocos at <code>87b9c116</code>.</p>
+  </section>
+
+</main>
+</body>
+</html>

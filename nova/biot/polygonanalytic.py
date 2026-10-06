@@ -2613,8 +2613,8 @@ def _vertex_product_tangent(left, d_left, right, d_right):
 
 def _vertex_quotient_tangent(numerator, d_numerator, denominator, d_denominator):
     """Return the tangent of ``numerator / denominator`` by the quotient rule."""
-    return d_numerator / denominator - numerator * d_denominator / (
-        denominator * denominator
+    return d_numerator / denominator + (-d_denominator * numerator) * (
+        1.0 / (denominator * denominator)
     )
 
 

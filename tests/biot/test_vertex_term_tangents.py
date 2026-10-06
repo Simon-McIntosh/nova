@@ -287,7 +287,29 @@ def _per_sample(got, reference):
 
 
 def _normwise(got, reference):
-    """Return each sample's worst normwise relative error over the output."""
+    """Return each sample's worst normwise relative error over the output.
+
+    The root moments are ``(1 - m/2) M_n - (m/4)(M_(n+1) + M_(n-1))``, and
+    beside a corner, where the complement falls to ``1e-20``, their tangents
+    cancel sixteen decades below the moments' own: ``1e-8`` from ``1e8``, which
+    is round-off of the operands in ``jax.jvp`` of the base as much as here.
+    So the root moments' tangent is measured against the larger of its own
+    series and the moment tangents it is formed from.
+    """
+    if isinstance(got, dict) and "root_moments" in got:
+        operand = np.max(
+            np.abs(np.stack([np.asarray(v) for v in reference["moments"]])), axis=0
+        )
+        rest = [key for key in got if key != "root_moments"]
+        errors = _per_sample(
+            {key: got[key] for key in rest}, {key: reference[key] for key in rest}
+        )
+        a = np.stack([np.asarray(v) for v in got["root_moments"]])
+        b = np.stack([np.asarray(v) for v in reference["root_moments"]])
+        scale = np.maximum(np.max(np.abs(b), axis=0), operand)
+        scale = np.where(scale == 0.0, 1.0, scale)
+        errors.append(np.nan_to_num(np.max(np.abs(a - b), axis=0) / scale, nan=np.inf))
+        return np.max(np.stack(errors), axis=0)
     return np.max(np.stack(_per_sample(got, reference)), axis=0)
 
 

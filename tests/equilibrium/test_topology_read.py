@@ -87,7 +87,7 @@ print('KERNEL_COMPILE_PREREQUISITE_COMPLETE ' + json.dumps(receipt), flush=True)
             ["git", "rev-parse", "HEAD"], text=True
         ).strip()
         stream.write(
-            f"REVISION={revision} TREE={Path.cwd()} COMMAND="
+            f"revision={revision} tree={Path.cwd()} command="
             + json.dumps(command)
             + "\n"
         )
@@ -2411,7 +2411,7 @@ m['_measure_kernel_compile_growth'](int(sys.argv[2]), sys.argv[3])
         ).strip()
         with log.open("w") as stream:
             stream.write(
-                f"REVISION={revision} TREE={Path.cwd()} COMMAND={json.dumps(command)}\n"
+                f"revision={revision} tree={Path.cwd()} command={json.dumps(command)}\n"
             )
             stream.flush()
             process = subprocess.Popen(

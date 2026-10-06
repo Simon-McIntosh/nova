@@ -23,9 +23,9 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -71,88 +71,19 @@
   <p class="landed-summary">Landed at bf2d0f38e: one lexical rule in <code>nova.database.filepath</code>, a <code>filepath relativize</code> subcommand, and 1,079 committed data files rewritten to repository-relative paths, each reproducible from its base revision. Five files with spellings the rule cannot map go to the §3 node. <a href="s2">full record</a></p>
 </section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s3">§3 — Launch scripts resolve the repository root when they run</h2>
-<section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
-    <p>Each launch script in the census taken at the node's dispatch base is read and handled in
-    one of two ways. Where the worktree
-    path is a <code>cd</code> target, an output root or any other path the script uses, the
-    script derives its repository root at run time from its own location. It uses the idiom
-    nova's launchers already settle on in <code>scripts/nova_lane/run.sh</code>,
-    <code>scripts/playable_server/run.sh</code> and
-    <code>scripts/regenerate_solovev_certificate.sh</code>: first resolve the script's own path
-    with <code>script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"</code>, then
-    <code>repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"</code>.
-    Resolving the path first keeps a script invoked through a relative path, or one that changes
-    directory before that line, on its own file. <code>BASH_SOURCE</code> rather than
-    <code>$0</code> makes a sourced script resolve its own file, not its caller's. A Python launch
-    script runs <code>git rev-parse --show-toplevel</code> from
-    <code>Path(__file__).resolve().parent</code>. It does not use
-    <code>nova.definitions.root_dir</code>, which is fixed at import time to whichever tree nova
-    was imported from. Through the shared environment's editable install, that is the canonical
-    checkout even when the script runs in a worktree. The resolved root is the toplevel of whichever
-    checkout the script runs in, a worktree or the canonical checkout, and output directories
-    are written beneath it. Where the worktree path appears only in a comment or an echoed
-    banner, the script file is passed through the §2 function instead. Paths to the canonical
-    checkout, such as the shared environment at <code>/home/ITER/mcintos/Code/nova/.venv</code>,
-    stay as they are.</p>
-    <p>The same node lands the §4 guard.</p>
-    <p><strong>Done when:</strong> no launch script contains the pattern. Every changed shell
-    script passes <code>bash -n</code>, and every changed Python script compiles under the
-    project interpreter. For each script given a run-time root, a probe evaluates its root line
-    from a temporary worktree of main and prints the value, which equals that worktree's
-    toplevel and not the canonical checkout. No script is executed against a solver or a SLURM
-    partition.</p>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed at f9b2219ad: 62 launch scripts resolve their repository root at run time, two benchmarks import the shared constant, and the five residual data files are repaired. <a href="s3-s4">full record</a></p>
+</section>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s4">§4 — The guard: nothing committed may name a worktree again</h2>
-<section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-attempts="0" data-status="implementable" data-links=""></section>
-    <p>Two read-only checks share one exemption set: <code>docs/state</code>,
-    <code>docs/plans</code> and <code>docs/research</code> (see §5), and
-    <code>nova/database/filepath.py</code>, where the rule, the pattern constant and the
-    exemption constant live. The checks skip those paths. Every other file, including the tests,
-    the subcommand and the hook, imports the constants or calls the subcommand rather than
-    spelling the pattern, so it needs no exemption.</p>
-    <ul>
-      <li><code>tests/test_artifacts_carry_no_worktree_paths.py</code> lists the tracked files with
-      <code>git ls-files</code>, passes them to <code>worktree_path_offenders</code> with a reader
-      over the working tree, and fails naming each offender the predicate returns. It does no
-      pattern matching of its own. A positive control proves the scan reaches files in every top-level directory.
-      It supersedes the directory-limited scan in <code>tests/test_render_receipt_paths.py</code>:
-      <code>test_no_receipt_directory_json_records_a_worktree_path</code> and its positive
-      control <code>test_the_scan_reaches_every_receipt</code> are deleted, together with the
-      helpers that serve only them, <code>_scanned_json</code> and
-      <code>RECEIPT_DIRECTORIES</code>. The test calls <code>worktree_path_offenders</code> over every
-      tracked file, so the only scanning decision in the repository is that one predicate. The
-      render-route tests in that file stay. The new test runs in the default fast lane, in seconds.</li>
-      <li>The commit-time check is a plain checked-in hook, <code>scripts/git-hooks/pre-commit</code>.
-      <code>pyproject.toml</code> declares the <code>pre-commit</code> framework as a dev dependency
-      and <code>AGENTS.md</code> describes its workflow, but nothing configures or installs it:
-      there is no <code>.pre-commit-config.yaml</code>, no installed hook, and no
-      <code>core.hooksPath</code> in any git configuration scope. The framework is not adopted,
-      because it stashes and restores unstaged changes around its hooks, which the workstation
-      policy bans in multi-agent checkouts. This hook is nova's one commit-time check. A later
-      read-only check, such as the size ceiling in converged-forward-solve's
-      <code>receipts-out-of-git</code> decision, joins this script rather than adding a second
-      mechanism. When the coordinator enables the hook, it also corrects the <code>AGENTS.md</code>
-      pre-commit section to describe it. The hook is a two-line shell shim. It runs the project
-      interpreter on <code>nova.database.scripts</code> with <code>relativize --check</code>,
-      setting <code>PYTHONPATH</code> to the hook's own checkout so that the rule applied is that
-      checkout's. The check reads only the staged files, rejects any outside the exemptions that
-      contains a worktree path, names <code>filepath relativize</code> as the fix in its message,
-      and never modifies a file. After the node lands, the coordinator enables it once with
-      <code>git config core.hooksPath scripts/git-hooks</code> in the main checkout. Worktrees
-      share that setting, and the line goes into the new-clone setup in <code>AGENTS.md</code>.
-      A worktree whose base predates the hook has no <code>scripts/git-hooks</code> directory,
-      so git runs no hook there, and in-flight workers are unaffected.</li>
-    </ul>
-    <p>Writers keep their paths relative at the source, through <code>repository_relative</code>,
-    wherever they record one. The guard covers the writers nobody has fixed yet, and captured
-    stdout, where a traceback prints whatever path the process ran under.</p>
-    <p><strong>Done when:</strong> the test passes on the merged head and fails at the node's
-    dispatch base, where the launch scripts still carry the pattern, logged as
-    the negative control. In a scratch repository, the hook rejects a staged file containing a
-    worktree path and accepts it once <code>filepath relativize</code> has rewritten it, both
-    logged. The default
-    pytest lane collects the test.</p>
+<section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed at f9b2219ad: <code>filepath relativize --check</code>, a repository guard test over the shared predicate, and the read-only <code>scripts/git-hooks/pre-commit</code>, enabled through <code>core.hooksPath</code> and documented in AGENTS.md (bdfde9844). <a href="s3-s4">full record</a></p>
+</section>
 
     <h2 id="s5">§5 — What stays outside, and why</h2>
     <p><code>docs/state</code> is reckon's run ledger. Its records say where each run executed,
@@ -171,6 +102,10 @@
 
     
 
+    <h2 id="s6">§6 — Close the guard&#x27;s blind spots</h2>
+<section data-reckon="section" data-id="s6" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>The review of the §3/§4 landing found four gaps, and this section closes them.</p><ul><li><strong>Binary files.</strong> The census and the guard both skip them, so <code>docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats</code>, a cProfile dump, still embeds worktree paths unseen. Load the dump with <code>pstats</code>, rewrite each recorded file path through <code>relativize_worktree_paths</code>, and write it back so it still loads. Make the guard find binary candidates too.</li><li><strong>Benchmark defaults.</strong> <code>DEFAULT_SHADOW_ROOT</code> in <code>benchmarks/backend_divergence_forensics.py</code> and <code>DEFAULT_PINNED_ROOT</code> in <code>benchmarks/pure_arm_comparison_figure.py</code> are built from the constant, so no literal remains, but they still resolve to a removed worktree. Make each root a required argument, and say in the help text where to obtain one.</li><li><strong>A record that contradicts itself.</strong> In <code>docs/evidence/archive/figure-and-solver-audit-landed.html</code>, the hand-repaired coil-edit receipt sentence still calls its now-relative path absolute. Reword that clause and change nothing else.</li><li><strong>A slow scan.</strong> <code>tests/test_artifacts_carry_no_worktree_paths.py</code> reads every tracked file in full: 34 s for its two tests, against the seconds §4 promised. Take the candidates from <code>git grep -l -a -F</code> on <code>WORKTREE_ROOT</code>, so binary files are covered, and pass only those candidates to <code>worktree_path_offenders</code>. The predicate stays the one decision.</li></ul><p><strong>Done when:</strong> the guard test fails on a scratch tracked binary file carrying a worktree path, and the hook refuses the same file staged, both logged. The pstats file loads with no worktree path left in it. Neither benchmark default names a worktree. The record reads consistently. The guard test runs in under ten seconds, logged.</p>
+
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-acnwp-rewrite-data-artifacts" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §2" data-resolved-at="2026-10-06T04:17:49+00:00" data-resolved-by="s22-nova">
@@ -179,10 +114,16 @@
     <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §2</pre>
     <p class="r-fu-outcome">Landed at bf2d0f38e (review 102): the rule, its offender predicate and constants, the filepath relativize subcommand, and 1,079 data files rewritten. The §3 node carries the launch scripts, the five unmapped data files, the two bare-root benchmarks and the §4 guard.</p>
     </article>
-<article class="r-fu" data-id="f-acnwp-launch-scripts-and-guard" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-acnwp-launch-scripts-and-guard" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §3" data-resolved-at="2026-10-06T11:09:12+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Launch scripts resolve their root at run time, the residual files are fixed, and the guard lands</h4>
     <div class="r-fu-body"><p>Sections 3 and 4 in one node. Give each launch script in the census its run-time root, using the realpath-first idiom in shell or git rev-parse from the script file in Python. Run comment-only scripts through the rule. Make <code>benchmarks/backend_divergence_forensics.py</code> and <code>benchmarks/pure_arm_comparison_figure.py</code> import <code>WORKTREE_ROOT</code>. Reword the two figure-and-solver-audit fragments and <code>docs/evidence/replan-2026-09-24/thin-interfaces.md</code>, and repair the truncated and space-broken paths in the two landed records by hand. Add <code>filepath relativize --check</code>, <code>tests/test_artifacts_carry_no_worktree_paths.py</code> calling <code>worktree_path_offenders</code>, and the hook shim <code>scripts/git-hooks/pre-commit</code>. Delete the superseded scan in <code>tests/test_render_receipt_paths.py</code> and its helpers. Done when the guard test passes at the head and fails at the base, and the hook rejects and then accepts a scratch file, each logged.</p></div>
     <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §3</pre>
+    <p class="r-fu-outcome">Landed at f9b2219ad (review 111); hook enabled and documented at bdfde9844. The four review follow-ons continue in section 6 (f-acnwp-guard-follow-ons).</p>
+    </article>
+<article class="r-fu" data-id="f-acnwp-guard-follow-ons" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the guard&#x27;s blind spots: binary artifacts, defaults into removed worktrees, and the slow scan</h4>
+    <div class="r-fu-body"><p>Section 6 covers the four follow-ons from the review of the §3/§4 landing: the binary cProfile dump, the two benchmark defaults that resolve to a removed worktree, the self-contradicting record sentence, and the slow full-tree guard scan.</p></div>
+    <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §6</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

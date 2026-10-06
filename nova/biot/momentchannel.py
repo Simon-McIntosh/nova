@@ -54,6 +54,10 @@ from nova.biot.pairedfloat import where as paired_where
 from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.rangefunction import (
     _array_program,
+    _contract_tangent,
+    _deflate_tangent,
+    _harmonic_multiply_tangent,
+    _quotient_tangent,
     across_the_range,
     contract,
     deflate,
@@ -526,17 +530,6 @@ def _pole_contraction(numerator, shift, seed, family, moments, mirrored, *, xp):
     )
 
 
-def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
-    """Return the tangent of ``numerator / denominator``.
-
-    Ordered as the quotient and the reciprocal square are formed, so a value
-    whose two halves cancel rounds as the primal program's own tangent does.
-    """
-    return d_numerator / denominator + (-d_denominator * numerator) * (
-        1.0 / (denominator * denominator)
-    )
-
-
 def _reciprocal_tangent(value, d_value):
     """Return the tangent of ``1 / value``, the quotient rule's second term alone."""
     return -d_value * (1.0 / (value * value))
@@ -632,77 +625,18 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     return primal, tangent
 
 
-def _deflate_step_tangent(
-    coefficient, d_coefficient, root, d_root, current, d_current, upper, d_upper
-):
-    """Return one downward Clenshaw step of :func:`deflate` and its tangent."""
-    return (
-        2.0 * coefficient + 2.0 * root * current - upper,
-        2.0 * d_coefficient
-        + ((2.0 * d_root) * current + (2.0 * root) * d_current)
-        - d_upper,
-    )
+def _across_the_range_differential(d_term: tuple) -> list:
+    """Return the differential of :func:`across_the_range`, which is linear.
 
-
-def _deflate_tangent(series: list, d_series: list, root, d_root):
-    """Return :func:`deflate` and its tangent as the same downward recurrence."""
-    degree = len(series) - 1
-    if degree < 1:
-        return ([], series[0] if series else 0.0), ([], d_series[0] if series else 0.0)
-    quotient: list = [0.0] * degree
-    d_quotient: list = [0.0] * degree
-    upper = d_upper = current = d_current = 0.0
-    for order in range(degree, 1, -1):
-        (current, d_next), upper, d_upper = (
-            _deflate_step_tangent(
-                series[order], d_series[order], root, d_root,
-                current, d_current, upper, d_upper,
-            ),
-            current,
-            d_current,
-        )  # fmt: skip
-        d_current = d_next
-        quotient[order - 1] = current
-        d_quotient[order - 1] = d_current
-    quotient[0] = series[1] + root * current - 0.5 * upper
-    d_quotient[0] = d_series[1] + (d_root * current + root * d_current) - 0.5 * d_upper
-    value = series[0] + root * quotient[0] - 0.5 * current
-    d_value = (
-        d_series[0] + (d_root * quotient[0] + root * d_quotient[0]) - 0.5 * d_current
-    )
-    return (quotient, value), (d_quotient, d_value)
-
-
-def _contract_tangent(numerator, d_numerator, moments, d_moments):
-    """Return the tangent of :func:`contract` by its own product-sum recurrence."""
-    total = 0.0
-    for order, coefficient in enumerate(numerator):
-        total = total + (
-            d_numerator[order] * moments[order] + coefficient * d_moments[order]
-        )
-    return total
-
-
-def _harmonic_multiply_tangent(left, d_left, right, d_right):
-    """Return the tangent of :func:`harmonic_multiply` by the product rule."""
-    if not left or not right:
-        return []
-    out: list = [0.0] * (len(left) + len(right) - 1)
-    for index, one in enumerate(left):
-        for other_index, other in enumerate(right):
-            term = (0.5 * d_left[index]) * other + (0.5 * one) * d_right[other_index]
-            out[index + other_index] = out[index + other_index] + term
-            out[abs(index - other_index)] = out[abs(index - other_index)] + term
-    return out
-
-
-def _across_the_range_tangent(d_term: tuple) -> list:
-    """Return the tangent of :func:`across_the_range`, which is linear."""
+    This is the tangent map alone, taking the input tangents and returning the
+    output ones; the primal returns with it in
+    :func:`nova.biot.rangefunction._across_the_range_tangent`.
+    """
     d_bulk, d_near, d_far = d_term
     ends = [0.5 * (d_near + d_far), 0.5 * (d_far - d_near)]
     both = [0.125, 0.0, -0.125]
     product = (
-        _harmonic_multiply_tangent(both, [0.0] * len(both), d_bulk, d_bulk)
+        _harmonic_multiply_tangent(both, [0.0] * len(both), d_bulk, d_bulk)[1]
         if d_bulk
         else []
     )
@@ -739,8 +673,7 @@ def _pole_contraction_tangent(
         quotient, value, d_quotient, d_value = [], 0.0, [], 0.0
     half = [0.5 + shift, 0.5 if mirrored else -0.5]
     d_half = [d_shift, 0.0]
-    weighted = harmonic_multiply(half, bulk)
-    d_weighted = _harmonic_multiply_tangent(half, d_half, bulk, d_bulk)
+    weighted, d_weighted = _harmonic_multiply_tangent(half, d_half, bulk, d_bulk)
     lever = end * (1.0 + shift) - other * shift
     d_lever = (
         d_end * (1.0 + shift) + end * d_shift - (d_other * shift + other * d_shift)
@@ -750,7 +683,7 @@ def _pole_contraction_tangent(
     d_deflated = (
         d_value * seed
         + value * d_seed
-        + factor * _contract_tangent(quotient, d_quotient, moments, d_moments)
+        + factor * _contract_tangent(quotient, d_quotient, moments, d_moments)[1]
     )
     product = shift * (1.0 + shift)
     d_product = d_shift * (1.0 + shift) + shift * d_shift
@@ -764,18 +697,20 @@ def _pole_contraction_tangent(
         d_lever * seed
         + lever * d_seed
         + ((d_other - d_end) * moments[0] + (other - end) * d_moments[0])
-        + _contract_tangent(weighted, d_weighted, moments, d_moments)
+        + _contract_tangent(weighted, d_weighted, moments, d_moments)[1]
         - (d_product * deflated + product * d_deflated)
     )
     if family is None:
         return held, d_held
     series = across_the_range(numerator)
-    d_series = _across_the_range_tangent(d_numerator)
+    d_series = _across_the_range_differential(d_numerator)
     near_root = shift <= POLE_SWITCH
     return (
         xp.where(near_root, held, contract(series, family)),
         xp.where(
-            near_root, d_held, _contract_tangent(series, d_series, family, d_family)
+            near_root,
+            d_held,
+            _contract_tangent(series, d_series, family, d_family)[1],
         ),
     )
 
@@ -796,8 +731,8 @@ def _across_tangent(
     series = across_the_range(numerator)
     plain = contract(series, moments)
     d_plain = _contract_tangent(
-        series, _across_the_range_tangent(d_numerator), moments, d_moments
-    )
+        series, _across_the_range_differential(d_numerator), moments, d_moments
+    )[1]
     pole_y, d_pole_y = _pole_contraction_tangent(
         numerator, d_numerator, shift_y, d_shift_y, seed_y, d_seed_y,
         family_y, d_family_y, moments, d_moments, False, xp=xp,

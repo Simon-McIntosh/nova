@@ -54,14 +54,16 @@ from nova.biot.rangefunction import _array_program
 from nova.biot.completeelliptic import (
     _complete_kind_tangent,
     _complete_pole_tangent,
-    _product_tangent,
-    _quotient_tangent,
-    _scale_tangent,
-    _tangent_sum,
     complete_kind,
     complete_kind_paired,
     complete_pole,
     complete_pole_paired,
+)
+from nova.biot.rangefunction import (
+    _product_tangent,
+    _quotient_tangent,
+    _scale_tangent,
+    _tangent_sum,
 )
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import divide as paired_divide

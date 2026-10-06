@@ -573,6 +573,20 @@ def _product_tangent(left, d_left, right, d_right):
     )
 
 
+def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
+    """Return the tangent of ``numerator / denominator``.
+
+    Ordered as the quotient and the reciprocal square are formed, so a value
+    whose two halves cancel rounds as the primal program's own tangent does.
+    """
+    return _tangent_sum(
+        None if d_numerator is None else d_numerator / denominator,
+        None
+        if d_denominator is None
+        else (-d_denominator * numerator) * (1.0 / (denominator * denominator)),
+    )
+
+
 def _scale_tangent(factor, tangent):
     """Return the tangent of ``factor * value`` for a constant factor."""
     return None if tangent is None else factor * tangent

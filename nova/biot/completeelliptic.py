@@ -63,7 +63,13 @@ from __future__ import annotations
 import jax
 import numpy as np
 
-from nova.biot.rangefunction import _array_program
+from nova.biot.rangefunction import (
+    _array_program,
+    _product_tangent,
+    _quotient_tangent,
+    _scale_tangent,
+    _tangent_sum,
+)
 
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import divide as paired_divide
@@ -337,43 +343,9 @@ def complete_pole_paired(pole, complement, *, xp=np, trips: int = TRIPS):
 # term is left out rather than added as zero, as ``jax.jvp`` leaves it out.
 
 
-def _tangent_sum(*tangents):
-    """Return the sum of the tangents that are present, or ``None``."""
-    present = [tangent for tangent in tangents if tangent is not None]
-    if not present:
-        return None
-    total = present[0]
-    for tangent in present[1:]:
-        total = total + tangent
-    return total
-
-
-def _product_tangent(left, d_left, right, d_right):
-    """Return the tangent of ``left * right`` by the product rule."""
-    return _tangent_sum(
-        None if d_left is None else d_left * right,
-        None if d_right is None else left * d_right,
-    )
-
-
-def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
-    """Return the tangent of ``numerator/denominator``."""
-    return _tangent_sum(
-        None if d_numerator is None else d_numerator / denominator,
-        None
-        if d_denominator is None
-        else (-d_denominator * numerator) * (1.0 / (denominator * denominator)),
-    )
-
-
 def _root_tangent(root, d_radicand):
     """Return the tangent of ``root = sqrt(radicand)``."""
     return None if d_radicand is None else d_radicand * (0.5 / root)
-
-
-def _scale_tangent(factor, tangent):
-    """Return the tangent of ``factor * value`` for a constant factor."""
-    return None if tangent is None else factor * tangent
 
 
 def _held_tangent(condition, tangent, xp):

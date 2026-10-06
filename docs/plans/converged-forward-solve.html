@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="87">
+<meta name="plan-version" content="88">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -305,7 +305,10 @@
     <div class="r-comment-body"><p>13 private exact tangents in nova/biot/rangefunction.py (the 12 range-function programs the point jet reaches plus rising_integral) agree with jax.jvp of the base with max relative error 0 on 10,000 unmasked samples each (100 percent covered), every one-term truncation fails (maxima 1 to 9e4), primals bit-identical, cold compile at most 2.60 times the primal (product).</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T044523606978-review-of-cfs-range-tangent-recurrences" data-who="reckon-build" data-when="2026-10-06T05:00:48.573Z">
-    <div class="r-comment-body"><p>independent review of r-20261006T041805209709-cfs-range-tangent-recurrences at base e74d8fce12601e372d91572aba1b5602f2d7df55 / head 21e7cdc07da57e5902b0689cfd644d75f6513bb9 stored as a parsed record scoring all six dimensions 0..20 (goal_fidelity 19, evidence 16, scope_discipline 20, durability 19, fit 19, reuse 15; total 108), with added_failure_count 0 and no added ids derived from the reviewed run&#x27;s own base and head suite logs, and four follow-on findings and no blocking ones.</p></div>
+    <div class="r-comment-body"><p>independent review of r-20261006T041805209709-cfs-range-tangent-recurrences at base e74d8fce12601e372d91572aba1b5602f2d7df55 / head 21e7cdc07da57e5902b0689cfd644d75f6513bb9 stored as a parsed record scoring all six dimensions 0..20 (goal_fidelity 19, evidence 16, scope_discipline 20, durability 19, fit 19, reuse 15; total 108), with added_failure_count 0 and no added ids derived from the reviewed run's own base and head suite logs, and four follow-on findings and no blocking ones.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T043403884339-cfs-limiter-designed-contact" data-who="reckon-build" data-when="2026-10-06T05:05:22.602Z">
+    <div class="r-comment-body"><p>`scripts/analytic_oracle_fixtures/measure.py` now exposes `designed_contact(wall)`, the one owner of the limiter&#x27;s authored contact (midpoint of the short vertical outboard edge, returned as an (R, Z) pair in metres; weak wall R = 7.80139579 m, where the old (n-1)//2 index reads the inboard vertex at 3.738 m); the contact test helper and both index-based benchmark readers delegate to it, and the former 241-to-481 convergence assertion is replaced by an exact-by-construction roundoff bound (both rungs at or below 1e-9 m), with 9/10/3 passed at head equal to 9/10/3 at base.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

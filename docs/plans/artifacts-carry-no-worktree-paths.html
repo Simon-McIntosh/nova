@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="artifacts-carry-no-worktree-paths">
   <meta name="plan-title" content="Artifacts Carry No Worktree Paths">
-  <meta name="plan-summary" content="Rewrite the 1,146 committed artifacts that point into reckon worktrees, and guard so no artifact can reference a worktree again.">
+  <meta name="plan-summary" content="Rewrite the 1,100-odd committed artifacts that point into reckon worktrees, and guard so no artifact can reference a worktree again.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="4.5">
@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -32,14 +32,19 @@
     <h2 id="s1">§1 — Why this plan exists</h2>
     <p>Every crew worker runs in a detached worktree under
     <code>/home/ITER/mcintos/Code/.reckon-worktrees/&lt;project&gt;-&lt;hash&gt;/&lt;session&gt;/&lt;node&gt;/</code>,
-    and every worktree is removed once its run is promoted. The lead's rule, given on
+    or, for runs from before that root was adopted, under
+    <code>/home/ITER/mcintos/.cache/reckon-worktrees/</code> with the same layout, and every
+    worktree is removed once its run is promoted. The lead's rule, given on
     2026-10-06, is that this is permanent: a worktree always goes, so a committed artifact
     that names a path inside one names a path that will not exist. The evidence then stops
     locating its own figures, logs and scripts, and a launch script that changes directory
     into a worktree stops running at all.</p>
-    <p>A census of <code>origin/main</code> at 88a14b2ad found 1,146 tracked files outside
+    <p>A first census of <code>origin/main</code> at 88a14b2ad found 1,146 tracked files outside
     <code>docs/plans</code> and <code>docs/state</code> containing the string
-    <code>.reckon-worktrees</code>. 1,071 sit under <code>docs/figures</code> in 38 topic
+    <code>.reckon-worktrees</code>. The counts in this section come from that census. The tree
+    gains such files as runs land, and a later count that included the older root found 1,149,
+    so every node works from its own census, taken at its dispatch base, and never from these
+    numbers. 1,071 sit under <code>docs/figures</code> in 38 topic
     directories, 62 under <code>scripts/</code>, 11 under <code>docs/evidence</code>, one under
     <code>tests/</code> and one under <code>docs/research</code>, which §5 keeps out with
     <code>docs/plans</code> and <code>docs/state</code>. By extension they are 611 logs,
@@ -65,7 +70,9 @@
     artifacts no longer exist. So the rule is lexical. The module gains one public function,
     <code>relativize_worktree_paths(text)</code>, which returns the rewritten text together with
     the list of worktree-path spans it could not map, and one constant holding the worktree
-    root's directory name, which every other file imports instead of spelling the pattern.
+    root's directory name, <code>reckon-worktrees</code>, which every other file imports instead
+    of spelling the pattern. The matcher covers both roots named in §1, with and without the
+    leading dot, and the rule below applies to a path under either.
     <code>repository_relative</code> delegates its worktree case to the same matcher, so a path
     under a removed worktree maps the same way through either entry point and the rule has one
     definition. That function is the only public surface the plan adds. It cannot be folded into
@@ -112,7 +119,8 @@
 
     <h2 id="s3">§3 — Launch scripts resolve the repository root when they run</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
-    <p>Each of the 64 launch scripts is read and handled in one of two ways. Where the worktree
+    <p>Each launch script in the census taken at the node's dispatch base is read and handled in
+    one of two ways. Where the worktree
     path is a <code>cd</code> target, an output root or any other path the script uses, the
     script derives its repository root at run time from its own location. In shell that is one
     line, <code>ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"</code>;
@@ -149,8 +157,17 @@
       <code>test_no_receipt_directory_json_records_a_worktree_path</code> and its positive
       control <code>test_the_scan_reaches_every_receipt</code> are deleted, and the render-route
       tests in that file stay. The new test runs in the default fast lane, in seconds.</li>
-      <li>nova has no pre-commit framework, so the commit-time check is a plain checked-in hook,
-      <code>scripts/git-hooks/pre-commit</code>. It reads only the staged files, rejects any
+      <li>The commit-time check is a plain checked-in hook, <code>scripts/git-hooks/pre-commit</code>.
+      <code>pyproject.toml</code> declares the <code>pre-commit</code> framework as a dev dependency
+      and <code>AGENTS.md</code> describes its workflow, but nothing configures or installs it:
+      there is no <code>.pre-commit-config.yaml</code>, no installed hook, and no
+      <code>core.hooksPath</code> in any git configuration scope. The framework is not adopted,
+      because it stashes and restores unstaged changes around its hooks, which the workstation
+      policy bans in multi-agent checkouts. This hook is nova's one commit-time check. A later
+      read-only check, such as the size ceiling in converged-forward-solve's
+      <code>receipts-out-of-git</code> decision, joins this script rather than adding a second
+      mechanism. When the coordinator enables the hook, it also corrects the <code>AGENTS.md</code>
+      pre-commit section to describe it. It reads only the staged files, rejects any
       outside the exemptions that contains the pattern, names
       <code>scripts/relativize_worktree_paths.py</code> as the fix in its message, and never
       modifies a file. After the node lands, the coordinator enables it once with

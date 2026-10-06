@@ -60,6 +60,7 @@ evaluates it directly rather than as a large cancellation.
 
 from __future__ import annotations
 
+import jax
 import numpy as np
 
 from nova.biot.rangefunction import _array_program
@@ -318,3 +319,351 @@ def complete_pole_paired(pole, complement, *, xp=np, trips: int = TRIPS):
     finite = paired_wrap(_finite_part(paired_value(held_pole), 1.0, 1.0, xp))
     value = paired_where(reachable, evaluated, finite, xp)
     return paired_where(live, value, paired_wrap(0.0 * value[0]), xp)
+
+
+# Tangents.  Each function below returns ``(primal, tangent)`` in the structure
+# ``jax.jvp`` gives for the function it is named after, and carries the tangent
+# through the SAME fixed-trip descent and accumulation as its own recurrence:
+# every trip's update is differentiated once, by hand, beside the primal update,
+# so a trace holds one tangent step per primal step rather than the derivative
+# of the whole unrolled loop.  The primal half is computed by the primal helpers
+# themselves, so it is the primal's arithmetic exactly.
+#
+# Each elementary rule is written in the arrangement ``jax.jvp`` itself uses --
+# ``g/y - g_y x/y^2`` for a quotient, ``g (0.5/sqrt x)`` for a root -- because a
+# tangent at a small complement is a cancellation of terms of order ``1/k'^2``,
+# and two arrangements that differ by an ulp per term would then differ in the
+# leading digits of the result.  ``None`` is a tangent known to be zero, and its
+# term is left out rather than added as zero, as ``jax.jvp`` leaves it out.
+
+
+def _tangent_sum(*tangents):
+    """Return the sum of the tangents that are present, or ``None``."""
+    present = [tangent for tangent in tangents if tangent is not None]
+    if not present:
+        return None
+    total = present[0]
+    for tangent in present[1:]:
+        total = total + tangent
+    return total
+
+
+def _product_tangent(left, d_left, right, d_right):
+    """Return the tangent of ``left * right`` by the product rule."""
+    return _tangent_sum(
+        None if d_left is None else d_left * right,
+        None if d_right is None else left * d_right,
+    )
+
+
+def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
+    """Return the tangent of ``numerator/denominator``."""
+    return _tangent_sum(
+        None if d_numerator is None else d_numerator / denominator,
+        None
+        if d_denominator is None
+        else (-d_denominator * numerator) * (1.0 / (denominator * denominator)),
+    )
+
+
+def _root_tangent(root, d_radicand):
+    """Return the tangent of ``root = sqrt(radicand)``."""
+    return None if d_radicand is None else d_radicand * (0.5 / root)
+
+
+def _scale_tangent(factor, tangent):
+    """Return the tangent of ``factor * value`` for a constant factor."""
+    return None if tangent is None else factor * tangent
+
+
+def _held_tangent(condition, tangent, xp):
+    """Return the tangent of ``where(condition, value, constant)``."""
+    return None if tangent is None else xp.where(condition, tangent, 0.0)
+
+
+def _descent_tangent_step(radical, d_radical, running, d_running, xp):
+    """Return one trip's next modulus and radical with their tangents.
+
+    The modulus is twice the root of the radical, and the next radical is that
+    modulus times the trip's updated sum, differentiated by the product rule.
+    """
+    root = xp.sqrt(radical)
+    modulus = 2.0 * root
+    d_modulus = _scale_tangent(2.0, _root_tangent(root, d_radical))
+    return (
+        modulus,
+        d_modulus,
+        modulus * running,
+        _product_tangent(modulus, d_modulus, running, d_running),
+    )
+
+
+def _descent_tangent(complement, d_complement, xp, trips: int = TRIPS):
+    """Return ``((radicals, sum), (d_radicals, d_sum))``, the descent and tangent."""
+    complement = xp.asarray(complement)
+    radicals, arithmetic = _descent(complement, xp, trips)
+    reachable = complement > 0.0
+    held = xp.where(reachable, complement, 1.0)
+    modulus = xp.sqrt(held)
+    d_modulus = _root_tangent(modulus, _held_tangent(reachable, d_complement, xp))
+    radical, d_radical = modulus, d_modulus
+    running, d_running = xp.ones_like(modulus), None
+    d_radicals = []
+    for _ in range(trips):
+        d_radicals.append(d_radical)
+        running = running + modulus
+        d_running = _tangent_sum(d_running, d_modulus)
+        modulus, d_modulus, radical, d_radical = _descent_tangent_step(
+            radical, d_radical, running, d_running, xp
+        )
+    return (radicals, arithmetic), (d_radicals, d_running)
+
+
+def _accumulate_tangent(
+    radicals,
+    d_radicals,
+    arithmetic,
+    d_arithmetic,
+    pole,
+    d_pole,
+    cosine_weight,
+    d_cosine_weight,
+    sine_weight,
+    d_sine_weight,
+    xp,
+):
+    """Return :func:`_accumulate` and its tangent in every floating input."""
+    value = _accumulate(radicals, arithmetic, pole, cosine_weight, sine_weight, xp)
+    pole_root = xp.sqrt(pole)
+    d_pole_root = _root_tangent(pole_root, d_pole)
+    cosine_part = cosine_weight + xp.zeros_like(arithmetic)
+    d_cosine_part = d_cosine_weight
+    sine_part = sine_weight / pole_root
+    d_sine_part = _quotient_tangent(sine_weight, d_sine_weight, pole_root, d_pole_root)
+    sine_part = sine_part + xp.zeros_like(arithmetic)
+    for radical, d_radical in zip(radicals, d_radicals):
+        previous, d_previous = cosine_part, d_cosine_part
+        d_cosine_part = _tangent_sum(
+            d_cosine_part,
+            _quotient_tangent(sine_part, d_sine_part, pole_root, d_pole_root),
+        )
+        cosine_part = cosine_part + sine_part / pole_root
+        gain = radical / pole_root
+        d_gain = _quotient_tangent(radical, d_radical, pole_root, d_pole_root)
+        d_sine_part = _scale_tangent(
+            2.0,
+            _tangent_sum(
+                d_sine_part, _product_tangent(previous, d_previous, gain, d_gain)
+            ),
+        )
+        sine_part = 2.0 * (sine_part + previous * gain)
+        pole_root = pole_root + gain
+        d_pole_root = _tangent_sum(d_pole_root, d_gain)
+    numerator = _HALF_PI * (sine_part + cosine_part * arithmetic)
+    d_numerator = _scale_tangent(
+        _HALF_PI,
+        _tangent_sum(
+            d_sine_part,
+            _product_tangent(cosine_part, d_cosine_part, arithmetic, d_arithmetic),
+        ),
+    )
+    span = arithmetic + pole_root
+    denominator = arithmetic * span
+    d_denominator = _product_tangent(
+        arithmetic, d_arithmetic, span, _tangent_sum(d_arithmetic, d_pole_root)
+    )
+    return value, _quotient_tangent(numerator, d_numerator, denominator, d_denominator)
+
+
+def _finite_part_series_tangent(series_rising, d_series_rising, xp):
+    """Return the tangent of the finite part's series in ``p - 1``."""
+    power = xp.ones_like(series_rising)
+    d_power = None
+    d_series = None
+    for order in range(1, 8):
+        d_power = _scale_tangent(
+            -1.0, _product_tangent(power, d_power, series_rising, d_series_rising)
+        )
+        power = -power * series_rising
+        d_series = _tangent_sum(
+            d_series, None if d_power is None else d_power / (2 * order + 1)
+        )
+    return d_series
+
+
+def _finite_part_tangent(
+    pole, d_pole, cosine_weight, d_cosine_weight, sine_weight, d_sine_weight, xp
+):
+    """Return :func:`_finite_part` and its tangent in every floating input."""
+    value = _finite_part(pole, cosine_weight, sine_weight, xp)
+    rising = pole - 1.0
+    separated = rising != 0.0
+    magnitude = xp.abs(rising)
+    d_magnitude = xp.where(rising >= 0.0, d_pole, -d_pole)
+    root = xp.sqrt(xp.where(separated, magnitude, 1.0))
+    d_root = _root_tangent(root, xp.where(separated, d_magnitude, 0.0))
+    below = rising < 0.0
+    held_pole = xp.where(below, pole, 1.0)
+    d_held_pole = xp.where(below, d_pole, 0.0)
+    arctangent = xp.arctan(root)
+    d_circular = _quotient_tangent(
+        arctangent, d_root / (1.0 + root * root), root, d_root
+    )
+    logarithm = xp.log1p(root) - 0.5 * xp.log(held_pole)
+    d_logarithm = d_root / (root + 1.0) - 0.5 * (d_held_pole / held_pole)
+    d_hyperbolic = _quotient_tangent(logarithm, d_logarithm, root, d_root)
+    d_over = xp.where(rising > 0.0, d_circular, d_hyperbolic)
+    close = xp.abs(rising) < 1e-4
+    series_rising = xp.where(close, rising, 0.0)
+    d_series = _finite_part_series_tangent(
+        series_rising, xp.where(close, d_pole, 0.0), xp
+    )
+    over = xp.where(rising > 0.0, arctangent / root, logarithm / root)
+    series = xp.ones_like(rising)
+    power = xp.ones_like(rising)
+    for order in range(1, 8):
+        power = -power * series_rising
+        series = series + power / (2 * order + 1)
+    elementary = xp.where(close, series, over)
+    d_elementary = xp.where(close, d_series, d_over)
+    scaled = sine_weight * rising
+    coefficient = (cosine_weight - sine_weight) + scaled / pole
+    d_coefficient = _tangent_sum(
+        d_cosine_weight,
+        _scale_tangent(-1.0, d_sine_weight),
+        _quotient_tangent(
+            scaled,
+            _product_tangent(sine_weight, d_sine_weight, rising, d_pole),
+            pole,
+            d_pole,
+        ),
+    )
+    return value, _product_tangent(coefficient, d_coefficient, elementary, d_elementary)
+
+
+def _descent_tangent_scanned(complement, d_complement, trips: int = TRIPS):
+    """Return the stacked radicals and final sum of the descent, with tangents.
+
+    The same trips as :func:`_descent_tangent`, carried as one scanned step so
+    the compiled program holds one trip rather than ``trips`` of them.
+    """
+    jnp = jax.numpy
+    reachable = complement > 0.0
+    held = jnp.where(reachable, complement, 1.0)
+    modulus = jnp.sqrt(held)
+    d_modulus = _root_tangent(modulus, jnp.where(reachable, d_complement, 0.0))
+    running = jnp.ones_like(modulus)
+
+    def trip(carry, _):
+        modulus, d_modulus, radical, d_radical, running, d_running = carry
+        running = running + modulus
+        d_running = d_running + d_modulus
+        modulus, d_modulus, next_radical, d_next_radical = _descent_tangent_step(
+            radical, d_radical, running, d_running, jnp
+        )
+        carry = (modulus, d_modulus, next_radical, d_next_radical, running, d_running)
+        return carry, (radical, d_radical)
+
+    initial = (modulus, d_modulus, modulus, d_modulus, running, jnp.zeros_like(running))
+    final, (radicals, d_radicals) = jax.lax.scan(trip, initial, None, length=trips)
+    return (radicals, final[4]), (d_radicals, final[5])
+
+
+def _accumulate_tangent_scanned(
+    radicals, d_radicals, arithmetic, d_arithmetic, sine_weight, d_sine_weight
+):
+    """Return the tangent of :func:`_accumulate` at a pole of one, scanned.
+
+    The pole of the first and second kinds is one with no tangent, so only the
+    sine weight and the descent carry one; the trips are one scanned step.
+    """
+    jnp = jax.numpy
+    zero = jnp.zeros_like(arithmetic)
+    pole_root = jnp.ones_like(arithmetic)
+    sine_part = sine_weight / pole_root + zero
+    d_sine_part = zero if d_sine_weight is None else d_sine_weight / pole_root + zero
+
+    def trip(carry, radical_pair):
+        cosine_part, sine_part, pole_root, d_cosine, d_sine, d_root = carry
+        radical, d_radical = radical_pair
+        d_next_cosine = d_cosine + _quotient_tangent(
+            sine_part, d_sine, pole_root, d_root
+        )
+        next_cosine = cosine_part + sine_part / pole_root
+        gain = radical / pole_root
+        d_gain = _quotient_tangent(radical, d_radical, pole_root, d_root)
+        d_sine = 2.0 * (d_sine + _product_tangent(cosine_part, d_cosine, gain, d_gain))
+        sine_part = 2.0 * (sine_part + cosine_part * gain)
+        return (
+            next_cosine, sine_part, pole_root + gain,
+            d_next_cosine, d_sine, d_root + d_gain,
+        ), None  # fmt: skip
+
+    initial = (zero + 1.0, sine_part, pole_root, zero, d_sine_part, zero)
+    final, _ = jax.lax.scan(trip, initial, (radicals, d_radicals))
+    cosine_part, sine_part, pole_root, d_cosine, d_sine, d_root = final
+    numerator = _HALF_PI * (sine_part + cosine_part * arithmetic)
+    d_numerator = _HALF_PI * (
+        d_sine + _product_tangent(cosine_part, d_cosine, arithmetic, d_arithmetic)
+    )
+    span = arithmetic + pole_root
+    denominator = arithmetic * span
+    d_denominator = _product_tangent(
+        arithmetic, d_arithmetic, span, d_arithmetic + d_root
+    )
+    return _quotient_tangent(numerator, d_numerator, denominator, d_denominator)
+
+
+def _complete_kind_tangent(complement, d_complement, *, xp=np, trips: int = TRIPS):
+    """Return ``((K, E), (dK, dE))``, :func:`complete_kind` and its tangent.
+
+    The primal is :func:`complete_kind` itself; the tangent is the descent and
+    both accumulations carried as scanned trips, so its compiled program holds
+    one trip of each rather than ``trips`` of them.
+    """
+    complement = xp.asarray(complement)
+    d_complement = xp.asarray(d_complement) + xp.zeros_like(complement)
+    values = complete_kind(complement, xp=xp, trips=trips)
+    (radicals, arithmetic), (d_radicals, d_arithmetic) = _descent_tangent_scanned(
+        complement, d_complement, trips
+    )
+    reachable = complement > 0.0
+    held = xp.where(reachable, complement, 1.0)
+    d_held = xp.where(reachable, d_complement, 0.0)
+    d_first = _accumulate_tangent_scanned(
+        radicals, d_radicals, arithmetic, d_arithmetic, 1.0, None
+    )
+    d_second = _accumulate_tangent_scanned(
+        radicals, d_radicals, arithmetic, d_arithmetic, held, d_held
+    )
+    return values, (
+        xp.where(reachable, d_first, 0.0),
+        xp.where(reachable, d_second, 0.0),
+    )
+
+
+def _complete_pole_tangent(
+    pole, d_pole, complement, d_complement, *, xp=np, trips: int = TRIPS
+):
+    """Return :func:`complete_pole` and its tangent in the pole and complement."""
+    pole = xp.asarray(pole)
+    complement = xp.asarray(complement)
+    d_pole = xp.asarray(d_pole) + xp.zeros_like(pole)
+    d_complement = xp.asarray(d_complement) + xp.zeros_like(complement)
+    live = pole > 0.0
+    held_pole = xp.where(live, pole, 1.0)
+    d_held_pole = xp.where(live, d_pole, 0.0)
+    (radicals, arithmetic), (d_radicals, d_arithmetic) = _descent_tangent(
+        complement, d_complement, xp, trips
+    )
+    evaluated, d_evaluated = _accumulate_tangent(
+        radicals, d_radicals, arithmetic, d_arithmetic,
+        held_pole, d_held_pole, 1.0, None, 1.0, None, xp,
+    )  # fmt: skip
+    finite, d_finite = _finite_part_tangent(
+        held_pole, d_held_pole, 1.0, None, 1.0, None, xp
+    )
+    reachable = complement > 0.0
+    value = xp.where(reachable, evaluated, finite)
+    d_value = xp.where(reachable, d_evaluated, d_finite)
+    return xp.where(live, value, 0.0), xp.where(live, d_value, 0.0)

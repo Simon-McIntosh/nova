@@ -51,6 +51,12 @@ import numpy as np
 from nova.biot.rangefunction import _array_program
 
 from nova.biot.completeelliptic import (
+    _complete_kind_tangent,
+    _complete_pole_tangent,
+    _product_tangent,
+    _quotient_tangent,
+    _scale_tangent,
+    _tangent_sum,
     complete_kind,
     complete_kind_paired,
     complete_pole,
@@ -1163,3 +1169,436 @@ def _pole_forward_step(diagonal, ratio, solution, moment, weight):
 def _pole_backward_step(solution, ratio, following):
     """One ordered substitution step of the harmonic pole system."""
     return solution - ratio * following
+
+
+# Tangents of the moment families the point jet reaches.  Each returns
+# ``(primal, tangent)`` in the structure ``jax.jvp`` gives for the function it is
+# named after, with the tangent carried as its own recurrence beside the primal
+# one -- the same orders, the same direction, the same branch selection -- and
+# every elementary rule in the arrangement ``jax.jvp`` uses; see the tangent
+# block of :mod:`nova.biot.completeelliptic` for why the arrangement matters.
+# The primal half is the primal helpers' own arithmetic.  ``None`` is a tangent
+# known to be zero.
+
+
+def _held_tangent(condition, tangent, xp):
+    """Return the tangent of ``where(condition, value, constant)``."""
+    return None if tangent is None else xp.where(condition, tangent, 0.0)
+
+
+def _harmonic_rising_step_tangent(
+    current,
+    d_current,
+    previous,
+    d_previous,
+    parameter,
+    d_parameter,
+    complement,
+    d_complement,
+    seed,
+    d_seed,
+    current_weight,
+    previous_weight,
+    seed_weight,
+    divisor,
+):
+    """Return :func:`_harmonic_rising_step` and its tangent."""
+    value = _harmonic_rising_step(
+        current,
+        previous,
+        parameter,
+        complement,
+        seed,
+        current_weight,
+        previous_weight,
+        seed_weight,
+        divisor,
+    )
+    current_factor = current_weight * (1.0 + complement)
+    previous_factor = previous_weight * parameter
+    seed_factor = seed_weight * complement
+    d_total = _tangent_sum(
+        _product_tangent(
+            current_factor,
+            _scale_tangent(current_weight, d_complement),
+            current,
+            d_current,
+        ),
+        _product_tangent(
+            previous_factor,
+            _scale_tangent(previous_weight, d_parameter),
+            previous,
+            d_previous,
+        ),
+        _product_tangent(
+            seed_factor,
+            _scale_tangent(seed_weight, d_complement),
+            seed,
+            d_seed,
+        ),
+    )
+    total = current_factor * current + previous_factor * previous + seed_factor * seed
+    return value, _quotient_tangent(
+        -total,
+        _scale_tangent(-1.0, d_total),
+        divisor * parameter,
+        _scale_tangent(divisor, d_parameter),
+    )
+
+
+def _harmonic_ratio_step_tangent(
+    ratio,
+    d_ratio,
+    parameter,
+    d_parameter,
+    complement,
+    d_complement,
+    numerator_weight,
+    ratio_weight,
+    mean_weight,
+):
+    """Return :func:`_harmonic_ratio_step` and its tangent."""
+    value = _harmonic_ratio_step(
+        ratio, parameter, complement, numerator_weight, ratio_weight, mean_weight
+    )
+    ratio_factor = ratio_weight * parameter
+    denominator = ratio_factor * ratio + mean_weight * (1.0 + complement)
+    d_denominator = _tangent_sum(
+        _product_tangent(
+            ratio_factor,
+            _scale_tangent(ratio_weight, d_parameter),
+            ratio,
+            d_ratio,
+        ),
+        _scale_tangent(mean_weight, d_complement),
+    )
+    return value, _quotient_tangent(
+        numerator_weight * parameter,
+        _scale_tangent(numerator_weight, d_parameter),
+        denominator,
+        d_denominator,
+    )
+
+
+def _harmonic_moments_tangent(
+    parameter,
+    d_parameter,
+    count: int,
+    *,
+    complement=None,
+    d_complement=None,
+    xp=np,
+):
+    """Return :func:`harmonic_moments` and its tangent in parameter and complement.
+
+    The upward family's tangent obeys the upward recursion differentiated term by
+    term, and the downward ratios' tangent the downward ratio recursion
+    differentiated the same way, so each runs in the direction its primal runs,
+    from the same seeds, over the same orders.
+    """
+    parameter = xp.asarray(parameter)
+    d_parameter = xp.asarray(d_parameter) + xp.zeros_like(parameter)
+    if complement is None:
+        complement = 1.0 - parameter
+        d_complement = -d_parameter
+    complement = xp.asarray(complement) + xp.zeros_like(parameter)
+    d_complement = xp.asarray(d_complement) + xp.zeros_like(parameter)
+    (complete_k, complete_e), (d_complete_k, d_complete_e) = _complete_kind_tangent(
+        complement, d_complement, xp=xp
+    )
+    degenerate = parameter > _HARMONIC_SWITCH
+
+    held = xp.where(degenerate, parameter, 1.0)
+    d_held = _held_tangent(degenerate, d_parameter, xp)
+    held_complement = xp.where(degenerate, complement, 0.0)
+    d_held_complement = _held_tangent(degenerate, d_complement, xp)
+    numerator = 2.0 * (complete_e - held_complement * complete_k)
+    d_numerator = _scale_tangent(
+        2.0,
+        _tangent_sum(
+            d_complete_e,
+            _scale_tangent(
+                -1.0,
+                _product_tangent(
+                    held_complement, d_held_complement, complete_k, d_complete_k
+                ),
+            ),
+        ),
+    )
+    upward = [xp.zeros_like(parameter), numerator / held]
+    d_upward = [None, _quotient_tangent(numerator, d_numerator, held, d_held)]
+    for order in range(1, count - 1):
+        value, tangent = _harmonic_rising_step_tangent(
+            upward[order],
+            d_upward[order],
+            upward[order - 1],
+            d_upward[order - 1],
+            held,
+            d_held,
+            held_complement,
+            d_held_complement,
+            complete_k,
+            d_complete_k,
+            4.0 * order,
+            2 * order - 1,
+            (-1.0) ** order * 8.0 * order,
+            2 * order + 1,
+        )
+        upward.append(value)
+        d_upward.append(tangent)
+
+    ratio = xp.zeros_like(parameter)
+    d_ratio = None
+    ratios = [None] * (count + _HARMONIC_HEADROOM + 1)
+    d_ratios = [None] * (count + _HARMONIC_HEADROOM + 1)
+    for order in range(count + _HARMONIC_HEADROOM, 0, -1):
+        ratio, d_ratio = _harmonic_ratio_step_tangent(
+            ratio,
+            d_ratio,
+            parameter,
+            d_parameter,
+            complement,
+            d_complement,
+            -(2 * order - 1),
+            2 * order + 1,
+            4.0 * order,
+        )
+        if order <= count:
+            ratios[order] = ratio
+            d_ratios[order] = d_ratio
+    downward = [complete_k]
+    d_downward = [d_complete_k]
+    for order in range(1, count):
+        d_downward.append(
+            _product_tangent(
+                downward[order - 1],
+                d_downward[order - 1],
+                ratios[order],
+                d_ratios[order],
+            )
+        )
+        downward.append(downward[order - 1] * ratios[order])
+    values = [
+        xp.where(
+            degenerate,
+            upward[order] + (-1.0) ** order * complete_k,
+            downward[order],
+        )
+        for order in range(count)
+    ]
+    tangents = [
+        xp.where(
+            degenerate,
+            _tangent_sum(d_upward[order], (-1.0) ** order * d_complete_k),
+            d_downward[order],
+        )
+        for order in range(count)
+    ]
+    return values, tangents
+
+
+def _pole_forward_step_tangent(
+    diagonal,
+    d_diagonal,
+    ratio,
+    d_ratio,
+    solution,
+    d_solution,
+    moment,
+    d_moment,
+    weight,
+):
+    """Return :func:`_pole_forward_step` and its tangent."""
+    values = _pole_forward_step(diagonal, ratio, solution, moment, weight)
+    pivot = diagonal - ratio
+    d_pivot = _tangent_sum(d_diagonal, _scale_tangent(-1.0, d_ratio))
+    return values, (
+        _quotient_tangent(1.0, None, pivot, d_pivot),
+        _quotient_tangent(
+            weight * moment - solution,
+            _tangent_sum(
+                _scale_tangent(weight, d_moment), _scale_tangent(-1.0, d_solution)
+            ),
+            pivot,
+            d_pivot,
+        ),
+    )
+
+
+def _pole_backward_step_tangent(
+    solution, d_solution, ratio, d_ratio, following, d_following
+):
+    """Return :func:`_pole_backward_step` and its tangent."""
+    value = _pole_backward_step(solution, ratio, following)
+    return value, _tangent_sum(
+        d_solution,
+        _scale_tangent(-1.0, _product_tangent(ratio, d_ratio, following, d_following)),
+    )
+
+
+def _harmonic_pole_moments_tangent(
+    shift,
+    d_shift,
+    seed,
+    d_seed,
+    moments,
+    d_moments,
+    count: int,
+    *,
+    mirrored: bool = False,
+):
+    """Return :func:`harmonic_pole_moments` and its tangent.
+
+    The tangent satisfies the same tridiagonal system with the diagonal's own
+    tangent moved to the right-hand side, so it is eliminated forward and
+    substituted backward over the same orders, beside the primal sweep.
+    """
+    sign = -1.0 if mirrored else 1.0
+    diagonal = sign * (2.0 + 4.0 * shift)
+    d_diagonal = _scale_tangent(sign, _scale_tangent(4.0, d_shift))
+    top = count + POLE_HEADROOM
+    ratio = [1.0 / diagonal]
+    d_ratio = [_quotient_tangent(1.0, None, diagonal, d_diagonal)]
+    first = 4.0 * sign * moments[1] - seed
+    solution = [first / diagonal]
+    d_solution = [
+        _quotient_tangent(
+            first,
+            _tangent_sum(
+                _scale_tangent(4.0 * sign, d_moments[1]), _scale_tangent(-1.0, d_seed)
+            ),
+            diagonal,
+            d_diagonal,
+        )
+    ]
+    for order in range(2, top + 1):
+        (next_ratio, next_solution), (d_next_ratio, d_next_solution) = (
+            _pole_forward_step_tangent(
+                diagonal,
+                d_diagonal,
+                ratio[-1],
+                d_ratio[-1],
+                solution[-1],
+                d_solution[-1],
+                moments[order],
+                d_moments[order],
+                4.0 * sign,
+            )
+        )
+        ratio.append(next_ratio)
+        d_ratio.append(d_next_ratio)
+        solution.append(next_solution)
+        d_solution.append(d_next_solution)
+    values = [None] * (top + 1)
+    d_values = [None] * (top + 1)
+    values[top] = solution[top - 1]
+    d_values[top] = d_solution[top - 1]
+    for order in range(top - 1, 0, -1):
+        values[order], d_values[order] = _pole_backward_step_tangent(
+            solution[order - 1],
+            d_solution[order - 1],
+            ratio[order - 1],
+            d_ratio[order - 1],
+            values[order + 1],
+            d_values[order + 1],
+        )
+    values[0] = seed
+    d_values[0] = d_seed
+    return values[:count], d_values[:count]
+
+
+def _harmonic_root_tangent_term(
+    mean, d_mean, moment, d_moment, quarter, d_quarter, pair, d_pair
+):
+    """Return the tangent of ``mean P_n + quarter (P_(n+1) + P_|n-1|)``."""
+    return _tangent_sum(
+        _product_tangent(mean, d_mean, moment, d_moment),
+        _product_tangent(quarter, d_quarter, pair, d_pair),
+    )
+
+
+def _harmonic_root_moments_tangent(
+    moments, d_moments, parameter, d_parameter, *, xp=np
+):
+    """Return :func:`harmonic_root_moments` and its tangent.
+
+    The root family is a closed three-term combination of the reciprocal one, so
+    its tangent is that combination's product rule over the moments' tangents.
+    """
+    parameter = xp.asarray(parameter)
+    values = harmonic_root_moments(moments, parameter, xp=xp)
+    mean = 1.0 - 0.5 * parameter
+    d_mean = _scale_tangent(-1.0, _scale_tangent(0.5, d_parameter))
+    quarter = 0.25 * parameter
+    d_quarter = _scale_tangent(0.25, d_parameter)
+    tangents = [
+        _harmonic_root_tangent_term(
+            mean,
+            d_mean,
+            moments[order],
+            d_moments[order],
+            quarter,
+            d_quarter,
+            moments[order + 1] + moments[abs(order - 1)],
+            _tangent_sum(d_moments[order + 1], d_moments[abs(order - 1)]),
+        )
+        for order in range(len(moments) - 1)
+    ]
+    return values, tangents
+
+
+def _cn_pole_moment_tangent(
+    shift,
+    d_shift,
+    parameter,
+    d_parameter,
+    *,
+    parameter_complement=None,
+    d_parameter_complement=None,
+    xp=np,
+):
+    """Return :func:`cn_pole_moment` and its tangent."""
+    shift = xp.asarray(shift)
+    if parameter_complement is None:
+        parameter_complement = 1.0 - xp.asarray(parameter)
+        d_parameter_complement = _scale_tangent(-1.0, d_parameter)
+    value = cn_pole_moment(
+        shift, parameter, parameter_complement=parameter_complement, xp=xp
+    )
+    span = 1.0 + shift
+    pole = shift / span
+    d_pole = _quotient_tangent(shift, d_shift, span, d_shift)
+    seed, d_seed = _complete_pole_tangent(
+        pole, d_pole, parameter_complement, d_parameter_complement, xp=xp
+    )
+    return value, _quotient_tangent(seed, d_seed, span, d_shift)
+
+
+def _sn_pole_moment_tangent(
+    shift,
+    d_shift,
+    parameter,
+    d_parameter,
+    *,
+    parameter_complement=None,
+    d_parameter_complement=None,
+    xp=np,
+):
+    """Return :func:`sn_pole_moment` and its tangent."""
+    shift = xp.asarray(shift)
+    if parameter_complement is None:
+        parameter_complement = 1.0 - xp.asarray(parameter)
+        d_parameter_complement = _scale_tangent(-1.0, d_parameter)
+    value = sn_pole_moment(
+        shift, parameter, parameter_complement=parameter_complement, xp=xp
+    )
+    live = shift > 0.0
+    held = xp.where(live, shift, 1.0)
+    d_held = _held_tangent(live, d_shift, xp)
+    span = 1.0 + held
+    pole = span / held
+    d_pole = _quotient_tangent(span, d_held, held, d_held)
+    seed, d_seed = _complete_pole_tangent(
+        pole, d_pole, parameter_complement, d_parameter_complement, xp=xp
+    )
+    return value, xp.where(live, _quotient_tangent(seed, d_seed, held, d_held), 0.0)

@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="65">
+<meta name="plan-version" content="66">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -257,6 +257,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T001613255359-cfs-kernel-qualification" data-who="reckon-build" data-when="2026-10-06T01:18:16Z">
     <div class="r-comment-body"><p>Completed stop record: cold compile clause breached at 132/300/550 cells; H200 job 1281162 FAILED, each child bounded at 900 s. Expanded counts 1518527/1499787/1499787 fit N^-0.00906937. At 550, value_gradient contributes 1486950 expanded equations; harmonic_multiply contributes 448810. Cache-hit refusal control NOT RUN. Larger rows and tangents remain strict expected failures pending the lead’s differentiated-loop representation decision at 1e-13. [Stop record](/nova/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html#cfs-kernel-qualification-record).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T011954907430-review-of-cfs-kernel-qualification" data-who="reckon-build" data-when="2026-10-06T01:28:49Z">
+    <div class="r-comment-body"><p>Independent review stored for base 7313cdd335bf493ccba3c51700c31bd8e89a76f8 to head 9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78; six scores total 85, four follow-on findings, and added failures unmeasured because the reviewed run has no baseline suite log.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

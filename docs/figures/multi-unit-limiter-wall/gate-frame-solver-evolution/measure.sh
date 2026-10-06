@@ -1,4 +1,7 @@
 #!/bin/bash
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -euo pipefail
 export TMPDIR=/tmp
 export PYTHONDONTWRITEBYTECODE=1
@@ -6,7 +9,7 @@ export JAX_PLATFORMS=cuda,cpu
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
-WORK=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-solver-evolution
+WORK=${repository_root}
 RUN=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143133299349-mulw-gate-frame-solver-evolution
 OUT="$RUN/jobs/$SLURM_JOB_ID"
 PY=/home/ITER/mcintos/Code/nova/.venv/bin/python

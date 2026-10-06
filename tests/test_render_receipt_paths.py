@@ -2,11 +2,11 @@
 
 Every driver whose receipt names a rendered artifact must record that path
 relative to the repository root, so the committed evidence still locates its
-figure once the worktree that produced it is reclaimed.  The directory scan
-reads the receipt JSON files the render drivers write; the render-route checks
+figure once the worktree that produced it is reclaimed.  The render-route checks
 run each driver's solve-free render path into a temporary directory that carries
 its own ``.git`` marker and assert that every filesystem path the written receipt
-records resolves inside that root.
+records resolves inside that root.  The repository-wide worktree-path scan lives
+in ``tests/test_artifacts_carry_no_worktree_paths.py``.
 """
 
 from __future__ import annotations
@@ -37,46 +37,6 @@ RECEIPTS = {
         "shafranov-discriminator/receipt.json",
     ),
 }
-
-#: The receipt directories, scanned for any JSON that still records a worktree
-#: path.  A historical SLURM preflight record once lived here and was excluded
-#: as a non-render receipt; it now records repository-relative paths too, so the
-#: scan covers every JSON in these directories without exception.
-RECEIPT_DIRECTORIES = tuple(
-    sorted({Path(receipt).parent for paths in RECEIPTS.values() for receipt in paths})
-)
-
-
-def _scanned_json():
-    """Return every receipt-directory JSON the worktree-path scan inspects."""
-    for directory in RECEIPT_DIRECTORIES:
-        for json_path in sorted((ROOT / directory).glob("*.json")):
-            yield json_path.relative_to(ROOT).as_posix(), json_path
-
-
-def test_the_scan_reaches_every_receipt():
-    """Positive control: the scan enumerates the receipts it exists to guard."""
-    scanned = {relative for relative, _ in _scanned_json()}
-    expected = {receipt for paths in RECEIPTS.values() for receipt in paths}
-    missing = expected.difference(scanned)
-    assert missing == set()
-    # The preflight record carries no worktree path now, so the scan that is
-    # meant to guard it must reach it rather than exclude it.
-    assert (
-        "docs/figures/cut-cell-current-attribution/outboard-hole/"
-        "preflight-receipt.json" in scanned
-    )
-    for relative in expected:
-        assert (ROOT / relative).read_text() != ""
-
-
-def test_no_receipt_directory_json_records_a_worktree_path():
-    offenders = [
-        relative
-        for relative, json_path in _scanned_json()
-        if ".reckon-worktrees" in json_path.read_text()
-    ]
-    assert offenders == []
 
 
 def _driver_module(relative_path, name):

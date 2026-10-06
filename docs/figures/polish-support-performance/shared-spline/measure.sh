@@ -8,8 +8,11 @@
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:1
 #SBATCH --time=02:00:00
-#SBATCH --output=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/docs/figures/polish-support-performance/shared-spline/slurm-%j.out
-#SBATCH --error=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/docs/figures/polish-support-performance/shared-spline/slurm-%j.err
+#SBATCH --output=docs/figures/polish-support-performance/shared-spline/slurm-%j.out
+#SBATCH --error=docs/figures/polish-support-performance/shared-spline/slurm-%j.err
+
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
 
 set -euo pipefail
 
@@ -20,7 +23,7 @@ export JAX_PLATFORMS=cuda
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv
 
-worktree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline
+worktree=${repository_root}
 baseline_source="$worktree/docs/figures/polish-support-performance/shared-spline/.baseline-source"
 artifact_dir="$worktree/docs/figures/polish-support-performance/shared-spline"
 driver="$worktree/benchmarks/polish_support_performance.py"

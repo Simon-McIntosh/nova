@@ -9,9 +9,12 @@
 #SBATCH --gres=gpu:1
 #SBATCH --time=03:00:00
 
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -uo pipefail
 
-shadow=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay-shadow
+shadow=${repository_root}
 python_bin=/home/ITER/mcintos/Code/nova/.venv/bin/python
 export TMPDIR=/tmp
 export PYTHONPATH="$shadow"

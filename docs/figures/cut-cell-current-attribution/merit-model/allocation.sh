@@ -5,11 +5,14 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=96G
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction/allocation.log
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -uo pipefail
-export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction
+export TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=${repository_root}
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
-cd /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction
+cd ${repository_root}
 printf 'revision=%s tree=%s command=%s\n' "$(git rev-parse HEAD)" "$PWD" "measure.py --cells 110 then --cells 300"
 failed=0
 for cells in 110 300; do

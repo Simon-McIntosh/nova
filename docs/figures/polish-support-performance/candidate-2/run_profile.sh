@@ -11,6 +11,9 @@
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T162436664899-nia-candidate2-trip-attribution-3/slurm-%j.out
 #SBATCH --error=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T162436664899-nia-candidate2-trip-attribution-3/slurm-%j.err
 
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -euo pipefail
 
 export TMPDIR=/tmp
@@ -22,7 +25,7 @@ export JAX_LOG_COMPILES=1
 export JAX_EXPLAIN_CACHE_MISSES=1
 export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv
 
-candidate_root=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-3
+candidate_root=${repository_root}
 artifact_root="$candidate_root/docs/figures/polish-support-performance/candidate-2"
 run_root=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T162436664899-nia-candidate2-trip-attribution-3
 polish_tip="$run_root/checkouts/polish-tip"

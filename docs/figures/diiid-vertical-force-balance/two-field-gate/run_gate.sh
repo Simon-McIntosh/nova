@@ -8,13 +8,16 @@
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:1
 #SBATCH --time=01:00:00
-#SBATCH --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/dvf-frame144-two-field-gate
-#SBATCH --output=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/dvf-frame144-two-field-gate/docs/figures/diiid-vertical-force-balance/two-field-gate/slurm-%j.out
-#SBATCH --error=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/dvf-frame144-two-field-gate/docs/figures/diiid-vertical-force-balance/two-field-gate/slurm-%j.err
+#SBATCH --chdir=.
+#SBATCH --output=docs/figures/diiid-vertical-force-balance/two-field-gate/slurm-%j.out
+#SBATCH --error=docs/figures/diiid-vertical-force-balance/two-field-gate/slurm-%j.err
+
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
 
 set -euo pipefail
 
-readonly worktree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/dvf-frame144-two-field-gate
+readonly worktree=${repository_root}
 readonly output="$worktree/docs/figures/diiid-vertical-force-balance/two-field-gate"
 
 export TMPDIR=/tmp

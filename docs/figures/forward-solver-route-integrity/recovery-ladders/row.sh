@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # Solve one certificate row under the recovery-ladder runtime counter.
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -u
 CASE="$1"
 CELLS="$2"
 LOG="$3"
-WORKTREE="/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census"
+WORKTREE="${repository_root}"
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cpu
 export PYTHONPATH="$WORKTREE"

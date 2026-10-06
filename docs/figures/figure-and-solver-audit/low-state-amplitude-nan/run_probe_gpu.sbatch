@@ -7,9 +7,12 @@
 #SBATCH --time=00:59:00
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -u
 export TMPDIR=/tmp
-WORKTREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-low-state-amplitude-nan-attribution
+WORKTREE=${repository_root}
 OUT="$WORKTREE/docs/figures/figure-and-solver-audit/low-state-amplitude-nan"
 export NOVA_COMPILATION_CACHE_ROOT=/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm
 cd "$WORKTREE" || exit 90

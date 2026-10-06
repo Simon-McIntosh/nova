@@ -8,9 +8,12 @@
 #SBATCH --mem=64G
 #SBATCH --gres=gpu:1
 #SBATCH --time=01:00:00
-#SBATCH --chdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile
+#SBATCH --chdir=.
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T213026191322-msc-production-solve-host-profile/slurm-%j.out
 #SBATCH --error=/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T213026191322-msc-production-solve-host-profile/slurm-%j.err
+
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
 
 set -euo pipefail
 
@@ -19,7 +22,7 @@ export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export JAX_PLATFORMS=cuda,cpu
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
-export PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-production-solve-host-profile
+export PYTHONPATH=${repository_root}
 
 python_bin=/home/ITER/mcintos/Code/nova/.venv/bin/python
 profile_driver=benchmarks/production_solve_host_profile.py

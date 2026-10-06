@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -uo pipefail
 
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cpu
-export PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair
+export PYTHONPATH=${repository_root}
 
-root=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-moment-reduction-repair
+root=${repository_root}
 mode=${1:-after}
 output="$root/docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/cpu-$mode-gates"
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python

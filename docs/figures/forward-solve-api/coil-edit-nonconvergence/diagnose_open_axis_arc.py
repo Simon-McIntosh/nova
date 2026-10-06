@@ -1,7 +1,10 @@
+import subprocess
+from pathlib import Path
+
 import numpy as np, jax, jax.numpy as jnp
 jax.config.update("jax_enable_x64", True)
 from nova.equilibrium.flux_surface_connectivity import fit_tensor_spline, traced_spline_contour
-W='/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-coil-edit-panel-lcfs-2'
+W=str(Path(subprocess.run(["git","-C",str(Path(__file__).resolve().parent),"rev-parse","--show-toplevel"],capture_output=True,text=True,check=True).stdout.strip()))
 z=np.load(W+'/docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz',allow_pickle=False)
 r=jnp.asarray(z['radius']); h=jnp.asarray(z['height'])
 def show(i, dlevel=0.0):

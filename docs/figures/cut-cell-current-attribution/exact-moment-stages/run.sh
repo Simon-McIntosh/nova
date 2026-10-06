@@ -1,7 +1,10 @@
 #!/bin/bash
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -uo pipefail
 
-worktree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution
+worktree=${repository_root}
 log="$worktree/docs/figures/cut-cell-current-attribution/exact-moment-stages/job.log"
 command=(/home/ITER/mcintos/Code/nova/.venv/bin/python "$worktree/benchmarks/exact_cut_cell_moment_stages.py")
 revision=$(git -C "$worktree" rev-parse HEAD)

@@ -8,13 +8,16 @@
 #SBATCH --job-name=exterior-h200
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/traced-exterior/h200-%j.log
 
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -uo pipefail
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 
-worktree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-traced-exterior-one-compile-per-mesh
+worktree=${repository_root}
 python=/home/ITER/mcintos/Code/nova/.venv/bin/python
 script="$worktree/docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py"
 artifact="$worktree/docs/figures/millisecond-converged-solve/traced-exterior"

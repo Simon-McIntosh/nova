@@ -6,16 +6,19 @@
 #SBATCH --job-name=profile-coefficients-lowering
 #SBATCH --output=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/profile-args/lowering-%j.log
 
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -uo pipefail
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cpu
-export PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-profile-coefficients-recompile-audit
+export PYTHONPATH=${repository_root}
 export HLO_RUN_DIRECTORY=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-review/profile-args
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH
 
 echo "STAGE allocation started job=$SLURM_JOB_ID host=$(hostname)"
 /home/ITER/mcintos/Code/nova/.venv/bin/python -u \
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/msc-profile-coefficients-recompile-audit/benchmarks/profile_coefficients_recompile_audit.py
+  ${repository_root}/benchmarks/profile_coefficients_recompile_audit.py
 status=$?
 echo "STAGE allocation finished status=$status"
 exit "$status"

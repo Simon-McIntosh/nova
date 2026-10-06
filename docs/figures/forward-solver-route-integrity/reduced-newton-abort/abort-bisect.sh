@@ -4,10 +4,13 @@
 # abort_timeline records map count and RSS at every test boundary; one arm
 # clears JAX's compilation caches between tests to test whether retained
 # executables carry the map growth.
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -u
 export TMPDIR=/tmp JAX_PLATFORMS=cpu
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH NOVA_COMPILATION_CACHE_ROOT
-TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort
+TREE=${repository_root}
 OUT=$TREE/docs/figures/forward-solver-route-integrity/reduced-newton-abort
 export PYTHONPATH=$TREE:$OUT
 cd "$TREE" || exit 1

@@ -4,10 +4,13 @@
 # Each process is sampled every 5 s for VmRSS, VmHWM and its memory-map count,
 # and logs every JAX compile, so program count, resident memory and mapping
 # count before any abort are all on disk beside the pytest log.
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -u
 export TMPDIR=/tmp JAX_PLATFORMS=cpu JAX_LOG_COMPILES=1 TF_CPP_MIN_LOG_LEVEL=0
 unset UV_NO_SYNC UV_RUN_RECURSION_DEPTH NOVA_COMPILATION_CACHE_ROOT
-TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort
+TREE=${repository_root}
 export PYTHONPATH=$TREE
 cd "$TREE" || exit 1
 OUT=$TREE/docs/figures/forward-solver-route-integrity/reduced-newton-abort

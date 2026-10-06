@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
+script_path="$(realpath -e -- "${BASH_SOURCE[0]}")"
+repository_root="$(git -C "$(dirname "${script_path}")" rev-parse --show-toplevel)"
+
 set -u
 
-WORKTREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-bank-callback-capacity-from-the-mesh
+WORKTREE=${repository_root}
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
 OUTPUT_ROOT="$WORKTREE/docs/figures/cut-cell-current-attribution/exact-bank-capacity"
 export TMPDIR=/tmp

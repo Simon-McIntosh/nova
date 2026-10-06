@@ -50,13 +50,14 @@ cites `docs/state/nova/crew.json:8673`, line 235 cites `:201511`,
 
 Measured:
 
-- `grep -rn 'reckon-worktrees' docs/figures/ --include='*.json' -l | wc -l` → **413** JSON
-  files under `docs/figures/` carry a worktree path.
-- `grep -rnE '/\.reckon-worktrees/|/\.cache/reckon-worktrees' nova/ tests/ benchmarks/ scripts/ | wc -l`
-  → **177 matching lines across 63 files**. Source (not log) carriers: `nova/scripts/render_misfit_figures.py`,
+- **413** JSON files under `docs/figures/` carry a worktree path (the census greps
+  `docs/figures/` for the worktree-root directory name).
+- A repository scan over `nova/`, `tests/`, `benchmarks/` and `scripts/` for the same
+  worktree-root directory name finds
+  **177 matching lines across 63 files**. Source (not log) carriers: `nova/scripts/render_misfit_figures.py`,
   `benchmarks/pure_arm_comparison_figure.py`, `benchmarks/backend_divergence_forensics.py`,
   `benchmarks/constraint_centroid_receipt.py`, `scripts/run_amplitude_census.sh`.
-- Per-file samples (`grep -c reckon-worktrees <file>`): `docs/figures/cut-cell-current-attribution/exact-support-floor/report.json` 2,
+- Per-file samples (count of the worktree-root directory name per file): `docs/figures/cut-cell-current-attribution/exact-support-floor/report.json` 2,
   `docs/figures/cut-cell-current-attribution/dual-stencil/receipt.json` 1.
 
 Sizes, `find docs/figures -name '*.json' -size +5M -printf '%s %p\n' | sort -rn`:
@@ -284,7 +285,7 @@ Counted in area 5 (5.1); it is the one imas-adjacent hard-coded path.
 | file | coupled lines | literal |
 | --- | --- | --- |
 | nova/catalog/mast_geometry.py | 2 | `DEFAULT_LEVEL1_ROOT` / `DEFAULT_LEVEL2_ROOT` under `/work/projects/imas_gpu/mast/level{1,2}/shots` |
-| nova/scripts/render_misfit_figures.py | 2 | `/home/ITER/mcintos/.cache/nova-mast/...` and a `.cache/reckon-worktrees` path |
+| nova/scripts/render_misfit_figures.py | 2 | `/home/ITER/mcintos/.cache/nova-mast/...` and a worktree-root cache path |
 | nova/imas/mast_vacuum_cohort.py | 1 | `SHOT_STORE = /work/projects/imas_gpu/mast/level1/shots` |
 | nova/imas/mast_fitted_parameters.py | 1 | same level-1 store |
 | nova/imas/diiid_current.py | 1 | `/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc` |

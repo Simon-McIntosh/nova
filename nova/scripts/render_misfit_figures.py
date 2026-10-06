@@ -12,6 +12,7 @@ half of a signed field.
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import matplotlib
@@ -24,10 +25,21 @@ from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 from matplotlib.lines import Line2D
 
 HUNT = Path("/home/ITER/mcintos/.cache/nova-mast/misfit-hunt")
-FIGDIR = Path(
-    "/home/ITER/mcintos/.cache/reckon-worktrees/nova-a0f1e0938fc2/s5-followup/"
-    "doc-nova/docs/figures/mast-misfit-hunt"
+ROOT = Path(
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(Path(__file__).resolve().parent),
+            "rev-parse",
+            "--show-toplevel",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
 )
+FIGDIR = ROOT / "docs/figures/mast-misfit-hunt"
 
 # imas-ink InkStyle palette
 FLUX = "#3366cc"

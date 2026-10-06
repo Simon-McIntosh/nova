@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="51">
+<meta name="plan-version" content="52">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
@@ -147,6 +147,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261006T121734726986-review-of-acnwp-guard-follow-ons" data-who="reckon-build" data-when="2026-10-06T12:26:48.163Z">
     <div class="r-comment-body"><p>review stored for r-20261006T113551108285-acnwp-guard-follow-ons at reviewed head dc944c4156b562d0ce384080dc95894192970c1e, total 103/120, one blocking finding (nova/database/scripts.py:58) and one follow-on (nova/database/filepath.py:167)</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261006T121908599145-acnwp-hook-worktree-root" data-who="reckon-build" data-when="2026-10-06T12:34:22.639Z">
+    <div class="r-comment-body"><p>Commit hook now resolves its checkout root from its own path (realpath -e, then directory parent twice via cd/pwd -P) instead of git -C rev-parse, so a linked worktree admits clean commits and refuses worktree paths; measure — gate tests/test_commit_hook_in_worktree.py 4 passed, negative control against the base hook 2 failed/2 passed exit 1 with the linked-worktree clean commit refused.</p></div>
 </div>
 </section>
 </main>

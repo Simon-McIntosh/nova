@@ -1,0 +1,600 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "1c023858f308f13adbf7290c318434afbb5e0b31",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 6104445,
+      "input_tokens_cumulative": 6104445,
+      "output_tokens": 39694,
+      "output_tokens_cumulative": 39694,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 138,
+    "files": 3,
+    "removed": 2
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "a8ec8e5073d6d74a5031b67fd710f9e4e0af8516"
+  ],
+  "completed_at": "2026-10-06T12:34:22.639Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T12:19:27Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest -p",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/acnwp-hook-worktree-root /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_commit_hook_in_worktree.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121908599145-acnwp-hook-worktree-root/gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "artifacts-carry-no-worktree-paths",
+    "reason": "no-impl-recorded-at-dispatch",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-06T13:04:09.616291+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": null,
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-06T12:19:09Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 5,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 13,
+    "mean_context": 106667,
+    "observed_at": "2026-10-06T12:19:04Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 5,
+      "aggregate_tokens_per_second": 142.459,
+      "detail": "",
+      "mean_tokens_per_second": 118.716,
+      "observed_at": "2026-10-06T12:19:04Z",
+      "runs": 1.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T12:34:22.639Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121908599145-acnwp-hook-worktree-root/manifest.md",
+  "member": "disposable-r-20261006T121908599145-acnwp-hook-worktree-root",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_commit_hook_in_worktree.py::test_clean_commit_admitted_in_linked_worktree",
+      "tests/test_commit_hook_in_worktree.py::test_worktree_path_refused_in_linked_worktree"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_commit_hook_in_worktree.py::test_clean_commit_admitted_in_linked_worktree",
+      "tests/test_commit_hook_in_worktree.py::test_worktree_path_refused_in_linked_worktree"
+    ],
+    "declaration": "the new test run against the base hook fails because the linked-worktree clean commit is refused",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121908599145-acnwp-hook-worktree-root/negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121908599145-acnwp-hook-worktree-root/negative_control.log",
+    "test_paths": [
+      "tests/test_commit_hook_in_worktree.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "acnwp-hook-worktree-root",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1600,
+          "cached_input_tokens": 818329,
+          "input_tokens": 819931,
+          "output_tokens": 2358,
+          "reasoning_output_tokens": 1112,
+          "total_tokens": 822289,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "8e9e8ed7-4297-47b5-977e-2bb9277844d6",
+      "session_id": "s22-nova"
+    },
+    "done_when": "At the dispatch base 5337225ba, scripts/git-hooks/pre-commit sets hook_root with git -C on its own directory followed by rev-parse --show-toplevel. Inside a linked worktree git exports GIT_DIR, and GIT_WORK_TREE is unset or relative, while a hook runs, so that rev-parse returns the hooks directory and the hook refuses every commit made from a worktree. (1) Resolve the checkout root from the hook's own location without consulting git: realpath -e the script, then take its directory's parent's parent with cd and pwd -P. Keep the hook a read-only shim that runs the checkout's .venv/bin/python3 on nova.database.scripts with relativize --check and PYTHONPATH set to that root. (2) Add tests/test_commit_hook_in_worktree.py. It builds a small scratch git repository under tmp_path with a linked worktree from git worktree add, and core.hooksPath pointing at a copy of the hook. Make the hook's nova import resolvable without copying the whole repository, for example by placing nova as a symlink to the real package directory and .venv/bin/python3 as a symlink to /home/ITER/mcintos/Code/nova/.venv/bin/python3. Then commit from the linked worktree: a clean file is admitted, and a file naming a nova worktree path is refused naming that file. Also commit once from the scratch main checkout, to show both still work. Gate: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_commit_hook_in_worktree.py, run from the worktree with PYTHONPATH set to the worktree, passes, logged with EXIT=. Negative control, logged: the same test against the base hook fails on the linked-worktree clean commit. Do not set core.hooksPath in any real checkout; the coordinator re-enables it after landing. Every uv command carries --no-sync and nothing runs uv sync. Report to /home/ITER/mcintos/.config/reckon/crew/reports/nova/s27/acnwp-hook-worktree-root.md.",
+    "estimated_hours": 0.5,
+    "goal": "the commit hook resolves its own checkout inside a linked worktree, so it admits clean commits and refuses worktree paths from every worktree",
+    "id": "acnwp-hook-worktree-root",
+    "lane_declaration": {
+      "backend": null,
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-06T12:19:09Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 5,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 13,
+      "mean_context": 106667,
+      "observed_at": "2026-10-06T12:19:04Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 5,
+        "aggregate_tokens_per_second": 142.459,
+        "detail": "",
+        "mean_tokens_per_second": 118.716,
+        "observed_at": "2026-10-06T12:19:04Z",
+        "runs": 1.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121908599145-acnwp-hook-worktree-root/manifest.md",
+    "negative_control": "the new test run against the base hook fails because the linked-worktree clean commit is refused",
+    "plan": "artifacts-carry-no-worktree-paths",
+    "requested_backend": null,
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/git-hooks/pre-commit",
+      "tests/test_commit_hook_in_worktree.py",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s27/acnwp-hook-worktree-root.md",
+      "docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-hook-worktree-root.html",
+      "docs/figures/artifacts-carry-no-worktree-paths/acnwp-hook-worktree-root"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2051287.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "acnwp-hook-worktree-root",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T12:19:12.949968+00:00",
+    "score": 0.64375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.76,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 471.511,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 557.102,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 4.736416423125,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 63.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 4.736416423125,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 67.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 3,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 5,
+          "not-run": 17,
+          "passed": 87,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 42
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 2,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.11,
+      "claude-haiku": 0.01,
+      "claude-opus": 0.01,
+      "clive": 0.79,
+      "codex": 0.02,
+      "codex-astra": 0.02,
+      "codex-luna": 0,
+      "hold": 0.04
+    },
+    "rendered_token_estimate": 1373,
+    "usage": {
+      "cost": 0.000144984,
+      "input_tokens": 3452,
+      "output_tokens": 89
+    }
+  },
+  "plan": "artifacts-carry-no-worktree-paths",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a8ec8e5073d6d74a5031b67fd710f9e4e0af8516",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "1c023858f308f13adbf7290c318434afbb5e0b31",
+    "reviewed_head_sha": "a8ec8e5073d6d74a5031b67fd710f9e4e0af8516",
+    "scores": {
+      "durability": 18,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 113
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T121908599145-acnwp-hook-worktree-root",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "s22-nova",
+  "session_harness": "claude",
+  "session_id": "90d39b92-3f68-42fc-8ec4-01dd901da0ec",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 6104445,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 886.223,
+    "generated_tokens": 39694,
+    "generation_seconds": 589.105,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 61.3,
+    "machine_seconds": 297.118,
+    "peak_input_tokens": 141118,
+    "tokens_per_second": 67.38,
+    "wall_tokens_per_second": 44.79
+  },
+  "time_budget": "45m",
+  "tool_steps": 56.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 895,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T12:34:26Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T12:19:32Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T121908599145-acnwp-hook-worktree-root",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7175,
+    "worker_pid": 2278142
+  },
+  "worker_seconds": 857,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

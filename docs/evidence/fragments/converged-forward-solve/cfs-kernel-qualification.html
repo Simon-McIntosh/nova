@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-kernel-qualification">
+<meta name="plan-title" content="Kernel-backed topology cold-compile qualification">
+<meta name="plan-summary" content="Bounded cold topology compile measurements and an observed-cache-hit refusal control">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-commits" content="3b38b8b7e1498a92d63f16474fb61135834e39da,92e95f4e942bb0df31d54604edc6846e3067e8cb">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-environment" content="H200 jobs 1281162 and 1281166; two allocated CPUs and 64 GiB per job; shared nova environment">
+<title>Kernel-backed topology cold-compile qualification | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-kernel-qualification-record">Kernel-backed topology cold-compile qualification</h1>
+<table id="cfs-kernel-qualification-measurements">
+<caption>Measurements in progress at revision 92e95f4e942bb0df31d54604edc6846e3067e8cb. Native cold compilation is separate from tracing and lowering; pending values are unavailable, not zero.</caption>
+<thead><tr><th>Measurement</th><th>Observed result</th><th>Receipt or constraint</th></tr></thead>
+<tbody>
+<tr><td>Expected-failure reason</td><td>Biot harmonic kernel compilation exceeds the per-test wall bound</td><td>Strict barrier-only markers retained; ownership belongs to cfs-kernel-qualification.</td></tr>
+<tr><td>132-cell cold trace</td><td>59182 unique / 1518527 expanded equations; trace 3.8817127384245396 s; lower 1.6674501448869705 s; StableHLO 10646957 bytes</td><td>H200 job 1281162; WALL_LIMIT_SECONDS=900, EXIT=-15. Native compilation unfinished; executable bytes unavailable.</td></tr>
+<tr><td>300-cell cold trace</td><td>57596 unique / 1499787 expanded equations; native compile running</td><td>Same job; child process bounded at 900 s.</td></tr>
+<tr><td>550 cells</td><td>Pending</td><td>Same job; child process bounded at 900 s.</td></tr>
+<tr><td>1074 / 2616 and implicit kernel tangents</td><td>Not run</td><td>Conditional on 550-cell cold compile ≤60 s and executable ≤50000000 bytes.</td></tr>
+<tr><td>Dominant 132-cell construct</td><td>value_gradient contains 1505690 expanded equations (99.15%); harmonic_multiply 448810; _pole_contraction 443920</td><td>Inclusive nested-call counts overlap and must not be added.</td></tr>
+<tr><td>Warm-cache refusal control</td><td>Warmup running</td><td>H200 job 1281166; fresh-process probe must observe a persistent cache hit and refuse the cold claim.</td></tr>
+</tbody></table>
+</main></body></html>

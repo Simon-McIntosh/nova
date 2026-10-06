@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-tangent-helper-home">
+<meta name="plan-title" content="One home for the point jet's tangent helpers">
+<meta name="plan-summary" content="The point jet's shared tangent helpers now have one definition each in rangefunction.py; completeelliptic, elliptic, gradedresidual and momentchannel import them and carry no copy. No tangent value changes: every identity row passes, every truncation row still fails, the cold-compile gate holds under its bound on the median of seven fresh processes in two separate runs, and tests/biot adds no failing test against the base revision.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="4554bb6f4,58a811d7d,ccb46cfab">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="pending">
+<meta name="plan-environment" content="Shared nova virtualenv; identity, compile and suite rows in place on fleet job 1277272">
+<title>One home for the point jet's tangent helpers | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/nova/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-tangent-helper-home-record">One home for the point jet's tangent helpers</h1>
+<p id="cfs-tangent-helper-home-summary">Every shared tangent helper the Biot point jet's jaxpr reaches now has one definition in <code>nova/biot/rangefunction.py</code>, and <code>completeelliptic</code>, <code>elliptic</code>, <code>gradedresidual</code> and <code>momentchannel</code> import them rather than carrying local copies. A tangent is then written in one place and read in one place, and the modules cannot drift apart. The arithmetic order each helper forms is unchanged, so no tangent value changes: every identity row agrees with <code>jax.jvp</code> of the base revision, every truncation row still fails against it, every primal half is bit-identical, the cold-compile ratio holds under 3.0 on the median of seven fresh processes in two separate runs, and <code>tests/biot</code> adds no failing test against the base revision.</p>
+<p id="cfs-tangent-helper-home-homed">The helpers homed in <code>rangefunction.py</code> are <code>_tangent_sum</code>, <code>_tangent_difference</code>, <code>_product_tangent</code>, <code>_quotient_tangent</code>, <code>_scale_tangent</code>, <code>_deflate_step_tangent</code>, <code>_deflate_tangent</code>, <code>_contract_tangent</code>, <code>_harmonic_multiply_tangent</code> and <code>_across_the_range_tangent</code>, each defined exactly once there. The four importing modules were checked for a duplicate definition and carry none.</p>
+<p id="cfs-tangent-helper-home-difference">One helper is a genuinely different computation and was not collapsed into the other. The momentchannel <code>_across_the_range_tangent</code> took only the input tangents <code>(d_bulk, d_near, d_far)</code> and returned the output tangents alone, because the map is linear; the rangefunction namesake takes the primal term beside the tangent and returns both. Rather than fold a tangent-only map into a primal-and-tangent one, the momentchannel helper was renamed <code>_across_the_range_differential</code>, by what it computes, and its two call sites follow. The momentchannel <code>_deflate_tangent</code>, <code>_contract_tangent</code> and <code>_harmonic_multiply_tangent</code> are the same computation as their rangefunction namesakes and differ only in whether the primal returns beside the tangent; those three were collapsed into one definition each, and the call sites now take the pair.</p>
+<h2 id="cfs-tangent-helper-home-identity-heading">Identity and truncation rows</h2>
+<table id="cfs-tangent-helper-home-rows">
+<caption>Hand-written tangents against jax.jvp of the base revision on 10,000 samples per function, and with one recurrence term dropped. Rows run in place on fleet job 1277272 with JAX_PLATFORMS=cpu from the shared virtualenv; the head arm is the module default, the control arm sets NOVA_TANGENT_TRUNCATION=1. The exact-bound modules hold the tangent to 1e-13, the elliptic module to 0 for its unrolled tangents and to 1e-9 for its scanned ones.</caption>
+<thead><tr><th>module</th><th>rows</th><th>head identity rows</th><th>head truncation rows</th><th>control identity rows failing</th></tr></thead>
+<tbody>
+<tr><td>test_range_tangent_recurrences</td><td>13</td><td>13 pass</td><td>13 pass</td><td>13 of 13</td></tr>
+<tr><td>test_elliptic_tangent_recurrences</td><td>9</td><td>9 pass</td><td>9 pass</td><td>9 of 9</td></tr>
+<tr><td>test_vertex_edge_tangent_recurrences</td><td>7</td><td>7 pass</td><td>7 pass</td><td>7 of 7</td></tr>
+</tbody></table>
+<p id="cfs-tangent-helper-home-identity">The head arm is 74 passed in 113 s (<code>logs/identity-final.log</code>). Each row asserts the primal half is exactly the base primal and the tangent half is within its bound, and the truncation row asserts the same bound is broken once the recurrence loses one term. The packages' public functions are separately asserted equal to the base revision's on the shared sample.</p>
+<p id="cfs-tangent-helper-home-control">The negative control, the declared mutation "with NOVA_TANGENT_TRUNCATION=1 every identity row in the three tangent test modules still fails", ran as one arm over all three modules: 29 identity rows, all 29 failing, <code>CONTROL_EXIT=1</code>, log <code>logs/negative-control.log</code>. The failure ids are the <code>test_tangent_matches_base_jvp</code> rows the head arm passes; the truncation rows pass in both arms, as they should. So the shared helper has not disabled the control.</p>
+<h2 id="cfs-tangent-helper-home-compile-heading">Compile rows</h2>
+<p id="cfs-tangent-helper-home-compile">The cold-compile gate measures each case's tangent program against its primal in fresh, cache-disabled processes, seven per arm, and reports the median wall with the expanded equation count beside it. Both programs of every case appear below. Both runs are complete and every row is under the 3.0 bound; the equation counts are identical between the runs, which the harness asserts within each arm. Runs 1 and 2 are separate invocations, logs <code>logs/compile-run-1.log</code> and <code>logs/compile-run-2.log</code>. The two rows whose median ratio exceeded the 2.7 reporting threshold in either run are named here: <code>across</code> (run 1 median 2.80, run 2 median 2.57) and <code>graded_residual</code> (run 1 median 2.77, run 2 median 2.62). Both remain under the 3.0 bound in both runs.</p>
+<table id="cfs-tangent-helper-home-compile-table">
+<caption>Cold, cache-disabled compile in a fresh process, median of seven, per arm. <code>primal eq</code> and <code>tangent eq</code> are the expanded equation counts of the two programs, identical in both runs. The ratios are the tangent median wall over the primal median wall.</caption>
+<thead><tr><th>case</th><th>module</th><th>primal eq</th><th>tangent eq</th><th>run 1 ratio</th><th>run 2 ratio</th></tr></thead>
+<tbody>
+<tr><td>across</td><td>vertex-edge</td><td>931</td><td>2865</td><td>2.80</td><td>2.57</td></tr>
+<tr><td>graded_residual</td><td>vertex-edge</td><td>372</td><td>954</td><td>2.77</td><td>2.62</td></tr>
+<tr><td>factorise</td><td>vertex-edge</td><td>88</td><td>184</td><td>1.79</td><td>2.62</td></tr>
+<tr><td>pole_contraction_mirrored</td><td>vertex-edge</td><td>372</td><td>1120</td><td>2.58</td><td>2.31</td></tr>
+<tr><td>cn_pole_moment</td><td>elliptic</td><td>264</td><td>1315</td><td>2.57</td><td>1.62</td></tr>
+<tr><td>harmonic_multiply</td><td>range</td><td>223</td><td>548</td><td>2.43</td><td>1.61</td></tr>
+<tr><td>product</td><td>range</td><td>405</td><td>862</td><td>2.31</td><td>2.18</td></tr>
+<tr><td>pole_contraction</td><td>vertex-edge</td><td>372</td><td>1120</td><td>2.09</td><td>2.28</td></tr>
+<tr><td>complete_pole</td><td>elliptic</td><td>259</td><td>1035</td><td>2.16</td><td>2.05</td></tr>
+<tr><td>contract</td><td>range</td><td>80</td><td>210</td><td>1.95</td><td>2.04</td></tr>
+<tr><td>sn_pole_moment</td><td>elliptic</td><td>272</td><td>1336</td><td>2.00</td><td>1.89</td></tr>
+<tr><td>rising_integral</td><td>range</td><td>179</td><td>348</td><td>1.50</td><td>2.00</td></tr>
+<tr><td>harmonic_root_moments</td><td>elliptic</td><td>213</td><td>597</td><td>1.99</td><td>1.92</td></tr>
+<tr><td>regularised</td><td>vertex-edge</td><td>38</td><td>81</td><td>1.93</td><td>1.85</td></tr>
+<tr><td>finite_part</td><td>elliptic</td><td>69</td><td>243</td><td>1.79</td><td>1.84</td></tr>
+<tr><td>harmonic_pole_moments</td><td>elliptic</td><td>418</td><td>519</td><td>1.79</td><td>1.62</td></tr>
+<tr><td>harmonic_pole_moments_mirrored</td><td>elliptic</td><td>418</td><td>519</td><td>1.69</td><td>1.67</td></tr>
+<tr><td>harmonic_moments</td><td>elliptic</td><td>2769</td><td>3537</td><td>1.02</td><td>1.66</td></tr>
+<tr><td>model_integral</td><td>vertex-edge</td><td>70</td><td>184</td><td>1.60</td><td>1.61</td></tr>
+<tr><td>complete_kind</td><td>elliptic</td><td>310</td><td>467</td><td>1.27</td><td>1.55</td></tr>
+<tr><td>deflate</td><td>range</td><td>49</td><td>125</td><td>1.29</td><td>1.46</td></tr>
+<tr><td>scaled</td><td>range</td><td>10</td><td>35</td><td>1.27</td><td>1.25</td></tr>
+<tr><td>harmonic_scale</td><td>range</td><td>7</td><td>26</td><td>1.20</td><td>1.20</td></tr>
+<tr><td>range_function</td><td>range</td><td>1</td><td>1</td><td>1.09</td><td>1.10</td></tr>
+<tr><td>total</td><td>range</td><td>23</td><td>37</td><td>1.06</td><td>1.10</td></tr>
+<tr><td>across_the_range</td><td>range</td><td>133</td><td>241</td><td>1.09</td><td>1.01</td></tr>
+<tr><td>paired_range_function</td><td>range</td><td>1</td><td>1</td><td>1.09</td><td>1.04</td></tr>
+<tr><td>harmonic_add</td><td>range</td><td>17</td><td>27</td><td>1.08</td><td>1.01</td></tr>
+<tr><td>sine_squared_times</td><td>range</td><td>16</td><td>31</td><td>1.04</td><td>1.02</td></tr>
+</tbody></table>
+<h2 id="cfs-tangent-helper-home-suite-heading">tests/biot suite delta</h2>
+<p id="cfs-tangent-helper-home-suite">Every module under <code>tests/biot</code> was run in one fresh process per module, each with its own <code>--basetemp</code>, in two arms, in a single driver pass that wrote each module's log and its exit status together (2026-10-06T08:37:02Z to 08:40:34Z UTC, <code>logs/suite2-status.json</code> and <code>logs/suite2-&lt;arm&gt;-&lt;module&gt;.log</code>). The base arm is the orientation-base revision extracted to a tree carrying the repository root <code>conftest.py</code>, with <code>GIT_DIR</code> pointed at the shared object store so the base tests' own <code>git show</code> loads resolve; the head arm is this worktree. Both arms run the same selection written out explicitly, <code>-m 'not slow'</code>. All ten module processes exited 0 and neither arm has a failing test, so <code>baseline_suite</code> and <code>after_suite</code> carry no module-qualified failure id and the change adds no failing test.</p>
+<p id="cfs-tangent-helper-home-suite-deselected">Each arm deselected 29 rows, and the reason is the same in both: the selection <code>-m 'not slow'</code> excludes the slow-marked cold-compile rows, 9 in the elliptic module, 13 in the range module and 7 in the vertex-edge module. Those rows are not skipped silently — they are the compile gate measured above, run separately under its own median-of-seven harness. The remaining rows were 80 passed in each arm, identical module by module: 19 + 40 + 15 + 5 + 1. The kernel-compile module additionally reports 4 skipped (GPU-only certificates) and 1 xfailed in both arms.</p>
+<table id="cfs-tangent-helper-home-suite-table">
+<caption>Per module, one fresh process each, both arms, one driver pass, logs <code>logs/suite2-&lt;arm&gt;-&lt;module&gt;.log</code>.</caption>
+<thead><tr><th>module</th><th>base arm</th><th>head arm</th></tr></thead>
+<tbody>
+<tr><td>test_elliptic_tangent_recurrences</td><td>19 passed, 9 deselected</td><td>19 passed, 9 deselected</td></tr>
+<tr><td>test_range_tangent_recurrences</td><td>40 passed, 13 deselected</td><td>40 passed, 13 deselected</td></tr>
+<tr><td>test_vertex_edge_tangent_recurrences</td><td>15 passed, 7 deselected</td><td>15 passed, 7 deselected</td></tr>
+<tr><td>test_kernel_compile_cost</td><td>5 passed, 4 skipped, 1 xfailed</td><td>5 passed, 4 skipped, 1 xfailed</td></tr>
+<tr><td>test_traced_section_moments</td><td>1 passed</td><td>1 passed</td></tr>
+</tbody></table>
+<p id="cfs-tangent-helper-home-finish">The homing is complete and verified: the helpers are defined once, the one non-identical helper is renamed by what it computes, no tangent value changes, every compile row holds under 3.0 in two separate runs, <code>tests/biot</code> adds no failure against the base, and the truncation control still bites.</p>
+</main></body></html>

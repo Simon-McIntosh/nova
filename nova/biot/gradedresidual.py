@@ -45,7 +45,11 @@ from functools import lru_cache
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 
-from nova.biot.rangefunction import _array_program
+from nova.biot.rangefunction import (
+    _array_program,
+    _product_tangent,
+    _quotient_tangent,
+)
 
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import multiply as paired_multiply
@@ -219,22 +223,6 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
 def _held_tangent(condition, value, d_value, fill, xp):
     """Return ``where(condition, value, fill)`` and its tangent."""
     return xp.where(condition, value, fill), xp.where(condition, d_value, 0.0)
-
-
-def _product_tangent(left, d_left, right, d_right):
-    """Return the tangent of ``left * right`` by the product rule."""
-    return d_left * right + left * d_right
-
-
-def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
-    """Return the tangent of ``numerator / denominator``.
-
-    Ordered as the quotient and the reciprocal square are formed, so a value
-    whose two halves cancel rounds as the primal program's own tangent does.
-    """
-    return d_numerator / denominator + (-d_denominator * numerator) * (
-        1.0 / (denominator * denominator)
-    )
 
 
 def _reciprocal_root(value, xp):

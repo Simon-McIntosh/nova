@@ -16,13 +16,7 @@ themselves, which is the declared mutation those rows must fail against.
 """
 
 from contextlib import contextmanager
-import importlib.util
-import json
 import os
-from pathlib import Path
-import subprocess
-import sys
-import tempfile
 
 import jax
 import jax.numpy as jnp
@@ -35,44 +29,23 @@ configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
 import nova.biot.rangefunction as rangefunction  # noqa: E402
+from tangent_identity import (  # noqa: E402
+    EXACT_TOLERANCE,
+    SAMPLES,
+    compile_ratio,
+    identity_row,
+    load_base_module,
+    per_sample_worst,
+    truncation_active,
+    worst,
+)
 
 BASE_REVISION = os.environ.get(
     "NOVA_RANGE_BASE_REVISION", "e74d8fce12601e372d91572aba1b5602f2d7df55"
 )
-ROOT = Path(__file__).resolve().parents[2]
-EXACT_TOLERANCE = 1e-13
-SAMPLES = 10_000
 
-
-def _load(name, path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def _base_module():
-    """Load the base revision's range-function module under its own name."""
-    directory = Path(tempfile.mkdtemp(prefix="rangefunction-base-"))
-    path = directory / "rangefunction.py"
-    path.write_bytes(
-        subprocess.check_output(
-            [
-                "git",
-                "-C",
-                str(ROOT),
-                "show",
-                f"{BASE_REVISION}:nova/biot/rangefunction.py",
-            ]
-        )
-    )
-    module = _load("base_rangefunction", path)
-    print(f"BASE_MODULE rangefunction={module.__file__}", flush=True)
-    assert not hasattr(module, "_harmonic_multiply_tangent")
-    return module
-
-
-BASE = _base_module()
+BASE = load_base_module("nova/biot/rangefunction.py", BASE_REVISION)
+assert not hasattr(BASE, "_harmonic_multiply_tangent")
 
 
 def _values(rng, shape):
@@ -204,6 +177,16 @@ def _cases():
 CASES = _cases()
 
 
+def compile_arm(name, arm):
+    """Return the callable the cold-compile probe compiles for ``arm``."""
+    tangent, base, _, _ = CASES[name]
+    if arm == "primal":
+        return lambda p, t: base(*p)
+    if arm == "tangent":
+        return lambda p, t: tangent(p, t)
+    return lambda p, t: jax.jvp(base, p, t)
+
+
 def _drop_last(series, like):
     """Return the series' tangent with its final coefficient's term removed."""
     return [*series[:-1], jnp.zeros_like(like)]
@@ -307,27 +290,6 @@ def _truncated(name):
         jax.clear_caches()
 
 
-def _relative(got, reference):
-    got, reference = np.asarray(got), np.asarray(reference)
-    agree = (np.isnan(got) & np.isnan(reference)) | (got == reference)
-    scale = np.where(reference == 0.0, 1.0, np.abs(reference))
-    error = np.where(agree, 0.0, np.abs(got - reference) / scale)
-    return np.nan_to_num(error, nan=np.inf)
-
-
-def _leaves(tree):
-    return [np.asarray(leaf) for leaf in jax.tree.leaves(tree)]
-
-
-def _worst(got, reference):
-    """Return the largest relative error and the per-sample worst error."""
-    errors = [
-        _relative(a, b) for a, b in zip(_leaves(got), _leaves(reference), strict=True)
-    ]
-    per_sample = np.max(np.stack(errors), axis=0)
-    return float(per_sample.max()), per_sample
-
-
 def _identity(name):
     tangent, base, primals, tangents = CASES[name]
     # a fresh jit per call, so a truncation applied since is traced afresh
@@ -338,24 +300,25 @@ def _identity(name):
 
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_matches_base_jvp(name):
-    if os.environ.get("NOVA_TANGENT_TRUNCATION") == "1":
+    if truncation_active():
         with _truncated(name):
             got, expected = _identity(name)
     else:
         got, expected = _identity(name)
-    tangent, per_sample = _worst(got[1], expected[1])
-    primal, _ = _worst(got[0], expected[0])
+    per_sample = per_sample_worst(got[1], expected[1])
     finite = np.all(
-        np.stack([np.isfinite(leaf) for leaf in _leaves(expected[1])]), axis=0
+        np.stack([np.isfinite(leaf) for leaf in jax.tree.leaves(expected[1])]), axis=0
     )
     covered = float(np.mean(per_sample <= EXACT_TOLERANCE))
-    print(f"IDENTITY {name} tangent_max_relative={tangent:.3e} "
-          f"bound={EXACT_TOLERANCE:.0e} primal_max_relative={primal:.3e} "
-          f"samples={per_sample.size} covered_fraction={covered:.6f} "
-          f"base_jvp_nonfinite_samples={int(np.count_nonzero(~finite))}")  # fmt: skip
+    identity_row(
+        name,
+        worst(got[0], expected[0]),
+        float(per_sample.max()),
+        EXACT_TOLERANCE,
+        extra=f"samples={per_sample.size} covered_fraction={covered:.6f} "
+        f"base_jvp_nonfinite_samples={int(np.count_nonzero(~finite))}",
+    )
     assert finite.all(), "the base jvp must be finite on every sample"
-    assert primal == 0.0
-    assert tangent <= EXACT_TOLERANCE
     assert covered == 1.0
 
 
@@ -363,11 +326,8 @@ def test_tangent_matches_base_jvp(name):
 def test_truncated_tangent_fails_identity(name):
     with _truncated(name):
         got, expected = _identity(name)
-    tangent, per_sample = _worst(got[1], expected[1])
-    failing = int(np.count_nonzero(per_sample > EXACT_TOLERANCE))
-    print(
-        f"TRUNCATED {name} tangent_max_relative={tangent:.3e} failing_samples={failing}"
-    )
+    tangent = worst(got[1], expected[1])
+    print(f"TRUNCATED {name} tangent_max_relative={tangent:.3e}")
     assert tangent > EXACT_TOLERANCE
 
 
@@ -392,70 +352,8 @@ def test_package_functions_equal_base_functions():
         np.testing.assert_array_equal(np.asarray(left), np.asarray(right))
 
 
-_COMPILE_PROBE = r"""
-import json, sys, time
-import jax
-jax.config.update("jax_enable_compilation_cache", False)
-from nova.jax.config import configure_dtypes
-configure_dtypes()
-assert jax.config.jax_enable_x64 is True
-hits = []
-jax.monitoring.register_event_listener(
-    lambda event, **kw: hits.append(event) if "cache_hit" in event else None
-)
-sys.argv = sys.argv[1:]
-sys.path.insert(0, sys.argv[1])
-import test_range_tangent_recurrences as t
-name, arm = sys.argv[2], sys.argv[3]
-tangent, base, primals, tangents = t.CASES[name]
-arguments = (primals, tangents)
-if arm == "primal":
-    function = lambda p, t: base(*p)
-elif arm == "tangent":
-    function = lambda p, t: tangent(p, t)
-else:
-    function = lambda p, t: jax.jvp(base, p, t)
-def count(jaxpr):
-    total = 0
-    for equation in jaxpr.eqns:
-        total += 1
-        for value in equation.params.values():
-            for sub in value if isinstance(value, (list, tuple)) else [value]:
-                inner = getattr(sub, "jaxpr", sub)
-                if hasattr(inner, "eqns"):
-                    total += count(inner)
-    return total
-equations = count(jax.make_jaxpr(function)(*arguments).jaxpr)
-lowered = jax.jit(function).lower(*arguments)
-start = time.perf_counter()
-lowered.compile()
-wall = time.perf_counter() - start
-print(json.dumps({"name": name, "arm": arm, "compile_seconds": wall,
-                  "equations": equations, "cache_hits": len(hits),
-                  "cache_enabled": jax.config.jax_enable_compilation_cache}))
-"""
-
-
-def _cold_compile(name, arm):
-    environment = dict(os.environ, JAX_ENABLE_COMPILATION_CACHE="false")
-    environment.pop("NOVA_TANGENT_TRUNCATION", None)
-    result = subprocess.run(
-        [sys.executable, "-c", _COMPILE_PROBE, "probe", str(Path(__file__).parent),
-         name, arm],
-        capture_output=True, text=True, env=environment, check=True,
-    )  # fmt: skip
-    row = json.loads(result.stdout.strip().splitlines()[-1])
-    assert row["cache_hits"] == 0 and row["cache_enabled"] is False
-    return row
-
-
 @pytest.mark.slow
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
-    rows = {arm: _cold_compile(name, arm) for arm in ("primal", "tangent", "jvp")}
-    for arm, row in rows.items():
-        print(f"COMPILE {name} {arm} seconds={row['compile_seconds']:.3f} "
-              f"equations={row['equations']} hits={row['cache_hits']}")  # fmt: skip
-    ratio = rows["tangent"]["compile_seconds"] / rows["primal"]["compile_seconds"]
-    print(f"COMPILE {name} tangent_over_primal={ratio:.2f}")
+    ratio = compile_ratio("test_range_tangent_recurrences", name)
     assert ratio <= 3.0

@@ -13,13 +13,6 @@ themselves, which is the declared mutation those rows must fail against.
 """
 
 from contextlib import contextmanager
-import importlib.util
-import json
-import os
-from pathlib import Path
-import subprocess
-import sys
-import tempfile
 
 import jax
 import jax.numpy as jnp
@@ -33,11 +26,17 @@ assert jax.config.jax_enable_x64 is True
 
 import nova.biot.completeelliptic as completeelliptic  # noqa: E402
 import nova.biot.elliptic as elliptic  # noqa: E402
-
-BASE_REVISION = os.environ.get(
-    "NOVA_ELLIPTIC_BASE_REVISION", "de54856c72490b216e69506c8f9fdcd7d839fedb"
+from tangent_identity import (  # noqa: E402
+    SAMPLES,
+    compile_ratio,
+    identity_row,
+    load_base_module,
+    truncation_active,
+    worst,
 )
-ROOT = Path(__file__).resolve().parents[2]
+
+BASE_REVISION = "de54856c72490b216e69506c8f9fdcd7d839fedb"
+
 # Tangents carried as scanned steps are held to this bound against jax.jvp of
 # the base, because a scan and an unrolled loop compile to differently fused
 # programs whose round-off differs; every other tangent must agree exactly.
@@ -50,37 +49,26 @@ SCANNED = frozenset(
         "harmonic_pole_moments_mirrored",
     )
 )
-SAMPLES = 10_000
 MOMENTS = 9 + elliptic.POLE_HEADROOM + 2
 POLE_COUNT = 10
 
 
-def _load(name, path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
 def _base_modules():
-    """Load the base revision's two elliptic modules under their own names."""
-    directory = Path(tempfile.mkdtemp(prefix="elliptic-base-"))
-    loaded = {}
-    for name in ("completeelliptic", "elliptic"):
-        path = directory / f"{name}.py"
-        path.write_bytes(
-            subprocess.check_output(
-                ["git", "-C", str(ROOT), "show", f"{BASE_REVISION}:nova/biot/{name}.py"]
-            )
-        )
-        module = _load(f"base_{name}", path)
-        for key, value in tuple(vars(module).items()):
-            origin = getattr(value, "__module__", "")
-            if origin in loaded:
-                setattr(module, key, getattr(loaded[origin], value.__name__))
-        loaded[f"nova.biot.{name}"] = module
-        print(f"BASE_MODULE {name}={module.__file__}", flush=True)
-    return loaded["nova.biot.completeelliptic"], loaded["nova.biot.elliptic"]
+    """Load the base revision's two elliptic modules under their own names.
+
+    The base ``elliptic`` imports names from the base ``completeelliptic``, so
+    each name it re-binds is repointed at the base module's own object; without
+    that the base elliptic would call this revision's complete-elliptic helpers
+    and the identity would be measured against the wrong program.
+    """
+    complete = load_base_module("nova/biot/completeelliptic.py", BASE_REVISION)
+    base_elliptic = load_base_module("nova/biot/elliptic.py", BASE_REVISION)
+    for key, value in tuple(vars(base_elliptic).items()):
+        # the base elliptic's import statement binds THIS revision's
+        # complete-elliptic members, so repoint each at the base module's own
+        if getattr(value, "__module__", "") == "nova.biot.completeelliptic":
+            setattr(base_elliptic, key, getattr(complete, value.__name__))
+    return complete, base_elliptic
 
 
 BASE_COMPLETE, BASE_ELLIPTIC = _base_modules()
@@ -104,21 +92,6 @@ def _domain(seed=0):
     order = rng.normal(size=(MOMENTS, SAMPLES))
     arrays = map(jnp.asarray, (complement, parameter, pole, shift, far))
     return (*arrays, jnp.asarray(tangent), jnp.asarray(order))
-
-
-def _relative(got, reference):
-    got, reference = np.asarray(got), np.asarray(reference)
-    agree = (np.isnan(got) & np.isnan(reference)) | (got == reference)
-    scale = np.where(reference == 0.0, 1.0, np.abs(reference))
-    error = np.where(agree, 0.0, np.abs(got - reference) / scale)
-    return float(np.max(np.nan_to_num(error, nan=np.inf)))
-
-
-def _worst(got, reference):
-    return max(
-        _relative(a, b)
-        for a, b in zip(jax.tree.leaves(got), jax.tree.leaves(reference), strict=True)
-    )
 
 
 def _cases():
@@ -227,6 +200,16 @@ def _cases():
 CASES = _cases()
 
 
+def compile_arm(name, arm):
+    """Return the callable the cold-compile probe compiles for ``arm``."""
+    tangent, reference, primal, _, _ = CASES[name]
+    if arm == "primal":
+        return lambda p, t: primal(*p)
+    if arm == "tangent":
+        return lambda p, t: tangent(p, t)
+    return lambda p, t: reference(p, t)
+
+
 def _truncated_descent_step(radical, d_radical, running, d_running, xp):
     root = xp.sqrt(radical)
     modulus = 2.0 * root
@@ -310,6 +293,7 @@ TRUNCATIONS = {
 
 @contextmanager
 def _truncated(name):
+    jax.clear_caches()
     saved = []
     for module, attribute, replacement in TRUNCATIONS[name]:
         saved.append((module, attribute, getattr(module, attribute)))
@@ -319,10 +303,11 @@ def _truncated(name):
     finally:
         for module, attribute, original in saved:
             setattr(module, attribute, original)
+        jax.clear_caches()
 
 
 def _identity(name):
-    tangent, reference, primal, primals, tangents = CASES[name]
+    tangent, reference, _, primals, tangents = CASES[name]
     # a fresh jit per call, so a truncation applied since is traced afresh
     got = jax.jit(lambda p, t: tangent(p, t))(primals, tangents)
     expected = jax.jit(lambda p, t: reference(p, t))(primals, tangents)
@@ -362,46 +347,50 @@ def _masked(tree, mask):
     return [np.asarray(leaf)[mask] for leaf in jax.tree.leaves(tree)]
 
 
+def tangent_of(name):
+    return CASES[name][0]
+
+
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_matches_base_jvp(name):
-    if os.environ.get("NOVA_TANGENT_TRUNCATION") == "1":
+    if truncation_active():
         with _truncated(name):
             got, expected = _identity(name)
     else:
         got, expected = _identity(name)
     mask = _resolved(name, expected)
-    tangent = _worst(_masked(got[1], mask), _masked(expected[1], mask))
-    whole = _worst(got[1], expected[1])
+    tangent = worst(_masked(got[1], mask), _masked(expected[1], mask))
+    whole = worst(got[1], expected[1])
     if name in SCANNED:
         # the primal half is the primal function itself, compiled in this program
         _, _, primal_function, primals, tangents = CASES[name]
         pair = jax.jit(lambda p, t: (tangent_of(name)(p, t)[0], primal_function(*p)))
         own, alone = pair(primals, tangents)
-        primal = _worst(own, alone)
-        context = _worst(got[0], expected[0])
+        primal = worst(own, alone)
+        context = worst(got[0], expected[0])
     else:
-        primal = context = _worst(got[0], expected[0])
+        primal = context = worst(got[0], expected[0])
     excluded = 0 if mask is None else int(np.size(mask) - np.count_nonzero(mask))
-    print(f"IDENTITY {name} primal_max_relative={primal:.3e} "
-          f"jvp_program_primal_max_relative={context:.3e} "
-          f"tangent_max_relative={tangent:.3e} bound={_bound(name):.0e} "
-          f"unresolved_samples={excluded} whole_domain_max={whole:.3e}")  # fmt: skip
-    assert primal == 0.0
-    assert tangent <= _bound(name)
+    identity_row(
+        name,
+        primal,
+        tangent,
+        _bound(name),
+        extra=f"jvp_program_primal_max_relative={context:.3e} "
+        f"unresolved_samples={excluded} whole_domain_max={whole:.3e}",
+    )
     if name == "complete_kind":
         complement, classical = _classical_second_kind(name, expected)
         below = (complement > 0.0) & (complement < RESOLVED_COMPLEMENT)
         scale = np.where(classical == 0.0, 1.0, np.abs(classical))
         scanned = np.abs(np.asarray(got[1][1]) - classical) / scale
         base = np.abs(np.asarray(expected[1][1]) - classical) / scale
-        print(f"CLASSICAL {name} below={RESOLVED_COMPLEMENT:g} "
-              f"scanned_max={scanned[below].max():.3e} "
-              f"base_jvp_max={base[below].max():.3e}")  # fmt: skip
+        print(
+            f"CLASSICAL {name} below={RESOLVED_COMPLEMENT:g} "
+            f"scanned_max={scanned[below].max():.3e} "
+            f"base_jvp_max={base[below].max():.3e}"
+        )  # fmt: skip
         assert scanned[below].max() <= 2.0 * base[below].max() + SCANNED_TOLERANCE
-
-
-def tangent_of(name):
-    return CASES[name][0]
 
 
 @pytest.mark.parametrize("name", list(CASES))
@@ -409,7 +398,7 @@ def test_truncated_tangent_fails_identity(name):
     with _truncated(name):
         got, expected = _identity(name)
     mask = _resolved(name, expected)
-    tangent = _worst(_masked(got[1], mask), _masked(expected[1], mask))
+    tangent = worst(_masked(got[1], mask), _masked(expected[1], mask))
     print(f"TRUNCATED {name} tangent_max_relative={tangent:.3e}")
     assert tangent > SCANNED_TOLERANCE
 
@@ -470,70 +459,8 @@ def test_primal_bit_identical_to_base():
         print(f"PRIMAL {name} bit_identical=True")
 
 
-_COMPILE_PROBE = r"""
-import json, sys, time
-import jax
-jax.config.update("jax_enable_compilation_cache", False)
-from nova.jax.config import configure_dtypes
-configure_dtypes()
-assert jax.config.jax_enable_x64 is True
-hits = []
-jax.monitoring.register_event_listener(
-    lambda event, **kw: hits.append(event) if "cache_hit" in event else None
-)
-sys.argv = sys.argv[1:]
-sys.path.insert(0, sys.argv[1])
-import test_elliptic_tangent_recurrences as t
-name, arm = sys.argv[2], sys.argv[3]
-tangent, reference, primal, primals, tangents = t.CASES[name]
-arguments = (primals, tangents)
-if arm == "primal":
-    function = lambda p, t: primal(*p)
-elif arm == "tangent":
-    function = lambda p, t: tangent(p, t)
-else:
-    function = lambda p, t: reference(p, t)
-def count(jaxpr):
-    total = 0
-    for equation in jaxpr.eqns:
-        total += 1
-        for value in equation.params.values():
-            for sub in value if isinstance(value, (list, tuple)) else [value]:
-                inner = getattr(sub, "jaxpr", sub)
-                if hasattr(inner, "eqns"):
-                    total += count(inner)
-    return total
-equations = count(jax.make_jaxpr(function)(*arguments).jaxpr)
-lowered = jax.jit(function).lower(*arguments)
-start = time.perf_counter()
-lowered.compile()
-wall = time.perf_counter() - start
-print(json.dumps({"name": name, "arm": arm, "compile_seconds": wall,
-                  "equations": equations, "cache_hits": len(hits),
-                  "cache_enabled": jax.config.jax_enable_compilation_cache}))
-"""
-
-
-def _cold_compile(name, arm):
-    environment = dict(os.environ, JAX_ENABLE_COMPILATION_CACHE="false")
-    environment.pop("NOVA_TANGENT_TRUNCATION", None)
-    result = subprocess.run(
-        [sys.executable, "-c", _COMPILE_PROBE, "probe", str(Path(__file__).parent),
-         name, arm],
-        capture_output=True, text=True, env=environment, check=True,
-    )  # fmt: skip
-    row = json.loads(result.stdout.strip().splitlines()[-1])
-    assert row["cache_hits"] == 0 and row["cache_enabled"] is False
-    return row
-
-
 @pytest.mark.slow
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
-    rows = {arm: _cold_compile(name, arm) for arm in ("primal", "tangent", "jvp")}
-    for arm, row in rows.items():
-        print(f"COMPILE {name} {arm} seconds={row['compile_seconds']:.3f} "
-              f"equations={row['equations']} hits={row['cache_hits']}")  # fmt: skip
-    ratio = rows["tangent"]["compile_seconds"] / rows["primal"]["compile_seconds"]
-    print(f"COMPILE {name} tangent_over_primal={ratio:.2f}")
+    ratio = compile_ratio("test_elliptic_tangent_recurrences", name)
     assert ratio <= 3.0

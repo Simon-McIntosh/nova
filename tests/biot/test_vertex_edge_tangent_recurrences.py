@@ -13,13 +13,6 @@ themselves, which is the declared mutation those rows must fail against.
 """
 
 from contextlib import contextmanager
-import importlib.util
-import json
-import os
-from pathlib import Path
-import subprocess
-import sys
-import tempfile
 
 import jax
 import jax.numpy as jnp
@@ -33,52 +26,27 @@ assert jax.config.jax_enable_x64 is True
 
 import nova.biot.gradedresidual as gradedresidual  # noqa: E402
 import nova.biot.momentchannel as momentchannel  # noqa: E402
-
-BASE_REVISION = os.environ.get(
-    "NOVA_VERTEX_EDGE_BASE_REVISION", "e74d8fce12601e372d91572aba1b5602f2d7df55"
+import nova.biot.rangefunction as rangefunction  # noqa: E402
+from tangent_identity import (  # noqa: E402
+    EXACT_TOLERANCE,
+    SAMPLES,
+    compile_ratio,
+    finite_fraction,
+    identity_row,
+    load_base_module,
+    truncation_active,
+    worst,
 )
-ROOT = Path(__file__).resolve().parents[2]
-# Every tangent here is an unrolled closed form or recurrence, so it is held to
-# the exact bound; round-off between two orderings of the same sum is all that
-# separates it from jax.jvp of the base.
-EXACT_TOLERANCE = 1e-13
-SAMPLES = 10_000
+
+BASE_REVISION = "e74d8fce12601e372d91572aba1b5602f2d7df55"
+
+BASE_CHANNEL = load_base_module("nova/biot/momentchannel.py", BASE_REVISION)
+BASE_GRADED = load_base_module("nova/biot/gradedresidual.py", BASE_REVISION)
+
 BULK = 7
 MOMENTS = 12
 FAMILY = 10
 NODES = 128
-# A program this small compiles in a tenth of a second, where scheduler noise
-# moves one process's wall by tens of percent, so each arm takes the median of
-# this many fresh, cache-disabled processes; the expanded equation count is
-# recorded beside it as the deterministic measure of the program's size.
-COMPILE_REPEATS = 7
-
-
-def _load(name, path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def _base_modules():
-    """Load the base revision's two modules under their own names."""
-    directory = Path(tempfile.mkdtemp(prefix="vertex-edge-base-"))
-    loaded = []
-    for name in ("momentchannel", "gradedresidual"):
-        path = directory / f"{name}.py"
-        path.write_bytes(
-            subprocess.check_output(
-                ["git", "-C", str(ROOT), "show", f"{BASE_REVISION}:nova/biot/{name}.py"]
-            )
-        )
-        module = _load(f"base_{name}", path)
-        print(f"BASE_MODULE {name}={module.__file__}", flush=True)
-        loaded.append(module)
-    return loaded
-
-
-BASE_CHANNEL, BASE_GRADED = _base_modules()
 
 
 def _magnitude(rng, low, high, size=SAMPLES):
@@ -170,10 +138,9 @@ def _vertex_domain(rng):
 
 def _vertex_panels(radius, level, offset, lower, upper):
     span = 2.0 * jnp.where(radius > 0.0, radius, 1.0)
-    level_offset = jnp.abs(level)
     return (
-        (level_offset, offset + 2.0 * radius, span, lower[0], upper[0]),
-        (level_offset, offset, span, lower[1], upper[1]),
+        (jnp.abs(level), offset + 2.0 * radius, span, lower[0], upper[0]),
+        (jnp.abs(level), offset, span, lower[1], upper[1]),
     )
 
 
@@ -350,24 +317,14 @@ def _cases():
 CASES = _cases()
 
 
-def _relative(got, reference):
-    got, reference = np.asarray(got), np.asarray(reference)
-    agree = (np.isnan(got) & np.isnan(reference)) | (got == reference)
-    scale = np.where(reference == 0.0, 1.0, np.abs(reference))
-    error = np.where(agree, 0.0, np.abs(got - reference) / scale)
-    return float(np.max(np.nan_to_num(error, nan=np.inf)))
-
-
-def _worst(got, reference):
-    return max(
-        _relative(a, b)
-        for a, b in zip(jax.tree.leaves(got), jax.tree.leaves(reference), strict=True)
-    )
-
-
-def _finite_fraction(tree):
-    leaves = [np.isfinite(np.asarray(leaf)) for leaf in jax.tree.leaves(tree)]
-    return float(np.mean(np.all(np.stack([np.ravel(v) for v in leaves]), axis=0)))
+def compile_arm(name, arm):
+    """Return the callable the cold-compile probe compiles for ``arm``."""
+    tangent, primal, _, _ = CASES[name]
+    if arm == "primal":
+        return lambda p, t: primal(*p)
+    if arm == "tangent":
+        return lambda p, t: tangent(p, t)
+    return lambda p, t: jax.jvp(primal, p, t)
 
 
 def _truncated_quotient(numerator, d_numerator, denominator, d_denominator):
@@ -375,22 +332,33 @@ def _truncated_quotient(numerator, d_numerator, denominator, d_denominator):
     return d_numerator / denominator
 
 
+_ORIGINAL_DEFLATE_STEP = rangefunction._deflate_step_tangent
+
+
 def _truncated_deflate_step(
     coefficient, d_coefficient, root, d_root, current, d_current, upper, d_upper
 ):
-    """The Clenshaw step's tangent with the lagged order's term dropped."""
-    return (
-        2.0 * coefficient + 2.0 * root * current - upper,
-        2.0 * d_coefficient + 2.0 * (d_root * current + root * d_current),
+    """The Clenshaw step's tangent with the lagged order's term dropped.
+
+    The lagged term is dropped by leaving its tangent absent, which the step
+    reads as a known zero and omits rather than adding, so the first iteration
+    (whose lagged tangent is absent) is unchanged and every later one loses it.
+    """
+    return _ORIGINAL_DEFLATE_STEP(
+        coefficient, d_coefficient, root, d_root, current, d_current, upper, None
     )
 
 
 def _truncated_contract(numerator, d_numerator, moments, d_moments):
-    """The contraction's tangent with the moments' own tangent term dropped."""
+    """The contraction's tangent with the moments' own tangent term dropped.
+
+    The signature matches the shared ``_contract_tangent``, and the primal it
+    returns is ``None`` because every call site discards it.
+    """
     total = 0.0
     for order in range(len(numerator)):
         total = total + d_numerator[order] * moments[order]
-    return total
+    return None, total
 
 
 def _truncated_held(condition, value, d_value, fill, xp):
@@ -409,7 +377,7 @@ _MODEL_INTEGRAL = gradedresidual._model_integral_tangent
 TRUNCATIONS = {
     "factorise": [(momentchannel, "_quotient_tangent", _truncated_quotient)],
     "pole_contraction": [
-        (momentchannel, "_deflate_step_tangent", _truncated_deflate_step)
+        (rangefunction, "_deflate_step_tangent", _truncated_deflate_step)
     ],
     "pole_contraction_mirrored": [
         (momentchannel, "_contract_tangent", _truncated_contract)
@@ -425,6 +393,9 @@ TRUNCATIONS = {
 
 @contextmanager
 def _truncated(name):
+    # the shared bent tangents are jit-wrapped, so a trace from an earlier
+    # identical-shape call would otherwise be reused in place of the truncation
+    jax.clear_caches()
     saved = []
     for module, attribute, replacement in TRUNCATIONS[name]:
         saved.append((module, attribute, getattr(module, attribute)))
@@ -434,6 +405,7 @@ def _truncated(name):
     finally:
         for module, attribute, original in saved:
             setattr(module, attribute, original)
+        jax.clear_caches()
 
 
 def _identity(name):
@@ -446,27 +418,27 @@ def _identity(name):
 
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_matches_base_jvp(name):
-    if os.environ.get("NOVA_TANGENT_TRUNCATION") == "1":
+    if truncation_active():
         with _truncated(name):
             got, expected = _identity(name)
     else:
         got, expected = _identity(name)
-    primal = _worst(got[0], expected[0])
-    tangent = _worst(got[1], expected[1])
-    print(f"IDENTITY {name} primal_max_relative={primal:.3e} "
-          f"tangent_max_relative={tangent:.3e} bound={EXACT_TOLERANCE:.0e} "
-          f"covered_fraction=1.000 masked_samples=0 "
-          f"base_jvp_finite_fraction={_finite_fraction(expected[1]):.4f}")  # fmt: skip
-    assert primal == 0.0
-    assert tangent <= EXACT_TOLERANCE
-    assert _finite_fraction(expected[1]) == 1.0
+    identity_row(
+        name,
+        worst(got[0], expected[0]),
+        worst(got[1], expected[1]),
+        EXACT_TOLERANCE,
+        extra=f"covered_fraction=1.000 masked_samples=0 "
+        f"base_jvp_finite_fraction={finite_fraction(expected[1]):.4f}",
+    )
+    assert finite_fraction(expected[1]) == 1.0
 
 
 @pytest.mark.parametrize("name", list(CASES))
 def test_truncated_tangent_fails_identity(name):
     with _truncated(name):
         got, expected = _identity(name)
-    tangent = _worst(got[1], expected[1])
+    tangent = worst(got[1], expected[1])
     print(f"TRUNCATED {name} tangent_max_relative={tangent:.3e}")
     assert tangent > EXACT_TOLERANCE
 
@@ -502,80 +474,8 @@ def test_primal_bit_identical_to_base():
     print("PRIMAL graded_residual bit_identical=True")
 
 
-_COMPILE_PROBE = r"""
-import json, sys, time
-import jax
-jax.config.update("jax_enable_compilation_cache", False)
-from nova.jax.config import configure_dtypes
-configure_dtypes()
-assert jax.config.jax_enable_x64 is True
-hits = []
-jax.monitoring.register_event_listener(
-    lambda event, **kw: hits.append(event) if "cache_hit" in event else None
-)
-sys.argv = sys.argv[1:]
-sys.path.insert(0, sys.argv[1])
-import test_vertex_edge_tangent_recurrences as t
-name, arm = sys.argv[2], sys.argv[3]
-tangent, primal, primals, tangents = t.CASES[name]
-arguments = (primals, tangents)
-if arm == "primal":
-    function = lambda p, t: primal(*p)
-elif arm == "tangent":
-    function = lambda p, t: tangent(p, t)
-else:
-    function = lambda p, t: jax.jvp(primal, p, t)
-def count(jaxpr):
-    total = 0
-    for equation in jaxpr.eqns:
-        total += 1
-        for value in equation.params.values():
-            for sub in value if isinstance(value, (list, tuple)) else [value]:
-                inner = getattr(sub, "jaxpr", sub)
-                if hasattr(inner, "eqns"):
-                    total += count(inner)
-    return total
-equations = count(jax.make_jaxpr(function)(*arguments).jaxpr)
-lowered = jax.jit(function).lower(*arguments)
-start = time.perf_counter()
-lowered.compile()
-wall = time.perf_counter() - start
-print(json.dumps({"name": name, "arm": arm, "compile_seconds": wall,
-                  "equations": equations, "cache_hits": len(hits),
-                  "cache_enabled": jax.config.jax_enable_compilation_cache}))
-"""
-
-
-def _cold_compile(name, arm):
-    environment = dict(os.environ, JAX_ENABLE_COMPILATION_CACHE="false")
-    environment.pop("NOVA_TANGENT_TRUNCATION", None)
-    result = subprocess.run(
-        [sys.executable, "-c", _COMPILE_PROBE, "probe", str(Path(__file__).parent),
-         name, arm],
-        capture_output=True, text=True, env=environment, check=True,
-    )  # fmt: skip
-    row = json.loads(result.stdout.strip().splitlines()[-1])
-    assert row["cache_hits"] == 0 and row["cache_enabled"] is False
-    return row
-
-
 @pytest.mark.slow
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
-    rows = {
-        arm: [_cold_compile(name, arm) for _ in range(COMPILE_REPEATS)]
-        for arm in ("primal", "tangent", "jvp")
-    }
-    median = {}
-    for arm, runs in rows.items():
-        walls = sorted(row["compile_seconds"] for row in runs)
-        equations = {row["equations"] for row in runs}
-        assert len(equations) == 1
-        median[arm] = float(np.median(walls))
-        print(f"COMPILE {name} {arm} median_seconds={median[arm]:.3f} "
-              f"equations={equations.pop()} "
-              f"walls={','.join(f'{wall:.3f}' for wall in walls)} "
-              f"hits={sum(row['cache_hits'] for row in runs)}")  # fmt: skip
-    ratio = median["tangent"] / median["primal"]
-    print(f"COMPILE {name} median_tangent_over_primal={ratio:.2f}")
+    ratio = compile_ratio("test_vertex_edge_tangent_recurrences", name)
     assert ratio <= 3.0

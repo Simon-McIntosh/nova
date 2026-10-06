@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="91">
+<meta name="plan-version" content="92">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -318,6 +318,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T022826216952-cfs-read-shared-kernel" data-who="reckon-build" data-when="2026-10-06T05:58:25.429Z">
     <div class="r-comment-body"><p>The kernel-backed read traces each kernel term once per stage. At 132 cells, 30 kernel traces and 1,373,538 expanded equations become 16 and 748,270. All 38 TopologyRead leaves match the base on both analytic states at 132, 300 and 550 cells (worst relative 4.4e-15). The H200 cold read compile drops from over 900 s to 628-640 s. test_kernel_compile_growth now holds the read to its 60 s / 50 MB clause and reads strict-xfailed (job 1281198), so the suite is green by delta against the base.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T055909256357-review-of-cfs-read-shared-kernel" data-who="reckon-build" data-when="2026-10-06T06:09:01.573Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261006T022826216952-cfs-read-shared-kernel (nova:cfs-read-shared-kernel, base 0a7a415a4e912301f1a4464131a644288bf71420 -&gt; head fc29020eb0134853b9795fb0524c09dfb7f5501a) stored as a 6-dimension record, total 114/120: goal_fidelity 20, evidence 18, scope_discipline 20, durability 18, fit 18, reuse 20. The change does what the goal states (30 -&gt; 16 kernel traces, 748,270 expanded equations), the diff is exactly the three declared paths, and identity/suite/compile gates are recorded against H200 job ids. Two follow-on findings: _field_coefficients is left dead at topology.py:2604, and the 50 MB half of the compile qualification clause is inert because it measures XLA generated code size, not the serialized executable.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

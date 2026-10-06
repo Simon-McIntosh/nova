@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="59">
+<meta name="plan-version" content="60">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -341,6 +341,12 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261006T003101836748" data-who="" data-when="">
     <div class="r-comment-body"><p>True cold compile of the kernel point jet, 2026-10-06 (run <code>cfs-kernel-cold-compile-correction</code>, merged at <code>b6f1efd95</code>, H200 final gate 8 passed 2 strict xfail): in fresh processes with the compilation cache disabled before JAX initialises, the base-revision kernels compile in 83.9 s and the repaired kernels in 83.6 s, 2912 executable bytes each. The 4.5-times reduction of the unique equation count bought no compile time, so the unique-equation count is not the lever; the 30 s bound is a strict expected failure and a warmed-cache hit is refused rather than reported as cold. The read-level clause is now the decisive measurement, in flight on <code>cfs-kernel-qualification</code>; if the read's cold compile at 550 cells exceeds 60 s on these kernels, the representation of the differentiated kernel loop is the lead's question.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T003421698760" data-who="" data-when="">
+    <div class="r-comment-body"><p>Compile-count instrument, 2026-10-06, from the twenty-fourth composed plan review: the clause "one compiled program serves two geometries of the same shape" and §6's "compiled programs per mesh shape: one" are counted by the lane's existing instrument, <code>scripts/h200_test_lane/cache_guard.py</code>, which prints one row per program with its compile seconds and hit or miss outcome; a two-geometry run with the cache disabled reports exactly the program count the clause needs. No node builds a second compilation counter; the §4 and §6 gates cite the guard rows.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T003421698821" data-who="" data-when="">
+    <div class="r-comment-body"><p>Receipt placement resolver, 2026-10-06, from the same review: the GPFS receipt root named by the receipts-out-of-git decision is resolved through the repository's path owner, <code>nova/database/filepath.py</code> (<code>FilePath</code>, beside the <code>repository_relative</code> helper the figure-and-solver-audit plan landed there), never as a literal repeated in a node's script; the evidence pointer records the resolved path. The literal already hardcoded in other modules is their owners' hygiene, outside this plan.</p></div>
 </div>
 </section>
 </main>

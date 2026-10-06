@@ -10,6 +10,10 @@ resolution-markers = [
 ]
 
 [manifest]
+members = [
+    "nova-cocos",
+    "nova-stella",
+]
 overrides = [
     { name = "h5py", specifier = ">=3.15" },
     { name = "imas-python", specifier = ">=2.2" },
@@ -2085,6 +2089,10 @@ wheels = [
 ]
 
 [[package]]
+name = "nova-cocos"
+source = { editable = "packages/nova-cocos" }
+
+[[package]]
 name = "nova-stella"
 source = { editable = "." }
 dependencies = [
@@ -2095,6 +2103,7 @@ dependencies = [
     { name = "h5py" },
     { name = "imas-python" },
     { name = "netcdf4" },
+    { name = "nova-cocos" },
     { name = "numpy" },
     { name = "packaging" },
     { name = "pyarrow" },
@@ -2232,6 +2241,7 @@ requires-dist = [
     { name = "netcdf4", specifier = ">=1.7" },
     { name = "networkx", marker = "extra == 'test'" },
     { name = "nlopt", marker = "extra == 'thermofluids'", specifier = ">=2.7" },
+    { name = "nova-cocos", editable = "packages/nova-cocos" },
     { name = "numba", marker = "extra == 'numba'", specifier = ">=0.61" },
     { name = "numpy", specifier = ">=2" },
     { name = "openpyxl", marker = "extra == 'interchange'", specifier = ">=3.1.5" },

@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="34">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -69,7 +69,14 @@
     <p>The rule has one owner, <code>nova/database/filepath.py</code>. The root search in
     <code>repository_relative</code> cannot serve here on its own: it finds a repository by
     looking for the <code>.git</code> marker on disk, and the worktrees named in committed
-    artifacts no longer exist. So the rule is lexical. The module gains one public function,
+    artifacts no longer exist. So the rule is lexical. The nearest existing operation is reckon's
+    <code>_rewrite_worktree_roots</code> in <code>reckon/crew/promotion.py</code>. At replay time it
+    rewrites a run's recorded worktree roots inside a stored gate command to the absolute
+    checkout. Nova's rule differs in three ways. It cannot know the roots in advance, so it
+    matches any worktree path by its layout. It writes repository-relative paths, so an artifact
+    stays valid in any clone. And it rewrites committed text permanently rather than at replay.
+    Nova carries no reckon dependency it could import that function through, and the two answer
+    different questions, so neither replaces the other. The module gains one public function,
     <code>relativize_worktree_paths(text)</code>, which returns the rewritten text together with
     the list of worktree-path spans it could not map, and one constant holding the worktree
     root's directory name, <code>reckon-worktrees</code>, which every other file imports instead
@@ -77,9 +84,13 @@
     leading dot, and the rule below applies to a path under either.
     <code>repository_relative</code> delegates its worktree case to the same matcher, so a path
     under a removed worktree maps the same way through either entry point and the rule has one
-    definition. That function is the only public surface the plan adds. It cannot be folded into
-    <code>repository_relative</code>, because it takes and returns text rather than a path and it
-    reports what it left unmapped. Its command is a <code>relativize</code> subcommand of the
+    definition. It cannot be folded into <code>repository_relative</code>, because it takes and
+    returns text rather than a path and it reports what it left unmapped. Beside it sits one
+    predicate, <code>worktree_path_offenders(paths, read)</code>. Given file paths and a reader for
+    their contents, it applies the exemption set and returns each non-exempt file that contains a
+    worktree path. It is the one decision both guards make: §4's check mode calls it with staged
+    files read from the index, and §4's test calls it with tracked files read from the tree. The
+    two differ only in which files they feed it. Its command is a <code>relativize</code> subcommand of the
     existing <code>filepath</code> click group in <code>nova/database/scripts.py</code>, the
     console script that <code>pyproject.toml</code> already registers as this module's
     command-line owner. <code>filepath relativize FILE...</code> applies the function to the named
@@ -88,8 +99,9 @@
     each one outside the exemption set that contains a worktree path. The §4 hook is a two-line
     shim that runs this mode. So neither the pattern nor the exemption set is spelled anywhere
     except <code>nova/database/filepath.py</code>, which holds both as module constants.</p>
-    <p>Accounting for the surface this adds: one public function, two module constants, and one
-    subcommand on the module's existing command group, so no new command surface. Nothing in
+    <p>Accounting for the surface this adds: two public functions (the rewrite and the offender
+    predicate), two module constants, and one subcommand on the module's existing command group,
+    so no new command surface. Nothing in
     nova rewrites or rejects worktree paths today, so nothing retires except the
     receipt-directory scan named in §4. The constants are data shared by the function, the
     subcommand and the guard test, not separate entry points. The subcommand is the only way to
@@ -182,7 +194,8 @@
       <code>test_no_receipt_directory_json_records_a_worktree_path</code> and its positive
       control <code>test_the_scan_reaches_every_receipt</code> are deleted, together with the
       helpers that serve only them, <code>_scanned_json</code> and
-      <code>RECEIPT_DIRECTORIES</code>, so the repo-wide guard is the one scanner. The
+      <code>RECEIPT_DIRECTORIES</code>. The test calls <code>worktree_path_offenders</code> over every
+      tracked file, so the only scanning decision in the repository is that one predicate. The
       render-route tests in that file stay. The new test runs in the default fast lane, in seconds.</li>
       <li>The commit-time check is a plain checked-in hook, <code>scripts/git-hooks/pre-commit</code>.
       <code>pyproject.toml</code> declares the <code>pre-commit</code> framework as a dev dependency

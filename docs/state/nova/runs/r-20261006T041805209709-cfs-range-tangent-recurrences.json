@@ -1,0 +1,674 @@
+{
+  "agent": {
+    "alias": "sonnet 5.5",
+    "backend": "claude",
+    "effort": "high",
+    "launch": "cli",
+    "model": "claude-sonnet-5-5",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "claude",
+  "base_sha": "e74d8fce12601e372d91572aba1b5602f2d7df55",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": 2.602789,
+    "cost_usd_cumulative": 2.602789,
+    "detail": "backend reports utilisation and reset time",
+    "headroom": "known",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": "seven_day",
+    "refusal": false,
+    "resets_at": "2026-10-11T06:00:00Z",
+    "surpassed_threshold": null,
+    "threshold_status": "allowed_warning",
+    "tokens": {
+      "cache_creation_input_tokens": 176231,
+      "cache_creation_input_tokens_cumulative": 176231,
+      "cache_read_input_tokens": 6444975,
+      "cache_read_input_tokens_cumulative": 6444975,
+      "fallback_credit": null,
+      "inference_geo": "not_available",
+      "input_tokens": 90,
+      "input_tokens_cumulative": 90,
+      "output_tokens": 60869,
+      "output_tokens_cumulative": 60869,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": 63.0
+  },
+  "changed_lines": {
+    "added": 864,
+    "files": 3,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 54,
+        "name": "_base_module",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 366,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 340,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "window_line": 340
+    },
+    {
+      "existing_function": {
+        "line": 517,
+        "name": "_cold_compile",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 439,
+        "name": "_cold_compile",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "window_line": 439
+    },
+    {
+      "existing_function": {
+        "line": 532,
+        "name": "test_tangent_compiles_within_three_primals",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 454,
+        "name": "test_tangent_compiles_within_three_primals",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "window_line": 454
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "a86bc190084ff4fdf709aa5fe41d530d69317c17",
+    "a8a1a2362e53d6f5f9b401e808079ea9a1280f52",
+    "21e7cdc07da57e5902b0689cfd644d75f6513bb9"
+  ],
+  "completed_at": "2026-10-06T04:44:21.345Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-06T04:18:25Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/suite_arm.sh /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-range-tangent-recurrences /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/suite_after",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/suite_after"
+  },
+  "impl_move": {
+    "at_complete": 0.16666666666666666,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "range tangents are private ingredients; the point jet is not yet wrapped, so section 2 impl does not advance",
+    "verdict": "waived"
+  },
+  "lane_advisory": {
+    "backend": "claude",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "no projected exhaustion is available for 'claude'; the burn projection needs a numeric utilisation bounded by a known window, and without one no horizon comparison is made",
+    "horizon_ends_at": "2026-10-06T05:18:08.621086+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-02T10:09:47.079Z",
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": "2026-10-04T06:00:00Z",
+    "seconds_until_reset": 0,
+    "state": "quiet",
+    "utilisation_pct": 94.0
+  },
+  "lane_declaration": {
+    "backend": "claude",
+    "headroom": "unknown",
+    "metered": true,
+    "observed_at": "2026-10-02T10:09:47.079Z",
+    "read_at": "2026-10-06T04:18:08Z",
+    "resolved_backend": "claude",
+    "utilisation_pct": 94.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T04:44:21.345Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/manifest.md",
+  "member": "disposable-r-20261006T041805209709-cfs-range-tangent-recurrences",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[across_the_range]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[contract]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[deflate]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_add]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_multiply]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_scale]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[paired_range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[product]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[rising_integral]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[scaled]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[sine_squared_times]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[total]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[across_the_range]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[contract]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[deflate]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_add]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_multiply]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[harmonic_scale]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[paired_range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[product]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[range_function]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[rising_integral]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[scaled]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[sine_squared_times]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_matches_base_jvp[total]"
+    ],
+    "declaration": "each range tangent with its series truncated by one term fails the identity against jax.jvp of the base, maximum printed",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/negative_control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/negative_control.log",
+    "test_paths": [
+      "tests/biot/test_range_tangent_recurrences.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-range-tangent-recurrences",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1946,
+          "cached_input_tokens": 918730,
+          "input_tokens": 920678,
+          "output_tokens": 1151,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 921829,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Write the tangent of every function the Biot point jet differentiates in nova/biot/rangefunction.py only: the range-function and harmonic-series operations the point jet reaches there (enumerate them first from the jaxpr of packed_analytic_moments; expected: harmonic_multiply, harmonic_add, harmonic_scale, range_function, product, total, scaled, across_the_range, sine_squared_times, deflate, contract, rising_integral and their paired forms where the jet uses them), as its own recurrence, closed form or fixed-capacity scan, under the lead's locked decisions kernel-loop-representation = custom-derivative-rules and tangent-identity-tolerance = scan-tangents-1e-9 on converged-forward-solve. The elliptic family already landed this way (run r-20261006T022907188945, tests/biot/test_elliptic_tangent_recurrences.py and nova/biot/elliptic.py are the pattern to follow and reuse): exact hand-written tangents where they compile within three times the primal, fixed-capacity scan tangents held to 1e-9 relative where the exact form does not. Done when: (1) for each such function F a private tangent function returns the same structure jax.jvp(F) returns with respect to all floating inputs, without calling jax.jvp, jax.grad or jax.jacfwd on F, reusing the elliptic tangents for any elliptic call inside F; (2) identity: on 10,000 random inputs spanning the full domain the jet uses, with no masking of near-singular inputs (a target beside a source edge is reached by nulls inside the plasma; where the base jax.jvp itself is not finite there, compare against a reference evaluated in higher precision and say so), each tangent agrees with jax.jvp of the base to relative 1e-13 for exact forms and 1e-9 for scan forms, maxima printed, the fraction of samples covered printed and required to be 100 percent; (3) negative control: each tangent with its recurrence or series truncated by one term fails that identity, maximum printed; (4) cold compile of each tangent at or below three times its primal in fresh cache-disabled CPU processes on all_debug, in one job, wall and expanded equations recorded; (5) the primal outputs bit-identical to the base, asserted, and tests/biot plus the elliptic tests pass by delta in per-module fresh processes; (6) a test module tests/biot/test_range_tangent_recurrences.py holding the identity, control, coverage and compile rows, and an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-range-tangent-recurrences.html with plan-evidence-for converged-forward-solve, reckon audit-doc 0 errors. The custom_jvp wrapping of the point jet is a later node; this node does not wrap. Gates run on compute, never the login node: CPU work on all_debug with srun (TMPDIR=/tmp, JAX_PLATFORMS=cpu, the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree, orientation_worktree in the manifest, never uv on a compute node), or in place when the shell has SLURM_JOB_ID set. Every cold compile runs in a fresh subprocess with the persistent compilation cache disabled in the environment before jax is imported. Any wait is declared exactly as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, never a string and never exit:0. Every login-node uv command carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. Base-revision code is loaded through importlib from git show at the run orientation_base_sha under a different module name, never copied into the tree. No public signature changes. Commit with conventional subjects and bodies at every step and write the manifest before every job wait; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Write the tangent of every range-function and harmonic-series operation the Biot point jet differentiates, identical to jax.jvp of the base within the locked tolerances and compiling within three times the primal.",
+    "id": "cfs-range-tangent-recurrences",
+    "lane_declaration": {
+      "backend": "claude",
+      "headroom": "unknown",
+      "metered": true,
+      "observed_at": "2026-10-02T10:09:47.079Z",
+      "read_at": "2026-10-06T04:18:08Z",
+      "resolved_backend": "claude",
+      "utilisation_pct": 94.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/manifest.md",
+    "negative_control": "each range tangent with its series truncated by one term fails the identity against jax.jvp of the base, maximum printed",
+    "plan": "converged-forward-solve",
+    "requested_backend": "claude",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/rangefunction.py",
+      "tests/biot/test_range_tangent_recurrences.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-range-tangent-recurrences.html",
+      "docs/figures/converged-forward-solve/cfs-range-tangent-recurrences"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1976616.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "claude",
+    "member": null,
+    "node": "cfs-range-tangent-recurrences",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-06T04:18:12.388683+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.61,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 358.736,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 810.242,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": 5.070472685543982,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 2,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00Z",
+        "utilisation_pct": 61.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 3,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 25,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 32
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 17,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": "recorded account-window reading is stale",
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0.01,
+      "claude-haiku": 0,
+      "claude-opus": 0.09,
+      "clive": 0.66,
+      "codex": 0.06,
+      "codex-astra": 0.1,
+      "codex-luna": 0,
+      "hold": 0.08
+    },
+    "rendered_token_estimate": 1876,
+    "usage": {
+      "cost": 0.000164052,
+      "input_tokens": 3906,
+      "output_tokens": 89
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "21e7cdc07da57e5902b0689cfd644d75f6513bb9",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e74d8fce12601e372d91572aba1b5602f2d7df55",
+    "reviewed_head_sha": "21e7cdc07da57e5902b0689cfd644d75f6513bb9",
+    "scores": {
+      "durability": 19,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 15,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 108
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T041805209709-cfs-range-tangent-recurrences",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "db136737-fd0a-4722-aab7-3ace469cf578",
+  "session_model": "claude-sonnet-5-5",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 6444975,
+    "cumulative_input_tokens": 6621296,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the stream window 1000000",
+    "elapsed_seconds": 1550.924,
+    "generated_tokens": 60869,
+    "generation_seconds": 451.773,
+    "input_budget_tokens": 1000000,
+    "input_utilisation_pct": 18.7,
+    "machine_seconds": 1099.151,
+    "peak_input_tokens": 186799,
+    "tokens_per_second": 134.73,
+    "wall_tokens_per_second": 39.25
+  },
+  "time_budget": "60m",
+  "tool_steps": 48.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1556,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T04:44:27Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-06T04:18:29Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T041805209709-cfs-range-tangent-recurrences",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 429,
+    "worker_pid": 139502
+  },
+  "worker_seconds": 1524,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

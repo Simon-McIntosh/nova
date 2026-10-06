@@ -2,7 +2,7 @@
 
 Topology orders the signed, raw poloidal flux ``sigma * psi`` in webers, where
 ``sigma`` is derived from the state's declared COCOS sign tuple and the sign of
-its plasma current through :mod:`nova.io.cocos`; the magnetic axis is therefore
+its plasma current through :mod:`nova_cocos`; the magnetic axis is therefore
 a maximum of the signed flux.  Normalised flux is never a topology operand.
 
 The domain is the interior of the multi-unit vessel polygon under true polygon
@@ -29,7 +29,7 @@ from typing import ClassVar, Protocol, TypeAlias
 import jax
 import jax.numpy as jnp
 
-from nova.io.cocos import convention
+from nova_cocos import convention
 
 ContourTreeNode: TypeAlias = tuple[int, float, float, float]
 """One DD node as ``(critical_type, radius, height, psi)`` on raw flux."""

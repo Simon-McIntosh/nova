@@ -34,6 +34,7 @@ dependencies = [
   "h5py>=3.15",
   "imas-python>=2.2",
   "netcdf4>=1.7",
+  "nova-cocos",
   "numpy>=2",
   "packaging>=23.2",
   "pyarrow>=24",
@@ -157,6 +158,14 @@ override-dependencies = [
   "h5py>=3.15",
   "imas-python>=2.2",
 ]
+
+# The COCOS algebra is a distributable workspace member so a Python 3.12 engine
+# can install the factor table without nova's own dependency floor.
+[tool.uv.workspace]
+members = ["packages/nova-cocos"]
+
+[tool.uv.sources]
+nova-cocos = { workspace = true }
 
 [tool.hatch.version]
 source = "vcs"

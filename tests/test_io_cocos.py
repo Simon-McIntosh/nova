@@ -14,7 +14,7 @@ import math
 
 import pytest
 
-from nova.io.cocos import (
+from nova_cocos import (
     B0_LIKE,
     CONVENTION_DIGITS,
     DODPSI_LIKE,

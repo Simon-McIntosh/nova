@@ -1,0 +1,745 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "7313cdd335bf493ccba3c51700c31bd8e89a76f8",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 15292928,
+      "cached_input_tokens_cumulative": 15292928,
+      "input_tokens": 15591824,
+      "input_tokens_cumulative": 15591824,
+      "output_tokens": 66484,
+      "output_tokens_cumulative": 66484,
+      "reasoning_output_tokens": 31642,
+      "reasoning_output_tokens_cumulative": 31642
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 200,
+    "files": 2,
+    "removed": 9
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 2371,
+        "name": "_isolated_kernel_compile",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 42,
+        "name": "kernel_compile_budget",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 1977,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 404,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 404
+    },
+    {
+      "existing_function": {
+        "line": 886,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 691,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 693
+    },
+    {
+      "existing_function": {
+        "line": 1626,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 691,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 693
+    },
+    {
+      "existing_function": {
+        "line": 691,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 886,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 960
+    },
+    {
+      "existing_function": {
+        "line": 1626,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 886,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 958
+    },
+    {
+      "existing_function": {
+        "line": 691,
+        "name": "_render_read_panel",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1626,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1785
+    },
+    {
+      "existing_function": {
+        "line": 886,
+        "name": "test_closed_form_resolution_probe",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1626,
+        "name": "_measure_membership",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1783
+    },
+    {
+      "existing_function": {
+        "line": 404,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1977,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1977
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "kernel_compile_budget",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 2371,
+        "name": "_isolated_kernel_compile",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 2427
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "3b38b8b7e1498a92d63f16474fb61135834e39da",
+    "92e95f4e942bb0df31d54604edc6846e3067e8cb",
+    "354831de03d1517e88ba2d6b63f8b34279fcd9b3",
+    "e9cfc712b66e7654c1ee666e86e29803b7ce0903",
+    "93d4e801e832195d90df799577e013c7450ac0db",
+    "badfcc61ba74fb87219c13cd55977c4493821968",
+    "9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78"
+  ],
+  "completed_at": "2026-10-06T01:18:16Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-06T00:16:36Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "negative-result",
+  "follow_on_paths": [],
+  "gate": "failed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_kernel_compile_growth --runxfail -vv -s --timeout 3600",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/h200-topology-cold.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "failure-classification:negative-result",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-astra",
+    "burn_multiple": 1.7909320738374526,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-astra' is projected to exhaust at 2026-10-08T04:10:25Z, which is after this node's 3600s horizon ending 2026-10-06T01:16:15.849668+00:00",
+    "horizon_ends_at": "2026-10-06T01:16:15.849668+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-06T00:16:14Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-08T04:10:25Z",
+    "resets_at": "2026-10-09T21:13:34Z",
+    "seconds_until_reset": 334639,
+    "state": "quiet",
+    "utilisation_pct": 80.0
+  },
+  "lane_declaration": {
+    "backend": "codex-astra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-06T00:16:14Z",
+    "read_at": "2026-10-06T00:16:15Z",
+    "resolved_backend": "codex-astra",
+    "utilisation_pct": 80.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-06T01:18:16Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/manifest.md",
+  "member": "disposable-r-20261006T001613255359-cfs-kernel-qualification",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/equilibrium/test_topology_read.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "cfs-kernel-qualification",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3286,
+          "cached_input_tokens": 711491,
+          "input_tokens": 714779,
+          "output_tokens": 1909,
+          "reasoning_output_tokens": 228,
+          "total_tokens": 716688,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Qualify the topology read on the repaired kernels (the point-jet cold-compile correction is owned by cfs-kernel-cold-compile-correction and is not repeated here). Finding to correct (independent review of cfs-kernel-compile-cost, 2026-10-06): tests/biot/test_kernel_compile_cost.py's _compile disables jax_enable_compilation_cache only after point and geometry setup has initialised cache use, and jax.clear_caches does not reset that state in the installed JAX, so h200-fresh-cold.log records two jit_jet cache hits with stored compile costs 86 and 81 seconds while the fragment and the landing claim 11.2 and 7.9 seconds as cold. Done when, in this order, each step committed before the next: (1) the strict expected-failure markers in tests/equilibrium/test_topology_read.py carry a reason that names the mechanism (a kernel compile that exceeds the per-test bound) and no plan or node identifier, because a plan label in source is banned; the node ownership stays in the evidence document; (2) with the landed kernels, the kernel-backed topology read at 132, 300 and 550 cells (tests/equilibrium/test_topology_read.py kernel rows, currently strict xfail) is compiled cold on the H200 recording compile wall, jaxpr unique and expanded equation counts, executable bytes and peak host RSS per rung, in one job with each row bounded at 900 s; (3) if the 550-cell cold compile is at or below 60 s and the executable at or below 50 MB, the 1074 and 2616 rows and the implicit kernel null tangent rows run in one further job and their strict xfail markers are removed only for rows that pass, with the 2616 cold compile wall, executable bytes and peak host RSS recorded against the clause; if the 550 figure exceeds the clause, no larger row runs and the fragment states the fitted growth and the construct dominating the jaxpr, which is the lead's representation question; (4) an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html with plan-evidence-for converged-forward-solve carries one table of every measurement, the job ids and the gate commands, with reckon audit-doc 0 errors. Negative control: the corrected cold-compile test, run once with the cache deliberately left enabled from a warmed directory, must report the hit and refuse to call the wall cold. Gates run on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path under the run directory named in the manifest) --wait -- (the test targets of that step), never on the login node; on a compute node uv is not invoked, the shared environment's interpreter runs directly with PYTHONPATH set to the run's worktree (orientation_worktree in the manifest); every uv command on the login node carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. Commit with conventional subjects and bodies; the manifest's commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Compile the actual topology read on the repaired kernels at 132, 300 and 550 cells against the 60 s and 50 MB clause, qualify the 1074 and 2616 rows and kernel tangents if it passes, scrub the plan-label xfail reasons, and report the dominating construct if it does not.",
+    "id": "cfs-kernel-qualification",
+    "lane_declaration": {
+      "backend": "codex-astra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-06T00:16:14Z",
+      "read_at": "2026-10-06T00:16:15Z",
+      "resolved_backend": "codex-astra",
+      "utilisation_pct": 80.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/manifest.md",
+    "negative_control": "a kernel-backed row compiled with the cache deliberately enabled from a warmed directory must report the hit and refuse to call its wall cold",
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex-astra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/equilibrium/test_topology_read.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html",
+      "docs/figures/converged-forward-solve/cfs-kernel-qualification"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.7908998835653276,
+      "derived": 0.4913730846015212,
+      "drain_hours": 168.0,
+      "effective_limit": 0.4913730846015212,
+      "elapsed_fraction": 0.446702804183201,
+      "elapsed_hours": 75.04607110277777,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-06T00:16:19+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.19999999999999996,
+      "remaining_windows": null,
+      "resets_at": "2026-10-09T21:13:34Z",
+      "state": "observed",
+      "utilisation": 0.8,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.8960000000000001,
+      "decided_by": "window",
+      "margin": -0.23350000000000015,
+      "name": "cfs-kernel-qualification",
+      "score": 0.6625,
+      "state": "observed",
+      "verdict": "hold",
+      "window_fill": 0.8
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.85597,
+        "observed_at": "2026-10-06T00:16:19+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-09T21:13:34Z",
+        "state": "observed",
+        "utilisation": 0.8,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-astra",
+    "member": "codex",
+    "node": "cfs-kernel-qualification",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-06T00:16:19.855970+00:00",
+    "score": 0.6625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.64,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 456.891,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 904.437,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 24,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "utilisation_pct": null,
+        "worker_slots": 12
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_reason": null,
+        "burn_multiple": 1.7907540085888656,
+        "congestion": null,
+        "days_to_reset": 3.8728239844560184,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.4914131118955027,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 80.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_reason": null,
+        "burn_multiple": 1.7907540085888656,
+        "congestion": null,
+        "days_to_reset": 3.8728239844560184,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 17,
+          "unknown": 0
+        },
+        "pace_allowance": 0.4914131118955027,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 80.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_reason": null,
+        "burn_multiple": 1.7907540085888656,
+        "congestion": null,
+        "days_to_reset": 3.8728239844560184,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.4914131118955027,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-09T21:13:34+00:00",
+        "utilisation_pct": 80.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude": 0,
+      "claude-haiku": 0,
+      "claude-opus": 0.03,
+      "clive": 0.68,
+      "codex": 0.14,
+      "codex-astra": 0.1,
+      "codex-luna": 0.01,
+      "hold": 0.03
+    },
+    "rendered_token_estimate": 1704,
+    "usage": {
+      "cost": 0.000164178,
+      "input_tokens": 3909,
+      "output_tokens": 89
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "7313cdd335bf493ccba3c51700c31bd8e89a76f8",
+    "reviewed_head_sha": "9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78",
+    "scores": {
+      "durability": 11,
+      "evidence": 15,
+      "fit": 17,
+      "goal_fidelity": 17,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 85
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261006T001613255359-cfs-kernel-qualification",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a10e91-e122-7cd1-83cd-dd76969d102c",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 15292928,
+    "cumulative_input_tokens": 30884752,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 98126
+  },
+  "time_budget": "60m",
+  "tool_steps": 195.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 3700,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-06T01:18:19Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-06T01:14:03Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261006T001613255359-cfs-kernel-qualification",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 577,
+    "worker_pid": 3739588
+  },
+  "worker_seconds": 3700,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-06T01:18:16Z",
+    "session_id": "01a10e91-e122-7cd1-83cd-dd76969d102c",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-qualification"
+  }
+}

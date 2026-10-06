@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -279,6 +279,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T031732207059-cfs-wave-test-hygiene" data-who="reckon-build" data-when="2026-10-06T03:53:09.584Z">
     <div class="r-comment-body"><p>Two tests that wrote into tracked figure files now write into tmp_path only, and the raster receipt timeout is measured as a concurrency artefact with identical solve-program jaxpr counts at both revisions.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T035443799243-review-of-cfs-wave-test-hygiene" data-who="reckon-build" data-when="2026-10-06T04:09:09.677Z">
+    <div class="r-comment-body"><p>stored a parsed independent review of run r-20261006T031732207059-cfs-wave-test-hygiene at base 18152a0d569d376ba65eba20bf172cc27ae4106f / head 79b08252726938a494227fcaf369b2982d9935e6, total 93/120 with one blocking finding (the renderer change reddens tests/test_figure_panel_pin.py by three tests the node&#x27;s gate never ran) and two follow-ons.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

@@ -34,7 +34,7 @@ class KernelCompileBarrier(AssertionError):
 kernel_compile_expected_failure = pytest.mark.xfail(
     strict=True,
     raises=KernelCompileBarrier,
-    reason=("Biot harmonic kernel compilation exceeds the per-test wall bound"),
+    reason="Cold Biot harmonic kernel compilation exceeds the per-test wall bound",
 )
 
 

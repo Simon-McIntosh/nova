@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -195,9 +195,10 @@
     the subcommand and the hook, imports the constants or calls the subcommand rather than
     spelling the pattern, so it needs no exemption.</p>
     <ul>
-      <li><code>tests/test_artifacts_carry_no_worktree_paths.py</code> runs <code>git grep</code>
-      for the pattern over every tracked file outside the exemptions and fails naming each
-      offender. A positive control proves the scan reaches files in every top-level directory.
+      <li><code>tests/test_artifacts_carry_no_worktree_paths.py</code> lists the tracked files with
+      <code>git ls-files</code>, passes them to <code>worktree_path_offenders</code> with a reader
+      over the working tree, and fails naming each offender the predicate returns. It does no
+      pattern matching of its own. A positive control proves the scan reaches files in every top-level directory.
       It supersedes the directory-limited scan in <code>tests/test_render_receipt_paths.py</code>:
       <code>test_no_receipt_directory_json_records_a_worktree_path</code> and its positive
       control <code>test_the_scan_reaches_every_receipt</code> are deleted, together with the

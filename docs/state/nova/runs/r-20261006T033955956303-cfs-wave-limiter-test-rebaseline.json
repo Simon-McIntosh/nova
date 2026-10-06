@@ -413,6 +413,48 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "9ca9dfd12ee0ee806ff993cd06e403698fc86aab",
+  "release": {
+    "arms_kept": [
+      {
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline/scratch",
+        "reason": "outside the node-local temp root /tmp"
+      }
+    ],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 30475,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 30475,
+        "path": "/tmp/reckon-crew-scratch/r-20261006T033955956303-cfs-wave-limiter-test-rebaseline"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wave-limiter-test-rebaseline",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

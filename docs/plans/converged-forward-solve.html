@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="92">
+<meta name="plan-version" content="93">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -450,6 +450,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261006T043749534904" data-who="" data-when="">
     <div class="r-comment-body"><p>Coefficient-space Newton, 2026-10-06, from the same review: <code>nova/equilibrium/coefficient_carrier.py</code> owns a dense Newton over a coefficient-space fixed-point map (<code>dense_newton</code>, <code>coefficient_fixed_point_map</code>, <code>exact_fixed_point_map</code>), shipped by the coefficient-space-newton plan and measured there as a trade rather than a win. It is a cite-or-justify candidate for <code>solve.fixed_point</code>: the §5 node states in its evidence why a dense Jacobian over coefficients does or does not carry over to Newton-GMRES on the flux state, and §6's census lists the module as retired with the routes it serves or as retained with its remaining caller named.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s21-read-compile-after-sharing" data-who="s21-nova" data-when="2026-10-06T06:12:00Z">
+    <div class="r-comment-body"><p><strong>Read compile after kernel sharing (cfs-read-shared-kernel, merged 2c1823ef8).</strong> Tracing each kernel term once per read stage takes the 132-cell read from 30 kernel traces and 1.37 million expanded equations to 16 and 0.75 million, every TopologyRead leaf matching the base to 4.4e-15. The H200 cold read compile falls from over 900 s to 628 to 640 s at 132, 300 and 550 cells, flat in cell count. That is still ten times the 60 s clause, and value_gradient carries about 809 thousand of the 821 thousand equations the H200 census counts.</p><p>What the clause will take, as measured: the point jet's one-direction jvp compiles in 71.1 s against a 21.9 s primal on the H200, so custom derivative rules alone remove the autodiff unrolling but leave one kernel copy per stage. The read still traces the kernel in three jet stages (polish, curvature stencil, wall search) and two value stages, and the analytic fixture's exterior traces a second copy of the plasma kernel that a production conductor exterior would not. Qualification therefore needs the custom_jvp point jet and one shared jet evaluation per read; the compile-growth rows now assert the 60 s clause as strict expected failures, so they turn red the moment it is met. The 50 MB branch of that clause reads generated code size (about 14 KB) rather than the serialized executable (about 36 MB) and is repaired in the wrap node.</p></div>
 </div>
 </section>
 </main>

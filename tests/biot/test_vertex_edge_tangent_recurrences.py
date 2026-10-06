@@ -257,6 +257,29 @@ def _cases():
             _tangents(rng, primals),
         )
 
+    factors = BASE_CHANNEL.factorise(_arrays(_denominator_domain(rng)), jnp)
+    poles = (
+        jnp.asarray(_signed(rng, -3.0, 6.0)),
+        jnp.asarray(_signed(rng, -3.0, 6.0)),
+        [jnp.asarray(_signed(rng, -12.0, 2.0)) for _ in range(FAMILY)],
+        [jnp.asarray(_signed(rng, -12.0, 2.0)) for _ in range(FAMILY)],
+    )
+    primals = (numerator, factors, poles, moments)
+
+    def across(numerator, factors, poles, moments):
+        channel = object.__new__(BASE_CHANNEL.Channel)
+        channel.xp, channel.moments = jnp, moments
+        return channel.across(numerator, (factors, poles, None))
+
+    cases["across"] = (
+        lambda p, t: momentchannel._across_tangent(
+            p[0], t[0], p[1], t[1], p[2], t[2], p[3], t[3], xp=jnp
+        ),
+        across,
+        primals,
+        _tangents(rng, primals),
+    )
+
     offset = _magnitude(rng, -12.0, 1.0)
     offset[:500] = 0.0
     scale = _magnitude(rng, -9.0, 1.0)
@@ -366,6 +389,7 @@ TRUNCATIONS = {
     "pole_contraction_mirrored": [
         (momentchannel, "_contract_tangent", _truncated_contract)
     ],
+    "across": [(momentchannel, "_contract_tangent", _truncated_contract)],
     "model_integral": [(gradedresidual, "_held_tangent", _truncated_held)],
     "regularised": [(gradedresidual, "_held_tangent", _truncated_held)],
     "graded_residual": [

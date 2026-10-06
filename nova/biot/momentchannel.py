@@ -766,3 +766,37 @@ def _pole_contraction_tangent(
             near_root, d_held, _contract_tangent(series, d_series, family, d_family)
         ),
     )
+
+
+def _across_tangent(
+    numerator, d_numerator, factors, d_factors, poles, d_poles, moments, d_moments,
+    *, xp,
+):  # fmt: skip
+    """Return :meth:`Channel.across` and its tangent for one split denominator.
+
+    ``factors`` and ``poles`` are the first two parts of :meth:`Channel.split`,
+    each with its tangent, and ``moments`` the family the channel contracts.
+    """
+    weight_y, weight_x, weight_plain, shift_y, shift_x = factors
+    d_weight_y, d_weight_x, d_weight_plain, d_shift_y, d_shift_x = d_factors
+    seed_y, seed_x, family_y, family_x = poles
+    d_seed_y, d_seed_x, d_family_y, d_family_x = d_poles
+    series = across_the_range(numerator)
+    plain = contract(series, moments)
+    d_plain = _contract_tangent(
+        series, _across_the_range_tangent(d_numerator), moments, d_moments
+    )
+    pole_y, d_pole_y = _pole_contraction_tangent(
+        numerator, d_numerator, shift_y, d_shift_y, seed_y, d_seed_y,
+        family_y, d_family_y, moments, d_moments, False, xp=xp,
+    )  # fmt: skip
+    pole_x, d_pole_x = _pole_contraction_tangent(
+        numerator, d_numerator, shift_x, d_shift_x, seed_x, d_seed_x,
+        family_x, d_family_x, moments, d_moments, True, xp=xp,
+    )  # fmt: skip
+    return (
+        weight_plain * plain + weight_y * pole_y + weight_x * pole_x,
+        (d_weight_plain * plain + weight_plain * d_plain)
+        + (d_weight_y * pole_y + weight_y * d_pole_y)
+        + (d_weight_x * pole_x + weight_x * d_pole_x),
+    )

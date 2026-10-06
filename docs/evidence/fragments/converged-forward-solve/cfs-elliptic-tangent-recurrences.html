@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-elliptic-tangent-recurrences">
+<meta name="plan-title" content="Elliptic and harmonic-moment tangent recurrences">
+<meta name="plan-summary" content="Hand-written tangents of the 15 elliptic helpers the point jet reaches match jax.jvp of the base at relative error 0 on 10000 inputs, and every truncation fails. The compile bound fails for harmonic_moments at 41.6 times the primal, the same cost as jax.jvp.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="0a105dc2c,54e3aa23e,3a45a584d">
+<meta name="plan-recorded-at" content="2026-10-06">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="Shared nova virtualenv; CPU in place on fleet job 1277272 and all_debug job 1281182">
+<title>Elliptic and harmonic-moment tangent recurrences | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-elliptic-tangent-recurrences-record">Elliptic and harmonic-moment tangent recurrences</h1>
+<p id="cfs-elliptic-tangent-recurrences-summary">The point jet's jaxpr reaches 15 named helpers in the two elliptic modules: <code>_descent</code>, <code>_accumulate</code>, <code>_finite_part</code>, <code>complete_kind</code>, <code>_complete_kind</code>, <code>complete_pole</code>, <code>harmonic_moments</code>, <code>_harmonic_rising_step</code>, <code>_harmonic_ratio_step</code>, <code>harmonic_pole_moments</code>, <code>_pole_forward_step</code>, <code>_pole_backward_step</code>, <code>harmonic_root_moments</code>, <code>cn_pole_moment</code> and <code>sn_pole_moment</code>. It reaches no paired form. Each now has a private tangent. The tangent runs as its own recurrence beside the primal and uses the arrangement <code>jax.jvp</code> uses for each elementary rule. On 10,000 inputs per function the tangents match <code>jax.jvp</code> of the base revision exactly, with relative error 0. Truncating each recurrence by one term breaks that identity. The primal outputs are bit-identical to the base. The compile bound is not met. The harmonic family's tangent compiles 41.6 times slower than its primal, which is the same cost as <code>jax.jvp</code> of the base: a hand-written recurrence with the same arithmetic does not lower the XLA compile cost.</p>
+<table id="cfs-elliptic-tangent-recurrences-rows">
+<caption>Maximum relative error of the tangent against jax.jvp of the base (identity) and with one recurrence term dropped (truncated). Cold CPU compile in fresh processes with the persistent cache off and zero cache hits, from all_debug job 1281182.</caption>
+<thead><tr><th>function</th><th>identity</th><th>truncated</th><th>primal compile [s]</th><th>tangent compile [s]</th><th>jax.jvp compile [s]</th><th>tangent / primal</th></tr></thead>
+<tbody>
+<tr><td>complete_kind</td><td>0</td><td>1.4e18</td><td>0.365</td><td>1.158</td><td>0.798</td><td>3.17</td></tr>
+<tr><td>complete_pole</td><td>0</td><td>inf</td><td>0.419</td><td>1.032</td><td>0.811</td><td>2.46</td></tr>
+<tr><td>finite part</td><td>0</td><td>3.3e-5</td><td>0.099</td><td>0.115</td><td>0.129</td><td>1.16</td></tr>
+<tr><td>harmonic_moments</td><td>0</td><td>1.9e2</td><td>1.300</td><td>54.114</td><td>52.952</td><td>41.62</td></tr>
+<tr><td>harmonic_pole_moments</td><td>0</td><td>1.7e2</td><td>0.172</td><td>0.992</td><td>0.759</td><td>5.78</td></tr>
+<tr><td>harmonic_pole_moments, mirrored</td><td>0</td><td>2.2e4</td><td>0.202</td><td>1.008</td><td>0.806</td><td>5.00</td></tr>
+<tr><td>harmonic_root_moments</td><td>0</td><td>1.3e6</td><td>0.070</td><td>0.117</td><td>0.155</td><td>1.66</td></tr>
+<tr><td>cn_pole_moment</td><td>0</td><td>inf</td><td>0.384</td><td>1.054</td><td>0.800</td><td>2.75</td></tr>
+<tr><td>sn_pole_moment</td><td>0</td><td>2.6e3</td><td>0.448</td><td>1.060</td><td>0.774</td><td>2.37</td></tr>
+</tbody></table>
+<p id="cfs-elliptic-tangent-recurrences-arrangement">Exact agreement depends on the arrangement. A first version wrote the quotient rule as <code>(g - q g_y)/y</code> and missed <code>E</code>'s tangent by 4.1e-2 near a complement of 1e-16. There the tangent cancels terms of order <code>1/k'^2</code>, so an ulp of difference in each term reaches the leading digits. Using <code>jax.jvp</code>'s own forms, <code>g/y + (-g_y x)(1/y^2)</code> and <code>g (0.5/sqrt x)</code>, gives bit-identical results on the whole domain. That domain includes complements down to 1e-300, the confluence at zero, poles within 1e-4 of one, and zero shifts.</p>
+<p id="cfs-elliptic-tangent-recurrences-compile">Where the harmonic compile goes: with 3 orders and the full 96-order downward headroom the tangent compiles in 4.3 s against 0.5 s for the primal. With 43 orders and no headroom it takes 10.7 s against 0.8 s. With both at full size it takes 54 s, more than the parts added together. An optimisation barrier after every tangent step left it at 70.7 s, so the cost is not fusion duplicating producers across steps. That barrier was measured and then removed. Its patch had also reached the primal recurrence by mistake and was reverted, so the primal source has zero removed lines against the base.</p>
+</main></body></html>

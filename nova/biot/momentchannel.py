@@ -626,7 +626,9 @@ def _deflate_step_tangent(
     """Return one downward Clenshaw step of :func:`deflate` and its tangent."""
     return (
         2.0 * coefficient + 2.0 * root * current - upper,
-        2.0 * d_coefficient + 2.0 * (d_root * current + root * d_current) - d_upper,
+        2.0 * d_coefficient
+        + ((2.0 * d_root) * current + (2.0 * root) * d_current)
+        - d_upper,
     )
 
 
@@ -663,8 +665,8 @@ def _contract_tangent(numerator, d_numerator, moments, d_moments):
     """Return the tangent of :func:`contract` by its own product-sum recurrence."""
     total = 0.0
     for order, coefficient in enumerate(numerator):
-        total = (
-            total + d_numerator[order] * moments[order] + coefficient * d_moments[order]
+        total = total + (
+            d_numerator[order] * moments[order] + coefficient * d_moments[order]
         )
     return total
 
@@ -676,7 +678,7 @@ def _harmonic_multiply_tangent(left, d_left, right, d_right):
     out: list = [0.0] * (len(left) + len(right) - 1)
     for index, one in enumerate(left):
         for other_index, other in enumerate(right):
-            term = 0.5 * (d_left[index] * other + one * d_right[other_index])
+            term = (0.5 * d_left[index]) * other + (0.5 * one) * d_right[other_index]
             out[index + other_index] = out[index + other_index] + term
             out[abs(index - other_index)] = out[abs(index - other_index)] + term
     return out

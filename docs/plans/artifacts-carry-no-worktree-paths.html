@@ -23,9 +23,9 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -64,95 +64,12 @@
     (88a14b2ad). This plan applies the same rule to everything else, then closes the door
     with a guard so the next worker cannot reopen it.</p>
 
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-06</span>
     <h2 id="s2">§2 — One rewrite rule, applied to every committed data artifact</h2>
-<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
-    <p>The rule has one owner, <code>nova/database/filepath.py</code>. The root search in
-    <code>repository_relative</code> cannot serve here on its own: it finds a repository by
-    looking for the <code>.git</code> marker on disk, and the worktrees named in committed
-    artifacts no longer exist. So the rule is lexical. The nearest existing operation is reckon's
-    <code>_rewrite_worktree_roots</code> in <code>reckon/crew/promotion.py</code>. At replay time it
-    rewrites a run's recorded worktree roots inside a stored gate command to the absolute
-    checkout. Nova's rule differs in three ways. It cannot know the roots in advance, so it
-    matches any worktree path by its layout. It writes repository-relative paths, so an artifact
-    stays valid in any clone. And it rewrites committed text permanently rather than at replay.
-    Nova carries no reckon dependency it could import that function through, and the two answer
-    different questions, so neither replaces the other. The module gains one public function,
-    <code>relativize_worktree_paths(text)</code>, which returns the rewritten text together with
-    the list of worktree-path spans it could not map, and one constant holding the worktree
-    root's directory name, <code>reckon-worktrees</code>, which every other file imports instead
-    of spelling the pattern. The matcher covers both roots named in §1, with and without the
-    leading dot, and the rule below applies to a path under either.
-    <code>repository_relative</code> delegates its worktree case to the same matcher, so a path
-    under a removed worktree maps the same way through either entry point and the rule has one
-    definition. It cannot be folded into <code>repository_relative</code>, because it takes and
-    returns text rather than a path and it reports what it left unmapped. Beside it sits one
-    predicate, <code>worktree_path_offenders(paths, read)</code>. Given file paths and a reader for
-    their contents, it applies the exemption set and returns each non-exempt file that contains a
-    worktree path. It is the one decision both guards make: §4's check mode calls it with staged
-    files read from the index, and §4's test calls it with tracked files read from the tree. The
-    two differ only in which files they feed it. Its command is a <code>relativize</code> subcommand of the
-    existing <code>filepath</code> click group in <code>nova/database/scripts.py</code>, the
-    console script that <code>pyproject.toml</code> already registers as this module's
-    command-line owner. <code>filepath relativize FILE...</code> applies the function to the named
-    files in place, printing each file it changed and each span it left unmapped. With
-    <code>--check</code> it instead reads the files staged for commit and exits nonzero, naming
-    each one outside the exemption set that contains a worktree path. The §4 hook is a two-line
-    shim that runs this mode. So neither the pattern nor the exemption set is spelled anywhere
-    except <code>nova/database/filepath.py</code>, which holds both as module constants.</p>
-    <p>Accounting for the surface this adds: two public functions (the rewrite and the offender
-    predicate), two module constants, and one subcommand on the module's existing command group,
-    so no new command surface. Nothing in
-    nova rewrites or rejects worktree paths today, so nothing retires except the
-    receipt-directory scan named in §4. The constants are data shared by the function, the
-    subcommand and the guard test, not separate entry points. The subcommand is the only way to
-    run the function over files, and the hook adds no logic of its own. The rule:</p>
-    <ul>
-      <li>A path under a nova worktree,
-      <code>.reckon-worktrees/nova-&lt;hash&gt;/&lt;session&gt;/&lt;node&gt;/&lt;rest&gt;</code>,
-      is replaced by the bare string <code>&lt;rest&gt;</code>, for example
-      <code>docs/figures/x/receipt.json</code>, which is relative to the repository root.</li>
-      <li>A path under another repository's worktree is not rewritten. No committed file names
-      one today: every census match is a <code>nova-&lt;hash&gt;</code> worktree. Mapping such a
-      path would mean writing an absolute, machine-specific checkout path, which is the defect
-      this plan removes. So the matcher reports it as unmapped and leaves it unchanged, and the
-      §4 guard rejects it at commit like any other worktree path.</li>
-      <li>A bare nova worktree root with nothing below it, such as a recorded working directory,
-      is replaced by the literal string <code>.</code>.</li>
-      <li>The rewrite is idempotent and changes nothing outside the matched spans: the same bytes
-      elsewhere, the same line endings, and every JSON file still parses.</li>
-    </ul>
-    <p>The node first censuses the spellings present, because the matcher must cover each one:
-    the absolute form, which is the only path spelling present at f574e2817. There, 1,142 of the
-    1,147 files name paths under <code>nova-a0f1e0938fc2</code>. The other five name the root
-    itself with nothing below it, so the rewrite has nothing to map in them. Two are benchmark
-    scripts that compare paths against the root string
-    (<code>benchmarks/backend_divergence_forensics.py</code> and
-    <code>benchmarks/pure_arm_comparison_figure.py</code>). Two are evidence fragments under
-    <code>docs/evidence/fragments/figure-and-solver-audit/</code> that mention it as a subject, and
-    one is <code>tests/test_render_receipt_paths.py</code>, whose scan §4 retires. The §3 node
-    makes the two benchmarks import the constant and rewords the two fragments, so the guard
-    passes. A <code>~</code> form, JSON-escaped slashes or any other spelling found
-    later is reported, not guessed.
-    A path split
-    across two lines by a log's line wrap is not rewritten, because doing so would change that
-    line's ending. Like any spelling the matcher cannot map, it is listed with its file and line
-    in the node's report, under its report path, and left unchanged rather than guessed. The
-    same-bytes and same-line-endings promise therefore covers every span the matcher rewrites,
-    and every rewritten span lies on one line.</p>
-    <p>The <code>docs/figures/converged-forward-solve</code> topic was held while S21's live runs
-    wrote there. S21 reported those directories quiet on 2026-10-06, before this node
-    dispatched, and keeps its writes out of them until this node lands, so their 74 logs are
-    rewritten here with the rest.</p>
-    <p><strong>Done when:</strong> no data file contains the pattern. A
-    check script re-applies the function to each rewritten file as it stood at the node's
-    dispatch base and asserts that the result equals the committed bytes, which makes the
-    rewrite reviewable as a mechanical transform. Every rewritten JSON file still parses.
-    <code>tests/test_filepath.py</code>, which already exists, gains tests for each mapping
-    form, for idempotence, for the <code>repository_relative</code> delegation on a removed
-    worktree, and for an unmapped form that comes back in the unmapped list while the text is
-    left unchanged. The tests build the pattern from the module constant. They fail against a
-    scratch copy of the function with its nova mapping disabled, logged as the negative control.
-    No launch script, PNG or SVG changes, and no solve runs.</p>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="done" data-links=""></section></header>
+  <p class="landed-summary">Landed at bf2d0f38e: one lexical rule in <code>nova.database.filepath</code>, a <code>filepath relativize</code> subcommand, and 1,079 committed data files rewritten to repository-relative paths, each reproducible from its base revision. Five files with spellings the rule cannot map go to the §3 node. <a href="s2">full record</a></p>
+</section>
 
     <h2 id="s3">§3 — Launch scripts resolve the repository root when they run</h2>
 <section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
@@ -256,10 +173,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-acnwp-rewrite-data-artifacts" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-acnwp-rewrite-data-artifacts" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §2" data-resolved-at="2026-10-06T04:17:49+00:00" data-resolved-by="s22-nova">
     <h4 class="r-fu-title">Add the worktree-path rewrite rule and apply it to every committed data artifact</h4>
     <div class="r-fu-body"><p>Section 2: one rule in <code>nova.database.filepath</code>, one script that applies it, the census of prefix forms, and the mechanical rewrite of the data files, reproducible from each file's base revision. Then §3 and §4 follow in one node: launch scripts that resolve their root at run time, and the guard test and check-only hook.</p></div>
     <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §2</pre>
+    <p class="r-fu-outcome">Landed at bf2d0f38e (review 102): the rule, its offender predicate and constants, the filepath relativize subcommand, and 1,079 data files rewritten. The §3 node carries the launch scripts, the five unmapped data files, the two bare-root benchmarks and the §4 guard.</p>
+    </article>
+<article class="r-fu" data-id="f-acnwp-launch-scripts-and-guard" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Launch scripts resolve their root at run time, the residual files are fixed, and the guard lands</h4>
+    <div class="r-fu-body"><p>Sections 3 and 4 in one node. Give each launch script in the census its run-time root, using the realpath-first idiom in shell or git rev-parse from the script file in Python. Run comment-only scripts through the rule. Make <code>benchmarks/backend_divergence_forensics.py</code> and <code>benchmarks/pure_arm_comparison_figure.py</code> import <code>WORKTREE_ROOT</code>. Reword the two figure-and-solver-audit fragments and <code>docs/evidence/replan-2026-09-24/thin-interfaces.md</code>, and repair the truncated and space-broken paths in the two landed records by hand. Add <code>filepath relativize --check</code>, <code>tests/test_artifacts_carry_no_worktree_paths.py</code> calling <code>worktree_path_offenders</code>, and the hook shim <code>scripts/git-hooks/pre-commit</code>. Delete the superseded scan in <code>tests/test_render_receipt_paths.py</code> and its helpers. Done when the guard test passes at the head and fails at the base, and the hook rejects and then accepts a scratch file, each logged.</p></div>
+    <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §3</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

@@ -118,21 +118,12 @@ def _topology_row(case_name, radial, vertical, wall_nodes):
 
 
 def _designed_tangency(wall):
-    """The limiter tangency the fixture authors, found from the wall geometry.
+    """The designed limiter contact, read from the fixture that authors it.
 
-    The supporting lines of the limiter start at the outboard contact, so the
-    contact is the short vertical edge at the largest major radius that crosses
-    the midplane, and the designed tangency is that edge's midpoint.  The edge
-    is located from the polygon alone, so no vertex index convention enters.
+    The one owner of the construction is ``measure.designed_contact``; the test
+    delegates so it cannot drift from the benchmarks.
     """
-    wall = np.asarray(wall, dtype=np.float64)
-    following = np.roll(wall, -1, axis=0)
-    crossing = wall[:, 1] * following[:, 1] <= 0.0
-    assert np.any(crossing), "the wall has no edge crossing the midplane"
-    midpoint = 0.5 * (wall + following)
-    candidates = np.flatnonzero(crossing)
-    outboard = candidates[np.argmax(midpoint[candidates, 0])]
-    return midpoint[outboard]
+    return oracle_fixture.designed_contact(wall)
 
 
 def test_limiter_contact_is_spline_authored_at_analytic_tangency():
@@ -166,30 +157,35 @@ def test_wall_refinement_preserves_spline_authored_contact(case_name):
     assert position_delta <= coarse["median_panel_m"]
 
 
-# The designed contact lies on a vertical wall edge, so the radial coordinate is
-# exact by construction and only the height along the edge is read.  Flux is
-# stationary in that direction, so the height is resolved only to the rounding
-# of the flux values: the measured heights sit at 2.6e-15 m (241 nodes) and
-# 6.2e-13 m (481 nodes), independent of the panel size.  Below this floor a
-# ratio between two rungs compares rounding noise rather than truncation error.
-CONTACT_ROUNDOFF_FLOOR_M = 1.0e-9
+# The designed contact lies on the wall's short vertical edge at the outboard
+# midplane.  Its radial coordinate is the edge's major radius, exact by
+# construction; along the edge the flux is stationary, so the read resolves the
+# height only to the rounding of the flux values, not the panel size.  The
+# measured errors are 2.6e-15 m at 241 nodes and 6.2e-13 m at 481 nodes, both
+# swallowed by the roundoff bound below.  A ratio between the two rungs would
+# compare rounding residuals rather than a convergence order the operating point
+# cannot exercise.
+CONTACT_ROUNDOFF_BOUND_M = 1.0e-9
 
 
-def test_weak_position_error_is_second_order_between_241_and_481():
-    """The weak contact position error against the designed tangency is already
-    at the rounding floor (far below 1 um on 4-8 cm wall panels) at 241 nodes and
-    does not degrade at 481, which is the strongest form of the at-least-second-
-    order contract.  Errors below the rounding floor are compared at the floor,
-    since a ratio of rounding residuals carries no convergence information."""
+def test_weak_contact_position_is_exact_at_both_wall_resolutions():
+    """The weak designed contact is exact by construction at both rungs.
+
+    The contact is the midpoint of the wall's vertical outboard edge, so its
+    radial coordinate is exact and its height error is flux rounding, not a
+    discretisation error that shrinks with the panel count.  Both the 241-node
+    and 481-node reads are asserted at or below the stated roundoff bound, which
+    is the strongest contract the geometry supports; the test does not claim a
+    241-to-481 convergence order the operating point cannot exercise.
+    """
     coarse = _topology_row(WEAK, 45, 55, 241)
     fine = _topology_row(WEAK, 45, 55, 481)
     coarse_error = np.linalg.norm(
         coarse["contact"][:2] - _designed_tangency(coarse["wall"])
     )
     fine_error = np.linalg.norm(fine["contact"][:2] - _designed_tangency(fine["wall"]))
-    assert coarse_error < 1.0e-6
-    assert fine_error < 1.0e-6
-    assert fine_error <= 4.0 * max(coarse_error, CONTACT_ROUNDOFF_FLOOR_M)
+    assert coarse_error <= CONTACT_ROUNDOFF_BOUND_M
+    assert fine_error <= CONTACT_ROUNDOFF_BOUND_M
 
 
 def test_diverted_position_stays_within_one_wall_panel():

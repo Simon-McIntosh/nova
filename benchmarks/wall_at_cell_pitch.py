@@ -105,13 +105,16 @@ def _wall_metrics(case_name: str, exact: Any, requested_cells: int) -> dict[str,
     """Return the realised pitch and limiter perimeter of the 121-node carrier."""
 
     machine = audit._machine(case_name, exact, exact, requested_cells, 121)
-    panel_lengths = np.linalg.norm(
-        np.roll(machine.wall_node, -1, axis=0) - machine.wall_node, axis=1
-    )
+    wall_node = np.asarray(machine.wall_node, dtype=np.float64)
+    panel_lengths = np.linalg.norm(np.roll(wall_node, -1, axis=0) - wall_node, axis=1)
     perimeter = float(np.sum(panel_lengths))
     pitch = float(np.sqrt(np.median(np.asarray(machine.area, dtype=np.float64))))
     average_panel = perimeter / len(panel_lengths)
-    outboard_panel = float(panel_lengths[(len(panel_lengths) - 1) // 2])
+    contact = oracle_fixture.designed_contact(wall_node)
+    panel_midpoints = 0.5 * (wall_node + np.roll(wall_node, -1, axis=0))
+    outboard_panel = float(
+        panel_lengths[int(np.argmin(np.linalg.norm(panel_midpoints - contact, axis=1)))]
+    )
     return {
         "realised_cells": int(len(machine.node)),
         "pitch_m": pitch,
@@ -125,8 +128,8 @@ def _per_pitch_wall_counts(metrics: dict[str, float]) -> dict[str, int]:
 
     The outboard panel is ``outboard_panel_factor`` average panels, so setting
     the count to ``perimeter x factor / (target x pitch)`` places that panel at
-    ``target`` pitches.  Each count is rounded to the nearest odd integer so
-    ``limiter_contour`` keeps a node exactly on the outboard tangency.
+    ``target`` pitches.  Each count is rounded to the nearest odd integer, the
+    parity ``limiter_contour`` requires.
     """
 
     def odd(value: float) -> int:
@@ -605,9 +608,7 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
                 for row in rows
                 if row["case"] == case and abs(row["requested_cells"]) == cells
             ]
-            sampled = any(
-                row["sampling_label"] is not None for row in group
-            )
+            sampled = any(row["sampling_label"] is not None for row in group)
             caveat = (
                 ""
                 if sampled

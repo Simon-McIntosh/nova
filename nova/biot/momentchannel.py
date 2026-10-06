@@ -527,9 +527,13 @@ def _pole_contraction(numerator, shift, seed, family, moments, mirrored, *, xp):
 
 
 def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
-    """Return the tangent of ``numerator/denominator`` by the quotient rule."""
-    return d_numerator / denominator - d_denominator * numerator / (
-        denominator * denominator
+    """Return the tangent of ``numerator / denominator``.
+
+    Ordered as the quotient and the reciprocal square are formed, so a value
+    whose two halves cancel rounds as the primal program's own tangent does.
+    """
+    return d_numerator / denominator + (-d_denominator * numerator) * (
+        1.0 / (denominator * denominator)
     )
 
 
@@ -616,7 +620,9 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     return primal, tangent
 
 
-def _deflate_step_tangent(coefficient, d_coefficient, root, d_root, current, d_current, upper, d_upper):
+def _deflate_step_tangent(
+    coefficient, d_coefficient, root, d_root, current, d_current, upper, d_upper
+):
     """Return one downward Clenshaw step of :func:`deflate` and its tangent."""
     return (
         2.0 * coefficient + 2.0 * root * current - upper,
@@ -647,7 +653,9 @@ def _deflate_tangent(series: list, d_series: list, root, d_root):
     quotient[0] = series[1] + root * current - 0.5 * upper
     d_quotient[0] = d_series[1] + (d_root * current + root * d_current) - 0.5 * d_upper
     value = series[0] + root * quotient[0] - 0.5 * current
-    d_value = d_series[0] + (d_root * quotient[0] + root * d_quotient[0]) - 0.5 * d_current
+    d_value = (
+        d_series[0] + (d_root * quotient[0] + root * d_quotient[0]) - 0.5 * d_current
+    )
     return (quotient, value), (d_quotient, d_value)
 
 
@@ -656,9 +664,7 @@ def _contract_tangent(numerator, d_numerator, moments, d_moments):
     total = 0.0
     for order, coefficient in enumerate(numerator):
         total = (
-            total
-            + d_numerator[order] * moments[order]
-            + coefficient * d_moments[order]
+            total + d_numerator[order] * moments[order] + coefficient * d_moments[order]
         )
     return total
 
@@ -681,9 +687,11 @@ def _across_the_range_tangent(d_term: tuple) -> list:
     d_bulk, d_near, d_far = d_term
     ends = [0.5 * (d_near + d_far), 0.5 * (d_far - d_near)]
     both = [0.125, 0.0, -0.125]
-    product = _harmonic_multiply_tangent(
-        both, [0.0] * len(both), d_bulk, d_bulk
-    ) if d_bulk else []
+    product = (
+        _harmonic_multiply_tangent(both, [0.0] * len(both), d_bulk, d_bulk)
+        if d_bulk
+        else []
+    )
     length = max(len(ends), len(product))
     out: list = [0.0] * length
     for series in (ends, product):
@@ -720,11 +728,15 @@ def _pole_contraction_tangent(
     weighted = harmonic_multiply(half, bulk)
     d_weighted = _harmonic_multiply_tangent(half, d_half, bulk, d_bulk)
     lever = end * (1.0 + shift) - other * shift
-    d_lever = d_end * (1.0 + shift) + end * d_shift - (d_other * shift + other * d_shift)
+    d_lever = (
+        d_end * (1.0 + shift) + end * d_shift - (d_other * shift + other * d_shift)
+    )
     factor = -2.0 if mirrored else 2.0
     deflated = value * seed + factor * contract(quotient, moments)
-    d_deflated = d_value * seed + value * d_seed + factor * _contract_tangent(
-        quotient, d_quotient, moments, d_moments
+    d_deflated = (
+        d_value * seed
+        + value * d_seed
+        + factor * _contract_tangent(quotient, d_quotient, moments, d_moments)
     )
     product = shift * (1.0 + shift)
     d_product = d_shift * (1.0 + shift) + shift * d_shift

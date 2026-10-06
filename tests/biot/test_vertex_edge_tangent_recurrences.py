@@ -85,11 +85,15 @@ def _signed(rng, low, high, size=SAMPLES):
 
 
 def _denominator_domain(rng):
-    """Return a factorable denominator: positive ends, any ``x y`` coefficient."""
+    """Return a factorable denominator: positive ends and ``x y`` coefficient.
+
+    Both shifts are non-negative over the jet's denominators, which is a
+    non-negative ``x y`` coefficient against positive end values.
+    """
     near = _magnitude(rng, -12.0, 6.0)
     far = _magnitude(rng, -12.0, 6.0)
     far[:500] = near[:500]  # a vertical edge over a target level with both ends
-    leading = _signed(rng, -12.0, 6.0)
+    leading = _magnitude(rng, -12.0, 6.0)
     leading[:1000] = 0.0  # a vertical edge: a linear denominator
     near[1000:1100] = 0.0  # one end on the root
     rest = [rng.normal(size=SAMPLES) for _ in range(2)]
@@ -157,11 +161,9 @@ def _vertex_pieces(radius, level, offset):
 def _graded_tangent(primals, tangents):
     radius, level, offset, lower, upper = primals
     d_radius, d_level, d_offset, d_lower, d_upper = tangents
-    held_radius = jnp.where(radius > 0.0, radius, 1.0)
     d_span = 2.0 * jnp.where(radius > 0.0, d_radius, 0.0)
     d_level_offset = jnp.where(level >= 0.0, d_level, -d_level)
     panels = _vertex_panels(radius, level, offset, lower, upper)
-    del held_radius
     d_panels = (
         (d_level_offset, d_offset + 2.0 * d_radius, d_span, d_lower[0], d_upper[0]),
         (d_level_offset, d_offset, d_span, d_lower[1], d_upper[1]),
@@ -170,12 +172,17 @@ def _graded_tangent(primals, tangents):
     dr, du, do = d_radius[:, None], d_level[:, None], d_offset[:, None]
 
     def pieces_tangent(x, d_x, y, d_y):
-        numerator = o + 2.0 * r * y
-        d_numerator = do + 2.0 * (dr * y + r * d_y)
-        cross = 4.0 * r**2 * x * y
-        d_cross = 4.0 * (2.0 * r * dr * x * y + r**2 * (d_x * y + x * d_y))
+        # each product's tangent in the order the pieces form it
+        twice = 2.0 * r
+        numerator = o + twice * y
+        d_numerator = do + (2.0 * dr * y + twice * d_y)
+        quadruple = 4.0 * r**2
+        d_quadruple = 4.0 * (dr * (2.0 * r))
+        cross = quadruple * x
+        d_cross = d_quadruple * x + quadruple * d_x
+        cross, d_cross = cross * y, d_cross * y + cross * d_y
         denominator = jnp.sqrt(u**2 + cross)
-        d_denominator = (2.0 * u * du + d_cross) * (0.5 / denominator)
+        d_denominator = (du * (2.0 * u) + d_cross) * (0.5 / denominator)
         return (numerator, denominator), (d_numerator, d_denominator)
 
     return gradedresidual._graded_residual_tangent(
@@ -226,8 +233,18 @@ def _cases():
         name = "pole_contraction" + ("_mirrored" if mirrored else "")
         cases[name] = (
             lambda p, t, mirrored=mirrored: momentchannel._pole_contraction_tangent(
-                p[0], t[0], p[1], t[1], p[2], t[2], p[3], t[3], p[4], t[4],
-                mirrored, xp=jnp,
+                p[0],
+                t[0],
+                p[1],
+                t[1],
+                p[2],
+                t[2],
+                p[3],
+                t[3],
+                p[4],
+                t[4],
+                mirrored,
+                xp=jnp,
             ),  # fmt: skip
             lambda n, s, c, f, m, mirrored=mirrored: BASE_CHANNEL._pole_contraction(
                 n, s, c, f, m, mirrored, xp=jnp
@@ -301,13 +318,9 @@ def _finite_fraction(tree):
     return float(np.mean(np.all(np.stack([np.ravel(v) for v in leaves]), axis=0)))
 
 
-def _without(term):
-    """Return a quotient-rule tangent with its denominator term dropped."""
-
-    def truncated(numerator, d_numerator, denominator, d_denominator):
-        return d_numerator / denominator
-
-    return truncated
+def _truncated_quotient(numerator, d_numerator, denominator, d_denominator):
+    """The quotient rule's tangent with its denominator term dropped."""
+    return d_numerator / denominator
 
 
 def _truncated_deflate_step(
@@ -342,7 +355,7 @@ def _truncated_model_integral(*arguments):
 _MODEL_INTEGRAL = gradedresidual._model_integral_tangent
 
 TRUNCATIONS = {
-    "factorise": [(momentchannel, "_quotient_tangent", _without("denominator"))],
+    "factorise": [(momentchannel, "_quotient_tangent", _truncated_quotient)],
     "pole_contraction": [
         (momentchannel, "_deflate_step_tangent", _truncated_deflate_step)
     ],

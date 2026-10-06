@@ -221,6 +221,31 @@ def _held_tangent(condition, value, d_value, fill, xp):
     return xp.where(condition, value, fill), xp.where(condition, d_value, 0.0)
 
 
+def _product_tangent(left, d_left, right, d_right):
+    """Return the tangent of ``left * right`` by the product rule."""
+    return d_left * right + left * d_right
+
+
+def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
+    """Return the tangent of ``numerator / denominator``.
+
+    Ordered as the quotient and the reciprocal square are formed, so a value
+    whose two halves cancel rounds as the primal program's own tangent does.
+    """
+    return d_numerator / denominator + (-d_denominator * numerator) * (
+        1.0 / (denominator * denominator)
+    )
+
+
+def _reciprocal_root(value, xp):
+    """Return ``1/sqrt(value)``, by the fused reciprocal root on a traced array."""
+    if xp is np:
+        return 1.0 / np.sqrt(value)
+    from jax import lax
+
+    return lax.rsqrt(value)
+
+
 def _model_integral_tangent(
     offset, d_offset, scale, d_scale, lower, d_lower, upper, d_upper, xp
 ):
@@ -232,34 +257,34 @@ def _model_integral_tangent(
         live = bound > 0.0
         held_bound, d_held_bound = _held_tangent(live, bound, d_bound, 1.0, xp)
         stretched = scale * held_bound
-        d_stretched = d_scale * held_bound + scale * d_held_bound
+        d_stretched = _product_tangent(scale, d_scale, held_bound, d_held_bound)
         square = offset**2 + stretched**2
-        d_square = 2.0 * offset * d_offset + 2.0 * stretched * d_stretched
+        d_square = d_offset * (2.0 * offset) + d_stretched * (2.0 * stretched)
         logarithm = xp.log(square)
         d_logarithm = d_square / square
-        argument = held_scale * bound / held_offset
-        d_argument = (
-            d_held_scale * bound + held_scale * d_bound
-        ) / held_offset - d_held_offset * (held_scale * bound) / (
-            held_offset * held_offset
+        coefficient = 2.0 * offset / held_scale
+        d_coefficient = _quotient_tangent(
+            2.0 * offset, 2.0 * d_offset, held_scale, d_held_scale
         )
+        reach = held_scale * bound
+        d_reach = _product_tangent(held_scale, d_held_scale, bound, d_bound)
+        argument = reach / held_offset
+        d_argument = _quotient_tangent(reach, d_reach, held_offset, d_held_offset)
         angle = xp.arctan(argument)
         d_angle = d_argument / (1.0 + argument * argument)
-        coefficient = 2.0 * offset / held_scale
-        d_coefficient = 2.0 * d_offset / held_scale - d_held_scale * (
-            2.0 * offset
-        ) / (held_scale * held_scale)
         value = 0.5 * (
             xp.where(live, bound * logarithm, 0.0)
             - 2.0 * bound
             + xp.where(scale > 0.0, coefficient * angle, 2.0 * bound)
         )
         d_value = 0.5 * (
-            xp.where(live, d_bound * logarithm + bound * d_logarithm, 0.0)
+            xp.where(
+                live, _product_tangent(bound, d_bound, logarithm, d_logarithm), 0.0
+            )
             - 2.0 * d_bound
             + xp.where(
                 scale > 0.0,
-                d_coefficient * angle + coefficient * d_angle,
+                _product_tangent(coefficient, d_coefficient, angle, d_angle),
                 2.0 * d_bound,
             )
         )
@@ -273,8 +298,12 @@ def _regularised_tangent(
     numerator, d_numerator, denominator, d_denominator, model, d_model, sign, xp
 ):
     """Return :func:`_regularised` and its tangent, branch for branch."""
-    radical = numerator * numerator + denominator * denominator
-    d_radical = 2.0 * numerator * d_numerator + 2.0 * denominator * d_denominator
+    square = denominator * denominator
+    d_square = _product_tangent(denominator, d_denominator, denominator, d_denominator)
+    radical = numerator * numerator + square
+    d_radical = (
+        _product_tangent(numerator, d_numerator, numerator, d_numerator) + d_square
+    )
     root = xp.sqrt(radical)
     d_root = d_radical * (0.5 / root)
     direct, d_direct = numerator + root, d_numerator + d_root
@@ -285,24 +314,16 @@ def _regularised_tangent(
     other = xp.where(positive, mirror, direct)
     d_other = xp.where(positive, d_mirror, d_direct)
     held_other, d_held_other = _held_tangent(other > 0.0, other, d_other, 1.0, xp)
-    square = denominator * denominator
-    d_square = 2.0 * denominator * d_denominator
     same = positive == (numerator >= 0.0)
     base = xp.where(same, pick, square / held_other)
     d_base = xp.where(
-        same,
-        d_pick,
-        d_square / held_other
-        - d_held_other * square / (held_other * held_other),
+        same, d_pick, _quotient_tangent(square, d_square, held_other, d_held_other)
     )
-    live = sign != 0.0
-    factor, d_factor = _held_tangent(live, model, d_model, 1.0, xp)
+    factor, d_factor = _held_tangent(sign != 0.0, model, d_model, 1.0, xp)
     product = base * factor
-    d_product = d_base * factor + base * d_factor
+    d_product = _product_tangent(base, d_base, factor, d_factor)
     argument = product / denominator
-    d_argument = d_product / denominator - d_denominator * product / (
-        denominator * denominator
-    )
+    d_argument = _quotient_tangent(product, d_product, denominator, d_denominator)
     orientation = xp.where(sign < 0.0, -1.0, 1.0)
     return (
         orientation * xp.log(argument),
@@ -334,35 +355,34 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
         offset, end, scale, lower, upper = values
         d_offset, d_end, d_scale, d_lower, d_upper = tangents
         reach = xp.where(offset > 0.0, offset, xp.abs(end))
-        d_reach = xp.where(
-            offset > 0.0, d_offset, xp.where(end >= 0.0, d_end, -d_end)
-        )
+        d_reach = xp.where(offset > 0.0, d_offset, xp.where(end >= 0.0, d_end, -d_end))
         ratio = reach / scale
-        d_ratio = d_reach / scale - d_scale * reach / (scale * scale)
+        d_ratio = _quotient_tangent(reach, d_reach, scale, d_scale)
         clipped, d_clipped = _clip_tangent(ratio, d_ratio, LAYER_FLOOR, 1.0, xp)
         width, d_width = _held_tangent(reach > 0.0, clipped, d_clipped, 1.0, xp)
         held, d_held = width[:, None], d_width[:, None]
 
         def arsinh(bound, d_bound):
             argument = bound / width
-            d_argument = d_bound / width - d_width * bound / (width * width)
+            d_argument = _quotient_tangent(bound, d_bound, width, d_width)
             return (
                 xp.arcsinh(argument)[:, None],
-                (d_argument / xp.sqrt(argument * argument + 1.0))[:, None],
+                (d_argument * _reciprocal_root(argument**2 + 1.0, xp))[:, None],
             )
 
         start, d_start = arsinh(lower, d_lower)
         high, d_high = arsinh(upper, d_upper)
         span, d_span = high - start, d_high - d_start
-        stretch = start + 0.5 * span * (node + 1.0)[None, :]
-        d_stretch = d_start + 0.5 * d_span * (node + 1.0)[None, :]
+        half_span = 0.5 * span
+        stretch = start + half_span * (node + 1.0)[None, :]
+        d_stretch = d_start + (0.5 * d_span) * (node + 1.0)[None, :]
         stretched = xp.sinh(stretch)
-        d_stretched = xp.cosh(stretch) * d_stretch
+        d_stretched = d_stretch * xp.cosh(stretch)
         panel_offset = held * stretched
-        d_panel_offset = d_held * stretched + held * d_stretched
+        d_panel_offset = _product_tangent(held, d_held, stretched, d_stretched)
         sine = xp.sin(panel_offset)
         near = sine**2
-        d_near = 2.0 * sine * (xp.cos(panel_offset) * d_panel_offset)
+        d_near = (d_panel_offset * xp.cos(panel_offset)) * (2.0 * sine)
         if panel:
             x, d_x, y, d_y = 1.0 - near, -d_near, near, d_near
         else:
@@ -372,18 +392,23 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
         )
         sign = xp.sign(end)[:, None]
         scaled = scale[:, None] * panel_offset
-        d_scaled = d_scale[:, None] * panel_offset + scale[:, None] * d_panel_offset
-        model_radical = offset[:, None] ** 2 + scaled * scaled
-        model = xp.sqrt(model_radical)
+        d_scaled = _product_tangent(
+            scale[:, None], d_scale[:, None], panel_offset, d_panel_offset
+        )
+        model = xp.sqrt(offset[:, None] ** 2 + scaled * scaled)
         d_model = (
-            2.0 * offset[:, None] * d_offset[:, None] + 2.0 * scaled * d_scaled
+            d_offset[:, None] * (2.0 * offset[:, None])
+            + _product_tangent(scaled, d_scaled, scaled, d_scaled)
         ) * (0.5 / model)
-        half_span = 0.5 * span * held
-        d_half_span = 0.5 * (d_span * held + span * d_held)
-        cosine = xp.sqrt(1.0 + stretched * stretched)
-        d_cosine = (2.0 * stretched * d_stretched) * (0.5 / cosine)
-        jacobian = half_span * cosine
-        d_jacobian = d_half_span * cosine + half_span * d_cosine
+        lever = half_span * held
+        d_lever = _product_tangent(half_span, 0.5 * d_span, held, d_held)
+        growth = 1.0 + stretched * stretched
+        cosine = xp.sqrt(growth)
+        d_cosine = _product_tangent(stretched, d_stretched, stretched, d_stretched) * (
+            0.5 / cosine
+        )
+        jacobian = lever * cosine
+        d_jacobian = _product_tangent(lever, d_lever, cosine, d_cosine)
         bounded, d_bounded = _regularised_tangent(
             numerator, d_numerator, denominator, d_denominator, model, d_model,
             sign, xp,
@@ -395,7 +420,7 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
         total = total + (jacobian * bounded) @ weight - orientation * model_integral
         d_total = (
             d_total
-            + (d_jacobian * bounded + jacobian * d_bounded) @ weight
+            + _product_tangent(jacobian, d_jacobian, bounded, d_bounded) @ weight
             - orientation * d_model_integral
         )
     return total, d_total

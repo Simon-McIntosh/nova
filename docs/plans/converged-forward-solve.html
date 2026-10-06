@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -242,6 +242,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T000840521420-cfs-kernel-cold-compile-correction" data-who="reckon-build" data-when="2026-10-06T00:29:35Z">
     <div class="r-comment-body"><p>Corrected the kernel compile receipt: 11.2194146/7.91631825 s were cache hits; fresh-process cache-disabled H200 baseline/head walls were 83.8920958/83.6310465 s with 2912 executable bytes each; the 30 s head bound is strict xfail and a warmed-cache hit is refused.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T003145901922-review-of-cfs-kernel-cold-compile-correction" data-who="reckon-build" data-when="2026-10-06T00:37:46.088Z">
+    <div class="r-comment-body"><p>Independent review of r-20261006T000840521420-cfs-kernel-cold-compile-correction at base 7302d6fda04eeb4bf14f9bc3b9c4bcf3735f31bb / head 51a5f29f27a56c124d6080566794e348860427bc: approved (total 109/120); the correction is sound — the old 11.2215925/7.84881509 s walls were cache hits (guard recorded jit_jet hits with stored 81/86 s costs), the fresh-process cache-disabled H200 gate measured 83.8920958/83.6310465 s with executable_bytes=2912 and cache=miss, the under-30 s bound is a strict xfail naming the 80.1573431 s wall, and the warmed-cache control refuses the hit; two follow-on notes only.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

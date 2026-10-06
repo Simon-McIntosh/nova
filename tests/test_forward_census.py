@@ -394,7 +394,17 @@ def _diverted_oracle_read(requested_cells: int):
 
 
 def test_forward_census_exact_diverted_oracle():
-    """The carrier wall excludes the analytic saddle at both resolutions."""
+    """The carrier wall excludes the analytic saddle at both resolutions.
+
+    The realised cell counts are the hexes of a lattice tiled over the carrier's
+    limiter wall that meet that wall, so they follow the wall: a circumscribing
+    wall encloses 1.9052 m^2 where a chord wall through the same boundary points
+    encloses 1.9072 m^2, every lattice cell centre moves with it, and the fine
+    rung realises 341 cells in place of 342 while the coarse rung still realises
+    136.  The count is a
+    lattice-incidence number with no closed form, so it is pinned to the repaired
+    wall and the structural claims below do not depend on it.
+    """
     from benchmarks.solovev_certificate import AXIS_M, X_POINT_M
 
     _carrier, coarse_machine, coarse_operator, coarse_state, coarse_census = (
@@ -431,7 +441,7 @@ def test_forward_census_exact_diverted_oracle():
     )
     fine_pitch = float(np.sqrt(np.median(np.asarray(fine_machine.area))))
 
-    assert len(fine_machine.node) == 342
+    assert len(fine_machine.node) == 341
     assert not fine_operator._fixed_design_topology.grid.structured
     assert not bool(fine_census["spline_authored"])
     np.testing.assert_allclose(np.asarray(fine_state.axis), AXIS_M, atol=fine_pitch)
@@ -488,7 +498,7 @@ def test_forward_census_diverted_oracle_pitch_ladder_admits_no_saddle():
     and refinement does not move the wall that excludes the saddle. The
     measured ring-centre distances are what settle the question -- at 136 cells
     the nearest of 55 ring centres is 2.51 cell pitches from the saddle, and at
-    342 cells the nearest of 203 is 1.91, both far outside the quarter-pitch
+    341 cells the nearest of 203 is 1.91, both far outside the quarter-pitch
     admission window. Refinement is not a route to that window either: the wall
     does not refine while the pitch shrinks, so the saddle's distance from the
     wall, held in metres, grows without limit when counted in cell pitches. This fixture

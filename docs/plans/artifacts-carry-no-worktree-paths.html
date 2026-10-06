@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -39,21 +39,19 @@
     that names a path inside one names a path that will not exist. The evidence then stops
     locating its own figures, logs and scripts, and a launch script that changes directory
     into a worktree stops running at all.</p>
-    <p>A first census of <code>origin/main</code> at 88a14b2ad found 1,146 tracked files outside
-    <code>docs/plans</code> and <code>docs/state</code> containing the string
-    <code>.reckon-worktrees</code>. The counts in this section come from that census. The tree
-    gains such files as runs land, and a later count that included the older root found 1,149,
-    so every node works from its own census, taken at its dispatch base, and never from these
-    numbers. 1,071 sit under <code>docs/figures</code> in 38 topic
-    directories, 62 under <code>scripts/</code>, 11 under <code>docs/evidence</code>, one under
-    <code>tests/</code> and one under <code>docs/research</code>, which §5 keeps out with
-    <code>docs/plans</code> and <code>docs/state</code>. By extension they are 611 logs,
-    433 JSON receipts, 12 text files, 10 HTML files, 8 Markdown files, 7 stdout and stderr
-    captures, one patch file, and 64 launch scripts.</p>
+    <p>The census is the command <code>git grep -l -I 'reckon-worktrees' &lt;revision&gt; -- .
+    ':!docs/plans' ':!docs/state' ':!docs/research'</code>, which matches both worktree roots;
+    §5 says why those three directories stay out. Run at <code>origin/main</code> f574e2817 it
+    lists 1,147 tracked files: 1,071 under <code>docs/figures</code> in 38 topic directories,
+    58 under <code>scripts/</code>, 12 under <code>docs/evidence</code>, 3 under
+    <code>benchmarks/</code>, 2 under <code>tests/</code> and 1 under <code>nova/</code>. The tree
+    gains such files as runs land, so every node runs the census itself at its dispatch base and
+    works from that list, never from these numbers.</p>
     <p>In this plan a <em>launch script</em> is any census file ending <code>.sh</code>,
-    <code>.sbatch</code> or <code>.py</code>, wherever it sits: 48, 10 and 6 of them, 59 under
-    <code>docs/figures</code> and 5 under <code>scripts/</code>. Every other census file outside
-    <code>docs/research</code>, 1,081 in all, is a <em>data file</em>. Data files are rewritten
+    <code>.sbatch</code> or <code>.py</code>, wherever it sits. At f574e2817 there are 65: 48, 10
+    and 7 of each, 59 under <code>docs/figures</code>, 3 under <code>benchmarks/</code> and one each
+    under <code>scripts/</code>, <code>tests/</code> and <code>nova/</code>. Every other census
+    file, 1,082 at that revision, is a <em>data file</em>. Data files are rewritten
     mechanically (§2). Launch scripts are read one by one (§3), because a literal path there may
     be a <code>cd</code> target or an output root that has to be derived at run time, or may be
     only a comment that the mechanical rule can rewrite.</p>
@@ -77,18 +75,21 @@
     under a removed worktree maps the same way through either entry point and the rule has one
     definition. That function is the only public surface the plan adds. It cannot be folded into
     <code>repository_relative</code>, because it takes and returns text rather than a path and it
-    reports what it left unmapped. <code>scripts/relativize_worktree_paths.py</code> applies it
-    to named files in place and prints each file it changed and each span it left unmapped. With
+    reports what it left unmapped. Its command is a <code>relativize</code> subcommand of the
+    existing <code>filepath</code> click group in <code>nova/database/scripts.py</code>, the
+    console script that <code>pyproject.toml</code> already registers as this module's
+    command-line owner. <code>filepath relativize FILE...</code> applies the function to the named
+    files in place, printing each file it changed and each span it left unmapped. With
     <code>--check</code> it instead reads the files staged for commit and exits nonzero, naming
     each one outside the exemption set that contains a worktree path. The §4 hook is a two-line
     shim that runs this mode. So neither the pattern nor the exemption set is spelled anywhere
     except <code>nova/database/filepath.py</code>, which holds both as module constants.</p>
     <p>Accounting for the surface this adds: one public function, two module constants, and one
-    command with two modes. Nothing in nova rewrites or rejects worktree paths today, so nothing
-    retires except the receipt-directory scan named in §4. The constants are data that the
-    function, the command and the guard test share, not separate entry points. The command is
-    the only way to run the function over files, and the hook adds no logic of its own. The
-    rule:</p>
+    subcommand on the module's existing command group, so no new command surface. Nothing in
+    nova rewrites or rejects worktree paths today, so nothing retires except the
+    receipt-directory scan named in §4. The constants are data shared by the function, the
+    subcommand and the guard test, not separate entry points. The subcommand is the only way to
+    run the function over files, and the hook adds no logic of its own. The rule:</p>
     <ul>
       <li>A path under a nova worktree,
       <code>.reckon-worktrees/nova-&lt;hash&gt;/&lt;session&gt;/&lt;node&gt;/&lt;rest&gt;</code>,
@@ -165,8 +166,8 @@
     <code>docs/plans</code> and <code>docs/research</code> (see §5), and
     <code>nova/database/filepath.py</code>, where the rule, the pattern constant and the
     exemption constant live. The checks skip those paths. Every other file, including the tests,
-    the script and the hook, imports the constants or calls the script rather than spelling the
-    pattern, so it needs no exemption.</p>
+    the subcommand and the hook, imports the constants or calls the subcommand rather than
+    spelling the pattern, so it needs no exemption.</p>
     <ul>
       <li><code>tests/test_artifacts_carry_no_worktree_paths.py</code> runs <code>git grep</code>
       for the pattern over every tracked file outside the exemptions and fails naming each
@@ -185,10 +186,11 @@
       read-only check, such as the size ceiling in converged-forward-solve's
       <code>receipts-out-of-git</code> decision, joins this script rather than adding a second
       mechanism. When the coordinator enables the hook, it also corrects the <code>AGENTS.md</code>
-      pre-commit section to describe it. The hook is a two-line shell shim that runs
-      <code>scripts/relativize_worktree_paths.py --check</code> with the project interpreter, so
-      the check it applies is the script's: it reads only the staged files, rejects any outside
-      the exemptions that contains a worktree path, names the script as the fix in its message,
+      pre-commit section to describe it. The hook is a two-line shell shim. It runs the project
+      interpreter on <code>nova.database.scripts</code> with <code>relativize --check</code>,
+      setting <code>PYTHONPATH</code> to the hook's own checkout so that the rule applied is that
+      checkout's. The check reads only the staged files, rejects any outside the exemptions that
+      contains a worktree path, names <code>filepath relativize</code> as the fix in its message,
       and never modifies a file. After the node lands, the coordinator enables it once with
       <code>git config core.hooksPath scripts/git-hooks</code> in the main checkout. Worktrees
       share that setting, and the line goes into the new-clone setup in <code>AGENTS.md</code>.
@@ -201,7 +203,8 @@
     <p><strong>Done when:</strong> the test passes on the merged head and fails at the node's
     dispatch base, where the launch scripts still carry the pattern, logged as
     the negative control. In a scratch repository, the hook rejects a staged file containing a
-    worktree path and accepts it once the script has rewritten it, both logged. The default
+    worktree path and accepts it once <code>filepath relativize</code> has rewritten it, both
+    logged. The default
     pytest lane collects the test.</p>
 
     <h2 id="s5">§5 — What stays outside, and why</h2>

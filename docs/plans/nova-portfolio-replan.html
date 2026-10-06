@@ -18,7 +18,7 @@
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-effort-hours" content="3.0">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-tags" content="replan,handoff,infrastructure">
 <meta name="plan-informs" content="plasma-cell-read-fidelity,single-grid-solver-cutover,ensemble-forward-seam,forward-profile-validator-set,separatrix-spline-extraction,profile-owned-solve-domain,mast-nonaxisymmetric-physics,diiid-forward-onboarding,machine-description-retirement,diiid-pulse-replay,dual-branch-selection,efit-baseline-demonstration,mast-catalog-gpu-solve">
 <meta name="plan-capability-version" content="1.0">
@@ -166,6 +166,9 @@ Done when: the report lists each coupling with files, line counts, refactor and 
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261002T181941558895-review-of-nova-standing-suite-declaration" data-who="reckon-build" data-when="2026-10-02T18:29:17Z">
     <div class="r-comment-body"><p>Stored matching parsed review records for run r-20261002T173610463076-nova-standing-suite-declaration at reviewed head 90529c613d19c93132b471d699cf2fcfe2b4d001 with five 20/20 scores and no findings.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-nova-fd-20261006-size-ceiling-in-shared-hook" data-who="nova-fd" data-when="2026-10-06T02:30:00Z">
+    <div class="r-comment-body"><p>2026-10-06, for f-replan-receipts-out-of-git: the size ceiling is not a second commit-time mechanism. artifacts-carry-no-worktree-paths §4 (S27) adds nova's one commit-time hook, <code>scripts/git-hooks/pre-commit</code>, a read-only shim enabled through <code>core.hooksPath</code>. The receipts migration adds the ceiling as a second check line in that hook, in its own migration commit, after the hook lands. Its negative control is a test file above the ceiling refused by that hook.</p></div>
 </div>
 </section>
 </main>

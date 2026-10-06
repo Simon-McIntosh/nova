@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="artifacts-carry-no-worktree-paths">
+  <title>Commit hook resolves its own checkout | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="acnwp-hook-worktree-root-summary">§6 — the commit hook resolves its checkout root in a linked worktree</h2>
+    <p>Node <code>acnwp-hook-worktree-root</code> rewrites
+    <code>scripts/git-hooks/pre-commit</code> to resolve the checkout it guards
+    from the hook's own location — <code>realpath -e</code> of the script, then
+    its directory's parent's parent via <code>cd</code> and <code>pwd -P</code>
+    — instead of <code>git -C … rev-parse --show-toplevel</code>, which inside
+    a linked worktree returns the hooks directory because git exports
+    <code>GIT_DIR</code> while a hook runs. It adds
+    <code>tests/test_commit_hook_in_worktree.py</code>, which builds a scratch
+    repository with a <code>git worktree add</code> tree and shows the clean
+    commit admitted and a file naming a worktree path refused from both the
+    primary checkout and the linked worktree.</p>
+    <dl>
+      <dt id="acnwp-hook-worktree-root-gate">gate</dt>
+      <dd>pytest tests/test_commit_hook_in_worktree.py — 4 passed.</dd>
+      <dt id="acnwp-hook-worktree-root-control">negative control</dt>
+      <dd>the same test against the base hook fails on the linked-worktree
+      clean commit (<code>test_clean_commit_admitted_in_linked_worktree</code>),
+      exit 1. Logs are in the run directory.</dd>
+    </dl>
+  </main>
+</body>
+</html>

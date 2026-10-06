@@ -1,3 +1,4 @@
 #!/bin/sh
-hook_root="$(git -C "$(dirname "$(realpath -e -- "$0")")" rev-parse --show-toplevel)"
+hook_dir="$(cd -- "$(dirname -- "$(realpath -e -- "$0")")" && pwd -P)"
+hook_root="$(cd -- "$hook_dir/../.." && pwd -P)"
 PYTHONPATH="$hook_root" "$hook_root/.venv/bin/python3" -m nova.database.scripts relativize --check

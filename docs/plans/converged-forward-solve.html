@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="95">
+<meta name="plan-version" content="96">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -324,6 +324,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences" data-who="reckon-build" data-when="2026-10-06T06:28:46.229Z">
     <div class="r-comment-body"><p>Private hand-written tangents of factorise, _pole_contraction (both ends), Channel.across, graded_residual, _regularised and _model_integral match jax.jvp of the base on 10,000 unmasked jet-formed samples each (max 8.6e-15, four bit-identical), every one-term truncation fails (1.1e2 to 2.2e10), primal bit-identical, median-of-seven cold compile 1.64-2.85x primal in two separate runs with equation counts recorded; the polygon vertex and edge term tangents go to a separate node</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261006T063015821979-review-of-cfs-vertex-edge-tangent-recurrences" data-who="reckon-build" data-when="2026-10-06T06:51:13.234Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261006T041830744120-cfs-vertex-edge-tangent-recurrences, base 553c9fadf / head 37a6fb7ad, stored at both assigned paths, scoring all six dimensions 0..20 (goal_fidelity 10, evidence 15, scope_discipline 20, durability 19, fit 18, reuse 13; total 95) with one blocking finding (the namesake polygon vertex/edge residual tangents remain undelivered, carried from the prior review) and two follow-ons (the fragment&#x27;s added-line count 449 does not reconcile with the diff&#x27;s 498; the changed module&#x27;s own head suite arm is an incomplete log); added_failure_count 0 and no added ids derived from the reviewed run&#x27;s own base and head suite logs. The delta&#x27;s compile-bound repair is independently reproduced.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

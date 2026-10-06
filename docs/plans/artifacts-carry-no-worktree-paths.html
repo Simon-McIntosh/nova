@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 </head>
@@ -144,6 +144,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s6-review-refinements-20261006" data-who="" data-when="">
     <div class="r-comment-body"><p>Refinements from the third design review of section 6, carried into the node brief.</p><ul><li><strong>Offending branch.</strong> <code>tests/test_filepath.py:259</code>, <code>test_worktree_path_offenders_skips_the_exemption_set</code>, already tests it, so it is cited rather than duplicated. The node's new tests cover the binary-reader and candidate-search branches.</li><li><strong>A second producer.</strong> <code>benchmarks/program_scope_census.py:1091</code> also writes a cProfile dump, <code>cached-entry.prof</code>, into its run directory; no copy is tracked. The dump helper is applied there too.</li><li><strong>Retired enumerations.</strong> The shared candidate search retires <code>_staged_files</code> and <code>_staged_text</code> in <code>nova/database/scripts.py</code> and <code>_tracked_files</code> in the guard test, so the guard keeps one enumeration.</li><li><strong>Surface accounting.</strong> Section 6 adds two public definitions to <code>nova/database/filepath.py</code>, the dump helper and the candidate search. The search retires those three private enumerations, and the helper retires nothing because no pstats writer exists to extend.</li></ul></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261006T121734726986-review-of-acnwp-guard-follow-ons" data-who="reckon-build" data-when="2026-10-06T12:26:48.163Z">
+    <div class="r-comment-body"><p>review stored for r-20261006T113551108285-acnwp-guard-follow-ons at reviewed head dc944c4156b562d0ce384080dc95894192970c1e, total 103/120, one blocking finding (nova/database/scripts.py:58) and one follow-on (nova/database/filepath.py:167)</p></div>
 </div>
 </section>
 </main>

@@ -31,6 +31,11 @@ class KernelCompileBarrier(AssertionError):
     """The native kernel compiler did not finish inside its wall budget."""
 
 
+# Qualification clause for the cold topology read: compile wall and size.
+COLD_READ_COMPILE_SECONDS = 60.0
+COLD_READ_EXECUTABLE_BYTES = 50_000_000
+
+
 kernel_compile_expected_failure = pytest.mark.xfail(
     strict=True,
     raises=KernelCompileBarrier,
@@ -2396,10 +2401,23 @@ def _jaxpr_construct_counts(closed):
 
 
 @pytest.mark.parametrize("count", (132, 300, 550))
-@kernel_compile_expected_failure
+@pytest.mark.xfail(
+    strict=True,
+    raises=KernelCompileBarrier,
+    reason=(
+        "Cold topology read compile exceeds the 60 s / 50 MB qualification "
+        "clause (about 640 s on the H200 with the kernel shared per stage); "
+        "remove once the point jet carries custom derivative rules"
+    ),
+)
 @pytest.mark.timeout(930)
 def test_kernel_compile_growth(count, tmp_path):
-    """Measure each cold topology compile in a fresh, wall-bounded process."""
+    """Hold each cold topology compile to the read's qualification clause.
+
+    The 900 s child timeout is only a safety stop. The clause is read from
+    the child's executed receipt, so a strict unexpected pass fires exactly
+    when the cold read compiles within 60 s and 50 MB.
+    """
     _isolated_kernel_compile(count, tmp_path)
 
 
@@ -2473,6 +2491,27 @@ m['_measure_kernel_compile_growth'](int(sys.argv[2]), sys.argv[3])
             stream.write(f"\nEXIT={code}\n")
         print(log.read_text(), flush=True)
         assert code == 0, f"kernel compile {arm} refused: {log}"
+    _qualify_cold_compile(log)
+
+
+def _qualify_cold_compile(log):
+    """Raise the compile barrier when the executed receipt breaks the clause."""
+    rows = [
+        json.loads(line.split("COMPILE_GROWTH ", 1)[1])
+        for line in log.read_text().splitlines()
+        if line.startswith("COMPILE_GROWTH ")
+    ]
+    executed = [row for row in rows if row.get("phase") == "executed"]
+    assert executed, f"no executed COMPILE_GROWTH row in {log}"
+    wall = executed[-1]["cold_compile_wall_seconds"]
+    size = executed[-1]["executable_bytes"]
+    if wall > COLD_READ_COMPILE_SECONDS or size > COLD_READ_EXECUTABLE_BYTES:
+        raise KernelCompileBarrier(
+            f"cold read compile {wall:.1f} s and {size} executable bytes exceed "
+            f"the {COLD_READ_COMPILE_SECONDS:.0f} s / "
+            f"{COLD_READ_EXECUTABLE_BYTES} byte qualification clause; "
+            f"receipt: {log}"
+        )
 
 
 def _measure_kernel_compile_growth(count, tmp_path):

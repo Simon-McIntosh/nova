@@ -60,6 +60,7 @@ evaluates it directly rather than as a large cancellation.
 
 from __future__ import annotations
 
+import jax
 import numpy as np
 
 from nova.biot.rangefunction import _array_program
@@ -540,27 +541,104 @@ def _finite_part_tangent(
     return value, _product_tangent(coefficient, d_coefficient, elementary, d_elementary)
 
 
+def _descent_tangent_scanned(complement, d_complement, trips: int = TRIPS):
+    """Return the stacked radicals and final sum of the descent, with tangents.
+
+    The same trips as :func:`_descent_tangent`, carried as one scanned step so
+    the compiled program holds one trip rather than ``trips`` of them.
+    """
+    jnp = jax.numpy
+    reachable = complement > 0.0
+    held = jnp.where(reachable, complement, 1.0)
+    modulus = jnp.sqrt(held)
+    d_modulus = _root_tangent(modulus, jnp.where(reachable, d_complement, 0.0))
+    running = jnp.ones_like(modulus)
+
+    def trip(carry, _):
+        modulus, d_modulus, radical, d_radical, running, d_running = carry
+        running = running + modulus
+        d_running = d_running + d_modulus
+        modulus, d_modulus, next_radical, d_next_radical = _descent_tangent_step(
+            radical, d_radical, running, d_running, jnp
+        )
+        carry = (modulus, d_modulus, next_radical, d_next_radical, running, d_running)
+        return carry, (radical, d_radical)
+
+    initial = (modulus, d_modulus, modulus, d_modulus, running, jnp.zeros_like(running))
+    final, (radicals, d_radicals) = jax.lax.scan(trip, initial, None, length=trips)
+    return (radicals, final[4]), (d_radicals, final[5])
+
+
+def _accumulate_tangent_scanned(
+    radicals, d_radicals, arithmetic, d_arithmetic, sine_weight, d_sine_weight
+):
+    """Return the tangent of :func:`_accumulate` at a pole of one, scanned.
+
+    The pole of the first and second kinds is one with no tangent, so only the
+    sine weight and the descent carry one; the trips are one scanned step.
+    """
+    jnp = jax.numpy
+    zero = jnp.zeros_like(arithmetic)
+    pole_root = jnp.ones_like(arithmetic)
+    sine_part = sine_weight / pole_root + zero
+    d_sine_part = zero if d_sine_weight is None else d_sine_weight / pole_root + zero
+
+    def trip(carry, radical_pair):
+        cosine_part, sine_part, pole_root, d_cosine, d_sine, d_root = carry
+        radical, d_radical = radical_pair
+        d_next_cosine = d_cosine + _quotient_tangent(
+            sine_part, d_sine, pole_root, d_root
+        )
+        next_cosine = cosine_part + sine_part / pole_root
+        gain = radical / pole_root
+        d_gain = _quotient_tangent(radical, d_radical, pole_root, d_root)
+        d_sine = 2.0 * (d_sine + _product_tangent(cosine_part, d_cosine, gain, d_gain))
+        sine_part = 2.0 * (sine_part + cosine_part * gain)
+        return (
+            next_cosine, sine_part, pole_root + gain,
+            d_next_cosine, d_sine, d_root + d_gain,
+        ), None  # fmt: skip
+
+    initial = (zero + 1.0, sine_part, pole_root, zero, d_sine_part, zero)
+    final, _ = jax.lax.scan(trip, initial, (radicals, d_radicals))
+    cosine_part, sine_part, pole_root, d_cosine, d_sine, d_root = final
+    numerator = _HALF_PI * (sine_part + cosine_part * arithmetic)
+    d_numerator = _HALF_PI * (
+        d_sine + _product_tangent(cosine_part, d_cosine, arithmetic, d_arithmetic)
+    )
+    span = arithmetic + pole_root
+    denominator = arithmetic * span
+    d_denominator = _product_tangent(
+        arithmetic, d_arithmetic, span, d_arithmetic + d_root
+    )
+    return _quotient_tangent(numerator, d_numerator, denominator, d_denominator)
+
+
 def _complete_kind_tangent(complement, d_complement, *, xp=np, trips: int = TRIPS):
-    """Return ``((K, E), (dK, dE))``, :func:`complete_kind` and its tangent."""
+    """Return ``((K, E), (dK, dE))``, :func:`complete_kind` and its tangent.
+
+    The primal is :func:`complete_kind` itself; the tangent is the descent and
+    both accumulations carried as scanned trips, so its compiled program holds
+    one trip of each rather than ``trips`` of them.
+    """
     complement = xp.asarray(complement)
     d_complement = xp.asarray(d_complement) + xp.zeros_like(complement)
-    (radicals, arithmetic), (d_radicals, d_arithmetic) = _descent_tangent(
-        complement, d_complement, xp, trips
+    values = complete_kind(complement, xp=xp, trips=trips)
+    (radicals, arithmetic), (d_radicals, d_arithmetic) = _descent_tangent_scanned(
+        complement, d_complement, trips
     )
     reachable = complement > 0.0
     held = xp.where(reachable, complement, 1.0)
     d_held = xp.where(reachable, d_complement, 0.0)
-    first, d_first = _accumulate_tangent(
-        radicals, d_radicals, arithmetic, d_arithmetic,
-        1.0, None, 1.0, None, 1.0, None, xp,
-    )  # fmt: skip
-    second, d_second = _accumulate_tangent(
-        radicals, d_radicals, arithmetic, d_arithmetic,
-        1.0, None, 1.0, None, held, d_held, xp,
-    )  # fmt: skip
-    return (
-        (xp.where(reachable, first, 0.0), xp.where(reachable, second, 1.0)),
-        (xp.where(reachable, d_first, 0.0), xp.where(reachable, d_second, 0.0)),
+    d_first = _accumulate_tangent_scanned(
+        radicals, d_radicals, arithmetic, d_arithmetic, 1.0, None
+    )
+    d_second = _accumulate_tangent_scanned(
+        radicals, d_radicals, arithmetic, d_arithmetic, held, d_held
+    )
+    return values, (
+        xp.where(reachable, d_first, 0.0),
+        xp.where(reachable, d_second, 0.0),
     )
 
 

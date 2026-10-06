@@ -46,6 +46,7 @@ assembly but obvious against a reference integral.
 
 from __future__ import annotations
 
+import jax
 import numpy as np
 
 from nova.biot.rangefunction import _array_program
@@ -1294,7 +1295,10 @@ def _harmonic_moments_tangent(
     The upward family's tangent obeys the upward recursion differentiated term by
     term, and the downward ratios' tangent the downward ratio recursion
     differentiated the same way, so each runs in the direction its primal runs,
-    from the same seeds, over the same orders.
+    from the same seeds, over the same orders.  Each tangent recursion is carried
+    as one scanned step over its per-order coefficients rather than unrolled, so
+    its compiled program does not grow with the number of orders; the primal is
+    the primal function's own result.
     """
     parameter = xp.asarray(parameter)
     d_parameter = xp.asarray(d_parameter) + xp.zeros_like(parameter)
@@ -1303,10 +1307,12 @@ def _harmonic_moments_tangent(
         d_complement = -d_parameter
     complement = xp.asarray(complement) + xp.zeros_like(parameter)
     d_complement = xp.asarray(d_complement) + xp.zeros_like(parameter)
+    values = harmonic_moments(parameter, count, complement=complement, xp=xp)
     (complete_k, complete_e), (d_complete_k, d_complete_e) = _complete_kind_tangent(
         complement, d_complement, xp=xp
     )
     degenerate = parameter > _HARMONIC_SWITCH
+    zero = xp.zeros_like(parameter)
 
     held = xp.where(degenerate, parameter, 1.0)
     d_held = _held_tangent(degenerate, d_parameter, xp)
@@ -1325,67 +1331,61 @@ def _harmonic_moments_tangent(
             ),
         ),
     )
-    upward = [xp.zeros_like(parameter), numerator / held]
-    d_upward = [None, _quotient_tangent(numerator, d_numerator, held, d_held)]
-    for order in range(1, count - 1):
-        value, tangent = _harmonic_rising_step_tangent(
-            upward[order],
-            d_upward[order],
-            upward[order - 1],
-            d_upward[order - 1],
-            held,
-            d_held,
-            held_complement,
-            d_held_complement,
-            complete_k,
-            d_complete_k,
-            4.0 * order,
-            2 * order - 1,
-            (-1.0) ** order * 8.0 * order,
-            2 * order + 1,
-        )
-        upward.append(value)
-        d_upward.append(tangent)
+    first = numerator / held
+    d_first = _quotient_tangent(numerator, d_numerator, held, d_held)
 
-    ratio = xp.zeros_like(parameter)
-    d_ratio = None
-    ratios = [None] * (count + _HARMONIC_HEADROOM + 1)
-    d_ratios = [None] * (count + _HARMONIC_HEADROOM + 1)
-    for order in range(count + _HARMONIC_HEADROOM, 0, -1):
+    def rising(carry, weights):
+        current, previous, d_current, d_previous = carry
+        value, tangent = _harmonic_rising_step_tangent(
+            current, d_current, previous, d_previous,
+            held, d_held, held_complement, d_held_complement,
+            complete_k, d_complete_k, *weights,
+        )  # fmt: skip
+        return (value, current, tangent, d_current), tangent
+
+    orders = np.arange(1, max(count - 1, 1))
+    rising_weights = (
+        4.0 * orders,
+        (2 * orders - 1).astype(float),
+        (-1.0) ** orders * 8.0 * orders,
+        (2 * orders + 1).astype(float),
+    )
+    if count > 2:
+        _, d_rising = jax.lax.scan(rising, (first, zero, d_first, zero), rising_weights)
+        d_upward = [zero, d_first, *d_rising]
+    else:
+        d_upward = [zero, d_first][:count]
+
+    def falling(carry, weights):
+        ratio, d_ratio = carry
         ratio, d_ratio = _harmonic_ratio_step_tangent(
-            ratio,
-            d_ratio,
-            parameter,
-            d_parameter,
-            complement,
-            d_complement,
-            -(2 * order - 1),
-            2 * order + 1,
-            4.0 * order,
+            ratio, d_ratio, parameter, d_parameter, complement, d_complement, *weights
         )
-        if order <= count:
-            ratios[order] = ratio
-            d_ratios[order] = d_ratio
-    downward = [complete_k]
-    d_downward = [d_complete_k]
-    for order in range(1, count):
-        d_downward.append(
-            _product_tangent(
-                downward[order - 1],
-                d_downward[order - 1],
-                ratios[order],
-                d_ratios[order],
-            )
-        )
-        downward.append(downward[order - 1] * ratios[order])
-    values = [
-        xp.where(
-            degenerate,
-            upward[order] + (-1.0) ** order * complete_k,
-            downward[order],
-        )
-        for order in range(count)
-    ]
+        return (ratio, d_ratio), (ratio, d_ratio)
+
+    orders = np.arange(count + _HARMONIC_HEADROOM, 0, -1)
+    falling_weights = (
+        (-(2 * orders - 1)).astype(float),
+        (2 * orders + 1).astype(float),
+        4.0 * orders,
+    )
+    _, (ratios, d_ratios) = jax.lax.scan(falling, (zero, zero), falling_weights)
+    # the scan runs from the top order down; order n sits at index top - n
+    top = count + _HARMONIC_HEADROOM
+
+    def product(carry, ratio_pair):
+        moment, d_moment = carry
+        ratio, d_ratio = ratio_pair
+        d_moment = _product_tangent(moment, d_moment, ratio, d_ratio)
+        moment = moment * ratio
+        return (moment, d_moment), d_moment
+
+    if count > 1:
+        selected = (ratios[top - count + 1 :][::-1], d_ratios[top - count + 1 :][::-1])
+        _, d_falling = jax.lax.scan(product, (complete_k, d_complete_k), selected)
+        d_downward = [d_complete_k, *d_falling]
+    else:
+        d_downward = [d_complete_k]
     tangents = [
         xp.where(
             degenerate,
@@ -1451,60 +1451,69 @@ def _harmonic_pole_moments_tangent(
 
     The tangent satisfies the same tridiagonal system with the diagonal's own
     tangent moved to the right-hand side, so it is eliminated forward and
-    substituted backward over the same orders, beside the primal sweep.
+    substituted backward over the same orders, beside the primal sweep.  Both
+    sweeps are carried as one scanned step over the orders rather than unrolled,
+    so the compiled program does not grow with the system's size; the primal is
+    the primal function's own result.
     """
+    values = harmonic_pole_moments(shift, seed, moments, count, mirrored=mirrored)
     sign = -1.0 if mirrored else 1.0
     diagonal = sign * (2.0 + 4.0 * shift)
     d_diagonal = _scale_tangent(sign, _scale_tangent(4.0, d_shift))
     top = count + POLE_HEADROOM
-    ratio = [1.0 / diagonal]
-    d_ratio = [_quotient_tangent(1.0, None, diagonal, d_diagonal)]
+    ratio = 1.0 / diagonal
+    d_ratio = _quotient_tangent(1.0, None, diagonal, d_diagonal)
     first = 4.0 * sign * moments[1] - seed
-    solution = [first / diagonal]
-    d_solution = [
-        _quotient_tangent(
-            first,
-            _tangent_sum(
-                _scale_tangent(4.0 * sign, d_moments[1]), _scale_tangent(-1.0, d_seed)
-            ),
-            diagonal,
-            d_diagonal,
+    solution = first / diagonal
+    d_solution = _quotient_tangent(
+        first,
+        _tangent_sum(
+            _scale_tangent(4.0 * sign, d_moments[1]), _scale_tangent(-1.0, d_seed)
+        ),
+        diagonal,
+        d_diagonal,
+    )
+    weight = 4.0 * sign
+
+    def eliminate(carry, moment_pair):
+        ratio, solution, d_ratio, d_solution = carry
+        moment, d_moment = moment_pair
+        (ratio, solution), (d_ratio, d_solution) = _pole_forward_step_tangent(
+            diagonal, d_diagonal, ratio, d_ratio, solution, d_solution,
+            moment, d_moment, weight,
+        )  # fmt: skip
+        carry = (ratio, solution, d_ratio, d_solution)
+        return carry, carry
+
+    stacked = (
+        jax.numpy.stack(moments[2 : top + 1]),
+        jax.numpy.stack(d_moments[2 : top + 1]),
+    )
+    _, swept = jax.lax.scan(eliminate, (ratio, solution, d_ratio, d_solution), stacked)
+    # index ``j`` of each sweep holds what the unrolled elimination lists at ``j``
+    ratios, solutions, d_ratios, d_solutions = (
+        jax.numpy.concatenate((initial[None], rest))
+        for initial, rest in zip((ratio, solution, d_ratio, d_solution), swept)
+    )
+
+    def substitute(carry, row):
+        following, d_following = carry
+        solution, d_solution, ratio, d_ratio = row
+        value, d_value = _pole_backward_step_tangent(
+            solution, d_solution, ratio, d_ratio, following, d_following
         )
-    ]
-    for order in range(2, top + 1):
-        (next_ratio, next_solution), (d_next_ratio, d_next_solution) = (
-            _pole_forward_step_tangent(
-                diagonal,
-                d_diagonal,
-                ratio[-1],
-                d_ratio[-1],
-                solution[-1],
-                d_solution[-1],
-                moments[order],
-                d_moments[order],
-                4.0 * sign,
-            )
-        )
-        ratio.append(next_ratio)
-        d_ratio.append(d_next_ratio)
-        solution.append(next_solution)
-        d_solution.append(d_next_solution)
-    values = [None] * (top + 1)
-    d_values = [None] * (top + 1)
-    values[top] = solution[top - 1]
-    d_values[top] = d_solution[top - 1]
-    for order in range(top - 1, 0, -1):
-        values[order], d_values[order] = _pole_backward_step_tangent(
-            solution[order - 1],
-            d_solution[order - 1],
-            ratio[order - 1],
-            d_ratio[order - 1],
-            values[order + 1],
-            d_values[order + 1],
-        )
-    values[0] = seed
-    d_values[0] = d_seed
-    return values[:count], d_values[:count]
+        return (value, d_value), d_value
+
+    # orders ``top - 1`` down to one, each reading the elimination at order - 1
+    rows = tuple(
+        sweep[: top - 1][::-1] for sweep in (solutions, d_solutions, ratios, d_ratios)
+    )
+    _, d_substituted = jax.lax.scan(
+        substitute, (solutions[top - 1], d_solutions[top - 1]), rows
+    )
+    # order ``k`` sits at index ``top - 1 - k`` of the substitution
+    d_values = [d_seed] + [d_substituted[top - 1 - order] for order in range(1, count)]
+    return values, d_values
 
 
 def _harmonic_root_tangent_term(

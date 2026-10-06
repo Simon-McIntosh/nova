@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="artifacts-carry-no-worktree-paths">
+  <title>Guard follow-ons: binary dumps, required roots, one candidate search | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="acnwp-guard-follow-ons-summary">§6 — Closing the guard's blind spots</h2>
+    <p>Node <code>acnwp-guard-follow-ons</code> closes the four gaps the §3/§4
+    review found. A binary artifact that still embedded a worktree path is
+    repaired and its two producers now repair their own dumps; two benchmark
+    defaults that resolved into a removed worktree become required arguments;
+    one evidence sentence that called its now-relative path absolute is
+    reworded; and the guard's full-tree scan is replaced by one candidate
+    search shared with the commit hook. Every gate below is logged with its
+    exit status and wall time under
+    <code>logs/</code> in the run directory.</p>
+
+    <h2 id="acnwp-guard-follow-ons-dump">Binary artifacts: the cProfile dump and its producers</h2>
+    <p><code>docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats</code>
+    is a cProfile dump that stored each frame's file path verbatim, so a run
+    from a worktree embedded that worktree's path and the text scans skipped it
+    as binary. <code>relativize_cprofile_dump</code> in
+    <code>benchmarks/production_solve_host_profile.py</code>'s producer loads the
+    dump with <code>marshal</code>, rewrites every recorded file path -- both
+    the top-level stat keys and the nested caller keys -- through
+    <code>relativize_worktree_paths</code>, and writes it back in the format
+    <code>dump_stats</code> produced. The producer calls it right after
+    <code>dump_stats</code>, as does the second producer,
+    <code>benchmarks/program_scope_census.py</code> (which writes
+    <code>cached-entry.prof</code>; no copy is tracked). The committed dump was
+    repaired with the same helper.</p>
+    <p>Gate (c) reads the repaired dump: <code>pstats.Stats</code> loads it, the
+    237 entries and 393 caller keys hold 630 distinct recorded paths, and none
+    of the 630 contains the worktree root directory name
+    (<code>gate_c.log</code>, EXIT=0). <code>git grep</code> over the file
+    returns no match (rc=1).</p>
+
+    <h2 id="acnwp-guard-follow-ons-defaults">Benchmark defaults</h2>
+    <p><code>DEFAULT_SHADOW_ROOT</code> in
+    <code>benchmarks/backend_divergence_forensics.py</code> and
+    <code>DEFAULT_PINNED_ROOT</code> in
+    <code>benchmarks/pure_arm_comparison_figure.py</code> no longer hold a
+    literal path, but they still resolved into a removed worktree. Both are
+    removed; each root is now a required argument, and each option's help text
+    says what kind of tree to pass (a checkout at the pinned revision that
+    resolves the solver, and the <code>.npz</code> inside a pinned checkout
+    respectively). Nothing else in either driver changed.</p>
+
+    <h2 id="acnwp-guard-follow-ons-record">A record that contradicts itself</h2>
+    <p>In <code>docs/evidence/archive/figure-and-solver-audit-landed.html</code>
+    the hand-repaired coil-edit receipt sentence still described its
+    repository-relative path as absolute. The clause now reads that the receipt
+    recorded the path as absolute into a since-removed worktree and now carries
+    the published repo-relative path, so a reader resolving the receipt's own
+    <code>figure</code> field reaches the figure. Nothing else in the record
+    changed.</p>
+
+    <h2 id="acnwp-guard-follow-ons-search">One candidate search, shared</h2>
+    <p><code>worktree_path_candidates</code> in
+    <code>nova/database/filepath.py</code> runs
+    <code>git grep --no-color -l -a -F &lt;WORKTREE_ROOT&gt;</code> over the
+    working tree (the repository test) or over the index with
+    <code>--cached</code> (the commit check). <code>-a</code> treats binary
+    files as searchable, so a committed binary that carries the root name is a
+    candidate. Only the candidates are passed to
+    <code>worktree_path_offenders</code>, the single scanning decision, with a
+    reader that decodes each candidate's bytes with
+    <code>errors="replace"</code> instead of returning <code>""</code> for
+    binary content. This retires <code>_staged_files</code> and
+    <code>_staged_text</code> in <code>nova/database/scripts.py</code> and
+    <code>_tracked_files</code> in the guard test, all deleted, leaving one
+    enumeration for the hook and the test.</p>
+    <p>The guard test asserts first that the candidate search returns
+    <code>nova/database/filepath.py</code> -- the exempt module that always
+    holds the root name -- before it accepts an empty offender list, so a
+    search run from the wrong directory, without git, or after pattern drift
+    fails loudly rather than reading as a clean tree. The predicate's offending
+    branch is already covered at
+    <code>tests/test_filepath.py:263</code>; the node adds tests only for the
+    binary reader and for both forms of the candidate search.</p>
+
+    <h2 id="acnwp-guard-follow-ons-gates">Gates and negative controls</h2>
+    <ul>
+      <li><strong>Gate (a).</strong> From the worktree with
+      <code>PYTHONPATH</code> set to it, <code>pytest
+      tests/test_artifacts_carry_no_worktree_paths.py tests/test_filepath.py</code>
+      passes: 44 passed, 3 skipped, EXIT=0 (<code>gate_a.log</code>). The guard
+      file alone reports 1 passed in 4.63 s of pytest time (8.58 s including
+      the <code>uv run</code> wrapper), under the ten-second bar
+      (<code>guard_alone.log</code>).</li>
+      <li><strong>Negative control b1.</strong> A scratch git tree carrying a
+      binary file that names a worktree path makes the guard test fail naming
+      <code>artifact.bin</code>: <code>FAILED</code>, EXIT=1
+      (<code>negctl_b1.log</code>).</li>
+      <li><strong>Negative control b2.</strong> In a scratch git repository
+      carrying a copy of <code>scripts/git-hooks/pre-commit</code> (installed
+      the way the repository installs it, through <code>core.hooksPath</code>),
+      staging that binary file is refused: the hook prints
+      <code>artifact.bin: names a worktree path; run \`filepath relativize
+      artifact.bin\` to rewrite it</code>, exits 1, and commits nothing
+      (<code>negctl_b2.log</code>).</li>
+      <li><strong>Negative control b3.</strong> With the candidate search
+      forced to return nothing, the guard test fails on its positive control
+      (<code>the candidate search returned nothing it is known to hold ...:
+      candidates=[]</code>), EXIT=1 (<code>negctl_b3.log</code>).</li>
+    </ul>
+
+    <h2 id="acnwp-guard-follow-ons-existing-tests">Existing test files that import a changed module</h2>
+    <p>Each test file whose imports reach a changed module was run at the
+    dispatch base (the pristine main checkout at revision
+    <code>1c023858f</code>) and at the node head, one arm per file, all
+    EXIT=0 with zero added failures: <code>tests/test_database.py</code> (base
+    26 passed/19 skipped; head 26 passed/19 skipped),
+    <code>tests/test_render_receipt_paths.py</code> (base and head 5 passed;
+    this is the render-route suite and runs about nine minutes per arm), and
+    <code>tests/test_solve_program_size.py</code> (base 24 passed; head 24
+    passed). Logs <code>base_*.log</code> and <code>head_*.log</code>.</p>
+
+    <p>No figure is warranted for this node: the change is a guard, two
+    argument signatures and a record sentence, with no spatial or plotted
+    relationship to show. Surface accounting: two public definitions are added
+    to <code>nova/database/filepath.py</code>, the dump helper and the
+    candidate search; the shared reader is a module-private helper
+    (<code>_worktree_path_text</code>) so the count matches the plan, and the
+    search retires the three private enumerations named above.</p>
+  </main>
+</body>
+</html>

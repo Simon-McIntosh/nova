@@ -1538,9 +1538,14 @@ def _conditioned_hessian(hessian, tolerance):
 
 @partial(jax.custom_jvp, nondiff_argnums=(4,))
 def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
-    """Polish a point using analytic jets, with an implicit position tangent."""
+    """Polish a point using analytic jets, with an implicit position tangent.
 
-    def step(_index, position):
+    The loop evaluates the jet once more than it steps, so the jet at the
+    polished point comes from the same traced evaluation as every Newton step.
+    """
+
+    def step(index, carry):
+        position, _jet = carry
         jet = field.evaluate(position)
         valid, hessian = _conditioned_hessian(jet.hessian, tolerance)
         correction = jnp.linalg.solve(hessian, jet.gradient)
@@ -1548,18 +1553,23 @@ def _implicit_stationary_position(field, seed, pitch, tolerance, iterations):
         correction = correction * jnp.minimum(
             1.0, pitch / jnp.where(length > 0.0, length, 1.0)
         )
-        valid = valid & jnp.all(jnp.isfinite(correction))
-        return position - jnp.where(valid, correction, 0.0)
+        valid = valid & jnp.all(jnp.isfinite(correction)) & (index < iterations)
+        return position - jnp.where(valid, correction, 0.0), jet
 
-    return jax.lax.fori_loop(0, iterations, step, seed)
+    dtype = jnp.result_type(seed)
+    empty = FieldJet(
+        jnp.zeros((), dtype), jnp.zeros(2, dtype), jnp.zeros((2, 2), dtype)
+    )
+    return jax.lax.fori_loop(0, iterations + 1, step, (seed, empty))
 
 
 @_implicit_stationary_position.defjvp
 def _implicit_stationary_position_jvp(iterations, primals, tangents):
     field, seed, pitch, tolerance = primals
     field_tangent, _seed_tangent, _pitch_tangent, _tolerance_tangent = tangents
-    point = _implicit_stationary_position(field, seed, pitch, tolerance, iterations)
-    jet = field.evaluate(point)
+    point, jet = _implicit_stationary_position(
+        field, seed, pitch, tolerance, iterations
+    )
     valid, hessian = _conditioned_hessian(jet.hessian, tolerance)
     gradient_tangent = jax.jvp(
         lambda operand: operand.evaluate(point).gradient,
@@ -1567,7 +1577,13 @@ def _implicit_stationary_position_jvp(iterations, primals, tangents):
         (field_tangent,),
     )[1]
     tangent = -jnp.linalg.solve(hessian, gradient_tangent)
-    return point, jnp.where(valid, tangent, jnp.nan)
+    tangent = jnp.where(valid, tangent, jnp.nan)
+    jet_tangent = jax.jvp(
+        lambda operand, target: operand.evaluate(target),
+        (field, point),
+        (field_tangent, tangent),
+    )[1]
+    return (point, jet), (tangent, jet_tangent)
 
 
 def stationary_read(field, seed, pitch, policy):
@@ -1578,14 +1594,13 @@ def stationary_read(field, seed, pitch, policy):
     its exterior term evaluates the prescribed field at the same point.
     The evaluator and all its numerical operands must be registered pytrees.
     """
-    point = _implicit_stationary_position(
+    point, jet = _implicit_stationary_position(
         field,
         jnp.asarray(seed),
         pitch,
         policy.hessian_tolerance,
         policy.polish_iterations,
     )
-    jet = field.evaluate(point)
     tangent_valid, hessian = _conditioned_hessian(jet.hessian, policy.hessian_tolerance)
     finite = jnp.all(jnp.isfinite(point)) & jnp.isfinite(jet.value)
     finite = finite & jnp.all(jnp.isfinite(jet.gradient))
@@ -2572,16 +2587,40 @@ def _point_values(field, points):
         if hasattr(field, "value")
         else lambda point: field.evaluate(point).value
     )
+    flat = points.reshape(-1, 2)
     if isinstance(field, TotalField):
-        return jax.lax.map(evaluate, points.reshape(-1, 2), batch_size=8).reshape(
-            points.shape[:-1]
-        )
-    return jax.vmap(evaluate)(points.reshape(-1, 2)).reshape(points.shape[:-1])
+        # Pad to whole batches so the kernel is traced once, not once more
+        # for a remainder batch.
+        batch = 8
+        if flat.shape[0] <= batch:
+            return jax.vmap(evaluate)(flat).reshape(points.shape[:-1])
+        padding = -flat.shape[0] % batch
+        padded = jnp.concatenate((flat, jnp.broadcast_to(flat[-1:], (padding, 2))))
+        values = jax.lax.map(evaluate, padded, batch_size=batch)
+        return values[: flat.shape[0]].reshape(points.shape[:-1])
+    return jax.vmap(evaluate)(flat).reshape(points.shape[:-1])
 
 
 def _field_coefficients(field, geometry):
     values = _point_values(field, geometry.sample_points)
     return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
+
+
+def _sampled_flux(field, geometry):
+    """Fit coefficients and contour-cell flux from one batched value pass."""
+    sample = geometry.sample_points.reshape(-1, 2)
+    values = _point_values(
+        field, jnp.concatenate((sample, geometry.contour_sample_points.reshape(-1, 2)))
+    )
+    coefficient = jnp.einsum(
+        "nij,nj->ni",
+        geometry.fit_inverse,
+        values[: sample.shape[0]].reshape(geometry.sample_points.shape[:-1]),
+    )
+    centre_flux = values[sample.shape[0] :].reshape(
+        geometry.contour_sample_points.shape[:-1]
+    )
+    return coefficient, centre_flux
 
 
 def _null_census(field, geometry, coefficient, policy, tree):
@@ -2906,11 +2945,10 @@ def read(field, geometry, convention, policy):
         ),
     )
     sigma = convention.sigma
-    coefficient = _field_coefficients(field, geometry)
+    coefficient, centre_flux = _sampled_flux(field, geometry)
     from nova.equilibrium.contour_tree import build_contour_tree
 
     mesh = geometry.contour_mesh
-    centre_flux = _point_values(field, geometry.contour_sample_points)
     vertex_flux = jnp.sum(
         centre_flux[geometry.contour_sources] * geometry.contour_weights, axis=1
     )
@@ -2942,9 +2980,27 @@ def read(field, geometry, convention, policy):
             sigma * fourth,
         )
 
-    def inspect(index, admitted):
-        def evaluate_candidate(_):
-            candidate_form = normal_form(index)
+    # Forms are computed once inside the candidate loop and the saddle's form
+    # is selected from them, so the curvature stencil is traced once. Slot 0 is
+    # always formed because it is the selection when no candidate is admitted.
+    dtype = nulls.jet.hessian.dtype
+    empty_form = jax.tree.map(
+        lambda leaf: jnp.zeros(leaf.shape, leaf.dtype),
+        jax.eval_shape(
+            lambda: saddle_normal_form(
+                jnp.zeros(2, dtype),
+                jnp.zeros((2, 2), dtype),
+                jnp.zeros((2, 2, 2), dtype),
+                policy.hessian_tolerance,
+                jnp.zeros((2, 2, 2, 2), dtype),
+            )
+        ),
+    )
+
+    def inspect(index, carry):
+        admitted, forms = carry
+
+        def evaluate_candidate(candidate_form):
             support = _support_at_level(
                 geometry,
                 coefficient,
@@ -2965,22 +3021,40 @@ def read(field, geometry, convention, policy):
             reaches = jnp.any(owner[:, None] & selected)
             return support_valid & reaches & private_reaches_wall
 
+        candidate_form = jax.lax.cond(
+            saddles[index] | (index == 0),
+            normal_form,
+            lambda _: empty_form,
+            index,
+        )
         accepted = jax.lax.cond(
             saddles[index],
             evaluate_candidate,
             lambda _: jnp.asarray(False),
-            operand=None,
+            candidate_form,
         )
-        return admitted.at[index].set(accepted)
+        forms = jax.tree.map(
+            lambda stack, leaf: stack.at[index].set(leaf), forms, candidate_form
+        )
+        return admitted.at[index].set(accepted), forms
 
-    candidates_admitted = jax.lax.fori_loop(
-        0, policy.null_capacity, inspect, jnp.zeros(policy.null_capacity, dtype=bool)
+    candidates_admitted, forms = jax.lax.fori_loop(
+        0,
+        policy.null_capacity,
+        inspect,
+        (
+            jnp.zeros(policy.null_capacity, dtype=bool),
+            jax.tree.map(
+                lambda leaf: jnp.zeros((policy.null_capacity, *leaf.shape), leaf.dtype),
+                empty_form,
+            ),
+        ),
     )
     saddle_index = jnp.argmax(
         jnp.where(candidates_admitted, sigma * nulls.jet.value, -jnp.inf)
     )
     saddle_point = nulls.position[saddle_index]
-    form = normal_form(saddle_index)
+    form = jax.tree.map(lambda stack: stack[saddle_index], forms)
     saddle_live = jnp.any(candidates_admitted)
     wall_points, wall_flux = _wall_events(field, geometry, policy, sigma)
     wall_index = jnp.argmax(sigma * wall_flux)

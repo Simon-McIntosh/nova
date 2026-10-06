@@ -15,8 +15,8 @@
     "case": "weak-rotation-reactor-static",
     "compile_wall_seconds": 668.0443265810609,
     "compiler_artifacts": {
-      "optimised_hlo_gzip": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-solve-memory-scaling/docs/figures/cut-cell-current-attribution/exact-clip-memory/final-hlo/exact-110-optimised.hlo.txt.gz",
-      "qualifying_array_census_gzip": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-solve-memory-scaling/docs/figures/cut-cell-current-attribution/exact-clip-memory/final-hlo/exact-110-array-census.jsonl.gz"
+      "optimised_hlo_gzip": "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-hlo/exact-110-optimised.hlo.txt.gz",
+      "qualifying_array_census_gzip": "docs/figures/cut-cell-current-attribution/exact-clip-memory/final-hlo/exact-110-array-census.jsonl.gz"
     },
     "dimensions": {
       "active_set_steps": 16,

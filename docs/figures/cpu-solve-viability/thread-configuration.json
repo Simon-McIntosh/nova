@@ -12,7 +12,7 @@
       699.6709847091697
     ],
     "revision": "20f3f2e12d318dec4801497481732b8835d6e76d",
-    "source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-thread-configuration/docs/figures/cpu-solve-viability/cpu-discriminator.json",
+    "source": "docs/figures/cpu-solve-viability/cpu-discriminator.json",
     "source_sha256": "f7846397901546b33a6e15c40dd6f6bafe54c4fdb179d0ed9efc7116bf19a397",
     "xla_flags": ""
   },
@@ -6598,7 +6598,7 @@
       314.31605529514076
     ],
     "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
-    "source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-thread-configuration/docs/figures/solver-convergence-regression/backend-divergence.json",
+    "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
     "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd",
     "terminal_residual": 0.00048023353539180223,
     "termination": "active_set_stagnated",

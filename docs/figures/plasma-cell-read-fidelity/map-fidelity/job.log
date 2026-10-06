@@ -1,4 +1,4 @@
-revision=de29a1a303098542006dfe1b96575fce86ba535a tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state command=/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state/benchmarks/plasma_cell_map_fidelity.py
+revision=de29a1a303098542006dfe1b96575fce86ba535a tree=. command=/home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/plasma_cell_map_fidelity.py
 name, uuid
 NVIDIA H200 NVL, GPU-492a2dee-88e3-a142-6707-7ade0192889a
 PAIR_DONE case=diverted-single-null requested=-110 exit=0

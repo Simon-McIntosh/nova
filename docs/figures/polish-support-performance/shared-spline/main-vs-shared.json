@@ -314,7 +314,7 @@
           "named_cache_only_check": {
             "command": [
               "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-              "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure-2/benchmarks/mast_response_carrier_warm.py",
+              "benchmarks/mast_response_carrier_warm.py",
               "check",
               "--carrier",
               "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -649,7 +649,7 @@
           95.02001290302724
         ]
       },
-      "source_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure-2",
+      "source_root": ".",
       "topology_read": {
         "agreement": {
           "eager_vs_jit": {
@@ -1259,7 +1259,7 @@
           "named_cache_only_check": {
             "command": [
               "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
-              "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure/docs/figures/polish-support-performance/shared-spline/.baseline-source/benchmarks/mast_response_carrier_warm.py",
+              "docs/figures/polish-support-performance/shared-spline/.baseline-source/benchmarks/mast_response_carrier_warm.py",
               "check",
               "--carrier",
               "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -1594,7 +1594,7 @@
           93.5355956684798
         ]
       },
-      "source_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline-measure/docs/figures/polish-support-performance/shared-spline/.baseline-source",
+      "source_root": "docs/figures/polish-support-performance/shared-spline/.baseline-source",
       "topology_read": {
         "agreement": {
           "eager_vs_jit": {

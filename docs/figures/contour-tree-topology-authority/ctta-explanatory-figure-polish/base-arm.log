@@ -1,8 +1,8 @@
 revision: 78e721dfb6e592658bb7c37b5183722fa183f4ea (base figure module content)
-tree: /tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base (scratch, git-extracted); nova from /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
+tree: /tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base (scratch, git-extracted); nova from .
 module_file: /tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base/benchmarks/contour_tree_explanatory_figure.py
 cwd: /tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base
-command: PYTHONPATH=/tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py
+command: PYTHONPATH=/tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-base:. JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py
 FFFFFF                                                                   [100%]
 =================================== FAILURES ===================================
 ______________ test_figure_draws_exactly_the_receipts_valid_nodes ______________

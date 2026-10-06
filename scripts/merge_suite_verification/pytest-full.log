@@ -1,7 +1,7 @@
 warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification
+rootdir: .
 configfile: pyproject.toml
 testpaths: tests, nova/imas/database.py, nova/imas/equilibrium.py, nova/imas/extrapolate.py, nova/imas/machine.py, nova/imas/operate.py, nova/imas/pulsedesign.py
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
@@ -7233,7 +7233,7 @@ tests/test_mast_solve_inputs.py:807: AssertionError
     metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
 
 tests/test_sultan.py:34
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_sultan.py:34: DeprecationWarning: In ftputil 6.0.0, the default file path encoding will change from Latin-1 to UTF-8. Explicitly specify encoding="latin-1" for the path encoding if the remote file system uses Latin-1 encoding.
+  tests/test_sultan.py:34: DeprecationWarning: In ftputil 6.0.0, the default file path encoding will change from Latin-1 to UTF-8. Explicitly specify encoding="latin-1" for the path encoding if the remote file system uses Latin-1 encoding.
     import ftputil  # noqa: F401
 
 <frozen importlib._bootstrap>:491
@@ -7247,19 +7247,19 @@ tests/test_sultan.py:34
     metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
 
 tests/test_biotelliptic.py: 12 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+  tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
     the requested tolerance from being achieved.  The error may be 
     underestimated.
     expected, _ = scipy.integrate.quad(
 
 tests/test_biotelliptic.py: 14 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+  tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
     the requested tolerance from being achieved.  The error may be 
     underestimated.
     value, _ = scipy.integrate.quad(
 
 tests/test_biotelliptic.py: 24 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+  tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
     the requested tolerance from being achieved.  The error may be 
     underestimated.
     expected, _ = scipy.integrate.quad(
@@ -7267,18 +7267,18 @@ tests/test_biotelliptic.py: 24 warnings
 tests/test_coilset.py: 7 warnings
 tests/test_force.py: 3 warnings
 tests/test_shellgrid.py: 3 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/geometry/rdp.py:36: DeprecationWarning: Arrays of 2-dimensional vectors are deprecated. Use arrays of 3-dimensional vectors instead. (deprecated in NumPy 2.0)
+  nova/geometry/rdp.py:36: DeprecationWarning: Arrays of 2-dimensional vectors are deprecated. Use arrays of 3-dimensional vectors instead. (deprecated in NumPy 2.0)
     np.abs(np.linalg.norm(np.cross(end - start, start - point))),
 
 tests/test_idsindex.py::test_coil_current_array
 tests/test_idsindex.py::test_ids_node_length
 tests/test_idsindex.py::test_set_coil_turns
 tests/test_idsindex.py::test_set_coil_name
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/imas/ids_index.py:117: DeprecationWarning: 'maxsplit' is passed as positional argument
+  nova/imas/ids_index.py:117: DeprecationWarning: 'maxsplit' is passed as positional argument
     match re.split(r"\[|\]", ids_node.strip("."), 2):
 
 tests/test_mast_misfit_harmonics.py::test_assemble_refuses_a_group_no_channel_survives
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/imas/mast_misfit_harmonics.py:219: RuntimeWarning: All-NaN slice encountered
+  nova/imas/mast_misfit_harmonics.py:219: RuntimeWarning: All-NaN slice encountered
     value = np.nanmedian(sample, axis=0)
 
 tests/test_mast_passive_decay_modes.py::TestFit::test_the_fit_recovers_the_planted_multipliers
@@ -7315,19 +7315,19 @@ tests/test_mastcocos.py::test_flux_loop_ratio_measures_the_two_pi[12417]
   See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
 
 tests/test_netcdf.py::test_store_load_roundtrip
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/database/netcdf.py:49: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7fb000278310>
+  nova/database/netcdf.py:49: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7fb000278310>
     gc.collect()
   Enable tracemalloc to get traceback where the object was allocated.
   See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
 
 tests/test_netcdf.py::test_store_load_roundtrip
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/database/netcdf.py:49: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7fb00027ba60>
+  nova/database/netcdf.py:49: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7fb00027ba60>
     gc.collect()
   Enable tracemalloc to get traceback where the object was allocated.
   See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
 
 tests/test_thermalhydralic.py: 20 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/thermalhydralic/cold_test.py:314: UserWarning: nperseg=256 is greater than signal length max(len(x), len(y)) = 115, using nperseg = 115
+  nova/thermalhydralic/cold_test.py:314: UserWarning: nperseg=256 is greater than signal length max(len(x), len(y)) = 115, using nperseg = 115
     __, psd = scipy.signal.welch(data.loc[:, col].to_numpy(), 1 / dt)
 
 tests/test_transport_environment.py::test_nova_transport_and_torax_share_the_expected_jax_runtime

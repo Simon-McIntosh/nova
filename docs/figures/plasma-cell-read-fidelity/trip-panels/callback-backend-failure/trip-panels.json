@@ -5,11 +5,11 @@
   "driver_sha256": "a22656a531142f9ac48eb801d559328732eadd42103e139f54dd81e4e7754570",
   "dispatch_base": "db2108e6adaca770cda30e39e052d9dcf20e18a9",
   "pre_repair_revision": "664ade0c32ac72ac3c37f34f711012f69fa68f5e",
-  "negative_control_log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/negative-control.log",
+  "negative_control_log": "docs/figures/plasma-cell-read-fidelity/trip-panels/negative-control.log",
   "arms": [
     {
       "revision": "664ade0c32ac72ac3c37f34f711012f69fa68f5e",
-      "nova_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/__init__.py",
+      "nova_file": "docs/figures/plasma-cell-read-fidelity/trip-panels/source-664ade0c3/nova/__init__.py",
       "clip_mode": "exact",
       "status": "not-measured",
       "trips": [],
@@ -4253,7 +4253,7 @@
       },
       "realised_cells": 132,
       "process_exit_status": 1,
-      "log": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/docs/figures/plasma-cell-read-fidelity/trip-panels/664ade0c3-exact.log",
+      "log": "docs/figures/plasma-cell-read-fidelity/trip-panels/664ade0c3-exact.log",
       "exception": "jax.debug.callback failed to find a local CPU device to place the inputs on. Make sure \"cpu\" is listed in --jax_platforms or the JAX_PLATFORMS environment variable.",
       "terminal_residual": null,
       "trip_count": null,

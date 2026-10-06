@@ -1,7 +1,7 @@
 revision=c9618e83a-mutation with trip_limit forced to active_set_steps (the frozen route re-reads the partition at every Newton trip boundary instead of holding one)
 tree=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-one-read
 command=timeout 900 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_one_read_per_trip.py -q
-module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/fixed_point.py
+module=nova/equilibrium/fixed_point.py
 cwd=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-one-read
 01:26:29 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 F.F                                                                      [100%]

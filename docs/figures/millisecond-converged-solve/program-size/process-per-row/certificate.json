@@ -9,14 +9,14 @@
     "digest": 4
   },
   "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
-  "baseline_state_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
+  "baseline_state_receipt": "docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
   "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
   "captured_at": "2026-09-20T18:16:10.272281+00:00",
   "comparison": "terminal state recorded at the base revision against the head accelerated program",
   "execution_mode": "one-process-per-row",
   "identity_row_count": 4,
   "measurement_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
-  "panel_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/panels",
+  "panel_directory": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels",
   "parent_process_id": 766438,
   "passed": false,
   "pending_rows": [],
@@ -87,8 +87,8 @@
         17620
       ],
       "requested_cells": -300,
-      "row_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-0-weak-rotation-reactor-static.json",
-      "samples_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-0-weak-rotation-reactor-static-maps.jsonl",
+      "row_receipt": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-0-weak-rotation-reactor-static.json",
+      "samples_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-0-weak-rotation-reactor-static-maps.jsonl",
       "within_one_program_load": true
     },
     {
@@ -103,8 +103,8 @@
         17620
       ],
       "requested_cells": -300,
-      "row_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-1-moderate-rotation-conventional-static.json",
-      "samples_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-1-moderate-rotation-conventional-static-maps.jsonl",
+      "row_receipt": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-1-moderate-rotation-conventional-static.json",
+      "samples_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-1-moderate-rotation-conventional-static-maps.jsonl",
       "within_one_program_load": false
     },
     {
@@ -119,8 +119,8 @@
         17620
       ],
       "requested_cells": -300,
-      "row_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-2-strong-rotation-compact-static.json",
-      "samples_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-2-strong-rotation-compact-static-maps.jsonl",
+      "row_receipt": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-2-strong-rotation-compact-static.json",
+      "samples_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-2-strong-rotation-compact-static-maps.jsonl",
       "within_one_program_load": false
     },
     {
@@ -135,8 +135,8 @@
         17620
       ],
       "requested_cells": -500,
-      "row_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-3-diverted-single-null.json",
-      "samples_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-3-diverted-single-null-maps.jsonl",
+      "row_receipt": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-3-diverted-single-null.json",
+      "samples_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/rows/row-3-diverted-single-null-maps.jsonl",
       "within_one_program_load": false
     }
   ],
@@ -155,7 +155,7 @@
       "candidate_arm_source": "head-revision solve",
       "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
       "candidate_seconds": 74.38096461258829,
-      "candidate_state_array_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states/weak-rotation-reactor-static_300.npy",
+      "candidate_state_array_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/states/weak-rotation-reactor-static_300.npy",
       "candidate_state_array_values": 1529,
       "candidate_state_finite": true,
       "candidate_state_sha256_binary64": "08fa9fe0b218a2b7f2da77b1652643cb634824868af0afd53a515fe864607bb6",
@@ -191,7 +191,7 @@
       "candidate_arm_source": "head-revision solve",
       "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
       "candidate_seconds": 369.9605151005089,
-      "candidate_state_array_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states/moderate-rotation-conventional-static_300.npy",
+      "candidate_state_array_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/states/moderate-rotation-conventional-static_300.npy",
       "candidate_state_array_values": 1535,
       "candidate_state_finite": true,
       "candidate_state_sha256_binary64": "b87d82f65d4ccfafadd7121b921a6172219cc57ef5fc9410680811a8ac5f212d",
@@ -227,7 +227,7 @@
       "candidate_arm_source": "head-revision solve",
       "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
       "candidate_seconds": 381.26935445331037,
-      "candidate_state_array_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states/strong-rotation-compact-static_300.npy",
+      "candidate_state_array_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/states/strong-rotation-compact-static_300.npy",
       "candidate_state_array_values": 1525,
       "candidate_state_finite": true,
       "candidate_state_sha256_binary64": "fd7c9756af2c72116ba9cc86dac614ef4f976b4f2c557f8dbdae6f30af1effda",
@@ -263,7 +263,7 @@
       "candidate_arm_source": "head-revision solve",
       "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
       "candidate_seconds": 472.4918174017221,
-      "candidate_state_array_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states/diverted-single-null_500.npy",
+      "candidate_state_array_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/states/diverted-single-null_500.npy",
       "candidate_state_array_values": 2226,
       "candidate_state_finite": true,
       "candidate_state_sha256_binary64": "c8f934d0dbed8a02eb69aedd2cc8a99213f31f76bceef08702cda9c058a88e6e",
@@ -288,5 +288,5 @@
   ],
   "schema": "nova.solve-program-certificate-identity",
   "field_semantics_note": "Written under the superseded receipt field semantics at revision 2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0 and left as measured rather than rewritten. Two fields read against the names they now carry: candidate_state_array_path holds an absolute worktree path rather than a name relative to the states directory this receipt records, and the per-row exit_code field holds the probe wrapper's status while the status of the child that solved the row is under probe_exit_code. The within_one_program_load flag on each row is the two-load comparison, which is now its own field within_two_program_loads; a receipt minted after the repair reports exit_code as the child status, probe_wrapper_exit as the wrapper's, and both load bounds separately.",
-  "state_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states"
+  "state_directory": "docs/figures/millisecond-converged-solve/program-size/process-per-row/states"
 }

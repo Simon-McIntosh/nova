@@ -1,7 +1,7 @@
 {
   "case": "weak-rotation-reactor-static",
   "cells": 2608,
-  "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-2500-chord.npz",
+  "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-2500-chord.npz",
   "input_sha256": "88d95450076fd988a2522bb8a81b8365a04c05b8175077e4ce1e49baad9b9d49",
   "map_mismatch": {
     "sup_relative": 4.82138406919214e-05,

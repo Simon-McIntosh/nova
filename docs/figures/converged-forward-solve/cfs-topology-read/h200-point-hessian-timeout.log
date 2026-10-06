@@ -1,4 +1,4 @@
-REVISION=6546771e2e97b715c77e8065ab5cad2193f08da3 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=recorded below
+REVISION=6546771e2e97b715c77e8065ab5cad2193f08da3 TREE=. COMMAND=recorded below
 RAW_LOG=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-point-hessian.log
 RAW_SHA256=884b26397654cefcdbdb23da73abf45f86ab8a87932638af2ef3d56ac58bacff
 ELISION=historical CACHE_GUARD_PREWARM JSON only
@@ -8,9 +8,9 @@ RUNG=h200
 SLURM_JOB_ID=1281104
 SLURM_JOB_PARTITION=betelgeuse
 SOURCE_REVISION=6546771e2e97b715c77e8065ab5cad2193f08da3
-REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+REPOSITORY_ROOT=.
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+PYTHONPATH=.:scripts/h200_test_lane
 JAX_PLATFORMS=cuda,cpu
 TMPDIR=/tmp
 MODE=pytest
@@ -33,7 +33,7 @@ CACHE_GUARD_VERSION_KEY=
 CACHE_GUARD_MISS_BUDGET=not-enforced
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function

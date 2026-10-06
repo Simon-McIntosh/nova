@@ -1,4 +1,4 @@
-# mutation: virtual outside slot typed minimum again (0); revision working tree with mutation; tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-virtual-node-not-a-critical-point
+# mutation: virtual outside slot typed minimum again (0); revision working tree with mutation; tree .
 # command: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD JAX_PLATFORMS=cpu uv run --no-sync pytest --timeout 0 -p no:cacheprovider tests/test_contour_tree_merge.py::test_virtual_slot_is_typed_outside_and_excluded_from_dd -q
 F                                                                        [100%]
 =================================== FAILURES ===================================

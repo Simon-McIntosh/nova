@@ -94,7 +94,7 @@
       "tmpdir": "/tmp"
     },
     "allocation_proof": "driver-local proof of the reserved H200, mirroring the instrument's with a memory floor: the instrument's proof requires exactly 128 GiB, which one frame's 131 GiB compile footprint does not fit",
-    "artifact_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels/docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
+    "artifact_path": "docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
     "artifact_primary_arm": "head",
     "artifact_revisions": {
       "base_materialisation": "git archive with the current row-persistence instrument overlaid",
@@ -131,7 +131,7 @@
       "xla_python_client_preallocate": "false"
     },
     "device_sha": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
-    "device_tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
+    "device_tree": ".",
     "driver": "benchmarks/diiid_gate_frame_identity.py",
     "driver_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
     "driver_sha256": "28e49be2c7077049930283b8f06c76002dfc794a4f95df868e17faea569e814a",
@@ -157,8 +157,8 @@
     "job_id": 1280450,
     "machine_artifact_digest": "sha256:c842fd7dd85d279e5ddf1052639821a665a4e73c00eb08a86ce0df4aa32e6d0e",
     "machine_cache": "/home/ITER/mcintos/.cache/nova/reckon-artifact-repaired-ring-cache",
-    "measurement_cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
-    "measurement_module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels/nova/equilibrium/forward.py",
+    "measurement_cwd": ".",
+    "measurement_module": "nova/equilibrium/forward.py",
     "member_identities": [
       "d3d_shot_0003ff34e7.parquet frame 44"
     ],

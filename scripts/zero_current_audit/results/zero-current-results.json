@@ -1,8 +1,8 @@
 {
   "inputs": {
-    "fixture": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
-    "localization": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/ring_quadrature/inputs/source-shift-localization.npz",
-    "ring_fields": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/ring_quadrature/results/ring-quadrature-fields.npz"
+    "fixture": "scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
+    "localization": "scripts/ring_quadrature/inputs/source-shift-localization.npz",
+    "ring_fields": "scripts/ring_quadrature/results/ring-quadrature-fields.npz"
   },
   "population": {
     "nonempty_cells": 447,
@@ -72,8 +72,8 @@
     "one_sided_max_absolute_cell_current_a": 3811.4829594374805
   },
   "artifacts": {
-    "classification": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/zero_current_audit/results/leg-cell-classification.csv",
-    "worst_cells": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/zero_current_audit/results/worst-leg-cells.csv",
-    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/docs/figures/boundary-ring-source-completion/ring-m0-current-weighted-error.png"
+    "classification": "scripts/zero_current_audit/results/leg-cell-classification.csv",
+    "worst_cells": "scripts/zero_current_audit/results/worst-leg-cells.csv",
+    "figure": "docs/figures/boundary-ring-source-completion/ring-m0-current-weighted-error.png"
   }
 }

@@ -1,4 +1,4 @@
-revision=1ad663cf58db3011735d25057de58a78cc565670 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract/tests/test_contour_tree_conventions.py -q
+revision=1ad663cf58db3011735d25057de58a78cc565670 tree=. command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_contour_tree_conventions.py -q
 mutation=flip the sign sigma_for_state returns: the axis is no longer a maximum of sigma*psi and the four orientation assertions fail
 FFFF..                                                                   [100%]
 =================================== FAILURES ===================================

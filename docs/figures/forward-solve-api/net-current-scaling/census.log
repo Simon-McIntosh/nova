@@ -1,4 +1,4 @@
-NET_CURRENT_CENSUS revision=423672965012bd504f128143ab9669be62e2841c tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route argv=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py --output-root /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/docs/figures/forward-solve-api/net-current-scaling junctions=['certificate', 'cold-seed', 'reduced-newton']
+NET_CURRENT_CENSUS revision=423672965012bd504f128143ab9669be62e2841c tree=. argv=benchmarks/net_current_scaling_census.py --output-root docs/figures/forward-solve-api/net-current-scaling junctions=['certificate', 'cold-seed', 'reduced-newton']
 NET_CURRENT_ROW route=newton_krylov mode=chord case=weak-rotation-reactor-static seed=2.036589 terminal=1.811178 converged=False core=54
 NET_CURRENT_ROW route=newton_krylov mode=chord case=moderate-rotation-conventional-static seed=2.061925 terminal=1.777645 converged=False core=56
 NET_CURRENT_ROW route=newton_krylov mode=chord case=strong-rotation-compact-static seed=1.890751 terminal=3.034357 converged=False core=32
@@ -83,40 +83,40 @@ E0923 13:15:03.946718  615094 execution_engine.cc:54] LLVM compilation error: Ca
 Traceback (most recent call last):
   File "<frozen runpy>", line 198, in _run_module_as_main
   File "<frozen runpy>", line 88, in _run_code
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 548, in <module>
+  File "benchmarks/net_current_scaling_census.py", line 548, in <module>
     raise SystemExit(main())
                      ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 543, in main
+  File "benchmarks/net_current_scaling_census.py", line 543, in main
     report = run(arguments.output_root, routes)
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 411, in run
+  File "benchmarks/net_current_scaling_census.py", line 411, in run
     row = _solve_row(case_name, CERTIFICATE_CELLS, clip_mode, route)
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/net_current_scaling_census.py", line 192, in _solve_row
+  File "benchmarks/net_current_scaling_census.py", line 192, in _solve_row
     seed, requested_class, seed_receipt = certificate._production_seed(
                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
         profile, case_name, target_current, centroid, current_receipt
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/benchmarks/solovev_certificate.py", line 667, in _production_seed
+  File "benchmarks/solovev_certificate.py", line 667, in _production_seed
     portfolio = profile.cold_seed_portfolio(
         target_current,
         centroid,
         diverted_geometry=geometry,
     )
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward.py", line 772, in cold_seed_portfolio
+  File "nova/equilibrium/forward.py", line 772, in cold_seed_portfolio
     anchors, anchor_flux, anchor_available = jax.vmap(anchor)(flux, requested)
                                              ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward.py", line 766, in anchor
+  File "nova/equilibrium/forward.py", line 766, in anchor
     _masks, topology = self.operator.read(branch_flux, branch_class)
                        ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward_operator.py", line 3182, in read
+  File "nova/equilibrium/forward_operator.py", line 3182, in read
     masks, topology, _connected, admitted = self._fixed_design_read(
                                             ~~~~~~~~~~~~~~~~~~~~~~~^
         physical, requested_class
         ^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-net-current-scaling-census-per-route/nova/equilibrium/forward_operator.py", line 3013, in _fixed_design_read
+  File "nova/equilibrium/forward_operator.py", line 3013, in _fixed_design_read
     result = self._fixed_design_topology.read_qualification(
         physical,
     ...<3 lines>...

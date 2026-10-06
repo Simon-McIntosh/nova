@@ -1,5 +1,5 @@
 {
-  "state": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/pfs-playable-persistent-cache-keyframe-receipt/docs/figures/playable-forward-solve/keyframes/mast-22086-43-bulk-z-moved-state.npz",
+  "state": "docs/figures/playable-forward-solve/keyframes/mast-22086-43-bulk-z-moved-state.npz",
   "one_call_reproduction": "SurfaceGeometryError: a requested surface does not close inside the lattice; the boundary flux does not bound this map",
   "requested_psi_norm": [
     0.1,

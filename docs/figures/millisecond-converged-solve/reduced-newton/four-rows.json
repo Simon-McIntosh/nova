@@ -54,8 +54,8 @@
       "selection": "explicit_per_recipe",
       "version_key": "runtime-0745ecebea4cb264e054"
     },
-    "previous_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/millisecond-converged-solve/reduced-newton/four-rows-before.json",
-    "production_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry/four-rows-after.json",
+    "previous_receipt": "docs/figures/millisecond-converged-solve/reduced-newton/four-rows-before.json",
+    "production_receipt": "docs/figures/solver-convergence-regression/settled-mask-stall/fallback-carry/four-rows-after.json",
     "response_carrier": {
       "carrier": {
         "file_sha256": "1da2b7bdb4a79d6b81513fa4aba909d318bd157c9b5453340b122bfd595428c9",
@@ -76,7 +76,7 @@
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/benchmarks/mast_response_carrier_warm.py",
+          "benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -89,7 +89,7 @@
       }
     }
   },
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/millisecond-converged-solve/reduced-newton/four-rows.png",
+  "figure": "docs/figures/millisecond-converged-solve/reduced-newton/four-rows.png",
   "measurement_contract": {
     "convergence_tolerance": 1e-08,
     "newton_steps": 12,
@@ -3920,6 +3920,6 @@
     "previous_receipt_reproduced": true,
     "prototype_converged_count": 1,
     "row_count": 4,
-    "terminal_flux": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-playable/msc-batched-refused-ladder-tail/docs/figures/millisecond-converged-solve/reduced-newton/four-rows-terminal-flux.npz"
+    "terminal_flux": "docs/figures/millisecond-converged-solve/reduced-newton/four-rows-terminal-flux.npz"
   }
 }

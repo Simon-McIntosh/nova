@@ -5,7 +5,7 @@
       "/home/ITER/mcintos/Code/reckon/.venv/bin/python",
       "-m",
       "reckon.doccheck",
-      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/docs/plans/cut-cell-current-attribution.html"
+      "docs/plans/cut-cell-current-attribution.html"
     ],
     "exit_status": 0,
     "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/plan-audit.log",
@@ -17,7 +17,7 @@
       "/home/ITER/mcintos/Code/reckon/.venv/bin/python",
       "-m",
       "reckon.doccheck",
-      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/docs/evidence/archive/cut-cell-current-attribution-landed.html"
+      "docs/evidence/archive/cut-cell-current-attribution-landed.html"
     ],
     "exit_status": 0,
     "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/evidence-audit.log",
@@ -29,7 +29,7 @@
       "/home/ITER/mcintos/Code/nova/.venv/bin/ruff",
       "check",
       "--no-cache",
-      "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/docs/figures/cut-cell-current-attribution/direction-generators/measure.py"
+      "docs/figures/cut-cell-current-attribution/direction-generators/measure.py"
     ],
     "exit_status": 0,
     "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed/instrument-lint.log",

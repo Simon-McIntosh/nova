@@ -1,9 +1,9 @@
 REVISION=bd439c315c5ec9db523d22e0eb5addc164be7a33
-TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+TREE=.
 WRAP_COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point -v --durations=0 --timeout 10000
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function

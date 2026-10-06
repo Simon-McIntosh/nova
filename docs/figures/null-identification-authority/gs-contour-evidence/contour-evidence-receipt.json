@@ -331,7 +331,7 @@
   },
   "legend": "/nova/figures/null-identification-authority/mechanism-evidence/marker-legend.png",
   "orientation_base_revision": "40c2d4749469db4fa5fa45a85ffeb77c291aa975",
-  "renderer_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/nia-contour-renderer-repair/docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py",
+  "renderer_source": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py",
   "schema": "nova.forward-gs-contour-evidence.v1",
   "status": "complete"
 }

@@ -2,7 +2,7 @@ slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
 slurmstepd: error: Setting TMPDIR to /tmp
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -144,19 +144,19 @@ tests/test_solovev_recovery_gates.py ....                                [100%]
     metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
 
 tests/test_biotelliptic.py: 12 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration/tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+  tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
     the requested tolerance from being achieved.  The error may be
     underestimated.
     expected, _ = scipy.integrate.quad(
 
 tests/test_biotelliptic.py: 14 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration/tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+  tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
     the requested tolerance from being achieved.  The error may be
     underestimated.
     value, _ = scipy.integrate.quad(
 
 tests/test_biotelliptic.py: 24 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration/tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+  tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
     the requested tolerance from being achieved.  The error may be
     underestimated.
     expected, _ = scipy.integrate.quad(

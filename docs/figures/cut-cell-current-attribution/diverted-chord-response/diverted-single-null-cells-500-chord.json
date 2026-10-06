@@ -1,7 +1,7 @@
 {
   "case": "diverted-single-null",
   "cells": 550,
-  "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-500-chord.npz",
+  "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-500-chord.npz",
   "input_sha256": "552bbded401f73eb6edf91aed6c0fee6fe40a1546aa7abfa491710ad78ee7998",
   "map_mismatch": {
     "sup_relative": 0.033867325392280156,

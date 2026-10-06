@@ -1,4 +1,4 @@
---- /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/forward.py	2026-10-01 23:16:11.040212000 +0200
+--- nova/equilibrium/forward.py	2026-10-01 23:16:11.040212000 +0200
 +++ /tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/negctl-tree/nova/equilibrium/forward.py	2026-10-02 00:20:27.302474605 +0200
 @@ -203,20 +203,17 @@
  

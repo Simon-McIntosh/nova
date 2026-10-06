@@ -114,7 +114,7 @@
     "raw_regeneration_sha256": "28a9127205ebf5bd713854905838d433a57f1f7d8b60729e838f4d9be3d31fe8",
     "regenerated_at": "2026-09-05T19:30:40.408413+02:00",
     "runtime": {
-      "checkout_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-rebank-remaining-identities",
+      "checkout_root": ".",
       "jax": "0.11.0",
       "jax_platforms": [
         "cuda",

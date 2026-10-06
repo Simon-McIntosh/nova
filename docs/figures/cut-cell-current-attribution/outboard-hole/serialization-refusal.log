@@ -1,14 +1,14 @@
 Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 421, in <module>
+  File "docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 421, in <module>
     main()
     ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 413, in main
+  File "docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 413, in main
     measure(args.revision)
     ~~~~~~~^^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 180, in measure
+  File "docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 180, in measure
     _write("terminal-attribution.json", payload)
     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-candidacy-from-the-clip-geometry-not-the-label/docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 65, in _write
+  File "docs/figures/cut-cell-current-attribution/outboard-hole/measure.py", line 65, in _write
     json.dumps(census._strict(payload), indent=2, allow_nan=False) + "\n"
     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/json/__init__.py", line 242, in dumps

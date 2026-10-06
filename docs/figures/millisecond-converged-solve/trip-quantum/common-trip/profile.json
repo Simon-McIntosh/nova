@@ -44,7 +44,7 @@
     }
   },
   "evidence_inputs": {
-    "baseline": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-common-trip-executable/docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/profile.json",
+    "baseline": "docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/profile.json",
     "baseline_sha256": "3653188f77545c8c29d6107ae6607ac4399c66a2fef4bdfaf58d8e8582e85609",
     "carrier": {
       "carrier": {
@@ -66,7 +66,7 @@
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-common-trip-executable/benchmarks/mast_response_carrier_warm.py",
+          "benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -384,7 +384,7 @@
       "selection": "explicit_per_recipe",
       "version_key": "runtime-0745ecebea4cb264e054"
     },
-    "production_driver": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-common-trip-executable/docs/figures/polish-support-performance/candidate-2/trip_quantum_profile.py",
+    "production_driver": "docs/figures/polish-support-performance/candidate-2/trip_quantum_profile.py",
     "production_driver_sha256": "fd99a680830031b990d04b807e0215f247717a16bd0ca87838feec0417746e50"
   },
   "runtime": {

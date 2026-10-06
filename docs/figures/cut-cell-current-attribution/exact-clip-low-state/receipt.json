@@ -75,7 +75,7 @@
     "selection": "explicit_per_recipe",
     "version_key": "runtime-0745ecebea4cb264e054"
   },
-  "reference_parts": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-seed-books-target-current/docs/figures/cut-cell-current-attribution/exact-clip-seed/parts",
+  "reference_parts": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts",
   "revision": "fc3abf0c52396b984fb32d1acffcd58a421687f8",
   "rows": [
     {
@@ -362,7 +362,7 @@
             "stored_flux_samples_used": false,
             "supported_cell_count": 36
           },
-          "source_part": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-seed-books-target-current/docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
+          "source_part": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
           "source_part_sha256": "132da5d169d239f3d9da2af91bbb5d389615097e203c515b4cee096f68d1fdef",
           "source_terminal": {
             "axis_error_m": 0.015131692325351172,
@@ -874,7 +874,7 @@
             "stored_flux_samples_used": false,
             "supported_cell_count": 96
           },
-          "source_part": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-seed-books-target-current/docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-cells-300.json",
+          "source_part": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-cells-300.json",
           "source_part_sha256": "4bab1e6585035663685cfcc653de53ba7aad438ff7e112789d19bc4413a2baf9",
           "source_terminal": {
             "axis_error_m": 0.03637121347760671,

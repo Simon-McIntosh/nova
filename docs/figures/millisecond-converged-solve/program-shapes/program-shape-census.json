@@ -1,7 +1,7 @@
 {
  "schema": "nova.program-shape-census",
  "captured_at": "2026-09-19T16:13:23+0200",
- "bank_cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-delete-observation-shim/logs/exact-operand-cache.npz",
+ "bank_cache": "logs/exact-operand-cache.npz",
  "compiled_program_key": "nova/equilibrium/reduced_newton.py:2055 _compiled_program_key",
  "certificate_source": "benchmarks/solovev_certificate._certificate_compile_problem dimensions",
  "requested_cells": -300,

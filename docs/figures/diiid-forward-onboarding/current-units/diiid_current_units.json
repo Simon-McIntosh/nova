@@ -3398,7 +3398,7 @@
   },
   "wiring_dependency": {
     "status": "consumed",
-    "source_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260820-diiid/diiid-coil-wiring/docs/figures/diiid-forward-onboarding/wiring/diiid_coil_wiring.json",
+    "source_path": "docs/figures/diiid-forward-onboarding/wiring/diiid_coil_wiring.json",
     "sha256": "56bba9a13450d57775b45fa3f262cdf0c531ceee6ba6d9d61a1333208bafaa2b",
     "pair_count": 276,
     "classification_counts": {

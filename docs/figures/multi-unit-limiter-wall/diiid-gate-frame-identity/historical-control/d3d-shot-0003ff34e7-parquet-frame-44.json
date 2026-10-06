@@ -94,7 +94,7 @@
       "tmpdir": "/tmp"
     },
     "allocation_proof": "driver-local proof of the reserved H200, mirroring the instrument's with a memory floor: the instrument's proof requires exactly 128 GiB, which one frame's 131 GiB compile footprint does not fit",
-    "artifact_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels/docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
+    "artifact_path": "docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json",
     "artifact_primary_arm": "head",
     "artifact_revisions": {
       "base_materialisation": "git archive with the current row-persistence instrument overlaid",

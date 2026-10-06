@@ -1,8 +1,8 @@
-revision=93895112d596e328a6d88b5d8f2070df3d732367 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=["/home/ITER/mcintos/Code/nova/.venv/bin/python", "-m", "pytest", "-p", "no:cacheprovider", "-p", "order_mutation", "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited]", "-vv", "-s", "--tb=short", "--timeout=1200"]
+revision=93895112d596e328a6d88b5d8f2070df3d732367 tree=. command=["/home/ITER/mcintos/Code/nova/.venv/bin/python", "-m", "pytest", "-p", "no:cacheprovider", "-p", "order_mutation", "tests/equilibrium/test_topology_read.py::test_saddle_support_order[limited]", "-vv", "-s", "--tb=short", "--timeout=1200"]
 ORDER_MUTATION: c0 -= 0.1*(abs(c3)+abs(c5)) on Z > 0.2 m; inward O(h^2) flux bias away from nulls, O(h) membership error
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function

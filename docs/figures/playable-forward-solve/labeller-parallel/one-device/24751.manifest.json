@@ -2,8 +2,8 @@
   "schema": "nova-forward-labeller-shot",
   "shot": 24751,
   "status": "complete",
-  "session": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-host-engine-identity/docs/figures/playable-forward-solve/labeller-parallel/one-device/24751.nc",
-  "companion": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-host-engine-identity/docs/figures/playable-forward-solve/labeller-parallel/one-device/24751.npz",
+  "session": "docs/figures/playable-forward-solve/labeller-parallel/one-device/24751.nc",
+  "companion": "docs/figures/playable-forward-solve/labeller-parallel/one-device/24751.npz",
   "nova_revision": "8381c6cdc3ae8d4403dd9247bc629500f669852b",
   "nova_equilibrium_tree": "9fc047bbb9b51ad682fdad4d3957a4e905e1f977",
   "labeller_batch_tree": "6a8aeb8943f56a101926a2dc3a4f05c95dfd82f9",
@@ -34,7 +34,7 @@
     "named_cache_only_check": {
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-batched/pfs-host-engine-identity/benchmarks/mast_response_carrier_warm.py",
+        "benchmarks/mast_response_carrier_warm.py",
         "check",
         "--carrier",
         "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",

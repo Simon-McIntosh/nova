@@ -1,10 +1,10 @@
 {
   "source_revision": "fa8af260e8adb154a7df4191d0c5308e6b675911",
-  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure",
+  "worktree": ".",
   "command": [
     "benchmarks/plasma_cell_map_fidelity.py",
     "--output",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure/docs/figures/plasma-cell-read-fidelity/map-fidelity"
+    "docs/figures/plasma-cell-read-fidelity/map-fidelity"
   ],
   "slurm_job_id": "1279817",
   "requested_rungs": [

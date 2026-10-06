@@ -1,4 +1,4 @@
-revision=474910dcb876839ddad7aea73f791cac282b570e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-first-step-degenerate-direction command=python benchmarks/plasma_cell_first_step_directions.py --output docs/figures/plasma-cell-read-fidelity/first-step
+revision=474910dcb876839ddad7aea73f791cac282b570e tree=. command=python benchmarks/plasma_cell_first_step_directions.py --output docs/figures/plasma-cell-read-fidelity/first-step
 NVIDIA H200 NVL
 BUILD production
 SEED {'core_cells': 83.0, 'unscaled_support_current_a': 38009.95261696202, 'lambda': 0.9818308983646898, 'nonfinite_support_count': 0.0, 'nonzero_moment_count': 249.0, 'moment_elements': 396.0}

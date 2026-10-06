@@ -8,7 +8,14 @@ import sys
 import tempfile
 
 import nova
-from nova.database.filepath import FilePath, repository_relative
+from nova.database.filepath import (
+    WORKTREE_PATH_EXEMPTIONS,
+    WORKTREE_ROOT,
+    FilePath,
+    relativize_worktree_paths,
+    repository_relative,
+    worktree_path_offenders,
+)
 from nova.definitions import root_dir
 from nova.utilities.importmanager import mark_import
 
@@ -172,6 +179,95 @@ def test_repository_relative_prefers_the_nearest_repository_root(tmp_path):
     target.parent.mkdir(parents=True)
     target.write_bytes(b"")
     assert repository_relative(target) == "docs/figure.png"
+
+
+def test_relativize_maps_a_worktree_path_to_its_trailing_name():
+    path = (
+        f"/home/user/Code/.{WORKTREE_ROOT}"
+        "/nova-a0f1e0938fc2/session-a/node-b/docs/figures/x/receipt.json"
+    )
+    rewritten, unmapped = relativize_worktree_paths(f"see {path} for details")
+    assert rewritten == "see docs/figures/x/receipt.json for details"
+    assert unmapped == []
+
+
+def test_relativize_maps_a_bare_worktree_root_to_dot():
+    path = f"/home/user/Code/.{WORKTREE_ROOT}/nova-a0f1e0938fc2/session-a/node-b"
+    rewritten, unmapped = relativize_worktree_paths(path)
+    assert rewritten == "."
+    assert unmapped == []
+
+
+def test_relativize_covers_the_legacy_cache_root():
+    path = (
+        f"/home/user/.cache/{WORKTREE_ROOT}"
+        "/nova-a0f1e0938fc2/session-a/node-b/nova/database/filepath.py"
+    )
+    rewritten, unmapped = relativize_worktree_paths(path)
+    assert rewritten == "nova/database/filepath.py"
+    assert unmapped == []
+
+
+def test_relativize_changes_nothing_outside_the_matched_span():
+    """The same bytes elsewhere and the same line ending survive."""
+    path = (
+        f"/home/user/Code/.{WORKTREE_ROOT}"
+        "/nova-a0f1e0938fc2/session-a/node-b/docs/x.json"
+    )
+    text = f'line one\r\n{{"source": "{path}", "n": 1}}\r\n'
+    rewritten, unmapped = relativize_worktree_paths(text)
+    assert rewritten == 'line one\r\n{"source": "docs/x.json", "n": 1}\r\n'
+    assert unmapped == []
+
+
+def test_relativize_is_idempotent():
+    path = (
+        f"/home/user/Code/.{WORKTREE_ROOT}"
+        "/nova-a0f1e0938fc2/session-a/node-b/docs/x.json"
+    )
+    once, _ = relativize_worktree_paths(path)
+    twice, unmapped = relativize_worktree_paths(once)
+    assert twice == once
+    assert unmapped == []
+
+
+def test_relativize_reports_a_foreign_worktree_unmapped_and_unchanged():
+    path = (
+        f"/home/user/Code/.{WORKTREE_ROOT}/ambix-deadbeef/session-a/node-b/docs/x.json"
+    )
+    rewritten, unmapped = relativize_worktree_paths(path)
+    assert rewritten == path
+    assert unmapped == [path]
+
+
+def test_relativize_reports_an_incomplete_layout_unmapped():
+    path = f"/home/user/.cache/{WORKTREE_ROOT}"
+    rewritten, unmapped = relativize_worktree_paths(path)
+    assert rewritten == path
+    assert unmapped == [path]
+
+
+def test_repository_relative_maps_a_removed_worktree_lexically():
+    """A worktree path maps through the shared matcher without a .git marker."""
+    path = (
+        f"/home/nobody/Code/.{WORKTREE_ROOT}"
+        "/nova-a0f1e0938fc2/session-a/node-b/docs/figures/x/figure.png"
+    )
+    assert repository_relative(path) == "docs/figures/x/figure.png"
+
+
+def test_worktree_path_offenders_skips_the_exemption_set():
+    contents = {
+        "docs/figures/x/a.json": f"see .{WORKTREE_ROOT}/nova-a0f1e0938fc2/s/n/f.json",
+        "docs/plans/p.html": f"mentions .{WORKTREE_ROOT} as a subject",
+        "docs/research/r.html": f".{WORKTREE_ROOT}",
+        "docs/state/s.json": f".{WORKTREE_ROOT}",
+        "nova/database/filepath.py": f'WORKTREE_ROOT = "{WORKTREE_ROOT}"',
+        "nova/database/scripts.py": "calls the subcommand, no literal",
+    }
+    offenders = worktree_path_offenders(contents, contents.__getitem__)
+    assert offenders == ["docs/figures/x/a.json"]
+    assert len(WORKTREE_PATH_EXEMPTIONS) == 4
 
 
 if __name__ == "__main__":

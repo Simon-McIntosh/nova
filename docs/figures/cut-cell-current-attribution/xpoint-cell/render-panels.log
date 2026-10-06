@@ -1,5 +1,5 @@
 revision 1cfd3fd4c
-tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-repair-the-wedge-null-markers
+tree .
 command python -m benchmarks.xpoint_cell_wedge_oracle --render-only
 XPOINT_WEDGE_PANEL cells=110 glyphs={'solved_axis': 1, 'solved_saddle': 0, 'analytic_axis': 1, 'analytic_saddle': 1} unexpected=[]
 XPOINT_WEDGE_PANEL cells=300 glyphs={'solved_axis': 1, 'solved_saddle': 0, 'analytic_axis': 1, 'analytic_saddle': 1} unexpected=[]

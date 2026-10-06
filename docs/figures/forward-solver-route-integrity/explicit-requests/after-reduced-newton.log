@@ -1,7 +1,7 @@
-revision=674ad986d plus reduced request integration; tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine; command=python -m pytest -p no:cacheprovider tests/test_reduced_newton.py -vv --tb=short
+revision=674ad986d plus reduced request integration; tree=.; command=python -m pytest -p no:cacheprovider tests/test_reduced_newton.py -vv --tb=short
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -86,8 +86,8 @@ Thread 0x00007fa028c0eb80 [python] (most recent call first):
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 142 in _run_python_pjit
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 266 in cache_miss
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py", line 195 in reraise_with_filtered_traceback
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/nova/equilibrium/reduced_newton.py", line 1984 in solve_reduced_newton
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/tests/test_reduced_newton.py", line 422 in test_threshold_one_reproduces_the_refusal_only_policy
+  File "nova/equilibrium/reduced_newton.py", line 1984 in solve_reduced_newton
+  File "tests/test_reduced_newton.py", line 422 in test_threshold_one_reproduces_the_refusal_only_policy
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py", line 167 in pytest_pyfunc_call
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121 in _multicall
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120 in _hookexec

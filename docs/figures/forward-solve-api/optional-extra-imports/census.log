@@ -1,4 +1,4 @@
-revision=4d51fba1a tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-core-modules-importing-optional-extras-census
+revision=4d51fba1a tree=.
 command=python benchmarks/optional_extra_import_census.py
 skipped self-reference in extra 'test': ['nova-stella[jax,transport]']
 core import names: 22

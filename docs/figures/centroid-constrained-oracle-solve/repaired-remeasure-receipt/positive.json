@@ -41,7 +41,7 @@
   },
   "figure": {
     "bytes": 215420,
-    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-repaired-constrained-remeasure-receipt/docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/flux-panels.png",
+    "path": "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/flux-panels.png",
     "sha256": "37b91f85bd503cab1e1fbb36f12dbeab4e834ec45ab1ad9270f89c69824b95ee",
     "shared_levels_wb": [
       -19.51415956145873,
@@ -712,6 +712,6 @@
     "solved_boundary_flux_wb": 0.03408855834986747,
     "solved_span_wb": 49.907046627151956
   },
-  "terminal_state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-repaired-constrained-remeasure-receipt/docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/positive-state.npy",
+  "terminal_state_path": "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/positive-state.npy",
   "terminal_state_sha256_binary64": "0196d8cce7b0f3c5b7852bcc0e42ecd7ac154a3b5e11f81fedea8fe6bd77e04b"
 }

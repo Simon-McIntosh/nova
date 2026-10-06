@@ -1,7 +1,7 @@
-revision 4d7305f684bea23f59d28702bcd6dc636fc9d166 tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity -vv -s
+revision 4d7305f684bea23f59d28702bcd6dc636fc9d166 tree . command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity -vv -s
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -18,7 +18,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-46bfbcux/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-46bfbcux/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-46bfbcux/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-46bfbcux/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 RECURRENCE_IDENTITY points=10000 maximum=1
 FAILED
 

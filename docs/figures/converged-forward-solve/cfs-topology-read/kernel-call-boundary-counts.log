@@ -1,4 +1,4 @@
-REVISION=116ab7246c23bd9800af516c7aabc4441ba2994f TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=CPU jax.make_jaxpr point-jet and read diagnostic
+REVISION=116ab7246c23bd9800af516c7aabc4441ba2994f TREE=. COMMAND=CPU jax.make_jaxpr point-jet and read diagnostic
 START kernel-jet
 TRACE kernel-jet 10.600954670459032 {"unique_equations": 111965, "expanded_equations": 243965}
 START read

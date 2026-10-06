@@ -13,9 +13,9 @@
     "binding": "s_star = min(u_wall, u_x)",
     "diiid_efit_label_authority": "stored EFIT LCFS lower X-point in the banked DIII-D source frame",
     "height_band_used": false,
-    "mast_achieved_class_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/dual-branch-selection/pinned-branch-contrast.json",
+    "mast_achieved_class_authority": "docs/figures/dual-branch-selection/pinned-branch-contrast.json",
     "mast_achieved_class_rule": "the banked post-rebaseline class margin, never the legacy ForwardTopologyState.diverted-derived achieved_class string",
-    "mast_efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+    "mast_efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
     "private_region": "positive production component label unequal to the axis label",
     "public_region": "production saddle-aware axis component immediately before binding",
     "wall_segment_rule": "segment is reachable only when both endpoint wall nodes touch the public region"
@@ -28,7 +28,7 @@
       "binding_level_wb_from_axis_outward": 0.3839922933803552,
       "classification_inward_offset_wb": 0.0002037849339989549,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5688938498497009,
@@ -66,7 +66,7 @@
       "binding_level_wb_from_axis_outward": 0.3792330010098876,
       "classification_inward_offset_wb": 0.0002024765698907393,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5688938498497009,
@@ -101,7 +101,7 @@
       "binding_level_wb_from_axis_outward": 0.4074577036297895,
       "classification_inward_offset_wb": 0.00021249772257913555,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5459407567977905,
@@ -139,7 +139,7 @@
       "binding_level_wb_from_axis_outward": 0.39962035000195006,
       "classification_inward_offset_wb": 0.00021151063428358322,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5459407567977905,
@@ -174,7 +174,7 @@
       "binding_level_wb_from_axis_outward": 0.032924251731601156,
       "classification_inward_offset_wb": 0.0002852413082705959,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5590311884880066,
@@ -212,7 +212,7 @@
       "binding_level_wb_from_axis_outward": 0.033386748165128134,
       "classification_inward_offset_wb": 0.00028326859479465877,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5590311884880066,
@@ -250,7 +250,7 @@
       "binding_level_wb_from_axis_outward": 0.35594762941932445,
       "classification_inward_offset_wb": 0.000256883881641781,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5724796056747437,
@@ -288,7 +288,7 @@
       "binding_level_wb_from_axis_outward": 0.35550425659824464,
       "classification_inward_offset_wb": 0.00025380214962282375,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5724796056747437,
@@ -326,7 +326,7 @@
       "binding_level_wb_from_axis_outward": 0.5410701790814221,
       "classification_inward_offset_wb": 0.000281222585800967,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5749794840812683,
@@ -361,7 +361,7 @@
       "binding_level_wb_from_axis_outward": 0.3243709244057854,
       "classification_inward_offset_wb": 0.00027988749726209097,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5749794840812683,
@@ -399,7 +399,7 @@
       "binding_level_wb_from_axis_outward": 0.4691723819746658,
       "classification_inward_offset_wb": 0.00024576125274482826,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5856547355651855,
@@ -434,7 +434,7 @@
       "binding_level_wb_from_axis_outward": 0.46365824716905,
       "classification_inward_offset_wb": 0.0002436227978103113,
       "efit_label": "diverted",
-      "efit_label_authority": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/landing/reachability-grid-final/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "efit_label_authority": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "efit_x_points_m": [
         [
           0.5856547355651855,

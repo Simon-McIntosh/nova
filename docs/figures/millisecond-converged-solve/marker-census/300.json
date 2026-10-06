@@ -13147,37 +13147,37 @@
       }
     },
     "provenance": {
-      "expected_source_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+      "expected_source_file": "nova/equilibrium/forward_operator.py",
       "source_files": [
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/benchmarks/solve_program_size_gate.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/biot/null.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/biot/target.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/clip_quadrature.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/connectivity_boundary.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/convention.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/domain.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/fixed_point.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/flux_surface_connectivity.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/parallel_components.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/rotation.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/separatrix_clip.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/source.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/stencil_mesh.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/topology.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/geometry/select.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/linalg/interpolant.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/linalg/split_spline.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/linalg/tensor_spline.py",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/scripts/analytic_oracle_fixtures/measure.py"
+        "benchmarks/solve_program_size_gate.py",
+        "nova/biot/null.py",
+        "nova/biot/target.py",
+        "nova/equilibrium/clip_quadrature.py",
+        "nova/equilibrium/connectivity_boundary.py",
+        "nova/equilibrium/convention.py",
+        "nova/equilibrium/domain.py",
+        "nova/equilibrium/fixed_point.py",
+        "nova/equilibrium/flux_surface_connectivity.py",
+        "nova/equilibrium/forward.py",
+        "nova/equilibrium/forward_operator.py",
+        "nova/equilibrium/parallel_components.py",
+        "nova/equilibrium/rotation.py",
+        "nova/equilibrium/separatrix_clip.py",
+        "nova/equilibrium/source.py",
+        "nova/equilibrium/stencil_mesh.py",
+        "nova/equilibrium/topology.py",
+        "nova/geometry/select.py",
+        "nova/linalg/interpolant.py",
+        "nova/linalg/split_spline.py",
+        "nova/linalg/tensor_spline.py",
+        "scripts/analytic_oracle_fixtures/measure.py"
       ],
       "source_matches": true
     },
     "schema": "nova.solve-program-marker-census",
     "total_instructions": 692225
   },
-  "marker_source_file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+  "marker_source_file": "nova/equilibrium/forward_operator.py",
   "measurement_revision": "ad2c5ee18b09fc95d14d0f2e919954432839fcaa",
   "passed": true,
   "persistent_compilation_cache": {
@@ -13233,7 +13233,7 @@
     "selection": "explicit_per_recipe",
     "version_key": "runtime-ea5c55820be3d80549fe"
   },
-  "previous_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-instrument/docs/figures/millisecond-converged-solve/marker-census/300.json",
+  "previous_receipt": "docs/figures/millisecond-converged-solve/marker-census/300.json",
   "previous_receipt_counts": {
     "current-moment path": {
       "marker_bearing_computations": 444,
@@ -13291,17 +13291,17 @@
         "sentinel_line": 3044,
         "source_locations": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator.normalised_current_moments",
             "line": 3044
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator.normalised_current_moments",
             "line": 3046
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator.normalised_current_moments",
             "line": 3048
           }
@@ -13314,32 +13314,32 @@
         "sentinel_line": 2457,
         "source_locations": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 2453
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 2454
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 2455
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 2457
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 2467
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 2468
           }

@@ -1,6 +1,6 @@
 {
   "revision": "2502e08b50f955f45e826ed933522efec6b98bd8",
-  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-which-direction-generator-closes-the-cold-seed",
+  "worktree": ".",
   "backend": "cpu",
   "devices": "[CpuDevice(id=0)]",
   "requested_cells": 110,

@@ -1,7 +1,7 @@
-REVISION=01575b6b164607271c9f1d06cfa3f64f18128646 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost COMMAND=env JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/tests/biot/test_kernel_compile_cost.py -k expression_bound -vv -s
+REVISION=01575b6b164607271c9f1d06cfa3f64f18128646 TREE=. COMMAND=env JAX_PLATFORMS=cpu PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py -k expression_bound -vv -s
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -13,9 +13,9 @@ collected 3 items / 2 deselected / 1 selected
 
 tests/biot/test_kernel_compile_cost.py::test_point_jet_expression_bound REFERENCE_MODULE rangefunction=/tmp/biot-reference-n_dtmsvs/rangefunction.py
 REFERENCE_MODULE elliptic=/tmp/biot-reference-n_dtmsvs/elliptic.py
-REFERENCE_MODULE momentchannel=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/momentchannel.py
-REFERENCE_MODULE polygonanalytic=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/nova/biot/polygonanalytic.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+REFERENCE_MODULE momentchannel=nova/biot/momentchannel.py
+REFERENCE_MODULE polygonanalytic=nova/biot/polygonanalytic.py
+MEASUREMENT_CWD=.
 EQUATIONS before=78404 after=78404 ratio=1
 FAILED
 

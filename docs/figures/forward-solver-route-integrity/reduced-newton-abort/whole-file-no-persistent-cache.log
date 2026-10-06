@@ -1,7 +1,7 @@
-revision=f5af729a9de6a2287ebd2b528cea278d5bdb3157 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort host=98dci4-clu-3141.iter.org command=env JAX_ENABLE_COMPILATION_CACHE=false /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -vv --tb=short tests/test_reduced_newton.py
+revision=f5af729a9de6a2287ebd2b528cea278d5bdb3157 tree=. host=98dci4-clu-3141.iter.org command=env JAX_ENABLE_COMPILATION_CACHE=false /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -vv --tb=short tests/test_reduced_newton.py
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -102,11 +102,11 @@ Thread 0x00007f62ff8d6b80 [python] (most recent call first):
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 142 in _run_python_pjit
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py", line 266 in cache_miss
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py", line 195 in reraise_with_filtered_traceback
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort/nova/equilibrium/reduced_newton.py", line 428 in _timed
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort/nova/equilibrium/reduced_newton.py", line 1179 in _plain_newton_trip
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort/nova/equilibrium/reduced_newton.py", line 1374 in _drive_trips
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort/nova/equilibrium/reduced_newton.py", line 1939 in solve_reduced_newton
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-attribute-the-reduced-newton-abort/tests/test_reduced_newton.py", line 893 in test_compiled_slice_replays_the_host_step_and_trip_counters
+  File "nova/equilibrium/reduced_newton.py", line 428 in _timed
+  File "nova/equilibrium/reduced_newton.py", line 1179 in _plain_newton_trip
+  File "nova/equilibrium/reduced_newton.py", line 1374 in _drive_trips
+  File "nova/equilibrium/reduced_newton.py", line 1939 in solve_reduced_newton
+  File "tests/test_reduced_newton.py", line 893 in test_compiled_slice_replays_the_host_step_and_trip_counters
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py", line 167 in pytest_pyfunc_call
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121 in _multicall
   File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120 in _hookexec

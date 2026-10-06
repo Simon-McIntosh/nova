@@ -1,4 +1,4 @@
-revision=c054dc50fe02add3b03555a99ce66a099485dc72+candidate-worktree tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-closed-form-polygon-moments-replace-the-gauss-antiderivative command=srun --jobid=1275743 --overlap --cpus-per-task=1 --mem=8G /home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/exact-clip-closed-form/measure_replacement.py --suite candidate
+revision=c054dc50fe02add3b03555a99ce66a099485dc72+candidate-worktree tree=. command=srun --jobid=1275743 --overlap --cpus-per-task=1 --mem=8G /home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/exact-clip-closed-form/measure_replacement.py --suite candidate
 .................                                                        [100%]
 17 passed in 72.50s (0:01:12)
 .................                                                        [100%]

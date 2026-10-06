@@ -1,7 +1,7 @@
 revision=3763af81d (HEAD before the warmup-slot repair) with tests/test_one_read_per_trip.py at the repaired revision
 tree=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/repro-tree
 command=timeout 900 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_one_read_per_trip.py -q
-module=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-warmup-frozen-newton/nova/equilibrium/fixed_point.py
+module=nova/equilibrium/fixed_point.py
 cwd=/tmp/reckon-crew-scratch/r-20261001T211043363832-fsri-live-warmup-frozen-newton/repro-tree
 01:24:57 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 .F.                                                                      [100%]

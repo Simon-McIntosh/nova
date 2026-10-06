@@ -6,10 +6,10 @@ BUILD coarse analytic fixture
 plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:37<01:51, 37.08s/it]plasmagrid:  50%|█████████         | 2/4 [00:47<00:43, 21.54s/it]plasmagrid:  75%|████████████▊    | 3/4 [07:36<03:18, 198.41s/it]plasmagrid: 100%|█████████████████| 4/4 [11:28<00:00, 211.71s/it]plasmagrid: 100%|█████████████████| 4/4 [11:28<00:00, 172.18s/it]
 plasmawall:   0%|                          | 0/4 [00:00<?, ?it/s]plasmawall:  25%|████▌             | 1/4 [00:21<01:05, 21.68s/it]plasmawall:  50%|█████████         | 2/4 [00:22<00:18,  9.43s/it]plasmawall:  75%|█████████████▌    | 3/4 [02:50<01:12, 72.69s/it]plasmawall: 100%|██████████████████| 4/4 [03:04<00:00, 49.55s/it]plasmawall: 100%|██████████████████| 4/4 [03:04<00:00, 46.14s/it]
 Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/forcing-residual-decomposition/scripts/forcing_residual_decomposition/measure.py", line 501, in <module>
+  File "scripts/forcing_residual_decomposition/measure.py", line 501, in <module>
     main()
     ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/forcing-residual-decomposition/scripts/forcing_residual_decomposition/measure.py", line 375, in main
+  File "scripts/forcing_residual_decomposition/measure.py", line 375, in main
     refinement_bank = coverage_bank["analytic_core_oracle"]["refinement"][-1]
                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
 KeyError: 'refinement'

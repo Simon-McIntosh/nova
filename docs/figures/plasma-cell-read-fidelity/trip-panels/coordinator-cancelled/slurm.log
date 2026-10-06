@@ -1,5 +1,5 @@
-revision=638c996ee7bf33aa669be930c8912380e39ab784 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels command=JAX_PLATFORMS=cuda,cpu XLA_PYTHON_CLIENT_PREALLOCATE=false /home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/plasma_cell_trip_panels.py measure --base db2108e6adaca770cda30e39e052d9dcf20e18a9 --before 664ade0c32ac72ac3c37f34f711012f69fa68f5e --output docs/figures/plasma-cell-read-fidelity/trip-panels
-MEASUREMENT_DRIVER /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-production-route-trip-panels/benchmarks/plasma_cell_trip_panels.py
+revision=638c996ee7bf33aa669be930c8912380e39ab784 tree=. command=JAX_PLATFORMS=cuda,cpu XLA_PYTHON_CLIENT_PREALLOCATE=false /home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/plasma_cell_trip_panels.py measure --base db2108e6adaca770cda30e39e052d9dcf20e18a9 --before 664ade0c32ac72ac3c37f34f711012f69fa68f5e --output docs/figures/plasma-cell-read-fidelity/trip-panels
+MEASUREMENT_DRIVER benchmarks/plasma_cell_trip_panels.py
 GPU_CALLBACK_CONTROL_PASS captured=7 before any solve arm
 Preparing worktree (detached HEAD 664ade0c3)
 Updating files:  16% (929/5760)

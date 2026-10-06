@@ -1,5 +1,5 @@
 {
-  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+  "cache": "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
   "cache_sha256": "dacb1776d361dc80b282b038efd2b0a05937de818a9c1b1017554224fe808644",
   "cache_source_identity": "sha256:23038d9c17076ab89be916f6aa65fea049e6e2241edba15e334c8b4dcf90e0a3",
   "committed_class_authority": "the operand bank's own recorded class; governed receipts' achieved_class values are kept per row as a cross-check",
@@ -9,8 +9,8 @@
       "committed_class": "diverted",
       "identity": "21986/46 pure",
       "records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
         "operand_metadata": "diverted"
       }
     },
@@ -18,8 +18,8 @@
       "committed_class": "diverted",
       "identity": "21989/55 pure",
       "records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
         "operand_metadata": "diverted"
       }
     },
@@ -27,7 +27,7 @@
       "committed_class": "diverted",
       "identity": "21989/55 mixed",
       "records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
         "operand_metadata": "diverted"
       }
     }
@@ -43,8 +43,8 @@
   "pending_replayable_row_count": 0,
   "production_replay": "ForwardFluxOperator._fixed_design_read with MomentGeometry built from the row's committed cell polygons",
   "qualification_receipts": [
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json"
+    "docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+    "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json"
   ],
   "replayable_row_count": 12,
   "replayed_row_count": 12,
@@ -71,8 +71,8 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -83,7 +83,7 @@
       "figure_panel": "replayed",
       "frame": 35,
       "identity": "21978/35 pure",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
       "marginal_solver_basin": true,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.0688733772685376,
@@ -179,7 +179,7 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -190,7 +190,7 @@
       "figure_panel": "replayed",
       "frame": 35,
       "identity": "21978/35 mixed",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.06470777474906281,
@@ -286,8 +286,8 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -298,7 +298,7 @@
       "figure_panel": "replayed",
       "frame": 35,
       "identity": "21983/35 pure",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.09532994589373613,
@@ -394,7 +394,7 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -405,7 +405,7 @@
       "figure_panel": "replayed",
       "frame": 35,
       "identity": "21983/35 mixed",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.09500072235468891,
@@ -501,8 +501,8 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -513,7 +513,7 @@
       "figure_panel": "replayed",
       "frame": 51,
       "identity": "21985/51 pure",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.21253815211080979,
@@ -642,7 +642,7 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -653,7 +653,7 @@
       "figure_panel": "replayed",
       "frame": 51,
       "identity": "21985/51 mixed",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.21126305742088516,
@@ -727,8 +727,8 @@
       "committed_class": "diverted",
       "committed_class_disagreement": true,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -739,7 +739,7 @@
       "figure_panel": "replayed",
       "frame": 46,
       "identity": "21986/46 pure",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.1866302908683632,
@@ -813,7 +813,7 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": null,
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": null,
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -824,7 +824,7 @@
       "figure_panel": "replayed",
       "frame": 46,
       "identity": "21986/46 mixed",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.18548836655337939,
@@ -920,8 +920,8 @@
       "committed_class": "diverted",
       "committed_class_disagreement": true,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -932,7 +932,7 @@
       "figure_panel": "replayed",
       "frame": 55,
       "identity": "21989/55 pure",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.20290750834507917,
@@ -1061,7 +1061,7 @@
       "committed_class": "diverted",
       "committed_class_disagreement": true,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "limited",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -1072,7 +1072,7 @@
       "figure_panel": "replayed",
       "frame": 55,
       "identity": "21989/55 mixed",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.20220715925006458,
@@ -1146,8 +1146,8 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/gs-absolute-accuracy/efit-reproduction.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -1158,7 +1158,7 @@
       "figure_panel": "replayed",
       "frame": 43,
       "identity": "22086/43 pure",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/gs-absolute-accuracy/efit-reproduction.json:solver_qualification",
       "marginal_solver_basin": true,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.12440216027127877,
@@ -1232,7 +1232,7 @@
       "committed_class": "diverted",
       "committed_class_disagreement": false,
       "committed_class_records": {
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
+        "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json": "diverted",
         "operand_metadata": "diverted"
       },
       "committed_class_source": "operand bank metadata class",
@@ -1243,7 +1243,7 @@
       "figure_panel": "replayed",
       "frame": 43,
       "identity": "22086/43 mixed",
-      "marginal_flag_source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
+      "marginal_flag_source": "docs/figures/solver-convergence-regression/bank-rebaseline-regen.json:solver_qualification",
       "marginal_solver_basin": false,
       "production_replay_call": "ForwardFluxOperator._fixed_design_read on cached cell polygons",
       "raster_binding_flux": -0.12236763818412648,

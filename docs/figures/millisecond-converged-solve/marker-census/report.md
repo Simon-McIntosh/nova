@@ -4,7 +4,7 @@
 - job: 1272930 (all_debug, 98dci4-clu-3141, cpu)
 - optimised HLO: 692225 instructions, 219637882 bytes
 - compile: 345.483 s
-- dump provenance: compiled from /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-rebaseline/nova/equilibrium/forward_operator.py
+- dump provenance: compiled from nova/equilibrium/forward_operator.py
 
 ## The two counting rules
 
@@ -22,7 +22,7 @@ Both rules read the same printed module text, so a difference between them is a 
 
 ## Carried forward from the earlier receipt
 
-Source: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-marker-census-instrument/docs/figures/millisecond-converged-solve/marker-census/300.json` at revision `a30309ada656de97acbcd9129b1accf2618e9502`.
+Source: `docs/figures/millisecond-converged-solve/marker-census/300.json` at revision `a30309ada656de97acbcd9129b1accf2618e9502`.
 
 | marker path | sentinel copies | read-body frames | marker-bearing computations | read-body instructions |
 | --- | ---: | ---: | ---: | ---: |

@@ -4,9 +4,9 @@ RUNG=h200
 SLURM_JOB_ID=1281151
 SLURM_JOB_PARTITION=betelgeuse
 SOURCE_REVISION=4d7305f684bea23f59d28702bcd6dc636fc9d166
-REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+REPOSITORY_ROOT=.
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/scripts/h200_test_lane
+PYTHONPATH=.:scripts/h200_test_lane
 JAX_PLATFORMS=cuda,cpu
 TMPDIR=/tmp
 MODE=pytest
@@ -31,7 +31,7 @@ CACHE_GUARD_MISS_BUDGET=not-enforced
 [Cache inventory line omitted from excerpt; full raw receipt retained in run directory.]
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -48,7 +48,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-w7cef9e1/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-w7cef9e1/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-w7cef9e1/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-w7cef9e1/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 COMPILE arm=baseline backend=cuda:0 seconds=11.2194146 executable_bytes=2912
 COMPILE arm=head backend=cuda:0 seconds=7.91631825 executable_bytes=2912
 PASSEDCACHE_GUARD_MARKER=pre-warm-run misses=0 budget=not-enforced

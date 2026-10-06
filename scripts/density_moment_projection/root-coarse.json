@@ -256,7 +256,7 @@
   },
   "state_size": 2396,
   "terminal_root": {
-    "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/coarse-terminal-root.npz",
+    "artifact": "scripts/density_moment_projection/coarse-terminal-root.npz",
     "machine_precision": true,
     "residual": 1.5407907043237626e-15
   }

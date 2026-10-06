@@ -591,7 +591,7 @@
       "environment_note": "the receipt records the historical convergence transition but does not retain its CPU node, Python, JAX, or jaxlib environment",
       "environment_recorded": false,
       "outcome_before_regeneration": true,
-      "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/scr-backend-forensics/docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
+      "receipt": "docs/figures/primary-xpoint-evidence/efit-topology-corroboration.json",
       "recorded_regeneration_environment": {
         "allocated_cpus": 4,
         "allocated_gpus": 1,
@@ -668,7 +668,7 @@
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay-shadow/benchmarks/mast_response_carrier_warm.py",
+          "benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -696,7 +696,7 @@
   "source": {
     "pinned_revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
     "shadow_head": "0292d477c2d6e9bc7da862340d89763c065205e9",
-    "shadow_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-cache-replay-shadow",
+    "shadow_root": ".",
     "solver_diff_from_pinned_revision": false
   }
 }

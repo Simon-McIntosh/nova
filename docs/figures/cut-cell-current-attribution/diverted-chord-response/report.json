@@ -1,13 +1,13 @@
 {
   "revision": "6315abefa8a3d7cf38037aa0a3848fe891403e88",
-  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution",
+  "worktree": ".",
   "job": "1277044",
   "completed": true,
   "rows": [
     {
       "case": "diverted-single-null",
       "cells": 132,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-110-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-110-chord.npz",
       "input_sha256": "422d56fd1ba0a8312ff31a06cfd6fffe1fc8bfb6cfb17c231eb87f3311611999",
       "map_mismatch": {
         "sup_relative": 0.09508482252281597,
@@ -2087,7 +2087,7 @@
     {
       "case": "weak-rotation-reactor-static",
       "cells": 135,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-110-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-110-chord.npz",
       "input_sha256": "555018c150193593b12653cdcda5cff3e2ddfac6b0e047a47752ef38b64c0f9a",
       "map_mismatch": {
         "sup_relative": 9.540289289876033e-05,
@@ -4388,7 +4388,7 @@
     {
       "case": "diverted-single-null",
       "cells": 340,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-300-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-300-chord.npz",
       "input_sha256": "29e137faad7ffe3b96cec623475a709a84f6ecd5f95bf176bcaeb572597bb83f",
       "map_mismatch": {
         "sup_relative": 0.022909979026979332,
@@ -9496,7 +9496,7 @@
     {
       "case": "weak-rotation-reactor-static",
       "cells": 342,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-300-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-300-chord.npz",
       "input_sha256": "2b60e146e34e4f02e307883e0460722e97c693342c21c06b9c14c26b620b48ee",
       "map_mismatch": {
         "sup_relative": 9.596811024567728e-05,
@@ -15190,7 +15190,7 @@
     {
       "case": "diverted-single-null",
       "cells": 550,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-500-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-500-chord.npz",
       "input_sha256": "552bbded401f73eb6edf91aed6c0fee6fe40a1546aa7abfa491710ad78ee7998",
       "map_mismatch": {
         "sup_relative": 0.033867325392280156,
@@ -23361,7 +23361,7 @@
     {
       "case": "weak-rotation-reactor-static",
       "cells": 555,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-500-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-500-chord.npz",
       "input_sha256": "baa16c27e99a4243421e2ad631b0d2a1f1647c36eec3f97c5cddb02350ca93a0",
       "map_mismatch": {
         "sup_relative": 4.845887297315645e-05,
@@ -32508,7 +32508,7 @@
     {
       "case": "diverted-single-null",
       "cells": 1074,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-1000-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-1000-chord.npz",
       "input_sha256": "701b6f19812fcd198ddd0e8ed2d0ccd3c234d267b970c8f2adc5822bed44420a",
       "map_mismatch": {
         "sup_relative": 0.012675988788640584,
@@ -48339,7 +48339,7 @@
     {
       "case": "weak-rotation-reactor-static",
       "cells": 1072,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-1000-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-1000-chord.npz",
       "input_sha256": "d36553a2839a0cf8edc8ad195c4e5ddc3971d7e287f128617cdfb9c90a8d6d4c",
       "map_mismatch": {
         "sup_relative": 4.6793185526884956e-05,
@@ -65945,7 +65945,7 @@
     {
       "case": "diverted-single-null",
       "cells": 2616,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-chord.npz",
       "input_sha256": "4dd9dba793e9c00d522614aa28aeafa2a8a6c069a15ea6a07b532ed60a59d683",
       "map_mismatch": {
         "sup_relative": 0.004091844616166289,
@@ -104309,7 +104309,7 @@
     {
       "case": "weak-rotation-reactor-static",
       "cells": 2608,
-      "input_archive": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-diverted-chord-response-mismatch-attribution/docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-2500-chord.npz",
+      "input_archive": "docs/figures/plasma-cell-read-fidelity/map-fidelity/weak-rotation-reactor-static-cells-2500-chord.npz",
       "input_sha256": "88d95450076fd988a2522bb8a81b8365a04c05b8175077e4ce1e49baad9b9d49",
       "map_mismatch": {
         "sup_relative": 4.82138406919214e-05,

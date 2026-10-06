@@ -1,7 +1,7 @@
-revision=83e226f7c72d5bdf2a207591e6f40466953178a4+worktree tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=.venv/bin/python -m pytest -p no:cacheprovider -vv tests/test_single_site_krylov.py (login node, CPU, seconds)
+revision=83e226f7c72d5bdf2a207591e6f40466953178a4+worktree tree=. command=.venv/bin/python -m pytest -p no:cacheprovider -vv tests/test_single_site_krylov.py (login node, CPU, seconds)
 ============================= test session starts ==============================
-platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- .venv/bin/python
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function

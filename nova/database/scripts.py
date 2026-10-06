@@ -2,8 +2,9 @@
 
 import click
 import shutil
+from pathlib import Path
 
-from nova.database.filepath import FilePath
+from nova.database.filepath import FilePath, relativize_worktree_paths
 
 
 @click.group(
@@ -25,3 +26,23 @@ def clear(ctx):
     """Clear local file cache."""
     if ctx.obj.is_path():
         shutil.rmtree(ctx.obj.path)
+
+
+@filepath.command
+@click.argument("files", nargs=-1, type=click.Path(exists=True, dir_okay=False))
+def relativize(files):
+    """Rewrite nova worktree paths in FILE... to repository-relative names.
+
+    Each file is rewritten in place, preserving every byte outside the matched
+    spans.  Each file changed and each worktree-path span left unmapped is
+    printed.
+    """
+    for name in files:
+        source = Path(name)
+        text = source.read_bytes().decode("utf-8")
+        rewritten, unmapped = relativize_worktree_paths(text)
+        if rewritten != text:
+            source.write_bytes(rewritten.encode("utf-8"))
+            click.echo(f"rewrote {name}")
+        for span in unmapped:
+            click.echo(f"unmapped {name}: {span}")

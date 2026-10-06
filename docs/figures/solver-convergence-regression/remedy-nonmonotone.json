@@ -772,22 +772,22 @@
   "source": {
     "nova_diff_names": "nova/equilibrium/fixed_point.py",
     "revision": "1ba05eb83a8b4adae717db5c68cad0bfd8f14b88",
-    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-nonmonotone-acceptance"
+    "worktree": "."
   },
   "sources": {
-    "anderson": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-anderson/docs/figures/solver-convergence-regression/remedy-anderson.json",
+    "anderson": "docs/figures/solver-convergence-regression/remedy-anderson.json",
     "anderson_sha256": "087302ed9bd32eaa9402330343fda60b35720204b0f2849ae1beb52fef26571b",
-    "deflation": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-deflation/docs/figures/solver-convergence-regression/remedy-deflation.json",
+    "deflation": "docs/figures/solver-convergence-regression/remedy-deflation.json",
     "deflation_sha256": "15bb96d42d49ca6debc1eaee26642402659c9b6aed95e434a50b34c37c05a153",
-    "krylov_depth": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth/docs/figures/solver-convergence-regression/remedy-krylov-depth.json",
+    "krylov_depth": "docs/figures/solver-convergence-regression/remedy-krylov-depth.json",
     "krylov_depth_sha256": "c73a8c7e5921f85619e61a570e5037736289a90c53572c61321cf165998d15ae",
     "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T112721217237-scr-remedy-nonmonotone-acceptance/raw/remedy-nonmonotone-h200.json",
     "raw_capture_sha256": "8055f68324c4fd6c39aeaf71b051475835753b1993536e454108647aa23aecb6",
-    "root_cause": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-nonmonotone-acceptance/docs/figures/solver-convergence-regression/root-cause.json",
+    "root_cause": "docs/figures/solver-convergence-regression/root-cause.json",
     "root_cause_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821",
-    "true_pin": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-nonmonotone-acceptance/docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+    "true_pin": "docs/figures/solver-convergence-regression/true-pin-reproduction.json",
     "true_pin_sha256": "8bc5bd9971c3ee18e88d13c00e0ed3ebfb984edb3523b488f5b1ba15fe2b1c78",
-    "vertical_pin": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-vertical-pin/docs/figures/solver-convergence-regression/remedy-vertical-pin.json",
+    "vertical_pin": "docs/figures/solver-convergence-regression/remedy-vertical-pin.json",
     "vertical_pin_sha256": "ec2a6be867e60d610c07a5cc8eb57a5638424ea61291449c20ae6a7ee4638cda"
   },
   "tests": {

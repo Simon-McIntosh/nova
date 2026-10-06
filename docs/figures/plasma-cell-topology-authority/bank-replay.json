@@ -1,5 +1,5 @@
 {
-  "cache": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-null-generator-adoption/docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
+  "cache": "docs/figures/topology-visual-corroboration/mast-topology-operands.npz",
   "cache_sha256": "dacb1776d361dc80b282b038efd2b0a05937de818a9c1b1017554224fe808644",
   "cache_source_identity": "sha256:23038d9c17076ab89be916f6aa65fea049e6e2241edba15e334c8b4dcf90e0a3",
   "exact_non_marginal_pass_count": 4,
@@ -10,7 +10,7 @@
   "passes": true,
   "pending_replayable_row_count": 6,
   "production_replay": "ForwardFluxOperator._fixed_design_read with MomentGeometry built from the row's committed cell polygons",
-  "qualification_metadata": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-null-generator-adoption/docs/figures/gs-absolute-accuracy/efit-reproduction.json",
+  "qualification_metadata": "docs/figures/gs-absolute-accuracy/efit-reproduction.json",
   "replayable_row_count": 12,
   "row_count": 12,
   "rows": [

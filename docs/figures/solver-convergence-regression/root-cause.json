@@ -326,9 +326,9 @@
     }
   ],
   "sources": {
-    "later_backend_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-root-cause-reading/docs/figures/solver-convergence-regression/backend-divergence.json",
+    "later_backend_receipt": "docs/figures/solver-convergence-regression/backend-divergence.json",
     "later_backend_receipt_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd",
-    "true_pin_reproduction": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-root-cause-reading/docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+    "true_pin_reproduction": "docs/figures/solver-convergence-regression/true-pin-reproduction.json",
     "true_pin_reproduction_sha256": "8bc5bd9971c3ee18e88d13c00e0ed3ebfb984edb3523b488f5b1ba15fe2b1c78"
   },
   "targeted_reading": [

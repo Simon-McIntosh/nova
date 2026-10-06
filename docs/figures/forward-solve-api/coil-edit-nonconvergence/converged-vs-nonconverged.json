@@ -30,8 +30,8 @@
     "termination": "converged",
     "trips": 1
   },
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-make-the-coil-edit-records-carry-their-own-numbers/docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
-  "figure_vector": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-make-the-coil-edit-records-carry-their-own-numbers/docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.svg",
+  "figure": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.png",
+  "figure_vector": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.svg",
   "level_band": {
     "axis_flux": 0.34121722002326105,
     "boundary_flux": -0.12292990492126646
@@ -82,7 +82,7 @@
     "termination": "active_set_settled",
     "trips": 1
   },
-  "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsa-make-the-coil-edit-records-carry-their-own-numbers/docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.json",
+  "receipt": "docs/figures/forward-solve-api/coil-edit-nonconvergence/converged-vs-nonconverged.json",
   "reference_branches": {
     "axis_enclosing_component_count": 1,
     "boundary_flux": -0.12292990492126646,

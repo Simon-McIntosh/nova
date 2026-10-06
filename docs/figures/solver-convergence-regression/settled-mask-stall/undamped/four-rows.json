@@ -56,7 +56,7 @@
       "selection": "explicit_per_recipe",
       "version_key": "runtime-0745ecebea4cb264e054"
     },
-    "public_route_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json",
+    "public_route_receipt": "docs/figures/solver-convergence-regression/settled-mask-stall/public-route/four-rows.json",
     "public_route_receipt_sha256": "e9894a15256357f94e776fa7f1d56ccd3ffa47f32078d8dce70a6b960e06bb17",
     "response_carrier": {
       "carrier": {
@@ -78,7 +78,7 @@
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/benchmarks/mast_response_carrier_warm.py",
+          "benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -90,10 +90,10 @@
         "stdout": "MAST_RESPONSE_CARRIER_CACHE_ONLY shape=[1126, 101] circuits=101 warm_seconds=0.025428 direct_builders=0 verdict=PASS"
       }
     },
-    "vertical_mode_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
+    "vertical_mode_receipt": "docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
     "vertical_mode_receipt_sha256": "46169cd5aa481a3d29203df3d0927e75ad3d35e2a7876a8f07210440018374f7"
   },
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-step-cap-and-mask-relinearisation/docs/figures/solver-convergence-regression/settled-mask-stall/undamped/four-rows.png",
+  "figure": "docs/figures/solver-convergence-regression/settled-mask-stall/undamped/four-rows.png",
   "measurement_contract": {
     "frozen_mask_damping": {
       "merit_ladder": false,

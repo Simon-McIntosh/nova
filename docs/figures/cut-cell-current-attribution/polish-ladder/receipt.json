@@ -1,7 +1,7 @@
 {
   "completed": true,
   "figure": {
-    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-polish-accuracy-ladder/docs/figures/cut-cell-current-attribution/polish-ladder/polish-error-ladder.svg",
+    "path": "docs/figures/cut-cell-current-attribution/polish-ladder/polish-error-ladder.svg",
     "project_absolute_src": "/nova/figures/cut-cell-current-attribution/polish-ladder/polish-error-ladder.svg"
   },
   "fitted_orders": {
@@ -515,7 +515,7 @@
     }
   },
   "pitch_threshold": 0.001,
-  "report": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-polish-accuracy-ladder/docs/figures/cut-cell-current-attribution/polish-ladder/polish-accuracy-ladder.md",
+  "report": "docs/figures/cut-cell-current-attribution/polish-ladder/polish-accuracy-ladder.md",
   "rows": [
     "diverted-single-null-cells-500",
     "diverted-single-null-cells-750",

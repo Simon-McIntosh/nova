@@ -2467,7 +2467,7 @@
               "polysection": 657
             },
             "sample_rows": 2817,
-            "snapshot_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/exact-kernel-defaults/tests/exact_section_fine_after.npz",
+            "snapshot_path": "tests/exact_section_fine_after.npz",
             "snapshot_sha256": "c218b0b6f884f1c0b649400e7b604bd2ed29358450408d1820cff90b9b4f406e",
             "source_columns": 117,
             "source_elements": 682,
@@ -2484,7 +2484,7 @@
               "polysection": 361
             },
             "sample_rows": 2817,
-            "snapshot_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/exact-kernel-defaults/tests/exact_section_fine_before.npz",
+            "snapshot_path": "tests/exact_section_fine_before.npz",
             "snapshot_sha256": "2dd7b57ed9c22e020d07921b4e4d5a5353798dc7c71950e5773d675889a74429",
             "source_columns": 117,
             "source_elements": 682,

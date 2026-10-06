@@ -180,7 +180,7 @@
           "op_name": "jit(mapped)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/broadcast_in_dim",
           "shape": "s32[29547,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/topology.py",
+            "file": "nova/equilibrium/topology.py",
             "frame_id": 6169,
             "function": "Topology.axis_component",
             "line": 831
@@ -207,7 +207,7 @@
           "op_name": "jit(mapped)/gather",
           "shape": "f64[342,12,2]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 1909,
             "function": "_traced_clip",
             "line": 888
@@ -223,7 +223,7 @@
           "op_name": "jit(mapped)/stack",
           "shape": "f64[342,12,1,2]{3,2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 2002,
             "function": "_traced_clip",
             "line": 1001
@@ -239,7 +239,7 @@
           "op_name": "jit(mapped)/gather",
           "shape": "f64[4104,1,2]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 1909,
             "function": "_traced_clip",
             "line": 888
@@ -266,7 +266,7 @@
           "op_name": "jit(mapped)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/div",
           "shape": "f64[201,7,2]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/topology.py",
+            "file": "nova/equilibrium/topology.py",
             "frame_id": 6369,
             "function": "Topology.axis_component",
             "line": 798
@@ -315,7 +315,7 @@
           "op_name": "jit(mapped)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/mul",
           "shape": "f64[201,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/topology.py",
+            "file": "nova/equilibrium/topology.py",
             "frame_id": 6378,
             "function": "Topology.axis_component",
             "line": 865
@@ -342,7 +342,7 @@
           "op_name": "jit(mapped)/jit(read_qualification)/jit(__call__)/jit(read_census)/jit(candidate_census)/broadcast_in_dim",
           "shape": "s32[1407,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 5756,
             "function": "_FixedDesignNull2D._compatibility_census",
             "line": 774
@@ -358,7 +358,7 @@
           "op_name": "jit(mapped)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/jit(axis_connected_component)/jit(label_saddle_aware_hex_connected_components)/jit(label_saddle_aware_hex_connected_components_with_steps)",
           "shape": "s32[201,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/flux_surface_connectivity.py",
+            "file": "nova/equilibrium/flux_surface_connectivity.py",
             "frame_id": 6138,
             "function": "label_saddle_aware_hex_connected_components",
             "line": 466
@@ -374,7 +374,7 @@
           "op_name": "jit(mapped)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 2156,
             "function": "flux_field_polynomial",
             "line": 470
@@ -390,7 +390,7 @@
           "op_name": "jit(mapped)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 2157,
             "function": "flux_field_polynomial",
             "line": 473
@@ -406,7 +406,7 @@
           "op_name": "jit(mapped)/compact_clipped_current_moments/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 2204,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -422,7 +422,7 @@
           "op_name": "jit(mapped)/compact_clipped_current_moments/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 2209,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -449,7 +449,7 @@
           "op_name": "jit(mapped)/compact_clipped_current_moments/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 2253,
             "function": "_integrate_current_points",
             "line": 273
@@ -476,7 +476,7 @@
           "op_name": "jit(mapped)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/jit(axis_connected_component)/jit(label_saddle_aware_hex_connected_components)/jit(label_saddle_aware_hex_connected_components_with_steps)/while/body/closed_call/broadcast_in_dim",
           "shape": "s32[1206,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/flux_surface_connectivity.py",
+            "file": "nova/equilibrium/flux_surface_connectivity.py",
             "frame_id": 6415,
             "function": "_propagate_admissible_hex_minima",
             "line": 282
@@ -492,7 +492,7 @@
           "op_name": "jit(mapped)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/slice",
           "shape": "s32[1206,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/connectivity_boundary.py",
+            "file": "nova/equilibrium/connectivity_boundary.py",
             "frame_id": 6388,
             "function": "_canonicalize_reciprocal_hex_edges",
             "line": 692
@@ -541,7 +541,7 @@
           "op_name": "jit(mapped)/lt",
           "shape": "s64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 1904,
             "function": "_traced_clip",
             "line": 885
@@ -613,30 +613,30 @@
         "instructions": 4,
         "sentinel_line": 2462,
         "source": {
-          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+          "file": "nova/equilibrium/forward_operator.py",
           "function": "ForwardFluxOperator.normalised_current_moments",
           "line": 2462
         },
         "source_locations": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator.normalised_current_moments",
             "line": 2462
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator.normalised_current_moments",
             "line": 2464
           }
         ],
         "sources": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator.normalised_current_moments",
             "line": 2462
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._internal_on_partition",
             "line": 2301
           }
@@ -652,25 +652,25 @@
         "instructions": 14,
         "sentinel_line": 1885,
         "source": {
-          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+          "file": "nova/equilibrium/forward_operator.py",
           "function": "ForwardFluxOperator._fixed_design_read",
           "line": 1885
         },
         "source_locations": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1883
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1885
           }
         ],
         "sources": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1885
           }
@@ -1120,7 +1120,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -1136,7 +1136,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -1152,7 +1152,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -1201,7 +1201,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -1217,7 +1217,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -1233,7 +1233,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -1315,7 +1315,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -1331,7 +1331,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -1347,7 +1347,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -1363,7 +1363,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -1379,7 +1379,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -1395,7 +1395,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -1411,7 +1411,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -1427,7 +1427,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -1443,7 +1443,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -1657,7 +1657,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -1673,7 +1673,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -1689,7 +1689,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -1705,7 +1705,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -1721,7 +1721,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -1737,7 +1737,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[1066,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -2215,7 +2215,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -2231,7 +2231,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -2247,7 +2247,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -2296,7 +2296,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -2312,7 +2312,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -2328,7 +2328,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -2410,7 +2410,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -2426,7 +2426,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -2442,7 +2442,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -2458,7 +2458,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -2474,7 +2474,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -2490,7 +2490,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -2506,7 +2506,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -2522,7 +2522,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -2538,7 +2538,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -2752,7 +2752,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -2768,7 +2768,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -2784,7 +2784,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -2800,7 +2800,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -2816,7 +2816,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -2832,7 +2832,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -3310,7 +3310,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -3326,7 +3326,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -3342,7 +3342,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -3391,7 +3391,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -3407,7 +3407,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -3423,7 +3423,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -3505,7 +3505,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -3521,7 +3521,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -3537,7 +3537,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -3553,7 +3553,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -3569,7 +3569,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -3585,7 +3585,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -3601,7 +3601,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -3617,7 +3617,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -3633,7 +3633,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -3847,7 +3847,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -3863,7 +3863,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -3879,7 +3879,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -3895,7 +3895,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -3911,7 +3911,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -3927,7 +3927,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[121,342]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -4064,7 +4064,7 @@
           "op_name": "jit(solve)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/broadcast_in_dim",
           "shape": "s32[29547,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/topology.py",
+            "file": "nova/equilibrium/topology.py",
             "frame_id": 67791,
             "function": "Topology.axis_component",
             "line": 831
@@ -4212,7 +4212,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,6,7]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -4239,7 +4239,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,6,7]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -4277,7 +4277,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,6,7]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71397,
             "function": "_steepest_descent_promotion",
             "line": 1399
@@ -4293,7 +4293,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,6,7]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71379,
             "function": "_backtracking_scores",
             "line": 989
@@ -4309,7 +4309,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,6,7]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71417,
             "function": "_backtracking_scores",
             "line": 989
@@ -4391,7 +4391,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,6,7]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71324,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -4407,7 +4407,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "f64[342,6,7]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71362,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -4456,7 +4456,7 @@
           "op_name": "jit(solve)/gather",
           "shape": "f64[342,12,2]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 17379,
             "function": "_traced_clip",
             "line": 888
@@ -4472,7 +4472,7 @@
           "op_name": "jit(solve)/stack",
           "shape": "f64[342,12,1,2]{3,2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 17477,
             "function": "_traced_clip",
             "line": 1001
@@ -4488,7 +4488,7 @@
           "op_name": "jit(solve)/gather",
           "shape": "f64[4104,1,2]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 17379,
             "function": "_traced_clip",
             "line": 888
@@ -4548,7 +4548,7 @@
           "op_name": "jit(solve)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/div",
           "shape": "f64[201,7,2]{2,1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/topology.py",
+            "file": "nova/equilibrium/topology.py",
             "frame_id": 67991,
             "function": "Topology.axis_component",
             "line": 798
@@ -4608,7 +4608,7 @@
           "op_name": "jit(solve)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/mul",
           "shape": "f64[201,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/topology.py",
+            "file": "nova/equilibrium/topology.py",
             "frame_id": 68000,
             "function": "Topology.axis_component",
             "line": 865
@@ -4767,7 +4767,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/convert_element_type",
           "shape": "s32[342,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 30871,
             "function": "InteriorCurrentMomentStencil.flux_coefficients",
             "line": 232
@@ -4783,7 +4783,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/convert_element_type",
           "shape": "s32[342,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 24825,
             "function": "InteriorCurrentMomentStencil.flux_coefficients",
             "line": 232
@@ -4810,7 +4810,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/convert_element_type",
           "shape": "s32[342,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 29589,
             "function": "InteriorCurrentMomentStencil.flux_coefficients",
             "line": 232
@@ -4826,7 +4826,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/convert_element_type",
           "shape": "s32[342,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 28457,
             "function": "InteriorCurrentMomentStencil.flux_coefficients",
             "line": 232
@@ -4853,7 +4853,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/convert_element_type",
           "shape": "s32[342,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 23306,
             "function": "InteriorCurrentMomentStencil.flux_coefficients",
             "line": 232
@@ -4913,7 +4913,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[2394,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 4989,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -4929,7 +4929,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/broadcast_in_dim",
           "shape": "s32[2394,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 27001,
             "function": "InteriorCurrentMomentStencil.flux_coefficients",
             "line": 232
@@ -4945,7 +4945,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[2394,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 8197,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -4961,7 +4961,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/broadcast_in_dim",
           "shape": "s32[2394,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 32529,
             "function": "InteriorCurrentMomentStencil.flux_coefficients",
             "line": 232
@@ -4999,7 +4999,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[2394,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 4989,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -5015,7 +5015,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[2394,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 8197,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -5042,7 +5042,7 @@
           "op_name": "jit(solve)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/jit(axis_connected_component)/jit(label_saddle_aware_hex_connected_components)/jit(label_saddle_aware_hex_connected_components_with_steps)",
           "shape": "s32[201,7]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/flux_surface_connectivity.py",
+            "file": "nova/equilibrium/flux_surface_connectivity.py",
             "frame_id": 67760,
             "function": "label_saddle_aware_hex_connected_components",
             "line": 466
@@ -5058,7 +5058,7 @@
           "op_name": "jit(solve)/jit(read_qualification)/jit(__call__)/jit(read_census)/jit(candidate_census)/broadcast_in_dim",
           "shape": "s32[1407,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 67378,
             "function": "_FixedDesignNull2D._compatibility_census",
             "line": 774
@@ -5096,7 +5096,7 @@
           "op_name": "jit(solve)/jit(_where)/select_n",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 18681,
             "function": "_active_set_newton_krylov.<locals>.reconcile.<locals>.<lambda>",
             "line": 3559
@@ -5112,7 +5112,7 @@
           "op_name": "jit(solve)/while/body/jvp()/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9850,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5128,7 +5128,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 18329,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5144,7 +5144,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 18330,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5160,7 +5160,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 17948,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5176,7 +5176,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 17949,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5192,7 +5192,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 18509,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5208,7 +5208,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 18510,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5224,7 +5224,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 18140,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5240,7 +5240,7 @@
           "op_name": "jit(solve)/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 18141,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5256,7 +5256,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9067,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5272,7 +5272,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9068,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5288,7 +5288,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9442,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5304,7 +5304,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9443,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5320,7 +5320,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8505,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5336,7 +5336,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8506,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5363,7 +5363,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 5003,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5379,7 +5379,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 5004,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5395,7 +5395,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 5222,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5411,7 +5411,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 5223,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5438,7 +5438,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 6364,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5454,7 +5454,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp()/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 6365,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5470,7 +5470,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 6613,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5486,7 +5486,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 6614,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5502,7 +5502,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 7365,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5518,7 +5518,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 7366,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5545,7 +5545,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8215,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5561,7 +5561,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8216,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5577,7 +5577,7 @@
           "op_name": "jit(solve)/while/body/jvp(compact_clipped_current_moments)/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9899,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -5593,7 +5593,7 @@
           "op_name": "jit(solve)/while/body/jvp(compact_clipped_current_moments)/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9904,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -5609,7 +5609,7 @@
           "op_name": "jit(solve)/while/body/jvp(compact_clipped_current_moments)/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 10006,
             "function": "_integrate_current_points",
             "line": 273
@@ -5625,7 +5625,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp(compact_clipped_current_moments)/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 5051,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -5641,7 +5641,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp(compact_clipped_current_moments)/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 5056,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -5657,7 +5657,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp(compact_clipped_current_moments)/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 5157,
             "function": "_integrate_current_points",
             "line": 273
@@ -5673,7 +5673,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/compact_clipped_current_moments/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8265,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -5689,7 +5689,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/compact_clipped_current_moments/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8270,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -5705,7 +5705,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/cond/branch_1_fun/compact_clipped_current_moments/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 8340,
             "function": "_integrate_current_points",
             "line": 273
@@ -5721,7 +5721,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp(compact_clipped_current_moments)/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 6412,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -5737,7 +5737,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp(compact_clipped_current_moments)/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 6417,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -5753,7 +5753,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/jvp(compact_clipped_current_moments)/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 6518,
             "function": "_integrate_current_points",
             "line": 273
@@ -5769,7 +5769,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/compact_clipped_current_moments/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8555,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -5785,7 +5785,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/compact_clipped_current_moments/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 8560,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -5801,7 +5801,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -5817,7 +5817,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -5833,7 +5833,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 27004,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5849,7 +5849,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 27005,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5865,7 +5865,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 32532,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5881,7 +5881,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 32533,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5897,7 +5897,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 30874,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5913,7 +5913,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 30875,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5929,7 +5929,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/compact_clipped_current_moments/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 30930,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -5945,7 +5945,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71342,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -5961,7 +5961,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 24828,
             "function": "flux_field_polynomial",
             "line": 470
@@ -5977,7 +5977,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 24829,
             "function": "flux_field_polynomial",
             "line": 473
@@ -5993,7 +5993,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/compact_clipped_current_moments/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 24884,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -6009,7 +6009,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 71306,
             "function": "_backtracked_promotion.<locals>.recover_with_continuation",
             "line": 1188
@@ -6036,7 +6036,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/cond/branch_1_fun/compact_clipped_current_moments/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 7415,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -6052,7 +6052,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/cond/branch_1_fun/compact_clipped_current_moments/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 7420,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -6068,7 +6068,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/cond/branch_1_fun/compact_clipped_current_moments/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 7490,
             "function": "_integrate_current_points",
             "line": 273
@@ -6084,7 +6084,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 29592,
             "function": "flux_field_polynomial",
             "line": 470
@@ -6100,7 +6100,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 29593,
             "function": "flux_field_polynomial",
             "line": 473
@@ -6116,7 +6116,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/compact_clipped_current_moments/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 30925,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -6132,7 +6132,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/compact_clipped_current_moments/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 24879,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -6148,7 +6148,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 28460,
             "function": "flux_field_polynomial",
             "line": 470
@@ -6164,7 +6164,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 28461,
             "function": "flux_field_polynomial",
             "line": 473
@@ -6191,7 +6191,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/compact_clipped_current_moments/gather",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9117,
             "function": "FluxFieldPolynomial.sample",
             "line": 129
@@ -6207,7 +6207,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/compact_clipped_current_moments/div",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 9122,
             "function": "FluxFieldPolynomial.sample",
             "line": 131
@@ -6223,7 +6223,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/compact_clipped_current_moments/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 9192,
             "function": "_integrate_current_points",
             "line": 273
@@ -6239,7 +6239,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 23309,
             "function": "flux_field_polynomial",
             "line": 470
@@ -6255,7 +6255,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/scatter",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/stencil_mesh.py",
+            "file": "nova/equilibrium/stencil_mesh.py",
             "frame_id": 23310,
             "function": "flux_field_polynomial",
             "line": 473
@@ -6304,7 +6304,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/compact_clipped_current_moments/sub",
           "shape": "f64[342,2]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/clip_quadrature.py",
+            "file": "nova/equilibrium/clip_quadrature.py",
             "frame_id": 8630,
             "function": "_integrate_current_points",
             "line": 273
@@ -6331,7 +6331,7 @@
           "op_name": "jit(solve)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/jit(axis_connected_component)/jit(label_saddle_aware_hex_connected_components)/jit(label_saddle_aware_hex_connected_components_with_steps)/while/body/closed_call/broadcast_in_dim",
           "shape": "s32[1206,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/flux_surface_connectivity.py",
+            "file": "nova/equilibrium/flux_surface_connectivity.py",
             "frame_id": 68037,
             "function": "_propagate_admissible_hex_minima",
             "line": 282
@@ -6347,7 +6347,7 @@
           "op_name": "jit(solve)/jit(read_qualification)/jit(qualified_o_candidates)/vmap(jit(axis_component))/slice",
           "shape": "s32[1206,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/connectivity_boundary.py",
+            "file": "nova/equilibrium/connectivity_boundary.py",
             "frame_id": 68010,
             "function": "_canonicalize_reciprocal_hex_edges",
             "line": 692
@@ -6594,7 +6594,7 @@
           "op_name": "jit(solve)/lt",
           "shape": "s64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/separatrix_clip.py",
+            "file": "nova/equilibrium/separatrix_clip.py",
             "frame_id": 17374,
             "function": "_traced_clip",
             "line": 885
@@ -7204,7 +7204,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/sub",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 31152,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2146
@@ -7220,7 +7220,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/sub",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 25106,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2146
@@ -7280,7 +7280,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/sub",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 29870,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2146
@@ -7296,7 +7296,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 29868,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2144
@@ -7312,7 +7312,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 29869,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2145
@@ -7328,7 +7328,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_0_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 29867,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2143
@@ -7344,7 +7344,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 23585,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2144
@@ -7360,7 +7360,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 23586,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2145
@@ -7376,7 +7376,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 23584,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2143
@@ -7392,7 +7392,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/sub",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 28738,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2146
@@ -7408,7 +7408,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 28736,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2144
@@ -7424,7 +7424,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 28737,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2145
@@ -7440,7 +7440,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 28735,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2143
@@ -7500,7 +7500,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/sub",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 23587,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2146
@@ -7714,7 +7714,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 27280,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2144
@@ -7730,7 +7730,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 27281,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2145
@@ -7746,7 +7746,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/sub",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 27282,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2146
@@ -7762,7 +7762,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 27279,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2143
@@ -7789,7 +7789,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 32808,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2144
@@ -7805,7 +7805,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 32809,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2145
@@ -7821,7 +7821,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/sub",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 32810,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2146
@@ -7837,7 +7837,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call/cond/branch_1_fun/squeeze",
           "shape": "f64[342]{0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "frame_id": 32807,
             "function": "ForwardFluxOperator.coupling_current_moments",
             "line": 2143
@@ -8029,7 +8029,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[342,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 8197,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -8045,7 +8045,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[342,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 8197,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -8061,7 +8061,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[342,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 4989,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -8077,7 +8077,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[342,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 4989,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -8269,7 +8269,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[342,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 4989,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -8285,7 +8285,7 @@
           "op_name": "jit(solve)/while/body/cond/branch_1_fun/cond/branch_1_fun/cond/branch_1_fun/while/body/cond/branch_1_fun/while/body/closed_call",
           "shape": "s32[342,1]{1,0}",
           "source": {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/fixed_point.py",
+            "file": "nova/equilibrium/fixed_point.py",
             "frame_id": 8197,
             "function": "_rebuilt_model_promotion",
             "line": 1337
@@ -8335,40 +8335,40 @@
         "instructions": 534,
         "sentinel_line": 2462,
         "source": {
-          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+          "file": "nova/equilibrium/forward_operator.py",
           "function": "ForwardFluxOperator.normalised_current_moments",
           "line": 2462
         },
         "source_locations": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._internal_on_partition",
             "line": 2297
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._internal_on_partition",
             "line": 2298
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._internal_on_partition",
             "line": 2301
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._internal_on_partition",
             "line": 2303
           }
         ],
         "sources": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator.normalised_current_moments",
             "line": 2462
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._internal_on_partition",
             "line": 2301
           }
@@ -8384,35 +8384,35 @@
         "instructions": 331,
         "sentinel_line": 1885,
         "source": {
-          "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+          "file": "nova/equilibrium/forward_operator.py",
           "function": "ForwardFluxOperator._fixed_design_read",
           "line": 1885
         },
         "source_locations": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1882
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1883
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1885
           },
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1896
           }
         ],
         "sources": [
           {
-            "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/msc-program-size-budget/nova/equilibrium/forward_operator.py",
+            "file": "nova/equilibrium/forward_operator.py",
             "function": "ForwardFluxOperator._fixed_design_read",
             "line": 1885
           }

@@ -20,13 +20,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="equilibrium,fixed-point,jax,convergence,h200">
   <meta name="plan-informs" content="">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <title>Forward solver route integrity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-north-star" content="ns-accurate-millisecond-gs">
 <meta name="plan-modified" content="2026-10-06">
-<meta name="plan-version" content="116">
+<meta name="plan-version" content="118">
 <meta name="plan-blocks" content="millisecond-converged-solve">
 <meta name="plan-impl" content="0.67">
 </head>
@@ -539,10 +539,11 @@
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
     <p class="r-fu-outcome">Premise false; no per-test mark lands. Since 55bca9b99 and 75495edb0 (2026-10-02), the H200 lane launcher injects --timeout 3600 into any pytest payload without one. The standing suite routes this file through it, and conftest.py keeps it out of the default not-slow lane. H200 job 1280609 ran the file in 665.5 s, slowest test 312.6 s: those walls include compilation on a mismatched pin, so they are upper bounds. A 660 s mark would have lowered that test's lane bound and was withdrawn. Merged as evidence only at 346fc8dfa (review 81): forward-solver-route-integrity-landed.html#forward-solve-tests-fit-their-bound.</p>
     </article>
-<article class="r-fu" data-id="f-fsri-ladder-census-runtime-counts-are-live" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solver-route-integrity §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fsri-ladder-census-runtime-counts-are-live" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solver-route-integrity §2" data-resolved-at="2026-10-06T01:45:04+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Make the ladder census&#x27;s runtime execution counts register the ladder calls the solver makes</h4>
     <div class="r-fu-body"><p>From the merge of the recovery-ladder census (1ab7d00fd, review 93). On the diverted-single-null 300-cell row, all five per-solve execution counts read zero while the solver telemetry for the same solve records one promotion attempt. <code>instrumented()</code> patches module globals, and the ladder calls made inside the active-set route do not reach the patched names, although the trip entry does. That is an inert instrument.</p><p>Repair, all three in this node:</p><ol><li>Find how the active-set route reaches the ladder entries (a captured reference, a dispatch table, or a closure), and count at a point every call passes through.</li><li>Prove it with a row whose telemetry records a promotion: its census count must be nonzero and agree with the telemetry.</li><li>Fix the two review follow-ons. <code>test_module_under_test_is_the_imported_copy</code> asserts only that <code>fixed_point.__file__</code> is truthy, which no regression can fail. The committed report.json names census_commit 5721de656 while the raw run log names 419152362, so the report cannot be tied to the run that produced it.</li></ol><p>Benchmarks and tests only.</p></div>
     <pre class="r-fu-prompt">/reckon-build forward-solver-route-integrity §2</pre>
+    <p class="r-fu-outcome">Superseded 2026-10-06: the recovery ladders are retired, not patched, by converged-forward-solve §5 and deleted under its §6 census, so neither ladder instrument (recovery_ladder_census.py or recovery_ladder_telemetry.py) is repaired. §1 to §3 of this plan are declared deferred, superseded by converged-forward-solve §4 to §6. Done — no followup.</p>
     </article>
 <article class="r-fu" data-id="f-fsri-lane-cache-guard-loads" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova" data-written-at="2026-10-03" data-recommends-skill="/reckon-build forward-solver-route-integrity §4" data-resolved-at="2026-10-03T13:57:59+00:00" data-resolved-by="s21-nova">
     <h4 class="r-fu-title">Make the H200 lane&#x27;s payload prelude reach pytest so the cache guard loads</h4>

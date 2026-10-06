@@ -1,5 +1,6 @@
 """Analytic contract for axisymmetric force-balance diagnostics."""
 
+import hashlib
 import json
 import math
 from dataclasses import dataclass
@@ -570,6 +571,10 @@ GRID_RESOLUTION = 161
 CONTOUR_SAMPLINGS = (501, 1001, 2001, 8001)
 GRID_RESOLUTIONS = (21, 41, 81)
 QUADRATURE_ORDER_FLOOR = 1.8
+TRACKED_RECEIPT = (
+    Path(__file__).resolve().parents[1]
+    / "docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json"
+)
 
 
 def _contour_combination(row, contour, radial, vertical):
@@ -641,6 +646,7 @@ def test_grid_imaged_biot_field_converges_to_the_volume_definition(
     The measured order is printed and written to the receipt beside the ladder
     it was fitted from.
     """
+    tracked_digest = hashlib.sha256(TRACKED_RECEIPT.read_bytes()).hexdigest()
     case = cerfon_freidberg_single_null()
     row = _analytic_row(case, sampling=501, resolution=401)
     exact = 4.0 * row.pressure_integral / (
@@ -712,6 +718,9 @@ def test_grid_imaged_biot_field_converges_to_the_volume_definition(
     assert grid_gaps[-1] < grid_gaps[0], (
         f"grid-imaged route did not close on the analytic route at grids "
         f"{GRID_RESOLUTIONS}: {grid_gaps}"
+    )
+    assert hashlib.sha256(TRACKED_RECEIPT.read_bytes()).hexdigest() == tracked_digest, (
+        f"the diagnostics test rewrote a tracked receipt: {TRACKED_RECEIPT}"
     )
 
 

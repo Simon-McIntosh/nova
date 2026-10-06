@@ -2166,8 +2166,7 @@ def _render_persisted_row(
     _validate_render_data(data)
     logical = row["figure"]["filesystem_path"]
     if path is None:
-        path = FIGURE_ROOT / Path(logical).name
-    path.parent.mkdir(parents=True, exist_ok=True)
+        path = ROOT / logical
     errors = {name: np.asarray(data["error_fields"][name]) for name in NORM_FIELDS}
     started = perf_counter()
     figure = _plot(

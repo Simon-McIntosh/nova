@@ -7,6 +7,7 @@ terminal state without exercising the map or solve that produced it.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -27,6 +28,10 @@ from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 CASE = "weak-rotation-reactor-static"
 REQUESTED_CELLS = -300
 MAP_FIDELITY_BOUND = 1.0e-2
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _revision() -> str:
@@ -213,8 +218,7 @@ def test_live_certificate_route_requires_map_convergence_and_position(
 
     control = _map_measurement(route, _vertical_shifted_analytic(route))
     print(
-        f"LIVE_CERTIFICATE_CONTROL sup={control['sup']:.16g} "
-        f"rms={control['rms']:.16g}"
+        f"LIVE_CERTIFICATE_CONTROL sup={control['sup']:.16g} rms={control['rms']:.16g}"
     )
     with pytest.raises(AssertionError):
         _require_map_fidelity(control)
@@ -248,23 +252,35 @@ def test_rerendered_part_receipt_is_not_a_live_certificate_row(
     source = certificate._part_path(CASE, REQUESTED_CELLS)
     if not source.exists():
         pytest.skip(f"no persisted certificate part is available at {source}")
+    tracked = [
+        certificate.ROOT
+        / "docs/figures/gs-absolute-accuracy/solovev"
+        / f"{CASE}-production-route-cells-300{suffix}"
+        for suffix in (".png", ".svg")
+    ]
+    before = {path: _sha256(path) for path in tracked}
+    figure_root = tmp_path / "docs/figures/gs-absolute-accuracy/solovev"
+    figure_root.mkdir(parents=True)
     part_root = tmp_path / "parts"
     part_root.mkdir()
     target = part_root / source.name
     target.write_bytes(source.read_bytes())
+    monkeypatch.setattr(certificate, "ROOT", tmp_path)
     monkeypatch.setattr(certificate, "PART_ROOT", part_root)
-    monkeypatch.setattr(certificate, "FIGURE_ROOT", tmp_path / "figures")
+    monkeypatch.setattr(certificate, "FIGURE_ROOT", figure_root)
     persisted = certificate._measure(CASE, REQUESTED_CELLS, clip_mode="exact")
     assert persisted["figure"]["render_source"] == "persisted_part_receipt"
     with pytest.raises(AssertionError):
         _require_fresh_production_row(persisted)
+    for path, digest in before.items():
+        assert _sha256(path) == digest, (
+            f"the certificate test rewrote a tracked figure: {path}"
+        )
 
 
 def test_pinned_receipt_keeps_the_unqualified_rows_as_data() -> None:
     """The static receipt remains inspectable while live qualification replaces it."""
 
-    receipt = json.loads(
-        certificate.OUTPUT.read_text(encoding="utf-8")
-    )
+    receipt = json.loads(certificate.OUTPUT.read_text(encoding="utf-8"))
     rows = receipt["cases"][CASE]["rows"]
     assert any(row["solver"]["qualification"] == "unqualified" for row in rows)

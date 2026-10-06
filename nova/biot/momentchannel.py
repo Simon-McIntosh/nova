@@ -537,6 +537,11 @@ def _quotient_tangent(numerator, d_numerator, denominator, d_denominator):
     )
 
 
+def _reciprocal_tangent(value, d_value):
+    """Return the tangent of ``1 / value``, the quotient rule's second term alone."""
+    return -d_value * (1.0 / (value * value))
+
+
 def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     """Return :func:`factorise` and its tangent in closed form.
 
@@ -549,7 +554,9 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     d_leading = d_bulk[0] if bulk else 0.0 * d_near
     curved = leading != 0.0
     held_leading = xp.where(curved, leading, 1.0)
-    d_held_leading = xp.where(curved, d_leading, 0.0)
+    # a straight denominator's tangents reach no output through the held
+    # leading or the held gap, so neither is held a second time
+    d_held_leading = d_leading
     offset = near / held_leading
     d_offset = _quotient_tangent(near, d_near, held_leading, d_held_leading)
     ratio = far / held_leading
@@ -574,10 +581,10 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     rising = (~curved) & (far > near)
     falling = (~curved) & (far < near)
     gap = xp.where(curved, 1.0, xp.where(rising, far - near, near - far))
-    d_gap = xp.where(curved, 0.0, xp.where(rising, d_far - d_near, d_near - d_far))
+    d_gap = xp.where(rising, d_far - d_near, d_near - d_far)
     live_gap = gap != 0.0
     held_gap = xp.where(live_gap, gap, 1.0)
-    d_held_gap = xp.where(live_gap, d_gap, 0.0)
+    d_held_gap = d_gap
     shift_y = xp.where(rising, near / held_gap, shift_y)
     d_shift_y = xp.where(
         rising, _quotient_tangent(near, d_near, held_gap, d_held_gap), d_shift_y
@@ -597,7 +604,7 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
         d_held_gap,
     )
     inverse = 1.0 / divisor
-    d_inverse = _quotient_tangent(1.0, 0.0, divisor, d_divisor)
+    d_inverse = _reciprocal_tangent(divisor, d_divisor)
     live_near = near != 0.0
     held_near = xp.where(live_near, near, 1.0)
     d_held_near = xp.where(live_near, d_near, 0.0)
@@ -611,9 +618,7 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     tangent = (
         xp.where(live_y, d_inverse, 0.0),
         xp.where(live_x, d_inverse, 0.0),
-        xp.where(
-            live_y | live_x, 0.0, _quotient_tangent(1.0, 0.0, held_near, d_held_near)
-        ),
+        xp.where(live_y | live_x, 0.0, _reciprocal_tangent(held_near, d_held_near)),
         xp.where(live_y, d_shift_y, 0.0),
         xp.where(live_x, d_shift_x, 0.0),
     )

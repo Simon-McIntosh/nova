@@ -145,10 +145,32 @@ worker processes inside one allocation, not a reason for sixteen jobs.
   as separate jobs (a sweep of unrelated configurations), never for the rows of
   one receipt.
 
-### Pre-commit Hooks Require Virtual Environment
+### The commit hook refuses worktree paths (binding)
 
-The pre-commit hook runs checks through `.venv/bin/python3`, so it needs the
-environment reachable at that path:
+Worker worktrees are always removed after promotion, so a committed path into
+one never resolves again. nova's one commit-time check is the read-only hook
+`scripts/git-hooks/pre-commit`. It runs `filepath relativize --check`, which
+refuses any staged file that names a reckon worktree path. The exempt paths are
+`docs/plans`, `docs/state`, `docs/research` and `nova/database/filepath.py`,
+the module that owns the rule. To fix a refused file, run
+`filepath relativize <file>`, which rewrites nova worktree paths to
+repository-relative names, then restage it. The hook never modifies a file.
+`tests/test_artifacts_carry_no_worktree_paths.py` enforces the same rule over
+every tracked file. The `pre-commit` framework is not used, because it stashes
+unstaged changes, which multi-agent checkouts forbid. Any later read-only check
+joins this hook as another line rather than becoming a second mechanism; the
+receipts-out-of-git size ceiling is the next.
+
+Enable the hook once per clone; worktrees share the setting. A worktree whose
+base predates the hook has no `scripts/git-hooks` directory, so no hook runs
+there:
+
+```bash
+git config --local core.hooksPath scripts/git-hooks
+```
+
+The hook runs through `.venv/bin/python3` of the checkout it is in, so that
+environment must be reachable:
 
 ```bash
 # Main checkout: uv run resolves and syncs the root .venv (recommended)
@@ -159,8 +181,6 @@ uv run git commit -m 'type: description'
 ln -s ~/Code/nova/.venv .venv
 uv run --no-sync git commit -m 'type: description'
 ```
-
-**Why**: Pre-commit hooks fail with "pre-commit not found" if the venv is not accessible.
 
 ## Quick Reference
 

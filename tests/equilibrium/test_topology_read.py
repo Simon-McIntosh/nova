@@ -35,8 +35,7 @@ kernel_compile_expected_failure = pytest.mark.xfail(
     strict=True,
     raises=KernelCompileBarrier,
     reason=(
-        "Biot harmonic kernel compile barrier; "
-        "cfs-kernel-compile-cost must land before kernel qualification"
+        "Biot harmonic kernel compilation exceeds the per-test wall bound"
     ),
 )
 

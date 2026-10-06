@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -34,7 +34,11 @@
     <code>/home/ITER/mcintos/Code/.reckon-worktrees/&lt;project&gt;-&lt;hash&gt;/&lt;session&gt;/&lt;node&gt;/</code>,
     or, for runs from before that root was adopted, under
     <code>/home/ITER/mcintos/.cache/reckon-worktrees/</code> with the same layout, and every
-    worktree is removed once its run is promoted. The lead's rule, given on
+    worktree is removed once its run is promoted. Reckon owns that layout
+    (<code>reckon/crew/routing.py</code>, where the preferred root is the repository's parent
+    plus <code>.reckon-worktrees</code> and the legacy root is <code>reckon-worktrees</code> under
+    the temporary directory). Nova carries no reckon dependency, so §2 re-encodes the layout
+    rather than importing it. The lead's rule, given on
     2026-10-06, is that this is permanent: a worktree always goes, so a committed artifact
     that names a path inside one names a path that will not exist. The evidence then stops
     locating its own figures, logs and scripts, and a launch script that changes directory
@@ -109,10 +113,12 @@
       elsewhere, the same line endings, and every JSON file still parses.</li>
     </ul>
     <p>The node first censuses the spellings present, because the matcher must cover each one:
-    the absolute form, a <code>~</code> form, JSON strings with escaped slashes, and a single
-    path split across two lines by a log's line wrap. Any spelling it cannot map is listed with
-    its file and line in the node's report, under its report path, and left unchanged rather
-    than guessed.</p>
+    the absolute form, a <code>~</code> form, and JSON strings with escaped slashes. A path split
+    across two lines by a log's line wrap is not rewritten, because doing so would change that
+    line's ending. Like any spelling the matcher cannot map, it is listed with its file and line
+    in the node's report, under its report path, and left unchanged rather than guessed. The
+    same-bytes and same-line-endings promise therefore covers every span the matcher rewrites,
+    and every rewritten span lies on one line.</p>
     <p>The <code>docs/figures/converged-forward-solve</code> topic was held while S21's live runs
     wrote there. S21 reported those directories quiet on 2026-10-06, before this node
     dispatched, and keeps its writes out of them until this node lands, so their 74 logs are
@@ -174,8 +180,10 @@
       offender. A positive control proves the scan reaches files in every top-level directory.
       It supersedes the directory-limited scan in <code>tests/test_render_receipt_paths.py</code>:
       <code>test_no_receipt_directory_json_records_a_worktree_path</code> and its positive
-      control <code>test_the_scan_reaches_every_receipt</code> are deleted, and the render-route
-      tests in that file stay. The new test runs in the default fast lane, in seconds.</li>
+      control <code>test_the_scan_reaches_every_receipt</code> are deleted, together with the
+      helpers that serve only them, <code>_scanned_json</code> and
+      <code>RECEIPT_DIRECTORIES</code>, so the repo-wide guard is the one scanner. The
+      render-route tests in that file stay. The new test runs in the default fast lane, in seconds.</li>
       <li>The commit-time check is a plain checked-in hook, <code>scripts/git-hooks/pre-commit</code>.
       <code>pyproject.toml</code> declares the <code>pre-commit</code> framework as a dev dependency
       and <code>AGENTS.md</code> describes its workflow, but nothing configures or installs it:

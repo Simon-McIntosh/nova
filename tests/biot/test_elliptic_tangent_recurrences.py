@@ -223,10 +223,11 @@ def _truncated_descent_step(radical, d_radical, running, d_running, xp):
 
 
 def _truncated_series(series_rising, d_series_rising, xp):
+    """The finite part's series tangent with its leading term dropped."""
     power = xp.ones_like(series_rising)
     d_power = None
-    d_series = None
-    for order in range(1, 7):
+    d_series = xp.zeros_like(series_rising)
+    for order in range(1, 8):
         d_power = completeelliptic._scale_tangent(
             -1.0,
             completeelliptic._product_tangent(
@@ -234,15 +235,20 @@ def _truncated_series(series_rising, d_series_rising, xp):
             ),
         )
         power = -power * series_rising
-        d_series = completeelliptic._tangent_sum(d_series, d_power / (2 * order + 1))
+        if order > 1:
+            d_series = d_series + d_power / (2 * order + 1)
     return d_series
+
+
+_RATIO_STEP = elliptic._harmonic_ratio_step_tangent
+_BACKWARD_STEP = elliptic._pole_backward_step_tangent
 
 
 def _truncated_ratio_step(
     ratio, d_ratio, parameter, d_parameter, complement, d_complement, *weights
 ):
     """The downward ratio tangent with the ratio's own tangent term dropped."""
-    return elliptic._harmonic_ratio_step_tangent(
+    return _RATIO_STEP(
         ratio, None, parameter, d_parameter, complement, d_complement, *weights
     )
 
@@ -251,9 +257,7 @@ def _truncated_backward_step(
     solution, d_solution, ratio, d_ratio, following, d_following
 ):
     """The back substitution with the following order's tangent dropped."""
-    return elliptic._pole_backward_step_tangent(
-        solution, d_solution, ratio, d_ratio, following, None
-    )
+    return _BACKWARD_STEP(solution, d_solution, ratio, d_ratio, following, None)
 
 
 def _truncated_root_term(mean, d_mean, moment, d_moment, quarter, d_quarter, *pair):

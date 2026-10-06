@@ -6,9 +6,9 @@ from pathlib import Path
 
 from nova.database.filepath import (
     FilePath,
-    _worktree_path_text,
     relativize_worktree_paths,
     worktree_path_candidates,
+    worktree_path_index_text,
     worktree_path_offenders,
 )
 
@@ -55,7 +55,7 @@ def relativize(files, check):
         root = Path(__file__).resolve().parents[2]
         candidates = worktree_path_candidates(root, cached=True)
         offenders = worktree_path_offenders(
-            candidates, lambda path: _worktree_path_text(root, path)
+            candidates, lambda path: worktree_path_index_text(root, path)
         )
         for path in offenders:
             click.echo(

@@ -14,9 +14,9 @@ from __future__ import annotations
 from pathlib import Path
 
 from nova.database.filepath import (
-    _worktree_path_text,
     worktree_path_candidates,
     worktree_path_offenders,
+    worktree_path_text,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,7 +34,7 @@ def test_no_tracked_file_names_a_worktree_path():
         f"candidates={candidates!r}"
     )
     offenders = worktree_path_offenders(
-        candidates, lambda path: _worktree_path_text(ROOT, path)
+        candidates, lambda path: worktree_path_text(ROOT, path)
     )
     assert offenders == [], (
         "tracked files naming a worktree path (run `filepath relativize` on "

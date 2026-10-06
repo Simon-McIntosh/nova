@@ -4,6 +4,7 @@ import fsspec
 import os
 from pathlib import Path
 import pytest
+import subprocess
 import sys
 import tempfile
 
@@ -12,11 +13,12 @@ from nova.database.filepath import (
     WORKTREE_PATH_EXEMPTIONS,
     WORKTREE_ROOT,
     FilePath,
-    _worktree_path_text,
     relativize_worktree_paths,
     repository_relative,
     worktree_path_candidates,
+    worktree_path_index_text,
     worktree_path_offenders,
+    worktree_path_text,
 )
 from nova.definitions import root_dir
 from nova.utilities.importmanager import mark_import
@@ -280,9 +282,51 @@ def test_worktree_path_text_decodes_a_binary_file():
         Path(directory, "artifact.bin").write_bytes(
             b"\x00\xff" + WORKTREE_ROOT.encode() + b"/nova-abc/s/n/x\x00"
         )
-        text = _worktree_path_text(directory, "artifact.bin")
+        text = worktree_path_text(directory, "artifact.bin")
     assert text != ""
     assert WORKTREE_ROOT in text
+
+
+def test_worktree_path_index_text_decodes_a_binary_blob():
+    """The index reader also returns decoded text, not '', for a staged blob."""
+    with tempfile.TemporaryDirectory() as directory:
+        subprocess.run(["git", "-C", directory, "init", "-q"], check=True)
+        (Path(directory) / "artifact.bin").write_bytes(
+            b"\x00\xff" + WORKTREE_ROOT.encode() + b"/nova-abc/s/n/x\x00"
+        )
+        subprocess.run(["git", "-C", directory, "add", "artifact.bin"], check=True)
+        text = worktree_path_index_text(directory, "artifact.bin")
+    assert text != ""
+    assert WORKTREE_ROOT in text
+
+
+def test_index_reader_reports_a_staged_file_the_working_tree_no_longer_names(
+    tmp_path,
+):
+    """The index reader decides from the staged blob, the working-tree reader
+    from the file.
+
+    A file staged while it named a worktree path, then edited in the working
+    tree without restaging, still names the path in the index -- what a commit
+    would record. The index reader must report it and the working-tree reader
+    must not, which is the difference the commit check depends on.
+    """
+    subprocess.run(["git", "-C", str(tmp_path), "init", "-q"], check=True)
+    target = tmp_path / "receipt.json"
+    target.write_text(f"see .{WORKTREE_ROOT}/nova-abc/s/n/x.json for details")
+    subprocess.run(["git", "-C", str(tmp_path), "add", "receipt.json"], check=True)
+    target.write_text("clean now\n")
+
+    candidates = worktree_path_candidates(tmp_path, cached=True)
+    assert "receipt.json" in candidates
+    index_offenders = worktree_path_offenders(
+        candidates, lambda path: worktree_path_index_text(tmp_path, path)
+    )
+    working_tree_offenders = worktree_path_offenders(
+        candidates, lambda path: worktree_path_text(tmp_path, path)
+    )
+    assert index_offenders == ["receipt.json"]
+    assert working_tree_offenders == []
 
 
 def test_worktree_path_candidates_search_the_working_tree():

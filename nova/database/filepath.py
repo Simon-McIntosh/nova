@@ -164,15 +164,38 @@ def worktree_path_candidates(
     ]
 
 
-def _worktree_path_text(root: str | os.PathLike, path: str | os.PathLike) -> str:
-    """Return a tracked path's bytes decoded, replacing undecodable bytes.
+def worktree_path_text(root: str | os.PathLike, path: str | os.PathLike) -> str:
+    """Return a tracked path's working-tree bytes decoded, replacing bad bytes.
 
-    The reader the candidate search's callers pass to
-    :func:`worktree_path_offenders`. Binary artifacts are read rather than
-    skipped, so a committed binary file that carries a worktree root is reported
-    instead of reading as text-free.
+    The reader the repository test passes to :func:`worktree_path_offenders`
+    when its candidates come from the working tree. Binary artifacts are read
+    rather than skipped, so a binary file that carries a worktree root is
+    reported instead of reading as text-free.
     """
     return (Path(root) / path).read_bytes().decode("utf-8", errors="replace")
+
+
+def worktree_path_index_text(root: str | os.PathLike, path: str | os.PathLike) -> str:
+    """Return a tracked path's staged bytes decoded, replacing bad bytes.
+
+    The reader the commit check passes to :func:`worktree_path_offenders` when
+    its candidates come from the index: the staged blob, not the working-tree
+    file, is what a commit would record. ``git show :path`` reads the blob the
+    index holds, so a file staged with a worktree path and then edited in the
+    working tree without restaging is still reported. Undecodable bytes are
+    replaced rather than skipping a binary blob.
+    """
+    completed = subprocess.run(
+        ["git", "-C", str(root), "show", f":{path}"],
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(
+            f"worktree-path index read failed for {path}: "
+            + completed.stderr.decode("utf-8", errors="replace").strip()
+        )
+    return completed.stdout.decode("utf-8", errors="replace")
 
 
 def relativize_cprofile_dump(path: str | os.PathLike) -> list[str]:

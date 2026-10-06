@@ -403,13 +403,16 @@ def test_tangent_matches_base_jvp(name):
             np.abs(np.concatenate([np.ravel(v) for v in jax.tree.leaves(expected[1])]))
         )
     )
+    elementwise_only = _elementwise_only(got[1], expected[1], passing)
+    reference_count = int((~judged).sum())
     print(f"IDENTITY {name} primal_max_relative={primal:.3e} "
           f"jvp_program_primal_max_relative={context:.3e} "
           f"tangent_max_normwise_relative={error.max():.3e} "
           f"tangent_max_elementwise_relative={_worst(got[1], expected[1]):.3e} "
-          f"elementwise_fail_normwise_pass={_elementwise_only(got[1], expected[1], passing)} "
+          f"elementwise_fail_normwise_pass={elementwise_only} "
           f"bound={SCAN_TOLERANCE:.0e} covered_fraction={covered:.4f} "
-          f"judged_by_base_jvp={int(judged.sum())} judged_by_reference={int((~judged).sum())} "
+          f"judged_by_base_jvp={int(judged.sum())} "
+          f"judged_by_reference={reference_count} "
           f"base_jvp_finite_fraction={finite:.4f} "
           f"base_tangent_median_abs={magnitude:.3e}")  # fmt: skip
     assert primal == 0.0

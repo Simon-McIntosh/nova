@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="nova">
+  <meta name="plan-slug" content="artifacts-carry-no-worktree-paths">
+  <title>Worktree-path rewrite rule and the data-file rewrite | nova</title>
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="acnwp-rewrite-data-artifacts-summary">§2 — the rewrite rule and the data-file rewrite</h2>
+    <p>Node <code>acnwp-rewrite-data-artifacts</code> implements the §2 rewrite rule
+    in <code>nova/database/filepath.py</code> and applies it to every committed
+    data file the census names. The rule is lexical, because the worktrees a
+    committed path names no longer exist on disk. It matches a path under a
+    <code>nova-&lt;hash&gt;</code> worktree by layout and rewrites it to its
+    repository-relative trailing name; a bare worktree root becomes
+    <code>.</code>; a path under another repository's worktree, or a layout the
+    matcher cannot complete, is reported and left unchanged, never guessed.</p>
+
+    <h2 id="acnwp-rewrite-data-artifacts-surface">The surface added</h2>
+    <ul>
+      <li><code>relativize_worktree_paths(text) -&gt; (rewritten_text, unmapped_spans)</code>
+      owns the rule. <code>repository_relative</code> delegates its worktree
+      case to the same matcher, so a path under a removed worktree maps
+      identically through either entry point.</li>
+      <li><code>worktree_path_offenders(paths, read)</code> is the one scanning
+      decision the commit check and the repository test share.</li>
+      <li>Two module constants — <code>WORKTREE_ROOT</code> and
+      <code>WORKTREE_PATH_EXEMPTIONS</code> — are imported by every other file
+      that would otherwise spell the pattern, including the tests.</li>
+      <li>The <code>relativize</code> subcommand of the existing
+      <code>filepath</code> click group applies the rule over files in place and
+      prints each file changed and each span left unmapped.</li>
+    </ul>
+
+    <h2 id="acnwp-rewrite-data-artifacts-census">Census and rewrite</h2>
+    <p>The census at the dispatch base <code>f9940c575</code> lists 1,147 files.
+    Excluding the launch scripts (<code>.sh</code>, <code>.sbatch</code>,
+    <code>.py</code>) leaves 1,082 data files. The one worktree spelling present
+    is the absolute form under <code>nova-a0f1e0938fc2</code>. The rewrite
+    changed 1,079 files (4,457 changed lines), leaving every other byte and
+    every line ending intact.</p>
+    <p>Five files carry a spelling the rule cannot map and is required to
+    report rather than guess: <code>cpu-compile-abort-landed.html</code> (a path
+    truncated to the project directory), <code>figure-and-solver-audit-landed.html</code>
+    (a path split by a line wrap), and three files that mention the root itself
+    as a subject — the two <code>figure-and-solver-audit</code> fragments
+    (§3 rewords those) and <code>replan-2026-09-24/thin-interfaces.md</code>.
+    Nine unmapped spans were reported across those five files.</p>
+  </main>
+</body>
+</html>

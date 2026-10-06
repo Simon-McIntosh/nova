@@ -47,10 +47,11 @@ BULK = 7
 MOMENTS = 12
 FAMILY = 10
 NODES = 128
-# A program this small compiles in a tenth of a second, where scheduler noise is
-# a multiple of the difference between arms, so each arm keeps the fastest of
-# this many fresh, cache-disabled processes.
-COMPILE_REPEATS = 3
+# A program this small compiles in a tenth of a second, where scheduler noise
+# moves one process's wall by tens of percent, so each arm takes the median of
+# this many fresh, cache-disabled processes; the expanded equation count is
+# recorded beside it as the deterministic measure of the program's size.
+COMPILE_REPEATS = 7
 
 
 def _load(name, path):
@@ -562,15 +563,19 @@ def _cold_compile(name, arm):
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
     rows = {
-        arm: min(
-            (_cold_compile(name, arm) for _ in range(COMPILE_REPEATS)),
-            key=lambda row: row["compile_seconds"],
-        )
+        arm: [_cold_compile(name, arm) for _ in range(COMPILE_REPEATS)]
         for arm in ("primal", "tangent", "jvp")
     }
-    for arm, row in rows.items():
-        print(f"COMPILE {name} {arm} seconds={row['compile_seconds']:.3f} "
-              f"equations={row['equations']} hits={row['cache_hits']}")  # fmt: skip
-    ratio = rows["tangent"]["compile_seconds"] / rows["primal"]["compile_seconds"]
-    print(f"COMPILE {name} tangent_over_primal={ratio:.2f}")
+    median = {}
+    for arm, runs in rows.items():
+        walls = sorted(row["compile_seconds"] for row in runs)
+        equations = {row["equations"] for row in runs}
+        assert len(equations) == 1
+        median[arm] = float(np.median(walls))
+        print(f"COMPILE {name} {arm} median_seconds={median[arm]:.3f} "
+              f"equations={equations.pop()} "
+              f"walls={','.join(f'{wall:.3f}' for wall in walls)} "
+              f"hits={sum(row['cache_hits'] for row in runs)}")  # fmt: skip
+    ratio = median["tangent"] / median["primal"]
+    print(f"COMPILE {name} median_tangent_over_primal={ratio:.2f}")
     assert ratio <= 3.0

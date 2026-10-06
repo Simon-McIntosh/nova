@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="70">
+<meta name="plan-version" content="71">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -380,6 +380,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261006T021141702213" data-who="" data-when="">
     <div class="r-comment-body"><p>Exterior field owner, 2026-10-06, from the composed plan review filed under s22: <code>ForwardFluxOperator.external</code> (<code>forward_operator.py</code>, around line 3038) owns exterior-flux evaluation today (conductor targets on grid, wall and sample, plus the prescribed field) and is deleted with the class at §6. Its successor has one owner: the <code>ExteriorField</code> operand the §2 read already takes (value, gradient and Hessian at moving points), whose production implementation is the conductor-to-point Biot coupling with its analytic derivatives plus the prescribed field. <code>gs.apply</code> consumes that same operand for ψ_ext on the mesh rather than carrying a second exterior path, and the read consumes it at the nulls; <code>external</code>'s conductor and prescribed-field logic is the cite-or-justify candidate carried into it. The §6 census checks by name that no module other than the exterior operand evaluates conductor flux for the forward solve.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T023137302757" data-who="" data-when="">
+    <div class="r-comment-body"><p>Implementing the <code>kernel-loop-representation</code> lock, 2026-10-06. The first node (<code>cfs-kernel-derivative-rules</code>, claude-opus) stopped before any source change with a scoping measurement that sharpens the plan of attack without changing the decision: at 132 cells the read traces 1,373,538 expanded equations from 30 inlined kernel traces (20 primal <code>value_gradient</code>, 10 <code>jacfwd</code> <code>evaluate</code>); one primal point kernel compiles cold on CPU in 23.5 s at 1.87 GB, while a single-direction jvp of its field rows does not compile in 420 s, so a hand-written tangent is the right direction; and nova/biot has no analytic polygon second-derivative kernel, so the rule is derived through four families. Split, staged: <code>cfs-read-shared-kernel</code> (one kernel trace per read stage, identity to 1e-13, cold compile measured on the H200 together with the point kernel's primal against its jvp) and <code>cfs-elliptic-tangent-recurrences</code> (tangents of the elliptic and harmonic-moment recurrences as their own recurrences, 1e-13 against jax.jvp of the base) are in flight on claude-opus; the range-product and vertex-edge residual families follow once the elliptic node proves the tangent contract, and a final node wraps the point jet in custom_jvp and measures the read against the clause.</p></div>
 </div>
 </section>
 </main>

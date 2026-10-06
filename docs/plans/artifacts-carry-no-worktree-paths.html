@@ -23,7 +23,7 @@
   <title>Artifacts Carry No Worktree Paths | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
 </head>
@@ -78,7 +78,16 @@
     definition. That function is the only public surface the plan adds. It cannot be folded into
     <code>repository_relative</code>, because it takes and returns text rather than a path and it
     reports what it left unmapped. <code>scripts/relativize_worktree_paths.py</code> applies it
-    to named files in place and prints each file it changed and each span it left unmapped. The
+    to named files in place and prints each file it changed and each span it left unmapped. With
+    <code>--check</code> it instead reads the files staged for commit and exits nonzero, naming
+    each one outside the exemption set that contains a worktree path. The §4 hook is a two-line
+    shim that runs this mode. So neither the pattern nor the exemption set is spelled anywhere
+    except <code>nova/database/filepath.py</code>, which holds both as module constants.</p>
+    <p>Accounting for the surface this adds: one public function, two module constants, and one
+    command with two modes. Nothing in nova rewrites or rejects worktree paths today, so nothing
+    retires except the receipt-directory scan named in §4. The constants are data that the
+    function, the command and the guard test share, not separate entry points. The command is
+    the only way to run the function over files, and the hook adds no logic of its own. The
     rule:</p>
     <ul>
       <li>A path under a nova worktree,
@@ -125,8 +134,9 @@
     script derives its repository root at run time from its own location. In shell that is one
     line, <code>ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"</code>;
     <code>BASH_SOURCE</code> rather than <code>$0</code> makes a sourced script resolve its own
-    file, not its caller. In Python it is the same <code>git rev-parse --show-toplevel</code>
-    run from the script's own directory. The resolved root is the toplevel of whichever
+    file, not its caller. A Python launch script that already imports nova uses the existing
+    root owner, <code>nova.definitions.root_dir</code>; one that does not runs the same
+    <code>git rev-parse --show-toplevel</code> from its own directory. The resolved root is the toplevel of whichever
     checkout the script runs in, a worktree or the canonical checkout, and output directories
     are written beneath it. Where the worktree path appears only in a comment or an echoed
     banner, the script file is passed through the §2 function instead. Paths to the canonical
@@ -146,9 +156,10 @@
 <section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-attempts="0" data-status="implementable" data-links=""></section>
     <p>Two read-only checks share one exemption set: <code>docs/state</code>,
     <code>docs/plans</code> and <code>docs/research</code> (see §5), and
-    <code>nova/database/filepath.py</code>, where the rule and its constant live. The checks
-    skip those paths. Every other file, the tests and the script included, imports the constant
-    rather than spelling the pattern, so it needs no exemption.</p>
+    <code>nova/database/filepath.py</code>, where the rule, the pattern constant and the
+    exemption constant live. The checks skip those paths. Every other file, including the tests,
+    the script and the hook, imports the constants or calls the script rather than spelling the
+    pattern, so it needs no exemption.</p>
     <ul>
       <li><code>tests/test_artifacts_carry_no_worktree_paths.py</code> runs <code>git grep</code>
       for the pattern over every tracked file outside the exemptions and fails naming each
@@ -167,10 +178,11 @@
       read-only check, such as the size ceiling in converged-forward-solve's
       <code>receipts-out-of-git</code> decision, joins this script rather than adding a second
       mechanism. When the coordinator enables the hook, it also corrects the <code>AGENTS.md</code>
-      pre-commit section to describe it. It reads only the staged files, rejects any
-      outside the exemptions that contains the pattern, names
-      <code>scripts/relativize_worktree_paths.py</code> as the fix in its message, and never
-      modifies a file. After the node lands, the coordinator enables it once with
+      pre-commit section to describe it. The hook is a two-line shell shim that runs
+      <code>scripts/relativize_worktree_paths.py --check</code> with the project interpreter, so
+      the check it applies is the script's: it reads only the staged files, rejects any outside
+      the exemptions that contains a worktree path, names the script as the fix in its message,
+      and never modifies a file. After the node lands, the coordinator enables it once with
       <code>git config core.hooksPath scripts/git-hooks</code> in the main checkout. Worktrees
       share that setting, and the line goes into the new-clone setup in <code>AGENTS.md</code>.
       A worktree whose base predates the hook has no <code>scripts/git-hooks</code> directory,

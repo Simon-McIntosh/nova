@@ -557,19 +557,23 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     # a straight denominator's tangents reach no output through the held
     # leading or the held gap, so neither is held a second time
     d_held_leading = d_leading
+    # one reciprocal square serves both quotients of the held leading
+    # coefficient, with the arithmetic the quotient rule forms per element
+    leading_square = 1.0 / (held_leading * held_leading)
     offset = near / held_leading
-    d_offset = _quotient_tangent(near, d_near, held_leading, d_held_leading)
+    d_offset = d_near / held_leading + (-d_held_leading * near) * leading_square
     ratio = far / held_leading
-    d_ratio = _quotient_tangent(far, d_far, held_leading, d_held_leading)
+    d_ratio = d_far / held_leading + (-d_held_leading * far) * leading_square
     pivot = 1.0 + ratio - offset
     d_pivot = d_ratio - d_offset
     radical = pivot * pivot + 4.0 * offset
     root = xp.sqrt(radical)
     d_root = (2.0 * pivot * d_pivot + 4.0 * d_offset) * (0.5 / root)
     lower = pivot + root
-    curved_y = 2.0 * offset / lower
+    twice_offset = 2.0 * offset
+    curved_y = twice_offset / lower
     d_curved_y = _quotient_tangent(
-        2.0 * offset, 2.0 * d_offset, lower, d_pivot + d_root
+        twice_offset, 2.0 * d_offset, lower, d_pivot + d_root
     )
     shift_y = xp.where(curved, curved_y, 0.0)
     d_shift_y = xp.where(curved, d_curved_y, 0.0)
@@ -585,16 +589,18 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     live_gap = gap != 0.0
     held_gap = xp.where(live_gap, gap, 1.0)
     d_held_gap = d_gap
+    gap_square = 1.0 / (held_gap * held_gap)
     shift_y = xp.where(rising, near / held_gap, shift_y)
     d_shift_y = xp.where(
-        rising, _quotient_tangent(near, d_near, held_gap, d_held_gap), d_shift_y
+        rising, d_near / held_gap + (-d_held_gap * near) * gap_square, d_shift_y
     )
     shift_x = xp.where(falling, far / held_gap, shift_x)
     d_shift_x = xp.where(
-        falling, _quotient_tangent(far, d_far, held_gap, d_held_gap), d_shift_x
+        falling, d_far / held_gap + (-d_held_gap * far) * gap_square, d_shift_x
     )
     live_y = curved | rising
     live_x = curved | falling
+    live = live_y | live_x
 
     total = 1.0 + shift_y + shift_x
     divisor = xp.where(curved, held_leading * total, held_gap)
@@ -611,16 +617,17 @@ def _factorise_tangent(denominator: tuple, d_denominator: tuple, xp) -> tuple:
     primal = (
         xp.where(live_y, inverse, 0.0),
         xp.where(live_x, inverse, 0.0),
-        xp.where(live_y | live_x, 0.0, 1.0 / held_near),
+        xp.where(live, 0.0, 1.0 / held_near),
         xp.where(live_y, shift_y, 1.0),
         xp.where(live_x, shift_x, 1.0),
     )
     tangent = (
         xp.where(live_y, d_inverse, 0.0),
         xp.where(live_x, d_inverse, 0.0),
-        xp.where(live_y | live_x, 0.0, _reciprocal_tangent(held_near, d_held_near)),
-        xp.where(live_y, d_shift_y, 0.0),
-        xp.where(live_x, d_shift_x, 0.0),
+        xp.where(live, 0.0, _reciprocal_tangent(held_near, d_held_near)),
+        # each shift's tangent is already zero wherever its own root is not live
+        d_shift_y,
+        d_shift_x,
     )
     return primal, tangent
 

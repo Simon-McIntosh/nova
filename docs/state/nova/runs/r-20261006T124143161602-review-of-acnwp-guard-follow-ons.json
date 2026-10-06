@@ -500,6 +500,44 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "07e130ba588a965c19db94476fe53ef0a350c3b4",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": true,
+    "process_stopped_pid": 2373771,
+    "scratch_bytes": 2781863672,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261006T124143161602-review-of-acnwp-guard-follow-ons",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 2781863672,
+        "path": "/tmp/reckon-crew-scratch/r-20261006T124143161602-review-of-acnwp-guard-follow-ons"
+      }
+    ],
+    "scratch_warning": "run scratch for r-20261006T124143161602-review-of-acnwp-guard-follow-ons is 2781863672 bytes, above the 2147483648 byte budget",
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/review-of-acnwp-guard-follow-ons",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": null,
   "review_tier": "none",

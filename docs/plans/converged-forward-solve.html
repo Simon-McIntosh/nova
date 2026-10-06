@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="58">
+<meta name="plan-version" content="59">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -338,6 +338,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261006T001741738392" data-who="" data-when="">
     <div class="r-comment-body"><p>Partial landing promoted, 2026-10-06: run <code>r-20261005T163955173721-cfs-topology-read</code>, 58 commits merged at <code>3f9edf73a</code> and <code>3ef5c19c1</code>, re-review 116 with no blocking finding after the order-acceptance repair (live fixed-radius arm from current reads, mutation fails at 0.911). Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#topology-read">landed record, topology-read anchor</a>. The section stays open until <code>cfs-kernel-qualification</code> (in flight on codex-astra) qualifies the kernel-backed 1074 and 2616 rows and the kernel tangents on the repaired kernels, or reports the dominating construct for the lead. The wave's integration suite at the merged head is dispatched as its own node.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T003101836748" data-who="" data-when="">
+    <div class="r-comment-body"><p>True cold compile of the kernel point jet, 2026-10-06 (run <code>cfs-kernel-cold-compile-correction</code>, merged at <code>b6f1efd95</code>, H200 final gate 8 passed 2 strict xfail): in fresh processes with the compilation cache disabled before JAX initialises, the base-revision kernels compile in 83.9 s and the repaired kernels in 83.6 s, 2912 executable bytes each. The 4.5-times reduction of the unique equation count bought no compile time, so the unique-equation count is not the lever; the 30 s bound is a strict expected failure and a warmed-cache hit is refused rather than reported as cold. The read-level clause is now the decisive measurement, in flight on <code>cfs-kernel-qualification</code>; if the read's cold compile at 550 cells exceeds 60 s on these kernels, the representation of the differentiated kernel loop is the lead's question.</p></div>
 </div>
 </section>
 </main>

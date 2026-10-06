@@ -1469,7 +1469,7 @@ def _limited_convergence(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _limiter_node_construction() -> list[dict[str, Any]]:
-    """Prove whether the authored limited wall samples the smooth tangency."""
+    """Read the authored wall's designed contact against the smooth tangency."""
 
     result = []
     for case_name in (
@@ -1481,20 +1481,21 @@ def _limiter_node_construction() -> list[dict[str, Any]]:
         tangency = np.asarray([outboard, 0.0], dtype=np.float64)
         for wall_nodes in WALL_NODE_COUNTS:
             wall = oracle_fixture.limiter_contour(exact, points=wall_nodes)
-            index = (wall_nodes - 1) // 2
+            contact = oracle_fixture.designed_contact(wall)
+            index = int(np.argmin(np.linalg.norm(wall - contact, axis=1)))
             result.append(
                 {
                     "case": case_name,
                     "wall_nodes": wall_nodes,
-                    "tangency_node_index": index,
-                    "tangency_node_rz_m": wall[index].tolist(),
+                    "contact_rz_m": contact.tolist(),
+                    "nearest_node_index": index,
+                    "nearest_node_rz_m": wall[index].tolist(),
                     "distance_to_smooth_analytic_tangency_m": float(
-                        np.linalg.norm(wall[index] - tangency)
+                        np.linalg.norm(contact - tangency)
                     ),
-                    "node_flux_wb": float(
-                        _exact_flux(case_name, exact, wall[index : index + 1])[0]
+                    "contact_flux_wb": float(
+                        _exact_flux(case_name, exact, contact[None, :])[0]
                     ),
-                    "angle_formula_index_hits_pi": True,
                 }
             )
     return result
@@ -1625,24 +1626,24 @@ def _write_report(path: Path, receipt: dict[str, Any]) -> None:
     maximum_distance = max(
         item["distance_to_smooth_analytic_tangency_m"] for item in construction
     )
-    maximum_flux = max(abs(item["node_flux_wb"]) for item in construction)
+    maximum_flux = max(abs(item["contact_flux_wb"]) for item in construction)
     lines.extend(
         [
             "",
-            "## Why the 121-node level looked exact",
+            "## Designed contact against the smooth tangency",
             "",
             (
-                "Yes: `limiter_contour` samples angles as "
-                "`2*pi*(arange(points)+0.5)/points`. Every requested odd count places "
-                "index `(points-1)/2` exactly at angle pi, the authored smooth "
-                "outboard tangency. Across weak and moderate rows and all four counts, "
-                f"the maximum node displacement is {maximum_distance:.3g} m and the "
-                f"maximum analytic node flux magnitude is {maximum_flux:.3g} Wb. "
-                "The 2.7e-9 Wb weak-121 read is therefore a lucky sampling identity, "
-                "not evidence that the piecewise wall contact is position-accurate. "
-                "The wall polygon's adjacent chord enters the analytic plasma; its "
-                "extremum is one panel away in position, producing the measured "
-                "first-order position and second-order level ladders."
+                "The designed contact is read from the wall geometry as the midpoint "
+                "of the short vertical outboard edge at the largest major radius "
+                "crossing the midplane (`measure.designed_contact`), never from a "
+                "vertex index. Across weak and moderate rows and all four wall counts, "
+                f"the maximum distance from the designed contact to the smooth "
+                f"analytic tangency is {maximum_distance:.3g} m and the maximum "
+                f"analytic contact flux magnitude is {maximum_flux:.3g} Wb. The "
+                "contact radius is the offset supporting line at the outboard "
+                "midplane, so the radial offset is exact by construction; the "
+                "remaining height is flux rounding along the stationary vertical "
+                "edge, not a panel-size truncation."
             ),
         ]
     )

@@ -233,6 +233,28 @@ def limiter_contour(
     )[..., 0]
 
 
+def designed_contact(wall: np.ndarray) -> np.ndarray:
+    """Return the limiter's designed wall contact as an ``(R, Z)`` pair in metres.
+
+    The supporting lines of :func:`limiter_contour` start at the outboard
+    midplane, so vertex zero and the last vertex share the vertical supporting
+    line at the largest major radius and the edge joining them is the wall's
+    short vertical contact edge.  The plasma's designed contact is that edge's
+    midpoint.  The edge is found from the polygon geometry alone -- the
+    midplane-crossing edge at the largest major radius -- so no vertex index
+    convention enters and the reader cannot drift to the inboard side.
+    """
+    wall = np.asarray(wall, dtype=np.float64)
+    following = np.roll(wall, -1, axis=0)
+    crossing = wall[:, 1] * following[:, 1] <= 0.0
+    if not np.any(crossing):
+        raise ValueError("the wall has no edge crossing the midplane")
+    midpoint = 0.5 * (wall + following)
+    candidates = np.flatnonzero(crossing)
+    outboard = candidates[np.argmax(midpoint[candidates, 0])]
+    return midpoint[outboard]
+
+
 def offset_wall(
     boundary: np.ndarray, *, clearance: float, points: int = WALL_POINT_COUNT
 ) -> np.ndarray:

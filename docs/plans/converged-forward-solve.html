@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-modified" content="2026-10-06">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -326,6 +326,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T234742215161" data-who="" data-when="">
     <div class="r-comment-body"><p>Region authority disposition, 2026-10-06, from the twenty-third composed plan review: <code>nova/equilibrium/domain.py</code> (<code>classify_domains</code>, <code>axis_connected_component</code>, <code>saddle_qualified_domains</code>, <code>PlasmaDomain</code>, <code>DomainMasks</code>) is the plasma-region classification authority today and is one of the region-role modules the design inventory binds to <code>topology.read</code>. Its <code>axis_connected_component</code> is a cite-or-justify candidate for the read's axis-connected membership (the landed read builds the component on the shipped contour tree with exact sub-cell fragment containment, and its evidence states why the cell-level component was not carried). <code>domain.py</code> retires at §6 with the other region authorities, its ten importers re-pointed onto the read's qualification verdict and membership fractions, and the census clause reads: after retirement no module other than <code>topology.py</code> classifies a plasma region or selects an axis-connected component.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20261006T001034032743" data-who="" data-when="">
+    <div class="r-comment-body"><p>Correction, 2026-10-06, appended rather than edited. The kernel landing <code>cfs-kernel-compile-cost</code> (merged at <code>3c0b5aefa</code>, ledger outcome stating a cold compile of 7.9 s against 11.2 s) was promoted by the coordinator before its independent review was read; that review's blocking finding is right: the test disabled the compilation cache only after setup had initialised cache use, and <code>h200-fresh-cold.log</code> records both arms as cache hits with stored compile costs of 86 s and 81 s. The true cold compile of the point jet is therefore about 80 s, not under 30 s, and the under-30-second clause is not met. What stands from that landing: bit-exact identity on 10,000 points for both source kinds, the repaired section moments, 342 kernel tests, and the 78,404 to 17,544 unique-equation reduction with its live 20,000 budget. The correction is measured by <code>cfs-kernel-cold-compile-correction</code> (fresh subprocess, cache disabled before JAX initialises, both arms, appended to the kernel fragment), and the read-level compile clause is measured by <code>cfs-kernel-qualification</code> once the §2 run's claim on its test module is released.</p></div>
 </div>
 </section>
 </main>

@@ -82,8 +82,9 @@ def test_analytic_first_moment_centroid_has_derived_tolerance(analytic_row):
     limiter wall, and the wall fixes where every cell sits.  It measures 2.28e-4 on
     the circumscribing wall (2.96e-4 and 3.06e-4 at clearances 0.14 and 0.10,
     135 cells each), 7.7e-5 on an intruding chord wall that clips 2.2e-4 m^2 of
-    the plasma (135 cells), and 2.7e-4 on a wider chord wall that still clips
-    1.6e-4 m^2 (133 cells), so no single pinned magnitude is physical.  The
+    the plasma (135 cells), 2.7e-4 and 1.2e-4 on wider chord walls that still
+    clip 1.6e-4 and 1.2e-4 m^2 (133 and 136 cells), so the residual does not
+    track the clipped area and no single pinned magnitude is physical.  The
     physical claim is that the retained first moments recover the centroid far
     better than cell centres do: the residual is bounded relative to the
     centre-only error (6.3e-3 on this carrier, a factor 28 above the residual)

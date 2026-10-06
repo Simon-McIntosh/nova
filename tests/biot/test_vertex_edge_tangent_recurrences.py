@@ -89,17 +89,40 @@ def _signed(rng, low, high, size=SAMPLES):
 
 
 def _denominator_domain(rng):
-    """Return a factorable denominator: positive ends and ``x y`` coefficient.
+    """Return denominators formed as the reduction forms them, from geometry.
 
-    Both shifts are non-negative over the jet's denominators, which is a
-    non-negative ``x y`` coefficient against positive end values.
+    The ring denominator is ``4 r^2 x y + u^2 x + u^2 y`` (``_Vertex``) and the
+    plane one ``4 b1^2 r^2 x y + w^2 x + (w + 2 r)^2 y`` (``_Edge``), with ``w``
+    the target's offset from the edge's extended line taken as the edge does.
+    Target and edge radii run from a centimetre to twenty metres over a forty
+    metre height.  The factorisation's pivot root cancels to zero -- and the
+    base primal itself returns an infinite shift -- only where a plane end
+    value exceeds the other end plus the ``x y`` coefficient by sixteen decades,
+    which needs the extended line at negative radius and the product of the
+    target's and the edge's radii below about ``1e-8`` of the squared height;
+    the ring's equal end values never cancel.  So that corner is not sampled.
     """
-    near = _magnitude(rng, -12.0, 6.0)
-    far = _magnitude(rng, -12.0, 6.0)
-    far[:500] = near[:500]  # a vertical edge over a target level with both ends
-    leading = _magnitude(rng, -12.0, 6.0)
-    leading[:1000] = 0.0  # a vertical edge: a linear denominator
-    near[1000:1100] = 0.0  # one end on the root
+    radius = _magnitude(rng, -2.0, 1.3)
+    height = rng.uniform(-20.0, 20.0, SAMPLES)
+    level = _signed(rng, -12.0, 1.3)
+    level[:200] = 0.0  # a target level with the corner: both ring ends vanish
+    ring = 4000
+    edge_r = _magnitude(rng, -2.0, 1.3, (2, SAMPLES))
+    edge_z = rng.uniform(-20.0, 20.0, (2, SAMPLES))
+    edge_r[1, ring : ring + 500] = edge_r[0, ring : ring + 500]  # a vertical edge
+    # a target on the edge's end: the plane's near end value vanishes exactly
+    radius[ring + 500 : ring + 800] = edge_r[0, ring + 500 : ring + 800]
+    height[ring + 500 : ring + 800] = edge_z[0, ring + 500 : ring + 800]
+    (ra, rb), (za, zb) = edge_r, edge_z
+    slope = (rb - ra) / (zb - za)
+    offset = ((ra - radius) * (zb - height) - (rb - radius) * (za - height)) / (zb - za)
+    plane = slice(ring, None)
+    leading = 4.0 * radius * radius
+    near = level * level
+    far = near.copy()
+    leading[plane] = (4.0 * slope * slope * radius * radius)[plane]
+    near[plane] = (offset**2)[plane]
+    far[plane] = ((offset + 2.0 * radius) ** 2)[plane]
     rest = [rng.normal(size=SAMPLES) for _ in range(2)]
     return [leading, *rest], near, far
 
@@ -134,7 +157,8 @@ def _vertex_domain(rng):
     level[:300] = 0.0
     offset[300:600] = 0.0
     level[600:800] = offset[600:800] = 0.0
-    radius[800:900] = 1e-300
+    # near the axis, which only an exact zero radius is held away from
+    radius[800:900] = _magnitude(rng, -6.0, -3.0, 100)
     lower = np.zeros((2, SAMPLES))
     upper = np.full((2, SAMPLES), gradedresidual.QUARTER)
     # a finite arc: each panel stops at an interior amplitude
@@ -434,6 +458,7 @@ def test_tangent_matches_base_jvp(name):
           f"base_jvp_finite_fraction={_finite_fraction(expected[1]):.4f}")  # fmt: skip
     assert primal == 0.0
     assert tangent <= EXACT_TOLERANCE
+    assert _finite_fraction(expected[1]) == 1.0
 
 
 @pytest.mark.parametrize("name", list(CASES))

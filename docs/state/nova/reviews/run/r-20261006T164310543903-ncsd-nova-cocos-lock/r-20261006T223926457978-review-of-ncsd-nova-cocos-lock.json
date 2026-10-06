@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "b85115a12b30a459cad765a26982a04e14d2c33f",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T22:46:08.898Z",
+  "dispatched_at": "2026-10-06T22:39:47Z",
+  "findings": [
+    {
+      "file": "uv.lock",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "nothing in the repository guards lockfile freshness: no CI workflow, no test referencing uv.lock or uv lock --check, and no pre-commit lock check, so a pyproject edit that leaves uv.lock stale (the exact defect this node repaired, already committed once by the member node) is not caught automatically; the repo's uv shim forces --no-sync on every uv run, so an ordinary run neither heals nor reports the staleness."
+    },
+    {
+      "file": "docs/evidence/fragments/cocos-standalone-distribution/ncsd-nova-cocos-lock.html",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "the fragment sets plan-verifies cocos-standalone-distribution#s1, but this node verifies only the lock-coherence portion of s1's compound done-when; the wheel METADATA, clean py3.12 venv install, re-export identity, five COCOS test modules and imas-ambix resolve were verified (or not) on the member node, so a reader following plan-verifies to this fragment alone would over-credit s1."
+    }
+  ],
+  "head_log_revision": "8876ea26390540ce692c3af54167372e2e614696",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "a lockfile is a build artifact with no code call sites; the member graph it resolves is consumed by uv, and the package it names (nova_cocos) is imported by nova's COCOS modules and the imas-ambix checkout recorded on the member node.",
+    "diff": "read commit by commit against b85115a12; 4b3d1a90f adds the member to manifest.members, adds the [[package]] nova-cocos block and adds the nova-cocos entry to nova-stella's dependencies and requires-dist, and 8876ea26 adds only the evidence fragment.",
+    "done_when": "the node's own gate is uv lock --check (EXIT=0) plus a before/after package comparison; both reproduce; the node makes no claim about s1's wheel-build, clean-py3.12-venv, re-export-identity, COCOS-test or imas-ambix-resolve elements, which belong to the member node.",
+    "goal": "the goal is to regenerate uv.lock so the nova-cocos workspace member declared at b85115a12 resolves; the +10-line uv.lock change lands it, verified by uv lock --check EXIT=0 at the head.",
+    "manifest": "read; it states uv lock --check EXIT=0 and uv lock EXIT=0, records the +10/-0 lock diff, the editable member source, the gained dependency entries and the ADDED=[nova-cocos]/REMOVED=[]/VERSION-CHANGED=[] comparison, and names its two log paths.",
+    "write_paths": "read the declared paths and git diff --name-status: every changed path is inside the declared set, nothing extra."
+  },
+  "justifications": {
+    "durability": "the repaired defect is caught by uv lock --check, which genuinely fails on a stale lock (reviewer arm EXIT=1 at base), but nothing in the repository runs it: there is no .github/workflows and no .gitlab-ci.yml, no test references uv.lock or \"uv lock --check\", and scripts/git-hooks/pre-commit performs only the filepath-relativize check; the same staleness recurred once already (the member node edited pyproject and left the lock behind) and the repo's uv shim forces --no-sync on every uv run, so an ordinary run neither heals nor reports a stale lock.",
+    "evidence": "two standalone gate logs exist and both reproduce: uv-lock.log (uv lock resolution, EXIT=0, 288 packages, \"Added nova-cocos (dynamic)\") and version-compare.log (before 287 -> after 288, ADDED=[nova-cocos], REMOVED=[], VERSION-CHANGED=[]); the reviewer independently re-ran uv lock --check in extracted base and head trees (base EXIT=1 \"The lockfile at uv.lock needs to be updated\", head EXIT=0 \"Resolved 288 packages in 3ms\") and re-derived the package diff with tomllib, matching the node's version-compare.log exactly; the deduction is that the node never read the plan HTML (its own manifest records a storage-slow read_plan and reconstructs s1 from pyproject.toml plus the sibling fragment), and the version-comparison is a worker-authored script rather than an independent tool, though it reproduces trivially.",
+    "fit": "uv.lock is in the canonical machine-generated form uv itself emits, and the new evidence fragment matches its sibling ncsd-nova-cocos-member.html in every meta field, section id and table id, so it renders and lists under the same conventions.",
+    "goal_fidelity": "the node's goal is to regenerate uv.lock so the nova-cocos workspace member resolves coherently; at head 8876ea26 uv.lock carries manifest.members=[nova-cocos,nova-stella], a [[package]] nova-cocos block with source={editable=\"packages/nova-cocos\"}, and the nova-cocos reference in nova-stella's dependencies and requires-dist, which is exactly the member graph the root pyproject at b85115a12 declares but the lock did not carry.",
+    "reuse": "no duplication is introduced: the change adds only the member reference uv computes from the already-declared workspace, leaving the single canonical lockfile in place and forking no resolver or version source.",
+    "scope_discipline": "git diff --name-status b85115a12 8876ea26 lists exactly M uv.lock and A docs/evidence/fragments/cocos-standalone-distribution/ncsd-nova-cocos-lock.html, both inside the node's declared write paths [uv.lock, docs/evidence/fragments/cocos-standalone-distribution/ncsd-nova-cocos-lock.html, docs/figures/cocos-standalone-distribution/ncsd-nova-cocos-lock]; the declared figures directory was unused, which is not a defect; commit messages are conventional with bodies and carry no attribution trailer."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to regenerate uv.lock so the nova-cocos workspace member declared at b85115a12 resolves; the +10-line uv.lock change lands it, verified by uv lock --check EXIT=0 at the head.\nVERDICT done_when: the node's own gate is uv lock --check (EXIT=0) plus a before/after package comparison; both reproduce; the node makes no claim about s1's wheel-build, clean-py3.12-venv, re-export-identity, COCOS-test or imas-ambix-resolve elements, which belong to the member node.\nVERDICT write_paths: read the declared paths and git diff --name-status: every changed path is inside the declared set, nothing extra.\nVERDICT manifest: read; it states uv lock --check EXIT=0 and uv lock EXIT=0, records the +10/-0 lock diff, the editable member source, the gained dependency entries and the ADDED=[nova-cocos]/REMOVED=[]/VERSION-CHANGED=[] comparison, and names its two log paths.\nVERDICT diff: read commit by commit against b85115a12; 4b3d1a90f adds the member to manifest.members, adds the [[package]] nova-cocos block and adds the nova-cocos entry to nova-stella dependencies and requires-dist, and 8876ea26 adds only the evidence fragment.\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: uv.lock at head carries manifest.members=[nova-cocos,nova-stella], the editable nova-cocos package block and the nova-stella dependency entries, exactly the member graph the root pyproject declares but the base lock did not carry.\nSCORE evidence: 18\nJUSTIFICATION evidence: uv-lock.log and version-compare.log reproduce independently (reviewer base arm EXIT=1 on stale lock, head arm EXIT=0; tomllib package diff ADDED=[nova-cocos] REMOVED=[] VERSION-CHANGED=[]), but the node never read the plan HTML and the version comparison is a worker-authored script.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status b85115a12 8876ea26 is exactly M uv.lock and A the fragment, both inside the declared write paths, commits conventional with bodies and no attribution.\nSCORE durability: 12\nJUSTIFICATION durability: uv lock --check genuinely fails on a stale lock, but no CI, test or hook runs it, and the repo's uv shim forces --no-sync, so the recurrence this node repaired is unguarded.\nSCORE fit: 20\nJUSTIFICATION fit: uv.lock is in uv's canonical generated form and the fragment matches its sibling's meta/section/table convention exactly.\nSCORE reuse: 20\nJUSTIFICATION reuse: no duplication; the single canonical lockfile gains only the member reference uv computes, with no forked resolver or version source.\nFINDING uv.lock:0 follow-on: nothing in the repository guards lockfile freshness; a pyproject edit that leaves uv.lock stale is not caught automatically.\nFINDING docs/evidence/fragments/cocos-standalone-distribution/ncsd-nova-cocos-lock.html:11 follow-on: plan-verifies s1 over-credits this fragment, which verifies only the lock-coherence portion of s1's compound done-when.",
+  "review_run_id": "r-20261006T223926457978-review-of-ncsd-nova-cocos-lock",
+  "reviewed_base_sha": "b85115a12b30a459cad765a26982a04e14d2c33f",
+  "reviewed_head_sha": "8876ea26390540ce692c3af54167372e2e614696",
+  "reviewed_run_id": "r-20261006T164310543903-ncsd-nova-cocos-lock",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "timestamp": "2026-10-06T22:44:48+00:00",
+  "total": 110
+}

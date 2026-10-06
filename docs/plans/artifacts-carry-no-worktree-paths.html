@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="artifacts-carry-no-worktree-paths">
+  <meta name="plan-title" content="Artifacts Carry No Worktree Paths">
+  <meta name="plan-summary" content="Rewrite the 1,146 committed artifacts that point into reckon worktrees, and guard so no artifact can reference a worktree again.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="4.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="standard">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint" content="S27">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="provenance,evidence">
+  <meta name="plan-standalone" content="Repository hygiene that no plan waits on and that waits on no plan; it changes recorded paths and launch scripts, never a solver or a measured value.">
+  <title>Artifacts Carry No Worktree Paths | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-10-06">
+<meta name="plan-version" content="2">
+<meta name="plan-section-declarations" content="{&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s1&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why this plan exists</h2>
+    <p>Every crew worker runs in a detached worktree under
+    <code>/home/ITER/mcintos/Code/.reckon-worktrees/&lt;project&gt;-&lt;hash&gt;/&lt;session&gt;/&lt;node&gt;/</code>,
+    and every worktree is removed once its run is promoted. The lead's rule, given on
+    2026-10-06, is that this is permanent: a worktree always goes, so a committed artifact
+    that names a path inside one names a path that will not exist. The evidence then stops
+    locating its own figures, logs and scripts, and a launch script that changes directory
+    into a worktree stops running at all.</p>
+    <p>A census of <code>origin/main</code> at 88a14b2ad found 1,146 tracked files outside
+    <code>docs/plans</code> and <code>docs/state</code> containing the string
+    <code>.reckon-worktrees</code>. 1,071 sit under <code>docs/figures</code> in 38 topic
+    directories, 11 under <code>docs/evidence</code> and the rest under <code>scripts/</code>.
+    By extension they are 611 logs, 433 JSON receipts, 12 text files, 10 HTML files, 8 Markdown
+    files, 7 stdout and stderr captures, one patch file, and 64 launch scripts (48 <code>.sh</code>,
+    10 <code>.sbatch</code>, 6 <code>.py</code>). The data files can be rewritten
+    mechanically. The launch scripts cannot, because a literal path there is usually a
+    <code>cd</code> target or an output root, and it has to be derived at run time instead.</p>
+    <p>S22 repaired the four regenerated receipts first (227a55bd5) and gave the
+    repository-relative path helper one owner, <code>nova.database.filepath.repository_relative</code>
+    (88a14b2ad). This plan applies the same rule to everything else, then closes the door
+    with a guard so the next worker cannot reopen it.</p>
+
+    <h2 id="s2">§2 — One rewrite rule, applied to every committed data artifact</h2>
+<section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Add one function to <code>nova/database/filepath.py</code>, beside
+    <code>repository_relative</code>, that rewrites worktree paths inside a text. It is the
+    only owner of the rule, and a small script, <code>scripts/relativize_worktree_paths.py</code>,
+    applies it to named files in place. The rule:</p>
+    <ul>
+      <li>A path under a nova worktree,
+      <code>.reckon-worktrees/nova-&lt;hash&gt;/&lt;session&gt;/&lt;node&gt;/&lt;rest&gt;</code>,
+      becomes <code>&lt;rest&gt;</code>, which is relative to the repository root.</li>
+      <li>A path under another repository's worktree becomes the same file in that
+      repository's canonical checkout, <code>/home/ITER/mcintos/Code/&lt;repository&gt;/&lt;rest&gt;</code>.
+      Canonical checkouts are never removed, so that path stays valid.</li>
+      <li>A bare worktree root with no file below it, such as a recorded working directory,
+      becomes <code>.</code> for nova and the canonical checkout for another repository.</li>
+      <li>The rewrite is idempotent and changes nothing else in the file: same bytes outside
+      the matched paths, same line endings, and JSON still parses.</li>
+    </ul>
+    <p>The census of prefix forms comes first, inside the node, because the rule must match
+    every spelling present: the absolute form, a <code>~</code> form, paths inside JSON
+    strings with escaped slashes, and paths broken across lines in logs. Any form the rule
+    cannot map is listed in the report rather than guessed.</p>
+    <p><strong>Done when:</strong> every tracked data file (everything in the census except the
+    launch scripts, <code>docs/plans</code>, <code>docs/research</code> and
+    <code>docs/state</code>) contains no <code>.reckon-worktrees</code> string. Re-applying the
+    script to each file's base revision reproduces the committed head bytes exactly, which makes
+    the rewrite reviewable as a mechanical transform. Every rewritten JSON file still parses.
+    <code>tests/test_filepath.py</code> pins each mapping form, including idempotence and a
+    negative control in which an unmapped form is reported and left unchanged. No PNG or SVG is
+    re-rendered, and no solve is run.</p>
+
+    <h2 id="s3">§3 — Launch scripts resolve the repository root when they run</h2>
+<section data-reckon="section" data-id="s3" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>The 64 launch scripts that contain a literal worktree path derive the repository root
+    from their own location instead: <code>git -C "$(dirname "$0")" rev-parse --show-toplevel</code>
+    in shell, and <code>Path(__file__).resolve()</code> walked up to the git root in Python,
+    reusing <code>repository_relative</code>'s root search rather than a second one. A script
+    whose path names an output directory writes beneath the resolved root. A script that
+    records the worktree path only in a comment or an echoed banner has that text rewritten
+    by the §2 rule. Scripts that pass a shared-environment path such as
+    <code>/home/ITER/mcintos/Code/nova/.venv</code> keep it, since the canonical checkout is
+    permanent.</p>
+    <p><strong>Done when:</strong> no launch script contains <code>.reckon-worktrees</code>.
+    Every changed shell script passes <code>bash -n</code> and every Python script compiles
+    under the project interpreter. For each changed script, a dry resolution of its root,
+    run from a temporary worktree of main, prints that worktree's root and not the canonical
+    checkout. No script is executed against a solver or a SLURM partition.</p>
+
+    <h2 id="s4">§4 — The guard: nothing committed may name a worktree again</h2>
+<section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-attempts="0" data-status="implementable" data-links=""></section>
+    <p>Two checks, both read-only:</p>
+    <ul>
+      <li><code>tests/test_artifacts_carry_no_worktree_paths.py</code> runs
+      <code>git ls-files</code> and <code>git grep</code> for <code>.reckon-worktrees</code>
+      over every tracked file, and fails naming each offender. It is exempt only for
+      <code>docs/state</code> (reckon's run ledger, see §5), <code>docs/plans</code> and
+      <code>docs/research</code> (prose that reckon edits, see §5), and the three files that
+      must spell the pattern: the test itself, the §2 rule in <code>nova/database/filepath.py</code>,
+      and <code>scripts/relativize_worktree_paths.py</code>. It runs in the default fast lane,
+      in seconds.</li>
+      <li>A check-only pre-commit hook in <code>.pre-commit-config.yaml</code> rejects any staged
+      file outside those exemptions that contains the pattern. Its message names
+      <code>scripts/relativize_worktree_paths.py</code> as the fix, so a worker whose gate log
+      or receipt was written inside its worktree relativizes it before committing. The hook
+      never modifies a file, as the repository's pre-commit policy requires.</li>
+    </ul>
+    <p>Writers keep their paths relative at the source wherever they record one, through
+    <code>repository_relative</code>. The guard is what makes the rule hold for writers nobody
+    has fixed yet, and for captured stdout, where a traceback prints whatever path the process
+    ran under.</p>
+    <p><strong>Done when:</strong> the test passes on the merged head and fails at the base,
+    logged as the negative control. The hook rejects a staged scratch file that contains a
+    worktree path and accepts it once the script has rewritten it, both logged. The default
+    pytest lane collects the test.</p>
+
+    <h2 id="s5">§5 — What stays outside, and why</h2>
+    <p><code>docs/state</code> is reckon's run ledger. Its records say where each run executed,
+    which is provenance about a run rather than an artifact that locates content, and reckon
+    writes it. Rewriting it would make the ledger misreport where runs ran. It is exempt from
+    both the rewrite and the guard. <code>docs/plans</code> and <code>docs/research</code> are
+    edited only through reckon's tools, never as files. The few plan comments that mention the
+    pattern discuss it as a subject. Any that use a worktree path as a link are corrected
+    through <code>edit_plan</code> by the coordinator, not by the mechanical rewrite.</p>
+    <p>The worker contract that reckon composes is reckon's to change. After §4 lands, the
+    coordinator tells reckon that nova rejects worktree paths at commit, so its dispatch
+    contract can name the relativizing step. A worker running without that line still cannot
+    land a worktree path, because the hook and the test stop it.</p>
+
+    
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-acnwp-rewrite-data-artifacts" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-written-by="s22-nova" data-written-at="2026-10-06" data-recommends-skill="/reckon-build artifacts-carry-no-worktree-paths §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Add the worktree-path rewrite rule and apply it to every committed data artifact</h4>
+    <div class="r-fu-body"><p>Section 2: one rule in <code>nova.database.filepath</code>, one script that applies it, the census of prefix forms, and the mechanical rewrite of the data files, reproducible from each file's base revision. Then §3 and §4 follow in one node: launch scripts that resolve their root at run time, and the guard test and check-only hook.</p></div>
+    <pre class="r-fu-prompt">/reckon-build artifacts-carry-no-worktree-paths §2</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

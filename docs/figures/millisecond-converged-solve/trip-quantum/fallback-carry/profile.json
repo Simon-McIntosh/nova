@@ -1,7 +1,7 @@
 {
   "baseline": {
     "measurement_revision": "0efbf12314d9746e7ab99d1d1e303fd73a5d6548",
-    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate/docs/figures/millisecond-converged-solve/trip-quantum/late-trips/profile.json",
+    "path": "docs/figures/millisecond-converged-solve/trip-quantum/late-trips/profile.json",
     "production_synchronized_s": 34.96027131937444,
     "stated_solve_wall_s": 34.96,
     "stated_trip_range_s": [
@@ -11,10 +11,10 @@
   },
   "captured_at": "2026-09-05T05:38:20.227106+00:00",
   "measurement": {
-    "outer_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate/docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/outer-loop.json",
-    "production_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate/docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/production-only.json",
+    "outer_path": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/outer-loop.json",
+    "production_path": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/production-only.json",
     "production_synchronized_s": 30.86651725973934,
-    "promotion_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-fallback-carry-four-row-gate/docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/promotion-profile.json",
+    "promotion_path": "docs/figures/millisecond-converged-solve/trip-quantum/fallback-carry/promotion-profile.json",
     "summary": {
       "accepted_newton_promotions": 65,
       "active_set_trips": 7,

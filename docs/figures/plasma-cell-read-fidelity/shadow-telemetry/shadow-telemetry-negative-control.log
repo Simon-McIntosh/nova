@@ -50,7 +50,7 @@ E            DESIRED: array([False, False, False, False, False, False, False, Fa
 E                  False, False, False, False, False, False, False, False, False,
 E                  False, False, False, False, False, False, False, False, False,...
 
-/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-shadow-telemetry-node-flux/tests/test_plasma_cell_shadow_telemetry.py:170: AssertionError
+tests/test_plasma_cell_shadow_telemetry.py:170: AssertionError
 ----------------------------- Captured stdout call -----------------------------
 node_flux_wall_census={"axis_m": [1.7, 3.659182332138577e-17], "carrier_private": 0, "fixture": "limited", "label_owned_private": 0, "nearest_cell_disagreements": 0, "saddle_flux": NaN, "wall_nodes": 96, "x_point_m": [NaN, NaN]}
 =========================== short test summary info ============================

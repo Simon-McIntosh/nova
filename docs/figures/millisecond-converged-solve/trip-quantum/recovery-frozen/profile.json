@@ -2,7 +2,7 @@
   "baseline": {
     "banked_uninstrumented_s": 41.787351296283305,
     "measurement_revision": "083036e9310dbd8051f630e9202bc9bd47681acf",
-    "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition/docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/profile.json",
+    "path": "docs/figures/millisecond-converged-solve/trip-quantum/outer-loop/profile.json",
     "stated_active_trip_range_s": [
       3.4,
       12.2
@@ -11,9 +11,9 @@
   },
   "captured_at": "2026-09-05T02:07:38.572752+00:00",
   "measurement": {
-    "outer_trace_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition/docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/outer-loop.json",
+    "outer_trace_path": "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/outer-loop.json",
     "outer_uninstrumented_s": 36.41673356946558,
-    "production_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/msc-recovery-scoring-on-frozen-partition/docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/production-only.json",
+    "production_path": "docs/figures/millisecond-converged-solve/trip-quantum/recovery-frozen/production-only.json",
     "production_synchronized_s": 34.27321686595678,
     "summary": {
       "accepted_newton_promotions": 65,

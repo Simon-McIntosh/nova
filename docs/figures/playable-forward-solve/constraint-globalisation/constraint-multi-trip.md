@@ -36,4 +36,4 @@ Overall: **PASS**. The iteration recorded 5 trips and 3 nonzero capped applicati
 
 The termination reason above is reported exactly as returned. Any termination-order change belongs to the separately owned solver node.
 
-Receipt: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-constraint-multi-trip-target/docs/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.json`. Figure: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/pfs-constraint-multi-trip-target/docs/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.svg`.
+Receipt: `docs/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.json`. Figure: `docs/figures/playable-forward-solve/constraint-globalisation/multi-trip-target.svg`.

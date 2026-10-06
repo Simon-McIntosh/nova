@@ -331,11 +331,11 @@
     ]
   },
   "figures": [
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/profile_routes.png",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/route_deviation.png",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/primitive_integrals.png",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/anchor_offsets.png",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/forcing_routes.png"
+    "docs/figures/dina-profile-routes/profile_routes.png",
+    "docs/figures/dina-profile-routes/route_deviation.png",
+    "docs/figures/dina-profile-routes/primitive_integrals.png",
+    "docs/figures/dina-profile-routes/anchor_offsets.png",
+    "docs/figures/dina-profile-routes/forcing_routes.png"
   ],
   "gauge": "Nova total poloidal flux Phi = -psi_IDS after COCOS 11 to 17; declared anchors bound reproduction support, map/topology anchors only parameterize affine extraction",
   "primitive_integral_cross_checks": {

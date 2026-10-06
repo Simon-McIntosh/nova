@@ -23,9 +23,9 @@
     "canvas_width_px": 1728.0,
     "text": "Mapped-source current ledger: common-SOL cells\nred outlines: carrying common-SOL cells with per-cell A\nred LCFS marker and admitted boundary nulls over grey solved contours\ncommon-SOL total 1072.71 A split 844.49 A in the 16 fitted-cut cells + 228.22 A in the 15 fully open cells"
   },
-  "png": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-receipt-revision-and-gate/docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.png",
-  "svg": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-receipt-revision-and-gate/docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.svg",
-  "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-receipt-revision-and-gate/docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json"
+  "png": "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.png",
+  "svg": "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-current.svg",
+  "receipt": "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json"
 }
 
-RECEIPT /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsapi-sol-ledger-receipt-revision-and-gate/docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json
+RECEIPT docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json

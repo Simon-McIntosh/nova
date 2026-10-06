@@ -1,4 +1,4 @@
-revision=146af4b57ea600d4a4025aada6fd8211eb9d7c3c tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -vv -rP --timeout 3600 
+revision=146af4b57ea600d4a4025aada6fd8211eb9d7c3c tree=. command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py -vv -rP --timeout 3600 
 raw_log_sha256=31d3f947cdeaf03dd17279efdbfbfec2ca1277d29dd4f482c67d222e8050af86
 NOVA_LANE_START=2026-10-05T19:30:04+0200
 PLACEMENT=submit
@@ -6,9 +6,9 @@ RUNG=h200
 SLURM_JOB_ID=1281054
 SLURM_JOB_PARTITION=betelgeuse
 SOURCE_REVISION=146af4b57ea600d4a4025aada6fd8211eb9d7c3c
-REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+REPOSITORY_ROOT=.
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+PYTHONPATH=.:scripts/h200_test_lane
 JAX_PLATFORMS=cuda,cpu
 TMPDIR=/tmp
 MODE=pytest
@@ -33,7 +33,7 @@ CACHE_GUARD_MISS_BUDGET=not-enforced
 CACHE_GUARD_PREWARM=Historical pin payload omitted; retained in raw log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-initial.log
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function

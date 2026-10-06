@@ -2,7 +2,7 @@
   "artifact": "settled-mask stall diagnosis and unified-support comparison",
   "candidate_source_commit": "0dce5fe1c9593cd5d6d6f24755f0a5a71c3197e1",
   "current_source_commit": "b64ed3abb386532dc21dc4e6fcd89030fa71c66a",
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-settled-mask-stall-root-cause-2/docs/figures/solver-convergence-regression/settled-mask-stall/stall-diagnosis.png",
+  "figure": "docs/figures/solver-convergence-regression/settled-mask-stall/stall-diagnosis.png",
   "measurement_contract": {
     "finite_difference_relative_steps": [
       0.01,

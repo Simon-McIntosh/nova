@@ -11,10 +11,10 @@ E0904 13:34:37.978936 3930346 slow_operation_alarm.cc:140] The operation took 2m
 [Compiling module jit_one_newton_trip for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
 ********************************
 Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 1157, in <module>
+  File "benchmarks/polish_support_performance.py", line 1157, in <module>
     main()
     ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 1139, in main
+  File "benchmarks/polish_support_performance.py", line 1139, in main
     capture(
     ~~~~~~~^
         arguments.source_root,
@@ -24,12 +24,12 @@ Traceback (most recent call last):
         ^^^^^^^^^^^^^^^^
     )
     ^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 748, in capture
+  File "benchmarks/polish_support_performance.py", line 748, in capture
     topology = _topology_measurement(operands)
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 651, in _topology_measurement
+  File "benchmarks/polish_support_performance.py", line 651, in _topology_measurement
     read_one(field, axis, saddle, interface)
     ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-polish-support-shared-spline/benchmarks/polish_support_performance.py", line 614, in read_one
+  File "benchmarks/polish_support_performance.py", line 614, in read_one
     admitted_axis, admitted_saddle, _receipt = polish_census_stationary_points(
                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
         field,

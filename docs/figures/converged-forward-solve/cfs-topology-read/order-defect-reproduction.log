@@ -1,4 +1,4 @@
-revision=3d79cac6341da4519f1f2f6403c5c23a433a5c81 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=runpy saddle-order with read replaced by refusal
+revision=3d79cac6341da4519f1f2f6403c5c23a433a5c81 tree=. command=runpy saddle-order with read replaced by refusal
 FIXED_RADIUS_ORDER limited 1.975734887259203
 DEFECT_REPRODUCED historical test passed with current read disabled: limited
 FIXED_RADIUS_ORDER diverted 2.1308648956288034

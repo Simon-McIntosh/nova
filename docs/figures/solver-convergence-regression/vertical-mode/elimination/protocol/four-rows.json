@@ -2,7 +2,7 @@
   "receipt": "reference-free vertical-mode elimination public solve",
   "source": {
     "revision": "4ba8ba3fb016b19df6e75b148fc9bd6a90801461",
-    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-mode-elimination-on-protocol",
+    "worktree": ".",
     "python": "3.14.2",
     "jax": "0.11.0",
     "devices": [
@@ -38,7 +38,7 @@
   "inputs": {
     "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
     "operands_sha256": "c90f42ce0330e2fbe962b17ccfa34e9bf1e25511c939d703b694be8f326ae5ed",
-    "null_direction_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-mode-elimination-on-protocol/docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
+    "null_direction_receipt": "docs/figures/solver-convergence-regression/vertical-mode/jacobian-null-direction.json",
     "null_direction_receipt_sha256": "46169cd5aa481a3d29203df3d0927e75ad3d35e2a7876a8f07210440018374f7",
     "carrier_evidence": {
       "loaded_from_persisted_carrier": true,
@@ -60,7 +60,7 @@
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-vertical-mode-elimination-on-protocol/benchmarks/mast_response_carrier_warm.py",
+          "benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",

@@ -4,9 +4,9 @@ RUNG=h200
 SLURM_JOB_ID=1281140
 SLURM_JOB_PARTITION=betelgeuse
 SOURCE_REVISION=546a36f6101583eaadb2baec7b8d370b2dbfd2a8
-REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+REPOSITORY_ROOT=.
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/scripts/h200_test_lane
+PYTHONPATH=.:scripts/h200_test_lane
 JAX_PLATFORMS=cuda,cpu
 TMPDIR=/tmp
 MODE=pytest
@@ -31,7 +31,7 @@ CACHE_GUARD_MISS_BUDGET=not-enforced
 [Cache inventory line omitted: 1963869 characters; full log is in the run directory.]
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -48,7 +48,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-hbgn_2kl/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-hbgn_2kl/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-hbgn_2kl/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-hbgn_2kl/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 IDENTITY_COMPILE arm=baseline seconds=14.0688062 executable_bytes=2912
 IDENTITY_COMPILE arm=head seconds=107.708035 executable_bytes=2912
 IDENTITY_WORST point=[6.191426454923443, -5.7103163437081985] component=0 baseline=2.5793641787249078e-06 head=2.5793641787249078e-06
@@ -61,7 +61,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-v7rp3_0o/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-v7rp3_0o/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-v7rp3_0o/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-v7rp3_0o/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-zgup7xby/rangefunction.py
 REFERENCE_MODULE completeelliptic=/tmp/biot-reference-zgup7xby/completeelliptic.py
@@ -70,7 +70,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-zgup7xby/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-zgup7xby/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-zgup7xby/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-zgup7xby/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 RECURRENCE_IDENTITY points=10000 maximum=0
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-b060dkrl/rangefunction.py
@@ -80,7 +80,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-b060dkrl/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-b060dkrl/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-b060dkrl/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-b060dkrl/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 IDENTITY kind=filament points=10000 maximum=0
 PASSED
 tests/biot/test_traced_section_moments.py::test_traced_exact_section_moments_match_numpy_reference PASSEDCACHE_GUARD_MARKER=pre-warm-run misses=4 budget=not-enforced

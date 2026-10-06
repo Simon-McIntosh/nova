@@ -1,13 +1,13 @@
 {
   "artifacts": {
-    "coarse_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/coarse-terminal-root.npz",
-    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/density-moment-projection.png",
+    "coarse_root": "scripts/density_moment_projection/coarse-terminal-root.npz",
+    "figure": "scripts/density_moment_projection/density-moment-projection.png",
     "figure_bytes": 114577,
-    "fine_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/fine-terminal-root.npz"
+    "fine_root": "scripts/density_moment_projection/fine-terminal-root.npz"
   },
   "candidate_comparison": {
     "artifacts": {
-      "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/candidate-comparison.png",
+      "figure": "scripts/density_moment_projection/candidate-comparison.png",
       "figure_bytes": 101312
     },
     "banked_control": {
@@ -146,13 +146,13 @@
     "reason": "The direct path exposes a 0.68 percent interior representation floor; an upstream correction may need to land first so the main branch never regresses the banked representation pins."
   },
   "logs": [
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/candidate-compute-retry.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/cell-oracle.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/root-coarse-repair.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/root-fine-repair.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/repair-topology-green.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/repair-focused-green.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/repair-combined.log"
+    "scripts/density_moment_projection/candidate-compute-retry.log",
+    "scripts/density_moment_projection/cell-oracle.log",
+    "scripts/density_moment_projection/root-coarse-repair.log",
+    "scripts/density_moment_projection/root-fine-repair.log",
+    "scripts/density_moment_projection/repair-topology-green.log",
+    "scripts/density_moment_projection/repair-focused-green.log",
+    "scripts/density_moment_projection/repair-combined.log"
   ],
   "quadrature_oracle": {
     "fixture": "coarse",
@@ -617,7 +617,7 @@
       },
       "state_size": 2396,
       "terminal_root": {
-        "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/coarse-terminal-root.npz",
+        "artifact": "scripts/density_moment_projection/coarse-terminal-root.npz",
         "machine_precision": true,
         "residual": 1.5407907043237626e-15
       }
@@ -851,7 +851,7 @@
       },
       "state_size": 4216,
       "terminal_root": {
-        "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/fine-terminal-root.npz",
+        "artifact": "scripts/density_moment_projection/fine-terminal-root.npz",
         "machine_precision": true,
         "residual": 2.053615568930518e-15
       }

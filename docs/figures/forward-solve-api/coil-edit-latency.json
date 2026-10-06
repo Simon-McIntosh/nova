@@ -465,7 +465,7 @@
       "wall_milliseconds": 33423.211216926575
     }
   ],
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/fsa-coil-edit-latency/docs/figures/forward-solve-api/coil-edit-latency.png",
+  "figure": "docs/figures/forward-solve-api/coil-edit-latency.png",
   "forward_module": {
     "path": "nova/equilibrium/forward.py",
     "sha256": "e5ce2c96b031649673adb2b6ac415caf0ead07df875d36129467be3d3ab4e437"

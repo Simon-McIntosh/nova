@@ -1,4 +1,4 @@
-revision=a2c8836289ab399e3ed836f94c904ce111852ea4 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction command=/home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/cut-cell-current-attribution/merit-model/measure.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction
+revision=a2c8836289ab399e3ed836f94c904ce111852ea4 tree=. command=/home/ITER/mcintos/Code/nova/.venv/bin/python docs/figures/cut-cell-current-attribution/merit-model/measure.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-merit-model-refuses-the-analytic-direction
 BUILT 300 realised=342 elapsed=11.27
 BASE merit=0.0546254885059 residual=0.0518511705161
 NEWTON {"qualification": 1, "projected_condition": 250.7393550514506, "conditioning_applied": false, "condition_baseline": 3.921565815210816, "spectral_baseline": 3.921565815210816, "achieved_reduction": 1.9285662379695127e-13, "requested_tolerance": 1e-05}

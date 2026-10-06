@@ -1,8 +1,8 @@
 {
   "source_revision": "7d9cd7c92eb319d5f30b914055d49b7fc87f2d54",
-  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state",
+  "worktree": ".",
   "command": [
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pcrf-map-fidelity-at-the-analytic-state/benchmarks/plasma_cell_map_fidelity.py"
+    "benchmarks/plasma_cell_map_fidelity.py"
   ],
   "slurm_job_id": "1276828",
   "requested_rungs": [

@@ -1,13 +1,13 @@
-revision f45ab30fd594a06dc892d6060e613e7165bdab21 tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py -vv -s --timeout 3600 
+revision f45ab30fd594a06dc892d6060e613e7165bdab21 tree . command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_kernel_compile_cost.py -vv -s --timeout 3600 
 NOVA_LANE_START=2026-10-06T01:54:31+0200
 PLACEMENT=submit
 RUNG=h200
 SLURM_JOB_ID=1281153
 SLURM_JOB_PARTITION=betelgeuse
 SOURCE_REVISION=f45ab30fd594a06dc892d6060e613e7165bdab21
-REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+REPOSITORY_ROOT=.
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/scripts/h200_test_lane
+PYTHONPATH=.:scripts/h200_test_lane
 JAX_PLATFORMS=cuda,cpu
 TMPDIR=/tmp
 MODE=pytest
@@ -32,7 +32,7 @@ CACHE_GUARD_MISS_BUDGET=not-enforced
 [Cache inventory omitted from committed excerpt; full raw log retained in run directory.]
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -49,7 +49,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-d_drev68/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-d_drev68/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-d_drev68/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-d_drev68/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 EQUATIONS before=78404 after=17544 ratio=4.46899225
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_point_jet_tenfold_expression_reduction XFAILays identical to 1e-13 while reducing the
@@ -61,7 +61,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-ojmzfjxw/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-ojmzfjxw/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-ojmzfjxw/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-ojmzfjxw/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 COMPILE arm=baseline backend=cuda:0 seconds=11.2422753 executable_bytes=2912
 COMPILE arm=head backend=cuda:0 seconds=7.9787394 executable_bytes=2912
 PASSED
@@ -72,7 +72,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-9a1vgmxa/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-9a1vgmxa/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-9a1vgmxa/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-9a1vgmxa/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 IDENTITY_COMPILE arm=baseline seconds=14.1774195 executable_bytes=2912
 IDENTITY_COMPILE arm=head seconds=8.52228057 executable_bytes=2912
 IDENTITY_WORST point=[6.191426454923443, -5.7103163437081985] component=0 baseline=2.5793641787249078e-06 head=2.5793641787249078e-06
@@ -85,7 +85,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-h644uo1a/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-h644uo1a/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-h644uo1a/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-h644uo1a/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_harmonic_arithmetic_order REFERENCE_MODULE rangefunction=/tmp/biot-reference-zfxuj2pu/rangefunction.py
 REFERENCE_MODULE completeelliptic=/tmp/biot-reference-zfxuj2pu/completeelliptic.py
@@ -94,7 +94,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-zfxuj2pu/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-zfxuj2pu/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-zfxuj2pu/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-zfxuj2pu/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-8kttec5l/rangefunction.py
 REFERENCE_MODULE completeelliptic=/tmp/biot-reference-8kttec5l/completeelliptic.py
@@ -103,7 +103,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-8kttec5l/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-8kttec5l/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-8kttec5l/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-8kttec5l/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 RECURRENCE_IDENTITY points=10000 maximum=0
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-b23m9apt/rangefunction.py
@@ -113,7 +113,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-b23m9apt/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-b23m9apt/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-b23m9apt/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-b23m9apt/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 IDENTITY kind=filament points=10000 maximum=0
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_kernel_helper_sharing_requires_staging PASSEDCACHE_GUARD_MARKER=pre-warm-run misses=0 budget=not-enforced

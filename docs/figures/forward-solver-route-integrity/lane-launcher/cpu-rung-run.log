@@ -1,5 +1,5 @@
 # revision: 707552973b50e4e0ef967555ebf2f50296604657
-# tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
+# tree: .
 # command: scripts/nova_lane/run.sh --in-place --log /tmp/nl-cpu-run.log --mode python-c --target 'import time; time.sleep(5); print("nova-lane-cpu-target-ok")'
 # wall_seconds: 6
 WRAPPER_EXIT=0
@@ -10,9 +10,9 @@ RUNG=cpu
 SLURM_JOB_ID=1277272
 SLURM_JOB_PARTITION=rigel
 SOURCE_REVISION=707552973b50e4e0ef967555ebf2f50296604657
-REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
+REPOSITORY_ROOT=.
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-one-nova-lane-launcher
+PYTHONPATH=.
 JAX_PLATFORMS=cpu
 TMPDIR=/tmp
 MODE=python-c

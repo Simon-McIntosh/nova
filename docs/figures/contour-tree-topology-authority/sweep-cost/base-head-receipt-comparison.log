@@ -1,4 +1,4 @@
-base_revision: 11985735c020a39df74f76c75cbe6354e0e67d36 head_revision: 3ab1adef4903973ece6c3df64a51ab29e9b611b2 base_tree=/tmp/ctta-sweep-base head_tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size
+base_revision: 11985735c020a39df74f76c75cbe6354e0e67d36 head_revision: 3ab1adef4903973ece6c3df64a51ab29e9b611b2 base_tree=/tmp/ctta-sweep-base head_tree=.
 diverted-single-null equal=True changed=none base={'nodes': 13, 'edges': 12, 'overflow': False} head={'nodes': 13, 'edges': 12, 'overflow': False}
 moderate-rotation-conventional-static equal=True changed=none base={'nodes': 16, 'edges': 15, 'overflow': False} head={'nodes': 16, 'edges': 15, 'overflow': False}
 strong-rotation-compact-static equal=True changed=none base={'nodes': 22, 'edges': 21, 'overflow': False} head={'nodes': 22, 'edges': 21, 'overflow': False}

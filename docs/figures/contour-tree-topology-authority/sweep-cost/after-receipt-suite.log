@@ -1,4 +1,4 @@
-revision: 3ab1adef4903973ece6c3df64a51ab29e9b611b2 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size command=bounded receipt comparison on every fixture
+revision: 3ab1adef4903973ece6c3df64a51ab29e9b611b2 tree=. command=bounded receipt comparison on every fixture
 diverted-single-null {'nodes': 13, 'edges': 12, 'overflow': False}
 moderate-rotation-conventional-static {'nodes': 16, 'edges': 15, 'overflow': False}
 strong-rotation-compact-static {'nodes': 22, 'edges': 21, 'overflow': False}

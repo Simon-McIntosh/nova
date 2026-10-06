@@ -1410,28 +1410,28 @@
   "arms": {
     "reference": {
       "revision": "da3def20e95b7aa5b2b3c8d18715820c18009698",
-      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pre-adoption-reference-da3def20",
+      "tree": ".",
       "source_digest": "e20ef243bb4ee708e143ac6e952224309d3f494709cfe9817cf3feaa544bfdf3",
       "job": "1276057",
       "node": "98dci4-gpu-0002"
     },
     "reproduction": {
       "revision": "20088ff805bbf24c73fd143604bf48ad79f2be90",
-      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction",
+      "tree": ".",
       "source_digest": "88402a6d39a831183124d37eaa76e002bc3b33adb96137548562d451b9310213",
       "job": "1276057",
       "node": "98dci4-gpu-0002"
     },
     "reduced": {
       "revision": "450bab78a55b6178b145de2dcacaa3e479940743",
-      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction",
+      "tree": ".",
       "source_digest": "1e35df08903d6966ae810d88b77e55c78c29dd1bebd2af5494128f0cac28c23d",
       "job": "1276057",
       "node": "98dci4-gpu-0002"
     },
     "negative": {
       "revision": "450bab78a55b6178b145de2dcacaa3e479940743",
-      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction",
+      "tree": ".",
       "source_digest": "1e35df08903d6966ae810d88b77e55c78c29dd1bebd2af5494128f0cac28c23d",
       "job": "1276057",
       "node": "98dci4-gpu-0002"
@@ -2589,7 +2589,7 @@
     "log_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-reduction/deduplication-cost-gate.log",
     "job_id": 1276069,
     "completed": true,
-    "cost_receipt_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-reduction/docs/figures/plasma-cell-topology-authority/adopted-read-cost-reduction.json"
+    "cost_receipt_path": "docs/figures/plasma-cell-topology-authority/adopted-read-cost-reduction.json"
   },
   "source_restoration": {
     "tested_revision": "450bab78a55b6178b145de2dcacaa3e479940743",

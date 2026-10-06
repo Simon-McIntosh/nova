@@ -297,8 +297,8 @@
     "docs/figures/efit-flux-decomposition/native-grid-decomposition.json": "2b60e2de1caf27e3b2af34e28d3e9ca007b1f992e417fe540d5de84098e5958a"
   },
   "artifacts": {
-    "table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/moment-prediction-confidence/scripts/moment_prediction_confidence/moment-prediction-confidence.tsv",
-    "report": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/moment-prediction-confidence/scripts/moment_prediction_confidence/report.md",
+    "table": "scripts/moment_prediction_confidence/moment-prediction-confidence.tsv",
+    "report": "scripts/moment_prediction_confidence/report.md",
     "reference_figure": "docs/figures/moment-conditioned-basin-entry/reference-boundary-errors.png",
     "sensitivity_figure": "docs/figures/moment-conditioned-basin-entry/boundary-sensitivity.png"
   }

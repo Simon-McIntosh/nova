@@ -1,4 +1,4 @@
-revision=817231f5505e8262234e8ec843199c24daf5c1fa tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/replay_clip_body.py', '--suite', 'test_flux_surface_extraction.py']
+revision=817231f5505e8262234e8ec843199c24daf5c1fa tree=. command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', 'docs/figures/exact-clip-closed-form/replay_clip_body.py', '--suite', 'test_flux_surface_extraction.py']
 18:40:51 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 ............                                                             [100%]
 =============================== warnings summary ===============================

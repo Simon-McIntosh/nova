@@ -1,4 +1,4 @@
-revision=150a1398c478e2b11d7a25de5195e280838dd856 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state/benchmarks/exact_support_floor_attribution.py']
+revision=150a1398c478e2b11d7a25de5195e280838dd856 tree=. command=['benchmarks/exact_support_floor_attribution.py']
 devices=[CudaDevice(id=0)] x64=True
 BUILD diverted-single-null-cells-110
 EVALUATE diverted-single-null-cells-110 exact

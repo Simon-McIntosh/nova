@@ -1,6 +1,6 @@
-revision=fa8af260e8adb154a7df4191d0c5308e6b675911 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure command=['benchmarks/plasma_cell_map_fidelity.py', '--case', 'diverted-single-null', '--cells', '-110', '--cpu-preflight']
-module.__file__=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure/benchmarks/plasma_cell_map_fidelity.py
-cwd=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure backend=cpu
+revision=fa8af260e8adb154a7df4191d0c5308e6b675911 tree=. command=['benchmarks/plasma_cell_map_fidelity.py', '--case', 'diverted-single-null', '--cells', '-110', '--cpu-preflight']
+module.__file__=benchmarks/plasma_cell_map_fidelity.py
+cwd=. backend=cpu
 BUILD case=diverted-single-null requested=-110
 MAP case=diverted-single-null requested=-110 mode=exact
 ROW diverted-single-null-cells-110-exact mismatch={'sup_relative': 0.2113920412861747, 'rms_relative': 0.2057560392882921, 'sup_wb': 0.0022176907143519587, 'rms_wb': 0.0007164252674486328, 'sup_over_reference_span': 0.1371884842546403, 'rms_over_reference_span': 0.044318757294217026, 'reference_sup_wb': 0.010490890294917638, 'reference_rms_wb': 0.003481916107671688, 'finite': True} control={'sup_relative': 1.1560797800625258, 'rms_relative': 1.7783064249555152} centroid_offset_mm={'dR': -2.744586556334472, 'dZ': -13.8496718232591, 'booked_centroid_m': [1.7099215769536151, 0.01916922415288247], 'analytic_centroid_m': [1.7126661635099496, 0.03301889597614157], 'support_cell_count': 88, 'amplitude_lambda': 0.9881810818046899}

@@ -1,4 +1,4 @@
-revision=745304f0a428da76608973dcebc5a70b50a9f2c1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/probe_tree.py
+revision=745304f0a428da76608973dcebc5a70b50a9f2c1 tree=. command=JAX_PLATFORMS=cpu PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/probe_tree.py
 HOST_MESH limited overflow False vertices 300
 MESH_TRACE_REFUSAL TracerArrayConversionError The numpy.ndarray conversion method __array__() was called on traced array with shape float64[300]
 TREE limited overflow False

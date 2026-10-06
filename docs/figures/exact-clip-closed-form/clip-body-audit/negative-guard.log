@@ -1,5 +1,5 @@
 restore the unrolled per-cell body
-revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['docs/figures/exact-clip-closed-form/measure_clip_body.py', '--guard', 'negative']
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=. command=['docs/figures/exact-clip-closed-form/measure_clip_body.py', '--guard', 'negative']
 18:09:44 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 FF                                                                       [100%]
 =================================== FAILURES ===================================

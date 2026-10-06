@@ -5,10 +5,10 @@ CACHE fixture=coarse status=warm key=746fbe1553c4b242 load_s=0.960115004 build_s
 LINEARIZE state_size=2396
 COMPARATOR contracting omitted second moments
 Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/normalization-constant-discriminator/scripts/normalization_discriminator/measure.py", line 507, in <module>
+  File "scripts/normalization_discriminator/measure.py", line 507, in <module>
     main()
     ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/normalization-constant-discriminator/scripts/normalization_discriminator/measure.py", line 217, in main
+  File "scripts/normalization_discriminator/measure.py", line 217, in main
     raise AssertionError(
         "absolute-value interpolation does not reproduce production"
     )

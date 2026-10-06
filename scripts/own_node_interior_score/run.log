@@ -4,4 +4,4 @@ INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
 complete-ring interior cells: 351
 own-node: net error=-2.200423583e+02 A (0.001536992%), m0 L1=0.012004803%, m1 L1=0.011118534%
 cubic:    net error=-6.778625165e+04 A (0.473485729%), m0 L1=0.764643854%, m1 L1=0.906181114%
-results: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/interior-own-node-score/scripts/own_node_interior_score/results.json
+results: scripts/own_node_interior_score/results.json

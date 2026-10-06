@@ -2,7 +2,7 @@
   "revision": "ccc09221d1e982026eed45b5ee5cc0f865188d96",
   "base_revision": "b3abce70bd92fa143dbfbfd9d449f7de06de7dc2",
   "arm": "candidate",
-  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program",
+  "tree": ".",
   "job": "1275914",
   "cpu_affinity": [
     4,
@@ -246,91 +246,91 @@
   "ownership_examples": {
     "nova/equilibrium/separatrix_clip.py:_traced_clip": {
       "frame_id": 282213,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/separatrix_clip.py",
+      "file": "nova/equilibrium/separatrix_clip.py",
       "function": "_traced_clip",
       "line": 1197
     },
     "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments": {
       "frame_id": 284144,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+      "file": "nova/equilibrium/clip_quadrature.py",
       "function": "_straight_edge_monomial_moments",
       "line": 210
     },
     "nova/equilibrium/fixed_point.py:_active_set_newton_krylov": {
       "frame_id": 40106,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/fixed_point.py",
+      "file": "nova/equilibrium/fixed_point.py",
       "function": "_active_set_newton_krylov",
       "line": 3973
     },
     "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census": {
       "frame_id": 203538,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_FixedDesignNull2D._compatibility_census",
       "line": 1311
     },
     "nova/equilibrium/forward_operator.py:_cell_banked_current_moments": {
       "frame_id": 284246,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_cell_banked_current_moments",
       "line": 412
     },
     "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments": {
       "frame_id": 284042,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+      "file": "nova/equilibrium/clip_quadrature.py",
       "function": "clipped_support_current_moments",
       "line": 806
     },
     "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays": {
       "frame_id": 284638,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/clip_quadrature.py",
+      "file": "nova/equilibrium/clip_quadrature.py",
       "function": "_quadrature_from_arrays",
       "line": 406
     },
     "nova/linalg/interpolant.py:bernstein_basis": {
       "frame_id": 281087,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/interpolant.py",
+      "file": "nova/linalg/interpolant.py",
       "function": "bernstein_basis",
       "line": 53
     },
     "nova/equilibrium/topology.py:Topology.boundary": {
       "frame_id": 193279,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/topology.py",
+      "file": "nova/equilibrium/topology.py",
       "function": "Topology.boundary",
       "line": 762
     },
     "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__": {
       "frame_id": 281970,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_ExactClipLevel.__call__",
       "line": 530
     },
     "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis": {
       "frame_id": 281088,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/interpolant.py",
+      "file": "nova/linalg/interpolant.py",
       "function": "bernstein_basis.<locals>.term_basis",
       "line": 49
     },
     "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices": {
       "frame_id": 284899,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/separatrix_clip.py",
+      "file": "nova/equilibrium/separatrix_clip.py",
       "function": "_pack_traced_vertices",
       "line": 601
     },
     "nova/biot/null.py:Null2D.interpolate": {
       "frame_id": 203537,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/biot/null.py",
+      "file": "nova/biot/null.py",
       "function": "Null2D.interpolate",
       "line": 213
     },
     "nova/linalg/split_spline.py:SplitTensorBSpline._patch_evaluation": {
       "frame_id": 281987,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/linalg/split_spline.py",
+      "file": "nova/linalg/split_spline.py",
       "function": "SplitTensorBSpline._patch_evaluation",
       "line": 217
     },
     "nova/equilibrium/forward_operator.py:_polished_level_root.<locals>.polish": {
       "frame_id": 282641,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_polished_level_root.<locals>.polish",
       "line": 539
     }

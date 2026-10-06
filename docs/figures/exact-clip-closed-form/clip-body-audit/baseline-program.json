@@ -2,7 +2,7 @@
   "revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
   "base_revision": "abeccb9e4c29a94594ec3e2238f5cf5df8a7448f",
   "arm": "baseline",
-  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body",
+  "tree": ".",
   "job": "1275982",
   "cpu_affinity": [
     4,
@@ -246,91 +246,91 @@
   "ownership_examples": {
     "nova/equilibrium/separatrix_clip.py:_traced_clip": {
       "frame_id": 297763,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+      "file": "nova/equilibrium/separatrix_clip.py",
       "function": "_traced_clip",
       "line": 1197
     },
     "nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments": {
       "frame_id": 299694,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+      "file": "nova/equilibrium/clip_quadrature.py",
       "function": "_straight_edge_monomial_moments",
       "line": 210
     },
     "nova/equilibrium/fixed_point.py:_active_set_newton_krylov": {
       "frame_id": 40284,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/fixed_point.py",
+      "file": "nova/equilibrium/fixed_point.py",
       "function": "_active_set_newton_krylov",
       "line": 3973
     },
     "nova/equilibrium/forward_operator.py:_cell_banked_current_moments": {
       "frame_id": 299796,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_cell_banked_current_moments",
       "line": 413
     },
     "nova/equilibrium/forward_operator.py:_FixedDesignNull2D.read_census": {
       "frame_id": 330379,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_FixedDesignNull2D.read_census",
       "line": 1546
     },
     "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._compatibility_census": {
       "frame_id": 214855,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_FixedDesignNull2D._compatibility_census",
       "line": 1503
     },
     "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments": {
       "frame_id": 299592,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+      "file": "nova/equilibrium/clip_quadrature.py",
       "function": "clipped_support_current_moments",
       "line": 806
     },
     "nova/equilibrium/clip_quadrature.py:_quadrature_from_arrays": {
       "frame_id": 300188,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/clip_quadrature.py",
+      "file": "nova/equilibrium/clip_quadrature.py",
       "function": "_quadrature_from_arrays",
       "line": 406
     },
     "nova/linalg/interpolant.py:bernstein_basis": {
       "frame_id": 296627,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+      "file": "nova/linalg/interpolant.py",
       "function": "bernstein_basis",
       "line": 53
     },
     "nova/equilibrium/topology.py:Topology.boundary": {
       "frame_id": 204070,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/topology.py",
+      "file": "nova/equilibrium/topology.py",
       "function": "Topology.boundary",
       "line": 762
     },
     "nova/equilibrium/forward_operator.py:_ExactClipLevel.__call__": {
       "frame_id": 297520,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_ExactClipLevel.__call__",
       "line": 531
     },
     "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._local_fit_census": {
       "frame_id": 3,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_FixedDesignNull2D._local_fit_census",
       "line": 1021
     },
     "nova/linalg/interpolant.py:bernstein_basis.<locals>.term_basis": {
       "frame_id": 296628,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/linalg/interpolant.py",
+      "file": "nova/linalg/interpolant.py",
       "function": "bernstein_basis.<locals>.term_basis",
       "line": 49
     },
     "nova/equilibrium/separatrix_clip.py:_pack_traced_vertices": {
       "frame_id": 300449,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/separatrix_clip.py",
+      "file": "nova/equilibrium/separatrix_clip.py",
       "function": "_pack_traced_vertices",
       "line": 601
     },
     "nova/equilibrium/forward_operator.py:_FixedDesignNull2D._seed_representatives.<locals>.compact": {
       "frame_id": 330609,
-      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/nova/equilibrium/forward_operator.py",
+      "file": "nova/equilibrium/forward_operator.py",
       "function": "_FixedDesignNull2D._seed_representatives.<locals>.compact",
       "line": 1167
     }

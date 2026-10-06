@@ -58,8 +58,8 @@ STAGE FULL_TRIP_COMPILE_START
 STAGE FULL_TRIP_COMPILE_DONE seconds=20.872065
 STAGE FULL_TRIP_CONTROL_DONE quantum_ms=2.750082
 STAGE FULL_TRIP_SETTLED_DONE
-RECEIPT_WRITTEN=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mcs-trip-quantum-compiled/docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.json
-FIGURE_WRITTEN=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/mcs-trip-quantum-compiled/docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.png
+RECEIPT_WRITTEN=docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.json
+FIGURE_WRITTEN=docs/figures/millisecond-converged-solve/trip-quantum/width-one-compiled.png
 REPORT_WRITTEN=/home/ITER/mcintos/.config/reckon/crew/reports/nova/millisecond/trip-quantum-compiled.md
 EXIT_MARKER=0
 MEASUREMENT_COMPLETE job=1264702

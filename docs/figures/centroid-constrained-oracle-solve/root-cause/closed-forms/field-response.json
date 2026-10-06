@@ -1,7 +1,7 @@
 {
   "revision": "11985735c020a39df74f76c75cbe6354e0e67d36",
-  "module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-map-and-compensator-closed-forms/benchmarks/centroid_constrained_fixture_receipt.py",
-  "cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-map-and-compensator-closed-forms",
+  "module": "benchmarks/centroid_constrained_fixture_receipt.py",
+  "cwd": ".",
   "case": "weak-rotation-reactor-static",
   "realised_cells": 135,
   "flux_unit": "Wb total poloidal flux",

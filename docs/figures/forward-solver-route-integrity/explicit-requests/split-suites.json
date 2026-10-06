@@ -1,6 +1,6 @@
 {
   "base_fixed": {
-    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/baseline-fixed-point.log",
+    "log_path": "docs/figures/forward-solver-route-integrity/explicit-requests/baseline-fixed-point.log",
     "completed": true,
     "failure_ids": [],
     "abort_ids": [],
@@ -8,7 +8,7 @@
     "exit_status": 0
   },
   "base_reduced": {
-    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/baseline-reduced-newton.log",
+    "log_path": "docs/figures/forward-solver-route-integrity/explicit-requests/baseline-reduced-newton.log",
     "completed": false,
     "failure_ids": [
       "tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback",
@@ -21,7 +21,7 @@
     "exit_status": 134
   },
   "after_fixed": {
-    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/after-fixed-point.log",
+    "log_path": "docs/figures/forward-solver-route-integrity/explicit-requests/after-fixed-point.log",
     "completed": true,
     "failure_ids": [],
     "abort_ids": [],
@@ -29,7 +29,7 @@
     "exit_status": 0
   },
   "after_reduced": {
-    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/after-reduced-newton.log",
+    "log_path": "docs/figures/forward-solver-route-integrity/explicit-requests/after-reduced-newton.log",
     "completed": false,
     "failure_ids": [
       "tests/test_reduced_newton.py::test_diverted_normalised_certificate_rung_retains_finite_fallback",
@@ -56,6 +56,6 @@
     "exit_status": 0,
     "passed": 1,
     "seconds": 311.37,
-    "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-one-traced-operator-state-machine/docs/figures/forward-solver-route-integrity/explicit-requests/added-failure-isolated.log"
+    "log_path": "docs/figures/forward-solver-route-integrity/explicit-requests/added-failure-isolated.log"
   }
 }

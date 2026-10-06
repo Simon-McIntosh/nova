@@ -2,12 +2,12 @@
   "schema": "nova.hex_split_batch_throughput",
   "generated_at": "2026-09-01T09:16:28Z",
   "command": [
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-h200-batch/benchmarks/fieldnull_gpu_throughput.py",
+    "benchmarks/fieldnull_gpu_throughput.py",
     "measure-split-batch",
     "--platform",
     "gpu",
     "--partial",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-h200-batch/docs/figures/hex-cell-single-grid/h200-split-batch.json"
+    "docs/figures/hex-cell-single-grid/h200-split-batch.json"
   ],
   "source_revision": "608b94ee",
   "environment": {

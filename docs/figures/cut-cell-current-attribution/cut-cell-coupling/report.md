@@ -3,7 +3,7 @@
 Node `cca-cut-cell-clipped-coupling`, run r-20260911T001005914789.
 Base: 1046dc4f (rung A2, frozen per-trip support). Implementation commit
 `dbf3434f`, worktree
-`.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-cut-cell-clipped-coupling`.
+`.`.
 
 ## What changed
 

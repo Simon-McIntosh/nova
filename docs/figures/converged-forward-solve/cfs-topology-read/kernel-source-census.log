@@ -1,119 +1,119 @@
-REVISION=fe383cc795b70fcd67d1008f46e079490d64afc3 TREE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read COMMAND=CPU jaxpr source census through python -u -
+REVISION=fe383cc795b70fcd67d1008f46e079490d64afc3 TREE=. COMMAND=CPU jaxpr source census through python -u -
 SOURCE_CONTENT_REVISION=fe383cc795b70fcd67d1008f46e079490d64afc3 DIRTY_AT_START=false
 RAW_LOG=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/kernel-source-census.log
 RAW_SHA256=19a69685f9b4cddb0773ef6126e1adf56b6fbcf43d5af3596c97fa97a8c6efae
-FRAME_CONTROL ['current;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py:213', 'DynamicJaxprTrace.process_primitive;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/partial_eval.py:1905', 'Primitive.bind_with_trace;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py:735', 'Primitive.bind;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py:727', '_run_python_pjit;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py:145', '_cpp_pjit.<locals>.cache_miss;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py:266', 'api_boundary.<locals>.reraise_with_filtered_traceback;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py:195', 'TotalField.evaluate;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/equilibrium/topology.py:2339', '<lambda>;<stdin>:4']
+FRAME_CONTROL ['current;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/source_info_util.py:213', 'DynamicJaxprTrace.process_primitive;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/interpreters/partial_eval.py:1905', 'Primitive.bind_with_trace;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py:735', 'Primitive.bind;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/core.py:727', '_run_python_pjit;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py:145', '_cpp_pjit.<locals>.cache_miss;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/pjit.py:266', 'api_boundary.<locals>.reraise_with_filtered_traceback;/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/traceback_util.py:195', 'TotalField.evaluate;nova/equilibrium/topology.py:2339', '<lambda>;<stdin>:4']
 SOURCE_COUNTS [
   [
-    "contract;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:416",
+    "contract;nova/biot/rangefunction.py:416",
     9435
   ],
   [
-    "harmonic_multiply;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:101",
+    "harmonic_multiply;nova/biot/rangefunction.py:101",
     8971
   ],
   [
-    "harmonic_multiply;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:103",
+    "harmonic_multiply;nova/biot/rangefunction.py:103",
     5532
   ],
   [
-    "harmonic_pole_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:422",
+    "harmonic_pole_moments;nova/biot/elliptic.py:422",
     4592
   ],
   [
-    "harmonic_multiply;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:102",
+    "harmonic_multiply;nova/biot/rangefunction.py:102",
     4030
   ],
   [
-    "harmonic_pole_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:426",
+    "harmonic_pole_moments;nova/biot/elliptic.py:426",
     2624
   ],
   [
-    "deflate;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:435",
+    "deflate;nova/biot/rangefunction.py:435",
     2272
   ],
   [
-    "harmonic_pole_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:421",
+    "harmonic_pole_moments;nova/biot/elliptic.py:421",
     1968
   ],
   [
-    "harmonic_add;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:144",
+    "harmonic_add;nova/biot/rangefunction.py:144",
     1961
   ],
   [
-    "harmonic_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:305",
+    "harmonic_moments;nova/biot/elliptic.py:305",
     1804
   ],
   [
-    "harmonic_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:303",
+    "harmonic_moments;nova/biot/elliptic.py:303",
     1668
   ],
   [
-    "_accumulate;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/completeelliptic.py:139",
+    "_accumulate;nova/biot/completeelliptic.py:139",
     1654
   ],
   [
-    "_accumulate;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/completeelliptic.py:140",
+    "_accumulate;nova/biot/completeelliptic.py:140",
     1386
   ],
   [
-    "_accumulate;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/completeelliptic.py:141",
+    "_accumulate;nova/biot/completeelliptic.py:141",
     1366
   ],
   [
-    "Channel._pole;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/momentchannel.py:375",
+    "Channel._pole;nova/biot/momentchannel.py:375",
     1242
   ],
   [
-    "product;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:188",
+    "product;nova/biot/rangefunction.py:188",
     874
   ],
   [
-    "across_the_range;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:270",
+    "across_the_range;nova/biot/rangefunction.py:270",
     848
   ],
   [
-    "_descent;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/completeelliptic.py:121",
+    "_descent;nova/biot/completeelliptic.py:121",
     756
   ],
   [
-    "_descent;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/completeelliptic.py:122",
+    "_descent;nova/biot/completeelliptic.py:122",
     756
   ],
   [
-    "product;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:186",
+    "product;nova/biot/rangefunction.py:186",
     680
   ],
   [
-    "harmonic_pole_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:420",
+    "harmonic_pole_moments;nova/biot/elliptic.py:420",
     656
   ],
   [
-    "product;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:184",
+    "product;nova/biot/rangefunction.py:184",
     608
   ],
   [
-    "scaled;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:254",
+    "scaled;nova/biot/rangefunction.py:254",
     590
   ],
   [
-    "packed_analytic_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/polygonanalytic.py:2506",
+    "packed_analytic_moments;nova/biot/polygonanalytic.py:2506",
     570
   ],
   [
-    "_model_integral.<locals>.primitive;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/gradedresidual.py:100",
+    "_model_integral.<locals>.primitive;nova/biot/gradedresidual.py:100",
     560
   ],
   [
-    "deflate;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:437",
+    "deflate;nova/biot/rangefunction.py:437",
     552
   ],
   [
-    "deflate;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:438",
+    "deflate;nova/biot/rangefunction.py:438",
     552
   ],
   [
-    "Channel._pole;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/momentchannel.py:381",
+    "Channel._pole;nova/biot/momentchannel.py:381",
     552
   ],
   [
@@ -121,47 +121,47 @@ SOURCE_COUNTS [
     550
   ],
   [
-    "harmonic_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:292",
+    "harmonic_moments;nova/biot/elliptic.py:292",
     533
   ],
   [
-    "harmonic_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:291",
+    "harmonic_moments;nova/biot/elliptic.py:291",
     492
   ],
   [
-    "harmonic_scale;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:150",
+    "harmonic_scale;nova/biot/rangefunction.py:150",
     437
   ],
   [
-    "harmonic_root_moments;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/elliptic.py:481",
+    "harmonic_root_moments;nova/biot/elliptic.py:481",
     420
   ],
   [
-    "_finite_part;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/completeelliptic.py:221",
+    "_finite_part;nova/biot/completeelliptic.py:221",
     416
   ],
   [
-    "product;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:190",
+    "product;nova/biot/rangefunction.py:190",
     400
   ],
   [
-    "product;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/rangefunction.py:191",
+    "product;nova/biot/rangefunction.py:191",
     400
   ],
   [
-    "Channel._pole;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/momentchannel.py:376",
+    "Channel._pole;nova/biot/momentchannel.py:376",
     368
   ],
   [
-    "Channel._pole;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/momentchannel.py:384",
+    "Channel._pole;nova/biot/momentchannel.py:384",
     368
   ],
   [
-    "_near_collinear_arsinh_difference;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/polygonanalytic.py:1482",
+    "_near_collinear_arsinh_difference;nova/biot/polygonanalytic.py:1482",
     360
   ],
   [
-    "_model_integral.<locals>.primitive;/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/biot/gradedresidual.py:96",
+    "_model_integral.<locals>.primitive;nova/biot/gradedresidual.py:96",
     352
   ]
 ]

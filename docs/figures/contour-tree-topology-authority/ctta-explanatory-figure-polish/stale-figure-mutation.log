@@ -1,9 +1,9 @@
 revision: 11985735c020a39df74f76c75cbe6354e0e67d36
-tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
-module_file: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish/benchmarks/contour_tree_explanatory_figure.py
-cwd: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish
+tree: .
+module_file: benchmarks/contour_tree_explanatory_figure.py
+cwd: .
 mutation: copy the committed receipt+figure to scratch and alter one SVG coordinate, so the committed figure no longer matches the receipt
-command: PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish JAX_PLATFORMS=cpu CONTOUR_TREE_FIGURE_DIR=/tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-stale /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py::test_committed_figure_files_exist
+command: PYTHONPATH=. JAX_PLATFORMS=cpu CONTOUR_TREE_FIGURE_DIR=/tmp/reckon-crew-scratch/r-20261002T202644076479-ctta-explanatory-figure-polish/ctta-stale /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py::test_committed_figure_files_exist
 F                                                                        [100%]
 =================================== FAILURES ===================================
 ______________________ test_committed_figure_files_exist _______________________

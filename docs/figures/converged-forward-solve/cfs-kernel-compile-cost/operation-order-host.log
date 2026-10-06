@@ -5,7 +5,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-y7vdi5m0/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-y7vdi5m0/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-y7vdi5m0/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-y7vdi5m0/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 HOST harmonic_multiply max_abs 0.0
 HOST contract max_abs 0.0
 HOST deflate max_abs 0.0

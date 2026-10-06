@@ -4,10 +4,10 @@ INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
 throat-sector adaptive check complete
 all-sector adaptive radial check complete
 Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 814, in <module>
+  File "scripts/saddle_gap_check/measure_saddle_gap.py", line 814, in <module>
     main()
     ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 647, in main
+  File "scripts/saddle_gap_check/measure_saddle_gap.py", line 647, in main
     raise AssertionError(
         f"adaptive fan and cellwise core differ by {adaptive_cell_closure:.6f} A"
     )

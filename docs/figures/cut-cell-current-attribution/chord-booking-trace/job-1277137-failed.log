@@ -1,4 +1,4 @@
-revision=b360956e025ad2b0ad65540783402f03169d2347 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source command=['/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/benchmarks/chord_booking_operation_trace.py', '--output', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-chord-booking-exterior-current-source/docs/figures/cut-cell-current-attribution/chord-booking-trace']
+revision=b360956e025ad2b0ad65540783402f03169d2347 tree=. command=['benchmarks/chord_booking_operation_trace.py', '--output', 'docs/figures/cut-cell-current-attribution/chord-booking-trace']
 device=[CudaDevice(id=0)] x64=True
 SMOKE cell=2 current=236.853895742 radial=-7.76556612159 vertical=-4.74883909293
 ROW cells=132 positive=2.346e-14 base_map=0.0950848225228 conditioned_map=0.103972105832

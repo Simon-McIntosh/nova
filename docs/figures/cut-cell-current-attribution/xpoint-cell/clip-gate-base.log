@@ -151,23 +151,23 @@ E       AttributeError: 'types.SimpleNamespace' object has no attribute 'x_point
 nova/equilibrium/forward_operator.py:3091: AttributeError
 =============================== warnings summary ===============================
 test_forward_census.py::test_forward_census_exact_diverted_oracle
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:76: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  tests/test_solovev_recovery_gates.py:76: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.slow
 
 test_forward_census.py::test_forward_census_exact_diverted_oracle
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:93: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  tests/test_solovev_recovery_gates.py:93: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.slow
 
 test_forward_census.py::test_forward_census_exact_diverted_oracle
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:110: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  tests/test_solovev_recovery_gates.py:110: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.slow
 
 test_forward_census.py::test_forward_census_exact_diverted_oracle
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:138: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  tests/test_solovev_recovery_gates.py:138: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.slow
 
 test_forward_census.py::test_forward_census_exact_diverted_oracle
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-repair-the-independent-oracle-reconstruction/tests/test_solovev_recovery_gates.py:149: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+  tests/test_solovev_recovery_gates.py:149: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
     @pytest.mark.slow
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

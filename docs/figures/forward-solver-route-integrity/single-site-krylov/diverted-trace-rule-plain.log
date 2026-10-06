@@ -1,6 +1,6 @@
-revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit command=diverted_trace.py exit /home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T163850406961-fsri-single-site-krylov-vmap-exit/mechanism/rule-6204bfd6f-plain job=1277159
+revision=6204bfd6feb7227dd66c2594dd2433248072e4a1 tree=. command=diverted_trace.py exit /home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T163850406961-fsri-single-site-krylov-vmap-exit/mechanism/rule-6204bfd6f-plain job=1277159
 SERVED []
-ARM exit fixed_point=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-vmap-exit/nova/equilibrium/fixed_point.py instrument=False
+ARM exit fixed_point=nova/equilibrium/fixed_point.py instrument=False
 SOLOVEV_COMPILATION_CACHE directory=/home/ITER/mcintos/.cache/nova/jax-compilation/runtime-ea5c55820be3d80549fe version=runtime-ea5c55820be3d80549fe
 SOLOVEV_STAGE_BEGIN case=diverted-single-null requested_cells=-300 stage=case_and_machine
 SOLOVEV_STAGE_END case=diverted-single-null requested_cells=-300 stage=case_and_machine elapsed_seconds=0.834926

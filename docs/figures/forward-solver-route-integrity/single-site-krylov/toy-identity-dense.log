@@ -1,4 +1,4 @@
-revision=e84cbcaee756d32c35a724369769954d0040741e tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-single-site-krylov-for-the-qualified-step command=/home/ITER/mcintos/Code/nova/.venv/bin/python toy_identity.py dense job=1276452
+revision=e84cbcaee756d32c35a724369769954d0040741e tree=. command=/home/ITER/mcintos/Code/nova/.venv/bin/python toy_identity.py dense job=1276452
 {"size": 5, "iterations": 2, "base": {}, "base-fenced": {}}
 {"size": 5, "iterations": 8, "base": {}, "base-fenced": {}}
 {"size": 12, "iterations": 2, "base": {}, "base-fenced": {}}

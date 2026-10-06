@@ -1,7 +1,7 @@
 {
   "completed": true,
   "figure": {
-    "filesystem_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace/docs/figures/cut-cell-current-attribution/exact-clip-cost/exact-clip-warm-cost-and-memory.svg",
+    "filesystem_path": "docs/figures/cut-cell-current-attribution/exact-clip-cost/exact-clip-warm-cost-and-memory.svg",
     "project_absolute_src": "/nova/figures/cut-cell-current-attribution/exact-clip-cost/exact-clip-warm-cost-and-memory.svg",
     "sha256": "49b6cdc8841dc09cd88069a1db96fde7d9c5312393198e0dc4894f666bf99119"
   },
@@ -87,7 +87,7 @@
       "schema": "nova.exact-clip-warm-cost.moment-route-comparison",
       "source": {
         "benchmark_revision": "0720a96709c79bbfac4ffe272b01b1235f3e048c",
-        "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+        "benchmark_root": ".",
         "cell_banked_scan_present": true,
         "implicit_root_derivative_present": true,
         "production_base_revision": "e657f84c1f08549a66a3b13d5ca24c32001a5f75",
@@ -183,7 +183,7 @@
       "schema": "nova.exact-clip-warm-cost.moment-route-comparison",
       "source": {
         "benchmark_revision": "0720a96709c79bbfac4ffe272b01b1235f3e048c",
-        "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+        "benchmark_root": ".",
         "cell_banked_scan_present": true,
         "implicit_root_derivative_present": true,
         "production_base_revision": "e657f84c1f08549a66a3b13d5ca24c32001a5f75",
@@ -368,7 +368,7 @@
       "realised_cells": 135,
       "recovery": {
         "repair": "recursive nonfinite normalization stores padded NaN as null",
-        "source_temporary": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace/docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/.production-110.json.kg4jsgwk.tmp",
+        "source_temporary": "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/.production-110.json.kg4jsgwk.tmp",
         "source_temporary_sha256": "99dedc3c066b345bce7de3457c76f805b4e7e7bd81bdaed505ec3c2c4a2ac9c3",
         "timings_and_allocator_reused_without_execution": true
       },
@@ -402,7 +402,7 @@
       },
       "source": {
         "benchmark_revision": "29d03f6857be9914036304a2f08d27dfc6556e3e",
-        "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+        "benchmark_root": ".",
         "cell_banked_scan_present": true,
         "implicit_root_derivative_present": true,
         "production_revision": "2acade85c54fa42697a5301254d478377fa062cd",
@@ -1301,7 +1301,7 @@
           5.553440795328138
         ],
         "state_provenance": {
-          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace/docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
+          "path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
           "scope": "banked qualified terminal used only for the moment-route identity comparison; the timed terminal array was lost when the original atomic receipt serialization refused NaN padding",
           "sha256": "132da5d169d239f3d9da2af91bbb5d389615097e203c515b4cee096f68d1fdef",
           "timed_terminal_state_persisted": false
@@ -1492,7 +1492,7 @@
       },
       "source": {
         "benchmark_revision": "220f5f79990585c3247bf87c63437ff4fb1918a1",
-        "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+        "benchmark_root": ".",
         "cell_banked_scan_present": true,
         "implicit_root_derivative_present": true,
         "production_revision": "f21894624af24d7a57a994fafb64d9c837018328",
@@ -3333,7 +3333,7 @@
       },
       "source": {
         "benchmark_revision": "0720a96709c79bbfac4ffe272b01b1235f3e048c",
-        "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+        "benchmark_root": ".",
         "cell_banked_scan_present": true,
         "implicit_root_derivative_present": true,
         "production_base_revision": "e657f84c1f08549a66a3b13d5ca24c32001a5f75",
@@ -7497,7 +7497,7 @@
   "schema": "nova.exact-clip-warm-cost",
   "source": {
     "benchmark_revision": "0720a96709c79bbfac4ffe272b01b1235f3e048c",
-    "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+    "benchmark_root": ".",
     "cell_banked_scan_present": true,
     "implicit_root_derivative_present": true,
     "production_base_revision": "e657f84c1f08549a66a3b13d5ca24c32001a5f75",

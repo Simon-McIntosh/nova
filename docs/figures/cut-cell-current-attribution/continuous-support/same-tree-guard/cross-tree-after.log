@@ -1,8 +1,8 @@
-revision=88d6221006e82d338aca548a1572ebcbb277dbbc tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent command=PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent NOVA_EXACT_CLIP_IDENTITY_ROOT=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-slow-exact-clip-items-on-sirius/identity-after /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_exact_clip_memory.py::test_whole_cell_terminal_state_ignores_polish_jvp
+revision=88d6221006e82d338aca548a1572ebcbb277dbbc tree=. command=PYTHONPATH=. NOVA_EXACT_CLIP_IDENTITY_ROOT=/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-slow-exact-clip-items-on-sirius/identity-after /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_exact_clip_memory.py::test_whole_cell_terminal_state_ignores_polish_jvp
 host=98dci4-clu-5005.iter.org started=2026-09-22T00:34:08+02:00
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function

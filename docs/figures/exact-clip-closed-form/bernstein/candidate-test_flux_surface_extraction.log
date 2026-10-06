@@ -1,4 +1,4 @@
-revision=9dac42e15b0c8281a66f55ffd12326e31834038b tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-remove-the-bernstein-evaluator-from-the-exact-clip-program/docs/figures/exact-clip-closed-form/measure_bernstein.py', '--suite', 'candidate', 'test_flux_surface_extraction.py']
+revision=9dac42e15b0c8281a66f55ffd12326e31834038b tree=. command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', 'docs/figures/exact-clip-closed-form/measure_bernstein.py', '--suite', 'candidate', 'test_flux_surface_extraction.py']
 15:24:41 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 ............                                                             [100%]
 =============================== warnings summary ===============================

@@ -66,7 +66,7 @@
   "schema": "nova.exact-clip-warm-cost.moment-route-comparison",
   "source": {
     "benchmark_revision": "0720a96709c79bbfac4ffe272b01b1235f3e048c",
-    "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+    "benchmark_root": ".",
     "cell_banked_scan_present": true,
     "implicit_root_derivative_present": true,
     "production_base_revision": "e657f84c1f08549a66a3b13d5ca24c32001a5f75",

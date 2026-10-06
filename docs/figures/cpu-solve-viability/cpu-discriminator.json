@@ -14,7 +14,7 @@
   "evidence_inputs": {
     "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211049883942-csv-cpu-discriminator/raw/head-cpu.json",
     "raw_capture_sha256": "f6eb257c9860040121a1269839cf4a7a16dee0fde4021a1fa450dca72db973aa",
-    "reference_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-cpu-discriminator/docs/figures/solver-convergence-regression/backend-divergence.json",
+    "reference_receipt": "docs/figures/solver-convergence-regression/backend-divergence.json",
     "sstat_samples": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211049883942-csv-cpu-discriminator/raw/head-cpu-sstat.csv",
     "sstat_samples_sha256": "0de60f594c982114af3adec68939908ec5616747848fe8978518c90563d20973"
   },
@@ -3129,7 +3129,7 @@
         314.31605529514076
       ],
       "revision": "a4bec44f5cbf80ad5e210c01c984ac8d02a89de9",
-      "source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/csv-cpu-discriminator/docs/figures/solver-convergence-regression/backend-divergence.json",
+      "source": "docs/figures/solver-convergence-regression/backend-divergence.json",
       "source_sha256": "213f1036c0ac8a880bb3bea0aeca37ab38770d83a75f2cee732c69210f32eebd",
       "terminal_residual": 0.00048023353539180223,
       "termination": "active_set_stagnated",

@@ -153,7 +153,7 @@
   "realised_cells": 135,
   "recovery": {
     "repair": "recursive nonfinite normalization stores padded NaN as null",
-    "source_temporary": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace/docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/.production-110.json.kg4jsgwk.tmp",
+    "source_temporary": "docs/figures/cut-cell-current-attribution/exact-clip-cost/parts/.production-110.json.kg4jsgwk.tmp",
     "source_temporary_sha256": "99dedc3c066b345bce7de3457c76f805b4e7e7bd81bdaed505ec3c2c4a2ac9c3",
     "timings_and_allocator_reused_without_execution": true
   },
@@ -187,7 +187,7 @@
   },
   "source": {
     "benchmark_revision": "29d03f6857be9914036304a2f08d27dfc6556e3e",
-    "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+    "benchmark_root": ".",
     "cell_banked_scan_present": true,
     "implicit_root_derivative_present": true,
     "production_revision": "2acade85c54fa42697a5301254d478377fa062cd",
@@ -1086,7 +1086,7 @@
       5.553440795328138
     ],
     "state_provenance": {
-      "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace/docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
+      "path": "docs/figures/cut-cell-current-attribution/exact-clip-seed/parts/weak-rotation-reactor-static-production-route-reduced.json",
       "scope": "banked qualified terminal used only for the moment-route identity comparison; the timed terminal array was lost when the original atomic receipt serialization refused NaN padding",
       "sha256": "132da5d169d239f3d9da2af91bbb5d389615097e203c515b4cee096f68d1fdef",
       "timed_terminal_state_persisted": false

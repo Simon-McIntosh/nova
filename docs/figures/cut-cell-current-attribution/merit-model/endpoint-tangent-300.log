@@ -1,4 +1,4 @@
-revision=b64a3db64119ab3805b5a6e3b47358cae9708e5c tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-342-cell-terminal-fails-the-tangent-check command=/home/ITER/mcintos/Code/nova/.venv/bin/python -u docs/figures/cut-cell-current-attribution/merit-model/endpoint_tangent.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-342-cell-terminal-fails-the-tangent-check
+revision=b64a3db64119ab3805b5a6e3b47358cae9708e5c tree=. command=/home/ITER/mcintos/Code/nova/.venv/bin/python -u docs/figures/cut-cell-current-attribution/merit-model/endpoint_tangent.py --cells 300 --output /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-342-cell-terminal-fails-the-tangent-check
 BASE merit=0.0546254885059 nonzero=177 classes={'outside': 0, 'cut': 0, 'inside': 342} clip=chord
 ROW analytic h=1e-06 fd=814992 jvp=373.702 rel=0.99956518 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+08
 ROW analytic h=1e-07 fd=8.14673e+06 jvp=373.702 rel=0.9999565 confined_flips=3 open_flips=3 support_pm=0/0 nominal_error=2.93067e+09

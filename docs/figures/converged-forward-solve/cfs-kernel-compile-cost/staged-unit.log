@@ -1,7 +1,7 @@
-revision 4d7305f684bea23f59d28702bcd6dc636fc9d166 tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_biotcompleteelliptic.py tests/test_biotelliptic.py tests/test_biotrangefunction.py -vv
+revision 4d7305f684bea23f59d28702bcd6dc636fc9d166 tree . command /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_biotcompleteelliptic.py tests/test_biotelliptic.py tests/test_biotrangefunction.py -vv
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -356,19 +356,19 @@ tests/test_biotrangefunction.py::test_the_series_helpers_add_and_scale_as_functi
 
 =============================== warnings summary ===============================
 tests/test_biotelliptic.py: 12 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+  tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
     the requested tolerance from being achieved.  The error may be 
     underestimated.
     expected, _ = scipy.integrate.quad(
 
 tests/test_biotelliptic.py: 14 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+  tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
     the requested tolerance from being achieved.  The error may be 
     underestimated.
     value, _ = scipy.integrate.quad(
 
 tests/test_biotelliptic.py: 24 warnings
-  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost/tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+  tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
     the requested tolerance from being achieved.  The error may be 
     underestimated.
     expected, _ = scipy.integrate.quad(

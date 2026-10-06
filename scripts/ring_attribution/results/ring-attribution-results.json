@@ -426,10 +426,10 @@
     "jit_batch_compatible": true
   },
   "artifacts": {
-    "matrix_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/inputs/direct-target-matrices.npz",
-    "cell_table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/ring-cell-attribution.csv",
-    "field_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/ring-attribution-fields.npz",
-    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/retired-path-bank.png"
+    "matrix_bank": "scripts/ring_attribution/inputs/direct-target-matrices.npz",
+    "cell_table": "scripts/ring_attribution/results/ring-cell-attribution.csv",
+    "field_bank": "scripts/ring_attribution/results/ring-attribution-fields.npz",
+    "figure": "scripts/ring_attribution/results/retired-path-bank.png"
   },
   "production_vertex_authority": "The grid constructor supplies the authoritative pre-clip vertex array."
 }

@@ -1,4 +1,4 @@
-revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f base=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/ecq-one-vmapped-per-cell-clip-body/docs/figures/exact-clip-closed-form/measure_clip_body.py', '--suite', 'baseline', 'test_equilibrium_separatrix_clip.py']
+revision=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f base=abeccb9e4c29a94594ec3e2238f5cf5df8a7448f tree=. command=['/home/ITER/mcintos/Code/nova/.venv/bin/python', 'docs/figures/exact-clip-closed-form/measure_clip_body.py', '--suite', 'baseline', 'test_equilibrium_separatrix_clip.py']
 18:04:29 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
 ........................F                                                [100%]
 =================================== FAILURES ===================================

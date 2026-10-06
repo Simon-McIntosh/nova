@@ -17,6 +17,6 @@ The Sauter rerun returned `WindowReceipt` in `4` iterations with contraction `0.
 
 The zeros fraction remained exactly zero. The Sauter curves span `0` to `0.30852523791868824`. The maximum Nova-facade versus direct-TORAX separation is `0`.
 
-Figure: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/sauter-bootstrap-inspection/docs/figures/flux-function-forward-transport/bootstrap-model-comparison.svg`
-Profiles: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/sauter-bootstrap-inspection/scripts/bootstrap_inspection/profiles.tsv`
-Machine receipt: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/sauter-bootstrap-inspection/scripts/bootstrap_inspection/receipt.json`
+Figure: `docs/figures/flux-function-forward-transport/bootstrap-model-comparison.svg`
+Profiles: `scripts/bootstrap_inspection/profiles.tsv`
+Machine receipt: `scripts/bootstrap_inspection/receipt.json`

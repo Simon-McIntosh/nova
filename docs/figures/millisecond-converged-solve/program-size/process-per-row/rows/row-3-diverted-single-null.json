@@ -9,14 +9,14 @@
     "digest": 1
   },
   "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
-  "baseline_state_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
+  "baseline_state_receipt": "docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
   "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
   "captured_at": "2026-09-20T18:31:26.841703+00:00",
   "comparison": "terminal state recorded at the base revision against the head accelerated program",
   "execution_mode": null,
   "identity_row_count": 1,
   "measurement_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
-  "panel_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/panels",
+  "panel_directory": "docs/figures/millisecond-converged-solve/program-size/process-per-row/panels",
   "parent_process_id": null,
   "passed": false,
   "pending_rows": [],
@@ -90,7 +90,7 @@
       "candidate_arm_source": "head-revision solve",
       "candidate_revision": "2710b2ea1dcce2b5a217b91f5a5b9bbc25a956a0",
       "candidate_seconds": 472.4918174017221,
-      "candidate_state_array_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states/diverted-single-null_500.npy",
+      "candidate_state_array_path": "docs/figures/millisecond-converged-solve/program-size/process-per-row/states/diverted-single-null_500.npy",
       "candidate_state_array_values": 2226,
       "candidate_state_finite": true,
       "candidate_state_sha256_binary64": "c8f934d0dbed8a02eb69aedd2cc8a99213f31f76bceef08702cda9c058a88e6e",
@@ -114,5 +114,5 @@
     }
   ],
   "schema": "nova.solve-program-certificate-identity",
-  "state_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process/docs/figures/millisecond-converged-solve/program-size/process-per-row/states"
+  "state_directory": "docs/figures/millisecond-converged-solve/program-size/process-per-row/states"
 }

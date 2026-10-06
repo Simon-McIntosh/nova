@@ -1,6 +1,6 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
@@ -18,7 +18,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-ii1is2q1/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-ii1is2q1/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-ii1is2q1/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-ii1is2q1/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_harmonic_recurrence_identity REFERENCE_MODULE rangefunction=/tmp/biot-reference-_cjkudbj/rangefunction.py
 REFERENCE_MODULE completeelliptic=/tmp/biot-reference-_cjkudbj/completeelliptic.py
@@ -27,7 +27,7 @@ REFERENCE_MODULE gradedresidual=/tmp/biot-reference-_cjkudbj/gradedresidual.py
 REFERENCE_MODULE momentchannel=/tmp/biot-reference-_cjkudbj/momentchannel.py
 REFERENCE_MODULE polygonanalytic=/tmp/biot-reference-_cjkudbj/polygonanalytic.py
 REFERENCE_MODULE greens=/tmp/biot-reference-_cjkudbj/greens.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-compile-cost
+MEASUREMENT_CWD=.
 RECURRENCE_IDENTITY points=10000 maximum=0
 PASSED
 tests/biot/test_kernel_compile_cost.py::test_filament_point_jet_identity SKIPPED

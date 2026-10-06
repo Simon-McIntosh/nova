@@ -553,14 +553,14 @@
   "source": {
     "nova_diff_names": "nova/equilibrium/fixed_point.py",
     "revision": "777a582321a5e45cd7666ffc37d8e6e3dc7b060a",
-    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth"
+    "worktree": "."
   },
   "sources": {
     "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260901T211036140282-scr-remedy-krylov-depth/raw/remedy-krylov-h200.json",
     "raw_capture_sha256": "68c5d6e43cfcaa0ad87b09bc68fd94b298cb1220338f9e731040a80b1cfb61e2",
-    "root_cause": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth/docs/figures/solver-convergence-regression/root-cause.json",
+    "root_cause": "docs/figures/solver-convergence-regression/root-cause.json",
     "root_cause_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821",
-    "true_pin": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-remedy-krylov-depth/docs/figures/solver-convergence-regression/true-pin-reproduction.json",
+    "true_pin": "docs/figures/solver-convergence-regression/true-pin-reproduction.json",
     "true_pin_sha256": "8bc5bd9971c3ee18e88d13c00e0ed3ebfb984edb3523b488f5b1ba15fe2b1c78"
   },
   "tests": {

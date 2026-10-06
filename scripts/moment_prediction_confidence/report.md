@@ -39,7 +39,7 @@ Net current is available with exact structural confidence because the amplitude 
 
 ## Artifacts
 
-- Tree-stamped table: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/moment-prediction-confidence/scripts/moment_prediction_confidence/moment-prediction-confidence.tsv`
-- Machine-readable summary: `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/moment-prediction-confidence/scripts/moment_prediction_confidence/moment-prediction-confidence.json`
+- Tree-stamped table: `scripts/moment_prediction_confidence/moment-prediction-confidence.tsv`
+- Machine-readable summary: `scripts/moment_prediction_confidence/moment-prediction-confidence.json`
 - Figures: `docs/figures/moment-conditioned-basin-entry/reference-boundary-errors.png` and `docs/figures/moment-conditioned-basin-entry/boundary-sensitivity.png`
 - Source commit: `1583381cb1747ca9242af423b97e28cf9396af63`; source tree: `dc3c1a4b4642c875aaf6aa1a0da5b4df457332b6`.

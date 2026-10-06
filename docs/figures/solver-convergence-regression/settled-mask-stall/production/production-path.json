@@ -56,7 +56,7 @@
       "selection": "explicit_per_recipe",
       "version_key": "runtime-0745ecebea4cb264e054"
     },
-    "repair_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-production-path-damping/docs/figures/solver-convergence-regression/settled-mask-stall/repair/stall-repair.json",
+    "repair_receipt": "docs/figures/solver-convergence-regression/settled-mask-stall/repair/stall-repair.json",
     "repair_receipt_sha256": "4776fc852b3e72df11bb54a7bce3d2b49d956982dc69224fb61ddc4497cf69ec",
     "response_carrier": {
       "carrier": {
@@ -78,7 +78,7 @@
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-production-path-damping/benchmarks/mast_response_carrier_warm.py",
+          "benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",
@@ -92,8 +92,8 @@
     }
   },
   "figures": {
-    "production_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-production-path-damping/docs/figures/solver-convergence-regression/settled-mask-stall/production/production-path.png",
-    "whole_step_residual": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-production-path-damping/docs/figures/solver-convergence-regression/settled-mask-stall/production/whole-step-residual-21985-51.png"
+    "production_path": "docs/figures/solver-convergence-regression/settled-mask-stall/production/production-path.png",
+    "whole_step_residual": "docs/figures/solver-convergence-regression/settled-mask-stall/production/whole-step-residual-21985-51.png"
   },
   "measurement_contract": {
     "held_bank_replay_gmres_iterations": 12,

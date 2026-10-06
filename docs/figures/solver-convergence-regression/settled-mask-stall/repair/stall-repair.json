@@ -4,7 +4,7 @@
   "evidence_inputs": {
     "after_measurement": "docs/figures/solver-convergence-regression/settled-mask-stall/repair/after-measurement.json",
     "after_measurement_sha256": "ec3230853ba63082f19facb2d70bacc79f49562f6cd91672ab6636fa85a8c4d4",
-    "baseline_measurement": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-projected-conditioning-repair/docs/figures/solver-convergence-regression/settled-mask-stall/current-measurement.json",
+    "baseline_measurement": "docs/figures/solver-convergence-regression/settled-mask-stall/current-measurement.json",
     "baseline_measurement_sha256": "f5c127fc5a022631d090752ba54156765c67b5ba09e3b08b3fce616eb5666798",
     "fixed_point_source_sha256": "912e75268939e5912c3a51a97673304ac9383ef3a503bcbf9f8b458bfdc660e1",
     "operands": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260904T065818622161-nia-bank-regeneration-repaired-census-2/raw/current-operands.npz",
@@ -82,7 +82,7 @@
       "named_cache_only_check": {
         "command": [
           "/home/ITER/mcintos/Code/nova/.venv/bin/python3",
-          "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-projected-conditioning-repair/benchmarks/mast_response_carrier_warm.py",
+          "benchmarks/mast_response_carrier_warm.py",
           "check",
           "--carrier",
           "/work/projects/imas_gpu/sophelio/mast_frozen_six_response_carriers/1d2c4a2b2f448ab8f1ae981031bbaf85fe4ee87f8ed9606fe6847d0fc9f1e994.npz",

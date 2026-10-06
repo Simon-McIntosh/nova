@@ -355,7 +355,7 @@
       ]
     ]
   },
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest/docs/figures/solver-convergence-regression/remedy-presettlement/mast/remedy-presettlement.png",
+  "figure": "docs/figures/solver-convergence-regression/remedy-presettlement/mast/remedy-presettlement.png",
   "receipt": "presettlement incumbent-mask acceptance remedy",
   "scheduler": {
     "elapsed": "00:42:30",
@@ -368,12 +368,12 @@
   "source": {
     "nova_diff_names": "",
     "revision": "fff05974635f31994879d26627f6184a48be0bc5",
-    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest"
+    "worktree": "."
   },
   "sources": {
     "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260903T194804754130-scr-remedy-presettlement-mast-harvest/raw-presettlement-mast.json",
     "raw_capture_sha256": "ca5c56daf44f21ea3af1b9c4409a836e0bea8259f3ccd587498d3d9de93f0a18",
-    "root_cause": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/scr-remedy-presettlement-mast-harvest/docs/figures/solver-convergence-regression/root-cause.json",
+    "root_cause": "docs/figures/solver-convergence-regression/root-cause.json",
     "root_cause_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821"
   },
   "tests": {

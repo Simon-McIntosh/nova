@@ -1,7 +1,7 @@
 {
   "artifacts": {
-    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-jump-field-gate/docs/figures/hex-cell-single-grid/jump-field-advantage.png",
-    "receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-hexgrid/hdg-jump-field-gate/docs/figures/hex-cell-single-grid/jump-field-advantage.json"
+    "figure": "docs/figures/hex-cell-single-grid/jump-field-advantage.png",
+    "receipt": "docs/figures/hex-cell-single-grid/jump-field-advantage.json"
   },
   "falsifier_fired": false,
   "measurement": "boundary-band second-derivative advantage of a boundary-split fit over a matched-degrees-of-freedom global C2 fit",

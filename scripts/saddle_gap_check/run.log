@@ -10,5 +10,5 @@ throat-sector bias: -3.780776598 A (0.117305% of fan bias)
 saddle cluster: -89.806289810 A (2.632159%); remaining ring: -3322.080397463 A (97.367841%)
 saddle cell: 19; crossings: 4; chords: 1
 adaptive fan-cell closure: -2.374855587e+00 A
-results: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/results.json
-figure: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/saddle-gap.png
+results: scripts/saddle_gap_check/results.json
+figure: scripts/saddle_gap_check/saddle-gap.png

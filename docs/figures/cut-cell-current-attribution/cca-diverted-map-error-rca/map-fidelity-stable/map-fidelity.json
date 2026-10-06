@@ -1,10 +1,10 @@
 {
   "source_revision": "372c604914acda4cf25bfca797a1d95e6afae8ee",
-  "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-diverted-map-error-rca",
+  "worktree": ".",
   "command": [
     "benchmarks/plasma_cell_map_fidelity.py",
     "--output",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-diverted-map-error-rca/docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/map-fidelity-stable"
+    "docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca/map-fidelity-stable"
   ],
   "slurm_job_id": "1280601",
   "requested_rungs": [

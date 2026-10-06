@@ -133,7 +133,7 @@
       "termination_reason": "active_set_stagnated",
       "trip_count": 7
     },
-    "source": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-null-polish-attribution/docs/figures/solver-convergence-regression/root-cause.json",
+    "source": "docs/figures/solver-convergence-regression/root-cause.json",
     "source_sha256": "58363400d14c9d6be2df8c462ac0c3748b93c451ed78a1ac9f3d9ff4ab987821"
   },
   "revisions": {
@@ -283,7 +283,7 @@
       "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T034905309111-scr-null-polish-attribution/raw/before-null-polish.json",
       "raw_capture_sha256": "d74d7874da52ff6abd49e7c49618f7986c378ae5adfd01bbe6190afe7e926be2",
       "revision": "69fc5e3ea38cf7e550efee13a5c55dc9f14250d3",
-      "shadow_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-null-polish-before-shadow"
+      "shadow_root": "."
     },
     "main_head": {
       "allocation": {
@@ -543,7 +543,7 @@
       "raw_capture": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260902T034905309111-scr-null-polish-attribution/raw/main-head.json",
       "raw_capture_sha256": "505e4436259076ef71e93b3cbddff4102712d37c7056f10099f64f20303f601e",
       "revision": "4da60e9fc1f4af442942608c4c13c05a8017a183",
-      "shadow_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-northstar/scr-null-polish-main-shadow"
+      "shadow_root": "."
     }
   },
   "scheduler": {

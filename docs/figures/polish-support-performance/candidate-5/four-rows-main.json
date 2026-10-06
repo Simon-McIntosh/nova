@@ -89,7 +89,7 @@
       }
     }
   },
-  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate5-paired-remeasure/docs/figures/polish-support-performance/candidate-5/four-rows-main.png",
+  "figure": "docs/figures/polish-support-performance/candidate-5/four-rows-main.png",
   "measurement_contract": {
     "bank_pinned_gmres_iterations": 12,
     "conditioning_authority": "FixedPointResult whole-active-set aggregate checked against the per-step callback trace",

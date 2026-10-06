@@ -78,18 +78,18 @@ SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-300 stage
 SOLOVEV_STAGE_BEGIN case=strong-rotation-compact-static requested_cells=-300 stage=figure_render
 SOLOVEV_STAGE_END case=strong-rotation-compact-static requested_cells=-300 stage=figure_render elapsed_seconds=0.926680
 Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 381, in <module>
+  File "benchmarks/recovery_ladder_census.py", line 381, in <module>
     raise SystemExit(main())
                      ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 366, in main
+  File "benchmarks/recovery_ladder_census.py", line 366, in main
     payload = run(rows, Path(args.output), scratch)
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 184, in run
+  File "benchmarks/recovery_ladder_census.py", line 184, in run
     _merged(output, rows)
     ~~~~~~~^^^^^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 228, in _merged
+  File "benchmarks/recovery_ladder_census.py", line 228, in _merged
     "verdict": _verdict(receipts),
                ~~~~~~~~^^^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/fsri-recovery-ladder-execution-and-size-census/benchmarks/recovery_ladder_census.py", line 240, in _verdict
+  File "benchmarks/recovery_ladder_census.py", line 240, in _verdict
     converged = [row for row in rows if row["converged"]]
                                         ~~~^^^^^^^^^^^^^
 KeyError: 'converged'

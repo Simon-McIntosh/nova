@@ -22,37 +22,37 @@
   "python_route": {
     "compiled_map": [
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward.py",
+        "file": "nova/equilibrium/forward.py",
         "line": 649,
         "line_count": 14,
         "symbol": "ForwardProfile.flux_map"
       },
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "file": "nova/equilibrium/forward_operator.py",
         "line": 2652,
         "line_count": 20,
         "symbol": "ForwardFluxOperator.flux_map"
       },
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "file": "nova/equilibrium/forward_operator.py",
         "line": 2595,
         "line_count": 9,
         "symbol": "ForwardFluxOperator.internal"
       },
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "file": "nova/equilibrium/forward_operator.py",
         "line": 2375,
         "line_count": 11,
         "symbol": "ForwardFluxOperator.cell_current_moments"
       },
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "file": "nova/equilibrium/forward_operator.py",
         "line": 2281,
         "line_count": 12,
         "symbol": "ForwardFluxOperator._partitioned_current_moments"
       },
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "file": "nova/equilibrium/forward_operator.py",
         "line": 2046,
         "line_count": 23,
         "symbol": "ForwardFluxOperator.support_current_moments"
@@ -64,7 +64,7 @@
         "symbol": "InteriorCurrentMomentStencil.support_flux_moments"
       },
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/stencil_mesh.py",
+        "file": "nova/equilibrium/stencil_mesh.py",
         "line": 480,
         "line_count": 21,
         "symbol": "fixed_profile_current_moments"
@@ -76,7 +76,7 @@
         "symbol": "_direct_profile_current_moments"
       },
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/stencil_mesh.py",
+        "file": "nova/equilibrium/stencil_mesh.py",
         "line": 433,
         "line_count": 14,
         "symbol": "_quadratic_flux_design"
@@ -84,7 +84,7 @@
     ],
     "terminal_observation_only": [
       {
-        "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-review/cca-clip-quadrature-linear-in-cut-cells/nova/equilibrium/forward_operator.py",
+        "file": "nova/equilibrium/forward_operator.py",
         "line": 2307,
         "line_count": 67,
         "symbol": "ForwardFluxOperator._clipped_integral_measure"

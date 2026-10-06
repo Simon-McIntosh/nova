@@ -2,7 +2,7 @@
   "case": "weak-rotation-reactor-static",
   "requested_cells": 300,
   "realised_cells": 342,
-  "base_report": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-cut-cell-moment-stage-attribution/docs/figures/cut-cell-current-attribution/exact-support-floor/weak-rotation-reactor-static-cells-300.json",
+  "base_report": "docs/figures/cut-cell-current-attribution/exact-support-floor/weak-rotation-reactor-static-cells-300.json",
   "base_report_sha256": "179e2b93cb1675b26470df028290c4ef6dcd55082d5663c2b5594ccdd441551d",
   "simple_separatrix_cut": {
     "cells": [

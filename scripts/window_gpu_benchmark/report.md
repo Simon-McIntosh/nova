@@ -36,4 +36,4 @@ H200 current closure absolute/relative: `1.1641532182693481e-10` / `2.0883354249
 
 ## Solver and placement checks
 
-The equilibrium leg routes through `ForwardProfile.solve_portfolio` at `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/47247cc9-be75-4e83-a22e-ed27792dda52/h200-window-measurement/nova/equilibrium/forward.py:1123`. The run inspected `1903` CPU and `1903` H200 solve/state array observations and failed closed if any JAX array occupied the wrong backend.
+The equilibrium leg routes through `ForwardProfile.solve_portfolio` at `nova/equilibrium/forward.py:1123`. The run inspected `1903` CPU and `1903` H200 solve/state array observations and failed closed if any JAX array occupied the wrong backend.

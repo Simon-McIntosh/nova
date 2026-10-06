@@ -1,4 +1,4 @@
-revision=7b91c7290290d6a7e8dfd26955f8caedea84b931 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/test_order_repair_controls.py -vv -s --timeout=1400 --tb=short 
+revision=7b91c7290290d6a7e8dfd26955f8caedea84b931 tree=. command=/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/test_order_repair_controls.py -vv -s --timeout=1400 --tb=short 
 RAW_LOG=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-order-controls.log
 RAW_SHA256=ff4a2a3d537e13c0a43f5b77363c6de16981ab6d9b82f2b9049c1653a0252e85
 NOVA_LANE_START=2026-10-06T01:58:56+0200
@@ -7,9 +7,9 @@ RUNG=h200
 SLURM_JOB_ID=1281154
 SLURM_JOB_PARTITION=betelgeuse
 SOURCE_REVISION=7b91c7290290d6a7e8dfd26955f8caedea84b931
-REPOSITORY_ROOT=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+REPOSITORY_ROOT=.
 PYTHON=/home/ITER/mcintos/Code/nova/.venv/bin/python
-PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/scripts/h200_test_lane
+PYTHONPATH=.:scripts/h200_test_lane
 JAX_PLATFORMS=cuda,cpu
 TMPDIR=/tmp
 MODE=pytest

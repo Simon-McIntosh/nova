@@ -1,4 +1,4 @@
-revision=93895112d596e328a6d88b5d8f2070df3d732367 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=["/home/ITER/mcintos/Code/nova/.venv/bin/python", "-m", "pytest", "-p", "no:cacheprovider", "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py", "-vv", "-s", "--tb=short", "--timeout=1200"]
+revision=93895112d596e328a6d88b5d8f2070df3d732367 tree=. command=["/home/ITER/mcintos/Code/nova/.venv/bin/python", "-m", "pytest", "-p", "no:cacheprovider", "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py", "-vv", "-s", "--tb=short", "--timeout=1200"]
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
 rootdir: /home/ITER/mcintos
@@ -9,11 +9,11 @@ timeout method: signal
 timeout func_only: False
 collecting ... collected 2 items
 
-../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py::test_order_uses_current_read[limited] MEASUREMENT_MODULE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/equilibrium/topology.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py::test_order_uses_current_read[limited] MEASUREMENT_MODULE=nova/equilibrium/topology.py
+MEASUREMENT_CWD=.
 PASSED
-../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py::test_order_uses_current_read[diverted] MEASUREMENT_MODULE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read/nova/equilibrium/topology.py
-MEASUREMENT_CWD=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+../../../../../.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/current_read_probe.py::test_order_uses_current_read[diverted] MEASUREMENT_MODULE=nova/equilibrium/topology.py
+MEASUREMENT_CWD=.
 NORMAL_FORM_RADIUS {"radius_m": 0.054806712567833996, "maximum_normal_displacement_m": 1.0412382334788027e-06, "displacement_budget_m": 1.0412382422448233e-06, "outside_radius_m": 0.05535477969351234, "outside_displacement_m": 1.083929830982108e-06, "finest_pitch_m": 0.03173193918821776, "area_budget_regular_units": 8.143058319198677e-05, "budget_coefficient": 0.233718, "samples_per_ray": 257, "oracle_root_residual_per_radian": 1.6123645260196994e-16}
 PASSED
 

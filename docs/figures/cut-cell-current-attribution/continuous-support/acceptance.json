@@ -61,12 +61,12 @@
       "target": "tests/test_xpoint_cell_wedge_clip.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "baseline",
         "tests/test_xpoint_cell_wedge_clip.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_xpoint_cell_wedge_clip.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_xpoint_cell_wedge_clip.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 14
@@ -76,12 +76,12 @@
       "target": "tests/test_xpoint_cell_wedge_clip.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "after",
         "tests/test_xpoint_cell_wedge_clip.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_xpoint_cell_wedge_clip.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_xpoint_cell_wedge_clip.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 14
@@ -91,12 +91,12 @@
       "target": "tests/test_clipped_support_quadrature.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "baseline",
         "tests/test_clipped_support_quadrature.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_clipped_support_quadrature.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_clipped_support_quadrature.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 3
@@ -106,12 +106,12 @@
       "target": "tests/test_clipped_support_quadrature.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "after",
         "tests/test_clipped_support_quadrature.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_clipped_support_quadrature.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_clipped_support_quadrature.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 3
@@ -121,12 +121,12 @@
       "target": "tests/test_solovev_certificate_builder.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "baseline",
         "tests/test_solovev_certificate_builder.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_solovev_certificate_builder.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_solovev_certificate_builder.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 4
@@ -136,12 +136,12 @@
       "target": "tests/test_solovev_certificate_builder.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "after",
         "tests/test_solovev_certificate_builder.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_solovev_certificate_builder.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_solovev_certificate_builder.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 4
@@ -151,12 +151,12 @@
       "target": "tests/test_exact_clip_moments.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "baseline",
         "tests/test_exact_clip_moments.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_exact_clip_moments.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_exact_clip_moments.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 8
@@ -166,12 +166,12 @@
       "target": "tests/test_exact_clip_moments.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "after",
         "tests/test_exact_clip_moments.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_exact_clip_moments.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_exact_clip_moments.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 8
@@ -181,12 +181,12 @@
       "target": "tests/test_moment_path_separatrix_test.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "baseline",
         "tests/test_moment_path_separatrix_test.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_moment_path_separatrix_test.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_moment_path_separatrix_test.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 1
@@ -196,12 +196,12 @@
       "target": "tests/test_moment_path_separatrix_test.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "after",
         "tests/test_moment_path_separatrix_test.py"
       ],
       "exit_status": 0,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_moment_path_separatrix_test.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-after-test_moment_path_separatrix_test.log",
       "completed": true,
       "failure_ids": [],
       "passed_count": 1
@@ -211,12 +211,12 @@
       "target": "tests/test_exact_clip_memory.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "baseline",
         "tests/test_exact_clip_memory.py"
       ],
       "exit_status": null,
-      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_exact_clip_memory.log",
+      "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/paired-baseline-test_exact_clip_memory.log",
       "raw_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260921T151458383790-cca-continuous-confined-moments-and-tangent/records/paired-baseline-test_exact_clip_memory.log",
       "completed": false,
       "started": true,
@@ -226,7 +226,7 @@
         "elapsed": "00:59:26",
         "time_limit": "00:59:00",
         "scheduler_exit_code": "0:0",
-        "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/completion-allocation.log"
+        "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/completion-allocation.log"
       },
       "failure_count": null,
       "failure_ids": [],
@@ -240,7 +240,7 @@
       "target": "tests/test_exact_clip_memory.py",
       "command": [
         "/home/ITER/mcintos/Code/nova/.venv/bin/python",
-        "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
+        "docs/figures/cut-cell-current-attribution/continuous-support/test_gate.py",
         "after",
         "tests/test_exact_clip_memory.py"
       ],
@@ -255,7 +255,7 @@
         "elapsed": "00:59:26",
         "time_limit": "00:59:00",
         "scheduler_exit_code": "0:0",
-        "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-continuous-confined-moments-and-tangent/docs/figures/cut-cell-current-attribution/continuous-support/completion-allocation.log"
+        "log_path": "docs/figures/cut-cell-current-attribution/continuous-support/completion-allocation.log"
       },
       "failure_count": null,
       "failure_ids": [],

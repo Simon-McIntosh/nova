@@ -281,7 +281,7 @@
         1.2305167028328101
       ],
       "requested_class": 1,
-      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
+      "state_path": "docs/figures/forward-solve-api/coil-edit-nonconvergence/panel-states.npz",
       "stored_achieved_class": "diverted",
       "stored_converged": false,
       "stored_terminal_residual": 1.5055356487639855e-08
@@ -565,7 +565,7 @@
         1.224987587681386
       ],
       "requested_class": 1,
-      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/mast-centroid-capability/sweep-full-axis/panel-states.npz",
+      "state_path": "docs/figures/mast-centroid-capability/sweep-full-axis/panel-states.npz",
       "stored_achieved_class": "diverted",
       "stored_converged": true,
       "stored_terminal_residual": 1.785788854467814e-09
@@ -849,7 +849,7 @@
         1.2305167028328101
       ],
       "requested_class": 1,
-      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/mast-centroid-capability/panel-states.npz",
+      "state_path": "docs/figures/mast-centroid-capability/panel-states.npz",
       "stored_achieved_class": "diverted",
       "stored_converged": false,
       "stored_terminal_residual": 0.0030015738894111892
@@ -1133,14 +1133,14 @@
         1.224987587681386
       ],
       "requested_class": 1,
-      "state_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/docs/figures/mast-centroid-capability/sweep-full-axis/panel-states.npz",
+      "state_path": "docs/figures/mast-centroid-capability/sweep-full-axis/panel-states.npz",
       "stored_achieved_class": "diverted",
       "stored_converged": true,
       "stored_terminal_residual": 1.785788854467814e-09
     }
   ],
   "schema": "nova.two-grid-frame",
-  "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame",
+  "tree": ".",
   "verdict": "Corroborates the single-ring mechanism rather than a grid effect: one stored reference flux map read at 33x33 and at 65x65 admits the saddle nearest the reference X-point on both lattices, at 0.25 and 0.12 of a cell pitch, so under the adopted own-node census the resolution does not decide which saddle is admitted; the stored pair this frame's own figure draws is therefore a solver pair, not a resolution pair: the 65x65 terminal is reproduced to its own pre-adoption x-point exactly while the 33x33 terminal lands 0.64 of a cell pitch away in the same lower basin, at flux -0.0844 against -0.1230.",
   "version": 1
 }

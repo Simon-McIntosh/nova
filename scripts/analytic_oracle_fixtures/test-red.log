@@ -3,7 +3,7 @@ warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the p
 
 ==================================== ERRORS ====================================
 __________ ERROR collecting tests/test_equilibrium_analytic_oracle.py __________
-ImportError while importing test module '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-oracle-fixtures/tests/test_equilibrium_analytic_oracle.py'.
+ImportError while importing test module 'tests/test_equilibrium_analytic_oracle.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ../../../../../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/importlib/__init__.py:88: in import_module
@@ -13,7 +13,7 @@ tests/test_equilibrium_analytic_oracle.py:7: in <module>
     from scripts.analytic_oracle_fixtures.measure import (
 E   ModuleNotFoundError: No module named 'scripts.analytic_oracle_fixtures.measure'
 __________ ERROR collecting tests/test_equilibrium_analytic_oracle.py __________
-ImportError while importing test module '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-oracle-fixtures/tests/test_equilibrium_analytic_oracle.py'.
+ImportError while importing test module 'tests/test_equilibrium_analytic_oracle.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ../../../../../.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/importlib/__init__.py:88: in import_module

@@ -3,10 +3,10 @@ warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the p
 INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
 throat-sector adaptive check complete
 Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 814, in <module>
+  File "scripts/saddle_gap_check/measure_saddle_gap.py", line 814, in <module>
     main()
     ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 468, in main
+  File "scripts/saddle_gap_check/measure_saddle_gap.py", line 468, in main
     adaptive_sector, adaptive_radial_error, adaptive_history = adaptive_sector_currents(
                                                                ~~~~~~~~~~~~~~~~~~~~~~~~^
         case,
@@ -16,6 +16,6 @@ Traceback (most recent call last):
         ^^^^^^^^^^^^^^^^
     )
     ^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 289, in adaptive_sector_currents
+  File "scripts/saddle_gap_check/measure_saddle_gap.py", line 289, in adaptive_sector_currents
     raise AssertionError("adaptive radial panel refinement did not converge")
 AssertionError: adaptive radial panel refinement did not converge

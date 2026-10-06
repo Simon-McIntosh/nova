@@ -32,7 +32,7 @@
     "policy": "reuse a complete three-sample production timing from the same arm and revision when it was measured on one H200 in betelgeuse under the gpu_0003_grpA reservation; component probes run in the resume job",
     "resume_job_id": "1262723",
     "source_job_id": "1262710",
-    "source_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-relaunch/nia-candidate2-trip-attribution-3/docs/figures/polish-support-performance/candidate-2/profile-candidate.json",
+    "source_path": "docs/figures/polish-support-performance/candidate-2/profile-candidate.json",
     "source_sha256": "7ec0c74f8c335de82e9c94f46aa77127462b9b25bc6a61dc0e0f23ac5af9ccfe",
     "valid": true
   },

@@ -162,7 +162,7 @@
     "policy_digest": "b5f9ef456f665c593a40010b9756b16fb36abd4ebbd1fea4d83a3d628c77bc7d"
   },
   "schema": "boundary-wall-proximity",
-  "session_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-boundary-routing/docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-explicit-gate",
+  "session_root": "docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-explicit-gate",
   "shots": [
     {
       "dropped_slices": {
@@ -172,10 +172,10 @@
         "semantically_unconverged": 4,
         "unwritten": 11
       },
-      "manifest_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-boundary-routing/docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-explicit-gate/27079.manifest.json",
+      "manifest_path": "docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-explicit-gate/27079.manifest.json",
       "manifest_slice_count": 27,
       "reclassified_as_free_count": 0,
-      "session_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-labeller/pfs-boundary-routing/docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-explicit-gate/27079.nc",
+      "session_path": "docs/figures/playable-forward-solve/boundary-routing/relabelled-27079-explicit-gate/27079.nc",
       "shot_id": 27079,
       "slices": [
         {

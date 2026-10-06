@@ -1,8 +1,8 @@
 {
   "inputs": {
-    "fixture": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-prediction-gate/scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
-    "localization": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-prediction-gate/scripts/ring_quadrature/inputs/source-shift-localization.npz",
-    "quadrants": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-prediction-gate/scripts/ring_quadrature/inputs/source-coupling-signed-errors.npz"
+    "fixture": "scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
+    "localization": "scripts/ring_quadrature/inputs/source-shift-localization.npz",
+    "quadrants": "scripts/ring_quadrature/inputs/source-coupling-signed-errors.npz"
   },
   "controls": {
     "pre_repair_argmax_shift_wb": 10.935349448551932,

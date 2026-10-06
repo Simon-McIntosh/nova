@@ -1,5 +1,5 @@
 revision: 5666c8bcc8afc1483a7a7b8fca4ef446a2529b1f
-tree: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree
+tree: .
 command: CONTOUR_TREE_FIGURE_DROP_NODE=0 PYTHONPATH=$PWD JAX_PLATFORMS=cpu python -m pytest -p no:cacheprovider tests/test_contour_tree_explanatory_figure.py -q
 F.                                                                       [100%]
 =================================== FAILURES ===================================

@@ -4,7 +4,7 @@ Node `replan-thin-interfaces`, plan section `nova:nova-portfolio-replan` §2.
 Scope: find where nova reimplements, or couples tightly to, shared machinery, and name
 the refactor that reduces each coupling to a thin interface, with a one-line done-when.
 
-**Tree measured:** worktree `.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/replan-thin-interfaces`
+**Tree measured:** worktree `.`
 at `a71934910d2a0835dd9f6ab35576eef5c2f44754` (2026-10-01). Read-only: no source edits,
 no GPU, no SLURM jobs. Every count below is the stated bounded grep, run from the worktree
 root over the named subtrees listed in the command — no whole-tree walk. Sizes are the

@@ -1,9 +1,9 @@
-revision=598447933a408315153a7c40c7019502d9fcb5c6 tree=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read command=JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_traced_read_limited_quadratic tests/equilibrium/test_topology_read.py::test_closed_form_carrier_read[diverted] -vv --timeout 180
+revision=598447933a408315153a7c40c7019502d9fcb5c6 tree=. command=JAX_PLATFORMS=cpu PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/equilibrium/test_topology_read.py::test_traced_read_limited_quadratic tests/equilibrium/test_topology_read.py::test_closed_form_carrier_read[diverted] -vv --timeout 180
 SOURCE_STATE=committed read; reproduced single-cell triangulation and inactive-representation capacity failures
 RAW_SHA256=ef4ae24293e249d8ce6714c7682d637095e7134b14d8b5b1b25425e4ba54a68a RAW_PATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/tree-failure-reproduction.log.raw
 ============================= test session starts ==============================
 platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0 -- /home/ITER/mcintos/Code/nova/.venv/bin/python
-rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-topology-read
+rootdir: .
 configfile: pyproject.toml
 plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, timeout-2.4.0, typeguard-2.13.3, jaxtyping-0.3.11, xdist-3.8.0, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function

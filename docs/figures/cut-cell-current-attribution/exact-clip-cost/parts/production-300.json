@@ -181,7 +181,7 @@
   },
   "source": {
     "benchmark_revision": "220f5f79990585c3247bf87c63437ff4fb1918a1",
-    "benchmark_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-handoff-20260915/cca-exact-clip-warm-cost-and-workspace",
+    "benchmark_root": ".",
     "cell_banked_scan_present": true,
     "implicit_root_derivative_present": true,
     "production_revision": "f21894624af24d7a57a994fafb64d9c837018328",

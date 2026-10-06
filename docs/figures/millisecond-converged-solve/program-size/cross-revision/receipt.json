@@ -6,13 +6,13 @@
     "platform": "cpu"
   },
   "baseline_revision": "4e82bafb3abbd972096f84f306dfc8b28577e2fe",
-  "baseline_state_receipt": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-certificate-across-two-revisions/docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
+  "baseline_state_receipt": "docs/figures/millisecond-converged-solve/program-size/semantic/receipt.json",
   "candidate_revision": "42e6ade05335ec1b952ca8ed543717c327e17cd8",
   "captured_at": "2026-09-19T23:15:11.324655+00:00",
   "comparison": "terminal state recorded at the base revision against the head accelerated program",
   "identity_row_count": 4,
   "measurement_revision": "42e6ade05335ec1b952ca8ed543717c327e17cd8",
-  "panel_directory": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/msc-certificate-across-two-revisions/docs/figures/millisecond-converged-solve/program-size/cross-revision/panels",
+  "panel_directory": "docs/figures/millisecond-converged-solve/program-size/cross-revision/panels",
   "passed": null,
   "pending_rows": [
     [

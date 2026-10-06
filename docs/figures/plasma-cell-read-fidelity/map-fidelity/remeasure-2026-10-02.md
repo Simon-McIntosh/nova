@@ -1,6 +1,6 @@
 # Map-fidelity re-measure at the analytic Solov'ev state
 
-Revision `fa8af260e8adb154a7df4191d0c5308e6b675911` in worktree `/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure`; one H200 allocation, job 1279817 (betelgeuse, reservation gpu_0003_grpA, 1x H200). Every certificate rung of `diverted-single-null` and `weak-rotation-reactor-static` is evaluated in both `exact` and `chord` clip modes. Pass bound: sup relative and RMS relative both below 1e-2. Receipts and per-row state archives are beside this file.
+Revision `fa8af260e8adb154a7df4191d0c5308e6b675911` in worktree `.`; one H200 allocation, job 1279817 (betelgeuse, reservation gpu_0003_grpA, 1x H200). Every certificate rung of `diverted-single-null` and `weak-rotation-reactor-static` is evaluated in both `exact` and `chord` clip modes. Pass bound: sup relative and RMS relative both below 1e-2. Receipts and per-row state archives are beside this file.
 
 ## Rows
 

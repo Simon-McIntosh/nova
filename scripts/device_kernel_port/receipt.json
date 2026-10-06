@@ -85196,7 +85196,7 @@
     "measured_uniform_g0": {
       "allclose_atol": 0.0,
       "allclose_rtol": 2e-11,
-      "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/866e4d84-6f7c-4a80-9e2b-50068f8842c1/conditioned-sliver-rule/scripts/device_kernel_port/work/coarse-numpy-reference.npy",
+      "artifact": "scripts/device_kernel_port/work/coarse-numpy-reference.npy",
       "byte_identical_fraction": 1.0,
       "hostname": "98dci4-clu-3143.iter.org",
       "matrix_sha256": "e2b9fcd211dca21a241af6670c72d5e5e0ea9d429f27fc4a1ef8bee8ddc9d2be",
@@ -85260,7 +85260,7 @@
   },
   "source": {
     "commit": "3e32f08cf971c826f7dc8faf3952833ab389e0f8",
-    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/866e4d84-6f7c-4a80-9e2b-50068f8842c1/conditioned-sliver-rule"
+    "worktree": "."
   },
   "verdict": {
     "full_port_authorised_by_receipt": false,

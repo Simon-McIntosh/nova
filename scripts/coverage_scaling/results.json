@@ -598,11 +598,11 @@
     }
   },
   "inputs": {
-    "coarse_fixture": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/support-coverage-scaling/scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
+    "coarse_fixture": "scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
     "exact_total_current_authority": "binary64 sum of source-shift-localization analytic_m0 over the banked 566 support cells",
     "fine_state_bank": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/flux-state-bank/fine_homotopy_t5875.npz",
-    "localization_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/support-coverage-scaling/scripts/ring_quadrature/inputs/source-shift-localization.npz",
-    "reference_module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/support-coverage-scaling/tests/test_equilibrium_forward_reference.py",
+    "localization_bank": "scripts/ring_quadrature/inputs/source-shift-localization.npz",
+    "reference_module": "tests/test_equilibrium_forward_reference.py",
     "source_axis_flux_wb": -86.01817570002173,
     "source_boundary_flux_wb": -4.7117712394715845
   },

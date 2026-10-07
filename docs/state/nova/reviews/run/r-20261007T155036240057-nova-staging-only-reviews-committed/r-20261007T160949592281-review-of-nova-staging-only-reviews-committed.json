@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "c13b90edeee0ce1e679e897c2c36380f2dee8c52",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-07T16:32:30.213Z",
+  "dispatched_at": "2026-10-07T16:10:07Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155036240057-nova-staging-only-reviews-committed/manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "follow-on: the landing line reports 479 new files (139 plan, 342 run; 4,889,411 bytes) but those are the whole 481-file tree: two run records pre-existed at the base, so the additions are 139 plan and 340 run totalling 4,872,174 bytes, an overstatement of 2 files and 17,237 bytes"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155036240057-nova-staging-only-reviews-committed/manifest.md",
+      "line": "7",
+      "severity": "follow-on",
+      "text": "follow-on: the commit subject reads import nova host plan reviews while the commit also adds 340 run-review records, so the subject names a narrower change than the commit carries"
+    }
+  ],
+  "head_log_revision": "0c13001d7ef9419459fa39fb4ff189715c7b0a07",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "479 added files (139 plan, 340 run) under docs/state/nova/reviews, no modifications and no deletions, all parsing as valid JSON.",
+    "done_when": "the named points hold on re-run \u2014 430 records and 49 delivered reports imported, 2 already present, 0 refused, 0 quarantined, 0 deleted, and a second dry run reports 0 delivered reports without a record and 0 refused.",
+    "goal": "the change does what the brief names, committing the records the staging store left behind into the project's committed review tree.",
+    "manifest": "the manifest records the census counts, the write counts, the commit sha and the log paths; its landing line's file and byte figures describe the tree rather than the additions.",
+    "write_paths": "only docs/state/nova/reviews is committed, matching the node's declared path, by explicit git add."
+  },
+  "justifications": {
+    "durability": "the work is committed with a conventional subject and a body on the run's worktree branch, the worktree is clean, and a second import pass is idempotent.",
+    "evidence": "every count in the census and write logs is checkable and agrees with the tree, but the manifest's landing line labels the whole 481-file tree as the 479 additions, overstating both the file split and the byte total.",
+    "fit": "the node used the provided import_host_reviews.py rather than a bespoke path, honouring the one-commit-per-project shape of the plan node.",
+    "goal_fidelity": "the node committed nova's host staging reviews into docs/state/nova/reviews exactly as the import node requires, 430 recognised records and 49 delivered reports, with nothing deleted or quarantined.",
+    "reuse": "the import is delegated to the existing script and the shared committed-review writer, so no second mechanism for staging a record was introduced.",
+    "scope_discipline": "the commit adds only 479 files under docs/state/nova/reviews, all additions and no deletions, and the only other writes are the fenced report sidecars the import script clears."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 20\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 19\nSCORE fit: 20\nSCORE reuse: 20\nJUSTIFICATION goal_fidelity: the node committed nova's host staging reviews into docs/state/nova/reviews exactly as the import node requires, 430 recognised records and 49 delivered reports, with nothing deleted or quarantined.\nJUSTIFICATION evidence: every count in the census and write logs is checkable and agrees with the tree, but the manifest's landing line labels the whole 481-file tree as the 479 additions, overstating both the file split and the byte total.\nJUSTIFICATION scope_discipline: the commit adds only 479 files under docs/state/nova/reviews, all additions and no deletions, and the only other writes are the fenced report sidecars the import script clears.\nJUSTIFICATION durability: the work is committed with a conventional subject and a body on the run's worktree branch, the worktree is clean, and a second import pass is idempotent.\nJUSTIFICATION fit: the node used the provided import_host_reviews.py rather than a bespoke path, honouring the one-commit-per-project shape of the plan node.\nJUSTIFICATION reuse: the import is delegated to the existing script and the shared committed-review writer, so no second mechanism for staging a record was introduced.\nVERDICT goal: the change does what the brief names, committing the records the staging store left behind into the project's committed review tree.\nVERDICT done_when: the named points hold on re-run \u2014 430 records and 49 delivered reports imported, 2 already present, 0 refused, 0 quarantined, 0 deleted, and a second dry run reports 0 delivered reports without a record and 0 refused.\nVERDICT write_paths: only docs/state/nova/reviews is committed, matching the node's declared path, by explicit git add.\nVERDICT manifest: the manifest records the census counts, the write counts, the commit sha and the log paths; its landing line's file and byte figures describe the tree rather than the additions.\nVERDICT diff: 479 added files (139 plan, 340 run) under docs/state/nova/reviews, no modifications and no deletions, all parsing as valid JSON.\nCALL_SITES: none\nreviewed_base_sha: c13b90edeee0ce1e679e897c2c36380f2dee8c52\nreviewed_head_sha: 0c13001d7ef9419459fa39fb4ff189715c7b0a07\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155036240057-nova-staging-only-reviews-committed/manifest.md:10 follow-on: the landing line reports 479 new files (139 plan, 342 run; 4,889,411 bytes) but those are the whole 481-file tree: two run records pre-existed at the base, so the additions are 139 plan and 340 run totalling 4,872,174 bytes, an overstatement of 2 files and 17,237 bytes\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261007T155036240057-nova-staging-only-reviews-committed/manifest.md:7 follow-on: the commit subject reads import nova host plan reviews while the commit also adds 340 run-review records, so the subject names a narrower change than the commit carries\n",
+  "review_run_id": "r-20261007T160949592281-review-of-nova-staging-only-reviews-committed",
+  "reviewed_base_sha": "c13b90edeee0ce1e679e897c2c36380f2dee8c52",
+  "reviewed_head_sha": "0c13001d7ef9419459fa39fb4ff189715c7b0a07",
+  "reviewed_run_id": "r-20261007T155036240057-nova-staging-only-reviews-committed",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T16:31:40.286126+00:00",
+  "total": 116
+}

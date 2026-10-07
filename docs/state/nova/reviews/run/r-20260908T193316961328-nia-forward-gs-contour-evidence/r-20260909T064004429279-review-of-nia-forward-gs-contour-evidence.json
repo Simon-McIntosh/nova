@@ -1,0 +1,50 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-09T06:40:04.429279+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py",
+      "line": "26",
+      "text": "the committed renderer hardcodes the absolute path to another worktree's renderer (nia-poloidal-mechanism-evidence/.../render_mechanism_evidence.py) and loads it via importlib, so the figures cannot be regenerated from a clean checkout and the path breaks when that transient worktree is pruned."
+    },
+    {
+      "file": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py",
+      "line": "608",
+      "text": "the clip figures draw topology.axis, the solved terminal axis of a non-converged state (terminal residual 8.9469e-2 at 342), as the axis triangle, and neither the figure captions nor the reading section of docs/evidence/forward-gs-contour-evidence.html state that this is the solved rather than the analytic axis \u2014 on such a state the marker can sit on or across the red analytic separatrix, which is the most plausible mechanism for the lead review's \"boundary passes through the axis\" reading."
+    },
+    {
+      "file": "docs/evidence/forward-gs-contour-evidence.html",
+      "line": "94",
+      "text": "the clip panels and receipts are pinned to the unmerged revision 7cc2e06f with the regeneration obligation stated only in the document text, so the committed figures can silently diverge from Nova main if that hold lands in a different form and the pinned commit is not regenerated in the same session."
+    }
+  ],
+  "justifications": {
+    "durability": "no test in tests/ references the document, the renderer, or the committed receipts, and the audit-doc gate is not wired into the test suite, so nothing fails when this evidence regresses.",
+    "evidence": "the gate asserts what the done-when demands (docs/evidence/forward-gs-contour-evidence.html carrying reckon-type=evidence and plan-evidence-for=null-identification-authority with figures under docs/figures/null-identification-authority/gs-contour-evidence/, lines 7-8), its results are recorded in the manifest and contour-evidence-receipt.json, and an independent re-run of reckon audit-doc on the landed HTML exits 0.",
+    "fit": "the change reuses the established painters (nova/media/poloidal.py draw_flux_contours, draw_nulls, draw_plasma_cells, draw_boundary, draw_wall) and the existing mechanism-evidence renderer rather than authoring new machinery, uses project-absolute src consistent with the served convention, and its filenames carry no plan label or banned suffix.",
+    "goal_fidelity": "docs/evidence/forward-gs-contour-evidence.html delivers every element the node goal names \u2014 poloidal line-contour maps, critical points with wall containment, boundary, wall geometry and clipped hex cells \u2014 across certificate rungs, boundary-cut cells and a cold start, with no placeholder section.",
+    "scope_discipline": "git diff f2cf8411^..97700025 touches exactly 22 paths, every one under the two declared write paths docs/evidence/forward-gs-contour-evidence.html and docs/figures/null-identification-authority/gs-contour-evidence/, with no source or test file modified."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/forward-gs-contour-evidence.html delivers every element the node goal names \u2014 poloidal line-contour maps, critical points with wall containment, boundary, wall geometry and clipped hex cells \u2014 across certificate rungs, boundary-cut cells and a cold start, with no placeholder section.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate asserts what the done-when demands (docs/evidence/forward-gs-contour-evidence.html carrying reckon-type=evidence and plan-evidence-for=null-identification-authority with figures under docs/figures/null-identification-authority/gs-contour-evidence/, lines 7-8), its results are recorded in the manifest and contour-evidence-receipt.json, and an independent re-run of reckon audit-doc on the landed HTML exits 0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f2cf8411^..97700025 touches exactly 22 paths, every one under the two declared write paths docs/evidence/forward-gs-contour-evidence.html and docs/figures/null-identification-authority/gs-contour-evidence/, with no source or test file modified.\nSCORE durability: 5\nJUSTIFICATION durability: no test in tests/ references the document, the renderer, or the committed receipts, and the audit-doc gate is not wired into the test suite, so nothing fails when this evidence regresses.\nSCORE fit: 16\nJUSTIFICATION fit: the change reuses the established painters (nova/media/poloidal.py draw_flux_contours, draw_nulls, draw_plasma_cells, draw_boundary, draw_wall) and the existing mechanism-evidence renderer rather than authoring new machinery, uses project-absolute src consistent with the served convention, and its filenames carry no plan label or banned suffix.\nFINDING docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py:26 the committed renderer hardcodes the absolute path to another worktree's renderer (nia-poloidal-mechanism-evidence/.../render_mechanism_evidence.py) and loads it via importlib, so the figures cannot be regenerated from a clean checkout and the path breaks when that transient worktree is pruned.\nFINDING docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:608 the clip figures draw topology.axis, the solved terminal axis of a non-converged state (terminal residual 8.9469e-2 at 342), as the axis triangle, and neither the figure captions nor the reading section of docs/evidence/forward-gs-contour-evidence.html state that this is the solved rather than the analytic axis \u2014 on such a state the marker can sit on or across the red analytic separatrix, which is the most plausible mechanism for the lead review's \"boundary passes through the axis\" reading.\nFINDING docs/evidence/forward-gs-contour-evidence.html:94 the clip panels and receipts are pinned to the unmerged revision 7cc2e06f with the regeneration obligation stated only in the document text, so the committed figures can silently diverge from Nova main if that hold lands in a different form and the pinned commit is not regenerated in the same session.\n",
+  "review_run_id": "r-20260909T064004429279-review-of-nia-forward-gs-contour-evidence",
+  "reviewed_run_id": "r-20260908T193316961328-nia-forward-gs-contour-evidence",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "xhigh",
+    "model": "deepseek-v4-flash"
+  },
+  "reviewer_run_id": "r-20260909T064004429279-review-of-nia-forward-gs-contour-evidence",
+  "scores": {
+    "durability": 5,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-09T07:31:43.512289+00:00",
+  "total": 76
+}

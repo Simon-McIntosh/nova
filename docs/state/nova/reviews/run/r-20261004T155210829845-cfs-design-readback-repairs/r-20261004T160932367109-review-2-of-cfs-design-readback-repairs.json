@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest records empty baseline_suite and after_suite, so no base or head gate log exists to derive an added-failure count from; this is not a measured zero",
+  "blocking_finding_count": 2,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-04T16:15:03.136Z",
+  "dispatched_at": "2026-10-04T16:09:49Z",
+  "findings": [
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "206",
+      "severity": "blocking",
+      "text": "blocking: the acceptance test list contradicts the live plan for the five DIII-D rows; the plan's \u00a76 (since 0f6da4594, ancestor of the reviewed base f6827158) sets their clause set as global residual and every scaled row at or below 1e-6 with the value reached recorded, axis and X-point within one pitch of the EFIT reconstruction's nulls, and no map-fidelity clause, whereas lines 198-206 keep the global 1e-12 clause as the joint target, state that \"the plan does not define an analytic-map/null comparator\", require tests to report \"oracle not specified\" and forbid substituting EFIT, and no test id compares nulls with EFIT; an implementation built from this list would fail the five rows the plan passes and never run the EFIT-null clause the plan requires. Repair: restate the DIII-D clause set from the plan, add an EFIT-null position test id, and rebind line 23 to the current plan revision."
+    },
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "79",
+      "severity": "blocking",
+      "text": "blocking: the per-resolution membership and moment caps (5e-7 symmetric difference per cell area, 2e-6 normalised current and first moment, identical from 132 to 2616 cells) are unattainable by every field representation the plan offers, because the analytic oracle carries the non-polynomial x^2 ln x particular term (nova/equilibrium/analytic_single_null.py:224) and the read reconstructs it from a discrete carrier with a local fit (the ring fit in nova/equilibrium/stencil_mesh.py is a six-coefficient quadratic); a probe of that fit on a Solov'ev flux gives boundary displacement per pitch of 2.7e-3 median at h/R0 0.13, falling as h^2 to 1.3e-4 at h/R0 0.028, three to four orders above 5e-7 at every rung (fit-probe.log in the review run). The caps borrow a clip-quadrature precedent for an error the document says includes field reconstruction (line 88), and equal caps across a twentyfold change in cell count ignore convergence order. Repair: derive resolution-dependent caps from a measured convergence study of the chosen representation on both analytic states, or separate a clip-only cap at the analytic field from a reconstruction cap that scales with pitch."
+    },
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "100",
+      "severity": "follow-on",
+      "text": "follow-on: the compensating unknowns a are Newton variables in F(psi, a) but gs.apply(psi, operands) exposes only psi as its differentiated argument, with a entering through external flux inside operands (line 96); the signature should name how a is differentiated so the augmented JVP is unambiguous."
+    },
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "109",
+      "severity": "follow-on",
+      "text": "follow-on: the private-flux row quotes the 550-cell analytic-membership sup 0.0153 but not its X-point offset 16.9 mm, which is larger than the 132-cell 5.9 mm and bears on the claim that membership alone is necessary but not sufficient."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "git diff ce1deba42 HEAD on the document is empty, so HEAD a368e145a serves the reviewed text; the repair diff (10 lines) is sound, and the blocking defects lie in text it did not touch (lines 79-88 and 198-206).",
+    "done_when": "the reviewed node's gate is reckon audit-doc (0 errors, recorded); \u00a71's done-when additionally requires this re-review to list no blocking finding anywhere in the document, and it lists two, so \u00a71 is not met at ce1deba42.",
+    "goal": "read the whole of docs/research/converged-forward-solve-design.html at ce1deba42 as the design re-review \u00a71 requires, judging interface correctness, oracle independence, the three defect mechanisms, the per-resolution budgets and the acceptance test list; the run's own goal (one reading for the five readback sentences) is met, but the document as a whole carries two blocking defects.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T155210829845-cfs-design-readback-repairs/manifest.md; status complete, change ce1deba42, audit-doc EXIT=0; baseline_suite and after_suite are empty, so no added-failure count can be derived.",
+    "write_paths": "the reviewed run declared the design document, a landing fragment and a figures directory; its single change ce1deba42 touches only docs/research/converged-forward-solve-design.html."
+  },
+  "justifications": {
+    "durability": "no executable guard ties the document to the plan's acceptance clauses, which is how the DIII-D rows drifted out of agreement with plan revision 0f6da4594 without any check firing.",
+    "evidence": "all 12 local evidence anchors resolve and every quoted mechanism number (0.18057, 0.0712, 115.1/5.9 mm, 0.0153 at 550, 2.8e-16, 1.59545e-15, 0.03741195763932729) is present in its cited record, and the source markers frozen_map, selected_acceptance_map and _contained_local_roots exist at 6598321; the membership/moment caps carry no derivation or measurement, only clip-primitive precedents the document itself says are not analytic-state accuracy.",
+    "fit": "the document follows the research-doc convention, pinned source links and project-absolute anchors, but line 23 still binds acceptance to \"live plan version 2 read ... at 12:51 UTC\", which predates the plan's DIII-D clause set.",
+    "goal_fidelity": "the four signatures, invariants and inventory match the plan, but the DIII-D acceptance rows (lines 198-206) contradict the plan's \u00a76 clause set present since 0f6da4594, an ancestor of the reviewed base, and the per-resolution caps (lines 79-88) cannot be met by any candidate field representation, so \u00a72 and \u00a73 would be undeliverable as specified.",
+    "scope_discipline": "the reviewed change touches only the declared design document and adds nothing beyond its five clarifications."
+  },
+  "node": "review-2-of-cfs-design-readback-repairs",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: f682715872108f8e5f019b32014a59a2d507cde8\nreviewed_head_sha: ce1deba42c38934600cc9c5129851c9e23db309f\nVERDICT goal: read the whole of docs/research/converged-forward-solve-design.html at ce1deba42 as the design re-review \u00a71 requires, judging interface correctness, oracle independence, the three defect mechanisms, the per-resolution budgets and the acceptance test list; the run's own goal (one reading for the five readback sentences) is met, but the document as a whole carries two blocking defects.\nVERDICT done_when: the reviewed node's gate is reckon audit-doc (0 errors, recorded); \u00a71's done-when additionally requires this re-review to list no blocking finding anywhere in the document, and it lists two, so \u00a71 is not met at ce1deba42.\nVERDICT write_paths: the reviewed run declared the design document, a landing fragment and a figures directory; its single change ce1deba42 touches only docs/research/converged-forward-solve-design.html.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T155210829845-cfs-design-readback-repairs/manifest.md; status complete, change ce1deba42, audit-doc EXIT=0; baseline_suite and after_suite are empty, so no added-failure count can be derived.\nVERDICT diff: git diff ce1deba42 HEAD on the document is empty, so HEAD a368e145a serves the reviewed text; the repair diff (10 lines) is sound, and the blocking defects lie in text it did not touch (lines 79-88 and 198-206).\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: the four signatures, invariants and inventory match the plan, but the DIII-D acceptance rows (lines 198-206) contradict the plan's \u00a76 clause set present since 0f6da4594, an ancestor of the reviewed base, and the per-resolution caps (lines 79-88) cannot be met by any candidate field representation, so \u00a72 and \u00a73 would be undeliverable as specified.\nSCORE evidence: 14\nJUSTIFICATION evidence: all 12 local evidence anchors resolve and every quoted mechanism number (0.18057, 0.0712, 115.1/5.9 mm, 0.0153 at 550, 2.8e-16, 1.59545e-15, 0.03741195763932729) is present in its cited record, and the source markers frozen_map, selected_acceptance_map and _contained_local_roots exist at 6598321; the membership/moment caps carry no derivation or measurement, only clip-primitive precedents the document itself says are not analytic-state accuracy.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the reviewed change touches only the declared design document and adds nothing beyond its five clarifications.\nSCORE durability: 8\nJUSTIFICATION durability: no executable guard ties the document to the plan's acceptance clauses, which is how the DIII-D rows drifted out of agreement with plan revision 0f6da4594 without any check firing.\nSCORE fit: 17\nJUSTIFICATION fit: the document follows the research-doc convention, pinned source links and project-absolute anchors, but line 23 still binds acceptance to \"live plan version 2 read ... at 12:51 UTC\", which predates the plan's DIII-D clause set.\nFINDING docs/research/converged-forward-solve-design.html:206 blocking: the acceptance test list contradicts the live plan for the five DIII-D rows; the plan's \u00a76 (since 0f6da4594, ancestor of the reviewed base f6827158) sets their clause set as global residual and every scaled row at or below 1e-6 with the value reached recorded, axis and X-point within one pitch of the EFIT reconstruction's nulls, and no map-fidelity clause, whereas lines 198-206 keep the global 1e-12 clause as the joint target, state that \"the plan does not define an analytic-map/null comparator\", require tests to report \"oracle not specified\" and forbid substituting EFIT, and no test id compares nulls with EFIT; an implementation built from this list would fail the five rows the plan passes and never run the EFIT-null clause the plan requires. Repair: restate the DIII-D clause set from the plan, add an EFIT-null position test id, and rebind line 23 to the current plan revision.\nFINDING docs/research/converged-forward-solve-design.html:79 blocking: the per-resolution membership and moment caps (5e-7 symmetric difference per cell area, 2e-6 normalised current and first moment, identical from 132 to 2616 cells) are unattainable by every field representation the plan offers, because the analytic oracle carries the non-polynomial x^2 ln x particular term (nova/equilibrium/analytic_single_null.py:224) and the read reconstructs it from a discrete carrier with a local fit (the ring fit in nova/equilibrium/stencil_mesh.py is a six-coefficient quadratic); a probe of that fit on a Solov'ev flux gives boundary displacement per pitch of 2.7e-3 median at h/R0 0.13, falling as h^2 to 1.3e-4 at h/R0 0.028, three to four orders above 5e-7 at every rung (fit-probe.log in the review run). The caps borrow a clip-quadrature precedent for an error the document says includes field reconstruction (line 88), and equal caps across a twentyfold change in cell count ignore convergence order. Repair: derive resolution-dependent caps from a measured convergence study of the chosen representation on both analytic states, or separate a clip-only cap at the analytic field from a reconstruction cap that scales with pitch.\nFINDING docs/research/converged-forward-solve-design.html:100 follow-on: the compensating unknowns a are Newton variables in F(psi, a) but gs.apply(psi, operands) exposes only psi as its differentiated argument, with a entering through external flux inside operands (line 96); the signature should name how a is differentiated so the augmented JVP is unambiguous.\nFINDING docs/research/converged-forward-solve-design.html:109 follow-on: the private-flux row quotes the 550-cell analytic-membership sup 0.0153 but not its X-point offset 16.9 mm, which is larger than the 132-cell 5.9 mm and bears on the claim that membership alone is necessary but not sufficient.\n",
+  "review_run_id": "r-20261004T160932367109-review-2-of-cfs-design-readback-repairs",
+  "review_scope": "whole document docs/research/converged-forward-solve-design.html at ce1deba42, design re-review on claude-opus",
+  "reviewed_base_sha": "f682715872108f8e5f019b32014a59a2d507cde8",
+  "reviewed_head_sha": "ce1deba42c38934600cc9c5129851c9e23db309f",
+  "reviewed_run_id": "r-20261004T155210829845-cfs-design-readback-repairs",
+  "reviewer": "review-2-of-cfs-design-readback-repairs",
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-04T16:14:27.337715+00:00",
+  "total": 70
+}

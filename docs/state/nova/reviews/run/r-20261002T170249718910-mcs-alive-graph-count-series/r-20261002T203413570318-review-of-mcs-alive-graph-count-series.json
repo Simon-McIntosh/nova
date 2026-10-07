@@ -1,0 +1,102 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "From the reviewed run's own gate logs. The reviewed manifest declares no suite arms: baseline_suite and after_suite are both empty, and the reviewed change adds no product source or test, so there is no base/head pytest log to difference. added_failures_from_gate_logs(None, None) returns unmeasured (count null, ids []), so the count is stored as unmeasured rather than as a measured zero.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py: 407-line instrument; 021e72442 added the settled_reread refusal guard that fired in job 1280468",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json: 55 KB, unchanged since withdrawal, revision 82f26d0a / analysis_revision a9c29fa7, verdict executable_scoped_not_process_cumulative (withdrawn)",
+    "docs/evidence/fragments/millisecond-converged-solve/mcs-alive-graph-count-series.html: withdrawal fragment (HEAD), release unmeasured",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md: preamble withdrawal at :3-4; body still asserts executable_scoped at :51, :67"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "6b9fa435011793b757ec0506d7784be50ff1a005",
+    "82f26d0ac6984782693e7e48d06926a16664144f",
+    "217b698411ac47506df01d45d359be4a4950de58",
+    "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+    "37daba9a5d3f2594d182c27312967dd7556ae725",
+    "021e72442bdf0f4e81a807f9cabbe28c146931f8",
+    "993888eb40a9e6f103db2bf473087abe6311f1ff"
+  ],
+  "completed_at": "2026-10-02T20:47:31.280Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T20:34:40Z",
+  "evidence_inputs": "Reviewed 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567..993888eb40a9e6f103db2bf473087abe6311f1ff (seven commits). The reviewed run self-corrected the prior review's blocking finding: commit 021e72442 removes --analyze-existing as a verdict authority and adds a settled_reread marker after cache clear and device sync, and commit 993888eb rewrites the evidence fragment to withdraw the release claim. Fresh Titan job 1280468 at 021e72442 reached 20 program markers, then emitted before_drop and settled_reread with no XLA count between them and exited 1 (instrument refusal), so the release remains unmeasured and the manifest is status failed. The report body and the committed receipt.json were not updated with the withdrawal and still assert the withdrawn verdict. The reviewed manifest's baseline_suite and after_suite are empty, so the added-failure count is unmeasured.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md",
+      "line": "51",
+      "severity": "blocking",
+      "text": "blocking: The report's own preamble withdraws the executable-scoped release verdict (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":3-4) but its body still presents it as decided -- \"The Titan measurement decides the posed alternative: the alive CUDA executable-graph count is executable-scoped ... not process-cumulative\" (:51) -- so a reader who reads past the header is told the opposite of the withdrawal, and the named done-when artifact (\"the report ... states which of the two it is, with the evidence that decides it\") states the withdrawn verdict as the measurement."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md",
+      "line": "67",
+      "severity": "follow-on",
+      "text": "follow-on: The \"quantitative verdict recorded in receipt.json is\" block (:67 executable_scoped_not_process_cumulative, :73 graphs released at the drop boundary 1) still tabulates the withdrawn post-hoc values as the measurement, so the report carries both the withdrawal and the claim it withdraws."
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: The committed receipt is unchanged since the withdrawal (mtime before commit 993888eb), still labels itself revision 82f26d0a with analysis_revision a9c29fa7 (:5) and stores executable_scoped_not_process_cumulative with graphs_released_after_drop 1 (:2577, :2584), which the report body still cites as the quantitative verdict -- so the artifact a reader opens for the numbers contradicts the fragment's withdrawal."
+    }
+  ],
+  "gate_arms_note": "Read the reviewed run's own logs. Job 1280456 (revision 82f26d0a) completed with enabled arm 418 count observations and disabled arm 0, printing no_growth_observed; its drop-and-reread reading is the withdrawn churn reading. Fresh repair job 1280468 (revision 021e72442) reached all 20 markers then refused (titan-job-1280468.log: RuntimeError no XLA graph count between before_drop and settled_reread), so no fresh two-arm receipt exists.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read 021e72442 (instrument, +53/-78) and 993888eb (fragment, +17/-22) against 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567; nothing outside the declared scope.",
+    "done_when": "One titan job with a control arm and a drop-and-reread step -- job 1280456 completed but its reread is the withdrawn churn reading, and the repair job 1280468 refused, so the done-when is unmet and the manifest records status failed.",
+    "goal": "Measure whether the alive CUDA graph count accumulates per compiled executable or for the process -- the ladder arm answers no-per-program-growth (0 over twenty distinct shapes), but the release arm is unmeasured and no verdict is stated as measured.",
+    "manifest": "Read; status failed, checkpoint names the fresh-job refusal, commits list seven shas including 021e7244 and 993888eb, blockers name the used Titan job; baseline_suite and after_suite are empty.",
+    "write_paths": "Four declared paths plus the report; all changes land inside them."
+  },
+  "justifications": {
+    "durability": "Commit 021e72442 adds a settled_reread refusal that demonstrably fired (job 1280468 exited 1), so the parse can no longer borrow a churn count, but no test pins the guard, and the recorded verdict still moves with the artifact revision (82f26d0a no_growth_observed vs a9c29fa7 executable_scoped), so the result is not reproducible from its input.",
+    "evidence": "The withdrawal is well evidenced and reproducible from job 1280468's traceback and the raw enabled/disabled logs, but the primary artifacts contradict it -- the report body (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":51, :67) and the unchanged receipt.json (:5, :2577) still carry executable_scoped_not_process_cumulative as the measurement, and the deciding release evidence is absent.",
+    "fit": "The instrument and fragment are mechanism-worded with no plan-stage or version labels, and the figure keeps the data-ink rules, but the report and its shipped receipt give the same reader two opposite verdicts for one measurement.",
+    "goal_fidelity": "The ladder arm measures growth 0 over twenty distinct programs (receipt.json summary), but the drop-and-reread step the done-when names is unmeasured (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":51 still presents the withdrawn verdict), the fresh job 1280468 refused (titan-job-1280468.log), and the report's own preamble (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":3) withdraws the deciding claim, so the node delivers no answer to which of the two the count is.",
+    "scope_discipline": "git diff --numstat 8cbd46f3..993888eb changes exactly the four declared paths (measure_cuda_graph_count.py, receipt.json, run_measurement.sbatch, alive-graph-count.png) plus the declared evidence fragment and the declared out-of-repo report; the reviewed worktree is clean and nothing outside the declared write paths changed."
+  },
+  "plan": "nova:millisecond-converged-solve",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: The ladder arm measures growth 0 over twenty distinct programs (receipt.json summary), but the drop-and-reread step the done-when names is unmeasured (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":51 still presents the withdrawn verdict), the fresh job 1280468 refused (titan-job-1280468.log), and the report's own preamble (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":3) withdraws the deciding claim, so the node delivers no answer to which of the two the count is.\nSCORE evidence: 10\nJUSTIFICATION evidence: The withdrawal is well evidenced and reproducible from job 1280468's traceback and the raw enabled/disabled logs, but the primary artifacts contradict it -- the report body (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":51, :67) and the unchanged receipt.json (:5, :2577) still carry executable_scoped_not_process_cumulative as the measurement, and the deciding release evidence is absent.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --numstat 8cbd46f3..993888eb changes exactly the four declared paths (measure_cuda_graph_count.py, receipt.json, run_measurement.sbatch, alive-graph-count.png) plus the declared evidence fragment and the declared out-of-repo report; the reviewed worktree is clean and nothing outside the declared write paths changed.\nSCORE durability: 11\nJUSTIFICATION durability: Commit 021e72442 adds a settled_reread refusal that demonstrably fired (job 1280468 exited 1), so the parse can no longer borrow a churn count, but no test pins the guard, and the recorded verdict still moves with the artifact revision (82f26d0a no_growth_observed vs a9c29fa7 executable_scoped), so the result is not reproducible from its input.\nSCORE fit: 15\nJUSTIFICATION fit: The instrument and fragment are mechanism-worded with no plan-stage or version labels, and the figure keeps the data-ink rules, but the report and its shipped receipt give the same reader two opposite verdicts for one measurement.\nVERDICT goal: Measure whether the alive CUDA graph count accumulates per compiled executable or for the process -- the ladder arm answers no-per-program-growth (0 over twenty distinct shapes), but the release arm is unmeasured and no verdict is stated as measured.\nVERDICT done_when: One titan job with a control arm and a drop-and-reread step -- job 1280456 completed but its reread is the withdrawn churn reading, and the repair job 1280468 refused, so the done-when is unmet and the manifest records status failed.\nVERDICT write_paths: Four declared paths plus the report; all changes land inside them.\nVERDICT manifest: Read; status failed, checkpoint names the fresh-job refusal, commits list seven shas including 021e7244 and 993888eb, blockers name the used Titan job; baseline_suite and after_suite are empty.\nVERDICT diff: Read 021e72442 (instrument, +53/-78) and 993888eb (fragment, +17/-22) against 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567; nothing outside the declared scope.\nCALL_SITES: none\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md:51 blocking: The report's own preamble withdraws the executable-scoped release verdict (\"/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md\":3-4) but its body still presents it as decided -- \"The Titan measurement decides the posed alternative: the alive CUDA executable-graph count is executable-scoped ... not process-cumulative\" (:51) -- so a reader who reads past the header is told the opposite of the withdrawal, and the named done-when artifact (\"the report ... states which of the two it is, with the evidence that decides it\") states the withdrawn verdict as the measurement.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md:67 follow-on: The \"quantitative verdict recorded in receipt.json is\" block (:67 executable_scoped_not_process_cumulative, :73 graphs released at the drop boundary 1) still tabulates the withdrawn post-hoc values as the measurement, so the report carries both the withdrawal and the claim it withdraws.\nFINDING docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json:5 follow-on: The committed receipt is unchanged since the withdrawal (mtime before commit 993888eb), still labels itself revision 82f26d0a with analysis_revision a9c29fa7 (:5) and stores executable_scoped_not_process_cumulative with graphs_released_after_drop 1 (:2577, :2584), which the report body still cites as the quantitative verdict -- so the artifact a reader opens for the numbers contradicts the fragment's withdrawal.\n",
+  "review_base_sha": "f1dc34ef145550624b8046f269eb3a211d01b727",
+  "review_run_id": "r-20261002T203413570318-review-of-mcs-alive-graph-count-series",
+  "reviewed_base_sha": "8cbd46f3fdee9a61fbd48fb919cd7c0728d51567",
+  "reviewed_commit": "993888eb40a9e6f103db2bf473087abe6311f1ff",
+  "reviewed_head_sha": "993888eb40a9e6f103db2bf473087abe6311f1ff",
+  "reviewed_revision": "993888eb40a9e6f103db2bf473087abe6311f1ff",
+  "reviewed_run_id": "r-20261002T170249718910-mcs-alive-graph-count-series",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_node": "review-of-mcs-alive-graph-count-series",
+  "reviewer_run_id": "r-20261002T203413570318-review-of-mcs-alive-graph-count-series",
+  "scores": {
+    "durability": 11,
+    "evidence": 10,
+    "fit": 15,
+    "goal_fidelity": 9,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:04:21.189098+00:00",
+  "total": 65,
+  "verdict": "fail"
+}

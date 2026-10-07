@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:59:34.793Z",
+  "dispatched_at": "2026-10-05T15:51:45Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:1684",
+      "id": "reuse_search-1",
+      "reason": "naming or citing the producer (or stating that \u00a71 must build it) is what decides whether \u00a71 is a wiring node or a new subsystem node, and its five-hour estimate and reuse test both depend on that answer.",
+      "text": "\u00a71 names the landed consumer machinery (PrescribedCurrentField carries `radial_response`/`vertical_response`/`plasma_*_response`, `poloidal_field` images them, `response_identity` digests them, and tree_flatten/unflatten thread them) but its done-when rests on \"the machine's cached radial and vertical field tuples\", and no producer of that cached field tuple exists in the tree \u2014 the only response-matrix builders are nova/imas/mast_vacuum_response.py:coil_response_matrix (field components at probe positions) and :loop_response_matrix (flux loops), neither of which targets the operator grid \u2014 so the plan leaves the hardest half of \u00a71 (where the grid field blocks are computed and cached) unsearched and unscoped",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/io_magnetics.py:86",
+      "id": "duplicate_owner-1",
+      "reason": "a magnetics state reader forked from io_magnetics.py drifts from the channel enumeration and calibration it must agree with, and the ingest should be an extension of that reader into the store rather than a parallel path.",
+      "text": "\u00a74/`f-sos-diamagnetic-input` proposes to ingest the MAST diamagnetic signal through the store using DD 4 `magnetics.diamagnetic_flux(:)`, but the repo already owns the MAST magnetics read in nova/imas/io_magnetics.py, which enumerates exactly the diamagnetic flux-loop families and builds the flux-loop frame, with the store surface owned by nova/io/ingest.py and nova/io/signalstore.py; the plan names neither and so risks a second magnetics reader beside the owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c837357c1fed10b0c61a0f8cefe6fd3513bdedab07f2f31c93a5ff3d6ef5d1a3",
+  "plan_slug": "shafranov-observed-side",
+  "plan_version": 9,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T155130701823-plan-review-of-shafranov-observed-side",
+  "reviewed_blob_sha": "fd69e04347dbb54d3a91f25553db4564526e9f6a",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a71 constructs the field blocks inside the existing deep module `ForwardFluxOperator`/`PrescribedCurrentField` (six pytree leaves and a geometry digest behind `poloidal_field`), \u00a73 replaces the internals of `ExternalShafranovConstraint.observed` rather than adding wrappers, and \u00a72 changes an existing quadrature and its test; no new shallow wrapper family is proposed.",
+    "duplicate_owner": "a finding \u2014 \u00a74's \"read the MAST diamagnetic signal through the store\" overlaps the existing MAST magnetics state reader nova/imas/io_magnetics.py:86-113 already owns the `magnetics` diagnostic families (including `diamagnetic_internal`, `diamagnetic_external`, `diamagnetic_compensation`, `diamagnetic_differential`) and the store owners are nova/io/ingest.py + nova/io/signalstore.py.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds a CLI option, MCP view, refusal family or public API definition, and \u00a71/\u00a72/\u00a73 each name what they replace (a reuse test, a test assertion, the constraint's formula helpers), so the retirement rule is met where it applies.",
+    "reuse_search": "a finding \u2014 the plan cites the consumer machinery it will wire (`PrescribedCurrentField` leaves at forward_operator.py:1684-1913, `poloidal_field`, the pytree threading, `response_identity`) but never names or searches for the producer of \"the machine's cached radial and vertical field tuples\" that \u00a71 says it will build the blocks from; no such cached (B_R, B_Z) grid tuple exists in the tree, and the nearest owners are the probe/loop response builders in nova/imas/mast_vacuum_response.py.",
+    "thin_wrapper": "pass \u2014 no section adds a thin layer over existing machinery: \u00a71 extends the operator build in place, \u00a72 fixes the existing `_contour_metric`/`shafranov_contour_integrals` route, \u00a73 moves the formula out toward `diagnostics.shafranov_vertical_field` which already owns that identity (diagnostics.py:48-87), and \u00a74 reads through the existing store rather than a parallel reader."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:41.687421+00:00"
+}

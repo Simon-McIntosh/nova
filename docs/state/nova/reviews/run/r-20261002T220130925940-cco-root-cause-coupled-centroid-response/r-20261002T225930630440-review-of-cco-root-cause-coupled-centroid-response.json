@@ -1,0 +1,111 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest contains no baseline_suite and no after_suite, and its three gate logs are a failed CPU measurement, a controlled derivative retry and a successful coupled measurement, not complete suite arms. Therefore there are no readable baseline/after failure-id sets from which to measure a delta. Zero and [] mean no observed added suite failures, not a demonstrated zero-failure suite comparison.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/centroids.json",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/derivatives.json",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/response.json",
+    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-coupled-centroid-response.html",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-coupled-centroid-response.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225930630440-review-of-cco-root-cause-coupled-centroid-response/review-check.log"
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/measure.py:127",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/measure.py:135",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/coupled.py:24",
+    "nova/equilibrium/forward.py:2586"
+  ],
+  "commits_read": [
+    "49eacc1a442427a4690d4cc445a12299694ca2cc",
+    "8aaf12d5218cdd1d14a565a177367e5d81a2ddb2",
+    "91b7112f94504679d59e402afd8801337157bd65",
+    "b7f71be2719b977d2d5d0aad841834dac6593056",
+    "46214fb0c73701a669a6ab377c0e1b07957f165a",
+    "cfc315dd3c936b338808a36de8ecce49cf9830fa",
+    "fcafc84ea0e2d134f708cd24a881a25fb66d5ce2",
+    "25671c28680ce7c66e0a1ea16cff99bf3d781b1e"
+  ],
+  "completed_at": "2026-10-02T23:10:53Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T23:00:06Z",
+  "evidence_inputs": "Reviewed d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04..25671c28680ce7c66e0a1ea16cff99bf3d781b1e, eight commits and six added repository paths, plus one granted report. Independent receipt audit EXIT=0: 14 support probes share 121 active cells; row-native and requested-LIMITED JVPs and central differences coincide; radial JVP=+0.836870105450 m/T versus central=+1.629225248045 m/T, gap +0.792355142595 m/T. Formal coupled radial response +1.348673519303 m/T, cond(I-D_F)=296.705322184, nearest eigenvalue 0.932060231, predicted +0.004623913567 T versus banked -0.021255810529 T. Both paired measurements use the same exact direct-profile clip, so their gap is not a clip-mode mismatch. Request-routed paths default chord since af7403bc0, while the banked terminal source receipt predates that change and says exact. The inverse remains formal pending a step-size and internal-tangent investigation. No readable suite arms; added_failure_count=0 means no observed added failures.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/measure.py",
+      "line": "205",
+      "severity": "follow-on",
+      "text": "The finite difference is recorded only at 1e-6 T. Same active-cell indices rule out an admission switch, but do not rule out motion of exact cut-cell geometry, an internal branch tangent, or finite-step nonlinearity. Sweep the step size and compare clip and normalization tangents before treating +0.836870105 m/T as a validated local susceptibility."
+    },
+    {
+      "file": "nova/equilibrium/solve_request.py",
+      "line": "491",
+      "severity": "follow-on",
+      "text": "A request-routed solve defaults to chord and ignores the driver's global exact setting. This does not mix modes inside the reviewed JVP/central pair, which bypasses requests, and the banked terminal receipt records exact from before af7403bc0. Set clip_mode='exact' explicitly and inspect the receipt for any future request-routed remeasurement or terminal comparison."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/coupled.py",
+      "line": "63",
+      "severity": "follow-on",
+      "text": "The named zero-map control is an identity solve on the same columns followed by the same centroid JVP, so it must equal the direct response even if the coupled inverse is wrong. The converged GMRES and dense residuals are the substantive inverse checks; a future negative control should substitute a genuinely altered D_F."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/coupled-response/measure.py",
+      "line": "325",
+      "severity": "follow-on",
+      "text": "The retained measure.py response mode waits for untracked continuation files and later asserts that the direct JVP equals the historical central slope, which the committed receipt shows false. The successful inverse lives in coupled.py; remove or retire the stale response mode to leave one reproducible entry point."
+    }
+  ],
+  "gate_arms_note": "No baseline or after suite was armed in the reviewed run; the scope changed only measurement and documentation artifacts. Merged-head testing belongs to a separate node.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "measure.py directly calls ForwardProfile.current_moment_observation both with and without requested_class; coupled.py linearizes that same direct profile and the traced map. These calls do not construct a ForwardSolveRequest. The request solve route uses request.clip_mode, which defaults to chord at the reviewed head.",
+    "diff": "The declared d0e8f17e..25671c28 range contains six added repository files and passes git diff --check. The reviewed worktree HEAD equals the declared head, with no tracked modifications.",
+    "done_when": "Both observation calls give the same radial central difference +1.629225248045 m/T and JVP +0.836870105450 m/T; all 14 recorded base/signed support reads have the same 121 active-cell indices. The formal coupled radial response is +1.348673519303 m/T, cond(I-D_F)=296.705322184, nearest D_F eigenvalue 0.932060231, and the residual-corrected prediction is +0.004623913567 T versus banked -0.021255810529 T. The report explicitly says this formal inverse does not explain the terminal field and is limited by the derivative mismatch.",
+    "goal": "The run measured the analytic-state centroid derivative through both named observation calls and a formal fixed-point inverse, then compared the predicted compensating field with the banked converged field. It changed no solver or test code and ran no nonlinear solve.",
+    "manifest": "The reviewed manifest is complete, records all eight commits and seven deliverable paths, identifies the first failed CPU attempt, the controlled derivative retry and the successful coupled run, and carries no baseline_suite or after_suite arm. Its landing line and report agree with the committed receipts.",
+    "write_paths": "The eight reviewed commits add six repository paths under the granted coupled-response and evidence-fragment paths; the separate report is at the granted reports path. No product, test, plan or tolerance path changed."
+  },
+  "justifications": {
+    "durability": "The compact JSON receipts, reproducible scripts, eight commits, report, fragment and run logs preserve the numerical argument. The claimed zero-map control solves I x=C and then reapplies the already measured D_c, so its equality is algebraic and does not test the inverse implementation. measure.py also retains an older response mode gated on untracked sentinel files and a historical-JVP assertion known to fail; coupled.py is the actual successful inverse entry point.",
+    "evidence": "Independent JSON audit at reviewed head read the committed receipts and reproduced 14 identical 121-cell support lists, both equal call matrices, the 0.792355143 m/T radial JVP-central gap, the opposite-sign field comparison, four converged GMRES receipts, and the 296.705322 condition number. The original measurement log first failed during CPU compilation, the retry completed the derivative receipt with controlled EXIT=2, and coupled.log has EXIT=0. The derivative comparison uses one 1e-6 T step, so it does not identify whether the JVP or finite-step estimate is the physical local derivative.",
+    "fit": "The report distinguishes row-native from requested-LIMITED admission and explicitly calls the inverse formal. For this paired measurement, JVP and central difference cannot have traversed different clip modes: both direct profile observations use the same operator, and the driver sets the global to exact before building it. Since af7403bc0, a ForwardSolveRequest instead carries its own default chord mode; the saved terminal receipt was produced at source revision 211d75798c, before that change, and explicitly records exact. Any new request-routed comparison must set clip_mode='exact' and verify its receipt.",
+    "goal_fidelity": "The requested two-call comparison, three-column formal inverse, conditioning and eigenvalue check, field-cancellation estimate, report and landing fragment are present. The result properly rejects an explanation of the -21.256 mT terminal field by the +4.624 mT local prediction.",
+    "scope_discipline": "All six committed paths are within the reviewed run's grant; the separately written report is also granted. The review changed no project tree path."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04\nREVIEWED_HEAD_SHA: 25671c28680ce7c66e0a1ea16cff99bf3d781b1e\nVERDICT: pass-with-follow-ons; all requested numerical outputs and report delivered.\nSCORE goal_fidelity: 18\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 15\nSCORE fit: 17\nADDED_FAILURES: unmeasured because both suite arms are absent; encoded 0 and [].\nCLIP_MODE: paired JVP and central difference use exact direct-profile calls, while future request-routed solves default chord unless explicitly overridden.",
+  "review_base_sha": "f3ce0410b179d816220384eea0dea946a870154b",
+  "review_run_id": "r-20261002T225930630440-review-of-cco-root-cause-coupled-centroid-response",
+  "reviewed_base_sha": "d0e8f17e44aa6eb6f05cc94141ed513e1fa18d04",
+  "reviewed_commit": "25671c28680ce7c66e0a1ea16cff99bf3d781b1e",
+  "reviewed_head_sha": "25671c28680ce7c66e0a1ea16cff99bf3d781b1e",
+  "reviewed_revision": "25671c28680ce7c66e0a1ea16cff99bf3d781b1e",
+  "reviewed_run_id": "r-20261002T220130925940-cco-root-cause-coupled-centroid-response",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-coupled-centroid-response",
+  "reviewer_node": "review-of-cco-root-cause-coupled-centroid-response",
+  "reviewer_run_id": "r-20261002T225930630440-review-of-cco-root-cause-coupled-centroid-response",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T23:07:00Z",
+  "total": 87,
+  "verdict": "pass-with-follow-ons"
+}

@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's own readable positive gate log reports 2 passed and no failure identifiers; its own negative-control log reports exactly test_figure_draws_exactly_the_receipts_valid_nodes under deliberate mutation. Therefore the recorded head-gate failure set is []; a genuine base-to-head delta cannot be established because baseline_suite and after_suite are absent.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png: right graph visibly collapses the real tree at zero because of the -1.007007610773198 Wb virtual node",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json: 13 nodes, 12 edges, real-node range [-0.006135727633131027, +0.005701055738426553] Wb, virtual outside -1.007007610773198 Wb",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree/logs/gate.log: 2 passed, EXIT=0 at 5666c8bcc",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree/negative-control.log: 1 failed / 1 passed, EXIT=1 at declared revision 5666c8bcc"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "8980da9ef682542b412f039778f2deaa1e473d4f",
+    "f07b40302",
+    "4633d64eb",
+    "5666c8bcc",
+    "e3ee1c90a4e2f2d22321d3acaff9cb918715b9c0"
+  ],
+  "completed_at": "2026-10-02T18:19:03Z",
+  "dispatched_at": "2026-10-02T18:10:59Z",
+  "evidence_inputs": "Plan \u00a72 requires a traceable contour tree and a virtual outside node below interior levels. Reviewed receipt confirms 13 nodes and 12 edges. The virtual sentinel's numeric value and the real-node values were read from the committed receipt; figure visual inspection confirms the scale collapse and path-like dotted spatial edges.",
+  "findings": [
+    {
+      "file": "benchmarks/contour_tree_explanatory_figure.py",
+      "line": "360",
+      "severity": "blocking",
+      "text": "The graph plots the virtual outside node at its -1.007007610773198 Wb sentinel, forcing a roughly -1.05..+0.22 Wb axis while all real nodes lie within about 0.01 Wb of zero. Omit the virtual sentinel from the numeric signed-flux axis and represent its outside attachment explicitly; do not use a broken axis, which would still make a sentinel look like a physical flux datum."
+    },
+    {
+      "file": "benchmarks/contour_tree_explanatory_figure.py",
+      "line": "301",
+      "severity": "blocking",
+      "text": "Straight dotted edges across the poloidal panel read as geometric paths or field lines, although they encode contour-tree adjacency only. Remove them from the spatial panel (the right graph already carries topology), or label them directly as non-spatial topological adjacency; the caption currently says only that they are dashed between nodes."
+    },
+    {
+      "file": "tests/test_contour_tree_explanatory_figure.py",
+      "line": "35",
+      "severity": "blocking",
+      "text": "test_figure_draws_exactly_the_receipts_valid_nodes never reads the committed JSON, SVG or PNG. It can pass when the emitted artifact is missing, stale, or differs from build_state, so it is not a figure-matches-receipt guard."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree/manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "The reviewed run supplies no readable completed baseline or after arm. The positive gate is 2 passed at 5666c8bcc; this is evidence of the test at that parent, not a head-e3 outcome."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree/negative-control.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "At reviewed head e3ee1c90a the negative-control log still declares revision 5666c8bcc8afc1483a7a7b8fca4ef446a2529b1f, so the final receipt does not name the revision it purports to test."
+    }
+  ],
+  "gate_arms_note": "Reviewed gate.log: revision 5666c8bcc, 2 passed in 44.05s, EXIT=0. Reviewed committed negative-control.log at e3: revision 5666c8bcc, test_figure_draws_exactly_the_receipts_valid_nodes fails with assert 12 == 13, 1 failed / 1 passed, EXIT=1. An attempted independent exact-head test command did not return a readable result before this review record was written; it is not used as evidence.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "not applicable: this is an explanatory benchmark and static evidence artifact.",
+    "diff": "met: the diff is limited to the explanatory figure, its guard, receipt and evidence assets.",
+    "done_when": "not met: the right tree graph is flattened by the outside sentinel, the spatial-panel edge semantics are ambiguous, and the artifact-matching guard does not inspect an artifact.",
+    "goal": "partially met: computed receipt nodes are rendered, but the required explanatory tree cannot be read at the real-node scale.",
+    "manifest": "not met: baseline_suite and after_suite are empty, and the stored gate/negative-control revision remains 5666c8bcc instead of e3ee1c90a.",
+    "write_paths": "met: all changed paths are declared."
+  },
+  "justifications": {
+    "durability": "The mutation is a real refusal (dropping row 0 yields assert 12 == 13, 1 failed and EXIT=1), but the test only compares a freshly rebuilt State with a freshly rebuilt tree. It never opens contour-tree-computed.json, SVG or PNG, so stale or misrendered committed artifacts pass the guard.",
+    "evidence": "The reviewed manifest has no completed baseline_suite or after_suite. Its only positive gate log is headed revision 5666c8bcc rather than reviewed head e3ee1c90a, and the committed negative-control log at e3 repeats that stale header despite e3's stated re-recording purpose.",
+    "fit": "The right graph uses its numeric axis for a nonnumeric virtual sentinel and the poloidal panel draws one-pixel dotted straight lines between topological neighbours. Both conflict with the plotting/data-ink aim of an intelligible, directly labelled graph rather than spatial-path-looking decoration.",
+    "goal_fidelity": "The figure is generated from build_contour_tree and exposes all 13 receipt nodes, but its right-hand graph makes the real tree unreadable: the virtual outside sentinel is -1.007007610773198 Wb while every real node is in [-0.006135727633131027, +0.005701055738426553] Wb.",
+    "scope_discipline": "The seven changed paths from d0f91aa52 through e3ee1c90a are the benchmark, test, evidence fragment, receipt, PNG, SVG and declared negative-control log; all fall within the reviewed manifest's grant."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "VERDICT fail: the computed-tree figure has real provenance but is not an intelligible explanatory figure or a durably guarded artifact; 55/100.\nSCORE goal_fidelity: 12\nSCORE evidence: 7\nSCORE scope_discipline: 20\nSCORE durability: 8\nSCORE fit: 8\nFINDING blocking: omit the -1.007 Wb virtual outside sentinel from the right graph's numeric axis rather than using an axis break; explicitly draw/label its outside attachment.\nFINDING blocking: remove or explicitly qualify dotted poloidal edges because they read as spatial paths, while the caption does not say they are non-spatial topology.\nFINDING blocking: replace the in-memory State equality test with a receipt/artifact test that opens the emitted JSON and verifies its node/edge lists and rendered structural output.\nFOLLOW-ON: no completed baseline/after arms; both stored gate logs name 5666c8bcc, not reviewed head e3ee1c90a.",
+  "review_run_id": "r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree",
+  "reviewed_base_sha": "d0f91aa521b789a900fd5ff425cb712f60114edf",
+  "reviewed_head_sha": "e3ee1c90a4e2f2d22321d3acaff9cb918715b9c0",
+  "reviewed_revision": "e3ee1c90a4e2f2d22321d3acaff9cb918715b9c0",
+  "reviewed_run_id": "r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree",
+  "reviewer_node": "review-of-ctta-explanatory-figure-from-computed-tree",
+  "reviewer_run_id": "r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree",
+  "scores": {
+    "durability": 8,
+    "evidence": 7,
+    "fit": 8,
+    "goal_fidelity": 12,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:15:55Z",
+  "total": 55,
+  "verdict": "fail"
+}

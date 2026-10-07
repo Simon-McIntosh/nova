@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "the reviewed run's manifest.md carries no baseline_suite and no after_suite field, and its logs/ directory holds only render_figures.log (a figure-render log, not a pytest suite): the reviewed node ran no pytest gate, so the added-failure count is unmeasured rather than zero (a zero asserts a measurement that was never taken, which is the same reading reckon's read-path annotate_added_failures produces from an absent gate log); no failing test id was added because no suite ran.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/constraint-augmented-newton-krylov/shape-control/shape-steering.png (81348 B, blob 75458b936f9ee57942adcce5b9845f2fdeb949e5)",
+    "docs/figures/constraint-augmented-newton-krylov/shape-control/steering-authority.png (190346 B, blob 95cb03f9c0ab7dcb17f45256b424c410777837ab)",
+    "docs/figures/constraint-augmented-newton-krylov/thomson-forward/chord-comparison.png (199485 B, blob 373a8be405a5b451d5d51020ff06315c9aa1014c)",
+    "docs/figures/constraint-augmented-newton-krylov/thomson-forward/receipt.json disagreement: temperature_rmse_ev 33.5965833574119, temperature_max_absolute_error_ev 98.20279466837565, density_rmse_m3 2.4092668881284045e+18, density_max_absolute_error_m3 4.665891830875557e+18"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "1e2dd10d2"
+  ],
+  "completed_at": "2026-10-02T08:34:43.509Z",
+  "dispatched_at": "2026-10-02T08:07:35Z",
+  "evidence_inputs": {
+    "figure_visual_check": "opened shape-steering.png, steering-authority.png and chord-comparison.png: the two steering figures show poloidal panels with no axes, the MAST limiter wall, and every non-converged arm dashed and named in the legend; chord-comparison.png shows four panels (T_e and n_e comparison beside their per-chord residual) with rms and maximum in the suptitle",
+    "receipt_recompute_verified": "predicted-minus-measured recomputed from receipt.json trace (23 chords): Te rms 33.596583 eV, max 98.202795 eV; ne rms 2.409267e18, max 4.665892e18 m^-3, matching the receipt disagreement fields and the figure title exactly",
+    "svg_companions": "no SVG companion existed for either shape-control or thomson-forward figure at base 9ac842a600, so the 'staged with git add -f with an SVG companion where one existed' clause is vacuously satisfied"
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T064044955441-cank-shape-and-thomson-figures/logs/render_figures.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "the recorded command line invokes the Thomson renderer bare (docs/figures/constraint-augmented-newton-krylov/cank-shape-and-thomson-figures/render_thomson_chord.py) after a stray ';' and with no interpreter, while the committed file is mode 100644 and carries no shebang, so the bare path would fail with an exec error; the EXIT=0 the same log records for the thomson arm therefore cannot have come from the command the log names, so the log is not a receipt a later reader can re-run."
+    },
+    {
+      "file": "docs/figures/constraint-augmented-newton-krylov/cank-shape-and-thomson-figures/render_thomson_chord.py",
+      "line": "142",
+      "severity": "follow-on",
+      "text": "the suptitle identifies only the equilibrium slice 22086/43 and not the immediately preceding pulse the measured profile was mapped from, so two pulses still share one number in the title; the node's leading-defect goal (the missing disagreement metric) is met, but the audit's thomson-forward identity itemisation is left partly unaddressed."
+    }
+  ],
+  "follow_ons": [
+    "record the thomson render command with its interpreter (uv run --no-sync python <path>) so logs/render_figures.log is a receipt a later reader can re-run, and add the gate-log header lines naming module.__file__ and cwd"
+  ],
+  "gate_arms_note": "the reviewed run declares no pytest gate; its measure is the rendered figures. logs/render_figures.log records '--- shape-control --- EXIT=0' and '--- thomson --- EXIT=0' at revision 1e2dd10d2, but its command line is not reproducible for the thomson arm (see finding).",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read commit 1e2dd10d2 against base 9ac842a600: two renderers added, three PNGs regenerated, receipt.json gains the temperature/density maximum, and the fragment plus landed-archive section cite both followup ids.",
+    "done_when": "Read the prompt FENCE-EVIDENCE measure (axes off, wall via draw_wall, non-converged arms marked and named on the panel; chord-comparison per-chord residual panel and receipt rms and maximum in the title); verified in the committed renderers and confirmed visually by opening the three committed PNGs.",
+    "goal": "Read the dispatched goal (regenerate the shape-control and Thomson chord-comparison figures so they show the non-convergence and disagreement their receipts record, per followups f-fsa-figrepair-shape-control and f-fsa-figrepair-thomson-forward); both figure sets are regenerated and the leading defect of each followup is repaired.",
+    "manifest": "Read; status complete, names logs/render_figures.log with EXIT=0 for both arms and quotes the receipt rms and maximum.",
+    "write_paths": "Read the five declared write paths (shape-control dir, thomson-forward dir, the cank-shape-and-thomson-figures renderer dir, the landing fragment, the landed archive); every changed path is inside them."
+  },
+  "justifications": {
+    "durability": "the renderers are committed beside the figures and the receipt now persists temperature_max_absolute_error_ev and density_max_absolute_error_m3 so the plotted title numbers re-derive from the receipt fields (persist_maximum at render_thomson_chord.py:46), but a figure node adds no assertion that reddens on regression, so durability rests on the committed renderer rather than on a failing-if-regressed test.",
+    "evidence": "logs/render_figures.log records EXIT=0 for both arms, but its own command line at render_figures.log:2 invokes the Thomson renderer bare (docs/.../render_thomson_chord.py, mode 100644 with no shebang) with no interpreter, so the EXIT=0 it records for that arm is not reproducible from the command it names, and the log carries no module.__file__ or cwd header; the figures did change in the diff and the plotted numbers were independently recomputed from the receipt to match exactly.",
+    "fit": "render_shape_control.py imports and reuses the committed painters poloidal_axes and draw_wall from nova.media.ink and nova.media.poloidal, the Thomson figure loads the repository data-ink style sheet, colours are named module constants, and neither script introduces a plan, sprint or ticket identifier.",
+    "goal_fidelity": "the node goal is to regenerate the shape-control and Thomson figures so they show the non-convergence and disagreement their receipts record, and the committed renderers do exactly that: render_shape_control.py draws both steering panels with poloidal_axes (axis off) and draw_wall (MAST limiter) and every non-converged arm dashed and named with its termination via _arm_state, and render_thomson_chord.py adds a per-chord residual panel and prints the receipt rms and maximum in the suptitle at render_thomson_chord.py:142.",
+    "scope_discipline": "every path in the diff (render_shape_control.py, render_thomson_chord.py, three PNGs, thomson-forward/receipt.json, the landing fragment and the landed archive section) lies inside the five write paths declared in the reviewed manifest, and nothing outside them changed."
+  },
+  "plan": "nova:constraint-augmented-newton-krylov",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to regenerate the shape-control and Thomson figures so they show the non-convergence and disagreement their receipts record, per followups f-fsa-figrepair-shape-control and f-fsa-figrepair-thomson-forward; render_shape_control.py:49 _panel draws with poloidal_axes (axis off) and draw_wall (MAST limiter) and marks every non-converged arm dashed and named with its termination, and render_thomson_chord.py:79 adds a per-chord residual panel and prints the receipt rms and maximum.\nVERDICT done_when: read the FENCE-EVIDENCE measure (axes off, wall via draw_wall, non-converged arms marked and named on the panel; chord-comparison per-chord residual panel and receipt rms and maximum in the title); verified in the committed renderers and confirmed visually by opening the three committed PNGs.\nVERDICT write_paths: read the five declared write paths; every changed path (two renderers, three PNGs, receipt.json, the fragment, the landed archive) is inside them.\nVERDICT manifest: read; status complete, names logs/render_figures.log with EXIT=0 for both arms.\nVERDICT diff: read commit 1e2dd10d2 against base 9ac842a600; two renderers, three PNGs, the receipt maximum fields and the fragment/archive citation are all present.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: render_shape_control.py:49 _panel draws both steering panels with poloidal_axes (axis off) and draw_wall (MAST limiter) and every non-converged arm dashed and named via _arm_state, and render_thomson_chord.py:142 prints the receipt rms and maximum in the suptitle beside a per-chord residual panel.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/render_figures.log:2 invokes the Thomson renderer bare (mode 100644, no shebang, no interpreter) so its recorded EXIT=0 for that arm is not reproducible, though the figures changed and the plotted numbers recompute exactly from the receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all eight changed paths lie inside the five write paths declared in the reviewed manifest, and nothing outside them changed.\nSCORE durability: 14\nJUSTIFICATION durability: render_thomson_chord.py:46 persist_maximum writes the maximum into the receipt so the plotted title numbers re-derive from the receipt, but a figure node adds no assertion that reddens on regression.\nSCORE fit: 18\nJUSTIFICATION fit: render_shape_control.py:19-20 reuses the committed painters poloidal_axes and draw_wall and the Thomson figure loads the data-ink style sheet, with colours as module constants and no plan or ticket identifier.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T064044955441-cank-shape-and-thomson-figures/logs/render_figures.log:2 follow-on: the recorded command invokes the Thomson renderer bare (mode 100644, no shebang) after a stray ';' with no interpreter, so the EXIT=0 it records for that arm cannot come from the command it names.\nFINDING docs/figures/constraint-augmented-newton-krylov/cank-shape-and-thomson-figures/render_thomson_chord.py:142 follow-on: the suptitle names only the equilibrium slice 22086/43 and not the preceding pulse the measured profile came from, leaving the audit's thomson-forward identity itemisation partly unaddressed.\n",
+  "review_run_id": "r-20261002T080716267393-review-of-cank-shape-and-thomson-figures",
+  "reviewed_base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "reviewed_head_sha": "1e2dd10d2139a278c46b755a08b537e7a134ecc1",
+  "reviewed_revision": "1e2dd10d2139a278c46b755a08b537e7a134ecc1",
+  "reviewed_run_id": "r-20261002T064044955441-cank-shape-and-thomson-figures",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-shape-and-thomson-figures",
+  "reviewer_node": "review-of-cank-shape-and-thomson-figures",
+  "reviewer_run_id": "r-20261002T080716267393-review-of-cank-shape-and-thomson-figures",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "3",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:04:20.935132+00:00",
+  "total": 85,
+  "verdict": "pass"
+}

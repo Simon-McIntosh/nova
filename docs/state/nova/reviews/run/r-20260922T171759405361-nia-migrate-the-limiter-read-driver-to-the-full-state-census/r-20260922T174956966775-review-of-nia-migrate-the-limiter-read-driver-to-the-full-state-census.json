@@ -1,0 +1,43 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T17:49:56.966775+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/limiter_read_resolution_audit.py",
+      "line": "798",
+      "text": "the declared negative control (logs/coupling_probe.py negative_control()) exercises operator.null_flux_pool(physical) directly with the pre-migration 253-node prefix, rather than driving the full _saddle_wall_coupling call with that truncated operand. This is a faithful test that the migrated consumer contract refuses the reverted operand, but it does not reproduce the pre-fix code path exactly: before this node's change, _saddle_wall_coupling called operator._fixed_design_topology.split_flux_map(physical) rather than null_flux_pool(physical), and split_flux_map on a 253-node prefix apparently did not raise (the whole point of the defect was that it silently built a grid-only census instead of refusing). So the negative control demonstrates 'the migrated function guards against regression to the old operand shape' rather than 'the pre-fix code silently misbehaved on this operand', which is the harder claim implied by the landing prose's framing of the original defect. Not a blocker: the commit message and evidence record both describe this correctly as a ValueError the new function raises, and do not claim the negative control replays the pre-fix silent failure."
+    }
+  ],
+  "justifications": {
+    "durability": "The guarded thing is shown to fail, not inferred: the negative control drives operator.null_flux_pool with the exact pre-migration operand shape and the gate.log shows the declared ValueError firing (REFUSED AS DECLARED, exit 0 for the control script meaning the expected refusal occurred). This is a real reproduction of a guard firing, not suite-green inference. Docked two for the finding above -- the negative control validates the new function's own guard rather than replaying the pre-fix code path's silent failure through the actual pre-fix call chain (split_flux_map), so 'the defect used to slip through silently' is asserted in prose but not directly demonstrated by an executed reproduction of the pre-fix behaviour itself.",
+    "evidence": "I independently re-ran tests/test_limiter_read_render.py at the landed head: 7 passed in 4.97s (manifest claims 7 passed in 2.27s -- same count, wall-clock variance expected on a shared login node). Ruff over the changed source file is clean. I did not re-run the coupling probe myself (it drives a JAX-compiling forward operator on a 730-node analytic carrier, which is compute the login node should not carry per this repo's own heavy-work rule), so the probe's printed row (contained_x_candidate_count=3, deduplication_retained_count=3, axis_admitted=true, selected_x_point_error_m=9.63e-3) and the negative control's ValueError text are read from gate.log rather than reproduced independently. The log's structure (revision, tree, command, per-phase exit codes) is exactly the shape the manifest describes, and the printed carrier partition (730 = 132 grid + 477 direct + 121 wall) is internally consistent with the figure and with the operator's own physical_node_number=253=132+121. Docked three for not independently reproducing the probe and negative-control execution myself.",
+    "fit": "The change is a minimal, scoped consumer migration exactly matching a pre-recorded exact_patch from a shared migration-tracking artifact (consumer-migration.json), touching no other code, adding no new abstractions, and correctly using the existing null_flux_pool contract rather than reimplementing pool-assembly logic locally. Both commits carry clean conventional subjects with substantive bodies, no plan/sprint/ticket identifiers, no AI attribution. The evidence record correctly scopes what is and is not claimed (no baseline/full-suite claimed, since the one focused test does not import the changed function) rather than overstating coverage.",
+    "goal_fidelity": "Both replacements recorded in docs/figures/plasma-cell-topology-authority/consumer-migration.json's exact_patch for benchmarks/limiter_read_resolution_audit.py are applied verbatim inside _saddle_wall_coupling -- I diffed the committed change against the JSON's exact_patch entries character-for-character and they match exactly, including the replaced line `grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)` becoming `grid_flux = operator.null_flux_pool(physical)`. git show --stat confirms exactly two insertions/two deletions in the source file, no more. The migration target itself (null_flux_pool) is read directly from nova/equilibrium/forward_operator.py:2891-2901 and its behaviour (concatenate grid_flux with the direct-sample/wall tail when direct_sample_count is nonzero; raise ValueError on a shape mismatch otherwise) matches exactly what the commit message and landing record claim.",
+    "scope_discipline": "changed_paths across both commits (5dde6875e, add3a5784) are exactly the four declared orientation_write_paths: benchmarks/limiter_read_resolution_audit.py, docs/plans/null-identification-authority.html, docs/evidence/archive/null-identification-authority-landed.html, and the one file under docs/figures/null-identification-authority/. Both HTML edits are pure appends (new <section>/<div class=\"r-comment\"> blocks; existing content untouched in the diff). The worktree is clean at the reviewed head. No uv sync was run; the gate log's header states the root interpreter was invoked directly with uv never invoked on the compute node, consistent with this repo's binding SLURM-uv rule."
+  },
+  "model": "claude-sonnet-5",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: Both replacements from consumer-migration.json's exact_patch are applied verbatim inside _saddle_wall_coupling, matched character-for-character against the diff; the migration target null_flux_pool behaves exactly as claimed.\nSCORE evidence: 17\nJUSTIFICATION evidence: Independently re-ran tests/test_limiter_read_render.py: 7 passed, matching the manifest. Ruff clean. Did not independently re-run the JAX-compiling coupling probe or negative control (heavy compute, left to the gate log), docked three for that.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: changed_paths across both commits are exactly the four declared write paths; both HTML edits are pure appends; no uv sync; clean worktree.\nSCORE durability: 17\nJUSTIFICATION durability: The negative control shows a real guard firing (null_flux_pool refuses the pre-migration operand shape with the declared ValueError), but it drives the new function directly rather than replaying the pre-fix call chain (split_flux_map) that silently produced the original defect, so the 'silent failure' half of the story is asserted in prose rather than reproduced.\nSCORE fit: 19\nJUSTIFICATION fit: Minimal scoped migration exactly matching the pre-recorded patch, no new abstractions, correct use of the existing contract, clean commits, honestly scoped evidence claims.\nFINDING benchmarks/limiter_read_resolution_audit.py:798 the negative control exercises null_flux_pool directly with the reverted operand rather than driving _saddle_wall_coupling's pre-fix call chain (split_flux_map), so it demonstrates the new guard fires on that operand shape rather than replaying the original silent-failure path; not a blocker, correctly scoped in the prose.",
+  "review_run_id": "r-20260922T174956966775-review-of-nia-migrate-the-limiter-read-driver-to-the-full-state-census",
+  "reviewed_base": "48fa3d4b4c2d33a95a84a378b77c71dfd6a63f0a",
+  "reviewed_commit": "add3a5784db099e01a9ca0cc235e3aaf45ec5be0",
+  "reviewed_run_id": "r-20260922T171759405361-nia-migrate-the-limiter-read-driver-to-the-full-state-census",
+  "reviewer": {
+    "backend": "claude",
+    "effort": "medium",
+    "model": "claude-sonnet-5"
+  },
+  "reviewer_run_id": "r-20260922T174956966775-review-of-nia-migrate-the-limiter-read-driver-to-the-full-state-census",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T19:54:00Z",
+  "total": 93
+}

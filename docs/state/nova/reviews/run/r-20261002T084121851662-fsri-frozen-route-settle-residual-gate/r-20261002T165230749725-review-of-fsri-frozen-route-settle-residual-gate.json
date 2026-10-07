@@ -1,0 +1,107 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest supplies completed baseline_suite and after_suite arms. baseline_suite has failure_count 1 and the sole deliberate negative-control id tests/test_frozen_route_settlement.py::test_frozen_partition_settlement_exhausts_while_the_live_residual_is_large; after_suite has failure_count 0 and failure_ids []. Therefore the repaired arm adds no failures (after IDs minus baseline IDs = []). The baseline is a mutation control rather than an ordinary pre-change suite, which is recorded instead of misdescribing it as a regression baseline.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "frozen settlement is guarded by the unchanged live residual tolerance; telemetry distinguishes live partition reads and live-read Newton steps",
+      "path": "nova/equilibrium/fixed_point.py"
+    },
+    {
+      "headline": "a nonconverged frozen result routes to a cache-distinct live fallback program",
+      "path": "nova/equilibrium/forward.py"
+    },
+    {
+      "headline": "H200 live residual 1.2827280630881833e-11; frozen residual 2.3184046265790363e-05; frozen passes 2; live reads 3; live-read steps 1",
+      "path": "docs/figures/forward-solver-route-integrity/frozen-route-settle-gate/rca-after/receipt.json"
+    }
+  ],
+  "commits_read": [
+    "fd671f3dcdd36da4553599e769b091cec96b5789",
+    "82ba41417",
+    "de11143a053027ce0bd30cfb6fafe3052453810a",
+    "47f4fe523",
+    "69dd7142b",
+    "224a3b967b243f1d78c593e6ecfe1bc7c0e28b02",
+    "28b74cae42f2fc0086cfc57d163a9c13a38a29e6",
+    "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41"
+  ],
+  "completed_at": "2026-10-02T17:00:54Z",
+  "dispatched_at": "2026-10-02T16:53:04Z",
+  "evidence_inputs": {
+    "accelerator_routes": "accelerator-h200-split-fallback.log passed in 749.31s and accelerator-cpu-split-fallback.log passed in 4649.01s at 224a3b967; the head-only commits 28b74cae4 and dfcda3dbb add the RCA output and receipt, not further solver changes.",
+    "live_termination": "rca-after-h200.log and the committed receipt agree that the returned route has converged=true, reason CONVERGED, live_residual 1.2827280630881833e-11, frozen_partition_reads=3, frozen_partition_refreezes=1, live_partition_reads=3, and live_read_steps=1.",
+    "negative_control": "focused-baseline.log at d6dd846e1, the unconditional settle implementation, fails the control because active_set_iterations is 1 rather than 3; focused-final.log at de11143a0 passes the same test.",
+    "scope": "d6dd846e1..dfcda3dbb changes seven files: the two solver modules, a benchmark, two tests, and committed RCA report/receipt. All are within the reviewed manifest's declared write scope; the planned evidence fragment and figures were not produced before the originating node deadline."
+  },
+  "findings": [
+    {
+      "severity": "follow-on",
+      "text": "The originating node correctly left status failed because its evidence fragment and rendered residual/flux figures missed the hard deadline. This does not contradict the solver gate: this review independently confirms the code and its focused, CPU, H200, and RCA receipts. A subsequent evidence-rendering node must create the missing visual/fragment deliverables before claiming the full section evidence package."
+    },
+    {
+      "severity": "follow-on",
+      "text": "The CPU split-fallback route is correct but took 4649.01s, exceeding the plan's usual all_debug-hour context. The task's named semantic gate is satisfied, but performance ownership and any route-budget decision belong to the separately scoped merged-result/performance work."
+    }
+  ],
+  "follow_ons": [
+    "Render the residual/flux figures and evidence fragment from the committed receipt and existing CPU/H200 logs; those omitted artifacts are outside this review's grants.",
+    "Assess the 4649.01s CPU fallback duration in the performance/merged-result node, without weakening the fixed-point tolerance."
+  ],
+  "item_verdicts": {
+    "fallback_contract": "pass: ForwardProfile._solve obtains the frozen-program result first and, only if it is not converged, invokes _accelerated_history_program(..., live_read_fallback=True). Its cache key includes live_read_fallback, so the direct live Newton program is compiled separately rather than added to the frozen graph. The H200 and CPU split-fallback route logs pass at commit 224a3b967.",
+    "frozen_partition_contract": "pass: fixed_point.py reads the partition after live warmup, passes the carried partition into each frozen Newton trip, then calls partition_read(solved_state, mask) for live requalification before carrying the next pass. The H200 receipt records two frozen passes, three partition reads, and one re-freeze.",
+    "gate_arms": "pass with qualification: the reviewed manifest's declared baseline_suite is a deliberate red control at d6dd846e1 (one expected failing id, exit 1); after_suite is the repaired focused guard at de11143a0 (zero failures, exit 0). The later accelerator receipts test the complete fallback at 224a3b967 and the RCA receipt at 28b74cae4, all ancestors of reviewed head dfcda3dbb.",
+    "goal": "pass: the repair makes a frozen active-set pass refuse settlement above the unchanged 1e-6 tolerance, then runs a separately compiled live-map Newton fallback. The returned H200 route converges at live residual 1.282728063088e-11, not at the frozen objective.",
+    "termination_contract": "pass: the changed settled predicate now requires selected_residual <= convergence_tolerance when freeze_topology is true. The existing converged predicate also requires the same live residual and a zero live partition difference. The negative-control suite proves that the prior unconditional frozen settlement stops at one trip with residual 0.5, while the repaired code exhausts all three bounded trips and leaves converged false.",
+    "tolerance": "pass: the source diff contains no changed tolerance constant or widened threshold; the only new tolerance use compares selected_residual to the existing convergence_tolerance."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT pass (92/100; goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 19). The independent source review confirms that frozen Newton passes retain one partition, re-read the live partition between passes, and cannot settle or report converged on a frozen objective above the unchanged tolerance. The falsifying control still reproduces the old one-trip frozen settlement at residual 0.5; the repaired focused test passes. A cache-distinct direct live Newton fallback is used only after a nonconverged frozen result. Its H200 and CPU accelerator-route receipts pass, and the post-change H200 RCA receipt records converged=true at live residual 1.282728063088e-11 with 2 frozen passes, 3 live partition reads, and 1 live-read Newton step. The originating run missed only its visual/fragment delivery deadline; that remains a follow-on, not a solver-gate failure. added_failure_count is 0, derived from the reviewed run's declared completed baseline/after arms.",
+  "review_run_id": "r-20261002T165230749725-review-of-fsri-frozen-route-settle-residual-gate",
+  "reviewed_base_sha": "d6dd846e1d37b986d67795813d6ce5d5c1208824",
+  "reviewed_head_sha": "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41",
+  "reviewed_revision": "dfcda3dbb1f60fdea76d3625186bc7c9c6e17e41",
+  "reviewed_run_id": "r-20261002T084121851662-fsri-frozen-route-settle-residual-gate",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-residual-gate",
+  "reviewer_node": "review-of-fsri-frozen-route-settle-residual-gate",
+  "reviewer_run_id": "r-20261002T165230749725-review-of-fsri-frozen-route-settle-residual-gate",
+  "reviewing_run_id": "r-20261002T165230749725-review-of-fsri-frozen-route-settle-residual-gate",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/focused-baseline.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/focused-final.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/accelerator-h200-split-fallback.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/accelerator-cpu-split-fallback.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/rca-after-h200.log"
+  ],
+  "tests": [
+    {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-residual-gate /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-residual-gate/tests/test_frozen_route_settlement.py -q",
+      "result": "independent review execution passed: 1 passed in 16.45s"
+    },
+    {
+      "command": "reviewed-run accelerator-h200-split-fallback.log: tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point",
+      "result": "passed on H200 at 224a3b967 in 749.31s, EXIT_STATUS=0"
+    },
+    {
+      "command": "reviewed-run accelerator-cpu-split-fallback.log: tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point",
+      "result": "passed on CPU at 224a3b967 in 4649.01s, EXIT=0"
+    },
+    {
+      "command": "reviewed-run rca-after-h200.log: benchmarks/frozen_route_fixed_point_rca.py --refresh-newton-steps 8",
+      "result": "passed on H200 at 28b74cae4, EXIT_STATUS=0; committed receipt reports live_residual=1.2827280630881833e-11"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:04:21.002396+00:00",
+  "total": 92,
+  "verdict": "pass"
+}

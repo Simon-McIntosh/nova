@@ -1,0 +1,76 @@
+{
+  "absent": [
+    "the reviewed run's own review record (this review supplies it)",
+    "a paired-suite arm run at the reviewed head a7eab76dd itself"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T14:08:35.676Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T13:48:55Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T134835339850-cco-first-moment-test-stubs/manifest.md",
+      "line": "-",
+      "severity": "follow-on",
+      "text": "The paired after_suite arm names revision a9c837151e6583be3c3df0fe990ed9f838c86539 (the reviewed run's base) rather than the reviewed head a7eab76dd, so the arm the done-when calls 'the node head' is the node base and does not contain the reviewed commit. The delta is unaffected because the paired files are disjoint from the changed files, but the arm is not literally the reviewed head and a head-arm run at a7eab76dd would be the stronger receipt."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T134835339850-cco-first-moment-test-stubs/gate-head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The header revision line records a9c837151e6583be3c3df0fe990ed9f838c86539, but the gate result (15 passed) depends on an uncommitted working-tree edit; the logged revision does not contain the change that produced the result, so the exact measured tree is not reconstructible from the log. The same holds for negative-control.log line 2."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-test-stubs/tests/test_forward_moment_class.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "The commit body states 'Two SimpleNamespace stub operators in the test modules omitted the attribute', but three stub operators (one in test_observation_kernels.py, two here) were changed. A census inaccuracy in the record, not a code defect."
+    }
+  ],
+  "gate_arms_note": "baseline_suite (revision 4ee06a2e56afabf6bf8d1c617a6041145d816716, 6 failed/23 passed) and after_suite (revision a9c837151e6583be3c3df0fe990ed9f838c86539, 3 failed/26 passed) both ran to their summary lines and both name their log on disk. added_failure_ids is the after_suite failure_ids minus the baseline_suite failure_ids; every after_suite failure id is also a baseline_suite failure id, so the set difference is empty and added_failure_count is 0. The after_suite revision is the reviewed run's base (a9c837151), not the reviewed head a7eab76dd; the paired files tests/test_labeller_parallel.py and tests/test_equilibrium_constraint_protocol.py are disjoint from the only changed files, so the delta is unaffected.",
+  "justifications": {
+    "durability": "The change aligns the test stubs with the operator interface the first-moment read requires, so the seven AttributeError failures return to the gate and stay there; the coverage is the consuming tests themselves, which exercise ForwardProfile.current_moment_observation with the stubs. The commit is a local detached-HEAD commit reachable only from the reviewed worktree (origin/main does not contain a7eab76dd), which is the expected worker flow - the coordinator owns the merge and push - but it means the work is not durable in any shared ref until promoted. Deducted for the log-header revision mismatch, which means the exact measured tree cannot be reconstructed from the gate log alone.",
+    "evidence": "The gate is independently reproduced at the reviewed head (review-gate-head.log: 15 passed, EXIT=0) and the defect is independently reproduced on an unfixed tree (review-base-repro.log: 7 failed/8 passed, AttributeError at forward.py:1257, EXIT=1). The negative control has admissible form: negative-control.log ends with a bare EXIT line EXIT=1 and three failing ids (test_current_moment_map_declares_support_and_matches_central_difference, test_typed_pins_qualify_the_public_solve_without_statistical_state, test_public_solve_refuses_a_root_outside_a_pin_interval) that are absent from the head arm, all raising the declared AttributeError. Both paired arms carry full headers (revision, tree, command, module.__file__, cwd) and a bare EXIT line. Deducted for two blemishes: gate-head.log and negative-control.log name revision a9c837151 in their header while the measured fix existed only as an uncommitted working-tree edit, so the logged revision does not contain the change that produced the result; and paired-head.log needed an appended 'cwd-correction' line because its cwd header misprinted the run directory.",
+    "fit": "The change reuses the existing SimpleNamespace stub pattern and adds exactly the attribute the real operator carries (moment_geometry, None when a profile has no moment geometry), matching the None branch the source already handles at nova/equilibrium/forward.py:1257-1264. It is minimal, adds no machinery, and leaves the third stub in test_forward_moment_class.py that already set moment_geometry untouched.",
+    "goal_fidelity": "The exact goal - give the test stub operators the moment_geometry attribute the first-moment centroid reads - is met precisely. Three SimpleNamespace stub operators gain moment_geometry=None (one in tests/test_observation_kernels.py at _public_observation_profile, two in tests/test_forward_moment_class.py at _refusing_read_profile and _recording_read_profile); no source file changes. The named gate reproduces first-hand at the reviewed head a7eab76dd as 15 passed (8 observation-kernel + 7 forward-moment), EXIT=0, in 57s. An independent reproduction against a tree without the stub fix gives the stated 7 failed/8 passed with the identical seven ids and AttributeError at nova/equilibrium/forward.py:1257, so the defect the node claims to repair is real and the fix resolves exactly those seven tests. Deducted because the commit body says 'Two SimpleNamespace stub operators' where three stubs across the two files were changed.",
+    "scope_discipline": "The reviewed commit a7eab76dd touches exactly the two granted test paths, tests/test_observation_kernels.py (1 insertion) and tests/test_forward_moment_class.py (6 insertions, 2 deletions): 9 changed lines, no other path, no product source, no plan, no shared index, no concurrent node path. The reviewed worktree is clean. The commit carries a conventional subject with a body explaining the mechanism."
+  },
+  "node": "review-of-cco-first-moment-test-stubs",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The exact goal - give the test stub operators the moment_geometry attribute the first-moment centroid reads - is met precisely. Three SimpleNamespace stub operators gain moment_geometry=None (one in tests/test_observation_kernels.py, two in tests/test_forward_moment_class.py); no source file changes. The named gate reproduces first-hand at the reviewed head a7eab76dd as 15 passed, EXIT=0, in 57s; an independent reproduction on a tree without the fix gives the stated 7 failed/8 passed with identical ids and AttributeError at nova/equilibrium/forward.py:1257.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate independently reproduced at the reviewed head (15 passed, EXIT=0); defect independently reproduced (7 failed/8 passed, AttributeError at forward.py:1257, EXIT=1); negative control ends with a bare EXIT=1 and three failing ids absent from the head arm, all raising the declared AttributeError. Deducted because gate-head.log and negative-control.log name revision a9c837151 while the fix was an uncommitted working-tree edit, and paired-head.log required an appended cwd-correction line.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the reviewed commit a7eab76dd touches exactly tests/test_observation_kernels.py (1 insertion) and tests/test_forward_moment_class.py (6 insertions, 2 deletions), 9 changed lines, no other path, no source, plan or shared-index edit; worktree clean; conventional commit with a body.\nSCORE durability: 17\nJUSTIFICATION durability: the stubs now carry the interface the first-moment read requires, so the seven failures return to the gate and stay there with the consuming tests as coverage; the commit is a local detached-HEAD commit not yet in origin/main - expected worker flow - and the gate-log revision mismatch weakens reconstruction of the exact measured tree.\nSCORE fit: 19\nJUSTIFICATION fit: reuses the existing SimpleNamespace stub pattern and adds exactly the attribute the real operator carries (moment_geometry, None when absent), matching the None branch at forward.py:1257-1264; minimal, no new machinery, leaves the third stub that already set it untouched.\nTOTAL: 91\nVERDICT: pass\nCHECKS: defect reproduced first-hand (7 failed/8 passed, AttributeError at forward.py:1257, EXIT=1); gate reproduced at reviewed head a7eab76dd (15 passed, EXIT=0); negative control EXIT=1 with three failing ids absent from the head arm; added_failure_ids = after_suite failure_ids minus baseline_suite failure_ids = empty.\nFINDINGS: paired after_suite arm names a9c837151 (node base) not the reviewed head; gate/negative-control log headers name a revision that does not contain the measured change; commit body undercounts three stubs as two.\nABSENT: the reviewed run's own review record; a paired-suite arm at the reviewed head itself.",
+  "review_base_sha": "de70c5fc3c641126d4b520aeef739f91fd5cccdc",
+  "review_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T140914255499-review-of-cco-first-moment-test-stubs/review-gate-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T140914255499-review-of-cco-first-moment-test-stubs/review-base-repro.log"
+  ],
+  "review_run_id": "legacy-fc2eb55e54bf",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "4ee06a2e56afabf6bf8d1c617a6041145d816716",
+  "reviewed_commit": "a7eab76ddb85f9fb5bc07efce5a5cc0cb2963e58",
+  "reviewed_commits": [
+    "a7eab76ddb85f9fb5bc07efce5a5cc0cb2963e58"
+  ],
+  "reviewed_head_sha": "a7eab76ddb85f9fb5bc07efce5a5cc0cb2963e58",
+  "reviewed_run_id": "r-20261003T134835339850-cco-first-moment-test-stubs",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-test-stubs",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T14:22:00Z",
+  "total": 91,
+  "verdict": "pass"
+}

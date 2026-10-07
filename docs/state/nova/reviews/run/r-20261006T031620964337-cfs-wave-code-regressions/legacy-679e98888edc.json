@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/biot/completeelliptic.py:65",
+    "nova/biot/elliptic.py:51",
+    "nova/biot/gradedresidual.py:48",
+    "nova/biot/polygonanalytic.py:171",
+    "nova/equilibrium/solve_request.py:697"
+  ],
+  "completed_at": "2026-10-06T03:31:33.796Z",
+  "dispatched_at": "2026-10-06T03:16:53Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/solve_request.py",
+      "line": "426",
+      "severity": "follow-on",
+      "text": "follow-on: from_dict still performs its own TopologyPolicy(**dict(topology)) conversion at line 426 now that __post_init__ (lines 332-333) converts a Mapping during construction, so the mapping-to-policy conversion lives in two places and the two copies can drift."
+    },
+    {
+      "file": "nova/equilibrium/solve_request.py",
+      "line": "334",
+      "severity": "follow-on",
+      "text": "follow-on: the done-when clause that TypeError stays for a value that is neither a mapping nor a TopologyPolicy rests only on the one-shot probe in the run's negative-control-policy.log; no committed test covers the elif branch at line 334, so a refactor dropping it would not redden the suite."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T031620964337-cfs-wave-code-regressions/manifest.md",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite.log_path and after_suite.log_path each name only the biot module log while the recorded command loops over four modules and failure_ids spans modules, so a reader deriving added failures from the named logs sees one module; the failure_ids fields carry the full set and no failure was added."
+    }
+  ],
+  "gate_arms_note": "The reviewed manifest carries both suite arms at the revisions they claim. baseline_suite revision 18152a0d569d376ba65eba20bf172cc27ae4106f, exit 1, two module-qualified failure ids; after_suite revision a07c450938cee83aee5d4a81d2673e6285b54552, exit 0, no failure ids. The base and after logs reconcile: base-tests_test_biot_import_without_jax.py.log reports 1 failed, 5 passed; after-tests_test_biot_import_without_jax.py.log reports 6 passed. tests/test_route_solve_requests.py moved 1 failed, 7 passed to 8 passed; tests/test_forward_solve_request.py held at 5 passed; tests/biot/test_kernel_compile_cost.py held at 5 passed, 4 skipped, 1 xfailed. Added failures over the named logs are zero.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "one commit carries 13 insertions and 2 deletions across the two granted source files with no test edit; rangefunction.py gains a guarded jax import with two None guards and solve_request.py gains a Mapping branch in __post_init__.",
+    "done_when": "both named tests green and tests/test_forward_solve_request.py and tests/biot/test_kernel_compile_cost.py unchanged plus a refusing negative control; the base/after logs show biot 1 failed to 6 passed, route 1 failed to 8 passed, forward_solve_request 5 passed both arms, kernel_compile_cost 5 passed/4 skipped/1 xfailed both arms, and negative-control-policy.log records three TypeError refusals.",
+    "goal": "the goal names two repairs; nova/biot/rangefunction.py:56-62 guards the eager jax import and nova/equilibrium/solve_request.py:332-333 converts a mapping topology in __post_init__, and both named tests pass at a07c450938cee83aee5d4a81d2673e6285b54552.",
+    "manifest": "it records status complete, one commit a07c450938cee83aee5d4a81d2673e6285b54552, both suite arms with revisions and module-qualified failure ids, eight named logs and a negative-control note.",
+    "write_paths": "the manifest fenced the node to the two source files plus a fragment and a figures directory; git diff 18152a0d569d376ba65eba20bf172cc27ae4106f..a07c450938cee83aee5d4a81d2673e6285b54552 changes only nova/biot/rangefunction.py and nova/equilibrium/solve_request.py."
+  },
+  "justifications": {
+    "durability": "the two repaired regressions are guarded by tests that already existed and demonstrably fired at the base revision (tests/test_biot_import_without_jax.py and tests/test_route_solve_requests.py both FAILED at 18152a0d, both pass at a07c4509), but the solve_request.py:334 elif that keeps TypeError for a non-mapping non-policy value has no committed test.",
+    "evidence": "each module ran in its own fresh process to one log under the run directory with the revision on the header line, both suite arms are recorded, and tests/test_forward_solve_request.py and tests/biot/test_kernel_compile_cost.py hold their base outcome; the only reconciliation gap is the single-module log_path in the two suite fields.",
+    "fit": "the guarded import at nova/biot/rangefunction.py:56-62 matches the established idiom at nova/biot/operate.py:86-92, and the frozen slots dataclass assignment uses object.__setattr__ as every other __post_init__ in nova/equilibrium/solve_request.py:113-119 does.",
+    "goal_fidelity": "the goal names two repairs; nova/biot/rangefunction.py:56-62 guards the eager jax import and nova/equilibrium/solve_request.py:332-333 lets the constructor accept a mapping topology, and both named tests pass at a07c4509.",
+    "reuse": "the jax guard re-uses the repository's existing except-ModuleNotFoundError idiom at nova/biot/operate.py:86-92 and adds no new owner, but the mapping-to-TopologyPolicy conversion now duplicates nova/equilibrium/solve_request.py:426.",
+    "scope_discipline": "the single commit a07c4509 changes only nova/biot/rangefunction.py and nova/equilibrium/solve_request.py, both declared write paths, and edits no test file as the done-when requires."
+  },
+  "node": "review-of-cfs-wave-code-regressions",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 18152a0d569d376ba65eba20bf172cc27ae4106f\nreviewed_head_sha: a07c450938cee83aee5d4a81d2673e6285b54552\nVERDICT goal: the goal names two repairs; nova/biot/rangefunction.py:56-62 guards the eager jax import and nova/equilibrium/solve_request.py:332-333 converts a mapping topology in __post_init__, and both named tests pass at a07c450938cee83aee5d4a81d2673e6285b54552.\nVERDICT done_when: it requires both named tests green and tests/test_forward_solve_request.py and tests/biot/test_kernel_compile_cost.py unchanged plus a refusing negative control; the base/after logs show biot 1 failed to 6 passed, route 1 failed to 8 passed, forward_solve_request 5 passed both arms, kernel_compile_cost 5 passed/4 skipped/1 xfailed both arms, and negative-control-policy.log records three TypeError refusals.\nVERDICT write_paths: the manifest fenced the node to the two source files plus a fragment and a figures directory; git diff 18152a0d569d376ba65eba20bf172cc27ae4106f..a07c450938cee83aee5d4a81d2673e6285b54552 changes only nova/biot/rangefunction.py and nova/equilibrium/solve_request.py.\nVERDICT manifest: it records status complete, one commit a07c450938cee83aee5d4a81d2673e6285b54552, both suite arms with revisions and module-qualified failure ids, eight named logs and a negative-control note.\nVERDICT diff: one commit carries 13 insertions and 2 deletions across the two granted source files with no test edit; rangefunction.py gains a guarded jax import with two None guards and solve_request.py gains a Mapping branch in __post_init__.\nCALL_SITES: nova/biot/completeelliptic.py:65, nova/biot/elliptic.py:51, nova/biot/gradedresidual.py:48, nova/biot/polygonanalytic.py:171, nova/equilibrium/solve_request.py:697\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: both named tests pass at a07c4509 and nova/biot/rangefunction.py:56-62 plus nova/equilibrium/solve_request.py:332-333 implement exactly the two repairs the goal states.\nSCORE evidence: 18\nJUSTIFICATION evidence: each module ran in its own fresh process to a log under the run directory with a revision header, both suite arms are recorded, and tests/test_forward_solve_request.py and tests/biot/test_kernel_compile_cost.py hold their base outcome.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the commit changes only nova/biot/rangefunction.py and nova/equilibrium/solve_request.py, both declared write paths, and edits no test file.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_biot_import_without_jax.py and tests/test_route_solve_requests.py both FAILED at the base revision and pass at head, but the solve_request.py:334 elif that keeps TypeError for a non-mapping non-policy value has no committed test.\nSCORE fit: 18\nJUSTIFICATION fit: the guarded import at nova/biot/rangefunction.py:56-62 matches nova/biot/operate.py:86-92 and the frozen dataclass assignment uses object.__setattr__ as the surrounding __post_init__ methods do.\nSCORE reuse: 18\nJUSTIFICATION reuse: the jax guard re-uses the repository's existing except-ModuleNotFoundError idiom at nova/biot/operate.py:86-92, but the mapping-to-TopologyPolicy conversion duplicates nova/equilibrium/solve_request.py:426.\nFINDING nova/equilibrium/solve_request.py:426 follow-on: from_dict still performs its own TopologyPolicy(**dict(topology)) conversion at line 426 now that __post_init__ (lines 332-333) converts a Mapping during construction, so the mapping-to-policy conversion lives in two places and the two copies can drift.\nFINDING nova/equilibrium/solve_request.py:334 follow-on: the done-when clause that TypeError stays for a value that is neither a mapping nor a TopologyPolicy rests only on the one-shot probe in the run's negative-control-policy.log; no committed test covers the elif branch at line 334, so a refactor dropping it would not redden the suite.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T031620964337-cfs-wave-code-regressions/manifest.md:24 follow-on: baseline_suite.log_path and after_suite.log_path each name only the biot module log while the recorded command loops over four modules and failure_ids spans modules, so a reader deriving added failures from the named logs sees one module; the failure_ids fields carry the full set and no failure was added.\n",
+  "review_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "review_run_id": "legacy-679e98888edc",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "reviewed_commit": "a07c450938cee83aee5d4a81d2673e6285b54552",
+  "reviewed_head_sha": "a07c450938cee83aee5d4a81d2673e6285b54552",
+  "reviewed_run_id": "r-20261006T031620964337-cfs-wave-code-regressions",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wave-code-regressions",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T03:39:30.000000+00:00",
+  "total": 110
+}

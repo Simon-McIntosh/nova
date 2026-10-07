@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:15:30.447Z",
+  "dispatched_at": "2026-10-06T02:10:19Z",
+  "findings": [
+    {
+      "anchor": "reckon/crew/promotion.py:1875",
+      "id": "reuse_search-1",
+      "reason": "\u00a71/\u00a72 must cite `_rewrite_worktree_roots` and state why nova's rule differs (repo-relative output, whole-artifact text, no reckon dependency) or the \"one owner\" claim is unestablished.",
+      "text": "the plan's reuse map names reckon's layout owner but not its worktree-path rewriter, which already performs \u00a72's operation (a removed worktree root to a surviving checkout) for the same \"the worktree is gone, the artifact stops locating its content\" reason, so the plan cannot claim to have searched the repositories it names",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py",
+      "id": "deep_module-1",
+      "reason": "the plan should factor one predicate both callers invoke, or state why the two scans must differ, because two implementations of one exemption rule drift.",
+      "text": "the guard rule's decision is spread across two scanners with only data shared: \u00a72's `relativize --check` over staged files and \u00a74's test over tracked files, so the module's interface hides less than the rule it owns and \u00a74's \"the one scanner\" is not true",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "reckon/crew/routing.py:463",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a71 names the owner and justifies re-encoding over importing (nova carries no reckon dependency) and \u00a72 isolates the layout in one imported constant, so this records residual drift-risk rather than a required change.",
+      "text": "nova re-encodes the `reckon-worktrees` layout (both roots, with and without the leading dot) that reckon owns, adding a second copy of that knowledge",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "6ff54b892d4fe4dc96fe8a56fe2a636037dc1df605a63e5563ab66bb3d128a0c",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 30,
+  "project": "nova",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:18:04.460386+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Residual drift risk only, as the finding itself records: section 1 names reckon/crew/routing.py as the owner of the layout and gives the reason nova cannot import it, and section 2 keeps the layout in one constant, so a change in reckon touches one line in nova.",
+      "when": "2026-10-06T02:18:05.361179+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:18:03.392828+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T021000603797-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "e4a5ba5e8281d9d4494aba3f4a723e652c77b6b6",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 `relativize_worktree_paths` is a deep interface, but the check it enables is implemented twice: the `relativize --check` mode reads staged files while the \u00a74 test scans tracked files, sharing only the constants, so \u00a74's \"the repo-wide guard is the one scanner\" contradicts \u00a72's second scanner.",
+    "duplicate_owner": "a finding \u2014 the `reckon-worktrees` layout nova re-encodes is owned by reckon/crew/routing.py:463; the plan names the owner and justifies the non-import, so the residual is drift-risk only.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 names the one retirement (the \u00a74 receipt scan) and the subcommand's merge into the existing `filepath` group, and \u00a74 names its supersession and merge.",
+    "reuse_search": "a finding \u2014 the plan cites the layout owner reckon/crew/routing.py but misses reckon/crew/promotion.py:1875 `_rewrite_worktree_roots`, existing machinery that rewrites recorded worktree roots to the checkout on exactly the \"the worktree is gone\" rationale \u00a71 gives.",
+    "thin_wrapper": "pass \u2014 the `relativize` subcommand and the two-line hook are thin layers, and \u00a72 states why `repository_relative` (nova/database/filepath.py:62) cannot absorb the new function."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "c02fffce131e5645eae9ca7f35a1f03084eef5c27dbd891f29076ad27cba7679",
+    "s3": "af55126bd0713335b2716da37306ca4e7716c52a12337e9d50c6a6e28ad05475",
+    "s4": "e5decf9a39f4c60b283b650ddcf359170705c798e013e9e0104dbbfda2c459a0",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:17:46.248291+00:00"
+}

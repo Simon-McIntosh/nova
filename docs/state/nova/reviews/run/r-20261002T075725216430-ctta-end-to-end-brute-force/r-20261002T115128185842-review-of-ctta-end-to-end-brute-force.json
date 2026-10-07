@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed baseline_suite is completed true at 84374f8da with failure_ids [tests/test_contour_tree_brute_force.py::test_certificate_tree_matches_independent_superlevel_components, tests/test_contour_tree_brute_force.py::test_batched_certificate_trees_match_independent_builds]. The reviewed after_suite is completed true at revision 222867e6e with failure_ids []; the change therefore adds zero failing identifiers and resolves the two baseline failures. The after revision label does not reproduce its own 6-passed result (that revision collects four tests), which is recorded as a finding; the added-failure count is unaffected.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T115128185842-review-of-ctta-end-to-end-brute-force/independent-head-merged-gate.log: 6 passed in 164.27s, EXIT=0 at main f3dc0567 plus the reviewed head tests",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T115128185842-review-of-ctta-end-to-end-brute-force/independent-head-merged-negative.log: 2 failed, 4 passed in 144.67s, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T115128185842-review-of-ctta-end-to-end-brute-force/independent-after-222867e6e.log: 4 passed in 146.83s, EXIT=0 at the named after revision 222867e6e",
+    "docs/figures/contour-tree-topology-authority/brute-force/merged-gate.log (reviewed run): records 6 passed at revision 222867e6e",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T075725216430-ctta-end-to-end-brute-force/gate.log (reviewed run): baseline 84374f8da, 2 failed, EXIT=1"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "84374f8da7749577cb00acba1e168da15b453ca7",
+    "84d95c3303ae5267520cadadaf3344aa11cae9e4",
+    "c2b7fd136576a1eff2dcd5631102467321c26687"
+  ],
+  "completed_at": "2026-10-02T12:33:14.057Z",
+  "dispatched_at": "2026-10-02T11:51:43Z",
+  "evidence_inputs": "Reviewed base/head pair 72b14996b93bce1ce5fe2fe2f12f3af0c0ef7ed0 -> c2b7fd136576a1eff2dcd5631102467321c26687; run commits 84374f8da -> 84d95c330 -> c2b7fd136. Reviewed baseline_suite revision 84374f8da (the run's own first commit, not the declared base 72b14996b) with 2 failures; after_suite revision 222867e6e (a virtual merge whose parents are main f3dc0567 and 84374f8da) with 0 failures. The after-revision label is unreproducible: an archive extraction of 222867e6e defines four tests and yields 4 passed; the true 6-test state is main f3dc0567 plus the reviewed head's tests and benchmark.",
+  "findings": [
+    {
+      "file": "docs/figures/contour-tree-topology-authority/brute-force/merged-gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the header names revision 222867e6e, which defines four tests and independently yields 4 passed; the log records 6 passed, so the after arm's revision label is unreproducible and the manifest's after_suite.revision repeats it."
+    },
+    {
+      "file": "docs/evidence/fragments/contour-tree-topology-authority/ctta-end-to-end-brute-force.html",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment asserts 6 passed at the merge commit 222867e6e, but that revision collects four tests, so the committed evidence names a revision that cannot produce its own claim."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/brute-force/merged-negative-control.log",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: git diff --check reports trailing whitespace at lines 12 and 30 of the committed negative-control log."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T075725216430-ctta-end-to-end-brute-force/manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline arm's revision 84374f8da is the run's own first commit, not the declared orientation base 72b14996b, so the before measurement is taken after the first landed change."
+    }
+  ],
+  "gate_arms_note": "Reviewed baseline arm: 84374f8da, 2 failed, EXIT=1 (capacity refused). Reviewed after arm: labelled 222867e6e, 6 passed, EXIT=0. Independent reproduction of the after arm at the named revision 222867e6e: 4 passed, EXIT=0. Independent reproduction at main f3dc0567 plus the reviewed head tests and benchmark: 6 passed in 164.27s, EXIT=0. Independent negative control at that merged state: 2 failed, 4 passed, EXIT=1, failing the two comparison tests.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Test, benchmark, evidence and figure changes only against base 72b14996b, with no production source touched.",
+    "done_when": "All four section-2 bullets are asserted and independently reproduced at main f3dc0567 plus the reviewed head's tests and benchmark.",
+    "goal": "The node goal is the section-2 positive control, that the tree-implied superlevel count equals an independent brute-force count on the Solovev and MAST fixtures; tests/test_contour_tree_brute_force.py asserts it and benchmarks/contour_tree_brute_force.py:170 compare() supplies it.",
+    "manifest": "Both suite arms are completed and readable; the after arm's recorded revision is wrong, so the added-failure derivation is defensible but its provenance is not.",
+    "write_paths": "All eleven changed paths lie inside the reviewed manifest's grant."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_brute_force.py:66 compares the tree crossing count against an independent host graph search (benchmarks/contour_tree_brute_force.py:132), and the CONTOUR_TREE_CORRUPT=drop-wall-joins mutation reddens that assertion (2 failed, 4 passed, EXIT=1), so it guards the change.",
+    "evidence": "The after arm's named revision in docs/contour-tree-topology-authority/brute-force/merged-gate.log:1, 222867e6e, defines only four tests and an independent archive run yields 4 passed, not the recorded 6 passed; the result is true at the intended merge (main f3dc0567 plus the head's tests, 6 passed, EXIT=0) but the recorded revision is wrong.",
+    "fit": "The comparator reuses ContourMesh and the fixed-capacity receipt in nova/equilibrium/contour_tree.py and the jax.vmap identity path, matching the module idiom with no forbidden names.",
+    "goal_fidelity": "benchmarks/contour_tree_brute_force.py:170 compare() returns node_count, edge_count and per-level tree vs brute_force rows, and tests/test_contour_tree_brute_force.py:66 asserts them, so the section-2 measure is implemented and met.",
+    "scope_discipline": "git diff --name-status 72b14996b..c2b7fd136 lists eleven paths, each inside the reviewed manifest's declared grant: the test, the benchmark, the evidence fragment, six figures and two logs."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the section-2 positive control, that the tree-implied superlevel count equals an independent brute-force count on the Solovev and MAST fixtures; tests/test_contour_tree_brute_force.py asserts it and benchmarks/contour_tree_brute_force.py:170 compare() supplies it.\nVERDICT done_when: all four section-2 bullets are asserted and independently reproduced at main f3dc0567 plus the reviewed head's tests (6 passed, EXIT=0): brute-force agreement at every sampled level, node count minus edge count one, vmap identity, and a visible capacity refusal.\nVERDICT write_paths: read the reviewed manifest's grant; all eleven changed paths (the test, the benchmark, the evidence fragment, six figures and two logs) lie inside it.\nVERDICT manifest: read; baseline_suite (84374f8da, exit 1, 2 failures) and after_suite (revision 222867e6e, exit 0, 0 failures) are both completed and readable, but the after arm's named revision does not reproduce its own recorded result.\nVERDICT diff: read commit by commit (84374f8da, 84d95c330, c2b7fd136) against base 72b14996b; the change is test, benchmark, evidence and figures only, with no production source.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/contour_tree_brute_force.py:170 compare() returns node_count, edge_count and per-level tree vs brute_force rows, and tests/test_contour_tree_brute_force.py:66 asserts them, so the section-2 measure is implemented and met.\nSCORE evidence: 15\nJUSTIFICATION evidence: the after arm's named revision in docs/figures/contour-tree-topology-authority/brute-force/merged-gate.log:1, 222867e6e, defines only four tests and an independent archive run of it yields 4 passed, not the recorded 6 passed, so the arm's result is true at the intended merge but its recorded revision is wrong.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 72b14996b..c2b7fd136 lists eleven paths, each inside the reviewed manifest's declared grant.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_contour_tree_brute_force.py:66 compares the tree crossing count against an independent host graph search (benchmarks/contour_tree_brute_force.py:132), and the CONTOUR_TREE_CORRUPT=drop-wall-joins mutation reddens that assertion (2 failed, 4 passed, EXIT=1), so it is a genuine regression guard.\nSCORE fit: 19\nJUSTIFICATION fit: the comparator reuses ContourMesh and the fixed-capacity receipt in nova/equilibrium/contour_tree.py and the jax.vmap identity path, matching the module idiom with no forbidden names.\nFINDING docs/figures/contour-tree-topology-authority/brute-force/merged-gate.log:1 follow-on: the header names revision 222867e6e, which defines four tests and independently yields 4 passed; the log records 6 passed, so the after arm's revision label is unreproducible and the manifest's after_suite.revision repeats it.\nFINDING docs/evidence/fragments/contour-tree-topology-authority/ctta-end-to-end-brute-force.html:30 follow-on: the fragment asserts 6 passed at the merge commit 222867e6e, but that revision collects four tests, so the committed evidence names a revision that cannot produce its own claim.\nFINDING docs/figures/contour-tree-topology-authority/brute-force/merged-negative-control.log:12 follow-on: git diff --check reports trailing whitespace at lines 12 and 30 of the committed negative-control log.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T075725216430-ctta-end-to-end-brute-force/manifest.md:baseline_suite follow-on: the baseline arm's revision 84374f8da is the run's own first commit, not the declared orientation base 72b14996b, so the before measurement is taken after the first landed change.",
+  "review_run_id": "r-20261002T115128185842-review-of-ctta-end-to-end-brute-force",
+  "reviewed_base_sha": "72b14996b93bce1ce5fe2fe2f12f3af0c0ef7ed0",
+  "reviewed_head_sha": "c2b7fd136576a1eff2dcd5631102467321c26687",
+  "reviewed_revision": "c2b7fd136576a1eff2dcd5631102467321c26687",
+  "reviewed_run_id": "r-20261002T075725216430-ctta-end-to-end-brute-force",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-end-to-end-brute-force",
+  "reviewer_node": "review-of-ctta-end-to-end-brute-force",
+  "reviewer_run_id": "r-20261002T115128185842-review-of-ctta-end-to-end-brute-force",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T12:24:00Z",
+  "total": 91,
+  "verdict": "pass"
+}

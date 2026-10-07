@@ -1,0 +1,106 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:23:18.909Z",
+  "dispatched_at": "2026-10-06T01:17:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/contour-tree-topology-authority.html#s1",
+      "id": "reuse_search-1",
+      "reason": "the field names and the primary-O-point-first ordering the plan freezes should be reconciled against that existing layout note rather than re-derived, or the note must be retired.",
+      "text": "the \u00a71 DD mapping (`contour_tree.node`/`edges`, `boundary.type`, `boundary.psi`, `global_quantities.psi_magnetic_axis`, `boundary.closest_wall_point`) is authored without citing `nova/imas/contour_tree_layout.py:1`, which already documents a contour_tree layout inside the equilibrium IDS in this same repo and lists the node fields and their ordering the plan is about to fix",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/pulsedesign.py:488",
+      "id": "duplicate_owner-1",
+      "reason": "emitting `boundary.type` from the topology module without naming the writer forks a second equilibrium-to-DD path beside the one that already writes the field, and the two will drift on the DD3 `boundary_separatrix` vs DD4 `boundary` rename.",
+      "text": "the plan emits the class as `boundary.type` (0 limiter, 1 diverted) and the boundary level as `boundary.psi`, but the existing equilibrium\u2192IDS writer already owns those fields at `time_slice:boundary_separatrix.type`/`psi` (`nova/imas/pulsedesign.py:488-489`, mirrored at `nova/imas/sample.py:346`); the plan names neither the writer nor whether it extends it",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward.py:292",
+      "id": "duplicate_owner-2",
+      "reason": "the plan should name which of these two owns the plasma\u2013wall contact coordinate and extend it, rather than define a third wall-contact result.",
+      "text": "\u00a74's wall-contact reporting (the gap to the centre column in millimetres, and \u00a71's `boundary.closest_wall_point` with its r, z and distance) is designed as new geometry, while `nova/equilibrium/forward.py:292-306` already computes \"one exact inboard and one outboard separatrix crossing of the wall\" as `strike_points`/`strike_segment`/`strike_parameter`, and `nova/geometry/strike.py:16` owns strike-point extraction",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/connectivity_boundary.py:169",
+      "id": "duplicate_owner-3",
+      "reason": "\u00a73's contained-in-the-vessel-polygon requirement runs inside the traced read, so the plan must say whether the jitted containment survives (and name its owner) or is deleted, or a jitted duplicate is left behind against \u00a71's one-domain rule.",
+      "text": "\u00a71 mandates a single containment owner (\"true polygon containment over the multi-unit wall\") and \u00a75 deletes the raster class read in `connectivity_boundary.py`, but the file also holds a second jitted containment implementation, `_points_inside_polygon` (line 169), duplicating the host-side owner `nova.equilibrium.wall_mask.inside_polygon` (`nova/equilibrium/wall_mask.py:68`); \u00a75's deletion list names `_axis_component_before_level`, the sightline test and the raster hex partition but not this one",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/contour-tree-topology-authority.html#s1",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the public surface it introduces in its own text; \u00a75's deletion list offsets it at plan level but \u00a71's own text does not name it.",
+      "text": "with this week's counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, \u00a71 adds a public result type and a new named refusal family (`FluxCurrentSignError`, the convention error raised before any tree is built) without stating in \u00a71 what it retires or merges, or why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5321d2e54bdcc88051d72c266496d026e486edc9e992e48e146dc92ce5221701",
+  "plan_slug": "contour-tree-topology-authority",
+  "plan_version": 58,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Sections 3 to 5 are deferred to converged-forward-solve section 2; the boundary type and psi writer in nova/imas/pulsedesign.py:488 is routed to that plan's DD-emission ruling, not built here.",
+      "when": "2026-10-06T01:47:35.792956+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Sections 3 to 5 are deferred to converged-forward-solve section 2; the wall-contact geometry at nova/equilibrium/forward.py:292 is routed to that plan's census, not rebuilt here.",
+      "when": "2026-10-06T01:47:36.309107+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Section 5 is deferred; the deletion list is converged-forward-solve section 6's census, which covers connectivity_boundary.py, and _points_inside_polygon at :169 is routed there.",
+      "when": "2026-10-06T01:47:36.864702+00:00"
+    },
+    "interface_budget-1": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Section 1 landed; the result type and FluxCurrentSignError are carried by converged-forward-solve section 2's narrow interface, whose interface budget its own reviews rule on.",
+      "when": "2026-10-06T01:47:37.383972+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Sections 3 to 5 are declared deferred and are built as converged-forward-solve section 2, whose own composed reviews own the reuse census for the DD emission; nova/imas/contour_tree_layout.py is routed to that plan's owner (S21).",
+      "when": "2026-10-06T01:47:35.246981+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T011741626502-plan-review-of-contour-tree-topology-authority",
+  "reviewed_blob_sha": "12b215de8328943d06113b2702a401329d827321",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the authority hides the carrier, the join/split sweep, the receipt and the DD-emittable projection behind `build_contour_tree` / `dd_emittable_nodes` in one 616-line module (`nova/equilibrium/contour_tree.py`), with the mesh as a separate 333-line carrier builder and one vertex/edge interface between them; no fan of shallow wrappers over one mechanism.",
+    "duplicate_owner": "a finding \u2014 the plan's DD output and its wall-contact geometry each have an existing owner in nova that the design does not name, and \u00a75's deletion list omits the duplicated jitted containment in the file it is gutting.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 adds a public result type and a named refusal (`FluxCurrentSignError`) to the module contract without naming, in its own text, what it retires or why nothing can be.",
+    "reuse_search": "pass \u2014 the plan committed a reuse map (ctta-prior-art-scout, c94c95408, 74 path:line citations) and the landed tree module docstring cites it row by row (`nova/equilibrium/contour_tree_mesh.py:21-27` reuses `nova.biot.plasmagrid.PlasmaGrid.tessellate`, `nova.equilibrium.wall_mask.inside_polygon`, `nova.equilibrium.wall_mask.WallUnit`); the one gap is the DD-mapping half of \u00a71, which does not cite the in-repo contour-tree layout note.",
+    "thin_wrapper": "pass \u2014 the change is a replacement (the raster class read, the flood, the sightline and the normalized-flux quantities are deleted by \u00a75), not a layer over the existing read; \u00a71's \u03c3 derivation is a reuse of `nova.io.cocos`, not a new parallel convention."
+  },
+  "section_digests": {
+    "_document": "9458564b96fd928c83f539fd5095d882489299ff28dc88b8676fd572fdfa0f20",
+    "s-contract": "3918fddbd21f4c86987af6a3df8ff4325cac2218f6411ad26141be91da36735e",
+    "s0": "8d5c3cb8777543314fd11b5180ec70521284110efa05f307f5f3bbd8da07de9b",
+    "s1": "b3855216646b4c75ac7bc289a0025d2e2c6bd962cbabc41b6c8e50b7eab233e0",
+    "s2": "4175ca4fd263624181fe41fc51b51205b69812c2fa8a9c2f9978309bfc940849",
+    "s3": "df7e3ba391b7c8a5766babda42817b9860495b461a742dadf45f489214f9b3da",
+    "s4": "f77a589394b248fad745f631a4cca37c008b1fc7dae55a9025ea793fad86965b",
+    "s5": "e121a56b882cf68b520f82afbb9dbb6035f705e38988ce0bbe619eb47ccccdd6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:29:48.994810+00:00"
+}

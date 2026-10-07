@@ -1,0 +1,172 @@
+{
+  "absent": [
+    "The node's own terminal measurement is unmet: neither the archived-default-chord versus committed-explicit-chord smallest-row bit-identity comparison nor the exact-mode row capture (profile operator active mode == exact) was produced. Both were blocked by a pre-existing live-read fallback defect that raises ValueError('own-mask acceptance requires promoted shadow masks') before any certificate row receipt can be serialised. The fence records this as a separately dispatched measurement (run r-20261003T031455079972 on merge c090222b2) and the defect as repaired at 8130fed42. This is therefore an absent measurement, not a defect in this node's change.",
+    "The required landing evidence fragment docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub.html is committed but empty: its <body> carries no repair statement, no gate counts and no mechanism, unlike the sibling fsapi-clip-mode-request-field-core.html which is a populated <section>."
+  ],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Both arms are readable and completed. Base failure_ids (from the 26 per-module logs under base-tests/ and the base-suite-summary) are test_equilibrium_analytic_oracle::test_the_closed_form_boundary_is_the_production_boundary_read, test_exact_clip_moments::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from, test_figure_panel_pin::test_an_unchanged_panel_re_render_satisfies_the_content_pin, test_null_generator_admission::{raster_label_parity_over_both_analytic_fields, reachable_benchmark...) i.e. test_reachable_benchmark_consumers_keep_own_node_samples[resolution_ladder], test_oracle_axis_admission::test_coarse_diverted_exact_field_admits_axis_and_saddle, the eight test_production_solver_receipt_trip_alignment source_revision tests, test_solovev_recovery_gates::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point, and test_solve_path_census_inputs::test_solve_path_prefix_slices_do_not_feed_the_null_census, plus zero-collection for test_clipped_support_quadrature.py, test_exact_clip_seed_bracket.py and test_forward_compile_identity.py. Head failure_ids are the same except that test_exact_clip_moments and all eight test_production_solver_receipt_trip_alignment ids are absent (those modules pass at head). The set difference head-minus-base is empty, so added_failure_count is 0 and added_failure_ids is empty.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "282 changed lines (184 ins / 154 del across the three paths combined): every certificate clip-mode global mutation replaced by explicit clip_mode keyword state on _case, _case_machine, _certificate_solve_request.",
+      "path": "benchmarks/solovev_certificate.py"
+    },
+    {
+      "headline": "_analytic_profile_support and whole_cell_current_moments use operator.with_clip_mode('exact'|'chord'); 26 lines changed, 12 removed.",
+      "path": "scripts/analytic_oracle_fixtures/measure.py"
+    },
+    {
+      "headline": "empty <body> (10 added lines, no evidence content).",
+      "path": "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub.html"
+    },
+    {
+      "headline": "with_clip_mode returns a copy (line 2732); _active_support_clip_mode still falls back to the global when clip_mode is None (line 2742).",
+      "path": "nova/equilibrium/forward_operator.py (unchanged by this node)"
+    }
+  ],
+  "commits_read": [
+    "19a76002e866e4c514f108ff8155aa52704c406a",
+    "2e0061a7c4424cff1d1255ef1d59e901c15f6bbc"
+  ],
+  "completed_at": "2026-10-03T03:30:26.442Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T03:16:24Z",
+  "evidence_inputs": {
+    "bit_identity_gate": "Not measured by this node; the fence assigns it to run r-20261003T031455079972 on merge c090222b2. This review does not re-triage it.",
+    "head_only_timeout": "head-tests/test_forward_census.log reached EXIT=124 in the head arm against a passing base (11 passed, 2 skipped, EXIT=0 in 220.30 s). Not listed in either failure_ids; flagged as a follow-on, not counted as an added failure because timeouts are excluded from both arms' failure_ids.",
+    "product_change": "No process-global clip mutation remains in benchmarks/solovev_certificate.py or scripts/analytic_oracle_fixtures/measure.py; clip mode is threaded as an explicit operator/request argument with a None default that preserves prior behaviour. Scoped grep for set_support_clip_mode|support_clip_mode is empty.",
+    "record_fidelity": "baseline_suite/after_suite command strings carry an '<importing-module>' placeholder; failure_count (11/9) counts failure+zero-collection modules, disagrees with failure_ids length; the committed evidence fragment is empty.",
+    "reviewed_range": "19a76002e866e4c514f108ff8155aa52704c406a..2e0061a7c4424cff1d1255ef1d59e901c15f6bbc; 3 files changed, 184 insertions(+), 154 deletions(-).",
+    "row_gate_blocker": "The archived default-chord certificate row cannot build a receipt at base: forward.py:2811 -> fixed_point.py:5015 raises ValueError('own-mask acceptance requires promoted shadow masks'). Both row-base logs terminate there with EXIT=1. The manifest records this as a blocker and the fence states the live-read fallback defect is repaired at 8130fed42 (verified present: 'Merge fsri-live-read-fallback-acceptance').",
+    "two_passes_explained": "test_exact_clip_moments.py (1 base failure) and test_production_solver_receipt_trip_alignment.py (8 base failures) fail at base only because the base arm is an archive with no .git; _source_revision's `git rev-parse HEAD` raises exit 128. Both modules pass at head. This is the 'two passes at head that failed at base' the fence asked to be explained, and the explanation is recorded in the manifest's failure_attribution base_only_modules."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/solovev_certificate.py",
+      "line": 623,
+      "severity": "follow-on",
+      "text": "_closed_form_current_target accepts a keyword-only clip_mode: str | None = None but never reads it \u2014 the body operates on exact_physical and operator.moment_geometry only. Every call site passes clip_mode (lines 2309, 3767-ish), so the parameter is threaded but inert. Either consume it (apply the mode where it selects a support) or drop it, so a reader is not misled into thinking it affects the total-current/centroid computation."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub.html",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The committed evidence fragment is an empty HTML skeleton (\"<body></body>\"); it records no repair statement, gate counts or mechanism, unlike the sibling fsapi-clip-mode-request-field-core.html which is a populated <section>. Populate it with the migration, the paired-arm counts (base_failures=11 / head_failures=9, added 0) and the row-gate blocker, or the node's own record carries the only account."
+    },
+    {
+      "file": "manifest.md",
+      "line": "baseline_suite and after_suite",
+      "severity": "follow-on",
+      "text": "Two record defects: (i) both arms' command strings carry an unsubstituted '<importing-module>' placeholder rather than a literal command, and each collapses 26 per-module process logs into one log_path; (ii) failure_count (11 base / 9 head) counts modules that reported a pytest failure or a zero-collection, which is not the count of the failure_ids list recorded beside it (18 and 6 entries). Record the literal commands (or a directory of the 26 logs) and align failure_count with failure_ids' semantics."
+    },
+    {
+      "file": "manifest.md",
+      "line": "base arm provenance",
+      "severity": "follow-on",
+      "text": "The base arm ran against /tmp/fsapi-clip-mode-certificate-hub-base, an extracted archive with no .git, so benchmarks/solovev_certificate.py _source_revision() raises CalledProcessError exit 128 in 9 tests (test_exact_clip_moments.py and test_production_solver_receipt_trip_alignment.py) that are unrelated to clip mode. The manifest explains this in failure_attribution, and it does not change the zero added-failure result, but a base arm run from a real checkout would remove the artefact and make the arms comparable."
+    },
+    {
+      "file": "manifest.md",
+      "line": "head arm test_forward_census",
+      "severity": "follow-on",
+      "text": "At head test_forward_census.py timed out (EXIT=124) where the base arm passed (11 passed, 2 skipped, EXIT=0 in 220 s). Neither arm's failure_ids records it and the manifest does not mention it. Re-run this module at head under a stated base and a bounded timeout, or record it as a known head-only non-pass, so the paired-arm delta is not silently favourable."
+    }
+  ],
+  "follow_ons": [
+    "Populate docs/evidence/fragments... i.e. docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub.html with the migration, the paired-arm counts (base_failures=11 / head_failures=9, added 0) and the row-gate blocker \u2014 the committed file is an empty <body>.",
+    "Drop or consume the unused clip_mode keyword on _closed_form_current_target (benchmarks/solovev_certificate.py:623).",
+    "Re-run the base arm from a real git checkout (or a worktree) rather than /tmp/fsapi-clip-mode-certificate-hub-base, so _source_revision() does not manufacture 9 spurious base failures and the arms are comparable.",
+    "Re-run test_forward_census.py at head under a stated base and a bounded timeout; the head arm timed out where the base arm passed.",
+    "The two terminal certificate measurements (archived-default-chord vs committed-explicit-chord bit identity, and the exact-mode row capture) belong to run r-20261003T031455079972 on merge c090222b2, per the node's fence \u2014 not to this review.",
+    "Deleting the module global _SUPPORT_CLIP_MODE and its setter in nova/equilibrium/forward_operator.py is the wider f-fsapi-clip-mode-is-a-request-field deliverable and is outside this node's declared write scope."
+  ],
+  "gate_arms_note": "Both arms are completed and readable. The base arm dereferenced an extracted archive at /tmp/fsapi-clip-mode-certificate-hub-base (revision 19a76002e) and the head arm ran the worktree at revision 2e0061a7c; each arm's per-module logs emit a pytest summary line, so both completed is true. The base arm is contaminated by the archive having no .git, which turns _source_revision() into a CalledProcessError and manufactures 9 failures not caused by any clip-mode behaviour; those disappear at head. Timeouts (EXIT=124) appear in both arms (base: test_forward_receipt_raster, test_reduced_newton, test_two_class_recovery; head: the same three plus test_forward_census) and are excluded from both failure_ids lists, so the derived added-failure count of 0 is a measured result over the recorded failure ids, with the head-only forward_census timeout flagged separately.",
+  "item_verdicts": {
+    "gate": "Paired arms readable and completed. Each arm ran the 26 test modules that import either scoped file as fresh JAX_PLATFORMS=cpu processes. Base arm (/tmp/fsapi-clip-mode-certificate-hub-base, revision 19a76002e) reported base_failures=11 across 26 files; head arm (the worktree, revision 2e0061a7c) reported head_failures=9. The two modules whose failures vanish at head are explained, not accidental: base test_exact_clip_moments.py (1 failed) and base test_production_solver_receipt_trip_alignment.py (8 failed) both fail only because the base arm is an extracted archive with no .git, so benchmarks/solovev_certificate.py _source_revision() runs `git rev-parse HEAD` and raises CalledProcessError exit 128 ('fatal: not a git repository'); the head arm is a real worktree so both modules pass (13 passed and 15 passed, EXIT=0). The set difference of test-id failures is empty: added_failure_count is 0.",
+    "goal": "Substantially met for the two scoped files. Commit 2e0061a7c removes every process-global clip mutation from benchmarks/solovev_certificate.py and scripts/analytic_oracle_fixtures/measure.py and threads a mode as explicit state: _measure and _certificate_compile_problem apply operator.with_clip_mode(clip_mode) to both the empty and fixture operators (benchmarks/solovev_certificate.py:2279,2289,3760,3766) and pass clip_mode to _case, _case_machine, _closed_form_current_target and _certificate_solve_request; _fixture_floor_mode applies operator.with_clip_mode(mode) per mode (line 3199); _compile_solve_memory gains clip_mode and passes it to _certificate_compile_problem (line 3831); the three certificate drivers pass clip_mode='exact' down the row path (lines 4371,4409,4438); measure.py replaces the exact and chord global mutations with operator.with_clip_mode('exact') at _analytic_profile_support (line 1035) and operator.with_clip_mode('chord') at whole_cell_current_moments (line 1073).",
+    "mechanism": "Sound and behaviour-preserving. A scoped grep of the two files for set_support_clip_mode|support_clip_mode returns no matches (grep exit 1). ForwardFluxOperator.with_clip_mode (nova/equilibrium/forward_operator.py:2732-2740) returns a copy with clip_mode set, and _active_support_clip_mode (line 2742-2744) still falls back to the process global only when clip_mode is None, so a None default reproduces the prior chord behaviour at every site that did not previously flip a global (e.g. the strong-rotation control at line 429 and _nan_census at line 1114). The request path is explicit too: _certificate_solve_request adds inputs['clip_mode'] only when a mode is given (line 2250-2252) and ForwardSolveRequest.from_defaults accepts it (nova/equilibrium/solve_request.py:548), and forward.py applies request.clip_mode at _with_source(... clip_mode=request.clip_mode) (line 2586) and records it in resolved_defaults (line 2686).",
+    "receipt": "Committed but empty. The node added docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub.html, but its <body> is empty (a 10-line HTML skeleton with no <section>), so it records no repair statement, gate counts or mechanism. The numbers a reader needs exist only in the run's manifest and per-module logs under the run directory.",
+    "scope": "Met and behaviour-preserving. The range 19a76002e..2e0061a7c is exactly three paths and 184 insertions / 154 deletions: benchmarks/solovev_certificate.py, scripts/analytic_oracle_fixtures/measure.py and the evidence fragment. No solver semantics, schema, or module outside the two scoped files is touched; the global and its setter remain defined in nova/equilibrium/forward_operator.py, which is out of this node's declared scope (its deletion belongs to the wider follow-up). The large 154 deletions in solovev_certificate.py are the re-indentation of the _measure_reposed_fixture body after the try/finally global set/restore pair was removed, not code removal."
+  },
+  "justifications": {
+    "durability": "The product change and fragment are committed at 2e0061a7c4424cff1d1255ef1d59e901c15f6bbc under a conventional subject with a body stating what and why, and the gate logs and reproduction log persist under the run directory. Seven points reserved because the deliverable evidence fragment is empty (nothing durable records the repair beside the code), the paired-arm summaries live only in the run directory, and the base arm is not reproducible from a stated checkout (it was an archive dereferenced under /tmp).",
+    "evidence": "A readable paired-arm record exists: 26 per-module logs per arm, each headed with revision, tree, command, imported module path and cwd, plus a global-state reproduction log (before=chord... before=chord, after=exact, restored=chord) and AST-parse confirmation of both files at head. Eight points are reserved because the record has instrument defects a reader must work around: the base arm is an extracted archive with no .git, so it manufactures 9 base failures (1 exact_clip_moments + 8 production trip alignment) that are environment artefacts, not base behaviour; the manifest's baseline_suite/after_suite command strings carry an unsubstituted '<importing-module>' placeholder; failure_count (11/9) counts modules that reported pytest failures or zero collection, which disagrees with the 18/9-and-6 lengths of the failure_ids lists it is filed beside; and the head arm's test_forward_census.py timed out (EXIT=124) where the base arm passed (11 passed, 2 skipped, EXIT=0), a head-only non-pass that neither arm's failure_ids records.",
+    "fit": "The approach mirrors the sister request-field node (r-20261002T170741100631): explicit mode as operator and request state rather than a process global, identical in shape to the transport-receipt repair. No figure is warranted for a provenance/state-threading change and none was produced. Four points reserved for the dead clip_mode parameter on _closed_form_current_target and the empty fragment.",
+    "goal_fidelity": "The commit performs exactly the requested migration for the two files it owns. Every operator, profile and request built on the certificate path either receives an explicit mode or deliberately inherits the process global through a None default that preserves prior behaviour. Five points are reserved: (i) the node's own terminal goal is not reached \u2014 no certificate row is built, so the receipt-records-the-solving-mode claim is demonstrated only by the source path (forward_operator.py _fixture_floor_mode at line 3246 records operator.clip_mode; forward.py line 2686 records request.clip_mode) rather than by an executed row; (ii) _closed_form_current_target gains a clip_mode keyword it never reads.",
+    "scope_discipline": "The diff is exactly the scoped change and the fragment; 3 paths, no unrelated edits, no solver semantics. Two points reserved only because the committed evidence fragment is an empty stub \u2014 a missing deliverable, not scope creep."
+  },
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT partial (74/100; goal_fidelity 15, evidence 12, scope_discipline 18, durability 13, fit 16). Commit 2e0061a7c is a correct, behaviour-preserving migration: it removes every process-global clip mutation from benchmarks/solovev_certificate.py and scripts/analytic_oracle_fixtures/measure.py and threads clip mode as explicit operator and request state with a None default that falls back to the process global only where prior behaviour relied on it. The scoped grep for the legacy setter/reader is empty; with_clip_mode returns a copy; the request carries clip_mode and forward.py records it. The paired arms are readable (base_failures=11 / head_failures=9) and the only two modules that fail at base and pass at head are explained by the base arm being an archive without .git (git rev-parse raises exit 128), so added_failure_count is a measured 0. The node's own terminal gate is unmet and delegated: no certificate row is built because a pre-existing live-read fallback raises ValueError('own-mask acceptance requires promoted shadow masks'), repaired at 8130fed42 and measured separately by r-20261003T031455079972 on c090222b2. Defects are record-fidelity and evidence: the committed evidence fragment is an empty <body>, _closed_form_current_target takes a clip_mode it never uses, the arm command strings carry an '<importing-module>' placeholder and failure_count disagrees with failure_ids, and the head arm's test_forward_census timeout is unrecorded.",
+  "review_base_sha": "a28856c815922b0d8769335af5047786a4c9e943",
+  "review_run_id": "r-20261003T031551577478-review-of-fsapi-clip-mode-certificate-hub",
+  "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "reviewed_commit": "2e0061a7c4424cff1d1255ef1d59e901c15f6bbc",
+  "reviewed_head_sha": "2e0061a7c4424cff1d1255ef1d59e901c15f6bbc",
+  "reviewed_revision": "2e0061a7c4424cff1d1255ef1d59e901c15f6bbc",
+  "reviewed_run_id": "r-20261002T225104739997-fsapi-clip-mode-certificate-hub",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-certificate-hub",
+  "reviewer_node": "review-of-fsapi-clip-mode-certificate-hub",
+  "reviewer_run_id": "r-20261003T031551577478-review-of-fsapi-clip-mode-certificate-hub",
+  "reviewing_run_id": "r-20261003T031551577478-review-of-fsapi-clip-mode-certificate-hub",
+  "scores": {
+    "durability": 13,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "scope_discipline": 18
+  },
+  "section": "f-fsapi-clip-mode-is-a-request-field",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-suite-summary.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-suite-summary.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-tests/test_exact_clip_moments.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/test_exact_clip_moments.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-tests/test_production_solver_receipt_trip_alignment.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/test_production_solver_receipt_trip_alignment.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-tests/test_forward_census.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/test_forward_census.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/global-clip-reproduction.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/row-base-default-chord.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/row-base-default-chord-diverted.log"
+  ],
+  "tests": [
+    {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/tmp/fsapi-clip-mode-certificate-hub-base /home/ITER/mcintos/Code/nova/.venv... i.e. /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'not slow' /tmp/fsapi-clip-mode-certificate-hub-base/tests/test_exact_clip_moments.py (base); PYTHONPATH=<worktree> ... tests/test_exact_clip_moments.py (head)",
+      "result": "base 1 failed (source_revision git exit 128) / head 13 passed; EXIT=1 base, EXIT=0 head"
+    },
+    {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/tmp/fsapi-clip-mode-certificate-hub-base /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'not slow' /tmp/fsapi-clip-mode-certificate-hub-base/tests/test_production_solver_receipt_trip_alignment.py",
+      "result": "base 8 failed / head 15 passed; EXIT=1 base, EXIT=0 head"
+    },
+    {
+      "command": "global-support-clip-mode-reproduction on revision 19a76002e (worktree tree)",
+      "result": "before=chord after=exact restored=chord; EXIT=0 \u2014 the legacy global is mutable across a single process"
+    },
+    {
+      "command": "python -c 'from nova.equilibrium.forward import ...; receipt=profile.solve(request)' via measure_certificate_row.py, base tree, default-chord and diverted-jump-bearing",
+      "result": "both rows ValueError: own-mask acceptance requires promoted shadow masks; EXIT=1 \u2014 the live-read fallback refusal that blocked the row gate"
+    },
+    {
+      "command": "grep -n 'set_support_clip_mode|support_clip_mode' benchmarks/solovev_certificate.py scripts/analytic_oracle_fixtures/measure.py (head)",
+      "result": "no matches (exit 1)"
+    },
+    {
+      "command": "python -c 'ast.parse(open(f).read())' for both head files",
+      "result": "AST_OK for benchmarks/solovev_certificate.py and scripts/analytic_oracle_fixtures/measure.py"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T03:30:00+00:00",
+  "total": 74,
+  "verdict": "partial"
+}

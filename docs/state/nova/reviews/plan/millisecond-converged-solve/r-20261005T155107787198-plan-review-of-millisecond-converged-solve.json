@@ -1,0 +1,33 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:58:30.735Z",
+  "dispatched_at": "2026-10-05T15:51:23Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/solve_request.py:250",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner to extend turns \u00a71 from a parallel exit criterion into a parameterised extension of the policy the census already measured against, which is the difference between one exit mechanism and two that drift.",
+      "text": "the \u00a71 residual-progress exit window (\"stop when the retained best iterate stops improving beyond tolerance\") duplicates the role of the existing stagnation exit implemented as the `stagnated` predicate in nova/equilibrium/fixed_point.py and governed by the shared policy field ForwardSolvePolicy.stagnation_stop (solve_request.py:250) / kernel option stop_on_active_set_stagnation; the reduced route it targets (reduced_newton._drive_trips) exits only on CONVERGED, difference==0 (ACTIVE_SET_SETTLED / SUPPORTED_DECREASE_REFUSED), cycle and budget, so the plan should extend that shared exit policy with a tolerant stagnation/improvement window rather than fork a reduced-only exit family and a new termination reason",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "9e8ef624d9609d68236017cc2823b48a6accab4658a423210b582c461bf6f668",
+  "plan_slug": "millisecond-converged-solve",
+  "plan_version": 166,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T155107787198-plan-review-of-millisecond-converged-solve",
+  "reviewed_blob_sha": "d462428dfaf6a405f5236a5a7624231ad57bf478",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; the forward work deepens one already-deep module (nova/equilibrium/reduced_newton.py) behind its existing entry points, which is the opposite of adding surface.",
+    "duplicate_owner": "a finding \u2014 \u00a71's residual-progress exit window would add a second exit criterion beside the existing active-set stagnation exit instead of extending the shared policy owner.",
+    "interface_budget": "pass on the supplied counts (public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0) \u2014 the design adds no CLI option, MCP view or refusal family, and the new policy knobs it does introduce (an exit-window criterion, a Jacobian-refresh threshold already landed at 6487b487) are fields of the existing ForwardSolvePolicy dataclass, not new public definitions.",
+    "reuse_search": "pass \u2014 the design extends machinery that already exists and is cited: \u00a72 restructures nova/equilibrium/reduced_newton.py (solve_reduced_newton, solve_reduced_newton_compiled, _cached_compiled_program, the batched refused-tail and adaptive-refresh paths all present at HEAD), and \u00a73 reuses the gs-absolute-accuracy certificate and the solver-trip-orchestration census receipts (docs/figures/solver-trip-orchestration/suffix-census.json) rather than inventing new ones.",
+    "thin_wrapper": "pass \u2014 \u00a72 explicitly forbids a semantics-changing wrapper (\"any change here is semantics-preserving by construction; a restructuring that cannot keep them green returns to the lead as a policy question rather than landing\"), so no thin layer over existing machinery is proposed."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:41.294906+00:00"
+}

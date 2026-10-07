@@ -1,0 +1,113 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived with reckon.crew.review.added_failures_from_gate_logs from the reviewed run's base and head gate logs document-base.log (7c85b26ca, 5 failed) and document-head.log (a42ac76b5, 0 failed); reversed-arm control yields 5. The reviewed manifest leaves baseline_suite/after_suite empty, so read-time annotation will report null until the coordinator binds these logs there.",
+  "base_log_revision": "7c85b26caf5b8f4705f2cb523cb7274a99573b27",
+  "blocking_finding_count": 0,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-04T17:03:23.421Z",
+  "dispatched_at": "2026-10-04T16:56:26Z",
+  "findings": [
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "86",
+      "severity": "follow-on",
+      "text": "follow-on: the diverted budgets are set entirely by the two X-point samples (support-probe.json worst samples at (1.50..1.54, -1.017): membership 0.0333 at 132 to 0.00937 at 2616) while the next-worst smooth-boundary sample is 0.00384 to 0.000124 at an order near 2.3, so one per-case p=0.5 budget is 17x (132) to 250x (2616) looser than measured for every non-saddle diverted cell; when \u00a73 arms the gate, budget the saddle-neighbourhood cells separately from smooth-boundary cells and assert the measured order is at least p so an order loss is detected."
+    },
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "182",
+      "severity": "follow-on",
+      "text": "follow-on: the 1e-12 row clause is applied to scaled rows c/srow while line 115 leaves each row's srow free apart from being explicit and recorded; plan \u00a76 states |row| <= 1e-12 for analytic and centroid rows, so declare each constraint's scale (the centroid row in local pitch units, as the calibration receipt at line 128 already reports) so the clause cannot be met by choosing srow."
+    },
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "229",
+      "severity": "follow-on",
+      "text": "follow-on: the acceptance-binding and budget checks exist only in the reviewed run's check_document.py; land a versioned test_acceptance_clause_binding and budget-coefficient check with the implementation gates so a restored DIII-D mismatch or a corrupted coefficient stays detectable after the run directory is archived."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T161650844174-cfs-design-opus-repairs/manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are blank although document-base.log and document-head.log are complete arms with revision headers and EXIT lines, so reckon's read-time annotation reports added_failure_count null; the coordinator should bind those two logs into the suite fields, where reckon's own parser yields 0 added failures."
+    }
+  ],
+  "gate_logs": {
+    "base": {
+      "completed": true,
+      "failure_count": 5,
+      "failure_ids": [
+        "acceptance_authority",
+        "augmented_tangent",
+        "diiid_clause_set",
+        "membership_mechanism",
+        "reconstruction_budgets"
+      ],
+      "log_digest": "c7dcaa7e293df820381a67ff4dfd31b3b3632499b8e70399f30e1d943f2e5e0c",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T161650844174-cfs-design-opus-repairs/document-base.log",
+      "revision": "7c85b26caf5b8f4705f2cb523cb7274a99573b27"
+    },
+    "head": {
+      "completed": true,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_digest": "cd4229e50bb2a5f4dabfd66a45d6ac983d43a12d6efbf5e87efba8714e5d47bd",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T161650844174-cfs-design-opus-repairs/document-head.log",
+      "revision": "a42ac76b5ceb6b95e0c7db5a90cf105237544686"
+    }
+  },
+  "head_log_revision": "a42ac76b5ceb6b95e0c7db5a90cf105237544686",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read both commits against 7c85b26ca: 2e4b2a5f1 binds acceptance to plan version 12, sets DIII-D to 1e-6 with EFIT-null comparison, makes a an explicit differentiated argument of gs.apply and records the 550-cell 16.9 mm offset; a42ac76b5 adds the reconstruction probe description, the order/coefficient rule, the two budget tables and the separate clip allowances; plan \u00a71/\u00a76 text is unchanged between version 12 and the current version 14 (comment-only deltas).",
+    "done_when": "The reviewed node's gate is the run-local check_document.py (document-head.log 6 passed 0 failed EXIT=0 at a42ac76b5; document-base.log and document-mutation.log each 1 passed 5 failed EXIT=1) plus audit-doc.log OK EXIT=0; this review independently recomputed all six budget orders and coefficients from reconstruction-budgets.json (budget-recompute.log ALL_MATCH True, every row E<=B) and confirmed every cited evidence anchor and number exists in docs/evidence.",
+    "goal": "Read the whole of docs/research/converged-forward-solve-design.html at a42ac76b5 against plan \u00a71 and \u00a76; both earlier blocking findings are repaired (DIII-D rows 213-217 and paragraph 221 reproduce the \u00a76 clause set verbatim; lines 79-103 replace the unreachable 5e-7/2e-6 caps with six measured C(h/R0)^p budgets plus separate clip allowances), and the four signatures, 17/23 inventories, three defect mechanisms, per-resolution tolerances and \u00a76 test list that the \u00a71 done-when names are all present.",
+    "manifest": "The reviewed manifest names commits 2e4b2a5f1 and a42ac76b5, the base/head/mutation document logs and the probe receipts, but leaves baseline_suite and after_suite empty, so reckon's read-time annotation cannot see the gate logs; applying reckon's added_failures_from_gate_logs to document-base.log and document-head.log directly gives 0 added failures (reversed-arm control gives 5).",
+    "write_paths": "The run declared docs/research/converged-forward-solve-design.html, its figures directory and its evidence fragment; git diff 7c85b26ca a42ac76b5 touches only docs/research/converged-forward-solve-design.html (49 insertions, 31 deletions over two commits)."
+  },
+  "justifications": {
+    "durability": "The guard that refuses a restored 1e-12 DIII-D bound or a zeroed budget coefficient is the run-local check_document.py (document-mutation.log 5 refusals), not a committed test, and the diverted p=0.5 budget at docs/research/converged-forward-solve-design.html:86 cannot detect a loss of order in smooth-boundary cells.",
+    "evidence": "The six coefficients and orders at docs/research/converged-forward-solve-design.html:85-98 recompute exactly from reconstruction-budgets.json and every cited anchor (diverted-map-decomposition 0.18057/0.0712/115.1/0.0153/16.9, pcrf 0.03741195763932729, large-mesh 1.59545e-15) resolves in docs/evidence, but the reviewed manifest's canonical suite fields stay empty.",
+    "fit": "docs/research/converged-forward-solve-design.html keeps the typed research-document structure, reuses stencil_mesh.flux_field_polynomial as the proposed representation instead of a new mechanism, and labels the probe as calibration rather than a realised-cell certificate (line 81).",
+    "goal_fidelity": "docs/research/converged-forward-solve-design.html:213-221 matches plan \u00a76's DIII-D clause set word for word and lines 79-103 give achievable, measured per-resolution budgets while keeping topology, private-current and map-fidelity clauses independent, which is the \u00a71 done-when content.",
+    "scope_discipline": "Both commits change only docs/research/converged-forward-solve-design.html, with no source, test, plan or figure edits."
+  },
+  "limitations": [
+    "The budget probe is a local analytic calibration on regular hexes, not a realised-cell, shared-edge or boundary-level certificate.",
+    "Representation decision, implementation gates and merged-result verification remain coordinator work."
+  ],
+  "node": "review-2-of-cfs-design-opus-repairs",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 7c85b26caf5b8f4705f2cb523cb7274a99573b27\nreviewed_head_sha: a42ac76b5ceb6b95e0c7db5a90cf105237544686\nVERDICT goal: Read the whole of docs/research/converged-forward-solve-design.html at a42ac76b5 against plan \u00a71 and \u00a76; both earlier blocking findings are repaired (DIII-D rows 213-217 and paragraph 221 reproduce the \u00a76 clause set verbatim; lines 79-103 replace the unreachable 5e-7/2e-6 caps with six measured C(h/R0)^p budgets plus separate clip allowances), and the four signatures, 17/23 inventories, three defect mechanisms, per-resolution tolerances and \u00a76 test list that the \u00a71 done-when names are all present.\nVERDICT done_when: The reviewed node's gate is the run-local check_document.py (document-head.log 6 passed 0 failed EXIT=0 at a42ac76b5; document-base.log and document-mutation.log each 1 passed 5 failed EXIT=1) plus audit-doc.log OK EXIT=0; this review independently recomputed all six budget orders and coefficients from reconstruction-budgets.json (budget-recompute.log ALL_MATCH True, every row E<=B) and confirmed every cited evidence anchor and number exists in docs/evidence.\nVERDICT write_paths: The run declared docs/research/converged-forward-solve-design.html, its figures directory and its evidence fragment; git diff 7c85b26ca a42ac76b5 touches only docs/research/converged-forward-solve-design.html (49 insertions, 31 deletions over two commits).\nVERDICT manifest: The reviewed manifest names commits 2e4b2a5f1 and a42ac76b5, the base/head/mutation document logs and the probe receipts, but leaves baseline_suite and after_suite empty, so reckon's read-time annotation cannot see the gate logs; applying reckon's added_failures_from_gate_logs to document-base.log and document-head.log directly gives 0 added failures (reversed-arm control gives 5).\nVERDICT diff: Read both commits against 7c85b26ca: 2e4b2a5f1 binds acceptance to plan version 12, sets DIII-D to 1e-6 with EFIT-null comparison, makes a an explicit differentiated argument of gs.apply and records the 550-cell 16.9 mm offset; a42ac76b5 adds the reconstruction probe description, the order/coefficient rule, the two budget tables and the separate clip allowances; plan \u00a71/\u00a76 text is unchanged between version 12 and the current version 14 (comment-only deltas).\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/research/converged-forward-solve-design.html:213-221 matches plan \u00a76's DIII-D clause set word for word and lines 79-103 give achievable, measured per-resolution budgets while keeping topology, private-current and map-fidelity clauses independent, which is the \u00a71 done-when content.\nSCORE evidence: 18\nJUSTIFICATION evidence: The six coefficients and orders at docs/research/converged-forward-solve-design.html:85-98 recompute exactly from reconstruction-budgets.json and every cited anchor (diverted-map-decomposition 0.18057/0.0712/115.1/0.0153/16.9, pcrf 0.03741195763932729, large-mesh 1.59545e-15) resolves in docs/evidence, but the reviewed manifest's canonical suite fields stay empty.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Both commits change only docs/research/converged-forward-solve-design.html, with no source, test, plan or figure edits.\nSCORE durability: 12\nJUSTIFICATION durability: The guard that refuses a restored 1e-12 DIII-D bound or a zeroed budget coefficient is the run-local check_document.py (document-mutation.log 5 refusals), not a committed test, and the diverted p=0.5 budget at docs/research/converged-forward-solve-design.html:86 cannot detect a loss of order in smooth-boundary cells.\nSCORE fit: 19\nJUSTIFICATION fit: docs/research/converged-forward-solve-design.html keeps the typed research-document structure, reuses stencil_mesh.flux_field_polynomial as the proposed representation instead of a new mechanism, and labels the probe as calibration rather than a realised-cell certificate (line 81).\nFINDING docs/research/converged-forward-solve-design.html:86 follow-on: the diverted budgets are set entirely by the two X-point samples (support-probe.json worst samples at (1.50..1.54, -1.017): membership 0.0333 at 132 to 0.00937 at 2616) while the next-worst smooth-boundary sample is 0.00384 to 0.000124 at an order near 2.3, so one per-case p=0.5 budget is 17x (132) to 250x (2616) looser than measured for every non-saddle diverted cell; when \u00a73 arms the gate, budget the saddle-neighbourhood cells separately from smooth-boundary cells and assert the measured order is at least p so an order loss is detected.\nFINDING docs/research/converged-forward-solve-design.html:182 follow-on: the 1e-12 row clause is applied to scaled rows c/srow while line 115 leaves each row's srow free apart from being explicit and recorded; plan \u00a76 states |row| <= 1e-12 for analytic and centroid rows, so declare each constraint's scale (the centroid row in local pitch units, as the calibration receipt at line 128 already reports) so the clause cannot be met by choosing srow.\nFINDING docs/research/converged-forward-solve-design.html:229 follow-on: the acceptance-binding and budget checks exist only in the reviewed run's check_document.py; land a versioned test_acceptance_clause_binding and budget-coefficient check with the implementation gates so a restored DIII-D mismatch or a corrupted coefficient stays detectable after the run directory is archived.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T161650844174-cfs-design-opus-repairs/manifest.md:22 follow-on: baseline_suite and after_suite are blank although document-base.log and document-head.log are complete arms with revision headers and EXIT lines, so reckon's read-time annotation reports added_failure_count null; the coordinator should bind those two logs into the suite fields, where reckon's own parser yields 0 added failures.\n",
+  "review_run_id": "r-20261004T165608800090-review-2-of-cfs-design-opus-repairs",
+  "review_scope": "Whole design document docs/research/converged-forward-solve-design.html at a42ac76b5 against plan \u00a71 and \u00a76 (unchanged in substance from version 12 to 14): interface, oracle independence, three defect mechanisms against cited evidence, C*(h/R0)^p budgets and their probe, DIII-D clause set, acceptance test list. Documentation only; no product suite or merged-result verification.",
+  "reviewed_base_sha": "7c85b26caf5b8f4705f2cb523cb7274a99573b27",
+  "reviewed_commits": [
+    "2e4b2a5f1aca96b78d0c14cfa0475c4ea6bf1d25",
+    "a42ac76b5ceb6b95e0c7db5a90cf105237544686"
+  ],
+  "reviewed_head_sha": "a42ac76b5ceb6b95e0c7db5a90cf105237544686",
+  "reviewed_run_id": "r-20261004T161650844174-cfs-design-opus-repairs",
+  "reviewer": "review-2-of-cfs-design-opus-repairs",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-04T17:02:17.356208+00:00",
+  "total": 88,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T165608800090-review-2-of-cfs-design-opus-repairs/budget-recompute.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T165608800090-review-2-of-cfs-design-opus-repairs/diverted-saddle-vs-smooth.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T165608800090-review-2-of-cfs-design-opus-repairs/added-failures.log"
+  ]
+}

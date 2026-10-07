@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest declares no baseline_suite key. Its readable, completed after_suite is revision d7e149b6a209d08be16b66976eb120be248f3d9b, exit_status 0, failure_count 0, failure_ids []. This node's gate is a focused three-test file, not a whole-suite arm, so the after-arm is the only declared arm and it reports zero failures; the added-failure id set is empty. An independent re-run of the extracted test file at the same revision also exited 0 with 3 passed, corroborating the arm.",
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T02:01:28.010Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T01:49:51Z",
+  "evidence_inputs": {
+    "census_population": "AST census over fixed_point.py finds 4 callers across 5 sites, all forward-only and allowlisted.",
+    "independent_gate": "The commit's test file extracted via git show at d7e149b6a ran 3 passed EXIT=0 against the reviewed module.",
+    "reproduction": "The guard's own negative control remains red (1 failed naming the added caller, EXIT=1) and an independent AST mutant of the same shape reproduces the offender; the picard derivative file remains green (5 passed).",
+    "reviewed_increment": "d7e149b6a adds tests/test_krylov_reverse_mode_guard.py (3 tests) and its evidence fragment, guarding the reverse-mode boundary of _qualified_krylov_step."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_krylov_reverse_mode_guard.py",
+      "line": "99-125",
+      "severity": "follow-on",
+      "text": "_names_a_derivative_rule returns True when a call to custom_jvp/custom_vjp/custom_linear_solve appears anywhere in the enclosing function chain (ast.walk over each chain member at line 119-124), not when the _qualified_krylov_step call itself sits under such a rule. A caller that reverse-differentiates through the step but separately calls a rule elsewhere in its body is classified under_rule=True and the census reports no offender. Falsified: appending a function that calls _qualified_krylov_step and also calls jax.lax.custom_linear_solve yields offenders {} and under_rule True for the new caller, whereas the pure unclassified caller yields one offender. The guard can therefore pass the exact case it exists to catch."
+    },
+    {
+      "file": "tests/test_krylov_reverse_mode_guard.py",
+      "line": "127-148",
+      "severity": "follow-on",
+      "text": "The census parses only nova/equilibrium/fixed_point.py, so callers of _qualified_krylov_step in other modules are not enumerated. tests/test_single_site_krylov.py (lines 52, 91, 175, 208) and several benchmarks (e.g. benchmarks/diiid_admission_rate_diagnosis.py:174, benchmarks/inner_solve_accuracy.py:112) call the step directly; a reverse-mode caller added there would not be caught."
+    },
+    {
+      "file": "tests/test_krylov_reverse_mode_guard.py",
+      "line": "160-170",
+      "severity": "follow-on",
+      "text": "The positive case re-declares the Picard fixture inline (_picard_solve) duplicating the shape of tests/test_picard_implicit_derivative.py:_solve; the two definitions (evaluations=80, relaxation=0.7, implicit_tolerance=1e-12) can drift independently even though they assert the same 1.25 tangent."
+    }
+  ],
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-on: The single commit d7e149b6a adds a focused committed regression (tests/test_krylov_reverse_mode_guard.py) that pins all three spec clauses of followup item 3 and is independently reproduced green (3 passed EXIT=0) with a working negative control (1 failed naming the added caller EXIT=1). The reviewed manifest declares only an after_suite arm, completed with zero failures, so the added-failure set is empty. The census classifies a caller as rule-governed when a derivative-rule name appears anywhere in its enclosing function chain rather than when the step call sits under the rule, so a caller that separates the two passes silently; that a follow-on weakens the guard's stated guarantee and is recorded as a non-blocking follow-on finding.\nSCORE goal_fidelity: 18\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 18\n",
+  "review_run_id": "r-20261003T014922751890-review-of-fsri-krylov-reverse-mode-guard",
+  "reviewed_base_sha": "a51a137af4b354968bdc5f371842a1f57c686398",
+  "reviewed_commit": "d7e149b6a209d08be16b66976eb120be248f3d9b",
+  "reviewed_head_sha": "d7e149b6a209d08be16b66976eb120be248f3d9b",
+  "reviewed_revision": "d7e149b6a209d08be16b66976eb120be248f3d9b",
+  "reviewed_run_id": "r-20261003T012237519319-fsri-krylov-reverse-mode-guard",
+  "reviewer_node": "review-of-fsri-krylov-reverse-mode-guard",
+  "reviewer_run_id": "r-20261003T014922751890-review-of-fsri-krylov-reverse-mode-guard",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T01:58:08Z",
+  "total": 91,
+  "verdict": "pass-with-follow-on"
+}

@@ -1,0 +1,118 @@
+{
+  "absent": [],
+  "absent_items": [
+    {
+      "disposition": "not a defect: the head log names its module file and cwd under the worktree and the base log names them under its own extracted tree, so each arm's identity is not in question and the pair is a valid before/after; the reviewer confirmed the reviewed worktree is clean at head",
+      "item": "an independent source for the head arm's tree: the head arm imports through PYTHONPATH from the reviewed worktree while the base arm imports an extracted scratch tree"
+    },
+    {
+      "disposition": "follow-on: the report marks nova/equilibrium/forward.py:934 (shifted wall flux) and forward.py:1385/1390 (_integral_state) as 'yes in principle' receivers of the new refusal; the landed test drives only the fixture route in tests/test_fused_same_state_read.py, so a production host that now refuses an unqualified intermediate has no regression test",
+      "item": "coverage of the three production eager hosts the change makes fail-closed"
+    }
+  ],
+  "absent_observations": [
+    "no negative control of the gate itself: the reviewed run is measurement-only and declared negative_control_log 'none: measurement-only role, no test file in the write paths and no mutation applied', so no red arm falsifies that the gate would catch an added failure",
+    "no committed artifact: the reviewed run's only write path is the report under the crew reports directory, so the run has no commit and check-manifest leaves its standard 'status is complete but no commit is recorded' finding, which the run's manifest explains as a role default rather than a defect"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "d786948c468d01c1ffb87718758ed60483ea4910",
+    "571f4e8cc7e7916423e4baace06c33acd4245834"
+  ],
+  "completed_at": "2026-10-02T09:52:39.981Z",
+  "dispatched_at": "2026-10-02T09:05:27Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "934",
+      "severity": "follow-on",
+      "text": "follow-on: the report lists forward.py:934 and forward.py:1385/1390 as eager production hosts whose input class includes an unqualified intermediate, so the new refusal in _support_partition changes their behaviour from serving achieved labels to raising NoQualifiedAxisError. The landed test asserts the refusal only through the fixture route in tests/test_fused_same_state_read.py; none of the three production hosts, nor the benchmark/script eager hosts the report enumerates, is exercised, so a regression that silently re-served those states would pass the gate."
+    },
+    {
+      "file": "tests/test_fused_same_state_read.py",
+      "line": "216",
+      "severity": "follow-on",
+      "text": "follow-on: _first_unqualified_map_state drives the relaxed map until _fixed_design_read reports no admitted axis and then asserts the refusal on that state; it depends on the map leaving the qualified region within HOST_EVALUATIONS, raising a bare AssertionError otherwise, so a longer route to the unqualified region would fail the test for the wrong reason (fixture exhaustion) rather than on the guard."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-fused-route-wider-gate /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_forward_operator_domain.py ; JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-fused-route-wider-gate /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_sol_support_selection.py ; JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-fused-route-wider-gate /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_two_branch_batch_cost.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 3,
+      "failure_ids": [
+        "FAILED tests/test_forward_operator_domain.py::test_residual_support_has_no_boundary_flux_partition",
+        "FAILED tests/test_forward_operator_domain.py::test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "FAILED tests/test_forward_operator_domain.py::test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit"
+      ],
+      "log_digest": "",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/head_forward_operator_domain.log",
+      "revision": "571f4e8cc7e7916423e4baace06c33acd4245834"
+    },
+    "baseline_suite": {
+      "command": "env -C /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/base-d786948c4 JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/base-d786948c4 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_forward_operator_domain.py ; env -C /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/base-d786948c4 JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/base-d786948c4 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_sol_support_selection.py ; env -C /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/base-d786948c4 JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/base-d786948c4 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q --timeout 0 tests/test_two_branch_batch_cost.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 3,
+      "failure_ids": [
+        "FAILED tests/test_forward_operator_domain.py::test_residual_support_has_no_boundary_flux_partition",
+        "FAILED tests/test_forward_operator_domain.py::test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "FAILED tests/test_forward_operator_domain.py::test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit"
+      ],
+      "log_digest": "",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T081037268041-msc-fused-route-wider-gate/base_forward_operator_domain.log",
+      "revision": "d786948c468d01c1ffb87718758ed60483ea4910"
+    }
+  },
+  "gate_arms_note": "Derived from the reviewed run's own baseline_suite and after_suite gate logs. baseline_suite.failure_ids and after_suite.failure_ids are the same three node ids (all in tests/test_forward_operator_domain.py), so the head-minus-base set is empty: added_failure_count is 0 and added_failure_ids is empty by a measured set identity, not by an absent arm. This review independently reproduced both arms and got the same sets.",
+  "justifications": {
+    "durability": "The change ships a genuine guard: removing the added require_qualified_axis(admitted) call makes the new refusal test fail with DID NOT RAISE NoQualifiedAxisError at tests/test_fused_same_state_read.py:232, and the test is unmarked so it runs in the default fast lane; held below full because the three production eager hosts the change makes fail-closed have no regression test.",
+    "evidence": "Both arms' logs are header-stamped with revision, tree, module file path and cwd, and this review re-ran the arms independently and reproduced the failure sets value-for-value (head 3 failed / 12 passed; base fast modules 3 failed / 10 passed, the same three ids).",
+    "fit": "The change sits in nova/equilibrium beside the existing require_qualified_axis, adds no abstraction, carries no plan or ticket label, and the node measured on the CPU lane without touching a GPU or a solve.",
+    "goal_fidelity": "The change under review carries the qualified-axis refusal into the fused linear read exactly as its commit body states, and the reviewed node measured it on the three modules outside its own gate, which is its whole purpose.",
+    "scope_discipline": "The landed diff is exactly two files (one guard line in nova/equilibrium/forward_operator.py plus a rewritten tests/test_fused_same_state_read.py), and the measurement-only node wrote only its declared report."
+  },
+  "notes": "The reviewed node is a measurement-only wider gate: it holds no commit and reports that the axis-enforcement change at 571f4e8cc adds no failure in the three modules outside its own gate. This review reproduced both arms and confirms the added-failure set is empty (head 3 failed / 12 passed, base 3 failed / 10 passed plus the 2 passing two-branch tests, the same three ids), reproduced the change's own test module (4 passed), and falsified the guard with a negative control (removing the _support_partition guard reddens the refusal test). Scores: goal_fidelity 20, evidence 19, scope_discipline 20, durability 18, fit 20.",
+  "plan": "nova:millisecond-converged-solve",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "at head 571f4e8cc the call is bound to admitted and require_qualified_axis(admitted) is called before the partition is used; the fused route and read() now refuse the same state from identical inputs, and the test drops the try/except fallback that had hidden the divergence.",
+    "before": "at base d786948c4, _support_partition (nova/equilibrium/forward_operator.py) reads _fixed_design_read and discards the admitted flag, so the fused linear route returns achieved labels for a state with no admitted magnetic-axis candidate while read() raises NoQualifiedAxisError on the same state.",
+    "finding_id": "the fused linear read served an unqualified intermediate state the two-request read route refuses (the divergence the commit body names)"
+  },
+  "review_run_id": "r-20261002T090507348942-review-of-msc-fused-route-wider-gate",
+  "reviewed_base_sha": "d786948c468d01c1ffb87718758ed60483ea4910",
+  "reviewed_head_sha": "571f4e8cc7e7916423e4baace06c33acd4245834",
+  "reviewed_revision": "571f4e8cc7e7916423e4baace06c33acd4245834",
+  "reviewed_run_id": "r-20261002T081037268041-msc-fused-route-wider-gate",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-fused-route-wider-gate",
+  "reviewer_node": "review-of-msc-fused-route-wider-gate",
+  "reviewer_run_id": "r-20261002T090507348942-review-of-msc-fused-route-wider-gate",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T09:46:31.733779+00:00",
+  "total": 97,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha 571f4e8cc is the single commit in d786948c4..571f4e8cc and its parent is reviewed_base_sha d786948c468d01c1ffb87718758ed60483ea4910",
+    "the reviewed worktree is clean at head (git status shows no tracked modification) and its HEAD module nova/equilibrium/forward_operator.py is byte-identical to 571f4e8cc's",
+    "the landed diff is exactly two files: plus-one/minus-one in nova/equilibrium/forward_operator.py (binding admitted and calling require_qualified_axis) and a rewrite of tests/test_fused_same_state_read.py (53 insertions, 37 deletions)",
+    "require_qualified_axis (nova/equilibrium/topology.py:216-224) returns immediately under a jax.core.Tracer and otherwise raises NoQualifiedAxisError, so the guard is a no-op on the jitted/vmapped paths and fires only on the host",
+    "guard call count is 3 at head (forward_operator.py:3174, 3185, 3327) against 2 at base (3174, 3185), matching the reviewed run's guard_calls=3 head vs 2 base header probe and confirming the added call is the _support_partition one at 3327",
+    "the audited count of _support_partition call sites outside tests is 46 (3 in nova, 29 in benchmarks, 14 in scripts), matching the reviewed report",
+    "independently re-ran the wider gate at head (JAX_PLATFORMS=cpu, PYTHONPATH set to the reviewed worktree, cwd the reviewed worktree): 3 failed, 12 passed in 170.85s, with the same three failing ids in tests/test_forward_operator_domain.py that the reviewed run's after_suite names",
+    "independently re-ran the base fast modules (env -C set to the extracted base-d786948c4 tree, module file printed under the base tree): 3 failed, 10 passed in 12.90s, the same three failing ids; adding the 2 passing tests/test_two_branch_batch_cost.py reproduces the reviewed base arm's 3 failed / 12 passed, so the head-minus-base failure set is empty",
+    "re-ran the change's own test module at head: 4 passed in 190.66s (tests/test_fused_same_state_read.py, unmarked, collected by the default not-slow lane)",
+    "negative control: copied the head tree to a scratch dir, removed only the require_qualified_axis(admitted) call at forward_operator.py:3327, and re-ran the refusal test; it fails DID NOT RAISE NoQualifiedAxisError at tests/test_fused_same_state_read.py:232, whose import was confirmed to resolve the scratch module (tests/__init__.py makes pytest prepend the scratch basedir)",
+    "the negative-control log ends with a bare EXIT=1 line and names the failing id test_the_linear_arm_refuses_the_states_the_two_read_route_refuses, which the head arm (4 passed) does not fail"
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "assertion_audit": {
+    "live_read": "Monkeypatching current read raises during the test; reverting to historical JSON fails DID NOT RAISE in both retained probes. The positive current-source probe passes both.",
+    "order": "The independent analytic symmetric-difference error fit is recomputed from current reads; the retained inward flux bias produces order 0.911024417297566 and fails >=1.9 after all five valid qualified reads.",
+    "policy_round_trip": "Losing the zero pitch-floor value in JSON serialization fails the full policy equality; negative, NaN and infinity acceptance fails raises checks; changing the default fails the explicit 1.5 assertion.",
+    "radius": "The result radius check compares with the supplied effective radius: it checks plumbing, not independently derived physical accuracy. Restoring the hard-coded 1.5 floor fails the diverted fixed-radius arm at coarse rungs. Because the moving arm pre-expands the input radius, it alone does not prove the internal max operation.",
+    "resolution_and_radius_set": "A missing/extra rung or a moving-radius fixed arm fails the explicit five-cell-count list or single-radius-set assertion."
+  },
+  "base_log_revision": null,
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2905 (policy operand use)",
+    "nova/equilibrium/solve_request.py:365 (policy serialization)",
+    "nova/equilibrium/solve_request.py:426 (policy restoration)",
+    "nova/equilibrium/solve_request.py:650 (runtime receipt)",
+    "nova/equilibrium/forward.py:2399 (existing policy resolver)"
+  ],
+  "completed_at": "2026-10-06T00:14:35Z",
+  "decision": "approved",
+  "dispatched_at": "2026-10-06T00:09:26Z",
+  "evidence": {
+    "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/h200-order-controls-headed.log",
+    "base_suite_log": null,
+    "changed_path_count": 26,
+    "changed_paths": [
+      "docs/evidence/fragments/converged-forward-solve/cfs-topology-read.html",
+      "docs/figures/converged-forward-solve/cfs-topology-read/diverted-fixed-radius-current-orders.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/diverted-fixed-radius-current-rows.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/diverted-moving-floor-current-orders.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/diverted-moving-floor-current-rows.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-controls-cache-summary.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-controls.log",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-repair-cache-001.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-repair-cache-002.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-repair-cache-003.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-repair-cache-004.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-repair-cache-summary.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/h200-order-repair.log",
+      "docs/figures/converged-forward-solve/cfs-topology-read/limited-fixed-radius-current-orders.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/limited-fixed-radius-current-rows.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/limited-fixed-radius-mutation-orders.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/limited-fixed-radius-mutation-rows.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/limited-moving-floor-current-orders.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/limited-moving-floor-current-rows.json",
+      "docs/figures/converged-forward-solve/cfs-topology-read/order-answer-reversal-red.log",
+      "docs/figures/converged-forward-solve/cfs-topology-read/order-current-read-head.log",
+      "docs/figures/converged-forward-solve/cfs-topology-read/order-defect-reproduction.log",
+      "docs/figures/converged-forward-solve/cfs-topology-read/order-mutation-red.log",
+      "nova/equilibrium/solve_request.py",
+      "nova/equilibrium/topology.py",
+      "tests/equilibrium/test_topology_read.py"
+    ],
+    "gate_summaries": [
+      "2 failed, 8 passed in 1214.64s (0:20:14)",
+      "2 passed in 236.75s (0:03:56)",
+      "1 failed in 154.59s (0:02:34)",
+      "2 failed in 8.16s",
+      "2 passed in 28.49s"
+    ],
+    "independently_recomputed_orders": {
+      "diverted-fixed-radius-current": 2.1308648956288043,
+      "diverted-moving-floor-current": 0.8967816356562393,
+      "limited-fixed-radius-current": 1.9757348872592033,
+      "limited-fixed-radius-mutation": 0.911024417297565,
+      "limited-moving-floor-current": 1.9757348872592033
+    },
+    "live_plan_version_read": 54,
+    "raw_log_sha256": {
+      "h200-order-controls": "ff4a2a3d537e13c0a43f5b77363c6de16981ab6d9b82f2b9049c1653a0252e85",
+      "h200-order-repair": "50e2e0d25ee5c06216ea29458b0c74958f2c0af9031bf8c69de38ce43c62124c"
+    },
+    "reproduction_quote": "DEFECT_REPRODUCED historical test passed with current read disabled: limited; DEFECT_REPRODUCED historical test passed with current read disabled: diverted",
+    "review_worktree_revision": "7302d6fda04eeb4bf14f9bc3b9c4bcf3735f31bb",
+    "reviewed_commits": [
+      "93895112d596e328a6d88b5d8f2070df3d732367",
+      "ce705747393f8f97d0530f66a63b5f2357011c44",
+      "7b91c7290290d6a7e8dfd26955f8caedea84b931",
+      "0536466499b0b88b1b1b748f8f722d604f6c7fef",
+      "a95f55c17765217088b6b0b266174f1ca3f177eb"
+    ],
+    "reviewed_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/manifest.md",
+    "revision_read_method": "git show/diff of explicit target objects; assigned read-only checkout predates the target and was not switched or used to run product tests"
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite remains empty and after_suite names only the external control rerun; added_failure_count is null and added_failure_ids is [], not a measured zero; supply comparable completed baseline/head gates before asserting regression neutrality."
+    }
+  ],
+  "head_log_revision": "7b91c7290290d6a7e8dfd26955f8caedea84b931",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read all five commits from 3d79cac6341da4519f1f2f6403c5c23a433a5c81 through a95f55c17765217088b6b0b266174f1ca3f177eb; only 93895112d596e328a6d88b5d8f2070df3d732367 changes product/test source and the remaining four retain measurements and controls, with unchanged historical receipts.",
+    "done_when": "tests/equilibrium/test_topology_read.py:1951 asserts current smooth order >=1.9; committed H200 receipts show orders 1.9757348872592038 and 2.130864895628803, and order-mutation-red.log shows the same limited assertion failing at 0.911024417297566 with EXIT=1.",
+    "goal": "The five incremental commits repair the previously blocking historical-order guard; tests/equilibrium/test_topology_read.py:1944 now measures five current reads under the live plan version 54 two-arm ruling and authorised partial landing.",
+    "manifest": "The reviewed manifest names a completed after_suite at 7b91c7290290d6a7e8dfd26955f8caedea84b931 with 2 passing external controls, but baseline_suite is empty; regression delta is unmeasured and the earlier gate truthfully retains 2 failed external controls alongside 8 passing repository checks.",
+    "write_paths": "All 26 paths in the incremental diff are the assigned topology.py, solve_request.py, test_topology_read.py and the named evidence fragment/artifacts; no additional implementation path changed."
+  },
+  "justifications": {
+    "durability": "test_topology_read.py:1951 fails an actual first-order mutation and :1967 fails when the historical-only implementation is restored, while the mutation/reversal harness itself remains in the reviewed run directory rather than the repository.",
+    "evidence": "The h200-order-repair.log and h200-order-controls.log raw digests match, current row fits reproduce, and the red order/reversal logs falsify the guards, but the reviewed manifest has no baseline_suite and its after_suite covers only the external controls.",
+    "fit": "solve_request.py:249 extends the existing frozen policy and traced pytree leaves with nonnegative validation, and test_topology_read.py:1629 extracts its existing measurement implementation without changing its quadrature authority.",
+    "goal_fidelity": "tests/equilibrium/test_topology_read.py:1944 replaces the historical-only fit with current fixed-radius reads while topology.py:2905 preserves the default 1.5-pitch floor.",
+    "reuse": "test_topology_read.py:1629 reuses the existing membership sweep and symmetric-difference helper for both arms, and topology.py:2905 parameterizes the existing radius calculation rather than adding a second read or support implementation.",
+    "scope_discipline": "The five-commit diff touches exactly the 26 requested paths and changes no production consumer or Biot kernel outside the authorised repair."
+  },
+  "limitations": [
+    "No product suite rerun; review uses explicit target source and existing H200 evidence, with independent data/digest checks.",
+    "Missing baseline_suite prevents a measured added-failure delta.",
+    "Full kernel-backed qualification, strict expected-failure removal and production cutover remain separate work under the live plan.",
+    "Prior review findings outside these five commits are not re-adjudicated; the prior revision-keyed review is retained.",
+    "Zero parent cache rows in the control run are not zero numerical work: child pytest processes perform the measurements."
+  ],
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 3d79cac6341da4519f1f2f6403c5c23a433a5c81\nREVIEWED_HEAD_SHA: a95f55c17765217088b6b0b266174f1ca3f177eb\nVERDICT goal: The five incremental commits repair the previously blocking historical-order guard; tests/equilibrium/test_topology_read.py:1944 now measures five current reads under the live plan version 54 two-arm ruling and authorised partial landing.\nVERDICT done_when: tests/equilibrium/test_topology_read.py:1951 asserts current smooth order >=1.9; committed H200 receipts show orders 1.9757348872592038 and 2.130864895628803, and order-mutation-red.log shows the same limited assertion failing at 0.911024417297566 with EXIT=1.\nVERDICT write_paths: All 26 paths in the incremental diff are the assigned topology.py, solve_request.py, test_topology_read.py and the named evidence fragment/artifacts; no additional implementation path changed.\nVERDICT manifest: The reviewed manifest names a completed after_suite at 7b91c7290290d6a7e8dfd26955f8caedea84b931 with 2 passing external controls, but baseline_suite is empty; regression delta is unmeasured and the earlier gate truthfully retains 2 failed external controls alongside 8 passing repository checks.\nVERDICT diff: Read all five commits from 3d79cac6341da4519f1f2f6403c5c23a433a5c81 through a95f55c17765217088b6b0b266174f1ca3f177eb; only 93895112d596e328a6d88b5d8f2070df3d732367 changes product/test source and the remaining four retain measurements and controls, with unchanged historical receipts.\nCALL_SITES: nova/equilibrium/topology.py:2905 (policy operand use), nova/equilibrium/solve_request.py:365 (policy serialization), nova/equilibrium/solve_request.py:426 (policy restoration), nova/equilibrium/solve_request.py:650 (runtime receipt), nova/equilibrium/forward.py:2399 (existing policy resolver)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/equilibrium/test_topology_read.py:1944 replaces the historical-only fit with current fixed-radius reads while topology.py:2905 preserves the default 1.5-pitch floor.\nSCORE evidence: 17\nJUSTIFICATION evidence: The h200-order-repair.log and h200-order-controls.log raw digests match, current row fits reproduce, and the red order/reversal logs falsify the guards, but the reviewed manifest has no baseline_suite and its after_suite covers only the external controls.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five-commit diff touches exactly the 26 requested paths and changes no production consumer or Biot kernel outside the authorised repair.\nSCORE durability: 19\nJUSTIFICATION durability: test_topology_read.py:1951 fails an actual first-order mutation and :1967 fails when the historical-only implementation is restored, while the mutation/reversal harness itself remains in the reviewed run directory rather than the repository.\nSCORE fit: 20\nJUSTIFICATION fit: solve_request.py:249 extends the existing frozen policy and traced pytree leaves with nonnegative validation, and test_topology_read.py:1629 extracts its existing measurement implementation without changing its quadrature authority.\nSCORE reuse: 20\nJUSTIFICATION reuse: test_topology_read.py:1629 reuses the existing membership sweep and symmetric-difference helper for both arms, and topology.py:2905 parameterizes the existing radius calculation rather than adding a second read or support implementation.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163955173721-cfs-topology-read/manifest.md:21 follow-on: baseline_suite remains empty and after_suite names only the external control rerun; added_failure_count is null and added_failure_ids is [], not a measured zero; supply comparable completed baseline/head gates before asserting regression neutrality.\n",
+  "resolved_findings": [
+    {
+      "answering_commit": "93895112d596e328a6d88b5d8f2070df3d732367",
+      "evidence": "Historical guard passed with read disabled in both cases; live guard measures current code, fails a first-order mutation, and reversal fails both current-read probes.",
+      "id": "fca1879a505"
+    }
+  ],
+  "review_run_id": "r-20261006T000904931169-review-of-cfs-topology-read",
+  "review_scope": "Incremental review only: five commits since the prior reviewed head; approval of the order-guard repair within the authorised partial landing, not full kernel qualification.",
+  "reviewed_base_sha": "3d79cac6341da4519f1f2f6403c5c23a433a5c81",
+  "reviewed_head_sha": "a95f55c17765217088b6b0b266174f1ca3f177eb",
+  "reviewed_run_id": "r-20261005T163955173721-cfs-topology-read",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T00:13:41.557563+00:00",
+  "total": 116
+}

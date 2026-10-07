@@ -1,0 +1,96 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T16:07:20.638Z",
+  "dispatched_at": "2026-10-06T15:57:38Z",
+  "findings": [
+    {
+      "anchor": "nova/scripts/identify_source_cocos.py:858",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a71 must add this site, and its two consumers tests/test_mastcocos.py:21 and tests/test_io_cocos.py:33, to the importer census and delete the inline table in the same move, calling nova_cocos.identify_convention, or the standalone distribution ships beside a second copy of the very table it exists to single-source.",
+      "text": "cocos_from_digits re-declares the sixteen-row Sauter & Medvedev Table I inline at lines 862\u2013879, a second copy of the table nova/io/cocos.py:44 owns as CONVENTION_DIGITS, and its body is byte-for-byte the reverse lookup that nova.io.cocos.identify_convention already implements; the plan's stated premise that there is one factor table to make installable is false the moment \u00a71 lands and stays false after \u00a72, which only deletes the re-export",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/scripts/identify_source_cocos.py:862",
+      "id": "reuse_search-1",
+      "reason": "the incomplete reuse map is exactly what this item exists to produce; with this site added the plan migrates it to nova_cocos instead of leaving a second table behind, which is a one-line extension of the \u00a71 scope it already defines.",
+      "text": "the plan's search of nova enumerated the importers of nova.io.cocos (four modules plus five test modules, all verified present) but missed the duplicate that does not import it, and the same gap hides tests/test_mastcocos.py:21, which depends on the duplicate and never appears in the plan's list of five test modules",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cocos-standalone-distribution.html#s1",
+      "id": "interface_budget-1",
+      "reason": "the names are relocated and the old path is retained, so no public definition is added and \u00a72 carries the retirement disposition; the remedy is a clarifying sentence, not a change of design.",
+      "text": "\u00a71 introduces distribution nova-cocos and import package nova_cocos (thirteen public names) and does not itself name what that addition retires or merges, naming the retirement of the old import path only in the deferred \u00a72",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "29e8f26f0e7a3209c1a98d1dad5671016aa24e7c3fd915b5cffc3c17dfb095f5",
+  "plan_slug": "cocos-standalone-distribution",
+  "plan_version": 3,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "reckon-build coordinator",
+      "finding": "duplicate_owner-1",
+      "reason": "The script table is a deliberate independent oracle: tests/test_io_cocos.py states two copies of a published constant must be checked against each other and checks them row by row; folding it deletes the only independent check. v4 s1 names it as a check, not an owner.",
+      "when": "2026-10-06T16:08:36.501144+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "reckon-build coordinator",
+      "finding": "reuse_search-1",
+      "reason": "test_mastcocos.py imports cocos_from_digits, not nova.io.cocos, so it is unaffected by the move; the audit table stays as the cross-check (see duplicate_owner-1). v4 s1 now names the site.",
+      "when": "2026-10-06T16:08:36.504803+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "reckon-build coordinator",
+      "finding": "interface_budget-1",
+      "reason": "v4 s1 states its interface account: nova_cocos adds no public name; the thirteen names relocate, the old path stays as a re-export, s2 retires it.",
+      "when": "2026-10-06T16:08:36.507150+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "reckon-build coordinator",
+      "reason": "The script table is a deliberate independent oracle: tests/test_io_cocos.py states two copies of a published constant must be checked against each other and checks them row by row; folding it deletes the only independent check. v4 s1 names it as a check, not an owner.",
+      "when": "2026-10-06T16:08:36.501144+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "reckon-build coordinator",
+      "reason": "v4 s1 states its interface account: nova_cocos adds no public name; the thirteen names relocate, the old path stays as a re-export, s2 retires it.",
+      "when": "2026-10-06T16:08:36.507150+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "reckon-build coordinator",
+      "reason": "test_mastcocos.py imports cocos_from_digits, not nova.io.cocos, so it is unaffected by the move; the audit table stays as the cross-check (see duplicate_owner-1). v4 s1 now names the site.",
+      "when": "2026-10-06T16:08:36.504803+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T155723306754-plan-review-of-cocos-standalone-distribution",
+  "reviewed_blob_sha": "cddc361ace81ad3f52a876c629fb810349789893",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan moves the 224-line cocos.py behind its thirteen public names unchanged; one module hides the digit table and the composed-factor algebra, and no wrapper spread over that machinery is added.",
+    "duplicate_owner": "a finding \u2014 nova already holds two owners of Sauter & Medvedev Table I; the plan moves one into nova_cocos and leaves the duplicate literal table in nova/scripts/identify_source_cocos.py in place, so the standalone package is not the single source its done-when claims.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 adds a new distribution and import package (nova_cocos, thirteen public names) without stating in its own text that the old path is retained so no public name is added or removed, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan searched nova and imas-ambix and correctly reuses nova/io/cocos.py and the root hatch-vcs version owner, but its census of the table's owners in nova is incomplete: a second literal copy of the Sauter & Medvedev Table I sits in nova/scripts/identify_source_cocos.py:862, imports nothing from nova.io.cocos, and is therefore invisible to the plan's importer list.",
+    "thin_wrapper": "pass \u2014 the retained nova/io/cocos.py re-export is a temporary compatibility shim, and the plan states why it cannot be removed now (imas-ambix's four editable-path imports at imas_ambix/cocos.py:20, imas_ambix/challenge/convention.py:23, imas_ambix/data/cocos_convention.py:26, tests/data/test_cocos_convention.py:9, which the worker may not edit) and that \u00a72 retires it."
+  },
+  "section_digests": {
+    "_document": "d969a1a00170ca5a79fead6a49cadec35d03e5636d305dbde5695a193c13eab1",
+    "s1": "f724100c6efa6c4eb17db7ca9e1125394a0a99b8000f39a3eddbd78b1d8164e3",
+    "s2": "6779869cd975a335ff2c04a5baa4b4c3a80e5679c185e9e0b996c1b80ec97895"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T16:08:29.856597+00:00"
+}

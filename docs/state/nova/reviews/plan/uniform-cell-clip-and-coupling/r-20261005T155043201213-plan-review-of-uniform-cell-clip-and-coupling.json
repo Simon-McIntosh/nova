@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:57:57.329Z",
+  "dispatched_at": "2026-10-05T15:50:58Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:2714",
+      "id": "thin_wrapper-1",
+      "reason": "without naming the dispatch it retires, the \"one interaction operator\" lands as a third selectable mode and reproduces exactly the operator split the decision forbids.",
+      "text": "the design would land the unified clip-and-moment path as a third mode beside the existing `_active_support_clip_mode` string dispatch (values chord/exact/chord_cells, branch sites at lines 3239, 3329, 3374, 3417, 3430, 3526, 3548 choosing between two moment kernels); the decision names \"two kernels behind a dispatch\" and \"no host-side dispatch on cell geometry\" as rejected, so the plan must say the unified path replaces this dispatch, and it does not name it",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/clip_quadrature.py:714",
+      "id": "duplicate_owner-1",
+      "reason": "a \"one clip and one moment method\" that names five implementations but designates no owner cannot converge, and the named repair site may not be the function on the production call graph.",
+      "text": "the repair list in `f-20260909T1845` names `separatrix_clip._traced_clip` and `stencil_mesh.fixed_profile_current_moments`, but omits `clip_quadrature.clipped_support_current_moments`, the function `forward_operator.py` imports (lines 44-47) and calls to build clipped-cell moments (lines 337, 364, 3238, 3525); four further moment implementations coexist \u2014 `separatrix_clip.padded_polynomial_current_moments:496`, `polygon_moments.polygon_density_moments:187`, `stencil_mesh.fixed_profile_current_moments:480`, `stencil_mesh._direct_profile_current_moments:504` \u2014 and none is designated the single owner to extend, nor is any named for retirement",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0a3cc54d2729ff5c1b124117dbff3f223217212210991236b54277804d00dc76",
+  "plan_slug": "uniform-cell-clip-and-coupling",
+  "plan_version": 25,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T155043201213-plan-review-of-uniform-cell-clip-and-coupling",
+  "reviewed_blob_sha": "041e227e2f95c3add0e43d7016b145f5565d9cbc",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design's \"cell geometry as DATA not STRUCTURE\" (fixed shapes, vertex counts and supports padded to capacity, no data-dependent branching) is exactly the deep-module discipline that hides both tilings behind one traced operator, and it reuses the batch template already proven in this tree.",
+    "duplicate_owner": "a finding \u2014 the repair names `stencil_mesh.fixed_profile_current_moments`, but the clipped-cell moment function the production operator actually calls is `clip_quadrature.clipped_support_current_moments`, and four further moment implementations coexist with no owner named to extend nor anything retired.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 \u2014 the design sections add internal functions only; no section adds to any of the four families, so no retirement or merge is required of them.",
+    "reuse_search": "pass \u2014 the plan cites the existing machinery it extends by name (`separatrix_clip._traced_clip`, the profile-tables-into-stacked-member-leaves template now `StaticSourceStructure` + `ForwardOperatorBatch.map` in `forward_operator.py:2123,2265`), and a scout comment carries its 78 path:line reuse map, so the mechanism was searched rather than assumed.",
+    "thin_wrapper": "a finding \u2014 the unified path is designed beside the existing `_active_support_clip_mode` host dispatch selecting chord/exact moment kernels, of which the decision says \"two kernels behind a dispatch\" is rejected; the plan never names the dispatch it must replace."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:40.924598+00:00"
+}

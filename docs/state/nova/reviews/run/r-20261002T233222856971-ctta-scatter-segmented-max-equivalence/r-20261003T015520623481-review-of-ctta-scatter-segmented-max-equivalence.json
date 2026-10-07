@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own armed gate logs. baseline_suite: revision f7f823c667f9b65740a04d5de40d991e60a2cd4e, completed true, exit_status 0, failure_count 0, failure_ids [] (log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T233222856971-ctta-scatter-segmented-max-equivalence/ctta-scatter-segmented-max-equivalence-baseline-suite.log: 8 passed in 139.02s). after_suite: revision 93da36c7be39e44bf84376696a48130684c8f77d, completed true, exit_status 0, failure_count 0, failure_ids [] (log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T233222856971-ctta-scatter-segmented-max-equivalence/ctta-scatter-segmented-max-equivalence-after-suite.log: 8 passed in 135.19s). Both arms completed to their summary line, so added_failure_count is a measured zero (after_failure_ids minus baseline_failure_ids = []).",
+  "added_failure_ids": [],
+  "artifacts": [
+    "tests/test_contour_tree_scatter_equivalence.py",
+    "docs/evidence/fragments/contour-tree-topology-authority/ctta-scatter-segmented-max-equivalence.html",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T015520623481-review-of-ctta-scatter-segmented-max-equivalence/review-gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T015520623481-review-of-ctta-scatter-segmented-max-equivalence/review-negative-control.log"
+  ],
+  "commits_read": [
+    "06907398b1081984affc08f13537352ac3b3b126",
+    "35d6ee1a22f494d1537c33ba30cd1a9f94c6ddb3",
+    "93da36c7be39e44bf84376696a48130684c8f77d"
+  ],
+  "completed_at": "2026-10-03T02:17:28.919Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T01:55:51Z",
+  "evidence_inputs": "Reviewed f7f823c667f9b65740a04d5de40d991e60a2cd4e..93da36c7be39e44bf84376696a48130684c8f77d, three commits, two files (+250/-0), both inside the granted paths; the prior review's central finding (the test pinned a test-local identity and never exercised the product) is repaired. Reproduced independently: gate 7 passed EXIT=0 at 93da36c7b (reviewed worktree left clean); negative control (first_root pinned to slot 0 in a scratch copy) 3 failed, 4 passed, EXIT=1, failing ids exactly the declared three. added_failure_count measured 0 from the reviewed run's own arms (8 passed each). Two follow-ons; no blocking finding. The merged-receipt arc-set order dependence is recorded by the run as a measured limitation for the split-node subdivision, not by the combine these tests pin.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T233222856971-ctta-scatter-segmented-max-equivalence/manifest.md",
+      "line": "evidence_inputs",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control names the MAST carrier (646 vertices) as the mesh on which the join arc set moves. An independent scratch reproduction of the reviewed head under the same mutation (first_root pinned to slot 0) fails first on a certificate rung (468 vertices) for all three seeds. The three failing test ids are identical, so the guard the tests provide is real, but the run's stated failing mesh is not what a head reproduction produces; the negative-control log may have been taken from a copy whose certificate-rung fixtures differed. Re-run the control against the committed head and record the mesh it actually fails on."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T233222856971-ctta-scatter-segmented-max-equivalence/manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline and after suite arms both run tests/test_contour_tree_brute_force.py, a file this change does not touch, so the arms cannot regress the new test. The added-failure zero is correctly derived and valid, but the arms are no-regression evidence only; the new test file's own gate (7 passed) is the sole sensitivity measure for the combine. A future arm that also collects tests/test_contour_tree_scatter_equivalence.py would put the changed test inside the measured suite."
+    }
+  ],
+  "gate_arms_note": "Both suite arms are present, completed and readable; the added-failure count is a measured zero, not an unmeasured one.",
+  "item_verdicts": {
+    "call_sites": "verified the test drives the product sweep directly (_sweep_tree, build_contour_tree)",
+    "diff": "git diff f7f823c..93da36c7b touches two files (+250/-0), git diff --check clean. 06907398b adds the product-level tests; 35d6ee1a2 adds the evidence fragment; 93da36c7b replaces the earlier test-local scatter test. All reviewed artifacts read through git show and reproduced from a scratch copy of the reviewed head tree.",
+    "done_when": "tests/test_contour_tree_scatter_equivalence.py passes 7/7 at the reviewed head (independently reproduced in the reviewed worktree: 7 passed EXIT=0, 192.65s), and the product mutates to failure under the declared negative control (independently reproduced in a scratch copy of the head: 3 failed, 4 passed, EXIT=1, failing ids test_swept_arc_sets_are_invariant_to_carrier_edge_order[0], [1], [2], exactly the declared set). The brute-force suite adds no failure: baseline 8 passed EXIT=0 and after 8 passed EXIT=0, both arms completed to their summary line.",
+    "goal": "The prior review's central finding is repaired. The reviewed head replaces a test that pinned a test-local jax.numpy identity with product-level tests that import and drive the product sweep: _sweep_tree, build_contour_tree and _carrier_adjacency from nova.equilibrium.contour_tree. Two order-invariance tests permute the carrier edge storage order over the twelve certificate rungs and one MAST carrier under seeds 0,1,2; one asserts every receipt node field (node_vertex, node_psi, node_valid, critical_type, overflow) is bit-identical, the other sweeps the join and split trees directly and asserts both arc sets and node sets are invariant. A third hand-builds a triangle whose last-visited vertex has two active neighbours sharing one root and asserts a single arc with no spurious saddle. The followup item (4) is now named by tests that exercise the product, not argued in review.",
+    "manifest": "The reviewed manifest is complete: status complete, commit 93da36c7b, both changed paths listed, the green gate (7 passed), the declared negative control with its three failing ids, and both suite arms as JSON with revision, command, exit status, log path, completed and failure ids. Its evidence_inputs records the merged-receipt arc-set dependence as a measured limitation rather than a claim.",
+    "write_paths": "Three commits f7f823c..93da36c7b touch only tests/test_contour_tree_scatter_equivalence.py and docs/evidence/fragments/contour-tree-topology-authority/ctta-scatter-segmented-max-equivalence.html, +250/-0, both inside the granted repository paths. No nova/ file is touched (the product is owned by a peer node). The reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "The tests and the evidence fragment are committed with bodied conventional commits; the gate, negative-control and both suite-arm logs sit on disk under the run directory with revisions and literal commands. The repair is durable: the tests now fail when the product's position-dependent read is mutated, so a regression in the combine is caught by the committed suite rather than argued in review. Docked two because the negative-control mutation is a source edit in a scratch copy (not an injectable knob) and its declared failing mesh does not reproduce exactly.",
+    "evidence": "Every load-bearing claim was reproduced independently. Gate: the reviewed worktree at 93da36c7b runs 7 passed EXIT=0 (192.65s), worktree left clean. Negative control: in a scratch copy of the head under PYTHONPATH shadowing, mutating first_root = jnp.argmax(representative) to a fixed slot 0 gives 3 failed, 4 passed, EXIT=1, the failing ids exactly the three declared. added_failure_count is a measured zero from the reviewed run's own arms (baseline 8 passed EXIT=0; after 8 passed EXIT=0). Docked two because the declared negative-control log names the MAST carrier (646 vertices) as the failing mesh, while a faithful scratch reproduction of the head under the same mutation fails first on a certificate rung (468 vertices); the same three test ids fail either way, so the guard fires, but the run's stated failing mesh is not what the head reproduces (see finding).",
+    "fit": "Delivered as product-level pytest tests over the existing certificate-rung and MAST fixtures, matching the followup's 'named by a test' phrasing and reusing benchmarks.contour_tree_brute_force's fixture builders. The measured merged-arc limitation is recorded rather than asserted, keeping the test's claim (both raw swept arc sets and all receipt node fields) honest against the subdivision dependence it does not cover.",
+    "goal_fidelity": "The requested repair is delivered: the test now imports and drives the product's sweep (_sweep_tree, build_contour_tree, _carrier_adjacency), so the duplicate-root combine at contour_tree.py:326 is exercised rather than a re-implemented scatter. Docked three because the negative control targets the combine's representative selection (first_root), not the duplicate-index parents scatter itself; the manifest records that the direct scatter mutations were measured inert, which is consistent with the determinism the tests assert, but the guard that fires is order-invariance of the arc set under a source mutation, and its sensitivity to the parents scatter specifically is argued rather than shown.",
+    "scope_discipline": "Changes are confined to the two granted repository paths, +250 lines, no plan, sprint, index, product or out-of-scope file touched, and the reviewed worktree is clean. The review's own writes are the two review-record paths only; nothing was written into the reviewed tree."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: f7f823c667f9b65740a04d5de40d991e60a2cd4e\nREVIEWED_HEAD_SHA: 93da36c7be39e44bf84376696a48130684c8f77d\nVERDICT: pass-with-follow-ons; the prior review's central finding is repaired with product-level tests.\nSCORE goal_fidelity: 17\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 19\nTOTAL: 92\nADDED_FAILURES: measured 0 (both suite arms completed, 8 passed each, no failing ids).\nVERDICT goal: The prior review's central finding is repaired; see item_verdicts.goal.\nVERDICT done_when: gate 7 passed EXIT=0 at head (reproduced); negative control 3 failed 4 passed EXIT=1 (reproduced).\nVERDICT write_paths: three commits, two files, both in scope, worktree clean.\nVERDICT manifest: complete; evidence_inputs honest about the measured merged-arc limitation.\nVERDICT diff: +250/-0 over two files; git diff --check clean.\nJUSTIFICATION goal_fidelity: product-level tests delivered; docked because the negative control targets the representative selection, not the duplicate-index scatter directly.\nJUSTIFICATION evidence: gate and negative control independently reproduced; docked for the negative-control failing-mesh discrepancy.\nJUSTIFICATION scope_discipline: confined to granted paths; reviewed worktree clean.\nJUSTIFICATION durability: committed tests that fail under product mutation; docked for the scratch-copy control and the mesh discrepancy.\nJUSTIFICATION fit: product-level pytest over existing fixtures, matching the followup.",
+  "review_base_sha": "a51a137af4b354968bdc5f371842a1f57c686398",
+  "review_run_id": "r-20261003T015520623481-review-of-ctta-scatter-segmented-max-equivalence",
+  "reviewed_base_sha": "f7f823c667f9b65740a04d5de40d991e60a2cd4e",
+  "reviewed_commit": "93da36c7b",
+  "reviewed_head_sha": "93da36c7be39e44bf84376696a48130684c8f77d",
+  "reviewed_revision": "93da36c7be39e44bf84376696a48130684c8f77d",
+  "reviewed_run_id": "r-20261002T233222856971-ctta-scatter-segmented-max-equivalence",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-scatter-segmented-max-equivalence",
+  "reviewer_node": "review-of-ctta-scatter-segmented-max-equivalence",
+  "reviewer_run_id": "r-20261003T015520623481-review-of-ctta-scatter-segmented-max-equivalence",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "section": "s2",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T02:20:00Z",
+  "total": 92,
+  "verdict": "pass-with-follow-ons"
+}

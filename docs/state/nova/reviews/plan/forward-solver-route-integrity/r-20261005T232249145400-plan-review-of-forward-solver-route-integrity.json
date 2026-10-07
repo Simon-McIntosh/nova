@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:26:52.763Z",
+  "dispatched_at": "2026-10-05T23:23:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:89",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a72 owner note already resolves this (\"extends that gate with the 1000-cell row rather than adding a second one\"), so the section text is stale but the dispatch guidance is correct.",
+      "text": "\u00a72's done-when prescribes \"an executable-size gate sits beside the memory gate\", but benchmarks/solve_program_size_gate.py already implements it (`TARGET_300_EXECUTABLE_BYTES = 50_000_000`, `MAX_300_SOLVE_INSTRUCTIONS`, `REQUIRED_CELLS = (300, 1000)`), is fed by benchmarks/program_scope_census.py and covered by tests/test_solve_program_size.py and tests/test_solve_program_size_gate.py, so a node dispatched to \"add\" the gate would fork it",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:441",
+      "id": "duplicate_owner-2",
+      "reason": "the followup should be closed (or rewritten to its true remainder) so a node is not dispatched to redo a landed repair.",
+      "text": "followup f-fsri-audit-land-scan-pin (status open) instructs a node to \"inventory the lax.scan form by mechanism, add that test to the route gate\", but benchmarks/program_scope_census.py:1056 `_loop_inventory` already carries the `jax.lax.scan` row and tests/test_solve_program_size.py:213 `test_loop_inventory_finds_both_compiled_slice_budgets` already asserts it, so the open followup would re-land completed work",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:90",
+      "id": "reuse_search-1",
+      "reason": "the owner note records the section is superseded by converged-forward-solve and \"not dispatched again\", so no node acts on the stale done-when.",
+      "text": "\u00a72's done-when lists \"trips and Newton steps run as lax.scan or while_loop with fixed telemetry slots; the read is evaluated once per trip\", which the \u00a72 landing entries (shared trip body d8bbc049, shared promotion bodies faf2a7e0) measure as already landed, yet the section-level done-when still reads as unstarted work",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "95a150b871df82e2446cd11419619b7b0026902a2f3f96e96177ae973c51e767",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 114,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "The reviewer's own verdict is would-not-change: the section 2 owner note already states that the existing benchmarks/solve_program_size_gate.py is extended with the 1000-cell row rather than a second gate added, and the section is superseded by converged-forward-solve and not dispatched again.",
+      "when": "2026-10-05T23:30:13.238970+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:30:14.116969+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "The reviewer's own verdict is would-not-change: the section 2 landing entries record the scan and shared-body work as landed and the owner note marks the section superseded by converged-forward-solve, so no node acts on the stale done-when.",
+      "when": "2026-10-05T23:30:14.712225+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T232249145400-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "5d8585ccb175c0b4b79ad2ba97ea617550ef70b3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73's one-body state machine exists at nova/equilibrium/fixed_point.py:972 (`operator_request_body`) with nova/equilibrium/fixed_point.py:923 (`OperatorRequestKind`), one body behind six request kinds; \u00a72 uses lax.scan/while_loop primitives rather than new wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a72's done-when adds an executable-size gate, but that gate already exists as benchmarks/solve_program_size_gate.py, and the followup audit-land-scan-pin re-dispenses a loop-inventory repair already landed in benchmarks/program_scope_census.py.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the remaining sections extend existing gate rows (benchmarks/solve_program_size_gate.py) and the already-committed request machine (fixed_point.py), and add no public definition, CLI option, MCP view or refusal family.",
+    "reuse_search": "pass \u2014 every design section names the file it extends (fixed_point.py, forward.py, forward_operator.py, reduced_newton.py; \u00a72's gate; \u00a74's lane scripts) and the composed record's owner notes cite the existing owners, all of which I opened and confirmed present in the tree.",
+    "thin_wrapper": "pass \u2014 \u00a74's served_entries change extends scripts/h200_test_lane/cache_guard.py (its current counter is `directory_entry_count`, an `rglob` file count at cache_guard.py:209/218) toward the program-key owner scripts/h200_test_lane/cache_reuse_summary.py:63 (`served_keys`); the owner note records \"no second counter\"."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:30:12.300101+00:00"
+}

@@ -1,0 +1,91 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T11:33:47.743Z",
+  "dispatched_at": "2026-10-06T11:28:30Z",
+  "findings": [
+    {
+      "anchor": "tests/test_filepath.py:259",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite and reuse the existing coverage rather than re-add a duplicate test, and should spend the node's budget on the binary and candidate-search branches that genuinely lack coverage.",
+      "text": "\u00a76 proposes to add \"the predicate's offending branch directly: a non-exempt path whose reader returns the root name is returned as an offender, and an exempt one is not\", but `test_worktree_path_offenders_skips_the_exemption_set` already does exactly this (non-exempt `docs/figures/x/a.json` returned, four exempt paths skipped)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/program_scope_census.py:1091",
+      "id": "reuse_search-2",
+      "reason": "the design either applies the rewrite at both producers or states in its own text that this dump is out of the committed-artifact scope (its `--run-dir` default is `os.environ.get(_RUN_DIR_ENV, Path.cwd())`, not a tracked path), so a later reader is not left to rediscover it.",
+      "text": "\u00a76 names `benchmarks/production_solve_host_profile.py` as \"its producer\" of the committed cProfile dump and wires the new rewrite helper to it, but `profiler.dump_stats(profile_path)` at this second site writes `cached-entry.prof` under `--run-dir` and embeds the same absolute worktree frame paths on every run from a worktree",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/scripts.py:37",
+      "id": "duplicate_owner-1",
+      "reason": "unnamed, `_staged_files` survives and the guard has three enumerations over three different file sets (working tree, index, staged-only), which is the duplicate-owner defect the item exists to catch; the section must name `scripts.py` and the test helper as the sites it merges into `filepath`.",
+      "text": "\u00a76 gives `nova/database/filepath.py` \"one candidate search\" so \"the hook and the test share one enumeration\", but the hook reaches the guard through `nova.database.scripts relativize --check`, which enumerates with `_staged_files`/`_staged_text` (scripts.py:37-52), and the test enumerates with `_tracked_files` (tests/test_artifacts_carry_no_worktree_paths.py:20-26); the plan does not name these two as retired by the new owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "artifacts-carry-no-worktree-paths#s6",
+      "id": "interface_budget-1",
+      "reason": "with the week's public_definitions budget at 0, \u00a76 must state in its own text what it retires or merges (the candidate search can retire `_staged_files`/`_tracked_files`; the adapter retires nothing) or why the addition is unavoidable.",
+      "text": "the section adds two public definitions to `nova/database/filepath.py` (the cProfile dump adapter and the candidate search) and cites no retirement or merge for either, and no reason none is possible",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5f3aef33082fe861ae7bd2b00d686db436dbe9114f276c2e6919f9681aadf677",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 49,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:35:09.175863+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:35:09.625938+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:35:08.223785+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:35:08.716555+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T112815452334-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "a58bbbeba0fd936f03e389684fab130b7c0be740",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a76 adds the rule's binary adapter and the candidate enumeration to the existing deep owner `nova/database/filepath.py`, behind functions smaller than the behaviour they hide, rather than spreading the guard across new modules.",
+    "duplicate_owner": "a finding \u2014 `nova/database/scripts.py::_staged_files`/`_staged_text` and `tests/test_artifacts_carry_no_worktree_paths.py::_tracked_files` are parallel enumerations the plan means to merge into the new `filepath` candidate search but does not name, so the owner may gain a third.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a76 adds two public definitions (the cProfile adapter and the candidate search) and names no retirement, nor why nothing can be retired.",
+    "reuse_search": "a finding \u2014 the plan searched the owner module well but did not search for the existing predicate-branch test (`tests/test_filepath.py:259`) it proposes to re-add, nor for the second `dump_stats` producer (`benchmarks/program_scope_census.py:1091`).",
+    "thin_wrapper": "pass \u2014 the proposed cProfile helper is not a bare forwarder: it loads the dump, rewrites each recorded frame path, and writes the container back, work the rule alone cannot do; no existing shared pstats writer exists for it to extend instead."
+  },
+  "section_digests": {
+    "_document": "2ef8b7a57de154e8e7aca236a612afcc0b7934b729a8c7488e7324330d783a61",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "0391cba326b1fc80516ff770fbaa656f6d1a1ac9f2f9394de0a78cc02dfdf265",
+    "s3": "53237d5d24293dce23c291a9ae8509b4507b5c63e879ea07ef804bc3862a43b5",
+    "s4": "20494cf065ef7899a5e3c7ace93b3afcc0ec3d03613a4dd566446a54c46448ac",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b",
+    "s6": "d6be6effee2c3087365d1089b107a0dadf3d740a045c2db98055de50d7e55982"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T11:35:07.547147+00:00"
+}

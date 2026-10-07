@@ -1,0 +1,71 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest records completed baseline_suite and after_suite arms with failure_count 0 and failure_ids [] in each. Their supplied failure-id set difference is empty; their commands differ, so this is not a whole-suite regression claim.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T234025357423-review-of-fsri-picard-implicit-derivative/review-picard-implicit-derivative.log: 3 passed in 12.92s, EXIT=0"
+  ],
+  "completed_at": "2026-10-02T23:59:30Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T23:41:14Z",
+  "evidence_inputs": {
+    "comparison_verdict": "Root probe=3 and steps 293.18627897744824, 87.95588369323447, 29.318627897744825; head probe=0 and steps 460.2773665281249, 138.08320995843746, 46.02773665281249. Same fixture/direction/step is not established.",
+    "head_numerical_check": "Head current implicit -1.9896520954618935 versus central -1.989652251401126: 7.837511922293643e-08 relative error; head flux implicit -0.0031463096377653014 versus central -0.0031463100220860164: 1.2214966494446274e-07.",
+    "mechanism_verdict": "The convergence guard, terminal shadow, forward linear adjoint, and reverse/JVP rule are implemented and the focused independent test passed."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T221031289251-fsri-picard-derivative-contract-rca/h200-corrected-picard-derivative-contract.log",
+      "line": "14",
+      "severity": "blocking",
+      "text": "Predecessor receipt probe=3 and different finite-difference steps."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/picard-derivative-contract-direct.log",
+      "line": "14",
+      "severity": "blocking",
+      "text": "Head receipt probe=0 and different finite-difference steps; its own central difference agrees but is not paired with predecessor conditions."
+    },
+    {
+      "file": "benchmarks/picard_derivative_contract.py",
+      "line": "123-155",
+      "severity": "blocking",
+      "text": "The benchmark reselects direction and scales its step dynamically."
+    }
+  ],
+  "follow_ons": [
+    "Pin fixture identity, direction, and absolute step in a committed paired regression witness and rerun both revisions with driver digests.",
+    "Add a physical-fixture test that proves topology masks and partitions remain terminally frozen in reverse and JVP."
+  ],
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT fail: implementation mechanics pass, but the required predecessor-to-head numerical comparison is not reproducible because probe and absolute step changed and predecessor benchmark provenance is incomplete.",
+  "review_run_id": "r-20261002T234025357423-review-of-fsri-picard-implicit-derivative",
+  "reviewed_base_sha": "f3ce0410b179d816220384eea0dea946a870154b",
+  "reviewed_head_sha": "c75057d59d9a4a4baaf0fcf9e38ba2b3bf43c65b",
+  "reviewed_revision": "c75057d59d9a4a4baaf0fcf9e38ba2b3bf43c65b",
+  "reviewed_run_id": "r-20261002T230005440753-fsri-picard-implicit-derivative",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-picard-implicit-derivative",
+  "reviewer_node": "review-of-fsri-picard-implicit-derivative",
+  "reviewer_run_id": "r-20261002T234025357423-review-of-fsri-picard-implicit-derivative",
+  "scores": {
+    "durability": 16,
+    "evidence": 8,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T23:56:18Z",
+  "total": 75,
+  "verdict": "fail"
+}

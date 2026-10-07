@@ -1,0 +1,117 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "0 added. From the reviewed manifest's own suite fields, base failure_ids = [tests/test_render_receipt_paths.py::test_the_scan_reaches_every_receipt, ::test_each_driver_uses_the_shared_path_helper] and after failure_ids = [] -> delta 0. arms.log confirms it: the AFTER arm is 69 passed EXIT=0, and the two failures the file also prints belong to its BASE arm (base test files run in a scratch tree that omits benchmarks/sol_ledger_current_census.py, FileNotFoundError) \u2014 scaffold, not head. NOTE: a mechanical read of the named logs disagrees \u2014 baseline-arm.log (baseline_suite.log_path) ends EXIT=143 with no summary, while arms.log (after_suite.log_path) carries both arms, so reckon's added_failures_from_gate_logs derives 2 and would cap the total at 5. The mechanical figure is an artifact of the combined arms.log; the true count is 0.",
+  "blocking_finding_count": 0,
+  "completed_at": "2026-10-06T03:58:39.364Z",
+  "dispatched_at": "2026-10-06T03:39:50Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "after_suite.log_path names arms.log, which is a single file holding a full-text arm per comparison (AFTER arm at lines 3-8, BASE arm at lines 10-62). The reviewed change's real head arm is the AFTER arm (69 passed, EXIT=0, no failures), but because the BASE arm's two test_render_receipt_paths.py failures are printed in the same file, reckon's mechanical derivation (review.py added_failures_from_gate_logs, called on read via annotate_review_of_run) takes them as head failures and computes added_failure_count 2, capping the review total at ADDED_FAILURES_TOTAL_CAP=5. The honest count is 0. A per-arm log (or an after-only extraction) removes the hazard; the manifest should name one."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "baseline_suite records completed:true and failure_ids for the two scratch-scaffold failures, but the log it names (baseline-arm.log) is not the arm that produced them: it ends '.......F.F.FTerminated' then 'EXIT=143' with no pytest summary, so it is an unreadable terminated run. The readable base arm is the BASE section of arms.log (2 failed, 58 passed, 22 skipped, EXIT=1). A manifest that names an unreadable log for a completed arm cannot support its own completed:true."
+    },
+    {
+      "file": "nova/database/scripts.py",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "\u00a72's surface accounting describes the relativize subcommand as also having a --check mode that reads the files staged for commit and exits nonzero, naming each non-exempt offender, and names worktree_path_offenders as the predicate the commit check and the repository test share. At head the subcommand has only the in-place apply mode (no --check), and worktree_path_offenders has no production consumer \u2014 only tests/test_filepath.py:259 and docs. The node's report defers --check to \u00a74 ('--check is not added (it belongs to the \u00a74 guard node)'); that is a defensible split, but \u00a72's own paragraph states the mode as part of the command surface and \u00a72's done-when does not name it, so the ownership is ambiguous and a coordinator should settle it before \u00a74."
+    },
+    {
+      "file": "docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-rewrite-data-artifacts.html",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "The landing fragment says docs/evidence/archive/figure-and-solver-audit-landed.html carries 'a path split by a line wrap'. That source line (996 at head) is a single line: the span is broken by a literal space after 's19-northstar/' (an HTML source artifact), not by a newline. The function leaves it unmapped because the layout is space-broken/incomplete, not because of a line wrap; the outcome (report and leave) is correct but the stated reason is inaccurate."
+    }
+  ],
+  "follow_on_finding_count": 4,
+  "gate_logs": {
+    "base": {
+      "completed": false,
+      "exit_status": 143,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/baseline-arm.log",
+      "note": "named by baseline_suite; terminated, no pytest summary",
+      "revision": "f9940c5753b1514907bdf0768b9c2a5f72c284ee"
+    },
+    "base_readable_arm": {
+      "completed": true,
+      "exit_status": 1,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/arms.log",
+      "note": "BASE section of arms.log: 2 failed, 58 passed",
+      "revision": "f9940c5753b1514907bdf0768b9c2a5f72c284ee"
+    },
+    "head": {
+      "completed": true,
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/arms.log",
+      "note": "AFTER section of arms.log: 69 passed",
+      "revision": "ec1a51c366de131102f73a2389a8191b278e62c1"
+    }
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "relativize_worktree_paths consumed by repository_relative (filepath.py:188) and the relativize subcommand (scripts.py:33); worktree_path_offenders consumed only by tests/test_filepath.py:259 and docs.",
+    "diff": "Read commit by commit: ce26c583b adds the rule+predicate+subcommand+tests (243+/6-), 997da31d1 the 1,079-file rewrite (4,457+/4,457-), ec1a51c36 the landing fragment (53+).",
+    "done_when": "tests/test_filepath.py gains the required mapping/idempotence/delegation/unmapped tests (independently green 40 passed/3 skipped); the declared negative control reddens 2 mapping tests EXIT=1; gate (b) re-apply independently 0 mismatches. The literal 'no data file contains the pattern' is unmet by 5 files, all unmappable per \u00a72's body.",
+    "goal": "Owner, predicate, constants, delegation and subcommand delivered in nova/database/filepath.py + nova/database/scripts.py; the census, the 1,079-file rewrite and the 5 unmappable residuals all reconcile arithmetically. --check mode absent (deferred to \u00a74 by the node).",
+    "manifest": "Read; status complete; three commits; gate logs gate-a/b/c, arms.log, negative-control.log, relativize-apply.log present. baseline_suite/after_suite log wiring is defective (see findings).",
+    "write_paths": "Diff limited to the three declared .py files + 1,079 data files + the landing fragment; no plan edit, no .sh/.sbatch/.png/.svg change."
+  },
+  "justifications": {
+    "durability": "tests/test_filepath.py gains nine tests (21 functions at head vs 12 at base) covering every \u00a72 done-when item \u2014 full-path mapping, bare-root -> '.', the legacy .cache root, same-bytes-outside-span, idempotence, foreign-worktree unmapped-unchanged, incomplete-layout unmapped, repository_relative delegation on a removed worktree, and the offender exemption set \u2014 all built from WORKTREE_ROOT and reddened by the declared mutation. Durability is held below full because \u00a72's own guard (the \u00a74 hook and repository test, and the --check consumer of worktree_path_offenders) is not in this node, so at head worktree_path_offenders has no production consumer, and a downstream reader re-deriving added failures from the named logs is misled by the combined arms.log.",
+    "evidence": "The mechanical gate is reproduced independently under a scratch tree: I re-ran the node's check_reapply.py (review-gate-b.log) and got the same verdict, 0 mismatches / 0 non-idempotent / 433 rewritten JSON parse clean, EXIT=0 \u2014 the rewrite is exactly the function applied to each file's base blob. I re-ran tests/test_filepath.py against the head code in a scratch extraction (review-gate-c.log): 40 passed, 3 skipped, EXIT=0, matching gate-c. The declared negative control is sound: negctl/filepath_disabled.py differs from head by one line (_WORKTREE_PROJECT -> r'(?!nova)'), and the two mapping tests redden EXIT=1 (negative-control.log). The record is marked down because the reviewed run's baseline_suite / after_suite logs are defective: baseline_suite names baseline-arm.log and records completed:true while that log ends EXIT=143 ('Terminated', no pytest summary), and after_suite names arms.log, a combined two-arm log, so reckon's own added-failure derivation (review.py added_failures_from_gate_logs) reads the BASE arm's two failures as head failures and computes added_failure_count 2 (capping the total at 5). The true added count is 0: arms.log's AFTER arm is 69 passed EXIT=0.",
+    "fit": "The rule sits at the plan's named seam: nova/database/filepath.py owns the pattern and the exemption set as module constants, every other file imports them, and repository_relative delegates rather than defining a second copy \u2014 the plan's explicit 'one definition' requirement. The subcommand joins the filepath click group already registered as this module's command-line owner in pyproject.toml ([project.scripts] filepath), so no new command surface.",
+    "goal_fidelity": "\u00a72's core deliverable is delivered and independently re-derived: one rule owner (relativize_worktree_paths) + one predicate (worktree_path_offenders) + two module constants in nova/database/filepath.py, repository_relative delegating its worktree case to the same matcher, and a relativize subcommand on the existing filepath click group (nova/database/scripts.py:33). I applied the function to every one of the 1,147 tracked files the census names: 65 are launch scripts (.sh/.sbatch/.py) deferred to \u00a73, 1,077 data files are clean, and exactly 5 data files retain the pattern with spans the function returns unmapped (9 spans). The arithmetic reconciles with the plan: 1,082 data files carried the pattern at base f9940c575, 1,079 were rewritten (997da31d1, 4,457 insertions == 4,457 deletions), 3 carried only an unmappable mention. Two points keep this below full marks. \u00a72's stated done-when is literally 'no data file contains the pattern', which 5 data files contradict; \u00a72's own body requires unmappable forms to be reported and left, so the node's reading is defensible but the done-when text is unmet. And \u00a72's surface accounting names a --check staged-file mode on the relativize subcommand, which is absent at head; the node's report defers it to \u00a74 ('--check is not added (it belongs to the \u00a74 guard node)'), a reasonable reading but one \u00a72's own paragraph does not state.",
+    "reuse": "No new machinery: the work extends the existing nova/database/filepath.py and the existing filepath click group, and reuses the lexical approach the plan cites from reckon's _rewrite_worktree_roots without importing it. The tests extend the existing tests/test_filepath.py rather than a new file.",
+    "scope_discipline": "The reviewed range ce26c583b^..ec1a51c36 touches exactly three .py files (nova/database/filepath.py, nova/database/scripts.py, tests/test_filepath.py), 1,079 data files and one landing fragment. No plan file is edited, and no .sh/.sbatch/.png/.svg changes anywhere in the range (grep count 0), matching \u00a72's 'No launch script, PNG or SVG changes, and no solve runs'. The three .py paths and the fragment are all inside the manifest's declared write paths."
+  },
+  "limitations": [
+    "The baseline/after suites the reviewed manifest names were not re-run by this review (they are login-node pytest runs over the whole repo; re-running contends with peers). The AFTER arm (69 passed EXIT=0) is read from arms.log, and the mechanical gate that matters (check_reapply.py) was independently reproduced.",
+    "The 5 residual data files each carry a span the rule cannot model while keeping the same-bytes/same-line-endings promise: cpu-compile-abort-landed.html is truncated to the project directory, figure-and-solver-audit-landed.html is space-broken after s19-northstar/, the two fsa fragments and thin-interfaces.md mention the bare root as a prose subject. Rewording them (not rewriting) is \u00a73's, per the node's report.",
+    "worktree_path_offenders and the relativize --check mode have no production consumer at head; the \u00a74 hook is where they are wired."
+  ],
+  "node": "review-of-acnwp-rewrite-data-artifacts",
+  "project": "nova",
+  "raw_text": "VERDICT goal: Owner, predicate, constants, delegation and subcommand delivered in nova/database/filepath.py + nova/database/scripts.py; the census, the 1,079-file rewrite and the 5 unmappable residuals all reconcile arithmetically. --check mode absent (deferred to \u00a74 by the node).\nVERDICT done_when: tests/test_filepath.py gains the required mapping/idempotence/delegation/unmapped tests (independently green 40 passed/3 skipped); the declared negative control reddens 2 mapping tests EXIT=1; gate (b) re-apply independently 0 mismatches. The literal 'no data file contains the pattern' is unmet by 5 files, all unmappable per \u00a72's body.\nVERDICT write_paths: Diff limited to the three declared .py files + 1,079 data files + the landing fragment; no plan edit, no .sh/.sbatch/.png/.svg change.\nVERDICT manifest: Read; status complete; three commits; gate logs gate-a/b/c, arms.log, negative-control.log, relativize-apply.log present. baseline_suite/after_suite log wiring is defective (see findings).\nVERDICT diff: Read commit by commit: ce26c583b adds the rule+predicate+subcommand+tests (243+/6-), 997da31d1 the 1,079-file rewrite (4,457+/4,457-), ec1a51c36 the landing fragment (53+).\nCALL_SITES: relativize_worktree_paths consumed by repository_relative (filepath.py:188) and the relativize subcommand (scripts.py:33); worktree_path_offenders consumed only by tests/test_filepath.py:259 and docs.\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: \u00a72's core deliverable is delivered and independently re-derived: one rule owner (relativize_worktree_paths) + one predicate (worktree_path_offenders) + two module constants in nova/database/filepath.py, repository_relative delegating its worktree case to the same matcher, and a relativize subcommand on the existing filepath click group (nova/database/scripts.py:33). I applied the function to every one of the 1,147 tracked files the census names: 65 are launch scripts (.sh/.sbatch/.py) deferred to \u00a73, 1,077 data files are clean, and exactly 5 data files retain the pattern with spans the function returns unmapped (9 spans). The arithmetic reconciles with the plan: 1,082 data files carried the pattern at base f9940c575, 1,079 were rewritten (997da31d1, 4,457 insertions == 4,457 deletions), 3 carried only an unmappable mention. Two points keep this below full marks. \u00a72's stated done-when is literally 'no data file contains the pattern', which 5 data files contradict; \u00a72's own body requires unmappable forms to be reported and left, so the node's reading is defensible but the done-when text is unmet. And \u00a72's surface accounting names a --check staged-file mode on the relativize subcommand, which is absent at head; the node's report defers it to \u00a74 ('--check is not added (it belongs to the \u00a74 guard node)'), a reasonable reading but one \u00a72's own paragraph does not state.\nSCORE evidence: 14\nJUSTIFICATION evidence: The mechanical gate is reproduced independently under a scratch tree: I re-ran the node's check_reapply.py (review-gate-b.log) and got the same verdict, 0 mismatches / 0 non-idempotent / 433 rewritten JSON parse clean, EXIT=0 \u2014 the rewrite is exactly the function applied to each file's base blob. I re-ran tests/test_filepath.py against the head code in a scratch extraction (review-gate-c.log): 40 passed, 3 skipped, EXIT=0, matching gate-c. The declared negative control is sound: negctl/filepath_disabled.py differs from head by one line (_WORKTREE_PROJECT -> r'(?!nova)'), and the two mapping tests redden EXIT=1 (negative-control.log). The record is marked down because the reviewed run's baseline_suite / after_suite logs are defective: baseline_suite names baseline-arm.log and records completed:true while that log ends EXIT=143 ('Terminated', no pytest summary), and after_suite names arms.log, a combined two-arm log, so reckon's own added-failure derivation (review.py added_failures_from_gate_logs) reads the BASE arm's two failures as head failures and computes added_failure_count 2 (capping the total at 5). The true added count is 0: arms.log's AFTER arm is 69 passed EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The reviewed range ce26c583b^..ec1a51c36 touches exactly three .py files (nova/database/filepath.py, nova/database/scripts.py, tests/test_filepath.py), 1,079 data files and one landing fragment. No plan file is edited, and no .sh/.sbatch/.png/.svg changes anywhere in the range (grep count 0), matching \u00a72's 'No launch script, PNG or SVG changes, and no solve runs'. The three .py paths and the fragment are all inside the manifest's declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_filepath.py gains nine tests (21 functions at head vs 12 at base) covering every \u00a72 done-when item \u2014 full-path mapping, bare-root -> '.', the legacy .cache root, same-bytes-outside-span, idempotence, foreign-worktree unmapped-unchanged, incomplete-layout unmapped, repository_relative delegation on a removed worktree, and the offender exemption set \u2014 all built from WORKTREE_ROOT and reddened by the declared mutation. Durability is held below full because \u00a72's own guard (the \u00a74 hook and repository test, and the --check consumer of worktree_path_offenders) is not in this node, so at head worktree_path_offenders has no production consumer, and a downstream reader re-deriving added failures from the named logs is misled by the combined arms.log.\nSCORE fit: 18\nJUSTIFICATION fit: The rule sits at the plan's named seam: nova/database/filepath.py owns the pattern and the exemption set as module constants, every other file imports them, and repository_relative delegates rather than defining a second copy \u2014 the plan's explicit 'one definition' requirement. The subcommand joins the filepath click group already registered as this module's command-line owner in pyproject.toml ([project.scripts] filepath), so no new command surface.\nSCORE reuse: 19\nJUSTIFICATION reuse: No new machinery: the work extends the existing nova/database/filepath.py and the existing filepath click group, and reuses the lexical approach the plan cites from reckon's _rewrite_worktree_roots without importing it. The tests extend the existing tests/test_filepath.py rather than a new file.",
+  "review_run_id": "r-20261006T033916439656-review-of-acnwp-rewrite-data-artifacts",
+  "review_scope": "Independent review of the \u00a72 worktree-path rewrite: the rule in nova/database/filepath.py, the 1,079-file data rewrite, the tests and the negative control, against the plan's \u00a72 and the node's done-when. Read-only; an independent re-run of the mechanical re-apply gate and of the focused test file, plus a full tracked-file census scan; no solve, no figure render, no re-run of the repo-wide suite arms.",
+  "reviewed_base_sha": "f9940c5753b1514907bdf0768b9c2a5f72c284ee",
+  "reviewed_commits": [
+    "ce26c583bac31d12a631826ea9b984aec4449ed2",
+    "997da31d192e17d7c86e89755bb21dd175cb1642",
+    "ec1a51c366de131102f73a2389a8191b278e62c1"
+  ],
+  "reviewed_head_sha": "ec1a51c366de131102f73a2389a8191b278e62c1",
+  "reviewed_run_id": "r-20261006T025410524539-acnwp-rewrite-data-artifacts",
+  "reviewer": "review-of-acnwp-rewrite-data-artifacts",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T03:57:04.343798+00:00",
+  "total": 102,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033916439656-review-of-acnwp-rewrite-data-artifacts/review-gate-b.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033916439656-review-of-acnwp-rewrite-data-artifacts/review-gate-c.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T033916439656-review-of-acnwp-rewrite-data-artifacts/review-census-scan.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/arms.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/baseline-arm.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/negative-control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T025410524539-acnwp-rewrite-data-artifacts/relativize-apply.log"
+  ]
+}

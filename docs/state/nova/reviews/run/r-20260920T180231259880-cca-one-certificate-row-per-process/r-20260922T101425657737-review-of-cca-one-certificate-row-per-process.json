@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/solve_program_size_gate.py:2627 main() reached by the python -m invocation lane.sh runs",
+    "benchmarks/diiid_gate_frame_identity.py:78 which imports EmptyIdentitySetError and _require_identity_rows from the module"
+  ],
+  "completed_at": "",
+  "dimensions_reviewed": [
+    "durability",
+    "evidence",
+    "fit",
+    "goal_fidelity",
+    "scope_discipline"
+  ],
+  "dispatched_at": "2026-09-22T10:14:25.657737+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/solve_program_size_gate.py",
+      "line": "2170",
+      "text": "within_one_program_load compares the sampled peak against CERTIFICATE_CHILD_MAP_CEILING = 2 * CERTIFICATE_PROGRAM_LOAD_MAPS[0] = 33578 (line 62) while its name and the done_when compare against one load (16789 to 17620), so it reports True for weak-rotation-reactor-static at 24750 maps: the flag cannot show one-load headroom and asserts it by name anyway."
+    },
+    {
+      "file": "benchmarks/solve_program_size_gate.py",
+      "line": "2164",
+      "text": "the per-row entry's exit_code is the probe wrapper's return code and the child's own status is in probe_exit_code (line 2165), so the committed receipt and lane.log print exit 0 for four rows the plan's landing table prints as exit 1, and a reader of the receipt alone is told a failing child exited cleanly."
+    },
+    {
+      "file": "tests/test_certificate_baseline_revision.py",
+      "line": "387",
+      "text": "the merged-shape case drives its children through the inline _CHILD_ROW_SCRIPT (line 86) and the row API rather than through certificate_row_command (benchmarks/solve_program_size_gate.py:1969), so the command building and argparse plumbing the production lane depends on is asserted by no committed case."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md",
+      "line": "13",
+      "text": "the commits list cites 0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1 for the evidence commit, which resolves to no object (git cat-file -t: could not get object info); the evidence commit at the reviewed tree's HEAD is 0028295f5ed999d7d8d02d3dfa0fe427e12d2c12, so the run cannot be reconciled from its own manifest as written."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read both commits against base 71207f59a; 2710b2ea1 adds the row selector, per-row subprocess execution, the merge guard and the receipt fields, and 0028295f5ed9 adds the landing record, figures and receipt inside the declared plan, evidence and figure paths.",
+    "done_when": "read lane.sh, lane.log and the committed receipt against the done_when; one all_debug allocation with four sequential children, per-row receipts merged into the single receipt, and pending_rows empty are all present, but the clause asking the per-child mapping count to show no child exceeds one load is falsified by the receipt's own peaks (weak-rotation-reactor-static 24750 against the 16789-to-17620 per-load figure) and the flag that reports it tests twice one load at benchmarks/solve_program_size_gate.py:62,2170.",
+    "goal": "the source node's goal is one child process per certificate row so that no process accumulates more programs than it can map; benchmarks/solve_program_size_gate.py:2773 runs rows through process_per_row by default, and docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json records execution_mode one-process-per-row with four distinct child pids and all four rows complete.",
+    "manifest": "read; its measurement block matches the lane log and the committed receipt, but its commits list carries a sha that resolves to no object (manifest.md:13).",
+    "write_paths": "read the manifest's five declared paths; every path in both commits is inside them, including the figure files under the declared docs/figures/millisecond-converged-solve/program-size directory."
+  },
+  "justifications": {
+    "durability": "tests/test_certificate_baseline_revision.py:387 reddens under the declared one-process mutation and passed when re-run first-hand at 0028295f5 (reviewer-rerun.log, 2 passed in 68.09s), but no committed case drives certificate_row_command (benchmarks/solve_program_size_gate.py:1969) or the --certificate-row flag the lane uses.",
+    "evidence": "the lane log and receipt record the measurement including its negative half, but the receipt's own within_one_program_load flag (benchmarks/solve_program_size_gate.py:2170) tests twice one load and so cannot show the done_when clause it is named for.",
+    "fit": "the module's receipt idiom and the nova.media painters are followed in the new figure, but two emitted field names misstate their contents (benchmarks/solve_program_size_gate.py:2164-2165 and :2170), so a reader must work out each from the source.",
+    "goal_fidelity": "benchmarks/solve_program_size_gate.py:2773 runs each certificate row as its own child process by default and the committed receipt shows all four rows complete with distinct child pids, bounding what one process accumulates rather than proving headroom for larger rows.",
+    "scope_discipline": "both commits touch only the five declared paths, and the docs/plans/cpu-compile-abort.html diff carries the new landing section with no meta-line change."
+  },
+  "node": "review-of-cca-one-certificate-row-per-process",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node's goal is one child process per certificate row so that no process accumulates more programs than it can map; benchmarks/solve_program_size_gate.py:2773 runs rows through process_per_row by default, and docs/figures/millisecond-converged-solve/program-size/process-per-row/certificate.json records execution_mode one-process-per-row with four distinct child pids and all four rows complete.\nVERDICT done_when: read lane.sh, lane.log and the committed receipt against the done_when; one all_debug allocation with four sequential children, per-row receipts merged into the single receipt, and pending_rows empty are all present, but the clause asking the per-child mapping count to show no child exceeds one load is falsified by the receipt's own peaks (weak-rotation-reactor-static 24750 against the 16789-to-17620 per-load figure) and the flag that reports it tests twice one load at benchmarks/solve_program_size_gate.py:62,2170.\nVERDICT write_paths: read the manifest's five declared paths; every path in both commits is inside them, including the figure files under the declared docs/figures/millisecond-converged-solve/program-size directory.\nVERDICT manifest: read; its measurement block matches the lane log and the committed receipt, but its commits list carries a sha that resolves to no object (manifest.md:13).\nVERDICT diff: read both commits against base 71207f59a; 2710b2ea1 adds the row selector, per-row subprocess execution, the merge guard and the receipt fields, and 0028295f5ed9 adds the landing record, figures and receipt inside the declared plan, evidence and figure paths.\nCALL_SITES: benchmarks/solve_program_size_gate.py:2627 main() reached by the python -m invocation lane.sh runs, benchmarks/diiid_gate_frame_identity.py:78 which imports EmptyIdentitySetError and _require_identity_rows from the module\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/solve_program_size_gate.py:2773 runs each certificate row as its own child process by default and the committed receipt shows all four rows complete with distinct child pids, bounding what one process accumulates rather than proving headroom for larger rows.\nSCORE evidence: 14\nJUSTIFICATION evidence: the lane log and receipt record the measurement including its negative half, but the receipt's own within_one_program_load flag (benchmarks/solve_program_size_gate.py:2170) tests twice one load and so cannot show the done_when clause it is named for.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: both commits touch only the five declared paths, and the docs/plans/cpu-compile-abort.html diff carries the new landing section with no meta-line change.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_certificate_baseline_revision.py:387 reddens under the declared one-process mutation and passed when re-run first-hand at 0028295f5 (reviewer-rerun.log, 2 passed in 68.09s), but no committed case drives certificate_row_command (benchmarks/solve_program_size_gate.py:1969) or the --certificate-row flag the lane uses.\nSCORE fit: 15\nJUSTIFICATION fit: the module's receipt idiom and the nova.media painters are followed in the new figure, but two emitted field names misstate their contents (benchmarks/solve_program_size_gate.py:2164-2165 and :2170), so a reader must work out each from the source.\nFINDING benchmarks/solve_program_size_gate.py:2170 within_one_program_load compares the sampled peak against CERTIFICATE_CHILD_MAP_CEILING = 2 * CERTIFICATE_PROGRAM_LOAD_MAPS[0] = 33578 (line 62) while its name and the done_when compare against one load (16789 to 17620), so it reports True for weak-rotation-reactor-static at 24750 maps: the flag cannot show one-load headroom and asserts it by name anyway.\nFINDING benchmarks/solve_program_size_gate.py:2164 the per-row entry's exit_code is the probe wrapper's return code and the child's own status is in probe_exit_code (line 2165), so the committed receipt and lane.log print exit 0 for four rows the plan's landing table prints as exit 1, and a reader of the receipt alone is told a failing child exited cleanly.\nFINDING tests/test_certificate_baseline_revision.py:387 the merged-shape case drives its children through the inline _CHILD_ROW_SCRIPT (line 86) and the row API rather than through certificate_row_command (benchmarks/solve_program_size_gate.py:1969), so the command building and argparse plumbing the production lane depends on is asserted by no committed case.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260920T180231259880-cca-one-certificate-row-per-process/manifest.md:13 the commits list cites 0028295f5ba1e4c4d0c3ba0e1c98f0b0fbb4c9d1 for the evidence commit, which resolves to no object (git cat-file -t: could not get object info); the evidence commit at the reviewed tree's HEAD is 0028295f5ed999d7d8d02d3dfa0fe427e12d2c12, so the run cannot be reconciled from its own manifest as written.\n",
+  "review_base_sha": "e2e62d677ae3cceaa7a312456dd4717b3a2c15a1",
+  "review_run_id": "r-20260922T101425657737-review-of-cca-one-certificate-row-per-process",
+  "reviewed_commit": "0028295f5ed999d7d8d02d3dfa0fe427e12d2c12",
+  "reviewed_revision": "0028295f5ed999d7d8d02d3dfa0fe427e12d2c12",
+  "reviewed_run_id": "r-20260920T180231259880-cca-one-certificate-row-per-process",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-one-certificate-row-per-process",
+  "reviewer_run_id": "r-20260922T101425657737-review-of-cca-one-certificate-row-per-process",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T10:50:39.825183+00:00",
+  "total": 81
+}

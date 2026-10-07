@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by annotate_review_of_run from the reviewed run own baseline_suite and after_suite logs: both complete with zero FAILED ids, so added_failure_count=0 and added_failure_ids=[]. The baseline directory contained only test_traced_section_moments.py; its existing test also passes in staged-full-cpu.log. This zero does not validate cold timing.",
+  "assertion_audit": {
+    "arithmetic_and_eager_guards": "Host helper comparisons and five complete-kind gradient samples compare to pinned independent implementations; changing order or indiscriminately JITing eager differentiation can redden them.",
+    "cold_compile_guard": "Invalid: cached executable lookup can pass elapsed<30. Probe reproduces config=False with is_cache_used=True after the exact clear_caches/config sequence; resetting persistent cache state changes is_cache_used to False.",
+    "expression_guard": "Restoring baseline helpers gives 78404 equations, exceeding 20000; reproduction.log records before=after=78404 and its original tenfold guard fails. The independent baseline sanity guard requires >50000.",
+    "identity_guards": "Pinned git-show modules are rebound to separately loaded reference dependencies; finite checks and seven-component relative maxima fail on arithmetic drift. Historical packed candidate maximum 0.00010467739094605777 proves the identity instrument can discriminate.",
+    "recurrence_guard": "staged-negative.log deliberately drops one recurrence output, maximum=1, one failing identity test, EXIT=1; unmodified recurrence maximum=0.",
+    "sharing_guard": "Removing helper JIT staging eliminates the jit primitive from square make_jaxpr; square gradient has independent mathematical expected value 4.",
+    "tenfold_guard": "Strict xfail preserves the unmet tenfold target as executable evidence; reaching it causes XPASS and requires updating the record."
+  },
+  "base_log_revision": "01575b6b164607271c9f1d06cfa3f64f18128646",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient",
+    "nova/equilibrium/topology.py:BiotMomentCoupling.evaluate",
+    "nova/biot/greens.py:traced_filament_greens",
+    "nova/biot/momentchannel.py:Channel._pole"
+  ],
+  "completed_at": "2026-10-06T00:06:43Z",
+  "decision": "changes_requested",
+  "dispatched_at": "2026-10-06T00:00:15Z",
+  "evidence": {
+    "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-landing-gate.log",
+    "authorized_scope_and_target_changes": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/resume-1-advice.txt",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/resume-2-advice.txt"
+    ],
+    "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/baseline-suite.log",
+    "changed_path_count": 33,
+    "cold_claim_discriminator_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-fresh-cold.log",
+    "independent_probe_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T235953077826-review-of-cfs-kernel-compile-cost/cache-state-probe.log",
+    "live_plan_section": "s2",
+    "live_plan_version": 52,
+    "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/staged-negative.log",
+    "reviewed_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/manifest.md",
+    "source_unchanged_since_numerical_gate": "git diff 4d7305f684bea23f59d28702bcd6dc636fc9d166 63d55f70394b976e62cd63e19bbfb8174da57ecd -- nova/biot is empty"
+  },
+  "findings": [
+    {
+      "file": "tests/biot/test_kernel_compile_cost.py",
+      "line": "200",
+      "severity": "blocking",
+      "text": "blocking: _compile disables jax_enable_compilation_cache only after point and geometry setup has initialized cache use, and jax.clear_caches does not reset that memoized state in the installed JAX; h200-fresh-cold.log records exactly two jit_jet cache hits with stored compile costs 86 and 81 seconds while reporting 11.2194146 and 7.91631825 seconds as cold, so the under-30-second gate and the fragment's cold headline are invalid; disable persistent caching before any JAX work in a fresh process, require a receipt proving no executable cache hit, rerun both arms, and correct the evidence before landing."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-kernel-compile-cost.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: The actual topology-read cold compile, host RSS and executable-size clauses remain unmeasured; the fragment correctly carries them forward, and the reduced unique graph (17544) must not stand in for that gate because expanded equations increase from 83240 to 96854."
+    }
+  ],
+  "head_log_revision": "f45ab30fd594a06dc892d6060e613e7165bdab21",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read the base-to-head changes and 15-commit progression; rangefunction.py shares staged helper graphs, elliptic.py retains serial recurrence ordering, and the final two commits only adjust tests and evidence.",
+    "done_when": "The authorized resume-2-advice.txt accepts the 4.47-times graph reduction and strict tenfold xfail; h200-landing-gate.log records 8 passed and 1 xfailed, but h200-fresh-cold.log records persistent-cache hits for both measured point jets.",
+    "goal": "Read prompt.txt and both resume advice files; shared serial graphs preserve arithmetic and meet the revised 20000-equation target, but tests/biot/test_kernel_compile_cost.py:200 does not establish the retained cold-compile target.",
+    "manifest": "Read manifest.md, baseline_suite and after_suite logs; baseline has 1 passed, head has 8 passed and 1 xfailed, yielding zero added failing ids, while the claimed 7.9-second cold compile is contradicted by its cache receipt.",
+    "write_paths": "The 33-path final diff stays within the original grant plus the four sibling modules explicitly authorized in resume-1-advice.txt; no production caller was changed."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_kernel_compile_cost.py:181 and :360 catch graph growth and recurrence truncation, but its cold-compile assertion can pass by deserializing an existing executable.",
+    "evidence": "The committed identity and recurrence logs support exact arithmetic, but docs/evidence/fragments/converged-forward-solve/cfs-kernel-compile-cost.html:20 labels cached compilation as cold despite the two jet cache hits in h200-fresh-cold.log.",
+    "fit": "nova/biot/rangefunction.py:94 retains eager arithmetic and the public signatures, although staged detection relies on tracer attributes and a shared helper's fixed list of static parameter names.",
+    "goal_fidelity": "nova/biot/rangefunction.py:106 achieves the coordinator-authorized sharing result, but tests/biot/test_kernel_compile_cost.py:200 leaves cold compilation under 30 seconds unproved.",
+    "reuse": "The search of nova/biot and nova/jax found no existing staging-sensitive sharing owner; the added recurrence helpers extend elliptic.py, _pole_contraction is moved from Channel._pole rather than copied, and paired arithmetic remains owned by pairedfloat.py.",
+    "scope_discipline": "All changed production paths are the six kernel modules named by the prompt and resume-1-advice.txt, with only the assigned test and evidence paths alongside them."
+  },
+  "limitations": [
+    "No full suite or H200 job rerun by this read-only review. Numerical receipts were read from the reviewed run.",
+    "The independent probe tests installed JAX cache-state behavior without compiling kernels or mutating repository source. It confirms the mechanism already visible in the fresh-process H200 cache receipt.",
+    "Stored cached_compile_seconds are historical cache metadata, not a newly measured cold compile; no new cold wall is claimed.",
+    "The 2912-byte value is generated_code_size_in_bytes, not serialized executable size."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: Read prompt.txt and both resume advice files; shared serial graphs preserve arithmetic and meet the revised 20000-equation target, but tests/biot/test_kernel_compile_cost.py:200 does not establish the retained cold-compile target.\nVERDICT done_when: The authorized resume-2-advice.txt accepts the 4.47-times graph reduction and strict tenfold xfail; h200-landing-gate.log records 8 passed and 1 xfailed, but h200-fresh-cold.log records persistent-cache hits for both measured point jets.\nVERDICT write_paths: The 33-path final diff stays within the original grant plus the four sibling modules explicitly authorized in resume-1-advice.txt; no production caller was changed.\nVERDICT manifest: Read manifest.md, baseline_suite and after_suite logs; baseline has 1 passed, head has 8 passed and 1 xfailed, yielding zero added failing ids, while the claimed 7.9-second cold compile is contradicted by its cache receipt.\nVERDICT diff: Read the base-to-head changes and 15-commit progression; rangefunction.py shares staged helper graphs, elliptic.py retains serial recurrence ordering, and the final two commits only adjust tests and evidence.\nCALL_SITES: nova/equilibrium/topology.py:BiotMomentCoupling.value_gradient, nova/equilibrium/topology.py:BiotMomentCoupling.evaluate, nova/biot/greens.py:traced_filament_greens, nova/biot/momentchannel.py:Channel._pole\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: nova/biot/rangefunction.py:106 achieves the coordinator-authorized sharing result, but tests/biot/test_kernel_compile_cost.py:200 leaves cold compilation under 30 seconds unproved.\nSCORE evidence: 8\nJUSTIFICATION evidence: The committed identity and recurrence logs support exact arithmetic, but docs/evidence/fragments/converged-forward-solve/cfs-kernel-compile-cost.html:20 labels cached compilation as cold despite the two jet cache hits in h200-fresh-cold.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All changed production paths are the six kernel modules named by the prompt and resume-1-advice.txt, with only the assigned test and evidence paths alongside them.\nSCORE durability: 14\nJUSTIFICATION durability: tests/biot/test_kernel_compile_cost.py:181 and :360 catch graph growth and recurrence truncation, but its cold-compile assertion can pass by deserializing an existing executable.\nSCORE fit: 18\nJUSTIFICATION fit: nova/biot/rangefunction.py:94 retains eager arithmetic and the public signatures, although staged detection relies on tracer attributes and a shared helper's fixed list of static parameter names.\nSCORE reuse: 20\nJUSTIFICATION reuse: The search of nova/biot and nova/jax found no existing staging-sensitive sharing owner; the added recurrence helpers extend elliptic.py, _pole_contraction is moved from Channel._pole rather than copied, and paired arithmetic remains owned by pairedfloat.py.\nFINDING tests/biot/test_kernel_compile_cost.py:200 blocking: _compile disables jax_enable_compilation_cache only after point and geometry setup has initialized cache use, and jax.clear_caches does not reset that memoized state in the installed JAX; h200-fresh-cold.log records exactly two jit_jet cache hits with stored compile costs 86 and 81 seconds while reporting 11.2194146 and 7.91631825 seconds as cold, so the under-30-second gate and the fragment's cold headline are invalid; disable persistent caching before any JAX work in a fresh process, require a receipt proving no executable cache hit, rerun both arms, and correct the evidence before landing.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-kernel-compile-cost.html:20 follow-on: The actual topology-read cold compile, host RSS and executable-size clauses remain unmeasured; the fragment correctly carries them forward, and the reduced unique graph (17544) must not stand in for that gate because expanded equations increase from 83240 to 96854.\n",
+  "review_run_id": "r-20261005T235953077826-review-of-cfs-kernel-compile-cost",
+  "reviewed_base_sha": "01575b6b164607271c9f1d06cfa3f64f18128646",
+  "reviewed_head_sha": "63d55f70394b976e62cd63e19bbfb8174da57ecd",
+  "reviewed_run_id": "r-20261005T223546294421-cfs-kernel-compile-cost",
+  "scores": {
+    "durability": 14,
+    "evidence": 8,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T00:05:35.833168+00:00",
+  "total": 94
+}

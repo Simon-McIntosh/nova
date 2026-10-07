@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/media/poloidal.py:draw_flux_contours",
+    "nova/media/poloidal.py:draw_wall"
+  ],
+  "completed_at": "2026-10-03T17:33:49.521Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T17:08:08Z",
+  "findings": [
+    {
+      "file": "benchmarks/plasma_cell_fixed_point_attribution.py",
+      "line": "424",
+      "severity": "follow-on",
+      "text": "follow-on: four of the seven changed drivers (first_step_directions, fixed_point_attribution, seed_policy, trip_panels) are imported by no test, so the scanner verifies only that a wall= keyword is present, not that the render path runs; the change to those four is exercised by no runtime check."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-plasma-cell.md",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: the report asserts that each of the seven drivers reads committed .npz rather than re-solving, which is the premise of the later regeneration wave, but no check backs the claim and a regeneration node will only confirm or refute it when it runs."
+    }
+  ],
+  "gate_arms_note": "Derived from the reviewed run's manifest arms. baseline_suite revision 68762d3639852b0d4fc87c4beab07b6298a3b384, exit 0, completed true, failure_count 0, failure_ids []; after_suite revision 1cdad46bb8a18d34bfc092c1b1ae0219514871be, exit 0, completed true, failure_count 0, failure_ids []. added_failure_count = 0, added_failure_ids = [] (after - base). Independently reproduced: the scanner gate at the head 1cdad46bb exits 0, and at base 68762d363 exits 1 listing the eight declared sites.",
+  "head_log_revision": "1cdad46bb8a18d34bfc092c1b1ae0219514871be",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit at 1cdad46bb against 68762d363; one commit, seven files, ten insertions and nine deletions, each adding wall=units to a draw_flux_contours call fed by certificate._raster_field, plus one hoist; no nova/ source changed.",
+    "done_when": "the done_when names the scanner gate over the seven benchmark files; I re-ran it at the reviewed head and it exits 0 with no records, and at the base it exits 1 listing exactly the eight declared sites.",
+    "goal": "the node goal is to route every unguarded scattered-field renderer call in the plasma-cell batch through the wall mask; the diff adds wall=units at exactly the eight sites the scanner names, and nova/media/poloidal.py:173 blanks every grid point outside the wall when wall is given, so no figure draws field beyond the vessel.",
+    "manifest": "read; it states the head gate EXIT=0, the base control listing eight sites, the wall-mask effect 870/4458 outside vertices removed with 0 remaining, and logs both suite arms 19 passed each.",
+    "write_paths": "read from the run's manifest; the landed commit touches only seven benchmarks/plasma_cell_*.py paths, all inside the declared scope, and the done-when-named report under the reports path."
+  },
+  "justifications": {
+    "durability": "the guard is a source scanner run as a manual command, and no test in tests/ wires the seven corpus files, so removing wall=units at any site reddens no committed test; only tests/test_renderer_wall_scan.py:51 covers the scanner module on crafted inputs.",
+    "evidence": "I reproduced the head gate EXIT=0 and the base control (eight sites, EXIT=1) and the wall-mask effect verbatim (4458/870 unguarded to 3537/0 guarded) at benchmarks/solovev_certificate._raster_field on the committed diverted-single-null-trip-arms.npz field.",
+    "fit": "the change is one keyword per site with no new dependency, abstraction, or banned name, matching the draw_wall(units=units) idiom already at benchmarks/plasma_cell_first_step_directions.py:211.",
+    "goal_fidelity": "benchmarks/plasma_cell_trip_panels.py:517 and the seven sibling sites each pass wall=units, the same collection the panel already hands to draw_wall, so the scattered raster is blanked before contouring.",
+    "scope_discipline": "git diff 68762d363..1cdad46bb shows exactly the seven granted benchmark paths, one conventional commit with a body and no AI trailer, and no plan, shared-index or concurrent-node path."
+  },
+  "node": "review-of-fsa-wall-mask-plasma-cell",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to route every unguarded scattered-field renderer call in the plasma-cell batch through the wall mask; the diff adds wall=units at exactly the eight sites the scanner names, and nova/media/poloidal.py:173 blanks every grid point outside the wall when wall is given, so no figure draws field beyond the vessel.\nVERDICT done_when: the done_when names the scanner gate over the seven benchmark files; I re-ran it at the reviewed head and it exits 0 with no records, and at the base it exits 1 listing exactly the eight declared sites.\nVERDICT write_paths: read from the run's manifest; the landed commit touches only seven benchmarks/plasma_cell_*.py paths, all inside the declared scope, and the done-when-named report under the reports path.\nVERDICT manifest: read; it states the head gate EXIT=0, the base control listing eight sites, the wall-mask effect 870/4458 outside vertices removed with 0 remaining, and logs both suite arms 19 passed each.\nVERDICT diff: read commit by commit at 1cdad46bb against 68762d363; one commit, seven files, ten insertions and nine deletions, each adding wall=units to a draw_flux_contours call fed by certificate._raster_field, plus one hoist; no nova/ source changed.\nCALL_SITES: nova/media/poloidal.py:draw_flux_contours, nova/media/poloidal.py:draw_wall\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/plasma_cell_trip_panels.py:517 and the seven sibling sites each pass wall=units, the same collection the panel already hands to draw_wall, so the scattered raster is blanked before contouring.\nSCORE evidence: 18\nJUSTIFICATION evidence: I reproduced the head gate EXIT=0 and the base control (eight sites, EXIT=1) and the wall-mask effect verbatim (4458/870 unguarded to 3537/0 guarded) at benchmarks/solovev_certificate._raster_field on the committed diverted-single-null-trip-arms.npz field.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 68762d363..1cdad46bb shows exactly the seven granted benchmark paths, one conventional commit with a body and no AI trailer, and no plan, shared-index or concurrent-node path.\nSCORE durability: 15\nJUSTIFICATION durability: the guard is a source scanner run as a manual command, and no test in tests/ wires the seven corpus files, so removing wall=units at any site reddens no committed test; only tests/test_renderer_wall_scan.py:51 covers the scanner module on crafted inputs.\nSCORE fit: 18\nJUSTIFICATION fit: the change is one keyword per site with no new dependency, abstraction, or banned name, matching the draw_wall(units=units) idiom already at benchmarks/plasma_cell_first_step_directions.py:211.\nFINDING benchmarks/plasma_cell_fixed_point_attribution.py:424 follow-on: four of the seven changed drivers (first_step_directions, fixed_point_attribution, seed_policy, trip_panels) are imported by no test, so the scanner verifies only that a wall= keyword is present, not that the render path runs; the change to those four is exercised by no runtime check.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-plasma-cell.md:30 follow-on: the report asserts that each of the seven drivers reads committed .npz rather than re-solving, which is the premise of the later regeneration wave, but no check backs the claim and a regeneration node will only confirm or refute it when it runs.",
+  "review_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "review_run_id": "legacy-ad8122dfb8cd",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "reviewed_commit": "1cdad46bb8a18d34bfc092c1b1ae0219514871be",
+  "reviewed_commits": [
+    "1cdad46bb8a18d34bfc092c1b1ae0219514871be"
+  ],
+  "reviewed_head_sha": "1cdad46bb8a18d34bfc092c1b1ae0219514871be",
+  "reviewed_run_id": "r-20261003T170749901277-fsa-wall-mask-plasma-cell",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-wall-mask-plasma-cell",
+  "reviewer_node": "review-of-fsa-wall-mask-plasma-cell",
+  "reviewing_run_id": "r-20261003T173432430494-review-of-fsa-wall-mask-plasma-cell",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T17:44:29.216777+00:00",
+  "total": 90,
+  "verdict": "pass"
+}

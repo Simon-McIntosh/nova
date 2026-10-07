@@ -1,0 +1,39 @@
+{
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest's baseline_suite and after_suite are empty; its completed H200 receipts are benchmark gates rather than paired completed suite logs. The suite failure delta is therefore unmeasured, not zero.",
+  "added_failure_ids": [],
+  "completed_at": "2026-10-02T23:32:37Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T23:26:56Z",
+  "failure_attribution": {},
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "PASS 91/100. The committed staged measurement localises the first fixture-native public-map derivative mismatch to boundary_flux: 0.3938583892387886 at 1e-5 Wb, while axis_flux is 8.283022601140999e-10 and the smooth scalar control is 9.914458143356342e-11. Scope is exact and receipts are complete; paired suite arms and polished figure typography remain follow-ons.",
+  "review_run_id": "r-20261002T232624718974-review-of-fsri-moment-map-derivative-rca",
+  "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "reviewed_commit": "d255945461ee063747b05e7097fbefb59c6abfdd",
+  "reviewed_head_sha": "d255945461ee063747b05e7097fbefb59c6abfdd",
+  "reviewed_revision": "d255945461ee063747b05e7097fbefb59c6abfdd",
+  "reviewed_run_id": "r-20261002T225511267666-fsri-moment-map-derivative-rca",
+  "reviewer_node": "review-of-fsri-moment-map-derivative-rca",
+  "reviewer_run_id": "r-20261002T232624718974-review-of-fsri-moment-map-derivative-rca",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T23:27:18+00:00",
+  "total": 91,
+  "verdict": "pass"
+}

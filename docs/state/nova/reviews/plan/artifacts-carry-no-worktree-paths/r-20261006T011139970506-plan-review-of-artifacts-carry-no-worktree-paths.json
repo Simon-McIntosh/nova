@@ -1,0 +1,104 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:16:09.705Z",
+  "dispatched_at": "2026-10-06T01:11:53Z",
+  "findings": [
+    {
+      "anchor": "nova/database/filepath.py:62",
+      "id": "duplicate_owner-1",
+      "reason": "the nova case should delegate to `repository_relative`, leaving the new function to add only the text scan and the cross-repository canonical-checkout mapping; a parallel mapping drifts on symlinks, `.git`-file vs `.git`-directory and non-repository ancestors.",
+      "text": "\u00a72 states that a path under a nova worktree becomes `<rest>` and a bare worktree root becomes `.`, but `repository_relative` already returns exactly that: a linked worktree carries a `.git` file at its root, so its nearest-root search resolves to the worktree and returns `docs/figures/x/y.png` for a nested file and `.` for the root (demonstrated on this worktree at the base revision). The plan would add a second mapping beside the one that owns it.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/artifacts-carry-no-worktree-paths.html#s2",
+      "id": "thin_wrapper-1",
+      "reason": "\u00a73 already commits to reusing the same root search, so \u00a72 should either extend the helper or give the one-line reason a separate function is needed.",
+      "text": "\u00a72 introduces a new function beside `repository_relative` and never says why `repository_relative` cannot be extended to take a text and return the rewritten text, so the plan adds surface rather than extending the owner.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_render_receipt_paths.py:73",
+      "id": "reuse_search-1",
+      "reason": "the new guard should absorb, extend or explicitly supersede the existing scan (and state whether the receipt-directory scan is retired), otherwise two overlapping guards silently disagree as files are added.",
+      "text": "a worktree-path guard already exists (`test_no_receipt_directory_json_records_a_worktree_path`, with a positive control in `test_the_scan_reaches_every_receipt`), and \u00a74 proposes `tests/test_artifacts_carry_no_worktree_paths.py` without citing it.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": ".pre-commit-config.yaml:1",
+      "id": "reuse_search-2",
+      "reason": "introducing pre-commit config is a different, larger scope than the plan states and must be justified or replaced by a plain checked-in git hook, and the \u00a74 done-when (\"the hook rejects a staged scratch file\") cannot be satisfied by editing a non-existent file.",
+      "text": "\u00a74 says it adds \"a check-only pre-commit hook in `.pre-commit-config.yaml`\", but no such file is tracked or present (none in this worktree, none in the main checkout; the repo carries only git's sample hooks), so the node would create the framework's config from scratch rather than add a hook entry.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/artifacts-carry-no-worktree-paths.html#s2",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added public surface in its own text, most cheaply by extending `repository_relative` rather than adding a second public entry point.",
+      "text": "against a public_definitions budget of 0, the plan adds a new public function in `nova/database/filepath.py` and gives no retirement or merge and no reason none is possible.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "512bbec7f9cef50eeba390eccbae997d68d642cc62086fd9ed399375f515e65b",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 2,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:20:13.311028+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:20:17.520193+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:20:15.255721+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:20:16.420499+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:20:14.110272+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T011139970506-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "774c4194479de2e2f1235d10841a669cf224b5e5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one function in `nova/database/filepath.py` plus one script `scripts/relativize_worktree_paths.py` hides the census-of-forms, the mapping and the in-place write behind a small interface.",
+    "duplicate_owner": "a finding \u2014 the \u00a72 rule's nova-worktree mapping is already produced by `repository_relative`, which owns the root search in `nova/database/filepath.py:62`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a public function in `nova/database/filepath.py` and \u00a74 adds a hook family entry, and no section names what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan adds a new rewrite function and a new guard test without citing `repository_relative`'s existing nova-worktree mapping or the existing guard in `tests/test_render_receipt_paths.py`, and it names a pre-commit file that does not exist.",
+    "thin_wrapper": "a finding \u2014 \u00a72 adds a function \"beside `repository_relative`\" without stating why the existing helper cannot be extended to carry the text scan and the cross-repository mapping."
+  },
+  "section_digests": {
+    "_document": "efdf7a9a3a3fa57f5f2f4b064b17ba4ef4aee264a509e7aa846151cf2dd31bff",
+    "s1": "fc565f2206da87a91adbf548ed52373d866bfaf2f1bfc9c1908c052f09728159",
+    "s2": "f933347a80ac85f1c7117f9a4cc7cadc0eabe1eee7762b16050dd069902e9d11",
+    "s3": "522c6ff5c2abb3870fb78b796872302207dde8312b89484ece1dda5c5a52266f",
+    "s4": "bf98cda77ef75bfb2e73f8e0dd6aaf11592665974c2f4112df25490ed3b7babc",
+    "s5": "3928be7a6fe24d8f3f9d94b5998178a7a34b4781b754272b80668c7a5e53f8f9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:20:02.867042+00:00"
+}

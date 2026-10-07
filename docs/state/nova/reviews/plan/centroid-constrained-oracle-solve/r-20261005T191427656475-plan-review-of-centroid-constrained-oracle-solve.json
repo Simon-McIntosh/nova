@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T19:18:55.537Z",
+  "dispatched_at": "2026-10-05T19:14:40Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/constraint.py:489",
+      "id": "reuse_search-1",
+      "reason": "the section should be reconciled with what has landed (collapse it, or restate the genuinely open remainder: moderate/strong/single-null rows and the positive control on the repaired fixture) rather than re-issued as a to-build done-when.",
+      "text": "\u00a72's done-when asks to \"expose the two field increments as a compensating unknown implementing the existing protocol\" and to impose the centroid row on the analytic rows, but BoundedExteriorFieldUnknown, the fixture's vertical/radial response columns and the shared pair builders already exist at constraint.py:489 and scripts/analytic_oracle_fixtures/centroid_row.py:63,141,188, and the section's own landing records and followup f-cco-001 already claim weak-110 qualifies \u2014 so the section re-proposes machinery already built",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/reduced_newton.py:2398",
+      "id": "reuse_search-2",
+      "reason": "the certificate already runs on the augmented route, so this corrects the section's citation rather than its design, though the \"same interface as the machine rows\" clause should name the augmented owner.",
+      "text": "\u00a72 cites \"the reduced-route constraint pairs in nova/equilibrium/reduced_newton.py\" as machinery the centroid row is imposed through, but _row_augmentation admits only CircuitCurrentUnknown and refuses any compensator \"whose flux image reads the state\", which is exactly the plan's BoundedExteriorFieldUnknown; the fixture in fact assembles through the augmented route (assemble_augmented_system, constraint.py:1881)",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/equilibrium/constraint.py:993",
+      "id": "thin_wrapper-1",
+      "reason": "the section must justify the added functional/column against the existing compensator and point-flux owners, or fold the level term onto one of them, before the third column is treated as settled.",
+      "text": "FluxLevelConstraint's compensating term is a third component of BoundedExteriorFieldUnknown (an unbounded level column, scripts/analytic_oracle_fixtures/centroid_row.py:141), and it reads the interpolated flux at a fixed (R, Z) point exactly as IsofluxConstraint already does (constraint.py:1295), while the lead's own open followup frames the alternative of folding the level term onto the existing multiplier path (ConstraintMultiplier, constraint.py:400); neither \u00a72's text nor the decision states why that existing machinery cannot be extended",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/constraint.py:489",
+      "id": "interface_budget-1",
+      "reason": "the section must carry the accounting in its own text (scope, or fold the level term, or name the refusal family the bound joins) before the interface budget item can pass.",
+      "text": "\u00a72 adds BoundedExteriorFieldUnknown and FluxLevelConstraint as public definitions and introduces a new refusal family (the recorded exterior-field bound refusal), but the section text names neither what these retire or merge nor why a third compensating mechanism beside CircuitCurrentUnknown, ProfileAmplitudeUnknown and ConstraintMultiplier is unavoidable; the plan itself carries this as the open followup f-cco-account-for-constraint-surface",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e2996c01fd3e9d02a7bbed6ba1c8a507aca7c6188374ed7405024ed72d6889ce",
+  "plan_slug": "centroid-constrained-oracle-solve",
+  "plan_version": 84,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T191427656475-plan-review-of-centroid-constrained-oracle-solve",
+  "reviewed_blob_sha": "6ce96a5055d91f1e057d1122f9b566e297601280",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design hides damped step control, bound refusal, direction mapping and the operator flux application behind the existing three-member CompensatingUnknown protocol (nova/equilibrium/constraint.py:159); there is no spread of shallow wrappers over the same machinery.",
+    "duplicate_owner": "pass \u2014 the design extends the shared owners (CompensatingUnknown protocol, constraint.py:159; assemble_augmented_system, constraint.py:1881) rather than forking placement, path-resolution, scheduler or state-reader infrastructure.",
+    "interface_budget": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 \u2014 a finding \u2014 \u00a72 adds two public definitions (BoundedExteriorFieldUnknown, FluxLevelConstraint) and a refusal family (the recorded exterior-field bound refusal) without naming in the section text what they retire or merge, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a72's done-when re-proposes machinery that already exists in the tree: BoundedExteriorFieldUnknown (nova/equilibrium/constraint.py:489) and the fixture's response columns and pair builders (scripts/analytic_oracle_fixtures/centroid_row.py:63-188).",
+    "thin_wrapper": "a finding \u2014 the third flux-level compensating column is added without \u00a72 or the decision stating why the existing non-actuator compensator path (ConstraintMultiplier, nova/equilibrium/constraint.py:400) cannot carry it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:20:44.903939+00:00"
+}

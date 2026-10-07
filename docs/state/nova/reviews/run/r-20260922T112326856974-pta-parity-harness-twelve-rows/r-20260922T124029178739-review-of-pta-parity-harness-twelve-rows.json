@@ -1,0 +1,92 @@
+{
+  "absent": [
+    "a nonzero harness exit when a governed marginal_solver_basin flag is missing or null",
+    "the committed magnetic axis as part of the second null set in every replayed figure panel",
+    "a cited base-revision suite log and contract-shaped first lines for the gate and negative-control logs",
+    "one current section-4 landed summary without the superseded two-row pending verdict"
+  ],
+  "absent_items": [
+    {
+      "disposition": "repair before promotion; an absent flag currently yields status pending, passes true and process exit 0, while an explicit null is coerced to false",
+      "item": "fail-closed marginal qualification"
+    },
+    {
+      "disposition": "repair the figure and add a content regression; panel-count coverage alone does not enforce the plotting contract",
+      "item": "both complete null sets in the figure"
+    },
+    {
+      "disposition": "split or rewrite the logs so their first lines identify revision, tree and command, and so the negative-control log begins with the declared mutation; cite the base run",
+      "item": "durable gate record"
+    }
+  ],
+  "commits_read": [
+    "36fe7ee0c7a6ce7c0bc43772cd164b9883d02dd1",
+    "5afa24efa7bcceeceae9d655480015b829e2d87a"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T12:40:29.178739+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/topology_parity_harness.py",
+      "line": "167-173,856,903-906,931-932",
+      "severity": "high",
+      "text": "The marginal flag does not fail closed as section 4 requires. An independent current-head probe printed `absent (None, 'missing solver_qualification.marginal_solver_basin')`, `errors []`, `status pending`, `passes True` and exited 0: pending rows are excluded from exact parity, but receipt_errors accepts them, passes is derived only from errors, and main exits only when passes is false. The same probe printed `null (False, 'solver_qualification.marginal_solver_basin')`, because bool(None) silently turns an explicit JSON null into a governed non-marginal false value. Make missing and null qualification a validation error and process refusal, and pin both cases. The committed twelve-row receipt is unaffected because all twelve current flags are booleans; this is a durability defect in the guard, not a claim that the recorded census is wrong."
+    },
+    {
+      "file": "benchmarks/topology_parity_harness.py",
+      "line": "796-804",
+      "severity": "medium",
+      "text": "The plot does not render both complete null sets. draw_nulls receives the replayed magnetic axis and replayed X point plus only the committed X point as other_x_points; the committed magnetic axis is never drawn. The landed evidence admits this at docs/evidence/archive/plasma-cell-topology-authority-landed.html:169, while the section-4 contract at docs/plans/plasma-cell-topology-authority.html:94 requires both null sets. All twelve current axes coincide, so the omission is visually latent on this receipt, but a future axis movement would be hidden. The coverage test asserts only panel labels and cannot catch the missing marker."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-twelve-rows/lane.log",
+      "line": "1,1339-1375",
+      "severity": "medium",
+      "text": "The single cited file contains a valid green replay/test run and a red negative control, but it is not shaped as the declared durable record. Its first line is the host and timestamp rather than revision, worktree and command; the same path is cited as negative_control_log although its first line does not repeat the mutation; and the claimed base edc04e8c suite result (3 passed) is not present in this log or named by another log. The negative control itself is real: differing_cell_records returned records[:0], the focused regression failed with len(records)==0, NEG_CONTROL_EXIT=1, and NEG_RESTORED=1. Preserve that evidence in correctly headed logs and cite the base run rather than relying on manifest prose."
+    },
+    {
+      "file": "docs/plans/plasma-cell-topology-authority.html",
+      "line": "78,96-99",
+      "severity": "low",
+      "text": "The section now carries the correct twelve-row landing at lines 96-99, but its canonical landed-summary at line 78 still says only two rows replay, ten are unavailable, six flags are unknown, and the receipt is pending. The worker explicitly left this as a follow-on and the later record is readable, but a live plan should not present two current verdicts for the same gate. Replace or clearly retire the two-row summary when the implementation is promoted."
+    }
+  ],
+  "item_aggregate": 8,
+  "item_verdicts": {
+    "diff_and_scope": "PASS: both commits were read, the base-to-head range touches exactly the six declared deliverable paths, git diff --check is clean, the worktree is clean, and both commits have conventional subjects and explanatory bodies without attribution trailers.",
+    "figure": "PARTIAL: twelve poloidal panels show line contours on stated levels, census and raster boundary levels, the wall, replayed nulls and no axes, but the committed magnetic axis is omitted and no content regression enforces both full null sets.",
+    "marginal_guard": "FAIL: current data supplies twelve boolean flags, but missing qualification exits successfully and explicit null is coerced to false rather than failing closed.",
+    "plan_record": "PARTIAL: the new landing and cumulative evidence anchor honestly report the twelve-row metrics, the class-receipt disagreements and the figure limitations, but the earlier canonical landed-summary remains pending and contradictory.",
+    "production_replay": "PASS: every bank row is routed through ForwardFluxOperator._fixed_design_read on MomentGeometry built from the committed polygons; the benchmark contains no replacement domain-label algorithm.",
+    "receipt_and_disagreements": "PASS with an external follow-on: status is complete, passes true, all non-marginal differing_cells arrays are empty, cache sha256 and base_revision are present, and the three achieved_class conflicts on 21986/46 pure, 21989/55 pure and 21989/55 mixed are preserved per source. Taking the committed class from the operand bank is coherent because the producer recorded that class from the solve receipt used to create the replayed operand; the newer receipt conflict remains explicitly unresolved rather than silently deciding parity.",
+    "regressions_and_negative_control": "PARTIAL PASS: the coverage, one-cell difference and committed-class regressions pass 7 of 7, and the declared mutation makes the difference regression fail exactly as intended. The missing/null marginal behavior is asserted as acceptable rather than refused, and the log headers/base citation do not meet the durable evidence contract.",
+    "row_coverage": "PASS: the committed receipt records 12 declared, 12 replayed, 0 unavailable, 0 not replayable, 0 marginal unknown and 0 pending; every row has 1089 compared cells and a wall-node census."
+  },
+  "justifications": {
+    "durability": "The difference regression and its mutation are strong and the committed JSON receipt is detailed, but the marginal guard's own test expects no validation error for an unknown flag, explicit null is treated as false, plot coverage does not assert the second axis marker, and the cited logs omit the required headers and durable base-run evidence.",
+    "evidence": "The all_debug receipt is quantitatively strong: 12 of 12 rows replayed, 1089 cells each, zero differing labels, ten governed non-marginal exact rows, two governed marginal rows, per-row wall-node censuses, a named cache digest/base revision, and a real red negative control. Evidence is reduced by the incomplete second null set and by the gate/negative/base log record shape.",
+    "fit": "The replay uses the production topology call and project plotting helpers, and the operand-bank committed-class authority avoids receipt argument-order dependence while preserving all three external disagreements. Fit is reduced because the missing/null gate does not embody fail-closed semantics and the figure knowingly omits one member of the committed null set.",
+    "goal_fidelity": "The central twelve-row replay and required receipt metrics are achieved, the class-source conflict is reported rather than absorbed, and the difference mutation demonstrably fails. The exact section-4 goal is not fully met because absent marginal authority can still return process success and the figure does not contain both complete null sets.",
+    "scope_discipline": "The two commits touch only the declared benchmark, test, receipt, figure, plan and evidence paths; the worktree is clean, diff-check passes, and the unresolved solver receipt authority is correctly left as a follow-on. The stale landed-summary and evidence-log formatting are record-quality deductions, not unauthorized scope expansion."
+  },
+  "node": "review-of-pta-parity-harness-twelve-rows",
+  "project": "nova",
+  "raw_text": "VERDICT production_replay: PASS \u2014 all twelve rows traverse ForwardFluxOperator._fixed_design_read; no benchmark-owned label algorithm was found.\nVERDICT receipt: PASS on the current bank \u2014 row_count 12, replayed 12, unavailable 0, marginal_unknown 0, pending 0, 1089 cells per row, zero differing cells, wall census per row, status complete, passes true, cache sha256 and base_revision present.\nVERDICT committed_class: PASS WITH FOLLOW-ON \u2014 the operand-bank class is a coherent committed authority for the object replayed; the receipt preserves divergent achieved_class values for 21986/46 pure, 21989/55 pure and 21989/55 mixed instead of resolving by receipt order.\nVERDICT marginal_guard: FAIL \u2014 reproduced at current head: absent -> None, receipt_errors -> [], status pending, passes True, exit 0; explicit null -> False.\nVERDICT figure: PARTIAL \u2014 twelve compliant contour/wall panels, but only the committed X point is passed as the second set; the committed magnetic axis is absent.\nVERDICT negative_control: EXECUTED \u2014 the records[:0] mutation produced one failed difference test and NEG_CONTROL_EXIT=1, then NEG_RESTORED=1; the cited log does not begin with the declared mutation.\nREVIEWED_REVISION: 5afa24efa7bcceeceae9d655480015b829e2d87a\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the twelve-row production replay and receipt are real, but fail-closed qualification and both complete plotted null sets are explicit unmet requirements.\nSCORE evidence: 15\nJUSTIFICATION evidence: the measured bank census and red negative control are strong; the figure omits the committed axis and the gate, negative-control and base-suite logs are not contract-shaped.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all six changed paths are declared, the tree and diff are clean, and the unresolved solver-class authority is retained as a follow-on.\nSCORE durability: 13\nJUSTIFICATION durability: the difference guard is pinned, but the marginal guard accepts unknown state, explicit null becomes false, figure coverage checks only labels, and base evidence is manifest prose rather than a cited log.\nSCORE fit: 16\nJUSTIFICATION fit: production API and plotting idioms are used and the operand-class choice removes order dependence without erasing disagreement; the fail-open exit and incomplete null-set rendering do not fit their declared contracts.\nFINDING benchmarks/topology_parity_harness.py:167-173,856,903-906,931-932 missing or null marginal authority is not a process refusal.\nFINDING benchmarks/topology_parity_harness.py:796-804 the committed magnetic axis is not drawn.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/pta-parity-harness-twelve-rows/lane.log:1,1339-1375 the negative control is real but the log header and base evidence are not contract-shaped.\nFINDING docs/plans/plasma-cell-topology-authority.html:78,96-99 the live section retains both a stale pending summary and the new complete verdict.",
+  "review_run_id": "r-20260922T124029178739-review-of-pta-parity-harness-twelve-rows",
+  "reviewed_base_sha": "edc04e8c42c7575649bf9f11834083e2508cbd8d",
+  "reviewed_revision": "5afa24efa7bcceeceae9d655480015b829e2d87a",
+  "reviewed_run_id": "r-20260922T112326856974-pta-parity-harness-twelve-rows",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-parity-harness-twelve-rows",
+  "reviewer_run_id": "r-20260922T124029178739-review-of-pta-parity-harness-twelve-rows",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T14:52:25+02:00",
+  "total": 78
+}

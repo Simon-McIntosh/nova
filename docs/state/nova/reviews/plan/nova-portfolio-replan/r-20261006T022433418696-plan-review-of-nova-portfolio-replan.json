@@ -1,0 +1,90 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:29:09.572Z",
+  "dispatched_at": "2026-10-06T02:24:50Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/map_extraction.py:109",
+      "id": "deep_module-1",
+      "reason": "parameterizing on tolerance alone would either silently change mast_efit's acceptance (admitting an axis a spacing test wrongly rejects, or the reverse) or force a branch the single validator cannot express; the plan must name the predicate divergence, not just the tolerance, or scope those two sites out.",
+      "text": "the plan treats the three `_uniform_axis` copies as differing only by \"tolerance policy\", but they differ in *predicate*: map_extraction and diiid_efit (nova/media/sources/diiid_efit.py:38) test spacing-to-reconstruction within a tolerance, whereas mast_efit (nova/media/sources/mast_efit.py:44) deliberately tests against the reconstructed axis at stored (float32) precision because \"a spacing test rejects an axis that is uniform to\" it, and `LatticePolicy.__post_init__` (nova/equilibrium/conservation.py:146) enforces a node-count floor and positive radius, not a uniformity tolerance",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py:62",
+      "id": "reuse_search-1",
+      "reason": "the node's done-when (\"the census grep over `nova/` returns zero literal paths outside the resolver\") depends on a capability another plan owns landing first; with the dependency unstated, a worker may add a second resolver to `FilePath` \u2014 exactly the fork the plan says it avoids \u2014 or block, so the plan must name the cross-plan dependency and its ordering.",
+      "text": "the plan states `FilePath` \"also resolves the GPFS evidence root of the receipts-out-of-git policy\" (present tense), but `FilePath` carries no GPFS/evidence-root resolver today: `_resolve_absolute` (:209) handles only appdirs roots, and no `gpfs` / `evidence_root` / `imas_gpu` symbol exists in the module; that resolver is owned by the sibling plan converged-forward-solve (comment at docs/plans/converged-forward-solve.html:370)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/hdf5_read.py:1",
+      "id": "reuse_search-2",
+      "reason": "the plan already permits deletion, so the open choice does not change the design; naming it delete-only would merely simplify the node's done-when, and the reuse question is already settled by the absent callers.",
+      "text": "the plan offers \"route it through imas.DBEntry or delete it\", but the module has zero callers anywhere under nova/, tests/, benchmarks/ or scripts/ and is an unrunnable scratch script (module-level matplotlib `contour` side effects, hardcoded shot 150601)",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/imas/dataset.py:739",
+      "id": "duplicate_owner-1",
+      "reason": "it is an internal call site in the owner module, not a second owner, and the node already lands inside `dataset.py`; folding it in as one line of the node's text would close the last bypass without changing the design.",
+      "text": "the plan routes the fifteen call modules through the `db_entry` opener, but `dataset.py itself` opens a second, independent `imas.DBEntry(uri=self.uri, mode=\"r\")` in `is_valid` (:739\u2013:740) \u2014 a bypass of the very opener the node establishes",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "5d6ae24fa9c31e20baac5f4bd5752d36dd20e1a8afff98880ed35df0760b3f76",
+  "plan_slug": "nova-portfolio-replan",
+  "plan_version": 30,
+  "project": "nova",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T02:32:59.890304+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T02:33:05.247144+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T02:33:02.184973+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T02:33:03.471938+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T022433418696-plan-review-of-nova-portfolio-replan",
+  "reviewed_blob_sha": "436e9f6219b87f9d61ed9b733c3c4c10ecb71607",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each node folds many copies behind one small owner (one residual implementation for the seven identical bodies at constraint.py:968,1049,1342,1390,1466,1528,1643; one axis validator; one atomic receipt writer; one IMAS opener; one path resolver). This is consolidation into deep owners, not a spread of shallow wrappers.",
+    "duplicate_owner": "pass \u2014 every consolidation names the owner to extend and, where a duplicate exists, deletes it rather than forking: the DBEntry subclass in nova/imas/db_entry.py:15 (zero call sites \u2014 confirmed) is deleted, not adopted; the atomic-writer copies route to the single `filepath.py` owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds to none of the four families and retires surface (three axis-validator copies, three atomic-writer copies, one orphan module), naming each retirement in its own text.",
+    "reuse_search": "pass \u2014 the plan searched the codebase and cites the existing owner for every mechanism it consolidates; I opened each and confirmed it exists at the cited line: `_flux_jacobian_image` (nova/equilibrium/constraint.py:1281, five delegating `dual_flux_image` methods), `_uniform_axis` (nova/equilibrium/map_extraction.py:109), `repository_relative` / `FilePath._resolve_absolute|_resolve_relative` (nova/database/filepath.py:62,209,231), the `db_entry` opener (nova/imas/dataset.py:728), and `require_string` / `canonical_json` (nova/imas/machine_evidence.py:64,33).",
+    "thin_wrapper": "pass \u2014 the plan names its thin candidates and drops them (\"The read-only array group is dropped: each site is a single `setflags(write=False)` call, and a shared helper over it would be a thin wrapper\"), and its remaining moves extend existing owners rather than wrapping them."
+  },
+  "section_digests": {
+    "_document": "d8955ff15584087c7d7eca1aca77e8cca0110efbac8657a65b20c684231fd648",
+    "s1": "58ad1730dc7612f2dc456bf4599af55a71ceb55e5ed306ccf2229dd7bc011ac6",
+    "s2": "7b91ed2a58ab9aaae272d528c052c40f54ca4422ec97d9111051a88840cdbc66",
+    "s3": "69f113368c428a995aa7d308edeff811c658d2946119c0ee44e68f1e414847d0",
+    "s4": "dfcf60ced6835a5d7d7bb9ecdb680ea40fb3c97fec0fdcd93625427ad33c02a4",
+    "s5": "bca0f13c66c2d4fdeda958cc4c346e2082c744fa308d69a976a3f9070d2865d2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:32:58.632852+00:00"
+}

@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T10:27:49.862525+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/first-step/first-step.json",
+      "line": "4339",
+      "text": "the physical trial sequence supports the globalization reading in live-plan comment c-20260923-first-step-read, with a narrower causal claim than the comment's repair language. From seed merit 1.8017405799, factors 1, 1/2 and 1/4 each produce one core cell, zero support current and non-finite normalization/merit. Factor 1/8 is selected at merit 0.9238732814 despite retaining only 12 of 83 core cells and 1,624.64 of 38,009.95 A; factors 1/16 and 1/32 are also evaluated and lower merit to 1.0522038343 and 1.1433923378 while retaining 43 and 68 cells. Thus the globalizer prefers the most-collapsed finite member of the decreasing ladder because its scalar merit is best. This establishes an acceptance/objective validity-region failure, but does not by itself choose seed-amplitude repair over a support-aware acceptance criterion."
+    },
+    {
+      "file": "benchmarks/plasma_cell_first_step_directions.py",
+      "line": "564",
+      "text": "the fixed-lambda negative control is algebraically incapable of changing its declared observable: projection and control_projection are both computed as dot(step, shrink) from the same accepted physical displacement and the same current gradient. The worker reports projection_changed=false and not-supported rather than hiding this, which correctly refutes the declared lambda-specific discriminator, but the run never executes a fixed-lambda trajectory or chord-seed comparison. The spectra show the same structural 655-of-717 map near-null dimensions in both operators while both Newton-residual Jacobians have zero near-null dimensions; causal attribution to lambda, seed amplitude or a particular repair therefore remains open."
+    },
+    {
+      "file": "docs/plans/plasma-cell-read-fidelity.html",
+      "line": "248",
+      "text": "the live comment says the 1/16 and 1/32 candidates are never reached, but the receipt records both as physical merit evaluations in the first ladder. The accurate reading is that all ladder factors are evaluated in the vectorized score pass and the selector chooses the first sufficient factor in descending order, so the less-collapsed candidates are evaluated but not selected. This wording correction does not weaken the globalization conclusion; it makes the implicated policy precise."
+    },
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/first-step/artifact-audit.log",
+      "line": "1",
+      "text": "the final receipt is assembled and audited by an inline Python program recorded only as `uv run --no-sync python -`; the durable derive-first-promotion.py reproduces the first accepted projection, and all raw events, dense Jacobians and states are committed, but no committed assembler reproduces the line-search annotations, first-promotion merge and complete final JSON byte-for-byte. This is a recoverability limitation rather than missing scientific evidence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites changed; the benchmark temporarily wraps native fixed-point helpers inside its measurement process and restores every original in a finally block",
+    "diff": "read all three commits from base b0a432d184a747cf3dbed176dc354507c6af0b03 through candidate 0081c85c1f5b847bcbec07cb513fc138d0e5bf3a. The range adds a 617-line benchmark, a 75-line same-allocation projection script, 116 raw event archives, dense Jacobians and states, two PNG/SVG contour pairs, complete receipts and append-only plan/evidence entries. All 138 paths are inside the declared benchmark, evidence, plan and plasma-cell-read-fidelity figure fences; the candidate tree is clean.",
+    "done_when": "the measurement names event 1 as the first collapsed physical candidate; all 83 nonlinear map evaluations report zero non-finite support entries; the first accepted displacement and full-trip displacement have numerical projections on four singular bases; and the required own-level seed and accepted-trip PNG/SVG panels exist. The declared fixed-lambda control returns not-supported because it cannot change the projection of an unchanged step on an unchanged gradient. The trial sequence nevertheless independently supports a globalization failure: the selector accepts the factor-1/8 state at 12 cells and 1.625 kA because merit drops to 0.924, while evaluated factors 1/16 and 1/32 retain substantially more support but have higher merits of 1.052 and 1.143.",
+    "goal": "the node reproduces the first-trip support collapse on the certificate production route and refutes the proposed lambda-specific near-null mechanism. The normalized map is structurally rank-poor, but the accepted step has nearly identical near-null energy with lambda normalized and fixed, negligible cosine with the local support-shrink gradient, and no near-null direction in either Newton-residual Jacobian. The supported replacement reading is that an oversized frozen-partition proposal crosses a discontinuous support boundary and the globalization criterion selects a collapsed finite state because it improves scalar merit; whether the underlying remedy is seed amplitude, step validity region or a support-aware acceptance rule remains unmeasured.",
+    "manifest": "read from the target run directory: status complete, three commits through 0081c85c1f5b847bcbec07cb513fc138d0e5bf3a, explicit 138-path inventory, H200 job 1276502 COMPLETED 0:0 in 00:10:45, supplemental step 1276502.1 COMPLETED 0:0, five named logs, a bare negative_control_log path and quantitative evidence inputs. The separately retained scheduler step 1276502.0 CANCELLED 0:15 is disclosed rather than erased.",
+    "write_paths": "every repository change is within the five declared exclusive paths. Source is confined to benchmarks/plasma_cell_first_step_directions.py; all remaining changes are the owning plan, cumulative evidence record and artifacts under docs/figures/plasma-cell-read-fidelity. No production module, sprint resource, project index or coordinator-owned plan state was changed."
+  },
+  "justifications": {
+    "durability": "three conventional commits with bodies preserve the instrument, launch script, 116 raw event archives, dense Jacobians, states, figures, receipts, controls, scheduler accounting and append-only records; the candidate tree is clean and the manifest enumerates every path. The deduction is for the final JSON assembly and artifact audit being an uncommitted stdin program rather than a reproducible committed assembler, although the inputs needed to reconstruct it are durable.",
+    "evidence": "one real H200 job carries source revision, worktree, device, route and callback provenance; raw event arrays preserve every nonlinear merit evaluation; injected-NaN and synthetic spectral controls prove the instruments can see known positives; saved states and panels expose the physical collapse; and scheduler accounting is qualified rather than summarized as mere absence of error. The evidence supports globalization-selection failure quantitatively, but the fixed-lambda projection control is tautological and no alternate trajectory discriminates seed amplitude from acceptance validity or support-aware guarding.",
+    "fit": "the work uses the certificate production construction, one bounded GPU allocation, the shared root interpreter, native active-set boundaries, scoped lint/doc checks and Nova plotting conventions. It distinguishes the normalized map from the Newton residual Jacobian, which prevents the structural map null space from being mislabeled as the solve's degenerate direction. Minor deductions cover the one-off receipt assembler and the live comment's inaccurate 'never reached' description of vectorized ladder evaluations.",
+    "goal_fidelity": "all requested measurements, trial health fields, singular spectra, accepted-step projections and own-level panels are delivered, and the unsupported hypothesis is preserved as a scientific negative rather than forced into a pass. The trial sequence directly answers the review question in favor of the globalization reading. Full fidelity is withheld because the allowed fixed-lambda control did not actually rerun a changed trajectory and therefore cannot adjudicate lambda causality or select between the two repair families suggested by the live comment.",
+    "scope_discipline": "the candidate worktree is clean; all 138 paths are under the exclusive write fence; no production code, shared index, sprint resource or unrelated document is touched; the heavy measurement ran on betelgeuse; commits have bodies and contain no AI attribution. The unmerged candidate tip is expected for this independent pre-promotion review and is not a scope defect."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: b0a432d184a747cf3dbed176dc354507c6af0b03\nREVISION: 0081c85c1f5b847bcbec07cb513fc138d0e5bf3a\nVERDICT goal: the degenerate-direction hypothesis is not supported, while the recorded trial sequence does support a globalization/acceptance-criterion failure. The first three Newton factors collapse to one cell and zero current; factor 1/8 is selected at 12 cells, 1.625 kA and lambda 22.97 because merit falls to 0.924, even though evaluated factors 1/16 and 1/32 retain 43 and 68 cells. This shows the merit/globalization rule prefers the collapsed finite candidate, but it does not choose seed-amplitude repair over a validity-region or support-aware acceptance rule.\nVERDICT done_when: H200 job 1276502 completed 0:0 in 10:45; event 1 is the first collapse; 83 physical merit evaluations have finite raw moments; first-step and full-trip projections, four spectra and both PNG/SVG panels are present. The fixed-lambda control honestly returns not-supported, but it is tautological because it projects the same step on the same gradient.\nVERDICT write_paths: all 138 paths are within the benchmark, owning plan, cumulative evidence and figure fences; the candidate tree is clean and production source plus coordinator state are untouched.\nVERDICT manifest: complete at 0081c85c1 with three commits, explicit paths, H200 and supplemental-step receipts, five logs and quantitative metrics; the separate cancelled scheduler step is retained and qualified.\nVERDICT diff: the instrument observes native nonlinear trials without altering carries and restores wrapped functions in finally. The final receipt is scientifically reconstructable from committed raw arrays, but its stdin-based merge/audit program is not itself durable.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: every requested measurement is present and the failed hypothesis is preserved honestly; the control does not discriminate a changed trajectory or select a repair mechanism.\nSCORE evidence: 17\nJUSTIFICATION evidence: raw states, trials, Jacobians, controls, figures and scheduler provenance strongly support the globalization reading, while lambda and seed-policy causality remain untested.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the clean candidate touches only its exclusive benchmark, plan, evidence and artifact paths and leaves production and coordinator-owned state unchanged.\nSCORE durability: 18\nJUSTIFICATION durability: commits preserve extensive raw and derived evidence, but the final JSON assembly and audit were executed through stdin rather than a committed reproducible assembler.\nSCORE fit: 19\nJUSTIFICATION fit: route, compute, plotting, naming and scientific-negative conventions are followed; only the one-off assembly and imprecise live-comment description reduce fit.\nFINDING docs/figures/plasma-cell-read-fidelity/first-step/first-step.json:4339 the trial ladder supports globalization-selection failure: the selected 1/8 candidate is much more collapsed than the evaluated 1/16 and 1/32 alternatives because it has the best scalar merit.\nFINDING benchmarks/plasma_cell_first_step_directions.py:564 the fixed-lambda negative control computes identical projections from identical operands and therefore cannot discriminate lambda causality; a fixed-lambda trajectory or chord seed remains required.\nFINDING docs/plans/plasma-cell-read-fidelity.html:248 factors 1/16 and 1/32 were evaluated, not 'never reached'; they were not selected by the descending sufficient-factor rule.\nFINDING docs/figures/plasma-cell-read-fidelity/first-step/artifact-audit.log:1 the final receipt merge and audit ran through an inline stdin program rather than a committed reproducible assembler.\n",
+  "review_run_id": "r-20260923T102749862525-review-of-pcrf-first-step-degenerate-direction",
+  "reviewed_base_sha": "b0a432d184a747cf3dbed176dc354507c6af0b03",
+  "reviewed_head_sha": "0081c85c1f5b847bcbec07cb513fc138d0e5bf3a",
+  "reviewed_revision": "0081c85c1f5b847bcbec07cb513fc138d0e5bf3a",
+  "reviewed_run_id": "r-20260923T084704160021-pcrf-first-step-degenerate-direction",
+  "reviewer": {
+    "backend": "codex",
+    "model": "gpt-5"
+  },
+  "reviewer_run_id": "r-20260923T102749862525-review-of-pcrf-first-step-degenerate-direction",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T12:39:40+02:00",
+  "total": 92
+}

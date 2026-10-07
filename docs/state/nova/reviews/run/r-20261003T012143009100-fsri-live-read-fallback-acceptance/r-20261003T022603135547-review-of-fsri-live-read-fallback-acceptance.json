@@ -1,0 +1,99 @@
+{
+  "added_failure_count": 1,
+  "added_failure_derivation": "The reviewed manifest's completed baseline_suite is a51a137af4b354968bdc5f371842a1f57c686398 with zero failures; its completed after_suite is 3c0ddf7f390cf0f3dcbc71ea11ebebee4e60fdd7 with one named fixed-point failure. The derived delta is therefore one. The final head includes f56b62a6's green targeted H200 repair, but no completed final 33-test after arm.",
+  "added_failure_ids": [
+    "tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point"
+  ],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012143009100-fsri-live-read-fallback-acceptance/base-reproduction.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012143009100-fsri-live-read-fallback-acceptance/h200/base-regression-retry.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012143009100-fsri-live-read-fallback-acceptance/h200/head-regression.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012143009100-fsri-live-read-fallback-acceptance/h200/head-route-repair.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T022603135547-review-of-fsri-live-read-fallback-acceptance/review-focused-head-numba-cache.log"
+  ],
+  "changed_paths": [
+    "nova/equilibrium/forward.py",
+    "tests/test_live_read_fallback_acceptance.py",
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-live-read-fallback-acceptance.html"
+  ],
+  "commits_read": [
+    "3c0ddf7f390cf0f3dcbc71ea11ebebee4e60fdd7",
+    "3c505658c",
+    "f56b62a6bc837155d781682532b1f4f7c9154624",
+    "11fb49e98d2fd4ccdde155e2265b2a7cd92f120d"
+  ],
+  "completed_at": "2026-10-03T02:36:08Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T02:26:43Z",
+  "evidence_inputs": {
+    "failure_delta": "0 to 1 in readable declared arms; later targeted repair green, final full arm absent.",
+    "reproduction": "Base refusal remains red and exact-head focused replay is green.",
+    "reviewed_increment": "Own-mask callback forwarding plus a live callback repair."
+  },
+  "failure_attribution": {
+    "tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point": "3c0ddf7f390cf0f3dcbc71ea11ebebee4e60fdd7"
+  },
+  "findings": [
+    {
+      "file": "tests/test_live_read_fallback_acceptance.py",
+      "line": "24-74",
+      "severity": "follow-on",
+      "text": "The stub checks callback presence only; it neither invokes shadowed_map_fn nor gives the shadowed map shadow-sensitive behavior, so a frozen callback can still pass."
+    },
+    {
+      "file": "h200/head-regression.log",
+      "line": "completed after arm",
+      "severity": "follow-on",
+      "text": "The final head lacks a completed rerun of the recorded 33-test after suite; only the formerly failing one-test H200 recheck is green."
+    }
+  ],
+  "follow_ons": [
+    "Execute shadowed_map_fn against shadow-sensitive live/frozen behavior in the focused test.",
+    "Run the final 33-test selected after arm and record its failure delta."
+  ],
+  "gate_arms_note": "baseline_suite: a51a137af4b354968bdc5f371842a1f57c686398, completed=true, exit_status=0, failure_count=0, failure_ids=[]; after_suite: 3c0ddf7f390cf0f3dcbc71ea11ebebee4e60fdd7, completed=true, exit_status=1, failure_count=1, failure_ids=[tests/test_equilibrium_forward_solve.py::test_the_accelerator_routes_agree_on_the_fixed_point]. Final f56b62a6 H200 targeted repair: one passed, EXIT_STATUS=0.",
+  "item_verdicts": {
+    "baseline_failure_delta": "pass-with-follow-on: baseline 0, completed interim after 1, final targeted repair green",
+    "focused_fallback_callback_guard": "pass-with-follow-on: independent exact-head replay is green but does not execute shadowed_map_fn",
+    "recorded_defect_reproduction": "pass: base-reproduction.log is red with the expected ValueError",
+    "scope": "pass: three changed paths"
+  },
+  "justifications": {
+    "durability": "The regression is committed, but callback presence is weaker than live-read behavior and final full selected-suite evidence is absent.",
+    "evidence": "Original red/green logs and a final targeted H200 repair are readable, and the review independently replays the focused test green at exact head; a complete final selected after arm is missing.",
+    "fit": "The narrow route/test/evidence change matches the locked live-read fallback design.",
+    "goal_fidelity": "The base own-mask refusal is reproduced, the repair supplies the needed callbacks, and the final targeted H200 check passes the formerly failing route; the unit test does not execute the callback it checks.",
+    "scope_discipline": "The diff is exactly forward.py, one focused test, and one evidence fragment."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-on: exact-head focused guard passes, but the declared baseline/after logs derive one added interim failure and the final selected suite was not rerun. The unit test proves callback presence, not live-read behavior.\nSCORE goal_fidelity: 17\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 14\nSCORE fit: 18\n",
+  "review_run_id": "r-20261003T022603135547-review-of-fsri-live-read-fallback-acceptance",
+  "reviewed_base_sha": "a51a137af4b354968bdc5f371842a1f57c686398",
+  "reviewed_commit": "11fb49e98d2fd4ccdde155e2265b2a7cd92f120d",
+  "reviewed_head_sha": "11fb49e98d2fd4ccdde155e2265b2a7cd92f120d",
+  "reviewed_revision": "11fb49e98d2fd4ccdde155e2265b2a7cd92f120d",
+  "reviewed_run_id": "r-20261003T012143009100-fsri-live-read-fallback-acceptance",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-read-fallback-acceptance",
+  "reviewer_node": "review-of-fsri-live-read-fallback-acceptance",
+  "reviewer_run_id": "r-20261003T022603135547-review-of-fsri-live-read-fallback-acceptance",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T02:32:00Z",
+  "total": 85,
+  "verdict": "pass-with-follow-on"
+}

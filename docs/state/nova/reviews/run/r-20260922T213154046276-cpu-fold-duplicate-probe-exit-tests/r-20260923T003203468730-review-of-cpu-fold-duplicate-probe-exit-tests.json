@@ -1,0 +1,43 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T00:32:03.468730+00:00",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "ab32b8e63 moves the arbitrary-status case and rewrites the module docstring (29 +/- on the retained module, -77 on the deleted one); dd507e309 appends 15 and 17 additive lines to the plan and evidence records citing ab32b8e63; both bodies present, plan-meta lines untouched, the followup left data-status=\"open\"",
+    "done_when": "reviewer re-ran the named gate on the reviewed revision (3 passed, exit 0) and independently reapplied the declared control in a scratch archive of HEAD (2 failed, 1 passed, exit 1), reddening test_failed_child_fails_the_wrapper at assert 0 == 7 and the moved test at assert 0 == 3 while the zero-exit case passed",
+    "goal": "read the prompt, the followup body at docs/plans/cpu-compile-abort.html:154 and both commits; the followup asked that only test_the_wrapper_carries_an_arbitrary_child_status move into tests/test_compile_abort_probe.py and the duplicate module be deleted, and ab32b8e63 does exactly that (test present at tests/test_compile_abort_probe.py:79, tests/test_compile_abort_probe_exit.py absent at HEAD, grep -rh 'def _sample_a_child' tests/ counts 1)",
+    "manifest": "status complete, both shas, four changed paths, the gate command with its 3-passed result and log path, negative_control_log naming a log whose first line repeats the declared string verbatim; the reviewer did not re-run check-manifest but every field read against the tree agrees",
+    "write_paths": "the two commits touch four of the five assigned paths (tests/test_compile_abort_probe.py, tests/test_compile_abort_probe_exit.py, docs/plans/cpu-compile-abort.html, docs/evidence/archive/cpu-compile-abort-landed.html); docs/figures/cpu-compile-abort is unused and the manifest states no figure applies; no concurrent node's path appears"
+  },
+  "justifications": {
+    "durability": "the moved assertion at tests/test_compile_abort_probe.py:83 binds wrapper_status, the probe process status, against summary[\"exit_code\"] read from an independently produced summary, and it was shown to fail on the reinstated regression (return exit_code -> return 0), so it is a guard rather than a value compared against the test's own input",
+    "evidence": "every done_when clause reproduced at dd507e309 \u2014 the gate 3 passed exit 0, the helper count 1, the deleted module gone, and the declared control reddening the moved case at tests/test_compile_abort_probe.py:83 (2 failed, 1 passed, exit 1)",
+    "fit": "the fold reuses the retained module's imports and helper verbatim and introduces no name the naming rules forbid; the docstring merge at tests/test_compile_abort_probe.py:1 reads as the single home of the contract",
+    "goal_fidelity": "the moved case at tests/test_compile_abort_probe.py:79, the absent tests/test_compile_abort_probe_exit.py, and grep -rh 'def _sample_a_child' tests/ == 1 together are the followup's exact ask and nothing more",
+    "scope_discipline": "the landed diff is exactly the assigned paths, but applying the dispatch's own declared control required a transient edit of benchmarks/compile_abort_probe.py, outside the fence; the node disclosed it in the manifest evidence_inputs and reverted it (git diff 67c716eb1 HEAD -- benchmarks/compile_abort_probe.py empty, reviewed worktree clean)"
+  },
+  "node": "review-of-cpu-fold-duplicate-probe-exit-tests",
+  "project": "nova",
+  "raw_text": "REVIEWED_REVISION: dd507e309915ef15bf1df475817207031beeccc6\nreviewed base 67c716eb14bb94f56c2fe6a61ad781d6cc3edd13 (diff taken against it)\nreviewed run r-20260922T213154046276-cpu-fold-duplicate-probe-exit-tests, role implement, reviewed by r-20260923T003203468730\n\nVERDICT goal: read the prompt, the followup body at docs/plans/cpu-compile-abort.html:154 and both commits; the followup asked that only test_the_wrapper_carries_an_arbitrary_child_status move into tests/test_compile_abort_probe.py and the duplicate module be deleted, and ab32b8e63 does exactly that (test present at tests/test_compile_abort_probe.py:79, tests/test_compile_abort_probe_exit.py absent at HEAD, grep -rh 'def _sample_a_child' tests/ counts 1)\nVERDICT done_when: reviewer re-ran the named gate on the reviewed revision (3 passed, exit 0) and independently reapplied the declared control in a scratch archive of HEAD (2 failed, 1 passed, exit 1), reddening test_failed_child_fails_the_wrapper at assert 0 == 7 and the moved test at assert 0 == 3 while the zero-exit case passed\nVERDICT write_paths: the two commits touch four of the five assigned paths (tests/test_compile_abort_probe.py, tests/test_compile_abort_probe_exit.py, docs/plans/cpu-compile-abort.html, docs/evidence/archive/cpu-compile-abort-landed.html); docs/figures/cpu-compile-abort is unused and the manifest states no figure applies; no concurrent node's path appears\nVERDICT manifest: status complete, both shas, four changed paths, the gate command with its 3-passed result and log path, negative_control_log naming a log whose first line repeats the declared string verbatim; the reviewer did not re-run check-manifest but every field read against the tree agrees\nVERDICT diff: ab32b8e63 moves the arbitrary-status case and rewrites the module docstring (29 +/- on the retained module, -77 on the deleted one); dd507e309 appends 15 and 17 additive lines to the plan and evidence records citing ab32b8e63; both bodies present, plan-meta lines untouched, the followup left data-status=\"open\"\nCALL_SITES: none\n\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the moved case at tests/test_compile_abort_probe.py:79, the absent tests/test_compile_abort_probe_exit.py, and grep -rh 'def _sample_a_child' tests/ == 1 together are the followup's exact ask and nothing more\nSCORE evidence: 20\nJUSTIFICATION evidence: every done_when clause reproduced at dd507e309 \u2014 the gate 3 passed exit 0, the helper count 1, the deleted module gone, and the declared control reddening the moved case at tests/test_compile_abort_probe.py:83 (2 failed, 1 passed, exit 1)\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the landed diff is exactly the assigned paths, but applying the dispatch's own declared control required a transient edit of benchmarks/compile_abort_probe.py, outside the fence; the node disclosed it in the manifest evidence_inputs and reverted it (git diff 67c716eb1 HEAD -- benchmarks/compile_abort_probe.py empty, reviewed worktree clean)\nSCORE durability: 20\nJUSTIFICATION durability: the moved assertion at tests/test_compile_abort_probe.py:83 binds wrapper_status, the probe process status, against summary[\"exit_code\"] read from an independently produced summary, and it was shown to fail on the reinstated regression (return exit_code -> return 0), so it is a guard rather than a value compared against the test's own input\nSCORE fit: 20\nJUSTIFICATION fit: the fold reuses the retained module's imports and helper verbatim and introduces no name the naming rules forbid; the docstring merge at tests/test_compile_abort_probe.py:1 reads as the single home of the contract\n\nNOTE the dispatch declared the control string 'make the probe main return 0 unconditionally' while fencing out benchmarks/compile_abort_probe.py, the only file that string can be applied to, so the node could not satisfy fence and evidence together; it applied it transiently, reverted it, and recorded the conflict in the manifest evidence_inputs. The repair belongs to the dispatch (fence the probe in, or declare a control the fence admits), not to this landed change.\n",
+  "review_run_id": "r-20260923T003203468730-review-of-cpu-fold-duplicate-probe-exit-tests",
+  "reviewed_revision": "dd507e309915ef15bf1df475817207031beeccc6",
+  "reviewed_run_id": "r-20260922T213154046276-cpu-fold-duplicate-probe-exit-tests",
+  "role": "review",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T00:43:22.709579+00:00",
+  "total": 99
+}

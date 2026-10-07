@@ -1,0 +1,109 @@
+{
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "the reviewed run is a diagnostic benchmark node: its manifest records tests (an H200 diagnostic benchmark, no pytest suite), carries no baseline_suite and no after_suite, and its four gate logs are benchmark runs (fixed-point-rca-h200(.log|-rerun|-diag|-final.log) at revisions 412408ceb/b90741890/c1ad93fe/64fdfe787, all JSON receipts, none a test summary). With no baseline_suite and no after_suite arm there is nothing to subtract, so the count is null by the unmeasured rule and no ids are added because no suite ran.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "5 diagnosis sections; live residual 2.372871479533e-06, frozen residual 2.372871476315e-06, per-cell frozen-vs-live gap <=7.105427357601e-15, trajectory residual 7.969573083161e-13",
+      "path": "docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca/report.md"
+    },
+    {
+      "headline": "byte-identical to the 64fdfe787 H200 gate log JSON; termination ACTIVE_SET_SETTLED converged=False; partition_difference_cells 0; refreshed_live_residual 2.372871479532645e-06",
+      "path": "docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca/receipt.json"
+    },
+    {
+      "headline": "regenerates the report and receipt from the committed forward-solve fixture; initial route 142.10 s, refreshed pass 12.04 s",
+      "path": "benchmarks/frozen_route_fixed_point_rca.py"
+    },
+    {
+      "headline": "landing fragment citing job 1279957 EXIT=0 at revision 1119fbc79",
+      "path": "docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-fixed-point-diagnosis.html"
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "ca8cbebe5af08ee51ec46aa7fa6f4796112122fe",
+    "412408ceb6f63bed335f1d22d840fe4260ff24bc",
+    "b907418908e25b5b0422d8aa31275fa225ade95e",
+    "c1ad93fedc24b424f692f77daa2468e8ad5dfb8e",
+    "64fdfe7878b967f60890deca988e94855b8f632b",
+    "1119fbc792a119d8848167de9e312568e6e57bf3"
+  ],
+  "completed_at": "2026-10-02T09:01:36.425Z",
+  "dispatched_at": "2026-10-02T08:39:50Z",
+  "evidence_inputs": {
+    "orientation_base_sha_stale": "reviewed manifest orientation_base_sha 412408ceb is the node's own third commit, not the parent of its first commit; the base used for this review is f157f8419.",
+    "receipt_matches_gate_log": "committed receipt.json == the JSON printed at line 6 of fixed-point-rca-h200-final.log (json equality True); the gate log header names revision 64fdfe787, the worktree, the shared interpreter and measurement_module nova/equilibrium/fixed_point.py.",
+    "reviewed_base_provenance": "f157f8419 is the sole commit of the blocked predecessor run r-20261002T064655427735-fsri-frozen-route-fixed-point-rca and the parent of this node's first commit ca8cbebe.",
+    "reviewed_head_is_deliverable_head": "1119fbc792a119d8848167de9e312568e6e57bf3 adds receipt.json and report.md; git diff --name-only f157f8419..HEAD returns exactly the four manifest-declared paths.",
+    "settle_branch_has_no_residual_test": "nova/equilibrium/fixed_point.py lines 4639-4648: settled = stop_on_active_set_settlement & own_mask_acceptance & selected_finite & ~converged & ~cycle_detected & (selected_difference == 0) & (selected_newton_promotions == 0) & jnp.all(selected_state == state); no convergence_tolerance term, unlike converged at 4625-4628."
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-fixed-point-diagnosis/docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca/report.md",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "follow-on: imprecision (not a defect in the conclusion; the core claim holds): 'once the mask stops changing the settle test ends the loop' omits two conjuncts of the actual settled predicate \u2014 inner_result.accepted_newton_promotions == 0 and jnp.all(selected_state == state). Trip 0's mask difference is also 0 ([0,0,...]) yet the loop did not settle there because a promotion was accepted, so an unchanged mask alone is neither necessary-and-sufficient as the sentence implies. The load-bearing claim \u2014 the settle branch consults no residual \u2014 is correct."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-fixed-point-diagnosis/docs/figures/millisecond-converged-solve/newton-krylov-route/fixed-point-rca/report.md",
+      "line": "37",
+      "severity": "follow-on",
+      "text": "follow-on: partition.topology.x_point is an all-NaN column (absent X-point in this absolute-current fixture); the _changed() summariser computes changed_entries with !=, so NaN != NaN reports changed_entries=2 for a uniformly absent quantity and a reader sees x_point listed as changed. The report prints nan rather than concealing it, so this is a reporting artifact, not a hidden error, but a uniformly-NaN field flagged as 'changed' is the shape the negative-control rule warns about."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T070350895037-fsri-frozen-route-fixed-point-diagnosis/manifest.md",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: record defect \u2014 orientation_base_sha is 412408ceb, but the earliest commit in the manifest's own commits list is ca8cbebe, whose parent is f157f8419; 412408ceb is the node's third commit, recorded when the worktree was re-oriented after a resume. reviewed_base_sha uses f157f8419 (the parent of the first delivered commit, owned by the blocked predecessor run r-20261002T064655427735) so the reviewed change set is exactly the node's four declared paths."
+    }
+  ],
+  "follow_ons": [
+    "the recommended residual gate is not implemented here (correctly outside this node's write scope: nova/equilibrium/fixed_point.py belongs to fsri-frozen-newton-terminal-residual); it must be validated by a live-read pass, which this node's re-freezing refresh could not perform.",
+    "the x_point NaN changed_entries artifact is worth a one-line fix in the benchmark's _changed() summariser so an all-absent quantity is not reported as changed."
+  ],
+  "gate_arms_note": "no gate arms: the reviewed node modifies no test file and declares no baseline_suite or after_suite, so added_failure_count is unmeasured rather than zero-because-nothing-failed. The reviewed evidence is a single-arm H200 diagnostic; its falsifiable prediction (that refreshing the frozen partition moves the terminus) is reported as refuted by the rerun and is the closest thing it offers to a control.",
+  "item_verdicts": {
+    "call_sites": "no production call sites; the node adds a benchmark and two evidence documents and modifies no library code.",
+    "diff": "base f157f8419 to head 1119fbc79 touches exactly the four declared paths (+813/-53); the receipt.json and report.md were added at the head commit 1119fbc79 and match the 64fdfe787 gate log.",
+    "done_when": "the reviewed manifest declares tests: the H200 diagnostic benchmarks/frozen_route_fixed_point_rca.py --refresh-newton-steps 8, job 1279957, EXIT=0, 3m37s, at revision 64fdfe787; the committed receipt.json is byte-identical to that job's printed JSON (verified).",
+    "goal": "the node's goal is to diagnose why the frozen-Newton route terminates at a fixed-point residual (~2.37e-6) above the 1e-6 tolerance while the picard route converges below 1e-6; report.md answers it with five sections and reaches a named cause: the outer active-set settle branch admits termination on an unchanged mask without consulting the live residual, so the retained state carries the 2.37e-6 gap. Benchmarks/frozen-route file and fragment html state the same.",
+    "manifest": "read; status complete, commits six, changed_paths four, tests the H200 diagnostic, blockers none. One record defect: orientation_base_sha (412408ceb) is not the parent of the first listed commit (ca8cbebe); the true base of the delivered change set is f157f8419 (belongs to the predecessor run r-20261002T064655427735), which is what reviewed_base_sha records.",
+    "write_paths": "the manifest declares four write paths; git diff --name-only f157f8419..HEAD at the reviewed worktree returns exactly those four files (benchmark, report.md, receipt.json, fragment html), so no source, test, or plan file was written."
+  },
+  "justifications": {
+    "durability": "report.md, receipt.json, the fragment html and the benchmark script are all committed and reachable at the reviewed head; the benchmark regenerates both artifacts deterministically from a committed fixture. What limits the score is that no test pins the settle-branch behaviour the report identifies \u2014 a later edit to fixed_point.py could silently move the terminus the report characterizes \u2014 and the recommended gate itself is not implemented here.",
+    "evidence": "the committed receipt is byte-identical to the reviewed run's own final gate log (fixed-point-rca-h200-final.log, revision 64fdfe787, EXIT=0), so every quoted number reconciles with its source: live_residual 2.372871479532645e-06, frozen_residual 2.372871476315067e-06, trajectory_residual 7.969573083160983e-13, refreshed_live_residual identical, partition_difference_cells 0, termination ACTIVE_SET_SETTLED (converged=False), 2 trips, 1 accepted promotion. The mechanism prose is verified against the source rather than taken on trust. Two qualifiers hold the score below full: the falsifiable check re-freezes (acknowledged in report lines 55-56), so no live-read pass confirms the recommendation; and the receipt's partition.topology.x_point is an all-NaN column whose changed_entries=2 is a NaN!=NaN artifact.",
+    "fit": "the deliverables follow the repo's docs/figures/<topic>/report.md + receipt.json convention and the docs/evidence/fragments/ forward-solver-route-integrity fragment convention; the benchmark is named by mechanism (frozen_route_fixed_point_rca) with no plan, sprint, ticket or version labels (a regex scan of the diff for phase/stage/plan/W\\d/D\\d/S\\d/BUG/#NNN found none); commit messages carry bodies; the fragment carries a figure reference convention consistent with siblings.",
+    "goal_fidelity": "the diagnosis question is answered and independently verified: reading nova/equilibrium/fixed_point.py at HEAD, the settled predicate (lines 4639-4648) is stop_on_active_set_settlement & own_mask_acceptance & selected_finite & ~converged & ~cycle_detected & (selected_difference == 0) & (inner_result.accepted_newton_promotions == 0) & jnp.all(selected_state == state) \u2014 it contains no residual-versus-tolerance term, whereas the converged predicate (lines 4625-4628) does include selected_residual <= convergence_tolerance. selected_difference is jnp.sum(selected_mask != mask) (line 4563), so the settle branch terminates on an unchanged mask and unchanged state without a residual test, exactly the named mechanism.",
+    "scope_discipline": "exactly the four declared paths changed; fixed_point.py was left untouched and the residual-gate fix is correctly deferred to the node that owns it, named in follow_ons. The one deduction is the stale orientation_base_sha in the manifest."
+  },
+  "mechanism_supported": "yes: the receipt's numbers are the exact signature of the settle branch firing without a residual test. converged=False with termination_reason_name ACTIVE_SET_SETTLED, active_set_iterations 2, accepted_newton_promotions 1, mask differences [0,0,-1,...], and a live relative-sup residual of 2.372871479532645e-06 that exceeds the 1e-6 tolerance the plan names. Reading nova/equilibrium/fixed_point.py at HEAD confirms the settled predicate (lines 4639-4648) tests mask difference zero and state equality and zero accepted promotions but no residual-versus-tolerance term, while converged (lines 4625-4628) does; so the branch can and does terminate above tolerance. One nuance the report under-states: the predicate also requires jnp.all(selected_state == state) and zero accepted promotions, not only an unchanged mask.",
+  "project": "nova",
+  "raw_text": "VERDICT pass (87/100; goal_fidelity 18, evidence 17, scope_discipline 19, durability 15, fit 18). The reviewed node diagnoses why the frozen-Newton route terminates at live residual 2.372871479533e-06 above the 1e-6 tolerance: the outer active-set settle branch admits termination on an unchanged mask and unchanged state with zero accepted promotions and NO residual-versus-tolerance test. I verified the mechanism in nova/equilibrium/fixed_point.py at HEAD (settled predicate lines 4639-4648 has no convergence_tolerance term; converged at 4625-4628 does), verified the committed receipt is byte-identical to the reviewed run's own H200 gate log (64fdfe787, EXIT=0), and confirmed the review range f157f8419..1119fbc79 is exactly the four declared paths. The receipt's numbers are the exact signature of that branch firing (ACTIVE_SET_SETTLED, converged=False, residual 2.37e-6 > 1e-6, mask diffs [0,0], 1 accepted promotion), so the mechanism is supported; the recommended residual gate follows, qualified by the node's own honest caveat that its refresh re-freezes and so confirms no live-read pass, and by 8 further Newton steps not moving the residual. Findings: report line 60 under-states the settled predicate (mask alone is not sufficient; trip 0 also had mask diff 0); x_point is an all-NaN column whose changed_entries=2 is a NaN!=NaN artifact; and the manifest's orientation_base_sha is stale (412408ceb, not the parent of its first commit). added_failure_count null \u2014 the reviewed node ran no test suite, so there are no baseline/after arms.",
+  "residual_gate_follows": "yes, conditionally qualified: gating the settle on the reconciled live relative-sup residual at or below tolerance follows directly from the mechanism and is the minimal correct fix (the partition refresh was measured not to help: frozen map equals live map to 7.105427357601e-15 and the refreshed route reproduces 2.372871479532645e-06 bit-for-bit). The qualifier the report itself records: the refresh re-freezes, so it tests a repeated frozen pass and not a live-read pass; and 8 further Newton steps on the re-frozen route do not move the residual, which is mild counter-evidence that 'continue the local Newton trajectory' alone suffices. The recommendation is therefore sound as the fix a live-read confirmation should validate, and the node lists that confirmation as a follow-on.",
+  "review_run_id": "r-20261002T083927095389-review-of-fsri-frozen-route-fixed-point-diagnosis",
+  "reviewed_base_sha": "f157f841942b84b57d99c22603ed2539d039b830",
+  "reviewed_head_sha": "1119fbc792a119d8848167de9e312568e6e57bf3",
+  "reviewed_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T070350895037-fsri-frozen-route-fixed-point-diagnosis/manifest.md",
+  "reviewed_revision": "1119fbc792a119d8848167de9e312568e6e57bf3",
+  "reviewed_run_id": "r-20261002T070350895037-fsri-frozen-route-fixed-point-diagnosis",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-fixed-point-diagnosis",
+  "reviewer_node": "review-of-fsri-frozen-route-fixed-point-diagnosis",
+  "reviewer_run_id": "r-20261002T083927095389-review-of-fsri-frozen-route-fixed-point-diagnosis",
+  "reviewing_run_id": "r-20261002T083927095389-review-of-fsri-frozen-route-fixed-point-diagnosis",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T08:52:00+00:00",
+  "total": 87,
+  "verdict": "pass"
+}

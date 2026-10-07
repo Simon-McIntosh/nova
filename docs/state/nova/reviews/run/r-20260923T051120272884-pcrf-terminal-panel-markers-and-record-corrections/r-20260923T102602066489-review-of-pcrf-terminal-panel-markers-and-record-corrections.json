@@ -1,0 +1,47 @@
+{
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T10:26:02.066489+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/plasma_cell_terminal_state.py",
+      "line": "40",
+      "text": "the pixel-census instrument that discriminates the draw-order fix (marker_pixel_census / _cluster_pixel_census) lives only inside the render path and is exercised by a manually-launched negative-control job, not by a collected pytest regression. A future edit that reintroduces panel-over-reference drawing order would not fail any test in the default or slow lane; only a rerun of this benchmark's own render would catch it. Non-blocking: the node's own declared gate (render + pixel census) is exactly what it promised, and adding a collected test is beyond this node's stated scope."
+    }
+  ],
+  "item_verdicts": {
+    "done_when": "the render job (host 98dci4-clu-3141, a compute node, not login) ran --render-only against the stored trip-arms states with no solve, exit clean, and wrote the regenerated PNG/SVG/JSON. The receipt's marker_pixel_census reads 675 reference / 0 panel pixels at the analytic cluster for the repaired draw order, against 300/333 for the declared negative control (draw-order=panel-last), which is the declared falsifying mutation and is present in negative-control.log with its first line matching the stated mutation text. Ruff check and ruff format --check both pass over the sole changed source file at the committed revision (verified independently in this review). Both HTML record appends are additive: `git diff 218addacf 6a78bd168 -- docs/evidence/archive/*.html` shows 2 insertions, 0 deletions.",
+    "goal": "the node's goal (per its own node name and the plan's followup f-pcrf-003) is to fix the analytic panel overpainting and append two named record corrections. Read commits e8b613cef and 6a78bd168 in worktree pcrf-terminal-panel-markers-and-record-corrections (tip 6a78bd168): the analytic column now draws its null set once, in the reference style, and every other column draws the reference markers last so they stay on top of the panel-state markers. The regenerated PNG (visually inspected) shows the analytic column's three-candidate saddle cluster legible as blue hollow crosses, where before it was hidden under the small red panel markers. Both named record corrections are present verbatim as described: the terminal-state record notes the CANCELLED 0:15 python step beside the COMPLETED batch row, and the topology re-pin record replaces the stale 55 s figure with the scheduler's 10 s.",
+    "manifest": "read from the run directory: status complete, two commits with full bodies, an explicit six-path changed_paths list, a named gate command and log, a negative_control_log naming exactly one path with the mutation described in negative_control_note, and evidence_inputs naming the two consumed stored-state files. The manifest also records a prior failed launch (wrong reports path) as a follow_on rather than hiding it.",
+    "record_correction_fact_check": "independently reran `sacct -j 1276081 -o JobID,Elapsed,State` from this review: elapsed is 00:00:10, exactly matching the appended correction text ('sacct gives job 1276081 an elapsed of 10 s'). The scheduler-log-derived CANCELLED 0:15 claim for job 1276138 is quoted from the same scheduler.log already cited by the record it corrects and was not independently re-fetched, but the corrected text is consistent with the plan's own halt-record language.",
+    "write_paths": "the full diff (218addacf..6a78bd168) touches exactly: benchmarks/plasma_cell_terminal_state.py, the two evidence-archive HTML files, and the three terminal-state-trip-arms figure artifacts (json/png/svg) under docs/figures/plasma-cell-read-fidelity. All are inside the node's declared fence; no production solver source, plan file, or shared index was touched. The candidate worktree is clean."
+  },
+  "justifications": {
+    "durability": "two conventional commits, each with a full body, carry the fix and the regenerated artifacts separately; the render job log, negative-control log, and both commit-message files are preserved on disk beside the run. Minor deduction: the pixel-census instrument lives inside the benchmark module rather than as a collected regression test, so a future edit could silently reintroduce the overpaint without a test failing.",
+    "evidence": "the falsifying negative control is real and quantitative (a restored draw order that visibly re-covers the reference markers, 300/333 vs. 675/0), run in the same job as the repaired render rather than asserted. The additivity claim for the two HTML appends was independently reverified in this review with git diff (0 deletions). The 10 s scheduler-elapsed claim was independently reverified with a fresh sacct query, an exact match. The render ran on a compute node with no solve, consistent with the render-only, stored-state gate the node describes.",
+    "fit": "the fix follows the repo's plotting rules (line contours, both null sets, wall drawn, axes off) and does not touch solver source. The record corrections are stated as plain factual appends with no editorializing beyond what the evidence supports. Minor deduction: the scheduler-log CANCELLED claim in the first record correction is carried forward from context rather than freshly re-quoted from scheduler.log in this node's own gate, though it is consistent with the plan's own text.",
+    "goal_fidelity": "the node delivers exactly what its name and the plan followup describe: a draw-order fix with a selectable negative control, a regenerated figure with the analytic cluster now legible, and two additive, independently-verifiable record corrections. Nothing claimed exceeds what the receipt and the visual inspection support.",
+    "scope_discipline": "every changed path sits inside the node's declared fence; no plan file, shared index, or production solver code changed. The worktree is clean. A prior failed launch attempt (wrong path) is preserved as a record rather than discarded, matching the follow_ons field."
+  },
+  "project": "nova",
+  "raw_text": "REVISION: 6a78bd1688459dc86f8b73ea58d2ce428af88e1c\nVERDICT goal: fixes the analytic-panel overpaint (null set drawn once, reference markers drawn last elsewhere) and appends the two named record corrections, all verified present and accurate.\nVERDICT done_when: render-only gate ran on a compute node with no solve; marker_pixel_census reads 675/0 repaired vs 300/333 negative control; ruff check/format pass; both HTML appends are additive (0 deletions, independently reverified).\nVERDICT write_paths: diff confined to the source module, the figure triple, and the two evidence-archive HTML files; worktree clean; no plan or production-solver file touched.\nVERDICT manifest: complete, two bodied commits, explicit paths, named gate and negative-control logs, prior failed launch preserved as a follow_on.\nVERDICT record_correction_fact_check: independently reran sacct -j 1276081; elapsed 00:00:10 exactly matches the appended correction.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: delivers precisely the declared fix and both named corrections, nothing overclaimed.\nSCORE evidence: 19\nJUSTIFICATION evidence: real quantitative negative control plus two independently reverified facts (additivity, sacct elapsed).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: clean worktree, every changed path inside the declared fence.\nSCORE durability: 18\nJUSTIFICATION durability: two bodied commits and preserved logs; census instrument not yet a collected regression test.\nSCORE fit: 19\nJUSTIFICATION fit: follows plotting rules and naming conventions; one carried-forward (not freshly re-quoted) scheduler citation.\nFINDING benchmarks/plasma_cell_terminal_state.py:40 the draw-order regression instrument is exercised manually, not by a collected test, so a future regression would not fail CI.\n",
+  "review_run_id": "r-20260923T102602066489-review-of-pcrf-terminal-panel-markers-and-record-corrections",
+  "reviewed_head_sha": "6a78bd1688459dc86f8b73ea58d2ce428af88e1c",
+  "reviewed_revision": "6a78bd1688459dc86f8b73ea58d2ce428af88e1c",
+  "reviewed_run_id": "r-20260923T051120272884-pcrf-terminal-panel-markers-and-record-corrections",
+  "reviewer": {
+    "backend": "claude",
+    "model": "claude-sonnet-5"
+  },
+  "reviewer_run_id": "r-20260923T102602066489-review-of-pcrf-terminal-panel-markers-and-record-corrections",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T10:45:00+00:00",
+  "total": 95
+}

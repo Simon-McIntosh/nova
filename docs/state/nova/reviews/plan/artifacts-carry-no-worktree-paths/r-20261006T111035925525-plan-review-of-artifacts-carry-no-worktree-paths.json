@@ -1,0 +1,105 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T11:15:51.751Z",
+  "dispatched_at": "2026-10-06T11:10:55Z",
+  "findings": [
+    {
+      "anchor": "<plan>#s6",
+      "id": "deep_module-1",
+      "reason": "\u00a76 must keep an assertion that the candidate search finds a known-present worktree string (e.g. a seeded scratch tracked file or a known offender) before an empty offender list is trusted.",
+      "text": "taking scan candidates from `git grep -l -a -F WORKTREE_ROOT` and passing only those to `worktree_path_offenders` removes the positive control that the current test carries (`test_the_scan_reaches_every_top_level_directory`, `tests/test_*:51`), so a git-grep that returns nothing \u2014 wrong cwd in the hook, git unavailable, or pattern drift \u2014 produces an empty candidate list and reads as zero offenders, which is exactly the fail-open the guard exists to prevent",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/definitions.py:6",
+      "id": "duplicate_owner-1",
+      "reason": "the pattern is pre-existing and repo-wide and lies outside \u00a73's census (files that named a worktree), so consolidating onto `root_dir` is a separate node, not a change to this plan.",
+      "text": "the repository root is re-derived in 358 Python files (`grep -rln 'rev-parse\\|show-toplevel\\|Path(__file__).resolve().parents' --include=*.py`), of which 0 import `root_dir`; the \u00a73 Python launch scripts join this pattern (e.g. `docs/figures/forward-solve-api/coil-edit-nonconvergence/diagnose_open_axis_arc.py:7`, `docs/figures/cut-cell-current-attribution/exact-support-floor/audit.py:11`) instead of extending the owner",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/database/filepath.py:22",
+      "id": "duplicate_owner-2",
+      "reason": "the guard keys only on the stable `reckon-worktrees` token, so drift in the project-pattern would surface as an unmapped-path report rather than silence; a drift check is belt-and-braces rather than a correctness fix.",
+      "text": "the worktree layout is re-encoded (`WORKTREE_ROOT = \"reckon-worktrees\"`, `_WORKTREE_PROJECT = re.compile(r\"nova-[0-9a-f]+\")`, `_WORKTREE_PATH`) while `reckon/crew/routing.py:463-470` owns that root and layout; the plan states the justification (nova carries no reckon dependency) but adds no test binding the one re-encoded token that must not drift",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/definitions.py:6",
+      "id": "reuse_search-1",
+      "reason": "the shell census scripts (79 sites) cannot import Python, so the per-script idiom is unavoidable there, and the landed \u00a73 node is not worth reopening for the Python minority.",
+      "text": "for the Python launch scripts the plan re-derives the root lexically (git rev-parse / `parents[N]`) rather than extending `root_dir`; the plan searched reckon and cites `repository_relative`, but its account of prior art omits the in-repo root owner",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "<plan>#s2",
+      "id": "interface_budget-1",
+      "reason": "\u00a72 is landed and \u00a76 adds no CLI or refusal surface of its own, so the plan's remaining node is unaffected; \u00a76 in fact retires two benchmark defaults, which counts toward the budget.",
+      "text": "`filepath relativize` and its `--check` flag add CLI surface (cli_options 0 this week) and \u00a72's own text names no retirement or merge; only the \u00a73 followup body names a retirement (the superseded scan in `tests/test_render_receipt_paths.py`)",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "f42003368e2677d61f32f10719cd10e9cefa6dcaa0c36780768b88ab1e1a30e4",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 46,
+  "project": "nova",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:18:15.370190+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "nova.definitions.root_dir is fixed at import time to whichever tree nova was imported from. Through the shared editable install that is the canonical checkout even when a script runs in a worktree, which a design-review round of this plan established. So it is the wrong owner for a run-time root, and the launch scripts resolve their own. Consolidating the repo-wide root idiom is separate work, as the finding notes.",
+      "when": "2026-10-06T11:18:15.879796+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Residual drift risk, marked not plan-changing. The guard keys on the stable reckon-worktrees token, so drift in the project pattern surfaces as an unmapped report rather than silence. The layout owner is named in section 1.",
+      "when": "2026-10-06T11:18:16.446570+00:00"
+    },
+    "interface_budget-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Section 2 has landed and accounted for its surface before it collapsed: one subcommand on the existing filepath group, not a new command. Section 6 adds no CLI or refusal surface and retires two benchmark defaults, as the finding notes.",
+      "when": "2026-10-06T11:18:17.573178+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Same root_dir question as duplicate_owner-1: the import-time root resolves to the canonical checkout from a worktree, so it cannot serve as the run-time root. Section 3 states this.",
+      "when": "2026-10-06T11:18:17.025472+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T111035925525-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "412956834f7c0121f75570f3b0b708daaf5b5df0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a76 moves candidate enumeration out to `git grep -l -a -F WORKTREE_ROOT` and drops the current positive control, so the scan's reach becomes hidden behind an enumeration that can legitimately return nothing.",
+    "duplicate_owner": "a finding \u2014 the repository root is re-derived in 358 Python files and no file imports the owner `nova.definitions.root_dir`; the \u00a73 Python launch scripts join that pattern rather than extending the owner.",
+    "interface_budget": "a finding \u2014 cli_options 0, public_definitions 0, mcp_views 0, refusal_families 0; \u00a72 adds a `relativize` subcommand and a `--check` flag without naming, in its own text, what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites reckon's layout owner and the census, and reuses the realpath/git-root idiom already present in 79 shell scripts, but never cites `nova.definitions.root_dir`, the existing repository-root owner it could extend for the Python launch scripts.",
+    "thin_wrapper": "pass \u2014 the hook `scripts/git-hooks/pre-commit` is a justified thin caller of `filepath relativize --check`; git exposes no other commit-time hook, so a shim is the honest change."
+  },
+  "section_digests": {
+    "_document": "2ef8b7a57de154e8e7aca236a612afcc0b7934b729a8c7488e7324330d783a61",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "0391cba326b1fc80516ff770fbaa656f6d1a1ac9f2f9394de0a78cc02dfdf265",
+    "s3": "53237d5d24293dce23c291a9ae8509b4507b5c63e879ea07ef804bc3862a43b5",
+    "s4": "20494cf065ef7899a5e3c7ace93b3afcc0ec3d03613a4dd566446a54c46448ac",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b",
+    "s6": "ae8213eeb985a5b7e41c18ebedd6fde55438ec1d639b546b9170f43f4d434705"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T11:18:00.277577+00:00"
+}

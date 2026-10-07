@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T04:21:27.249Z",
+  "dispatched_at": "2026-10-06T03:40:36Z",
+  "findings": [
+    {
+      "file": "tests/test_topology_limiter_contact.py",
+      "line": "192",
+      "severity": "follow-on",
+      "text": "follow-on: the second-order assertion compares fine_error against 4.0 * max(coarse_error, CONTACT_ROUNDOFF_FLOOR_M) and the measured errors sit below the floor (2.6e-15 m at 241 nodes, 6.2e-13 m at 481), so at its operating point it reduces to fine_error <= 4e-9 and does not exercise the 241-to-481 order \"never with a loosened bound\" as done_when(2) requires, and the docstring's \"does not degrade at 481\" rests on an assertion that cannot fail there."
+    },
+    {
+      "file": "tests/test_first_moment_centroid_row.py",
+      "line": "122",
+      "severity": "follow-on",
+      "text": "follow-on: the anchored band 5.0e-5 < tol < 1.0e-4 is replaced by 5.0e-5 < tol < 0.1 * centre_only_error (upper bound now 6.3e-4, about 6x looser) for a quantity the node itself reports moved for a reason other than clipping, and done_when(3) directs a stop-and-report when a derived quantity moves for a non-clipping reason, where the node proceeded with a relation bound instead of stopping."
+    },
+    {
+      "file": "manifest.md",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: after_suite names revision 3056ab2e24799636ffe06cbf42b04d341c2ea7e1 while the reviewed head is 9ca9dfd12ee0ee806ff993cd06e403698fc86aab, a later commit, so the recorded gate result is one commit behind the revision under review; the intervening commit changes one docstring only, and a re-run of the contact arm at 9ca9dfd12 reproduces 9 passed."
+    },
+    {
+      "file": "logs/baseline_suite_combined.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the base contact arm ran as a renamed scratch copy (ctl-iet6) so its log prints unqualified ids (::test_limiter_contact_is_spline_authored_at_analytic_tangency, ::test_weak_position_error_is_second_order_between_241_and_481) while the manifest's baseline_suite requalifies them under tests/test_topology_limiter_contact.py, so the ids a store reader reduces from the log are not the ids the manifest names; the head arm has zero failures so added_failure_count is unaffected, but the pair is not reconcilable id-for-id."
+    },
+    {
+      "file": "benchmarks/limiter_read_resolution_audit.py",
+      "line": "1480",
+      "severity": "follow-on",
+      "text": "follow-on: the node's own consumer audit finds this benchmark and benchmarks/wall_at_cell_pitch.py still read the tangency by the (n-1)//2 vertex index, which the repaired limiter_contour now points inboard, and both are outside this grant so they are recorded under follow_ons (a) rather than fixed, which is correct handling and is flagged here so the consequence is not lost."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 18152a0d5; 3056ab2e2 rewrites the three test modules (+76/-16) and 9ca9dfd12 edits one docstring, all inside scope.",
+    "done_when": "the done_when requires geometric contact (met; the negative control misses by 4.063 m), a preserved sub-micrometre tangency (met; <1e-6 asserted at both rungs), a preserved second-order convergence claim (weakened; the ratio now compares at a 1e-9 floor), derived pins (met; 341 and the relation bound are both derived in docstrings and the manifest), and a consumer audit (met in the manifest's evidence_inputs).",
+    "goal": "the goal brings the five tests encoding the old intruding wall into agreement with the repaired fixture while keeping their physical claims; tests/test_topology_limiter_contact.py:120 finds the contact geometrically from the wall, tests/test_forward_census.py:444 pins 341 cells with its derivation, and tests/test_first_moment_centroid_row.py:122 rebinds the tolerance to a relation, with no fixture or source change.",
+    "manifest": "read; it records status complete, commits 3056ab2e2 and 9ca9dfd12, both suite arms with module-qualified ids, a negative-control path, the moved-quantity caveat and the consumer audit, but its after_suite names revision 3056ab2e2 rather than the head 9ca9dfd12.",
+    "write_paths": "read the manifest's five declared paths; git diff 18152a0d5..9ca9dfd12 touches only the three test modules, all inside them, and no nova/ source or scripts/analytic_oracle_fixtures."
+  },
+  "justifications": {
+    "durability": "the negative control at logs/negative_control_old_index.log reddens tests/test_topology_limiter_contact.py:133 by 4.063 m when the old index helper is restored, but tests/test_topology_limiter_contact.py:192 cannot fail on the values it measures and tests/test_first_moment_centroid_row.py:173 binds one code-derived quantity to another.",
+    "evidence": "both suite arms, the invariant test and the negative control are recorded and the head log reproduces (a re-run at 9ca9dfd12 gives 9 passed), but the after arm ran at 3056ab2e2, one commit before the reviewed head.",
+    "fit": "tests/test_topology_limiter_contact.py:120 follows the module's fixture idiom and CONTACT_ROUNDOFF_FLOOR_M is a descriptive name carrying no plan, version or ticket label.",
+    "goal_fidelity": "tests/test_topology_limiter_contact.py:120 and tests/test_forward_census.py:444 meet the goal, but tests/test_topology_limiter_contact.py:192 leaves the second-order convergence claim asserted only above a 1e-9 floor, so one physical claim the goal keeps is no longer exercised at the measured errors.",
+    "reuse": "`_designed_tangency` is the single helper in the module that owns the contact assertions, as done_when(1) directs, and the manifest's follow-on (b) names exposing the fixture's designed contact so this helper and the two benchmarks share one definition.",
+    "scope_discipline": "git diff 18152a0d5..9ca9dfd12 touches only tests/test_topology_limiter_contact.py, tests/test_first_moment_centroid_row.py and tests/test_forward_census.py, each a declared write path, and edits no source or fixture."
+  },
+  "node": "review-of-cfs-wave-limiter-test-rebaseline",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 18152a0d569d376ba65eba20bf172cc27ae4106f\nreviewed_head_sha: 9ca9dfd12ee0ee806ff993cd06e403698fc86aab\nVERDICT goal: the goal brings the five tests encoding the old intruding wall into agreement with the repaired fixture while keeping their physical claims; tests/test_topology_limiter_contact.py:120 finds the contact geometrically from the wall, tests/test_forward_census.py:444 pins 341 cells with its derivation, and tests/test_first_moment_centroid_row.py:122 rebinds the tolerance to a relation, with no fixture or source change.\nVERDICT done_when: the done_when requires geometric contact (met; the negative control misses by 4.063 m), a preserved sub-micrometre tangency (met; <1e-6 asserted at both rungs), a preserved second-order convergence claim (weakened; the ratio now compares at a 1e-9 floor), derived pins (met; 341 and the relation bound are both derived in docstrings and the manifest), and a consumer audit (met in the manifest's evidence_inputs).\nVERDICT write_paths: read the manifest's five declared paths; git diff 18152a0d5..9ca9dfd12 touches only the three test modules, all inside them, and no nova/ source or scripts/analytic_oracle_fixtures.\nVERDICT manifest: read; it records status complete, commits 3056ab2e2 and 9ca9dfd12, both suite arms with module-qualified ids, a negative-control path, the moved-quantity caveat and the consumer audit, but its after_suite names revision 3056ab2e2 rather than the head 9ca9dfd12.\nVERDICT diff: read commit by commit against 18152a0d5; 3056ab2e2 rewrites the three test modules (+76/-16) and 9ca9dfd12 edits one docstring, all inside scope.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: tests/test_topology_limiter_contact.py:120 and tests/test_forward_census.py:444 meet the goal, but tests/test_topology_limiter_contact.py:192 leaves the second-order convergence claim asserted only above a 1e-9 floor, so one physical claim the goal keeps is no longer exercised at the measured errors.\nSCORE evidence: 15\nJUSTIFICATION evidence: both suite arms, the invariant test and the negative control are recorded and the head log reproduces (a re-run at 9ca9dfd12 gives 9 passed), but the after arm ran at 3056ab2e2, one commit before the reviewed head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 18152a0d5..9ca9dfd12 touches only tests/test_topology_limiter_contact.py, tests/test_first_moment_centroid_row.py and tests/test_forward_census.py, each a declared write path, and edits no source or fixture.\nSCORE durability: 15\nJUSTIFICATION durability: the negative control at logs/negative_control_old_index.log reddens tests/test_topology_limiter_contact.py:133 by 4.063 m when the old index helper is restored, but tests/test_topology_limiter_contact.py:192 cannot fail on the values it measures and tests/test_first_moment_centroid_row.py:173 binds one code-derived quantity to another.\nSCORE fit: 18\nJUSTIFICATION fit: tests/test_topology_limiter_contact.py:120 follows the module's fixture idiom and CONTACT_ROUNDOFF_FLOOR_M is a descriptive name carrying no plan, version or ticket label.\nSCORE reuse: 17\nJUSTIFICATION reuse: `_designed_tangency` is the single helper in the module that owns the contact assertions, as done_when(1) directs, and the manifest's follow-on (b) names exposing the fixture's designed contact so this helper and the two benchmarks share one definition.\nFINDING tests/test_topology_limiter_contact.py:192 follow-on: the second-order assertion compares fine_error against 4.0 * max(coarse_error, CONTACT_ROUNDOFF_FLOOR_M) and the measured errors sit below the floor (2.6e-15 m at 241 nodes, 6.2e-13 m at 481), so at its operating point it reduces to fine_error <= 4e-9 and does not exercise the 241-to-481 order \"never with a loosened bound\" as done_when(2) requires, and the docstring's \"does not degrade at 481\" rests on an assertion that cannot fail there.\nFINDING tests/test_first_moment_centroid_row.py:122 follow-on: the anchored band 5.0e-5 < tol < 1.0e-4 is replaced by 5.0e-5 < tol < 0.1 * centre_only_error (upper bound now 6.3e-4, about 6x looser) for a quantity the node itself reports moved for a reason other than clipping, and done_when(3) directs a stop-and-report when a derived quantity moves for a non-clipping reason, where the node proceeded with a relation bound instead of stopping.\nFINDING manifest.md:18 follow-on: after_suite names revision 3056ab2e24799636ffe06cbf42b04d341c2ea7e1 while the reviewed head is 9ca9dfd12ee0ee806ff993cd06e403698fc86aab, a later commit, so the recorded gate result is one commit behind the revision under review; the intervening commit changes one docstring only, and a re-run of the contact arm at 9ca9dfd12 reproduces 9 passed.\nFINDING logs/baseline_suite_combined.log:1 follow-on: the base contact arm ran as a renamed scratch copy (ctl-iet6) so its log prints unqualified ids (::test_limiter_contact_is_spline_authored_at_analytic_tangency, ::test_weak_position_error_is_second_order_between_241_and_481) while the manifest's baseline_suite requalifies them under tests/test_topology_limiter_contact.py, so the ids a store reader reduces from the log are not the ids the manifest names; the head arm has zero failures so added_failure_count is unaffected, but the pair is not reconcilable id-for-id.\nFINDING benchmarks/limiter_read_resolution_audit.py:1480 follow-on: the node's own consumer audit finds this benchmark and benchmarks/wall_at_cell_pitch.py still read the tangency by the (n-1)//2 vertex index, which the repaired limiter_contour now points inboard, and both are outside this grant so they are recorded under follow_ons (a) rather than fixed, which is correct handling and is flagged here so the consequence is not lost.",
+  "review_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "review_run_id": "legacy-e38c065aae54",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "reviewed_commit": "9ca9dfd12ee0ee806ff993cd06e403698fc86aab",
+  "reviewed_head_sha": "9ca9dfd12ee0ee806ff993cd06e403698fc86aab",
+  "reviewed_run_id": "r-20261006T033955956303-cfs-wave-limiter-test-rebaseline",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wave-limiter-test-rebaseline",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T04:31:29.449567+00:00",
+  "total": 100
+}

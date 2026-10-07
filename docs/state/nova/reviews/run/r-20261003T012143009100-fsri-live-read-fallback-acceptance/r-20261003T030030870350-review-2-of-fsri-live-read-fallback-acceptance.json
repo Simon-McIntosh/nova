@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "baseline_suite a51a137af4b354968bdc5f371842a1f57c686398 is completed with zero failures and no ids; after_suite da5e378124e501eaf8bfc51d273218e6e14fe0ee is completed with zero failures and no ids. The derived after-minus-baseline set is empty.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012143009100-fsri-live-read-fallback-acceptance/frozen-map-negative-control-imported-scratch.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T012143009100-fsri-live-read-fallback-acceptance/h200/final-after-suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance/review-focused-final-head.log"
+  ],
+  "changed_paths": [
+    "nova/equilibrium/forward.py",
+    "tests/test_live_read_fallback_acceptance.py",
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-live-read-fallback-acceptance.html"
+  ],
+  "commits_read": [
+    "3c0ddf7f390cf0f3dcbc71ea11ebebee4e60fdd7",
+    "f56b62a6bc837155d781682532b1f4f7c9154624",
+    "11fb49e98d2fd4ccdde155e2265b2a7cd92f120d",
+    "da5e378124e501eaf8bfc51d273218e6e14fe0ee",
+    "821707843cb999bde0954e1f74a876721b1d3c0c"
+  ],
+  "completed_at": "2026-10-03T03:10:22Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T03:01:13Z",
+  "evidence_inputs": {
+    "after_arm": "H200 33 passed, 1 warning, 845.12s, EXIT_STATUS=0",
+    "independent_replay": "reviewed head 821707843: 1 passed in 15.50s, EXIT=0",
+    "negative_control": "frozen map: [2.0]; live requirement: [1.0]; control exit: 1"
+  },
+  "failure_attribution": {},
+  "findings": [],
+  "follow_ons": [],
+  "functional_after_suite_sha": "da5e378124e501eaf8bfc51d273218e6e14fe0ee",
+  "gate_arms_note": "baseline_suite: completed=true, exit_status=0, failure_count=0, failure_ids=[]. after_suite: completed=true, exit_status=0, failure_count=0, failure_ids=[].",
+  "item_verdicts": {
+    "failure_delta": "pass: completed baseline and after arms derive zero added failures.",
+    "prior_finding_final_after_arm": "closed at h200/final-after-suite.log:6, 14, 25, 37-40; H200 runs the required three files, collects 33 items, and exits 0 after 33 passed.",
+    "prior_finding_live_map_guard": "closed at tests/test_live_read_fallback_acceptance.py:22-30, 40-48, 90-94; frozen-map-negative-control-imported-scratch.log:110-132 records actual [2.0] versus expected [1.0], EXIT=1.",
+    "scope": "pass: exactly three node-owned paths changed."
+  },
+  "justifications": {
+    "durability": "The regression executes the protected callback and makes frozen/live authority observably distinct; both the exact-head replay and complete selected H200 arm are green.",
+    "evidence": "The frozen-map control fails at [2.0] versus required [1.0]; the H200 final arm collects and passes 33 ids; an independent focused replay at 821707843 passes.",
+    "fit": "The focused repair preserves the locked live-read route and no unrelated behavior was altered.",
+    "goal_fidelity": "forward.py:2067-2095 sends live_shadowed_map to the live-read fallback and keeps the own-mask callbacks.",
+    "scope_discipline": "Only forward.py, the focused test, and its evidence fragment belong to the reviewed increment; the correction touches the latter two only and diff --check is clean."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "prior_review_findings_closed": [
+    {
+      "prior_finding": "The fallback test did not execute its shadowed-map callback.",
+      "result": "closed: the callback is invoked and a frozen mutation fails with [2.0] against [1.0]."
+    },
+    {
+      "prior_finding": "The repaired state had no completed final selected after arm.",
+      "result": "closed: the H200 after arm at functional head da5e37812 reports 33 passed and exit status 0; the later 821707843 commit is evidence-only and the exact-head focused replay passes."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT pass: Both prior review findings are closed; frozen-map control is red, exact-head focused replay is green, H200 selected arm is 33 passed, and added failure count is zero.\nSCORE goal_fidelity: 20\nSCORE evidence: 20\nSCORE scope_discipline: 20\nSCORE durability: 20\nSCORE fit: 20\n",
+  "review_run_id": "r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance",
+  "reviewed_base_sha": "a51a137af4b354968bdc5f371842a1f57c686398",
+  "reviewed_commit": "821707843cb999bde0954e1f74a876721b1d3c0c",
+  "reviewed_head_sha": "821707843cb999bde0954e1f74a876721b1d3c0c",
+  "reviewed_revision": "821707843cb999bde0954e1f74a876721b1d3c0c",
+  "reviewed_run_id": "r-20261003T012143009100-fsri-live-read-fallback-acceptance",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-live-read-fallback-acceptance",
+  "reviewer_node": "review-2-of-fsri-live-read-fallback-acceptance",
+  "reviewer_run_id": "r-20261003T030030870350-review-2-of-fsri-live-read-fallback-acceptance",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T03:06:00Z",
+  "total": 100,
+  "verdict": "pass"
+}

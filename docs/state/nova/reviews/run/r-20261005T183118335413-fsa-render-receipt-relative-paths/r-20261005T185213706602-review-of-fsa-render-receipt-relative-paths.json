@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Zero added: base suite 1d02798a6 failed only tests/test_sol_ledger_render.py::test_receipt_names_the_revision_it_was_solved_at (scaffolding: the git-archive scratch tree has no .git, so git rev-parse HEAD raises CalledProcessError); head suite 80b1ebcb4 passed 55/0, so the head minus base id set is empty.",
+  "blocking_finding_count": 0,
+  "call_site_count": 5,
+  "call_sites": [
+    "benchmarks/sol_ledger_current_census.py:render_from_receipt",
+    "docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:render",
+    "benchmarks/shafranov_pair_receipt.py:measure",
+    "benchmarks/shafranov_pair_receipt.py:project_rows",
+    "benchmarks/shafranov_combination_discriminator.py:measure"
+  ],
+  "completed_at": "2026-10-05T19:00:35.050Z",
+  "dispatched_at": "2026-10-05T18:52:40Z",
+  "findings": [
+    {
+      "file": "tests/test_render_receipt_paths.py",
+      "line": "85",
+      "severity": "follow-on",
+      "text": "follow-on: test_each_driver_helper_returns_a_project_relative_path imports each driver and calls repository_relative directly and test_no_receipt_directory_json_records_a_worktree_path reads the committed JSON, so neither exercises a render route; a call site reverted to str(output) while repository_relative stays defined leaves all three tests green and the next render rewrites a worktree path undetected."
+    },
+    {
+      "file": "benchmarks/sol_ledger_current_census.py",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: repository_relative is copied verbatim into four drivers (also benchmarks/shafranov_pair_receipt.py:70, benchmarks/shafranov_combination_discriminator.py:93, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:31) and relative_carrier_evidence twice, so the same capability has five owners that can drift and record different forms of one path."
+    },
+    {
+      "file": "docs/figures/cut-cell-current-attribution/outboard-hole/preflight-receipt.json",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: a committed receipt under a regenerated directory still contains a path under .reckon-worktrees, excluded from the scan by NON_RENDER_RECEIPTS; the done_when's literal no-committed-receipt condition is met only for render receipts, which the manifest discloses but the scan does not assert."
+    }
+  ],
+  "follow_on_finding_count": 3,
+  "gate_logs": {
+    "base": {
+      "completed": true,
+      "exit_status": 1,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/negative-control-base.log",
+      "revision": "1d02798a6bb9c34df9856c8b479a6dd33ba3ba30"
+    },
+    "head": {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-render-receipt-relative-paths /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-render-receipt-relative-paths/tests/test_render_receipt_paths.py",
+      "completed": true,
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/gate-head.log",
+      "revision": "80b1ebcb41801af6fa899ed5e5aac0a76ae42a64"
+    }
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Read commit by commit against base 1d02798a6; 80b1ebcb4 adds the helpers and rewrites four receipts, 52616c306 adds only the landing fragment, ten files total.",
+    "done_when": "The done_when requires no committed receipt under the regenerated directories to carry .reckon-worktrees and a test asserting it per render-only route; the scan at tests/test_render_receipt_paths.py:62 asserts the four receipts and the base arm is red, but preflight-receipt.json under a regenerated directory is excluded and route call sites are not exercised.",
+    "goal": "The node goal is to make render receipts record project-relative paths and rewrite the committed ones; the four drivers gained repository_relative and the four committed receipts' path fields were rewritten.",
+    "manifest": "Read; it states the gate 3 passed at head 80b1ebcb4, red at base, and the importer suite 55 passed/0 added failures, naming gate-head.log, negative-control-base.log, suite-head.log and suite-base.log.",
+    "write_paths": "The manifest declares the four drivers, the four receipts, tests/test_render_receipt_paths.py and the landing fragment; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_render_receipt_paths.py reddens at base and asserts each helper relativises, but reverting a render route to str(output) while keeping repository_relative leaves all three tests green, so route regressions are unguarded (tests/test_render_receipt_paths.py:85).",
+    "evidence": "Gate tests/test_render_receipt_paths.py is named by the done_when and its result is recorded in the manifest and gate-head.log (3 passed, EXIT=0) with the base arm red in negative-control-base.log; the route itself is not exercised by the gate, which is recorded as a durability follow-on.",
+    "fit": "repository_relative follows the surrounding driver style and carries no forbidden name, but the identical definition is pasted into four drivers (benchmarks/sol_ledger_current_census.py:49, benchmarks/shafranov_pair_receipt.py:70, benchmarks/shafranov_combination_discriminator.py:93, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:31).",
+    "goal_fidelity": "The four committed receipts under the regenerated directories now record project-relative png/svg/receipt and carrier-module paths (docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json; docs/figures/cut-cell-current-attribution/outboard-hole/figure-receipt.json), matching the driver routes that write them.",
+    "reuse": "No canonical owner of a repository-relative path form exists (searched nova/ and benchmarks/), but the repository already carries ad-hoc forms (benchmarks/connectivity_route.py:725, benchmarks/exact_placement_discriminator.py:113, docs/figures/forward-solve-api uses str(FIGURE.relative_to(ROOT))) and this change adds four more copies instead of one shared helper.",
+    "scope_discipline": "git diff 1d02798a6..52616c306 touches only the four drivers, their four committed receipts, tests/test_render_receipt_paths.py and the landing fragment, all inside the manifest's declared write paths."
+  },
+  "limitations": [
+    "The gate asserts the committed receipts and each helper in isolation; it does not run a render route, so a route reverting to str(output) is not caught.",
+    "preflight-receipt.json and the .log/.sh files under the regenerated directories still carry .reckon-worktrees paths; those are outside the reviewed node's write scope and disclosed in its follow_ons."
+  ],
+  "node": "review-of-fsa-render-receipt-relative-paths",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to make render receipts record project-relative paths and rewrite the committed ones; the four drivers gained repository_relative and the four committed receipts' path fields were rewritten.\nVERDICT done_when: The done_when requires no committed receipt under the regenerated directories to carry .reckon-worktrees and a test asserting it per render-only route; the scan at tests/test_render_receipt_paths.py:62 asserts the four receipts and the base arm is red, but preflight-receipt.json under a regenerated directory is excluded and route call sites are not exercised.\nVERDICT write_paths: The manifest declares the four drivers, the four receipts, tests/test_render_receipt_paths.py and the landing fragment; every path in the diff is inside them.\nVERDICT manifest: Read; it states the gate 3 passed at head 80b1ebcb4, red at base, and the importer suite 55 passed/0 added failures, naming gate-head.log, negative-control-base.log, suite-head.log and suite-base.log.\nVERDICT diff: Read commit by commit against base 1d02798a6; 80b1ebcb4 adds the helpers and rewrites four receipts, 52616c306 adds only the landing fragment, ten files total.\nCALL_SITES: benchmarks/sol_ledger_current_census.py:render_from_receipt, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:render, benchmarks/shafranov_pair_receipt.py:measure, benchmarks/shafranov_pair_receipt.py:project_rows, benchmarks/shafranov_combination_discriminator.py:measure\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The four committed receipts under the regenerated directories now record project-relative png/svg/receipt and carrier-module paths (docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json; docs/figures/cut-cell-current-attribution/outboard-hole/figure-receipt.json), matching the driver routes that write them.\nSCORE evidence: 16\nJUSTIFICATION evidence: Gate tests/test_render_receipt_paths.py is named by the done_when and its result is recorded in the manifest and gate-head.log (3 passed, EXIT=0) with the base arm red in negative-control-base.log; the route itself is not exercised by the gate, which is recorded as a durability follow-on.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 1d02798a6..52616c306 touches only the four drivers, their four committed receipts, tests/test_render_receipt_paths.py and the landing fragment, all inside the manifest's declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_render_receipt_paths.py reddens at base and asserts each helper relativises, but reverting a render route to str(output) while keeping repository_relative leaves all three tests green, so route regressions are unguarded (tests/test_render_receipt_paths.py:85).\nSCORE fit: 16\nJUSTIFICATION fit: repository_relative follows the surrounding driver style and carries no forbidden name, but the identical definition is pasted into four drivers (benchmarks/sol_ledger_current_census.py:49, benchmarks/shafranov_pair_receipt.py:70, benchmarks/shafranov_combination_discriminator.py:93, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:31).\nSCORE reuse: 14\nJUSTIFICATION reuse: No canonical owner of a repository-relative path form exists (searched nova/ and benchmarks/), but the repository already carries ad-hoc forms (benchmarks/connectivity_route.py:725, benchmarks/exact_placement_discriminator.py:113, docs/figures/forward-solve-api uses str(FIGURE.relative_to(ROOT))) and this change adds four more copies instead of one shared helper.\nFINDING tests/test_render_receipt_paths.py:85 follow-on: test_each_driver_helper_returns_a_project_relative_path imports each driver and calls repository_relative directly and test_no_receipt_directory_json_records_a_worktree_path reads the committed JSON, so neither exercises a render route; a call site reverted to str(output) while repository_relative stays defined leaves all three tests green and the next render rewrites a worktree path undetected.\nFINDING benchmarks/sol_ledger_current_census.py:49 follow-on: repository_relative is copied verbatim into four drivers (also benchmarks/shafranov_pair_receipt.py:70, benchmarks/shafranov_combination_discriminator.py:93, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:31) and relative_carrier_evidence twice, so the same capability has five owners that can drift and record different forms of one path.\nFINDING docs/figures/cut-cell-current-attribution/outboard-hole/preflight-receipt.json:22 follow-on: a committed receipt under a regenerated directory still contains a path under .reckon-worktrees, excluded from the scan by NON_RENDER_RECEIPTS; the done_when's literal no-committed-receipt condition is met only for render receipts, which the manifest discloses but the scan does not assert.\nreviewed_base_sha: 1d02798a6bb9c34df9856c8b479a6dd33ba3ba30\nreviewed_head_sha: 52616c3065aa3bf1f2749dbf9537f27a1b24dd90\n",
+  "review_run_id": "r-20261005T185213706602-review-of-fsa-render-receipt-relative-paths",
+  "review_scope": "Committed four-driver path-recording delta and its four rewritten receipts against the reviewed node done-when; read-only, no re-render and no solve.",
+  "reviewed_base_sha": "1d02798a6bb9c34df9856c8b479a6dd33ba3ba30",
+  "reviewed_commits": [
+    "80b1ebcb41801af6fa899ed5e5aac0a76ae42a64",
+    "52616c3065aa3bf1f2749dbf9537f27a1b24dd90"
+  ],
+  "reviewed_head_sha": "52616c3065aa3bf1f2749dbf9537f27a1b24dd90",
+  "reviewed_run_id": "r-20261005T183118335413-fsa-render-receipt-relative-paths",
+  "reviewer": "review-of-fsa-render-receipt-relative-paths",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:00:00.825220+00:00",
+  "total": 96,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/gate-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/negative-control-base.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/suite-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T183118335413-fsa-render-receipt-relative-paths/suite-base.log"
+  ]
+}

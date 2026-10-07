@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T17:52:58.328Z",
+  "dispatched_at": "2026-10-05T17:47:53Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/batched_labeller.py:18",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a76 retirement list must either name the `batched_labeller` call sites to reroute onto `solve.fixed_point` or exclude the shared reduced-state program kernels from the deletion, before `reduced_newton.py` can be removed.",
+      "text": "\u00a76 (`converged-forward-solve.html` \u00a76, \"Retirement\") lists `reduced_newton.py` for deletion, but `batched_labeller.py` binds it at module level to `_BACKTRACKING_FACTORS`, `FixedPointTerminationReason`, `_row_augmentation`, `_compiled_program`, `_reduced_kernels`, `reduced_coordinates` and `_RowArguments` (lines 133\u2013653) plus the `FIXED_POINT_RESIDUAL_TOLERANCE`/`NEWTON_STEPS`/`ACTIVE_SET_STEPS` constants, and is exercised by `tests/test_batched_labeller.py`, `tests/test_labeller_parallel.py` and `benchmarks/batched_labeller_receipt.py`, so the deletion leaves a live, separately-owned batch-solver consumer broken; the design document's consumer audit (design line 179) names inverse, transport and media but omits the labeller.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3274aef9e775978c6ea35af69d4520a26cbd40fbe2640c9907cb5412556b4114",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 23,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T17:54:04.307111+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T174740501109-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "cde72fd6377399bfed4773ebfdeadcd1c0563ddb",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four pure functions each hide substantial behaviour behind a small interface: `topology.read` (field representation, sub-cell membership, normal-form saddle support, one differentiable null evaluator), `current.book` (exact-clip booking and quadrature), `gs.apply` (the map plus the implicit Picard, moment-map and boundary-flux-envelope derivatives), `solve.fixed_point` (Newton-GMRES on the map's own JVP through one fixed-capacity scan).",
+    "duplicate_owner": "a finding \u2014 \u00a76 retires `reduced_newton.py`, but that module is shared infrastructure consumed by `nova/equilibrium/batched_labeller.py`, whose import the plan does not name.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 (supplied 2026-10-05T17:47:40Z); each of \u00a72\u2013\u00a75 names in its own text what it retires (Topology.read/read_with_connectivity; `clipped_support_current_moments` plus the `forward_operator.py` support partition; the `ForwardFluxOperator` map; `newton_krylov`/`picard`/`operator_request_body`), so no section adds to a counted family without accounting for the surface it removes.",
+    "reuse_search": "pass \u2014 the plan and its design inventory bind 40 existing implementations (17 null-role, 23 region-role) to a destination each, and the two most recent prior reviews folded concrete reuse candidates into \u00a75 (`_single_site_krylov`, `_krylov_machine`, `_serve_krylov_stream`, `_krylov_outputs`, `_steepest_descent_promotion` \u2014 verified present at `nova/equilibrium/fixed_point.py:2619,2216,2394,2371,1672`) and \u00a72 (`nova/biot/null.py`, `nova/biot/fieldnull.py` \u2014 verified present); the shipped `coefficient-space-newton` route (`nova/equilibrium/coefficient_carrier.py`, `plan-status: shipped`, arm B \"a measured trade rather than a win\") is a concluded measured-loser, not a reuse candidate, so its absence from the inventory is not a gap.",
+    "thin_wrapper": "pass \u2014 \u00a76 states `gs.apply` \"replaces the map `ForwardFluxOperator` performs today rather than wrapping it\" (`nova/equilibrium/forward_operator.py:2323`), and \u00a75 relocates `fixed_point.py`'s single-site kernel into `solve.py` behind one call site rather than layering a wrapper; no unjustified thin layer is added over existing machinery."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T17:54:03.814550+00:00"
+}

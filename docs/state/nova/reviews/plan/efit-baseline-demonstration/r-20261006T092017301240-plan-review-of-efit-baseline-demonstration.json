@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:38:14.342Z",
+  "dispatched_at": "2026-10-06T09:20:41Z",
+  "findings": [
+    {
+      "anchor": "nova/imas/mast_efit_referee.py:263",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must name mast_efit_referee.py and mast_parity_chain.py as the second and third owners of the mechanism and retire or extend each, rather than asserting a single shared comparator when two parallel implementations survive.",
+      "text": "`_boundary_distance` re-implements the symmetric mean nearest-point boundary separation that nova/equilibrium/boundary_comparison.py owns (`compare_closed_boundaries`, symmetric_sup/rms_distance_m); the same mechanism is re-implemented a second time at nova/imas/mast_parity_chain.py:498 (`_lcfs_distance`, \"symmetric nearest-point distance between seed and solved boundaries\"). The plan's \u00a73 asserts \"one shared closed-boundary comparator wired into both EFIT harnesses\", but neither MAST-side implementation imports boundary_comparison, so the claim is contradicted at two sites the plan never lists. This is a census of the whole duplicate type, not the first instance \u2014 both MAST-side owners are named above and no other independent implementation exists in nova/ or benchmarks/ (grep for the `0.5 * (mean(min)) + mean(min)` shape finds only these two)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/demonstration_threshold_score.py:154",
+      "id": "thin_wrapper-1",
+      "reason": "the gate should consume the comparator's typed topology_class_agreement on both cohorts, or the plan must state why the MAST cohort re-derives it, if the demonstration is to have one agreement owner rather than one per cohort.",
+      "text": "`_mast_score` re-derives class agreement (computed_agreement) from the bank's `nova_achieved_class` and `efit_label` fields and nulls the row when the bank's own `label_agreement` disagrees, adding a second agreement authority beside the value `compare_closed_boundaries` already wrote into the bank; the DIII-D path (`_diiid_score`, line ~185) instead consumes `metrics.topology_class_agreement` directly, so the two cohorts of one gate do not use the same authority. The wrapper re-implements a decision the comparator owns instead of consuming it",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f4eb02edd160647a17b852988a12ed9fa6089c5e950d162295c57a57dd3959c1",
+  "plan_slug": "efit-baseline-demonstration",
+  "plan_version": 57,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T092017301240-plan-review-of-efit-baseline-demonstration",
+  "reviewed_blob_sha": "78538e0bf3b4c7abab85d9bdcf16fafce2fd35d3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the mechanisms the plan names already hide substantial behaviour behind small interfaces (nova/equilibrium/separatrix_branches.py:assemble_separatrix_branches, nova/equilibrium/boundary_comparison.py:compare_closed_boundaries, nova/equilibrium/flux_surface_connectivity.py:polish_stationary_points), not a spread of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 the shared symmetric nearest-point boundary distance the plan calls \"one shared comparator wired into both EFIT harnesses\" is still independently implemented in two MAST-side modules the plan does not name.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan's sections add no CLI, MCP or refusal-family surface and the machinery sections name what they retire (ForwardTopologyState.diverted, the local-quadratic position authority), so no added surface is left unaccounted.",
+    "reuse_search": "pass \u2014 the plan's \u00a72 landed a 25-candidate reuse map (docs/figures/efit-baseline-demonstration/reuse-map.md) that names traced_spline_contour, fit_tensor_spline, xpoint_candidates and the imas-ambix oracle, and \u00a73 cites the mechanisms it extends.",
+    "thin_wrapper": "a finding \u2014 the demonstration gate re-derives the topology-class agreement instead of consuming the comparator's own field."
+  },
+  "section_digests": {
+    "_document": "a2849d1beb66143a466ae91c220570164cc98fd71a0ceab61951d28e9e457cfc",
+    "s1": "006124cad332315ce0d031eb628017bdf5c62529d9c76cf3f211503bb1176c0a",
+    "s2": "9b5dcdf176de9d98a8768d814b33909a4fbf544107e7b4d7d747b55ae4881bdb",
+    "s3": "d0158f2d525b0f883d2a7937dfcc2dfa8675dedf37a6067893ddee58e9107a65",
+    "s4": "0331bb9d004fa89a68aee3abda41882d36f87835c1d9792059ae0c0cd5a8f46a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T09:39:36.434385+00:00"
+}

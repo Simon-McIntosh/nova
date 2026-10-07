@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T04:01:37.365Z",
+  "dispatched_at": "2026-10-06T03:55:43Z",
+  "findings": [
+    {
+      "anchor": "nova/docs/plans/converged-forward-solve.html#s6",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a76 retirement node must name these host routes for deletion or re-pointing, or a second solver silently survives the retirement the plan claims is complete.",
+      "text": "\u00a76 enumerates \"the anderson and reduced-Newton routes and the chord route\" for deletion, but `forward.py` also carries host-side solver routes `_solve_host` (forward.py:1803), `_solve_host_krylov` (forward.py:1868, calling `scipy.optimize.newton_krylov` at 1908) and `_solve_augmented_constraints` (2195) behind `SolveRoute` (forward.py:2769); the census-as-gate is by import and attribute name, so it does not enumerate method definitions, and the plan relies only on the general \"forward.py shrinks to the request and receipt adapter\" sentence to remove them",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/docs/plans/converged-forward-solve.html#decisions (kernel-loop-representation)",
+      "id": "reuse_search-1",
+      "reason": "the locked decision already adopts that exact pattern (custom_jvp on the kernel point jet), so naming greens.py would strengthen the \u00a72 node's reuse record and evidence without altering the decision or the 1e-13 identity it rests on.",
+      "text": "the decision and \u00a72 name `nova/biot/elliptic.py`'s `harmonic_pole_moments`/`harmonic_multiply` recurrences but do not cite `nova/biot/greens.py`, which already carries a hand-written `@custom_jvp` tangent rule (`attach_product_tangent_jvp`, greens.py:184-189) for the same Biot kernel subsystem",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "2abaa4b138f8ff4953ae680d50fb4548c6699e673b805da55e755cb1746cadb8",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 75,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T04:08:09.747253+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T04:08:09.748703+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-converged-forward-solve.v75.json",
+  "review_run_id": "r-20261006T035523292402-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "a7d63f346c6f37d880445b3a38cf20e5c4290722",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four pure functions (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`) each hide substantial behaviour (topology read + membership clip + derivative of the support map + a Newton-GMRES scan behind three signatures); this is a stage decomposition of the 4133-line `ForwardFluxOperator` and `fixed_point.py`, not a spread of wrappers over one body.",
+    "duplicate_owner": "a finding \u2014 \u00a76's named retirement list omits the host-side solver routes in `forward.py`.",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every section that adds a public name states the owner it retires or merges into (\u00a72/\u00a75 fold `TopologyPolicy`/`SolvePolicy` into `ForwardSolvePolicy`; \u00a72\u2013\u00a75 name the functions they replace), and \u00a76's request-surface ruling collapses `SolveRoute` six-to-one, deletes `SupportClipMode` and removes eight plumbing fields with a stated before/after field count.",
+    "reuse_search": "pass \u2014 the plan runs the reuse map and cites a real mechanism for every helper: the contour tree (verified called by the landed read, topology.py:2910), the single-site GMRES kernel, the backtracking helpers, the operand-layout machinery, the clip helpers, polygon_moments.py and the moment-map derivative; it also withdraws candidates with reasons (field-null kernels, `_steepest_descent_promotion`).",
+    "thin_wrapper": "pass \u2014 each new module states what it replaces rather than wraps: \u00a72 replaces `Topology.read`/`read_with_connectivity`; \u00a73 replaces `clipped_support_current_moments` and the support partition; \u00a74 replaces the map `ForwardFluxOperator` performs \"rather than wrapping it\"; \u00a75 replaces `newton_krylov`/`picard`/`operator_request_body`. The one retained seam (`ForwardProfile.operator`, \u00a76) is justified by the duck-typed consumers and re-pointing census."
+  },
+  "section_digests": {
+    "_document": "b01249bc810ba42b119be54e9f4e0e4e34bb6e0eefa3796eb38a79d8e496ea06",
+    "s0": "66bed59341ceddd2b2d61465f1233d35c4d59c22234d867f09b1e4a337b0b482",
+    "s1": "e3926ed31983268b83ff4f7fe6feb947700172eb86a0d601549966b9cd8f4e20",
+    "s2": "254b21ab4574a4654af4914ed85cd161db29a25975ca66c1cadc0169b816d17d",
+    "s3": "bfa74835b32e89f1d009029df7d262e2ff3a2ec8c1b385240ffd1944e826f14c",
+    "s4": "7d23b7b52a53c7baf79319043739e7f1a16c13c17507bb66d13c97607c5eed19",
+    "s5": "7d065f3d2a0cd7837dbcc5e5df468c3df2a608776346c22c209ab7a7595cc0ce",
+    "s6": "7d71ea2158135f26f4d2ad95e6f32e582e3479791b56228cae60d5cb4b3fad9d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T04:08:09.725361+00:00"
+}

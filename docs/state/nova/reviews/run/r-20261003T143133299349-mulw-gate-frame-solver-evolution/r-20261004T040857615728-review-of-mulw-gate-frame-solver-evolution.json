@@ -1,0 +1,112 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Canonical annotate_review_of_run reads the reviewed run's own manifest: both baseline_suite and after_suite are empty, so no base or head gate log is named and the added-failure count was not taken. null is intentional and is not a measured zero; the reviewed node added no repository test to a suite arm.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base or head gate log, so the added-failure count was not taken",
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143133299349-mulw-gate-frame-solver-evolution/h200-eager-1280655.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143133299349-mulw-gate-frame-solver-evolution/rows-validation.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143133299349-mulw-gate-frame-solver-evolution/render-final.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143133299349-mulw-gate-frame-solver-evolution/jobs/1280655/receipts/original",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143133299349-mulw-gate-frame-solver-evolution/jobs/1280655/receipts/current",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143133299349-mulw-gate-frame-solver-evolution/jobs/1280655/row-logs/before-1.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T040857615728-review-of-mulw-gate-frame-solver-evolution/review-verify-receipts.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T040857615728-review-of-mulw-gate-frame-solver-evolution/review-render.log"
+  ],
+  "assertion_audit": {
+    "oom_disclosure": "verify_receipts.py asserts the missing rows rather than the presence of an error: zero json files under before/ and after/, exactly 10 ROW and 1 ROW_FAILED records, 'EXIT=137' and 'oom_kill event' in the scheduler log. Removing the OOM evidence reddens the run.",
+    "receipt_binding": "verify_receipts.py:46-57 (run directory) asserts terminal_state_element_count == 1173, tolerance == 1e-6, converged is false, the terminal residual is finite, and abs(original residual - artifact head residual) < 1e-10 with header.device_sha == artifact source head_revision. Reinstating a wrong artifact comparison reddens line 57; I re-ran this script first-hand and it reproduced SUMMARY complete_rows=10 missing_before=1 missing_after=1 inputs_equal=5 geometry_equal=5 npz_valid=10 at EXIT=0.",
+    "render_geometry": "render.py:38-47 asserts the two receipts share terminal-grid shape and that radius_m, height_m, wall_coordinate_m and the three wall unit arrays are element-equal between the artifact and current revisions. Reinstating a geometry mismatch (for example drawing the current field on the artifact grid) reddens these asserts, so the panel cannot silently compare different frames; my re-render at head 4293571 reproduced render-final.log's FIGURE line and a byte-identical 142109-byte PNG."
+  },
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "94d08b997116b3f956b2b11d6022299cb996d24f",
+    "f11048648023e0bcf7abc4fd9d7bb5d6e7959424",
+    "f7839a10a67ba163a2cb06bb29c9ec50791adedb",
+    "029a6ddcb41e0fd9d2e24d78ac253df59d8af930",
+    "42935717346d89d69e0abc099d834ade3abde1e2"
+  ],
+  "completed_at": "2026-10-04T04:16:07.956Z",
+  "dispatched_at": "2026-10-04T04:09:16Z",
+  "evidence_inputs": {
+    "artifact_reproduction_confirmed": "Stored artifact docs/figures/batched-operator-boundary/exit-incidence/diiid-width5.json head residuals are 0.31894892143970444 (179), 0.44992479964918985 (44), 0.04220289939481827 (144), 0.8548015018976414 (146), 0.21538382135114667 (137); the run's artifact-revision receipts reproduce each to at most 1.2e-13, inside the asserted 1e-10.",
+    "gate_command": "RECKON_ALLOW_NESTED_LAUNCH=1 TMPDIR=/tmp sbatch --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 --cpus-per-task=8 --mem=160G --time=10:00:00 measure.sh -> job 1280655, OUT_OF_MEMORY after 09:27:10, EXIT=137",
+    "job_id": 1280655,
+    "missing_rows": "eleventh row frame 44 at bebd067ec6dce3e1c3cc224f00e30c503326c4ed produced no receipt (host RSS 151720 MiB at 420 s), twelfth row at bed0155bfb44200d4095e285e5e2972633dfcb4f not attempted",
+    "named_mechanism": "47f4fe5233cf3ece4178a018b81e93f4e3c53328 (live-map Newton fallback) and 224a3b967b243f1d78c593e6ecfe1bc7c0e28b02 (separate compiled program); neither proved causal",
+    "numerical_limit": "Ten paired rows prove the aggregate artifact-revision-to-current terminal-residual change; they do not isolate one causal commit, and the earlier 0.4499-to-0.2338 traced-route shift predates both fallback commits.",
+    "residual_pairs_artifact_current": "44 0.4499247996491899/0.0028729252207117424, 144 0.04220289939494098/0.0026680031570136217, 146 0.8548015018976414/0.010601445943646166, 137 0.21538382135114673/0.005439431493701938, 179 0.3189489214397042/0.04218027197682415; none converged at 1e-6",
+    "source_gate_summary": "SUMMARY complete_rows=10 missing_before=1 missing_after=1 inputs_equal=5 geometry_equal=5 npz_valid=10, EXIT=0",
+    "source_runtime_revision_current": "f11048648023e0bcf7abc4fd9d7bb5d6e7959424",
+    "source_runtime_revision_reference": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab"
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/multi-unit-limiter-wall/mulw-gate-frame-solver-evolution.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the done-when's central requirement \u2014 name the solver commit that moves frame 44 and attribute frames 144, 146, 137 and 179 to a named commit \u2014 is unmet. The paragraph names 47f4fe52 and 224a3b96 as candidate mechanisms but states expressly that the ten paired rows prove only the aggregate change and that the data do not isolate one causal commit; the intended frame-44 bracket row at bebd067e produced no receipt and the row at bed0155b was never attempted. The convergence question is answered and the obstruction is recorded, so this is a bounded shortfall the node discloses rather than a silent one, but the plan followup f-mulw-gate-frame-solver-evolution remains open."
+    },
+    {
+      "file": "verify_receipts.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the falsifiable checks for this 1775-line measurement instrument \u2014 1173-element count, tolerance, non-convergence, finite terminal state, <1e-10 artifact reproduction, device_sha binding, input and geometry equality \u2014 live in the run-directory script verify_receipts.py and the asserts in docs/figures/multi-unit-limiter-wall/gate-frame-solver-evolution/render.py, not in the repository test suite. A later edit to measure.py or to the nova.media painters these scripts import would not be exercised automatically. Preserve the corruption and geometry-mismatch cases as focused repository tests; this does not invalidate the recorded refusals for this delivery."
+    },
+    {
+      "file": "docs/figures/multi-unit-limiter-wall/gate-frame-solver-evolution/render.py",
+      "line": "38",
+      "severity": "follow-on",
+      "text": "follow-on: render.py's guards are bare assert statements, which are stripped under python -O, so a run with optimisation enabled would draw a panel from unvalidated receipts with no refusal. The measurement and validation scripts are invoked without -O in this node, so the delivered artifacts are unaffected; prefer an explicit raise where the guard is load-bearing for a published figure."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the five-commit chain a42dc665..4293571 (2020 insertions, 5 files): an eager measurement driver (measure.py), a serial runner (measure.sh), a paired-contour renderer (render.py), the committed frame-44 panel, and the fragment. No nova/ source, test or plan file is edited.",
+    "done_when": "The done-when demands a named solver commit for frame 44, attribution of the other four frames, and a convergence statement with the measured obstruction. The convergence statement and obstruction are delivered and the fragment tables frame by revision by residual, but the attribution is expressly unproved (see finding), so the measure is only partly asserted.",
+    "goal": "The goal \u2014 attribute the DIII-D gate-frame terminal-state change to a named solver revision and establish whether the frames converge under the production route \u2014 is half met: convergence is established (none of five frames reaches 1e-6, each terminating active_set_settled) and the change is bounded to the artifact-revision-to-current interval, but no named revision is established as the cause.",
+    "manifest": "The source manifest is status complete, names all five commits, the six changed paths, the literal job command and the ten-row/one-failed validation summary; it openly retains the OOM and the unproved single-commit attribution. Its baseline_suite and after_suite are empty, so the suite failure delta is unmeasured.",
+    "write_paths": "All five changed paths (measure.py, measure.sh, render.py under docs/figures/.../gate-frame-solver-evolution, the frame-44 PNG under docs/figures/.../mulw-gate-frame-solver-evolution, the fragment, and the report) fall inside the declared grants; the diffstat shows insertions only and no nova/ source change."
+  },
+  "justifications": {
+    "durability": "verify_receipts.py:57 and render.py:38-47 add genuinely falsifiable guards (artifact reproduction <1e-10 with device_sha binding, geometry element-equality, nonempty contours, axis off), but they reside in run-directory scripts and a docs/ figure renderer rather than a repository test, so a future regression in measure.py or the media painters is not caught automatically.",
+    "evidence": "I re-ran verify_receipts.py first-hand and reproduced SUMMARY complete_rows=10 missing_before=1 missing_after=1 inputs_equal=5 geometry_equal=5 npz_valid=10 at EXIT=0, and re-rendered frame 44 from the committed receipts to a byte-identical 142109-byte PNG matching render-final.log's FIGURE line; I independently confirmed the artifact-revision receipts reproduce the stored diiid-width5.json head residuals to at most 1.2e-13. The deduction is for the attribution the numbers cannot support.",
+    "fit": "The fragment uses the repo's media idiom \u2014 axis-free 1400x800 panel, line contours on 15 shared levels, both null sets and the wall, direct 20pt labels, project-absolute /nova/figures src \u2014 and names mechanism rather than plan context; the commit subjects are conventional with bodies and carry no attribution or plan label.",
+    "goal_fidelity": "The node goal's convergence clause is delivered (fragment line 16 states none of the five current eager solves reaches 1e-6 with the measured OOM obstruction), but its attribution clause is not: the same paragraph states the ten paired rows prove only the aggregate change and isolate no causal commit, so frame 44 and frames 144/146/137/179 are not attributed to a named solver revision.",
+    "scope_discipline": "The five commits touch five files, all inside the declared write paths (measure.py, measure.sh, render.py, the frame-44 PNG, the fragment) plus the granted report; git diff --stat a42dc665..4293571 is 2020 insertions and no deletions, and no nova/ source, test or plan file is modified."
+  },
+  "plan": "nova:multi-unit-limiter-wall",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The goal \u2014 attribute the DIII-D gate-frame terminal-state change to a named solver revision and establish whether the frames converge under the production route \u2014 is half met: convergence is established (none of five frames reaches 1e-6, each terminating active_set_settled) and the change is bounded to the artifact-revision-to-current interval, but no named revision is established as the cause.\nVERDICT done_when: The done-when demands a named solver commit for frame 44, attribution of the other four frames, and a convergence statement with the measured obstruction. The convergence statement and obstruction are delivered and the fragment tables frame by revision by residual, but the attribution is expressly unproved (see finding), so the measure is only partly asserted.\nVERDICT write_paths: All five changed paths (measure.py, measure.sh, render.py under docs/figures/.../gate-frame-solver-evolution, the frame-44 PNG under docs/figures/.../mulw-gate-frame-solver-evolution, the fragment, and the report) fall inside the same declared grants; the diffstat shows insertions only and no nova/ source change.\nVERDICT manifest: The source manifest is status complete, names all five commits, the six changed paths, the literal job command and the ten-row/one-failed validation summary; it openly retains the OOM and the unproved single-commit attribution. Its baseline_suite and after_suite are empty, so the suite failure delta is unmeasured.\nVERDICT diff: Read the five-commit chain a42dc665..4293571 (2020 insertions, 5 files): an eager measurement driver (measure.py), a serial runner (measure.sh), a paired-contour renderer (render.py), the committed frame-44 panel, and the fragment. No nova/ source, test or plan file is edited.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: The node goal's convergence clause is delivered (fragment line 16 states none of the five current eager solves reaches 1e-6 with the measured OOM obstruction), but its attribution clause is not: the same paragraph states the ten paired rows prove only the aggregate change and isolate no causal commit, so frame 44 and frames 144/146/137/179 are not attributed to a named solver revision.\nSCORE evidence: 17\nJUSTIFICATION evidence: I re-ran verify_receipts.py first-hand and reproduced SUMMARY complete_rows=10 missing_before=1 missing_after=1 inputs_equal=5 geometry_equal=5 npz_valid=10 at EXIT=0, and re-rendered frame 44 from the committed receipts to a byte-identical 142109-byte PNG matching render-final.log's FIGURE line; I independently confirmed the artifact-revision receipts reproduce the stored diiid-width5.json head residuals to at most 1.2e-13. The deduction is for the attribution the numbers cannot support.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The five commits touch five files, all inside the declared write paths (measure.py, measure.sh, render.py, the frame-44 PNG, the fragment) plus the granted report; git diff --stat a42dc665..4293571 is 2020 insertions and no deletions, and no nova/ source, test or plan file is modified.\nSCORE durability: 15\nJUSTIFICATION durability: verify_receipts.py:57 and render.py:38-47 add genuinely falsifiable guards (artifact reproduction <1e-10 with device_sha binding, geometry element-equality, nonempty contours, axis off), but they reside in run-directory scripts and a docs/ figure renderer rather than a repository test, so a future regression in measure.py or the media painters is not caught automatically.\nSCORE fit: 18\nJUSTIFICATION fit: The fragment uses the repo's media idiom \u2014 axis-free 1400x800 panel, line contours on 15 shared levels, both null sets and the wall, direct 20pt labels, project-absolute /nova/figures src \u2014 and names mechanism rather than plan context; the commit subjects are conventional with bodies and carry no attribution or plan label.\nFINDING docs/evidence/fragments/multi-unit-limiter-wall/mulw-gate-frame-solver-evolution.html:16 follow-on: the done-when's central requirement \u2014 name the solver commit that moves frame 44 and attribute frames 144, 146, 137 and 179 to a named commit \u2014 is unmet. The paragraph names 47f4fe52 and 224a3b96 as candidate mechanisms but states expressly that the ten paired rows prove only the aggregate change and that the data do not isolate one causal commit; the intended frame-44 bracket row at bebd067e produced no receipt and the row at bed0155b was never attempted. The convergence question is answered and the obstruction is recorded, so this is a bounded shortfall the node discloses rather than a silent one, but the plan followup f-mulw-gate-frame-solver-evolution remains open.\nFINDING verify_receipts.py:57 follow-on: the falsifiable checks for this 1775-line measurement instrument \u2014 1173-element count, tolerance, non-convergence, finite terminal state, <1e-10 artifact reproduction, device_sha binding, input and geometry equality \u2014 live in the run-directory script verify_receipts.py and the asserts in docs/figures/multi-unit-limiter-wall/gate-frame-solver-evolution/render.py, not in the repository test suite. A later edit to measure.py or to the nova.media painters these scripts import would not be exercised automatically. Preserve the corruption and geometry-mismatch cases as focused repository tests; this does not invalidate the recorded refusals for this delivery.\nFINDING docs/figures/multi-unit-limiter-wall/gate-frame-solver-evolution/render.py:38 follow-on: render.py's guards are bare assert statements, which are stripped under python -O, so a run with optimisation enabled would draw a panel from unvalidated receipts with no refusal. The measurement and validation scripts are invoked without -O in this node, so the delivered artifacts are unaffected; prefer an explicit raise where the guard is load-bearing for a published figure.\nREVIEWED_BASE_SHA: a42dc665cf41a4a698ba95df16fee43cfe3c4a32\nREVIEWED_HEAD_SHA: 42935717346d89d69e0abc099d834ade3abde1e2\n",
+  "review_limitations": [
+    "The H200 measurement (job 1280655) was read, not rerun; re-running it would repeat a ten-hour GPU allocation and the coordinator ruled no rerun. The review re-ran only the CPU receipt validation and the CPU figure render, both of which reproduced.",
+    "The reviewed run's commits (head 4293571) are committed in its own detached worktree and are not ancestors of the review worktree's HEAD (7c1a252cc, main); the diff, fragment and figure were read directly from the reviewed run's commits via git show rather than from a merged main.",
+    "render.py was executed from the reviewed run's worktree (read-only) because render.py exists only in that commit; no file outside the granted review-record paths was written."
+  ],
+  "review_run_id": "r-20261004T040857615728-review-of-mulw-gate-frame-solver-evolution",
+  "reviewed_base_sha": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "reviewed_head_sha": "42935717346d89d69e0abc099d834ade3abde1e2",
+  "reviewed_run_id": "r-20261003T143133299349-mulw-gate-frame-solver-evolution",
+  "reviewer_node": "review-of-mulw-gate-frame-solver-evolution",
+  "reviewer_run_id": "r-20261004T040857615728-review-of-mulw-gate-frame-solver-evolution",
+  "reviewing_run_id": "r-20261004T040857615728-review-of-mulw-gate-frame-solver-evolution",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-04T04:40:00+00:00",
+  "total": 84,
+  "verdict": "pass-with-follow-ons"
+}

@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest has neither baseline_suite nor after_suite, so it supplies no completed suite-arm failure-id sets. The three successful measurement logs are not suite arms. Zero and [] encode no observed added suite failures, not a demonstrated zero-failure suite comparison.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-tangent/step-sweep.json",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-tangent/derivative-factors.json",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-tangent/control.json",
+    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-centroid-tangent-localisation.html",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-tangent-localisation.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T235737052938-review-of-cco-root-cause-centroid-tangent-localisation/review-check.log"
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:3336",
+    "nova/equilibrium/forward_operator.py:3445",
+    "nova/equilibrium/clip_quadrature.py:898",
+    "nova/equilibrium/clip_quadrature.py:916",
+    "nova/equilibrium/clip_quadrature.py:883"
+  ],
+  "commits_read": [
+    "1b13bfc0570d6d6eab21c75b1c6e636482514843",
+    "c2324542f67ea3cdf301c7525dfe8b1d1c1dd33b",
+    "f634c313468519872a219d0eaa6e5b90526277b9",
+    "0de8a519cd1a8fd6eca21b55050709b6a04cd888",
+    "9a49893a21777228fff0de42722865a904ec05c2",
+    "8c42a3d526aea6401caa97c63180d5c78cbb4247"
+  ],
+  "completed_at": "2026-10-03T00:08:33Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T23:58:08Z",
+  "evidence_inputs": "Reviewed b4103b477e2807790996fbc9b7edeb07778cd433..8c42a3d526aea6401caa97c63180d5c78cbb4247, six commits, five repository paths and one granted external report. Independent committed-receipt/source audit EXIT=0: six slopes 1.629223955746..1.629226157207 m/T versus JVP 0.836870105527 m/T; gap 0.792355142519 m/T. Moving raw-current geometry finite difference/JVP L2 3.024582175e6/0.001288063 A/T, ratio 4.259e-10. Both signed field and uniform-level controls carry 121 active cells; uniform-level radial centroid central response 1.776e-11 m/Wb. At clip_quadrature.py:883, argnums=0 and tangents[0] omit moving vertex input 1. The result localizes the analytic-state JVP shortfall, not the coupled terminal-field reversal. Both suite arms absent; added-failure count 0 is unmeasured.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "nova/equilibrium/clip_quadrature.py",
+      "line": "883",
+      "severity": "follow-on",
+      "text": "Confirmed root cause: the custom JVP builds a local Jacobian only for coefficient input 0 and contracts tangents[0], discarding the tangent of the moving outer vertices passed as input 1 at line 916. The analytic-state finite difference measures 3.024582175e6 A/T L2 of moving-geometry raw-current response, versus 0.001288063 A/T L2 in JVP. Repair the vertex tangent in a separately scoped solver change and repeat the centroid derivative measurement."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-tangent-localisation.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "The report says the factor and uniform-level control checks are still running, but both cited logs end EXIT=0 and the report's later sections present their results. Replace the stale progress sentence with the completed status and keep the links."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/centroid-tangent/measure.py",
+      "line": "99",
+      "severity": "follow-on",
+      "text": "All committed receipts emit revision=b4103b47, whereas the completed sweep, factor and control logs say the measuring program ran at c2324542. The field appears to identify the physics base, but its name suggests the measurement revision. Record both source_base_sha and measurement_sha, or explain the existing field, so a reader can reproduce the exact measurement code without relying on separate logs."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-centroid-tangent-localisation.md",
+      "line": "34",
+      "severity": "follow-on",
+      "text": "The geometry RCA is presented only in tables and prose. Add a compact figure of the six-step central slopes against the JVP and the raw-current moving-geometry split, using the recorded data; the project graphics rule asks research RCAs to show geometry evidence."
+    }
+  ],
+  "gate_arms_note": "No baseline or after suite was armed by this read-only investigation node; merged-head verification belongs to a separately dispatched test node.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "The declared b4103b47..8c42a3d5 range changes five repository files; git diff --check passes. The review worktree is read-only and at c8e2ce3d, so committed reviewed artifacts were read through git show at the declared head.",
+    "done_when": "The 135-cell exact-clip analytic-state JVP is +0.836870105527 m/T; six central slopes range from +1.629223955746 to +1.629226157207 m/T. At the 1e-6 T step the centroid gap is +0.792355142519 m/T, with 121 current-carrying cells in both signed probes. Moving outer geometry contributes 3.024582175e6 A/T L2 to the finite difference but only 0.001288063 A/T L2 to JVP. The uniform-level control has negligible centroid and geometry response.",
+    "goal": "The run localizes the analytic-state radial centroid derivative mismatch to moving support in clipped-current integration, supplies a six-step field sweep, factor decomposition, zero-boundary-motion control, report and scoped evidence fragment, and leaves the solver repair to a separate node.",
+    "manifest": "The reviewed manifest is complete and lists all six commits, six deliverable paths including the external report, the three completed focused CPU arms, the initial failed compile attempt, and the repair follow-on. It contains no baseline_suite or after_suite arm.",
+    "source": "In nova/equilibrium/clip_quadrature.py:861-884, the custom JVP differentiates one_cell with argnums=0 and contracts tangents[0] only. The call at line 916 passes moving outer support vertices as argument 1. Their tangent is discarded while the primal uses their moved values.",
+    "write_paths": "The six commits add one measurement script, three JSON receipts and one scoped HTML fragment under the granted repository paths; the separate report is at the granted report path. No solver, plan, test or tolerance path changed."
+  },
+  "justifications": {
+    "durability": "Committed scripts and JSON receipts, three complete CPU logs, a failed-run log, a report, a fragment and a complete manifest preserve the result. The report still says factor and control runs are in progress after both ended EXIT=0, and receipt revision fields name the physics base b4103b47 while their logs identify measurement at c2324542. Those two revisions should be explicitly distinguished in the receipts.",
+    "evidence": "The independent committed-receipt audit reproduced the six-step plateau, the 0.792355142519 m/T gap and the 4.259e-10 ratio of moving-current JVP to finite difference. The positive field direction has a nonzero moving-current response, while the uniform-level direction yields a near-zero boundary and centroid response; these controls distinguish missing tangent from a dead or uniformly zero instrument. Source inspection confirms the omitted vertex tangent directly. All three completed CPU logs end EXIT=0.",
+    "fit": "The report limits its conclusion to this analytic-state exact-clip derivative and does not claim the subsequent solver repair or terminal field has been verified. A figure showing the step plateau and the factor split would make the geometry-based RCA easier to inspect under the project's research-document graphics rule.",
+    "goal_fidelity": "All named measurements and the root-cause report were delivered without implementing a solver repair outside this node's investigation scope. The report identifies the exact custom-JVP seam and states the remaining smaller outer-area tangent mismatch.",
+    "scope_discipline": "The reviewed commits stay within the declared figure and evidence paths, and the report is in the granted reports directory. Solver code was inspected, not changed."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: b4103b477e2807790996fbc9b7edeb07778cd433\nREVIEWED_HEAD_SHA: 8c42a3d526aea6401caa97c63180d5c78cbb4247\nVERDICT: pass-with-follow-ons; custom JVP omits moving vertex tangent.\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 15\nSCORE fit: 18\nADDED_FAILURES: unmeasured because both suite arms are absent; encoded 0 and [].",
+  "review_base_sha": "c8e2ce3db2c30ae52d28dd09acc5c632417d0cba",
+  "review_run_id": "r-20261002T235737052938-review-of-cco-root-cause-centroid-tangent-localisation",
+  "reviewed_base_sha": "b4103b477e2807790996fbc9b7edeb07778cd433",
+  "reviewed_commit": "8c42a3d526aea6401caa97c63180d5c78cbb4247",
+  "reviewed_head_sha": "8c42a3d526aea6401caa97c63180d5c78cbb4247",
+  "reviewed_revision": "8c42a3d526aea6401caa97c63180d5c78cbb4247",
+  "reviewed_run_id": "r-20261002T231145475955-cco-root-cause-centroid-tangent-localisation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-centroid-tangent-localisation",
+  "reviewer_node": "review-of-cco-root-cause-centroid-tangent-localisation",
+  "reviewer_run_id": "r-20261002T235737052938-review-of-cco-root-cause-centroid-tangent-localisation",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T00:03:00Z",
+  "total": 90,
+  "verdict": "pass-with-follow-ons"
+}

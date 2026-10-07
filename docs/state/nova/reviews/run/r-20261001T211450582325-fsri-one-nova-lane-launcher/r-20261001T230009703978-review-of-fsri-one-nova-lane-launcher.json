@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's classification.json records baseline_suite null and after_suite null, so no base/head gate-log arm exists and the added-failure count cannot be taken from the reviewed run's own gate logs. The reviewed run's focused launcher gate (pytest-lane-launcher.log, 4 passed, EXIT=0 at head) is a head arm with no matching baseline arm; the reviewed run changes shell launchers, a pytest test file and docs only.",
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/h200_test_lane/run.sh:40"
+  ],
+  "commits_read": [
+    "48a40fab18be098a17ea5df6d631c1b153a027f2",
+    "737dfc022af55eceef5b8bc57e78e03a048e2283",
+    "707552973b50e4e0ef967555ebf2f50296604657",
+    "99282e743a425dcb7be7cb6f794c064c1895f647"
+  ],
+  "completed_at": "2026-10-01T23:19:19.076Z",
+  "dispatched_at": "2026-10-01T23:00:23Z",
+  "findings": [
+    {
+      "file": "scripts/nova_lane/run.sh",
+      "line": "135",
+      "severity": "follow-on",
+      "text": "the concurrent sampler is restored (started before the target at scripts/nova_lane/run.sh:138, waited and its log appended at scripts/nova_lane/run.sh:146-149, faithful to the pre-change caller at 48a40fab1:scripts/h200_test_lane/run.sh), but no log on this host shows it executing: the worker ran inside allocation 1277272 where sbatch/srun are reckon host shims, so evidence is the dry-run's PAYLOAD_SAMPLER line (h200-payload-steps.log) and the code path, not a run. A real H200 submission should confirm the device inventory and the 10/30/60 s readings."
+    },
+    {
+      "file": "scripts/nova_lane/run.sh",
+      "line": "356",
+      "severity": "follow-on",
+      "text": "the rung fallback is now driven by a test against stubbed sbatch/squeue (tests/test_nova_lane_launcher.py:107) and the reason match was widened to Resources|Configuration|Partition|ReqNode*|NodeDown (scripts/nova_lane/run.sh:322-325); I reproduced the branch firing (base admitted ReqNodeNotAvail, head refuses and falls through). A real submission PENDING on that reason is still unexercised here -- the reviewed manifest records this under follow_ons and it is an environment limit rather than a defect."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read the whole delta 48a40fab1..HEAD: 737dfc022 adds scripts/nova_lane/run.sh and the tests and reduces scripts/h200_test_lane/run.sh to a thin caller; 707552973 restores the pin diagnostic and a concurrent --sampler step, adds the H200-steps test and the stubbed fallback test; 99282e743 regenerates the evidence logs and adds the two new ones.",
+    "done_when": "bash -n is clean on both scripts at head (verified), the dry-run prints the per-rung sbatch line plus PAYLOAD_PRELUDE/PAYLOAD_SAMPLER (verified at head), the focused launcher gate is 4 passed EXIT 0 (verified: TMPDIR=/tmp PYTHONPATH=$PWD /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_nova_lane_launcher.py -q -> 4 passed, EXIT=0), and the widened pending-reason match now refuses a ReqNodeNotAvail submission where the pre-change match admitted it (independently reproduced). A real sbatch submission and the sampler running against a live target remain unexercised on this host.",
+    "goal": "the reviewed node's goal is one general launcher placing a pytest target or a script on the H200, titan or CPU rung under the repository's SLURM rules, with the reserved-H200 lane as a thin caller; scripts/nova_lane/run.sh:55 rung_platforms and scripts/nova_lane/run.sh:63 rung_sbatch_flags encode the rung table and scripts/h200_test_lane/run.sh:40 execs it, so the goal is delivered.",
+    "manifest": "read the reviewed manifest.md; status complete, commits 737dfc022, 707552973, 99282e743, negative_control_log is a bare path, negative_control_note records two controls, and classification.json records baseline_suite null and after_suite null so no base/head gate-log arm exists.",
+    "write_paths": "the run's declared paths are scripts/nova_lane, scripts/h200_test_lane/run.sh, tests/test_nova_lane_launcher.py, the two docs/figures paths and the evidence fragment; git diff --name-status 48a40fab1..99282e743 lists exactly eleven files (10 added, 1 modified), every one inside a declared path."
+  },
+  "justifications": {
+    "durability": "the guards are real and reproducible: at head four tests pass and I independently reproduced the widened match by extracting scripts/nova_lane/run.sh:312-326 and driving it with a stub squeue, where the pre-change match admitted a PENDING ReqNodeNotAvail job but the head match refuses it; the sampler guard is weaker, a string assertion on the dry-run output (tests/test_nova_lane_launcher.py:93) rather than a run showing the sampler executes.",
+    "evidence": "the evidence was regenerated at the restored revision and improved: pytest-lane-launcher.log records 4 passed EXIT=0 at head, h200-payload-steps.log shows the restored pin-diagnostic prelude and PAYLOAD_SAMPLER, and negative-control-h200-steps.log adds a second red control; but no log exercises the sampler against a live target or a real sbatch submission, so the two restorations are evidenced by the dry-run and by reading the code path (scripts/nova_lane/run.sh:135-149) against the pre-change caller, not by a run.",
+    "fit": "scripts/nova_lane/run.sh and the thin caller follow the bash idiom of the pre-change scripts/h200_test_lane/run.sh, reuse the shared interpreter at scripts/nova_lane/run.sh:26, and introduce no forbidden name or plan identifier in the scripts, tests or evidence fragment.",
+    "goal_fidelity": "scripts/nova_lane/run.sh:55 rung_platforms and scripts/nova_lane/run.sh:63 rung_sbatch_flags supply the rung table the goal names, and scripts/h200_test_lane/run.sh:40 execs the launcher with the rung fixed to h200, so both the general launcher and its reserved-H200 caller deliver the goal.",
+    "scope_discipline": "git diff --name-status base..head touches only the declared paths -- the new scripts/nova_lane/run.sh, the modified scripts/h200_test_lane/run.sh and tests/test_nova_lane_launcher.py, and seven docs figures/fragment files -- all inside the declared scope, and every commit carries a conventional subject with a body and no plan or ticket identifier."
+  },
+  "limits": [
+    "Read-only review of a shell-launcher and test change; no SLURM job was run and no real submission was made (this reviewer and the reviewed worker share allocation 1277272, where sbatch/srun are reckon host shims).",
+    "The sampler's concurrent execution is verified by reading scripts/nova_lane/run.sh:135-149 against the pre-change caller and by the dry-run... by the dry-run's PAYLOAD_SAMPLER line, not by a live H200 run.",
+    "The rung fallback was verified by extracting scripts/nova_lane/run.sh:312-326 and driving it with a stub squeue, and by the reviewed run's own stubbed test; no real sbatch submission was made."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is one general launcher placing a pytest target or a script on the H200, titan or CPU rung under the repository's SLURM rules, with the reserved-H200 lane as a thin caller; scripts/nova_lane/run.sh:55 rung_platforms and scripts/nova_lane/run.sh:63 rung_sbatch_flags encode the rung table and scripts/h200_test_lane/run.sh:40 execs it, so the goal is delivered.\nVERDICT done_when: bash -n is clean on both scripts at head (verified), the dry-run prints the per-rung sbatch line plus PAYLOAD_PRELUDE/PAYLOAD_SAMPLER (verified at head), the focused launcher gate is 4 passed EXIT 0 (verified: TMPDIR=/tmp PYTHONPATH=$PWD /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_nova_lane_launcher.py -q -> 4 passed, EXIT=0), and the widened pending-reason match now refuses a ReqNodeNotAvail submission where the pre-change match admitted it (independently reproduced). A real sbatch submission and the sampler running against a live target remain unexercised on this host.\nVERDICT write_paths: the run's declared paths are scripts/nova_lane, scripts/h200_test_lane/run.sh, tests/test_nova_lane_launcher.py, the two docs/figures paths and the evidence fragment; git diff --name-status 48a40fab1..99282e743 lists exactly eleven files (10 added, 1 modified), every one inside a declared path.\nVERDICT manifest: read the reviewed manifest.md; status complete, commits 737dfc022, 707552973, 99282e743, negative_control_log is a bare path, negative_control_note records two controls, and classification.json records baseline_suite null and after_suite null so no base/head gate-log arm exists.\nVERDICT diff: read the whole delta 48a40fab1..HEAD: 737dfc022 adds scripts/nova_lane/run.sh and the tests and reduces scripts/h200_test_lane/run.sh to a thin caller; 707552973 restores the pin diagnostic and a concurrent --sampler step, adds the H200-steps test and the stubbed fallback test; 99282e743 regenerates the evidence logs and adds the two new ones.\nCALL_SITES: scripts/h200_test_lane/run.sh:40\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/nova_lane/run.sh:55 rung_platforms and scripts/nova_lane/run.sh:63 rung_sbatch_flags supply the rung table the goal names, and scripts/h200_test_lane/run.sh:40 execs the launcher with the rung fixed to h200, so both the general launcher and its reserved-H200 caller deliver the goal.\nSCORE evidence: 16\nJUSTIFICATION evidence: the evidence was regenerated at the restored revision and improved: pytest-lane-launcher.log records 4 passed EXIT=0 at head, h200-payload-steps.log shows the restored pin-diagnostic prelude and PAYLOAD_SAMPLER, and negative-control-h200-steps.log adds a second red control; but no log exercises the sampler against a live target or a real sbatch submission, so the two restorations are evidenced by the dry-run and by reading the code path (scripts/nova_lane/run.sh:135-149) against the pre-change caller, not by a run.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status base..head touches only the declared paths -- the new scripts/nova_lane/run.sh, the modified scripts/h200_test_lane/run.sh and tests/test_nova_lane_launcher.py, and seven docs figures/fragment files -- all inside the declared scope, and every commit carries a conventional subject with a body and no plan or ticket identifier.\nSCORE durability: 17\nJUSTIFICATION durability: the guards are real and reproducible: at head four tests pass and I independently reproduced the widened match by extracting scripts/nova_lane/run.sh:312-326 and driving it with a stub squeue, where the pre-change match admitted a PENDING ReqNodeNotAvail job but the head match refuses it; the sampler guard is weaker, a string assertion on the dry-run output (tests/test_nova_lane_launcher.py:93) rather than a run showing the sampler executes.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/nova_lane/run.sh and the thin caller follow the bash idiom of the pre-change scripts/h200_test_lane/run.sh, reuse the shared interpreter at scripts/nova_lane/run.sh:26, and introduce no forbidden name or plan identifier in the scripts, tests or evidence fragment.\nFINDING scripts/nova_lane/run.sh:135 follow-on: the concurrent sampler is restored (started before the target at scripts/nova_lane/run.sh:138, waited and its log appended at scripts/nova_lane/run.sh:146-149, faithful to the pre-change caller at 48a40fab1:scripts/h200_test_lane/run.sh), but no log on this host shows it executing: the worker ran inside allocation 1277272 where sbatch/srun are reckon host shims, so evidence is the dry-run's PAYLOAD_SAMPLER line (h200-payload-steps.log) and the code path, not a run. A real H200 submission should confirm the device inventory and the 10/30/60 s readings.\nFINDING scripts/nova_lane/run.sh:356 follow-on: the rung fallback is now driven by a test against stubbed sbatch/squeue (tests/test_nova_lane_launcher.py:107) and the reason match was widened to Resources|Configuration|Partition|ReqNode*|NodeDown (scripts/nova_lane/run.sh:322-325); I reproduced the branch firing (base admitted ReqNodeNotAvail, head refuses and falls through). A real submission PENDING on that reason is still unexercised here -- the reviewed manifest records this under follow_ons and it is an environment limit rather than a defect.",
+  "recommendation": "accept the restored work: the resume closes the two follow-ons the earlier review recorded at 737dfc022 -- the reserved-H200 thin caller again prints the pin-revision diagnostic and runs the concurrent GPU sampler, and the rung fallback's reason match now covers ReqNode*/NodeDown with a stubbed test -- while keeping every changed file inside the declared scope and every commit body clean. Record two residual follow-ons rather than repairs: a real sbatch submission should exercise the rung fallback and the sampler end-to-end, and the sampler's guard remains a dry-run string assertion rather than a run.",
+  "review_run_id": "r-20261001T230009703978-review-of-fsri-one-nova-lane-launcher",
+  "reviewed_base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+  "reviewed_head_sha": "99282e743a425dcb7be7cb6f794c064c1895f647",
+  "reviewed_run_id": "r-20261001T211450582325-fsri-one-nova-lane-launcher",
+  "reviewing_run_id": "r-20261001T230009703978-review-of-fsri-one-nova-lane-launcher",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-01T23:17:49.178378+00:00",
+  "total": 90
+}

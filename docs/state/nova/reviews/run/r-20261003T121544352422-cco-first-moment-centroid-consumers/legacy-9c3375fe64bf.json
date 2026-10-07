@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T12:40:29Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T12:16:07Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-first-moment-centroid-consumers.md",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "vertical-shift sanity threshold relaxed to admit a result: the check moved from a >1 mm bound to a nonzero 1 um detection threshold after the displaced measurement returned -32.789 um, so a gate threshold was changed to pass rather than the measurement reconciled to the bound. The shift is genuinely nonzero (about 33x the new 1 um threshold) and the report discloses the change, so it does not block, but the bound is now weak and its justification ('an instrument assumption') is the node's own reading rather than an independent one."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-consumers/docs/evidence/fragments/centroid-constrained-oracle-solve/cco-first-moment-centroid-consumers.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "evidence fragment not delivered: the granted fragment path docs/evidence/fragments/centroid-constrained-oracle-solve/cco-first-moment-centroid-consumers.html was never written (git ls-files returns nothing and the base..head name list names only consumer-inventory.md), so the landing contract's plan-side evidence anchor is a manifest landing: line with no fragment file behind it; for a node whose deliverable is the inventory itself the anchor that promotion lands on the plan section is the only evidence pointer."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121544352422-cco-first-moment-centroid-consumers/caller-audit.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "caller census is not reproducible from a committed artifact: the audit records DIRECT_INVOCATIONS=42 STUB_OR_DEFINITION=2 MISSING=0 as the output of an inline `python3 - [inline rg direct-caller coverage audit]`, so the inventory's central exhaustiveness claim cannot be re-derived from the repository or the log (the log records only the result, not the check); a later reader must re-author the census to verify it. My independent count reconciles (44 grep hits minus 2 definitions = 42), so the claim holds, but it is not self-checking."
+    }
+  ],
+  "gate_arms_note": "The reviewed run is a documentation/inventory node and is not suite-armed: its committed manifest.md carries baseline_suite empty and after_suite empty, and no *suite* log exists in the run directory. Its gate logs are the two CPU measurement lanes centroid-shift.log (REVISION=fda483e45007aa20084300afae13837d14efed88, analytic 135-cell exact-clip, EXIT=0) and displaced-centroid-shift-verified.log (REVISION=fda483e45, displaced 135-cell exact-clip, EXIT=0), plus caller-audit.log (REVISION=4fa444e91, DIRECT_INVOCATIONS=42 STUB_OR_DEFINITION=2 MISSING=0, EXIT=0). None is a pytest arm, so there are no suite failure ids to difference; added_failure_count=0 and added_failure_ids=[] are read from the absence of any readable baseline/after suite arm rather than from two green arms.",
+  "justifications": {
+    "durability": "consumer-inventory.md is committed and the three logs are preserved under the run directory, but the node's central completeness claim (42/42, MISSING=0) rests on an inline, uncommitted caller-audit script a later reader cannot re-run, and the granted evidence fragment cco-first-moment-centroid-consumers.html was never written so the plan-side anchor is a manifest landing: line alone.",
+    "evidence": "the report's figures reproduce the gate logs exactly (analytic R +0.006092233036050665, displaced R +0.005849878655870278, Z -3.278931795223927e-05, 0 A net-current shift) with manual-sum cross-checks (8.88e-16, 3.55e-15) and a zero-shift control, but a vertical sanity bound was relaxed from >1 mm to a 1 um threshold after the measurement returned -32.789 um, a gate threshold changed to admit the result.",
+    "fit": "the work is docs-only and matches the repo idiom of a markdown table under docs/figures/<plan>/<node>/ with mechanism-named file and line anchors and conventional commit bodies, introducing no name the repository naming rules forbid.",
+    "goal_fidelity": "the inventory at docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md is complete against an independent census I ran (44 hits for current_moment_observation( = 42 invocations + 2 definitions) and contains every consumer the done-when named as missing (nova/equilibrium/constraint.py:1623, scripts/labeller_batch/shard.py:607, benchmarks/batched_labeller_receipt.py:340, benchmarks/centroid_radius_attribution.py, benchmarks/playable_keyframe_receipt.py).",
+    "scope_discipline": "the base..head name list fda483e45..4fa444e91 is exactly docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md under a granted path with no product source and no tests changed, conventional subjects with bodies present, no AI attribution and no plan or sprint identifier, reviewed worktree clean."
+  },
+  "node": "review-of-cco-first-moment-centroid-consumers",
+  "project": "nova",
+  "raw_text": "VERDICT goal: I read the node goal (inventory every consumer of the current-centroid observation and how its values shift under first moments) and the delivered table at docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md; it enumerates direct and indirect readers with file and line, each reader's use, the committed receipt/gate/test it feeds, and the measured input shift, and it contains every consumer the done-when named as missing from the prior review.\nVERDICT done_when: I read the done-when (a report at reports/nova/s22/cco-first-moment-centroid-consumers.md with the table also under docs/figures/.../first-moment-consumers/, a per-consumer shift on one representative state, and a list of invalidated committed numbers and test expectations) against the two CPU gate logs and the report on disk; the report exists, carries the four-row shift table with per-consumer detail, and names the invalidated receipts and expectations.\nVERDICT write_paths: I read the four declared write paths and the two commits 8d324df31 and 4fa444e91; the full base..head name list (fda483e45..4fa444e91) is exactly one path, docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md, a granted path, with no product source and no tests touched.\nVERDICT manifest: I read manifest.md in the reviewed run directory; it records status complete, the two commits, changed_paths, the three log paths, an artifacts line and a landing line, and its headline figures (R +5.849878655870278 mm, Z -0.03278931795223927 mm, 0 A) reproduce the displaced gate log exactly.\nVERDICT diff: I read the diff of 8d324df31 (44 insertions) and 4fa444e91 (6 insertions); it is docs-only, adding the consumer table and the indirect-reader and fan-out paragraph, which is what the goal asks for.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the inventory at docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md is complete against an independent census I ran (44 hits for current_moment_observation( = 42 invocations + 2 definitions) and contains every consumer the done-when named as missing (nova/equilibrium/constraint.py:1623, scripts/labeller_batch/shard.py:607, benchmarks/batched_labeller_receipt.py:340, benchmarks/centroid_radius_attribution.py, benchmarks/playable_keyframe_receipt.py).\nSCORE evidence: 16\nJUSTIFICATION evidence: the report's figures reproduce the gate logs exactly (analytic R +0.006092233036050665, displaced R +0.005849878655870278, Z -3.278931795223927e-05, 0 A net-current shift) with manual-sum cross-checks (8.88e-16, 3.55e-15) and a zero-shift control, but a vertical sanity bound was relaxed from >1 mm to a 1 um threshold after the measurement returned -32.789 um, a gate threshold changed to admit the result.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the base..head name list fda483e45..4fa444e91 is exactly docs/figures/centroid-constrained-oracle-solve/first-moment-consumers/consumer-inventory.md under a granted path with no product source and no tests changed, conventional subjects with bodies present, no AI attribution and no plan or sprint identifier, reviewed worktree clean.\nSCORE durability: 15\nJUSTIFICATION durability: consumer-inventory.md is committed and the three logs are preserved under the run directory, but the node's central completeness claim (42/42, MISSING=0) rests on an inline, uncommitted caller-audit script a later reader cannot re-run, and the granted evidence fragment cco-first-moment-centroid-consumers.html was never written so the plan-side anchor is a manifest landing: line alone.\nSCORE fit: 18\nJUSTIFICATION fit: the work is docs-only and matches the repo idiom of a markdown table under docs/figures/<plan>/<node>/ with mechanism-named file and line anchors and conventional commit bodies, introducing no name the repository naming rules forbid.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-first-moment-centroid-consumers.md:16 follow-on: the vertical-shift sanity check was relaxed from a >1 mm bound to a nonzero 1 um detection threshold after the displaced measurement returned -32.789 um, so a gate threshold was changed to admit the result; the shift is genuinely nonzero and the report discloses the change, but the bound is now weak and its justification rests on the node's own reading of the instrument.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-consumers/docs/evidence/fragments/centroid-constrained-oracle-solve/cco-first-moment-centroid-consumers.html:1 follow-on: the granted evidence-fragment path was never written (git ls-files returns nothing and the base..head name list names only consumer-inventory.md), so the landing contract's plan-side evidence anchor is a manifest landing: line with no fragment file behind it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T121544352422-cco-first-moment-centroid-consumers/caller-audit.log:2 follow-on: the caller-completeness audit (DIRECT_INVOCATIONS=42 STUB_OR_DEFINITION=2 MISSING=0) is recorded as an inline `python3 - [inline rg direct-caller coverage audit]`, so the inventory's central exhaustiveness claim cannot be parsed and re-derived from a committed artifact and a later reader must re-author the census to check it.\n",
+  "review_base_sha": "c20cf4b29e1cf09a33fe67699ca3c8f0cb4b56b3",
+  "review_run_id": "legacy-9c3375fe64bf",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "fda483e45007aa20084300afae13837d14efed88",
+  "reviewed_commit": "4fa444e91e358bf0f192d8137be35a1ea98bcf98",
+  "reviewed_head_sha": "4fa444e91e358bf0f192d8137be35a1ea98bcf98",
+  "reviewed_run_id": "r-20261003T121544352422-cco-first-moment-centroid-consumers",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-consumers",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T12:49:11Z",
+  "total": 86
+}

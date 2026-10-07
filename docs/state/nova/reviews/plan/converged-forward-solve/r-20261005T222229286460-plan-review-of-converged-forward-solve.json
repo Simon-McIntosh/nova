@@ -1,0 +1,24 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T22:25:57.271Z",
+  "dispatched_at": "2026-10-05T22:22:42Z",
+  "findings": [],
+  "plan_fingerprint": "ee63b356051523cf0e0a9433a36056ab28ece8d17829c39da0360949e569c51e",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 42,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T222229286460-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "afedfe6b640185b69ddee75a56d5a1c5a2e51843",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the four signatures (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`) are each one pure function hiding a substantial stage, and each stage is over different machinery with its own analytic oracle and negative control, not four wrappers over one mechanism; `topology.read` additionally absorbs the design inventory's 17 null-role and 23 region-role implementations behind the one read, which is the definition of depth.",
+    "duplicate_owner": "pass \u2014 every proposed owner is either an existing file extended in place (`topology.py`, `constraint.py`, `polygon_moments.py`) or a named replacement of an owner being deleted in the same plan (`current.py`/`gs.py`/`solve.py` for `clip_quadrature.py`, `forward_operator.py`, `fixed_point.py`, `reduced_newton.py`), and each carry-over states the file to extend; no shared infrastructure is forked.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the two sections that add operand vocabulary (\u00a72 `TopologyPolicy`, \u00a75 `SolvePolicy`) each state in their own text that the type is merged into the existing `ForwardSolvePolicy` \"extended rather than duplicated\", and \u00a76 retires `SolveRoute` (six members to one), `SupportClipMode` and eight plumbing fields of `ForwardSolvePolicy`, with the before-and-after field counts stated as the interface-budget accounting the zero-count claim rests on.",
+    "reuse_search": "pass \u2014 the plan searched the codebase it names and its composed-review ledger carries eight cite-or-justify rulings (GMRES kernel, backtracking helpers, Newton candidates, operand layouts, clip helpers, polygon moments, contour tree, constraint scale, moment-map derivative); each named mechanism exists in the file cited, and the retirement census names importers (`mast_parity_chain.py`, `biot/boundary.py`, `steering_frames.py`, 177 `benchmarks/` files) that all bind the module whose deletion they are listed against.",
+    "thin_wrapper": "pass \u2014 the plan adds no thin layer: `gs.apply` \"replaces the map ForwardFluxOperator performs rather than wrapping it\", `current.book` replaces `clipped_support_current_moments` and the support partition, `solve.fixed_point` replaces `newton_krylov`, `picard` and `operator_request_body` in place of the file, and the retained `forward.py` is an existing request/receipt adapter that shrinks, with its retention justified by the transport-window consumer ruling rather than newly introduced."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T22:26:39.213478+00:00"
+}

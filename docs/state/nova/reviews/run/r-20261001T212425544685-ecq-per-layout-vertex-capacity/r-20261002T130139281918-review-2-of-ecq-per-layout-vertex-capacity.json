@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the run's module gate log gate-module-after.log, whose own summary line is '28 passed in 125.88s' with EXIT=0 - no failing test id at head, so no failure is added. The log is a single-arm head record (28 tests collected at head; the reviewed diff adds exactly one test), so the base comparison the evidence fragment asserts is not carried by this log.",
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/separatrix_clip.py:1340",
+    "nova/equilibrium/separatrix_clip.py:1940"
+  ],
+  "commits_read": [
+    "5b84f5bcb7dbc2e1d7451f49440996d61cafd480",
+    "7cac2452606e4fa8c8483f96b5f186955cf93a31"
+  ],
+  "completed_at": "2026-10-02T13:24:07.738Z",
+  "dispatched_at": "2026-10-02T13:01:57Z",
+  "excluded_commits": [
+    "61b2910890cea4b5f0528dd2c2c036f8dd39ad89"
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-per-layout-vertex-capacity.html",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment claims 'no failure added against the pre-change base for this module (log gate-module-after.log)', but that log is a single head arm (it collects the 28 post-change tests; the per-commit diff adds exactly one test) and no base-arm log for this module exists in the run directory - base-two-modules.log ERRORs on a missing glob path and then runs different modules, so the base comparison the sentence asserts is unsupported."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/gate-module-after.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's cited after-arm log names revision c00300b91596 (the base) on its header line though the arm it records is the head tree; the sibling after logs for the same worktree (census-and-refused-after.log:1, negative-control-one-arc-bound.log:2) name 7cac2452606e, so the one log the evidence fragment leans on reconciles to the wrong revision."
+    },
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": "1940",
+      "severity": "follow-on",
+      "text": "follow-on: the per-layout count is threaded only to _clip_cell; _expand_spline_saddle_wedges still calls traced_polygon_vertex_capacity(straight_capacity) on the one-run default, and its wedge construction concatenates two arc halves (first_half / second_half) around a straight middle, so if a saddle wedge presents two level runs its fixed bound is the pre-change one-arc value and the traced-clip family's capacity is not uniformly per-layout."
+    }
+  ],
+  "gate_arms_note": "gate-module-after.log is a head-only arm; no base arm for this module was logged in the run directory. The manifest's tests field records the module gate as head-only (28 passed) and reaches base only through a scratch forward_operator arm.",
+  "item_aggregate": 0,
+  "item_aggregate_note": "dimensional review; no per-item deliverables",
+  "item_verdicts": [],
+  "justifications": {
+    "durability": "The mechanism's behaviour is pinned by test_traced_polygon_capacity_is_the_arc_plus_the_straight_chain (the (34,1) and (34,2) values and the level_run_count<1 refusal) and by test_spline_clip_admits_a_two_run_layout_at_the_two_run_bound, and the declared negative control shows the admission test bites when the multiplier is removed. Not higher because no test covers a production multi-run call site, and the second capacity call site at separatrix_clip.py:1940 is unpinned at any run count but one.",
+    "evidence": "Each capacity claim was re-derived at 7cac2452606e and the named tests re-run (3 passed, 25 deselected) rather than taken on report; the negative-control log reproduces at the reviewed head revision, dropping the multiplier and failing the admission test with EXIT=1. Held down because the fragment's central base-comparison claim rests on a head-only log whose own header names the base revision, and no base arm for this module was logged.",
+    "fit": "Symbols and docstrings are named by mechanism (level_run_count, traced_polygon_vertex_capacity) with no plan, sprint or ticket identifiers in source, tests or commit bodies; the evidence fragment cites its followup and decision ids, which is the plan's own document system rather than source, so naming is consistent with the repository rules.",
+    "goal_fidelity": "The landed mechanism does what the goal states - traced_polygon_vertex_capacity now takes level_run_count and returns level_run_count*128 + straight, default 1, threaded through AtomicCellMesh.traced_clip -> _traced_clip -> _clip_cell as a Python int keeping the packed shape compile-time constant. Verified at head: the function returns 2*128+34=290 and 128+34=162, and the two-run fixture test admits refused_cells()==0, vertex_capacity 264, vertex_count 260, area 0.75. Held back from a higher score because the count reaches only the _clip_cell path; the saddle-wedge capacity at separatrix_clip.py:1940 keeps the one-run default, and the node's production outcome (admitting the diverted row's cell 9) is out of this review's scope by the run's own exclusion of the wiring commit.",
+    "scope_discipline": "git diff 5b84f5bcb^ 7cac2452606e names exactly three files - nova/equilibrium/separatrix_clip.py, tests/test_equilibrium_separatrix_clip.py, and the new evidence fragment - all inside the run's declared write paths, with the held wiring commit 61b291089 confirmed not an ancestor of the reviewed head."
+  },
+  "limitations": [
+    "This review reads only commits 5b84f5bcb and 7cac2452606e; the wiring commit 61b291089 (forward_operator._profile_support declaring the remark) is excluded as the node states, so whether the production route ever passes level_run_count>1 is not assessed here.",
+    "The elapsed-time budget bounded re-measurement to the focused capacity and admission tests plus the single divisor relationship ; the full 28-test module gate was read from the run's log rather than re-run.",
+    "The saddle-wedge finding at separatrix_clip.py:1940 identifies an asymmetry in where the count is consumed; whether any realised saddle wedge presents two level runs was not measured."
+  ],
+  "plan": "nova:exact-clip-moment-quadrature",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: The landed mechanism does what the goal states - traced_polygon_vertex_capacity now takes level_run_count and returns level_run_count*128 + straight, default 1, threaded through AtomicCellMesh.traced_clip -> _traced_clip -> _clip_cell as a Python int keeping the packed shape compile-time constant. Verified at head: the function returns 2*128+34=290 and 128+34=162, and the two-run fixture test admits refused_cells()==0, vertex_capacity 264, vertex_count 260, area 0.75. Held back from a higher score because the count reaches only the _clip_cell path; the saddle-wedge capacity at separatrix_clip.py:1940 keeps the one-run default, and the node's production outcome (admitting the diverted row's cell 9) is out of this review's scope by the run's own exclusion of the wiring commit.\nSCORE evidence: 14\nJUSTIFICATION evidence: Each capacity claim was re-derived at 7cac2452606e and the named tests re-run (3 passed, 25 deselected) rather than taken on report; the negative-control log reproduces at the reviewed head revision, dropping the multiplier and failing the admission test with EXIT=1. Held down because the fragment's central base-comparison claim rests on a head-only log whose own header names the base revision, and no base arm for this module was logged.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 5b84f5bcb^ 7cac2452606e names exactly three files - nova/equilibrium/separatrix_clip.py, tests/test_equilibrium_separatrix_clip.py, and the new evidence fragment - all inside the run's declared write paths, with the held wiring commit 61b291089 confirmed not an ancestor of the reviewed head.\nSCORE durability: 15\nJUSTIFICATION durability: The mechanism's behaviour is pinned by test_traced_polygon_capacity_is_the_arc_plus_the_straight_chain (the (34,1) and (34,2) values and the level_run_count<1 refusal) and by test_spline_clip_admits_a_two_run_layout_at_the_two_run_bound, and the declared negative control shows the admission test bites when the multiplier is removed. Not higher because no test covers a production multi-run call site, and the second capacity call site at separatrix_clip.py:1940 is unpinned at any run count but one.\nSCORE fit: 18\nJUSTIFICATION fit: Symbols and docstrings are named by mechanism (level_run_count, traced_polygon_vertex_capacity) with no plan, sprint or ticket identifiers in source, tests or commit bodies; the evidence fragment cites its followup and decision ids, which is the plan's own document system rather than source, so naming is consistent with the repository rules.\nFINDING docs/evidence/fragments/exact-clip-moment-quadrature/ecq-per-layout-vertex-capacity.html:4 follow-on: the fragment claims 'no failure added against the pre-change base for this module (log gate-module-after.log)', but that log is a single head arm (it collects the 28 post-change tests; the per-commit diff adds exactly one test) and no base-arm log for this module exists in the run directory - base-two-modules.log ERRORs on a missing glob path and then runs different modules, so the base comparison the sentence asserts is unsupported.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/gate-module-after.log:1 follow-on: the fragment's cited after-arm log names revision c00300b91596 (the base) on its header line though the arm it records is the head tree; the sibling after logs for the same worktree (census-and-refused-after.log:1, negative-control-one-arc-bound.log:2) name 7cac2452606e, so the one log the evidence fragment leans on reconciles to the wrong revision.\nFINDING nova/equilibrium/separatrix_clip.py:1940 follow-on: the per-layout count is threaded only to _clip_cell; _expand_spline_saddle_wedges still calls traced_polygon_vertex_capacity(straight_capacity) on the one-run default, and its wedge construction concatenates two arc halves (first_half / second_half) around a straight middle, so if a saddle wedge presents two level runs its fixed bound is the pre-change one-arc value and the traced-clip family's capacity is not uniformly per-layout.\n",
+  "review_run_id": "r-20261002T130139281918-review-2-of-ecq-per-layout-vertex-capacity",
+  "reviewed_base_sha": "c00300b91596dc94060c074ebe9bf735b5892174",
+  "reviewed_head_sha": "7cac2452606e4fa8c8483f96b5f186955cf93a31",
+  "reviewed_revision": "7cac2452606e4fa8c8483f96b5f186955cf93a31",
+  "reviewed_run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity",
+  "reviewer_node": "review-2-of-ecq-per-layout-vertex-capacity",
+  "reviewer_run_id": "r-20261002T130139281918-review-2-of-ecq-per-layout-vertex-capacity",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T13:18:55.493850+00:00",
+  "total": 83,
+  "verdict": "pass"
+}

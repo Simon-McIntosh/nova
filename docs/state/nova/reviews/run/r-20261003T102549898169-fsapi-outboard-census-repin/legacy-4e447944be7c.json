@@ -1,0 +1,68 @@
+{
+  "absent": [
+    "no committed test pins the chord total or the five outboard per-cell bookings as a movement assertion (they are pinned, but their invariance across the routing change is not itself asserted)",
+    "the _recommendation 'undetermined' conflation (both arms agree vs neither agrees) remains untested for the both-agree case as a distinguishable outcome"
+  ],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_source": "Derived from the run's own gate logs. gate-base-22faa10eb.log: 1 failed, 2 passed (test_booked_totals_reproduce_the_committed_state), EXIT=1 -- the stale exact clip pin, which is the defect the run repairs, not a failure it adds. gate-head-repin.log: 3 passed, EXIT=0. consistency-gate.log: 9 passed, EXIT=0. negative-control.log: 6 failed, 3 passed, EXIT=1 under the declared mutation. No test that passes at the reviewed base fails at the reviewed head, so added_failure_count is 0. Independently reproduced by this review: head gate 3 passed EXIT=0; consistency 9 passed EXIT=0; mutation 6 failed 3 passed EXIT=1.",
+  "commits_read": [
+    "22faa10ebc78efbc4e49b13fe7dfbde57456dd9b",
+    "45350169c1e07acbd75686251634f06ee6a1900f",
+    "123111a0e0beb4f66fc6e21433a342035d3e302d"
+  ],
+  "completed_at": "2026-10-03T10:47:48.069Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-03T10:26:10Z",
+  "findings": [
+    {
+      "file": "tests/test_outboard_hole_census_gate.py",
+      "line": "126",
+      "severity": "follow-on",
+      "text": "follow-on: the BOOKED_TOTALS_A comment anchors the re-pinned value to commit 38b441dad and to the sibling evidence fragment by path. Both resolve (the fragment exists at head), so this is a correct pointer and no repair is needed; the optional tidy is to move the sha provenance into the commit message, since the mechanism (supports above the whole-cell vertex capacity routed through compact cut-cell integration) is already stated and the comment stands without the sha. Non-blocking."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-api/fsapi-outboard-census-repin.html",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on for the coordinator: the dispatch fence states the merged evidence value as 15491539.124775 A, but the merged evidence publishes 15,491,539.124767 A (fsri-outboard-census-exact-total.html and paired-final-head.json exact_booked_a 15491539.124767259), and this review independently measured 15491539.124767259 A. The run's re-pinned value agrees with the merged evidence to published precision; the fence's 6th-decimal figure differs by 8e-6 A (5.2e-13 relative, inside the unchanged 1e-6 tolerance). Reconcile the fence's parenthetical so a transcription difference is not carried forward. Non-blocking."
+    }
+  ],
+  "item_aggregate": null,
+  "item_verdicts": {},
+  "justifications": {
+    "durability": "The run converts an uncommitted reconciliation into a committed, executable check: tests/test_outboard_census_receipt_consistency.py asserts the receipt's own verdict derivation and reconciles the committed receipt with the numbers the fragment publishes, and it is mutation-sensitive (shown above). This directly closes the durability gap the parent review recorded ('nothing in the repository would redden if _recommendation regressed or if the receipt and the fragment desynchronize again'). Residual: the invariance of the chord total and the per-cell bookings across the routing change is pinned as values but not asserted as a movement, so a future reroute that moved them silently would still pass as long as it landed on the same numbers.",
+    "evidence": "Every headline number is independently reproducible from the committed artefacts. This review measured terminal_booked_currents at head 123111a0e in a clean archive with JAX_PLATFORMS=cpu: exact 15491539.124767259 A (equals the pin exactly, relative 0.0), chord 15875439.764504183 A (relative 1.17e-16 vs the unchanged pin), and the five outboard cells nonzero and matching MEASURED_CELL_CURRENT_A to full precision. The base arm is a real reproduction, not a restated claim: gate-base-22faa10eb.log shows 1 failed 2 passed EXIT=1 with test_booked_totals_reproduce_the_committed_state naming exact 15,491,539.124767 outside 1e-6 of the stale 14,013,835.43717596 pin. Source is byte-identical between base and head (git diff base..head touches only two tests, one evidence fragment and one figure JSON), so the chord total and the five per-cell bookings are unchanged because nothing that books them moved -- verified by the pin diff (chord and MEASURED_CELL_CURRENT_A untouched, only BOOKED_TOTALS_A exact and a signature reformat changed). The consistency test imports the benchmark's own _recommendation (line 21) and fails under the declared mutation: forcing _recommendation to return 're-pin' gives 6 failed, 3 passed, EXIT=1 -- matching the run's negative-control.log exactly. Demerit only for the fence's stated evidence number differing in the 6th decimal from the merged evidence, which is immaterial to the decision.",
+    "fit": "New symbols and files are mechanism-named (test_outboard_census_receipt_consistency.py, _receipt, _fragment_text, _revision, _grouped, _recommendation) and carry no plan, sprint or ticket label. The receipt artefact was committed under the run's own figure directory (docs/figures/forward-solve-api/fsapi-outboard-census-repin/paired-final-head.json) so the test reads data rather than retyped constants -- the right call. Two minor reservations: the gate comment anchors a value to a commit sha and the consistency test hard-codes a sibling node's fragment filename (FRAGMENT path fsri-outboard-census-exact-total.html), which is a run/node identifier inside source (docs/figures/forward-solve-api/fsapi-outboard-census-repin/ directory name) and carries the node id the plan independently); both resolve and neither is a plan label, hence the fit is high but not full.",
+    "goal_fidelity": "The plan section 'Find why the outboard-hole census books 15.49 MA where its committed state holds 14.01 MA' asks the cause to be named by file and line, the test to pass against a committed state with no tolerance widened. The run names the cause in the fragment: 38b441dad routes supports with more than the whole-cell vertex capacity through compact cut-cell integration at nova/equilibrium/clip_quadrature.py lines 516-521 and 731-736, booking ten outboard supports that previously booked zero (+1,477,703.687597 A), which is the exact total gap. It re-pins BOOKED_TOTALS_A exact to 15_491_539.124767259 and leaves BOOKING_RELATIVE_TOLERANCE at 1e-6 (checked at head: line 143 unchanged). The gate passes 3/3 at head. It also closes the two open follow-*ons the parent review (r-20261003T063401667067) recorded: the red gate with a stale pin, and the absence of any committed test importing benchmarks/outboard_census_exact_total.py.",
+    "scope_discipline": "Four paths changed, all inside the run's granted write scope (two test modules, one evidence fragment, one figure JSON copy), and the copy of paired-final-head.json into the repository is declared in the manifest and in the fragment. No source module is touched, so the booking behaviour under review is unchanged by this commit. No plan file is edited by the run (the plan section text is authored by the coordinator, not the node). The commit that adds the consistency test and its referenced artefact landed before the re-pin commit; both carry bodies and no AI attribution was seen in the two commits."
+  },
+  "node": "review-of-fsapi-outboard-census-repin",
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "PASS 90/100. The run re-pins the outboard-hole census gate's exact booked total from 14,013,835.43717596 A to the currently booked 15,491,539.124767259 A, leaves the chord total and the five outboard per-cell bookings unchanged (verified: source identical base..head and measurements reproduced), does not widen BOOKING_RELATIVE_TOLERANCE, and adds a committed, mutation-sensitive consistency test that imports the benchmark's own _recommendation and reconciles the committed paired receipt with the merged evidence fragment. Reproduced independently in a clean archive: head gate 3 passed, consistency 9 passed, mutation 6 failed/3 passed, base gate 1 failed/2 passed. The re-pinned value agrees with the merged evidence 15,491,539.124767 A to published precision; the dispatch fence's parenthetical 15491539.124775 A is a 6th-decimal transcription difference (5.2e-13 relative) recorded as a note, not a blocker.",
+  "review_run_id": "legacy-4e447944be7c",
+  "review_run_id_source": "derived",
+  "review_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-fsapi-outboard-census-repin",
+  "reviewed_base_sha": "22faa10ebc78efbc4e49b13fe7dfbde57456dd9b",
+  "reviewed_commit": "123111a0e0beb4f66fc6e21433a342035d3e302d",
+  "reviewed_head_sha": "123111a0e0beb4f66fc6e21433a342035d3e302d",
+  "reviewed_node": "fsapi-outboard-census-repin",
+  "reviewed_revision": "123111a0e0beb4f66fc6e21433a342035d3e302d",
+  "reviewed_run_id": "r-20261003T102549898169-fsapi-outboard-census-repin",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-outboard-census-repin",
+  "reviewer": "review-of-fsapi-outboard-census-repin",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T11:05:34.946029+00:00",
+  "total": 90,
+  "verdict": "pass"
+}

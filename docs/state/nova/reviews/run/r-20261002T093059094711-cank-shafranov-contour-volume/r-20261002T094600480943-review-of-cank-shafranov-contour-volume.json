@@ -1,0 +1,107 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "d598cd1931edec10fff7a069b0149bd048989503",
+    "a5d8a4da16e29a0182bd877478c7ceabbf94cdd7"
+  ],
+  "completed_at": "2026-10-02T10:22:50.868Z",
+  "dispatched_at": "2026-10-02T09:46:13Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/diagnostics.py",
+      "line": "186",
+      "severity": "follow-on",
+      "text": "follow-on: the fourth-order central-tangent weight limits the vertical moment and toroidal stress to second order because the analytic separatrix places a vertex on the X-point corner, where the tangent stencil is off by order one; contour-ladder.log shows their 501-point departure rising from 7.3e-7 and 3.0e-5 under the chord rule to 3.4e-5 and 3.4e-5 under the new rule, so a coarse-sampling caller sees a worse secondary moment; disclosed in the report caveat and still under the bound, so it does not hold the node."
+    },
+    {
+      "file": "tests/test_equilibrium_diagnostics.py",
+      "line": "476",
+      "severity": "follow-on",
+      "text": "follow-on: the new guard compares the radial moment of the same function at two samplings, so a regression that shifts the moment by a sampling-independent amount leaves the departure under 1e-5 and passes; it catches the chord-rule class, shown by suite-head-with-new-test.log, but is not independent of the compared quantity."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "pytest tests/test_equilibrium_diagnostics.py -p no:cacheprovider --timeout 0 -m 'slow or not slow' JAX_PLATFORMS=cpu",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T093059094711-cank-shafranov-contour-volume/suite-after.log",
+      "revision": "a5d8a4da16e29a0182bd877478c7ceabbf94cdd7"
+    },
+    "baseline_suite": {
+      "command": "pytest tests/test_equilibrium_diagnostics.py -n 6 --timeout 0 -m 'slow or not slow' JAX_PLATFORMS=cpu",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 3,
+      "failure_ids": [
+        "tests/test_equilibrium_diagnostics.py::test_shafranov_contour_integrals_equal_their_volume_side[321]",
+        "tests/test_equilibrium_diagnostics.py::test_shafranov_contour_integrals_equal_their_volume_side[641]",
+        "tests/test_equilibrium_diagnostics.py::test_shafranov_contour_integrals_equal_their_volume_side[1281]"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T093059094711-cank-shafranov-contour-volume/suite-head.log",
+      "revision": "d598cd1931edec10fff7a069b0149bd048989503"
+    }
+  },
+  "gate_arms_note": "Derived from the reviewed run own suites. The reviewed manifest names no baseline_suite/after_suite keys, so the count was derived by hand: the reviewed base revision d598cd193 is the failing state measured in suite-head.log (3 failed, 60 passed, the three test_shafranov_contour_integrals_equal_their_volume_side ids) and the reviewed head revision a5d8a4da1 is suite-after.log (64 passed, 0 failed). The after failure set is empty, so it adds no id absent at the base: added_failure_count 0 and added_failure_ids []. The matched-base arm gate-base.log (3 passed) is not the reviewed run base revision, so it is cited for attribution only.",
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit a5d8a4da1 in full; _contour_metric returns vertices and a fourth-order tangent weight, _segment_mean is removed, and a radial-moment convergence test is added.",
+    "done_when": "the parametrised gate under the unchanged bound with a named mechanism and attribution; the base, HEAD and after arms are recorded and the bound is untouched.",
+    "goal": "the node goal is to resolve the three gate failures at resolutions 321, 641 and 1281 under the unchanged 5e-4 bound; the landed change replaces the contour sampling rule and all three pass.",
+    "manifest": "read; it declares status complete with commit a5d8a4da1 and the base, HEAD and after arms with their logs, but names no baseline_suite/after_suite keys.",
+    "write_paths": "git show --stat a5d8a4da1 lists only nova/equilibrium/diagnostics.py and tests/test_equilibrium_diagnostics.py, both inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the added test at tests/test_equilibrium_diagnostics.py:459 is a genuine guard - suite-head-with-new-test.log shows it failing on the chord rule with departure 5.667e-4 and suite-after.log shows it passing - though it is a self-convergence comparison (2001 against 8001) that a sampling-independent error would not redden.",
+    "evidence": "the gate measures the done-when and its result is recorded: residuals-after.log gives max 1.8e-4/1.1e-4/5.4e-5, the bound at tests/test_equilibrium_diagnostics.py:296 is unchanged, attribution.log isolates the cause to diagnostics.py, and contour-ladder.log shows the radial departure at 2001 points falling from 5.7e-4 to 8.1e-8; the deduction is that the reviewed manifest names no baseline_suite/after_suite, so the suite delta is not machine-derivable, and the commit body per-grid residual triple (1.1e-4, 8.7e-5, 1.8e-4) disagrees with residuals-after.log.",
+    "fit": "nova/equilibrium/diagnostics.py:146 is named by mechanism and its docstring states the rule and the corner-limited order; the removed _segment_mean leaves no dangling caller and no plan label or version appears in the added names or comments.",
+    "goal_fidelity": "nova/equilibrium/diagnostics.py:186 sums the integrand at the vertices with the four-point central-tangent weight, and the three cases of test_shafranov_contour_integrals_equal_their_volume_side at tests/test_equilibrium_diagnostics.py:452 now pass under the untouched CONTOUR_RESIDUAL_BOUND of 5e-4 (residuals-after.log: max 1.8e-4, 1.1e-4, 5.4e-5 at 321/641/1281).",
+    "scope_discipline": "git show --stat a5d8a4da1 lists exactly nova/equilibrium/diagnostics.py and tests/test_equilibrium_diagnostics.py, both inside the declared write paths, and nothing else."
+  },
+  "notes": "The landed change resolves all three gate failures under the unchanged 5e-4 bound and is well attributed (the chord-midpoint rule in diagnostics.py, commit 3818bd059), and its added radial-moment convergence test is a genuine discriminating guard that fails on the chord rule. Two follow-ons: the fourth-order tangent leaves the vertical moment and stress second order at the X-point corner vertex (disclosed and under the bound), and the new guard is a self-convergence comparison that would not catch a sampling-independent error. The reviewed manifest names no baseline_suite/after_suite keys, so the added-failure count was derived by hand from suite-head.log and suite-after.log (0 added). Scores: goal_fidelity 19, evidence 17, scope_discipline 19, durability 18, fit 18, total 91.",
+  "plan": "nova:constraint-augmented-newton-krylov",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to resolve the three gate failures at resolutions 321, 641 and 1281 under the unchanged 5e-4 bound and the landed change does so.\nVERDICT done_when: the parametrised gate under the unchanged bound with a named mechanism and attribution; base, HEAD and after arms are recorded and the bound is untouched.\nVERDICT write_paths: git show --stat a5d8a4da1 lists only nova/equilibrium/diagnostics.py and tests/test_equilibrium_diagnostics.py, both inside the declared scope.\nVERDICT manifest: read; it declares status complete with commit a5d8a4da1 and the base, HEAD and after arms with their logs, but names no baseline_suite/after_suite keys.\nVERDICT diff: read commit a5d8a4da1 in full; _contour_metric returns vertices and a fourth-order tangent weight, _segment_mean is removed, and a radial-moment convergence test is added.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/diagnostics.py:186 sums the integrand at the vertices with the four-point central-tangent weight, and the three cases at tests/test_equilibrium_diagnostics.py:452 now pass under the untouched 5e-4 bound.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate measures the done-when and its result is recorded, but the manifest names no baseline_suite/after_suite and the commit body residual triple disagrees with residuals-after.log.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git show --stat a5d8a4da1 lists exactly the two declared file paths and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: the added test at tests/test_equilibrium_diagnostics.py:459 fails on the chord rule (5.667e-4) and passes after, though it is a self-convergence comparison.\nSCORE fit: 18\nJUSTIFICATION fit: nova/equilibrium/diagnostics.py:146 is named by mechanism and _segment_mean is cleanly removed with no dangling caller or plan label.\nFINDING nova/equilibrium/diagnostics.py:186 follow-on: the fourth-order tangent leaves the vertical moment and toroidal stress second order at the X-point corner vertex, so a coarse-sampling caller sees a worse secondary moment; disclosed and under the bound.\nFINDING tests/test_equilibrium_diagnostics.py:476 follow-on: the new guard compares the radial moment at two samplings, so a sampling-independent error would not redden it.\n",
+  "review_run_id": "r-20261002T094600480943-review-of-cank-shafranov-contour-volume",
+  "reviewed_base_sha": "d598cd1931edec10fff7a069b0149bd048989503",
+  "reviewed_head_sha": "a5d8a4da16e29a0182bd877478c7ceabbf94cdd7",
+  "reviewed_revision": "a5d8a4da16e29a0182bd877478c7ceabbf94cdd7",
+  "reviewed_run_id": "r-20261002T093059094711-cank-shafranov-contour-volume",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-shafranov-contour-volume",
+  "reviewer_node": "review-of-cank-shafranov-contour-volume",
+  "reviewer_run_id": "r-20261002T094600480943-review-of-cank-shafranov-contour-volume",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T09:54:00+00:00",
+  "total": 91,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha a5d8a4da1 is a single commit whose parent is reviewed_base_sha d598cd193, subject fix(equilibrium): integrate the boundary stress with a fourth-order contour rule",
+    "git show --stat a5d8a4da1 reports exactly 2 files changed, 78 insertions, 57 deletions, both inside the declared write paths",
+    "the reviewed worktree is clean at its base (git status --porcelain empty) and HEAD is d598cd193",
+    "the new guard test_shafranov_radial_moment_is_resolved_by_the_gate_contour_sampling is present in the head tree at tests/test_equilibrium_diagnostics.py:459, a marker the change introduced rather than one it removed",
+    "CONTOUR_RESIDUAL_BOUND = 5.0e-4 is unchanged between base and head; only its explanatory comment changed (measured 1.4e-4)",
+    "_segment_mean is absent from nova/equilibrium/diagnostics.py at head and no caller references it across the repository",
+    "contour-ladder.log confirms the radial departure at 2001 points falls from 5.6667e-4 under the chord rule to 8.11e-8 under the new rule, matching the report table",
+    "attribution.log shows the HEAD tree with only nova/equilibrium/diagnostics.py replaced by the pre-chord-rule copy passing all three cases, so the regression is the chord rule in diagnostics.py (commit 3818bd059) and not the field-response commit 796df3501",
+    "suite-head-with-new-test.log shows the added guard failing on the chord rule at 5.667e-4, so it is a discriminating negative control",
+    "the reviewed manifest is internally consistent across its landing and artifacts lines (radial after 1.1e-4/3.7e-5/2.4e-5 and gate max after 1.8e-4/1.1e-4/5.4e-5), so the discrepancy is confined to the commit message"
+  ]
+}

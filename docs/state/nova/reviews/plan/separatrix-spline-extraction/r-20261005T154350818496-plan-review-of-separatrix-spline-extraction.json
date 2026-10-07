@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:55:34.524Z",
+  "dispatched_at": "2026-10-05T15:44:26Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html#s4",
+      "id": "duplicate_owner-1",
+      "reason": "the section's whole purpose is one shared metric; the author either routes the Solov'ev certifier through the section's comparator or states in \u00a74 why that consumer is out of scope, either of which rewrites \u00a74 and its done-when.",
+      "text": "\u00a74 states a single shared implementation for \"symmetric sup and symmetric RMS nearest-polyline distances in metres\", but wires only the two EFIT banks (MAST corroboration and the DIII-D match); a second symmetric nearest-polyline metric already exists at `benchmarks/solovev_certificate.py:1305` (`_symmetric_polyline_distance`, a sampled symmetric Hausdorff distance \u2014 the sup case of the same family), computing on the same polyline inputs. The stated goal of consolidation therefore forks again, and the owner to extend is `nova/equilibrium/boundary_comparison.py` (`compare_closed_boundaries` / the `_point_to_segment_distances` population).",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/separatrix-spline-extraction.html#s3",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the interface surface it adds; a one-line statement of what it retires, or why nothing can be retired, is what the item requires.",
+      "text": "\u00a73 introduces the exported definition `assemble_separatrix_branches` (and companions) at zero public-definition budget, and the section names no definition it retires or merges, nor states why nothing can be \u2014 in contrast to \u00a72, which retires the local quadratic `_refine_selected_vertices` and \u00a74, which replaces `_binding_contour` and `_separatrix`.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e985a2591c6b7cf2f943957ade7eb8c2e8a5872fb04ed904ff7d06b176f1764d",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 129,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T154350818496-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "ad88c33acf3cfa72621b9be3f96d1434158cc9b4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each contract lands behind one entry point that hides substantial behaviour: `polish_stationary_points(spline, seed_rz, valid)` (the fixed Newton kernel), `assemble_separatrix_branches(...)` (the graph assembly, split, and fixed-capacity classification), `compare_closed_boundaries(...)` (polyline sampling, nearest-segment population, sup/RMS/X metrics). One module per contract, not a fan of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a74's \"one shared metric implementation\" in `nova/equilibrium/boundary_comparison.py` leaves a second symmetric nearest-polyline metric unretired at `benchmarks/solovev_certificate.py:1305`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds the public definition `assemble_separatrix_branches` without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the plan cites the capability reuse map (`docs/figures/efit-baseline-demonstration/reuse-map.md`, commit `4b702960`, 25 candidates over nova and imas-ambix at pinned revisions), and every mechanism it names exists as cited: `nova.equilibrium.flux_surface_connectivity.traced_spline_contour`, `nova.equilibrium.stencil_nulls.xpoint_candidates`, `nova.equilibrium.separatrix_clip._traced_clip` / `TracedClippedSupports`, `nova.linalg.tensor_spline.fit_tensor_spline`. Re-running the search over nova I found no pre-existing closed-plus-open branch assembler, confirming the one gap the map names.",
+    "thin_wrapper": "pass \u2014 no thin layer over existing machinery is proposed; \u00a72 factors an embedded loop into a kernel, \u00a73 composes the existing traced-spline arcs and reuses the `TracedClippedSupports` padding/overflow conventions rather than forking them, and \u00a74 consolidates two existing metrics rather than wrapping either twice."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:40.511108+00:00"
+}

@@ -8,6 +8,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-10-05T17:02:50Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "prose documentation node: the durability dimension scores regression tests, which a design-document edit does not carry; the same exemption was recorded for the two earlier design repair runs",
+      "recorded_at": "2026-10-05T17:01:37.569591+00:00"
+    }
+  },
   "dispatched_at": "2026-10-05T16:51:42Z",
   "findings": [
     {

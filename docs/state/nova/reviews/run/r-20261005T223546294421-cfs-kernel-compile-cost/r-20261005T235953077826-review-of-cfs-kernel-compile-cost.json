@@ -23,6 +23,13 @@
   ],
   "completed_at": "2026-10-06T00:06:43Z",
   "decision": "changes_requested",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "cfs-kernel-qualification",
+      "recorded_at": "2026-10-06T00:07:46.355142+00:00"
+    }
+  },
   "dispatched_at": "2026-10-06T00:00:15Z",
   "evidence": {
     "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T223546294421-cfs-kernel-compile-cost/h200-landing-gate.log",

@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "7d56fa9b4",
+    "74489a363",
+    "418595d27",
+    "b6768d0db",
+    "2b803b2ff",
+    "a28a3e880dd4430fb13077c5f8954dce30cf1f02"
+  ],
+  "completed_at": "",
+  "created_at": "2026-09-24T13:10:43.873257+00:00",
+  "dispatched_at": "2026-09-24T12:30:04.621954+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/exact_cut_cell_moment_stages.py",
+      "line": "528",
+      "text": "[P3] the substitution control subtracts a simple-cut-only reduction term from the sister report's whole-plasma booked current, so on the diverted row it removes 1892.94 A against a 1710.08 A membership deficit and returns 1.004899883 above unity; nothing asserts this run's total booked current equals the sister report's, so a drift between the two runs would leave the control green."
+    },
+    {
+      "file": "benchmarks/exact_cut_cell_moment_stages.py",
+      "line": "551",
+      "text": "[P3] the interior positive control's secondary_geometry and reclip_self_intersection_loss ratios are identically zero by construction because interior cells are not reclipped, so the below 1e-9 control exercises only the density and reduction terms and cannot redden on a geometry or self-intersection instrument defect."
+    },
+    {
+      "file": "benchmarks/exact_cut_cell_moment_stages.py",
+      "line": "481",
+      "text": "[P3] the simple separatrix-cut cell set is inherited from the sister report's per-cell class and non_simple flags rather than re-derived from this run's own reclip output, so the census boundary comes from another node's classification, though the closure cross-check ties the subset totals to within 5.79e-14."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "reviewed 7d56fa9b4, 74489a363, 418595d27, b6768d0db, 2b803b2ff and a28a3e880 commit by commit against c3fc3b7e0; the delta is one evaluation driver, three per-row receipts with their SVG, a run script and four scheduler logs, and two appended document records.",
+    "done_when": "the source prompt.txt requires one H200 job over three rows, a named stage above 90 percent, a closure to the base report within 1e-6 relative, an interior positive control below 1e-9, a substitution control at 0.999 or above on the weak rows, report.json and report.md with the job log committed, and no change under nova/; report.json records closures 5.79e-14, 1.15e-15 and 8.30e-16, shares 0.998149478, 0.976911314 and 0.987611402, interior ratios at or below 4.76e-16, weak substituted fractions 0.999864704 and 0.999538490, and the diff touches no nova/ path.",
+    "goal": "read the source prompt.txt goal and the live plan section 6 landing record; the node names the stage of the exact moment path that loses current, reporting that moment reduction carries 99.81, 97.69 and 98.76 percent of the base simple separatrix-cut error.",
+    "manifest": "read the source manifest.md; it records status complete, six commits, accepted job 1277107 exiting zero, closures below 5.79e-14, shares above 0.976 and follow_ons naming the production polynomial moment reduction, and it agrees with the committed receipts; the earlier blocked final.txt is superseded by the resumed manifest.",
+    "write_paths": "compared the six commits c3fc3b7e..a28a3e880 against the five declared paths; every one of the 730922 inserted lines falls inside benchmarks/exact_cut_cell_moment_stages.py, docs/figures/cut-cell-current-attribution/exact-moment-stages/, docs/evidence/archive/cut-cell-current-attribution-landed.html, docs/figures/cut-cell-current-attribution/ and docs/plans/cut-cell-current-attribution.html, and both cumulative documents are append-only at 59 and 22 insertions with zero deletions."
+  },
+  "justifications": {
+    "durability": "no test file pins the instrument; benchmarks/exact_cut_cell_moment_stages.py carries real assertions that raise on closure above 1e-6, share below 0.9, interior at or above 1e-9 and substitution below 0.999, but they run only when the H200 driver is invoked by hand.",
+    "evidence": "report.json pins the sister receipt by sha256, closes the four-term sum to the base simple-cut error within 5.79e-14 and job.log names revision 2b803b2ff with EXIT=0, but the substitution at benchmarks/exact_cut_cell_moment_stages.py:528 mixes this run's simple-cut reduction term with the sister report's whole-plasma booked current.",
+    "fit": "benchmarks/exact_cut_cell_moment_stages.py:22 reuses the sister module's polygon_integral and lobe_region, calls set_support_clip_mode instead of editing production, and writes the SVG with the project-absolute /nova/figures/ source path.",
+    "goal_fidelity": "benchmarks/exact_cut_cell_moment_stages.py:511 selects the dominant stage by absolute term and raises below 0.9, and report.json names moment_reduction on all three rows.",
+    "scope_discipline": "the diff of c3fc3b7e0 to a28a3e880 lists 15 files with none under nova/, and both the plan and evidence HTML are pure insertions."
+  },
+  "limits": [
+    "Read-only review; no test or H200 job was rerun. The accepted receipt job.log (revision 2b803b2ff, EXIT=0) and the committed per-row receipts were read and audited.",
+    "The independent reference shares the production effective polygon, field and confined profile and forms its own Duffy points; it never calls the production reduction, which is what makes the moment-reduction term a measurement rather than a tautology.",
+    "The reference was revised in 2b803b2ff after job 1277106 exited zero; the revision is disclosed in the evidence record and replaces a double pointwise selector with the production confined closure, but both the diagnosis and the accepted run come from the same worker.",
+    "The four-term closure is an algebraic telescoping identity; the non-trivial half is the agreement of the sum with the sister report's simple_moment_integration_error_a, which is pinned by sha256 and closes within 5.79e-14.",
+    "The diverted substituted fraction is 1.004899883, above unity; the done_when only requires 0.999 on the weak rows, and the overshoot follows from the mixed arithmetic scope recorded in the first finding.",
+    "report.json is 9.5 MB and the per-row receipts run to 181k lines; the open followup f-cca-slim-committed-attribution-receipts already covers this."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the source prompt.txt goal and the live plan section 6 landing record; the node names the stage of the exact moment path that loses current, reporting that moment reduction carries 99.81, 97.69 and 98.76 percent of the base simple separatrix-cut error.\nVERDICT done_when: the source prompt.txt requires one H200 job over three rows, a named stage above 90 percent, a closure to the base report within 1e-6 relative, an interior positive control below 1e-9, a substitution control at 0.999 or above on the weak rows, report.json and report.md with the job log committed, and no change under nova/; report.json records closures 5.79e-14, 1.15e-15 and 8.30e-16, shares 0.998149478, 0.976911314 and 0.987611402, interior ratios at or below 4.76e-16, weak substituted fractions 0.999864704 and 0.999538490, and the diff touches no nova/ path.\nVERDICT write_paths: compared the six commits c3fc3b7e..a28a3e880 against the five declared paths; every one of the 730922 inserted lines falls inside benchmarks/exact_cut_cell_moment_stages.py, docs/figures/cut-cell-current-attribution/exact-moment-stages/, docs/evidence/archive/cut-cell-current-attribution-landed.html, docs/figures/cut-cell-current-attribution/ and docs/plans/cut-cell-current-attribution.html, and both cumulative documents are append-only at 59 and 22 insertions with zero deletions.\nVERDICT manifest: read the source manifest.md; it records status complete, six commits, accepted job 1277107 exiting zero, closures below 5.79e-14, shares above 0.976 and follow_ons naming the production polynomial moment reduction, and it agrees with the committed receipts; the earlier blocked final.txt is superseded by the resumed manifest.\nVERDICT diff: reviewed 7d56fa9b4, 74489a363, 418595d27, b6768d0db, 2b803b2ff and a28a3e880 commit by commit against c3fc3b7e0; the delta is one evaluation driver, three per-row receipts with their SVG, a run script and four scheduler logs, and two appended document records.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: benchmarks/exact_cut_cell_moment_stages.py:511 selects the dominant stage by absolute term and raises below 0.9, and report.json names moment_reduction on all three rows.\nSCORE evidence: 17\nJUSTIFICATION evidence: report.json pins the sister receipt by sha256, closes the four-term sum to the base simple-cut error within 5.79e-14 and job.log names revision 2b803b2ff with EXIT=0, but the substitution at benchmarks/exact_cut_cell_moment_stages.py:528 mixes this run's simple-cut reduction term with the sister report's whole-plasma booked current.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff of c3fc3b7e0 to a28a3e880 lists 15 files with none under nova/, and both the plan and evidence HTML are pure insertions.\nSCORE durability: 15\nJUSTIFICATION durability: no test file pins the instrument; benchmarks/exact_cut_cell_moment_stages.py carries real assertions that raise on closure above 1e-6, share below 0.9, interior at or above 1e-9 and substitution below 0.999, but they run only when the H200 driver is invoked by hand.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/exact_cut_cell_moment_stages.py:22 reuses the sister module's polygon_integral and lobe_region, calls set_support_clip_mode instead of editing production, and writes the SVG with the project-absolute /nova/figures/ source path.\nFINDING benchmarks/exact_cut_cell_moment_stages.py:528 [P3] the substitution control subtracts a simple-cut-only reduction term from the sister report's whole-plasma booked current, so on the diverted row it removes 1892.94 A against a 1710.08 A membership deficit and returns 1.004899883 above unity; nothing asserts this run's total booked current equals the sister report's, so a drift between the two runs would leave the control green.\nFINDING benchmarks/exact_cut_cell_moment_stages.py:551 [P3] the interior positive control's secondary_geometry and reclip_self_intersection_loss ratios are identically zero by construction because interior cells are not reclipped, so the below 1e-9 control exercises only the density and reduction terms and cannot redden on a geometry or self-intersection instrument defect.\nFINDING benchmarks/exact_cut_cell_moment_stages.py:481 [P3] the simple separatrix-cut cell set is inherited from the sister report's per-cell class and non_simple flags rather than re-derived from this run's own reclip output, so the census boundary comes from another node's classification, though the closure cross-check ties the subset totals to within 5.79e-14.\nreviewed_base_sha: c3fc3b7e0dd1c2df94c1a55bd069d835c34dcb95\nreviewed_head_sha: a28a3e880dd4430fb13077c5f8954dce30cf1f02\n",
+  "recommendation": "accept the attribution as the named loss stage; the production polynomial moment reduction is the repair target and is already tracked by the open moment-reduction followup, and no further measurement is required from this node",
+  "review_run_id": "r-20260924T123004621954-review-local-of-cca-moment-stage-attribution",
+  "reviewed_base_sha": "c3fc3b7e0dd1c2df94c1a55bd069d835c34dcb95",
+  "reviewed_head_sha": "a28a3e880dd4430fb13077c5f8954dce30cf1f02",
+  "reviewed_run_id": "r-20260923T224329719265-cca-exact-cut-cell-moment-stage-attribution",
+  "reviewing_run_id": "r-20260924T123004621954-review-local-of-cca-moment-stage-attribution",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-24T13:10:43.873257+00:00",
+  "total": 91
+}

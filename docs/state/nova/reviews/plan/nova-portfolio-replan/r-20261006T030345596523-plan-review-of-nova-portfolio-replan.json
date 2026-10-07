@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T03:09:10.212Z",
+  "dispatched_at": "2026-10-06T03:04:06Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/nova-portfolio-replan.html#s4",
+      "id": "reuse_search-1",
+      "reason": "the brief should cite the standing-suite owner and extend it (or state the default `pytest` selection it specifically targets and why the wrapper cannot cover it), instead of a parallel lane.",
+      "text": "`replan-fast-lane-restored` asks for a \"gate a node can run\" completing \"within a budget a node can afford\", but nova already declares exactly that: `docs/state/nova/flight.yaml` review.suite runs `scripts/nova_lane/standing_suite.sh` (landed 2026-10-02) under a stated 3h budget, emitting one aggregate summary line. The node re-derives a budgeted runner without naming the existing one.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/nova-portfolio-replan.html#s4",
+      "id": "deep_module-1",
+      "reason": "the plan must name the minimum-length parameter and the per-caller return contract, or its done-when (\"one implementation\") is satisfied by a helper that silently changes caller behaviour.",
+      "text": "`replan-small-primitives` specifies one `uniform_axis` that \"takes the tolerance from each caller\" and \"returns the reconstructed axis and its step\", but the four copies differ in more than tolerance: `map_extraction._uniform_axis` (:109) requires axis size >= 3 and returns the original float64 axis plus step, `LatticePolicy.__post_init__` (conservation.py:146) requires >= 2*STENCIL_MARGIN+3 and adds `radius[0] > 0`, the media copies require >= 2 and return a reconstruction. The census guard for this group (consolidation.json group 4) states \"Preserve minimum sizes, return shapes and dtype behavior\". A node following the plan text produces a validator that drops the minimum-length guard and returns a reconstruction where `map_extraction` callers expect the stored axis.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:185",
+      "id": "duplicate_owner-1",
+      "reason": "the new shared writer's stated purpose (unique sibling temporary) is already solved in the tree; the author should cite and reuse `fixed_point.py`'s staging discipline rather than invent it, or justify the exclusion.",
+      "text": "`nova/equilibrium/fixed_point.py:185` is a fourth atomic-writer implementation, and the only one that stages through a pid-scoped unique sibling temp (`.{name}.{pid}.tmp`) with `flush`/`fsync` on both the file and its containing directory. The three writers `replan-small-primitives` names (`calibrate/sweep.py:372`, `catalog/mast_geometry.py:198`, `imas/mast_parity_gate.py:579`) all stage through a FIXED sibling suffix (`.partial`/`.tmp`), which collides under concurrent writers \u2014 the collision the census reason for grouping 7 names (\"give each a unique sibling temporary\"). The shared `write_atomic` should adopt that sibling-temp discipline from the existing implementation, or the plan should name why the npz checkpoint writer is excluded.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/map_extraction.py:109",
+      "id": "reuse_search-2",
+      "reason": "`grid.py:277` is a hot-path `assert` in a GridSpace accessor, not a standalone receipt validator; folding it in would change a per-call assert into a raising check and is reasonably out of scope, but the plan should say so in one line so the omission reads as a decision rather than an oversight.",
+      "text": "the group's checklist is the census's duplicate list, but two further copies of the same uniformity predicate sit outside it: `nova/biot/grid.py:277` (`assert np.allclose(np.diff(points), delta)`) and the census itself omits `LatticePolicy` (the plan adds it). The node's done-when is \"the census's duplicate list ... reads zero\", which a missing copy cannot satisfy.",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "bff99f54587c479900aefaace04af02e5054fffa9e8759aff9b1ce87a86c83aa",
+  "plan_slug": "nova-portfolio-replan",
+  "plan_version": 37,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T030345596523-plan-review-of-nova-portfolio-replan",
+  "reviewed_blob_sha": "a0beefe7d495e8f47def8a67461ffa53ff56d3f3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the unified `uniform_axis` in \u00a74 `replan-small-primitives` is specified too shallowly to absorb its four callers: it states no per-caller minimum-length policy and it changes `map_extraction`'s return contract.",
+    "duplicate_owner": "a finding \u2014 \u00a74 `replan-small-primitives`'s shared `write_atomic` names three JSON writers but not `nova/equilibrium/fixed_point.py:185`, the tree's only atomic writer with pid-scoped unique-sibling temp naming and fsync, the very discipline the shared writer is meant to supply.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the \u00a74/\u00a75 additions (`uniform_axis` in `nova/utilities/axes.py`, `write_atomic` in `nova/io/json.py`, extended `require_string`/`canonical_json` in `nova/imas/machine_evidence.py`) each name the copies they retire, and the sections add no CLI option, MCP view or refusal family.",
+    "reuse_search": "a finding \u2014 \u00a74 `replan-fast-lane-restored` proposes a node-runnable budgeted default-lane gate without citing the standing-suite owner that already provides one (`scripts/nova_lane/standing_suite.sh` with `docs/state/nova/flight.yaml` review.suite, budget 3h).",
+    "thin_wrapper": "pass \u2014 \u00a75 routes call sites through the existing owners (`db_entry` property, `FilePath`, `repository_relative`) and \u00a74 explicitly drops the read-only array helper as a thin wrapper; no unjustified parallel layer is added."
+  },
+  "section_digests": {
+    "_document": "d8955ff15584087c7d7eca1aca77e8cca0110efbac8657a65b20c684231fd648",
+    "s1": "58ad1730dc7612f2dc456bf4599af55a71ceb55e5ed306ccf2229dd7bc011ac6",
+    "s2": "7b91ed2a58ab9aaae272d528c052c40f54ca4422ec97d9111051a88840cdbc66",
+    "s3": "69f113368c428a995aa7d308edeff811c658d2946119c0ee44e68f1e414847d0",
+    "s4": "b1165bf613b1d9692f04a7f4229703026595675ecf8a9b190357d55f0ca491ba",
+    "s5": "edcd4da2faa55ad2aba8d2fe37bce2029b24cf4c1f0edf9a050a806270eb35f1"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T03:11:58.009899+00:00"
+}

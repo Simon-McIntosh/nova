@@ -1,0 +1,138 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "arithmetic_scope": {
+    "chord_mode": "No arithmetic formulas change; retained whole/chord polygons within the 24-vertex capacity keep their existing route. The H200 receipt records exact equality of all chord moment arrays on the three required rows.",
+    "exact_cut_cells": "Polygons with vertex_count > 24 now use the cut route independently of the secondary boundary flag. Both current-moment and field-integral reducers receive this classification.",
+    "interior_cells": "No whole-cell integration rule changes. The H200 receipt records bit-identical interior currents, with relative change 0.0 on all three rows. This is not a claim that every interior first moment is bit-identical; the retained initial instrument refusal reports near-zero first-moment roundoff differences."
+  },
+  "assertion_audit": [
+    {
+      "fails_when": "x64 precision is disabled",
+      "path": "tests/test_exact_moment_reduction_cut_cells.py:27"
+    },
+    {
+      "fails_when": "the recorded fixture ceases to carry a sampled polygon wider than 24 vertices",
+      "path": "tests/test_exact_moment_reduction_cut_cells.py:62"
+    },
+    {
+      "fails_when": "order-8 and order-16 independent quadrature fail to agree at rtol 2e-11 / atol 2e-9",
+      "path": "tests/test_exact_moment_reduction_cut_cells.py:86"
+    },
+    {
+      "fails_when": "production current or first moments disagree with independently integrated profile density; restoring the original truncation is observed to fail all three rows",
+      "independence": "The reference shares the intended effective polygon, field and profile, but independently forms quadrature points and sums density; it never calls the production reduction.",
+      "path": "tests/test_exact_moment_reduction_cut_cells.py:92"
+    },
+    {
+      "fails_when": "production current differs from the independent reference by >=1e-8 relative; original truncation would also fail this assertion if reached",
+      "path": "tests/test_exact_moment_reduction_cut_cells.py:98"
+    },
+    {
+      "fails_when": "the explicit fixture tuple duplicates a row or loses either named case or requested resolution; this is fixture census validation, not physics coverage",
+      "path": "tests/test_exact_moment_reduction_cut_cells.py:102"
+    }
+  ],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:_cell_banked_current_moments:365",
+    "nova/equilibrium/forward_operator.py:_cell_banked_current_moments:392",
+    "nova/equilibrium/forward_operator.py:_cell_banked_field_integrals:444",
+    "nova/equilibrium/forward_operator.py:_cell_banked_field_integrals:473",
+    "nova/equilibrium/clip_quadrature.py:_flux_selected_current_moments.integrate:929"
+  ],
+  "commits_read": [
+    "38b441dad1dea2b10b684fa612b8802ef0973b86",
+    "d759d454ca78bf8e457a71935f44b04c85a25a9c"
+  ],
+  "completed_at": "",
+  "created_at": "2026-09-24T06:13:50.580124+00:00",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/candidate-weak-110.log",
+      "line": "3",
+      "text": "[P2] The required repaired all_debug weak-110 preflight never completes: the attribution driver raises on its stale reduction equality (difference 0.00529173 A), and no replacement completed CPU row receipt is committed; the green H200 run and single-cell diagnostic do not fulfil this separate named preflight."
+    },
+    {
+      "file": "docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/negative-control.log",
+      "line": "2",
+      "text": "[P2] The declared mutation proves the three test rows fail but records no total exact-support fraction and no assertion that it returns to baseline; baseline-weak-110.log records 0.9379885102414431 before repair, which is not a measurement under the later declared mutation."
+    },
+    {
+      "file": "tests/test_exact_moment_reduction_cut_cells.py",
+      "line": "51",
+      "text": "[P3] The added regression exercises current moments only; reverting just the field-integral classifier at clip_quadrature.py:519 would leave these three tests green, so add a retained >24-vertex boundary=false field-integral comparison against an independent reference."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Reviewed 38b441dad1dea2b10b684fa612b8802ef0973b86 and d759d454ca78bf8e457a71935f44b04c85a25a9c against a28a3e880dd4430fb13077c5f8954dce30cf1f02; the source delta is two classifier expressions, with one 107-line regression file and appended evidence that leaves plan closure open.",
+    "done_when": "The source prompt.txt requires three H200 rows, weak support fractions >=0.999, unchanged interior currents and chord currents, a completed repaired CPU preflight, and a mutation returning the fraction to baseline; h200-report.json satisfies the numeric three-row gate, but candidate-weak-110.log:3 refuses before a completed row receipt and negative-control.log:2 runs only pytest without measuring the total fraction.",
+    "goal": "Read the source run prompt.txt goal and live cut-cell-current-attribution section 6; nova/equilibrium/clip_quadrature.py:519,735 now preserves retained sampled polygons above the 24-vertex whole-cell capacity, repairing current integration without changing density projection.",
+    "manifest": "Read the source manifest.md and its committed logs; four regression cases pass and the mutation fails all three physical rows, while the manifest's complete checkpoint and follow_ons=none omit the failed CPU preflight and absent mutation fraction measurement.",
+    "write_paths": "Compared both commits with the eight paths declared in the source prompt.txt; all 41 changed files are within the allowed source, test, artifact and document paths, and source.py/stencil_mesh.py were untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_exact_moment_reduction_cut_cells.py:92 independently compares production moments with direct order-16 profile integration and the retained mutation log proves three failures, but the symmetric field-integral classifier at clip_quadrature.py:519 lacks an equivalent retained-polygon regression.",
+    "evidence": "docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200.log ends REPAIRED_ROWS_COMPLETE, but candidate-weak-110.log:3 and negative-control.log:2 leave the repaired CPU preflight and the declared mutation's fraction measurement incomplete.",
+    "fit": "nova/equilibrium/clip_quadrature.py:519,735 uses the existing whole-cell capacity constant and JAX masks without changing shapes, public interfaces, density rules, or naming conventions.",
+    "goal_fidelity": "nova/equilibrium/clip_quadrature.py:519,735 routes retained polygons wider than the whole-cell capacity through existing cut integration, and h200-report.json records reduction/base ratios 8.85082e-9, 2.20154e-9 and 3.25604e-8.",
+    "scope_discipline": "The diff from a28a3e880dd4430fb13077c5f8954dce30cf1f02 to d759d454ca78bf8e457a71935f44b04c85a25a9c stays within the source prompt.txt paths and appends rather than replaces both cumulative document records."
+  },
+  "limits": [
+    "No production test rerun by this read-only review; committed execution receipts were read and independently audited.",
+    "Review checkout f7371037454e2bea26639d405375d5a246962641 predates the repair, so reviewed source and artifacts were read via git show at d759d454ca78bf8e457a71935f44b04c85a25a9c.",
+    "The three-row source-node gate is narrower than the live followup's all-rung map-fidelity <=1e-2 gate; this review does not authorize exact mode as default or close the followup.",
+    "CPU baseline logs carry candidate HEAD 38b441dad; the manifest states the classifier was restored to base, and stream file-change ordering confirms mutation held through the completed baseline before repair was restored."
+  ],
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: a28a3e880dd4430fb13077c5f8954dce30cf1f02\nreviewed_head_sha: d759d454ca78bf8e457a71935f44b04c85a25a9c\nVERDICT goal: Read the source run prompt.txt goal and live cut-cell-current-attribution section 6; nova/equilibrium/clip_quadrature.py:519,735 now preserves retained sampled polygons above the 24-vertex whole-cell capacity, repairing current integration without changing density projection.\nVERDICT done_when: The source prompt.txt requires three H200 rows, weak support fractions >=0.999, unchanged interior currents and chord currents, a completed repaired CPU preflight, and a mutation returning the fraction to baseline; h200-report.json satisfies the numeric three-row gate, but candidate-weak-110.log:3 refuses before a completed row receipt and negative-control.log:2 runs only pytest without measuring the total fraction.\nVERDICT write_paths: Compared both commits with the eight paths declared in the source prompt.txt; all 41 changed files are within the allowed source, test, artifact and document paths, and source.py/stencil_mesh.py were untouched.\nVERDICT manifest: Read the source manifest.md and its committed logs; four regression cases pass and the mutation fails all three physical rows, while the manifest's complete checkpoint and follow_ons=none omit the failed CPU preflight and absent mutation fraction measurement.\nVERDICT diff: Reviewed 38b441dad1dea2b10b684fa612b8802ef0973b86 and d759d454ca78bf8e457a71935f44b04c85a25a9c against a28a3e880dd4430fb13077c5f8954dce30cf1f02; the source delta is two classifier expressions, with one 107-line regression file and appended evidence that leaves plan closure open.\nCALL_SITES: nova/equilibrium/forward_operator.py:_cell_banked_current_moments:365, nova/equilibrium/forward_operator.py:_cell_banked_current_moments:392, nova/equilibrium/forward_operator.py:_cell_banked_field_integrals:444, nova/equilibrium/forward_operator.py:_cell_banked_field_integrals:473, nova/equilibrium/clip_quadrature.py:_flux_selected_current_moments.integrate:929\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/clip_quadrature.py:519,735 routes retained polygons wider than the whole-cell capacity through existing cut integration, and h200-report.json records reduction/base ratios 8.85082e-9, 2.20154e-9 and 3.25604e-8.\nSCORE evidence: 14\nJUSTIFICATION evidence: docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/h200.log ends REPAIRED_ROWS_COMPLETE, but candidate-weak-110.log:3 and negative-control.log:2 leave the repaired CPU preflight and the declared mutation's fraction measurement incomplete.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The diff from a28a3e880dd4430fb13077c5f8954dce30cf1f02 to d759d454ca78bf8e457a71935f44b04c85a25a9c stays within the source prompt.txt paths and appends rather than replaces both cumulative document records.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_exact_moment_reduction_cut_cells.py:92 independently compares production moments with direct order-16 profile integration and the retained mutation log proves three failures, but the symmetric field-integral classifier at clip_quadrature.py:519 lacks an equivalent retained-polygon regression.\nSCORE fit: 20\nJUSTIFICATION fit: nova/equilibrium/clip_quadrature.py:519,735 uses the existing whole-cell capacity constant and JAX masks without changing shapes, public interfaces, density rules, or naming conventions.\nFINDING docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/candidate-weak-110.log:3 [P2] The required repaired all_debug weak-110 preflight never completes: the attribution driver raises on its stale reduction equality (difference 0.00529173 A), and no replacement completed CPU row receipt is committed; the green H200 run and single-cell diagnostic do not fulfil this separate named preflight.\nFINDING docs/figures/cut-cell-current-attribution/exact-moment-reduction-repair/negative-control.log:2 [P2] The declared mutation proves the three test rows fail but records no total exact-support fraction and no assertion that it returns to baseline; baseline-weak-110.log records 0.9379885102414431 before repair, which is not a measurement under the later declared mutation.\nFINDING tests/test_exact_moment_reduction_cut_cells.py:51 [P3] The added regression exercises current moments only; reverting just the field-integral classifier at clip_quadrature.py:519 would leave these three tests green, so add a retained >24-vertex boundary=false field-integral comparison against an independent reference.\n",
+  "recommendation": "complete the two missing evidence measures before declaring the source node done",
+  "regression_falsification": {
+    "cells": [
+      {
+        "case": "weak-rotation-reactor-static",
+        "cell": 108,
+        "reference_current_a": 192266.36623449638,
+        "requested_cells": 110,
+        "truncated_current_a": 0.0007330238238006195
+      },
+      {
+        "case": "weak-rotation-reactor-static",
+        "cell": 187,
+        "reference_current_a": 71095.6181024792,
+        "requested_cells": 300,
+        "truncated_current_a": 0.001429387746453501
+      },
+      {
+        "case": "diverted-single-null",
+        "cell": 110,
+        "reference_current_a": 652.1728870327481,
+        "requested_cells": 110,
+        "truncated_current_a": 0.00026009703220492903
+      }
+    ],
+    "observed": "3 failed, 1 passed; each failure occurs at production-versus-independent-reference assert_allclose on line 92",
+    "restored_condition": "boundary = selected & jnp.asarray(support.boundary, dtype=bool)",
+    "would_fail_original_truncation": true
+  },
+  "review_run_id": "legacy-64cfed5491ab",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a28a3e880dd4430fb13077c5f8954dce30cf1f02",
+  "reviewed_head_sha": "d759d454ca78bf8e457a71935f44b04c85a25a9c",
+  "reviewed_run_id": "r-20260924T051104708441-cca-exact-moment-reduction-repair",
+  "reviewing_run_id": "r-20260924T060614116308-review-of-cca-exact-moment-reduction-repair",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-10-07T06:07:15.654315+00:00",
+  "total": 92
+}

@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:09:52.689Z",
+  "dispatched_at": "2026-10-05T23:07:08Z",
+  "findings": [
+    {
+      "anchor": "forward-solver-route-integrity#s2",
+      "id": "reuse_search-1",
+      "reason": "naming the existing gate (and whether the section extends it or adds the missing 1000-cell row) prevents a second, divergent size gate being built beside the one that already runs.",
+      "text": "\u00a72's done-when (\"An executable-size gate sits beside the memory gate (solve executable under 50 MB at 1000 cells, HLO op count reported)\") proposes a gate the repository already owns: `benchmarks/solve_program_size_gate.py` gates serialized executable bytes (`MAX_300_EXECUTABLE_BYTES`, `TARGET_300_EXECUTABLE_BYTES = 50_000_000`) and instruction count (`MAX_300_SOLVE_INSTRUCTIONS`), fed by `benchmarks/program_scope_census.py`, with `tests/test_solve_program_size.py` and `tests/test_solve_program_size_gate.py` covering it; the plan never names the owner",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "forward-solver-route-integrity#s3",
+      "id": "reuse_search-2",
+      "reason": "the section should state that construction is done and its remaining work is whole-solve scheduling under the 203,078/204,531 ceilings, so a planner does not restart the request-machine design the module already carries.",
+      "text": "\u00a73's done-when describes building \"one lax state machine whose sole operator body serves residual, merit, acceptance, recovery, reconciliation and Jacobian-vector requests\", but that machine is already committed: `nova/equilibrium/fixed_point.py:923` defines `OperatorRequestKind` with exactly RESIDUAL/MERIT/ACCEPTANCE/RECOVERY/RECONCILIATION/JVP and `operator_request_body` (\u00a73's own landed entry `f-fsri-explicit-live-requests` records committing the request contract)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/h200_test_lane/cache_reuse_summary.py:69",
+      "id": "duplicate_owner-1",
+      "reason": "the section must extend the existing key reader rather than add a second program-key counter, so the two do not drift on what a \"program-key entry\" is.",
+      "text": "\u00a74 proposes making \"the guard's `served_entries` count program-key cache entries rather than a recursive file count that includes the XLA autotune subtree\" and making the marker line-anchored; the key-set accounting already exists in `scripts/h200_test_lane/cache_reuse_summary.py` (`served_keys` derives program keys, and `pin_keys_absent_from_disk`/`lane_keys_absent_from_disk` compare them), while the recursive `find -type f | wc -l` lives at `scripts/h200_test_lane/prewarm.sh:135`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/h200_test_lane/prewarm.sh:135",
+      "id": "duplicate_owner-2",
+      "reason": "the section should be written as landing/extending the existing row validator from that worktree, not as a fresh pre-warm row set, or the same guard is authored twice.",
+      "text": "\u00a74's \"Add the lane target's program set as pre-warm rows\" targets the same pin-manifest machinery already owned by `scripts/h200_test_lane/prewarm_row.py`, `publish_prewarm_pin.py` and `prewarm.sh`, and the plan's own followup `f-fsri-prewarm-pin-land-or-drop` already holds the real fix (the `PREWARM_ROW_NO_PROGRAMS` refusal) unreleased in a worktree at `89fe2174d`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "3a3682d4a2986e3a7c7164d987a99353a3532b0bdbc60b7d3fdfd8bd78ad0203",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 113,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:12:12.546696+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:12:13.023102+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:12:11.515589+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:12:12.041908+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T230655568690-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "1758d44f4fce99f4b5fb54df311dc39f3c38d197",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73's state machine is a genuine deep module: one lowered operator body (with one read-authority switch) hides six request kinds behind the small `OperatorRequestKind`/`OperatorRequest`/`operator_request_body` interface at `nova/equilibrium/fixed_point.py:923-975`, which is depth, not wrapper spread.",
+    "duplicate_owner": "a finding \u2014 \u00a74's \"make the guard's `served_entries` count program-key cache entries rather than a recursive file count\" re-implements key-set accounting that `scripts/h200_test_lane/cache_reuse_summary.py` already owns (`served_keys`, `pin_keys_absent_from_disk`, `lane_keys_absent_from_disk`), rather than extending that owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no design section adds a public definition, a CLI option, an MCP view or a new refusal family \u2014 \u00a72's gate is a benchmark/test, \u00a71\u2013\u00a73 edit internal solver bodies, and \u00a74 modifies the existing guard's marker and entry count in place (an existing refusal, not a new family).",
+    "reuse_search": "a finding \u2014 \u00a72's done-when proposes an \"executable-size gate ... beside the memory gate\" as if new, and \u00a73's done-when proposes \"one lax state machine whose sole operator body serves residual, merit, acceptance, recovery, reconciliation and Jacobian-vector requests\" as if new, while both mechanisms already exist in the tree (`benchmarks/solve_program_size_gate.py`, `nova/equilibrium/fixed_point.py:923`).",
+    "thin_wrapper": "pass \u2014 no section adds a thin forwarding layer: \u00a71\u2013\u00a73 edit the existing solver bodies in `fixed_point.py`/`forward.py`/`forward_operator.py`/`reduced_newton.py` in place, and \u00a74 edits `scripts/h200_test_lane/cache_guard.py` and `prewarm.sh` in place; none proposes a parallel wrapper over a working mechanism."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:12:11.026585+00:00"
+}

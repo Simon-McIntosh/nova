@@ -1,0 +1,94 @@
+{
+  "absent": [],
+  "absent_items": [
+    "a check that the provenance marker is consumed by any reader",
+    "a structural (non-substring) sweep test and a bound on which directories the sweep covers"
+  ],
+  "absent_observations": [
+    "no baseline_suite / after_suite arm: the reviewed run is documentation-only and declared neither, so added_failure_count=0 and added_failure_ids=[] are derived from absence rather than a measured set identity",
+    "no negative control: the reviewed run's write paths contain no test file and it declared none.",
+    "no guard against later silent removal of a provenance marker, and no structural instrument: the sweep treats a value outside the enumerated {2560,3072,3840,2816} as out of scope and detects marking only by the substring 'dimensions_provenance'"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "d1adce6cb9f6e6f80626ce64655e4c524008282f",
+    "df8f2989b01ec660decc3ecbd061ce6ceb86bb63",
+    "4d3e055486c357dda0dafbf950b2c00ba2b27de5",
+    "1288db4a7b0f6594437dcda03f9b0017a0f6c569"
+  ],
+  "completed_at": "2026-10-02T14:52:44.635Z",
+  "dispatched_at": "2026-10-02T14:32:25Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-mark-cut-cell-capacity-receipts.html",
+      "line": "No numeric value changed / 399-insertion correction",
+      "severity": "follow-on",
+      "text": "follow-on: the correction paragraph states the first fragment's 399-insertion figure 'counted only the fourteen JSON receipts'. The subset is fifteen: the fifteen receipt JSONs df8f2989b adds sum to exactly 399 (4x19 clip-quadrature + base/complete/final 57 each + four part files 19 each + two gpu 19 each = 399), and df8f2989b's remaining 424 insertions are the annotation receipt (194) and the driver (230). So the paragraph whose purpose is to stop mis-quoting the 399 figure introduces a new off-by-one in the very number it corrects; it should read fifteen. The same paragraph is otherwise correct (per-commit git diff --shortstat: df8f2989b 823, 4d3e05548 71, 1288db4a7 225/47, all reproduced)."
+    },
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/ecq-mark-cut-cell-capacity-receipts/mark_cut_cell_capacity_receipts.py",
+      "line": "main() sweep block and the reference swept_files substring test",
+      "severity": "follow-on",
+      "text": "follow-on: the completeness proof is instrument-bounded. A file counts as marked if the substring 'dimensions_provenance' appears anywhere in it, and the sweep scans only git-tracked files under docs/figures, so (a) a value outside the four enumerated swept values is invisible to it, and (b) two non-receipt files are counted in the headline 36 - a report.md that embeds a block and the reference driver itself, matched by a quoted capacity in its own snippet. Neither defect is load-bearing for this node's goal (which enumerates the four values and finds zero unmarked for each), but the fragment's 'whole-tree' wording is stronger than the instrument: it is a docs/figures scan by substring, not a structural whole-tree check."
+    },
+    {
+      "file": "1288db4a7b0f6594437dcda03f9b0017a0f6c569",
+      "line": "commit message body",
+      "severity": "follow-on",
+      "text": "follow-on: the repair commit body ends with a stray ', ' ('...lies outside this node.,'). Cosmetic; no functional or naming impact. Recorded only because the commit body is part of the delivered artifact."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "gate_arms_note": "Derived from the reviewed run's own suites. The reviewed run carries no baseline_suite and no after_suite key in its manifest: it is a documentation-provenance change under docs/figures/ that touches no module and no test, and its write paths contain no test file. The added-failure count is therefore 0 and the id set empty by ABSENCE OF ANY CODE ARM, not by a measured before/after set identity. The gate logs it cites (verify.log, mark_cut_cell.log) are the marker driver plus a numeric-diff verify step, not a pytest suite, and carry no baseline/after pair. This review did not re-run any suite, and did not run the marker driver against the reviewed worktree (that would write outside this node's scope); the measure I reproduced instead is the marker's own arithmetic, the empty numeric diff, and the whole-tree sweep.",
+  "justifications": {
+    "durability": "The marker is a durable machine-readable block written beside the value it annotates, so a reader sees the retirement without leaving the file, and the driver is idempotent (an existing dimensions_provenance block is preserved rather than replaced). The repair strengthens the completeness statement by emitting marked/unmarked counts per swept value rather than a bare target count. Held below full for the inherited limitations: there is still no guard that a later edit cannot silently drop the marker, no negative control falsifies the marker's presence (the reviewed run's write paths contain no test file and it declared none), the completeness test is a substring rather than a structural check, and nothing exercises a downstream consumer of the marker.",
+    "evidence": "The substance is independently reproducible and I reproduced it. A path-keyed walk of every numeric value in the twenty changed files between base d1adce6cb and head 1288db4a7 reads 78144 numeric paths with 0 changed and 0 missing (the annotation-receipt is new at head and has no base arm). The block arithmetic is verified: each added block's current_derived_value_for_this_layout equals traced_polygon_vertex_capacity(atomic_support_capacity) for 20/22/24/30 -> 148/150/152/158, each carries status historical and retired_by_revision f7fefbd780aae7ef3d9707722fc4d80a1f0742cd, which resolves to 'refactor(equilibrium): size the traced polygon capacity to its realised layout'. The whole-tree sweep reproduces exactly: 36 target files, 3072=26 marked, 2560=5, 2816=8, 3840=9, zero unmarked for every value. Held below full for two reasons: the sweep's marked test is a bare substring ('dimensions_provenance' anywhere in the file) and scans only tracked docs/figures files, so a value outside the four enumerated values remains invisible and two non-receipt files (a report.md that embeds a block, and the reference driver itself) are counted; and the correction paragraph introduces a new mis-count (finding 1).",
+    "fit": "The change sits in the docs/figures receipt tree it maintains, reuses the predecessor annotator unchanged, and ships one focused driver plus a build-evidence fragment. Commit subjects are conventional and all three carry bodies; no plan, sprint or ticket identifier and no AI attribution appears in any commit message, filename, symbol or comment (independently grepped). The driver docstring states the mechanism (spline_chain_samples_per_chord plus atomic_support_capacity; the swept product and its retiring revision as provenance data). Held 1 for a cosmetic defect: the repair commit body ends with a stray ', ' ('lies outside this node.,').",
+    "goal_fidelity": "The change fully discharges followup f-ecq-memory-identification-swept-product. The prior review (at 4d3e0554) found the sweep enumerated only {3072,3840,2816}, leaving the atomic-capacity-20 layout (swept 2560, current bound 148) unmarked in two requested-500 sibling receipts. Head 1288db4a7 adds 2560 to TARGET_VALUES, marks both siblings (each gains a dimensions_provenance block with recorded_value 2560 and current_derived_value_for_this_layout 148), and re-emits the receipt with a per-value marked/unmarked count. I independently reproduce: the sweep over tracked docs/figures files reads 36 target files with per-value unmarked 2560=0, 2816=0, 3072=0, 3840=0, and the block census over the changed receipts is 2560->148 x5, 2816->150 x4, 3072->152 x9, 3840->158 x5 = 23 blocks, matching the driver docstring. Every layout is arithmetically correct (128+20/22/24/30). Held 1 for a new off-by-one in the correction prose (finding 1).",
+    "scope_discipline": "The landed range is twenty files, every one inside a declared write path: seventeen receipts under docs/figures/cut-cell-current-attribution/{clip-quadrature,exact-clip-memory}/ (the fifteen of the first commit plus the two requested-500 siblings of the repair), the evidence fragment under docs/evidence/fragments/exact-clip-moment-quadrature/, and the driver plus its receipt under docs/figures/exact-clip-moment-quadrature/ecq-mark-cut-cell-capacity-receipts/. git diff --shortstat base..head is 20 files, 1072 insertions, 0 deletions: purely additive. No module and no test file is touched, so there is no code surface to regress. The repair commit alone is 5 files, 225 insertions, 47 deletions, all in scope."
+  },
+  "notes": "The reviewed node is a documentation-provenance change with no code arm: it marks the retired swept exact_support_capacity historical in seventeen cut-cell receipts and leaves every recorded number intact. The head repair commit resolves the prior review's outstanding finding: it sweeps the atomic-capacity-20 layout (2560), marks the two requested-500 siblings that carried it, states the four layouts (148/150/152/158), and gives per-commit diff sizes by git diff --shortstat. The substance is independently verified (empty numeric diff over 78144 paths, correct arithmetic on all 23 blocks, a valid revision anchor, a sweep that reproduces 36 marked / 0 unmarked for every one of the four values). Three follow-ons and no blocking defect keep the score at 90: (1) the correction paragraph reintroduces a mis-count, attributing 399 to 'fourteen JSON receipts' where the subset is fifteen; (2) the completeness proof remains a docs/figures substring scan, so the 'whole-tree' wording overstates the instrument; (3) a stray ', ' ends the repair commit body. None changes a recorded numeric value or lands outside the declared scope, and the range is purely additive on twenty in-scope files. Scores: goal_fidelity 19, evidence 16, scope_discipline 20, durability 16, fit 19; total 90.",
+  "plan": "nova:exact-clip-moment-quadrature",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "At head 1288db4a7 TARGET_VALUES names all four values; the two requested-500 receipts each gain a dimensions_provenance block (recorded_value 2560, current_derived_value_for_this_layout 148, retired_by_revision f7fefbd7), and the re-emitted receipt reports 2560 marked 5 unmarked 0. I independently reproduce the sweep at head: 36 target files, per-value unmarked 2560=0 2816=0 3072=0 3840=0, with the block census 2560->148 x5 / 2816->150 x4 / 3072->152 x9 / 3840->158 x5 = 23 blocks.",
+    "before": "At 4d3e0554 the driver's TARGET_VALUES read {3072,3840,2816}; docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-500.json and .../final-memory-parts/requested-500.json each recorded exact_support_capacity 2560 under a dimensions mapping with no dimensions_provenance block (0 occurrences in both), and the fragment claimed every receipt in the directory carries a block. Independently confirmed: both files are absent from the 4d3e0554 changed_paths.",
+    "finding_id": "prior review (at 4d3e0554) finding 1: the sweep enumerated only {3072,3840,2816}, so the atomic-capacity-20 layout (swept 2560) was marked in three files but left unmarked in two requested-500 siblings under the node's own declared directory"
+  },
+  "review_run_id": "r-20261002T143205108694-review-of-ecq-mark-cut-cell-capacity-receipts",
+  "reviewed_base_sha": "d1adce6cb9f6e6f80626ce64655e4c524008282f",
+  "reviewed_head_sha": "1288db4a7b0f6594437dcda03f9b0017a0f6c569",
+  "reviewed_revision": "1288db4a7b0f6594437dcda03f9b0017a0f6c569",
+  "reviewed_run_id": "r-20261002T130441946179-ecq-mark-cut-cell-capacity-receipts",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-mark-cut-cell-capacity-receipts",
+  "reviewer_node": "review-of-ecq-mark-cut-cell-capacity-receipts",
+  "reviewer_run_id": "r-20261002T143205108694-review-of-ecq-mark-cut-cell-capacity-receipts",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T14:45:00+00:00",
+  "total": 90,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha 1288db4a7 has parent 4d3e0554 whose parent is df8f2989b whose parent is reviewed_base_sha d1adce6cb, so the reviewed range is exactly the three commits claimed",
+    "the reviewed worktree is clean at head (git status --porcelain empty) and its HEAD is 1288db4a7b0f6594437dcda03f9b0017a0f6c569",
+    "git diff --shortstat d1adce6cb..1288db4a7 is 20 files, 1072 insertions, 0 deletions; every path lies under docs/figures/ or docs/evidence/ (no module, no test file); per-commit: df8f2989b 17 files/823 insertions, 4d3e05548 1 file/71 insertions, 1288db4a7 5 files/225 insertions/47 deletions",
+    "independently walked every numeric value path in the twenty changed files between base and head: 78144 numeric paths, 0 changed, 0 missing",
+    "independently reproduced the whole-tree sweep over tracked docs/figures files: 36 target files, 0 unmarked, per-value 3072 marked 26, 2560 marked 5, 2816 marked 8, 3840 marked 9",
+    "independently censused the added dimensions_provenance blocks over the changed receipts: 2560->148 x5, 2816->150 x4, 3072->152 x9, 3840->158 x5 = 23, each derived value equal to 128 + atomic_support_capacity and each carrying retired_by_revision f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+    "the retiring revision f7fefbd780aae7ef3d9707722fc4d80a1f0742cd exists and reads 'refactor(equilibrium): size the traced polygon capacity to its realised layout'",
+    "the followup's own receipt docs/figures/cut-cell-current-attribution/reposed-fixture/certificate/solve-memory-identification.json already carries a dimensions_provenance block and lies outside the reviewed node's declared write paths (the node states this; confirmed present at head)",
+    "the two non-JSON sweep hits are docs/figures/exact-clip-moment-quadrature/ecq-mark-swept-capacity-receipts/mark_swept_capacity_receipts.py (a 3072 snippet in its own report text) and docs/figures/figure-and-solver-audit/low-state-amplitude-nan/report.md, which genuinely embeds a dimensions_provenance block",
+    "no AI attribution in any of the three commit messages; all three carry bodies and conventional subjects; no plan/sprint/ticket identifier appears in any changed path or in the driver symbols or comments"
+  ]
+}

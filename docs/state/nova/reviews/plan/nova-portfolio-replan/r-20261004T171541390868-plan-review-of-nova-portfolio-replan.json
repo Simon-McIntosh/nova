@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:23:10.352Z",
+  "dispatched_at": "2026-10-04T17:15:54Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/nova-portfolio-replan.html:72",
+      "id": "deep_module-1",
+      "reason": "the atomic writer belongs on one named owner (fixed_point.py's publication path, or a shared receipt module it defines) and each other helper belongs beside its existing owner (`canonical_json`/`require_string` at `nova/imas/machine_evidence.py:33,64`), so the plan should split the node or name the single owner it extends rather than collecting five forks under one label.",
+      "text": "`replan-small-primitives` bundles five independent helpers (uniform-axis validator, read-only array constructor, atomic receipt writer, trimmed-string check, canonical digest) into one work unit, and its \"one atomic receipt writer for calibrate/sweep.py, catalog/mast_geometry.py and imas/mast_parity_gate.py\" re-implements machinery that already exists at `nova/equilibrium/fixed_point.py:185-215` (temp file, `stream.flush()`, `os.fsync`, `os.replace`, plus a sidecar `.sha256` digest) \u2014 a bundle of shallow wrappers over machinery that has already been duplicated at least three times rather than one module that hides the behaviour once",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/nova-portfolio-replan.html:84",
+      "id": "thin_wrapper-1",
+      "reason": "extending `nova/imas/db_entry.py` with the DD-interface/backend policy and routing the 12 direct `imas.DBEntry(...)` construction sites through it is the honest change; a separate opener forks the same ownership and the two will drift, so the finding changes which file the node edits.",
+      "text": "`replan-dbentry-constructor` proposes \"one owned opener [that] carries the DD-version and backend policy\" for the 15 call sites, but an owned open already exists as the `DBEntry(imas.DBEntry)` subclass at `nova/imas/db_entry.py:15`, which already takes `uri`, `mode`, `dd_version` and `xml_path`; the plan adds a parallel function without saying why the subclass cannot carry the policy it wants added",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/nova-portfolio-replan.html:84",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must name `nova/database/filepath.py` as the mechanism to extend (or state why it cannot host a data-root resolver) so the census's 177 lines are repaired against the existing owner instead of a second resolver being seeded beside it.",
+      "text": "`replan-gpfs-data-root` proposes a new \"data-root resolver\" for the 119 files / 177 lines of hard-coded GPFS paths, but `nova/database/filepath.py:110` (`class FilePath`) is already the path/data-root owner, is built on `nova.definitions.root_dir` and `appdirs`/`fsspec`, and is imported by 9 modules including `nova/database/netcdf.py` and `nova/imas/datasource.py`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/nova-portfolio-replan.html:84",
+      "id": "duplicate_owner-2",
+      "reason": "one path resolver owned by `nova/database/filepath.py` should serve both the `nova/` product paths and the `benchmarks/`+`scripts/` tooling paths, as the plan itself already commits to `FilePath`-style repo-relative plus absolute-path handling elsewhere; the review changes the plan by collapsing the two nodes' resolver into one named owner.",
+      "text": "`replan-evidence-tooling-paths` proposes \"one resolver with repo-relative receipt paths\" for crew run directories and worktree literals in `benchmarks/` and `scripts/`, and `replan-gpfs-data-root` proposes a separate one, so the plan spreads the same path-resolution concern across two nodes and two new resolvers",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "142607ec52ae891d535926a4172b28b28e9659299abbe4d1173225d19f139e35",
+  "plan_slug": "nova-portfolio-replan",
+  "plan_version": 21,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T171541390868-plan-review-of-nova-portfolio-replan",
+  "reviewed_blob_sha": "0ffa6788ec50722798429215a7eda49d45b494cf",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 `replan-small-primitives` is a grab-bag of five unrelated single-function helpers rather than one deeper interface, and it silently rebuilds an atomic writer whose owner already exists.",
+    "duplicate_owner": "a finding \u2014 `replan-gpfs-data-root` and `replan-evidence-tooling-paths` each propose a new path resolver without naming the existing owner `nova/database/filepath.py`.",
+    "reuse_search": "pass \u2014 \u00a74 and \u00a75 are grounded in a real structural census rather than asserted: the reckon data directory `docs/research/data/crew-pattern-review/code-depth/` exists (code-depth.json, consolidation.json, candidates.py, findings.md) and the \u00a72 census at `docs/evidence/replan-2026-09-24/thin-interfaces.md` is cited; the nodes name the callers they consolidate (`nova/equilibrium/constraint.py`, `map_extraction.py`, `diiid_efit.py`, `mast_efit.py`), and the eight `residual` / `dual_flux_image` method bodies the plan counts are present at `nova/equilibrium/constraint.py:141,151,968,980,1049,1061,1342,1354,1390,1402,1466,1478,1528,1540,1643,1656`.",
+    "thin_wrapper": "a finding \u2014 `replan-dbentry-constructor` proposes a new owned opener function beside the owned `DBEntry` subclass that already exists, with no statement of why the subclass cannot be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.459775+00:00"
+}

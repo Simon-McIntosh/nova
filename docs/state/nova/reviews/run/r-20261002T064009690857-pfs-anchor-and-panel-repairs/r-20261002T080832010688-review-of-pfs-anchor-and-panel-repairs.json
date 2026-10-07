@@ -1,0 +1,105 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "the reviewed manifest (run_dir/manifest.md) names no baseline_suite and no after_suite gate log, so annotate_review_of_run derives an unmeasured added-failure count (None) rather than a measured zero; the run changed no test file (the diff is figure PNGs and evidence HTML), so it cannot have added a failing pytest node id.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/playable-forward-solve/limited-anchor/row-11-10ms.png..row-17-40ms.png (7 panels; rows 11-14 converged=False refusal, rows 15-17 level_fraction 0.0138/0.1223/0.2385)",
+    "docs/figures/playable-forward-solve/early-frame-placement/early-frame-placement.png (7 rows sorted 11..17, unconverged arms refused)",
+    "docs/figures/playable-forward-solve/centroid-attribution/centroid-radius-attribution.png (frozen anchor, 6/7 agree)",
+    "docs/figures/playable-forward-solve/batched-labeller/h200-throughput-receipt.png (arms 1.06/2.34/3.18 slices/s)",
+    "docs/figures/playable-forward-solve/batched-labeller/terminal-state-parity.png (48-slice denominator)"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "3581cf133",
+    "ef65f0881",
+    "77b300406"
+  ],
+  "completed_at": "2026-10-02T08:28:56.455Z",
+  "dispatched_at": "2026-10-02T08:08:53Z",
+  "evidence_inputs": {
+    "centroid_agreement_verified": "6 of 7 frozen-anchor rows",
+    "compensator_clause_not_met": true,
+    "limited_anchor_level_fractions_verified": {
+      "row15": 0.013797,
+      "row16": 0.122258,
+      "row17": 0.238514
+    },
+    "parity_denominator_verified": 48,
+    "reviewed_revision_read": "77b3004067ccc83be495991e82c8fdf63d799caf (head), 9ac842a600928fd88b9b68ff531265be0cbb06d3 (base)",
+    "throughput_arms_verified": [
+      1.0597475801899894,
+      2.3375032984385924,
+      3.184991059700392
+    ],
+    "throughput_refusal_clause_not_met": true
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-anchor-and-panel-repairs/docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html",
+      "line": "54",
+      "severity": "follow-on",
+      "text": "the node was dispatched 'SPEC exact \u2014 implement as written' and its done-when requires 'the throughput curve is replaced by the refusal', but the panel is drawn from the measured arms instead; the deviation is physically justified (h200-throughput-receipt.json is complete-selected with arms 1.06/2.34/3.18 slices/s) and is disclosed in the fragment, yet the manifest reports blockers: none rather than reporting the spec deviation as a blocker, so the literal done-when is not met."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-anchor-and-panel-repairs/docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html",
+      "line": "52",
+      "severity": "follow-on",
+      "text": "the done-when also requires that the compensator line break between its two measured groups with the nine-of-ten claim reconciled, but compensator-authority/compensator-authority.png lies outside the node's write scope so neither was done; the gap is correctly recorded under follow_ons rather than left silent, so it caps goal fidelity but does not hold the node."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-anchor-and-panel-repairs/docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html",
+      "line": "47",
+      "severity": "follow-on",
+      "text": "the fragment attributes the ratios 1.370 and 1.544 to 'the conditioned arms' at rows 16 and 17, but early-frame-placement.json holds those values on the conditioned_warm arm (conditioned_warm.enclosed_area_ratio 1.3696 and 1.5444), while the conditioned arm at row 16 is 0.00189 and absent at row 17, so the landing prose mislabels which arm crosses the wall."
+    }
+  ],
+  "follow_ons": [
+    "regenerate docs/figures/playable-forward-solve/compensator-authority/compensator-authority.png to split the line at its two measured groups and reconcile the nine-of-ten claim (named by f-fsaudit-repair-empty-and-invalid-data-panels but outside this node's write scope)",
+    "add an executable assertion that each controlled vocabulary caption equals its receipt field, since the current gate only proves the panels render"
+  ],
+  "gate_arms_note": "after_suite = none named by the reviewed manifest; the rendered gate is docs/.../render-gate.log at revision 77b300406, 'done / EXIT=0' with 11 figures written. The reviewed run declares negative_control 'none: caption and panel agreement verified by re-reading each caption against its named receipt field'.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site found",
+    "diff": "read commits 3581cf133, ef65f0881 and 77b300406 against base 9ac842a60: two new render drivers, 11 re-rendered PNGs, and three caption edits.",
+    "done_when": "read the prompt's FENCE-EVIDENCE measure; the gate is the two render drivers recorded at render-gate.log (revision 77b300406, all 11 figures written, EXIT=0), which proves the panels render but executes neither the caption/receipt assertion nor the refusal clauses.",
+    "goal": "read the dispatched NODE goal (make the limited-anchor, centroid-attribution, batched-labeller and early-frame-placement figures state the data they draw per three f-fsaudit followups); the diff re-renders 11 panels from committed receipts and reconciles the atlas and landed captions, meeting the figure clauses but not the compensator-line or throughput-by-refusal clauses.",
+    "manifest": "read; status complete, names render-gate.log with EXIT=0, and records the compensator-scope and throughput deviations under follow_ons.",
+    "write_paths": "read the eight declared write paths (four figure dirs, the atlas, the landed archive, the fragment, the node figure dir); every changed path is inside them."
+  },
+  "justifications": {
+    "durability": "the change adds no test or executable assertion \u2014 render_panels.py and render_attribution.py carry no assert, and the manifest declares negative_control 'none' \u2014 so nothing reddens if a caption is edited away from the receipt it cites.",
+    "evidence": "the gate render-gate.log:1 names revision 77b300406 and EXIT=0 with all 11 figures written, and the receipt-bound numbers reconcile (limited-anchor-containment.json row15/16/17 level_fraction 0.0138/0.1223/0.2385 match the captions; h200-throughput-receipt.json arms 1.06/2.34/3.18; acceptance-receipt.json denominator 48; centroid 6/7), but the drivers run no assertion \u2014 render-gate.log:4 states 'every census caption matches its receipt' as an intention that render_panels.py never executes.",
+    "fit": "the drivers reuse the repository painters (nova.media.poloidal draw_flux_contours/draw_wall/draw_nulls/draw_boundary, nova.media.ink poloidal_axes/trace_axes) at render_panels.py:21-22 and render_attribution.py:22, name every colour as a module constant, and carry no plan, sprint or ticket identifier.",
+    "goal_fidelity": "the three f-fsaudit followups are delivered for their in-scope clauses: docs/figures/playable-forward-solve/pfs-anchor-and-panel-repairs/render_panels.py:43-170 redraws the seven census panels (rows 11-14 as refusals, rows 15-17 at the receipt's level) and render_attribution.py:35-165 redraws the class, throughput and parity panels; the done-when's compensator-line clause and its throughput-by-refusal clause are not met.",
+    "scope_discipline": "every path in the diff against 9ac842a60 (docs/figures/playable-forward-solve/{limited-anchor,centroid-attribution,batched-labeller,early-frame-placement,pfs-anchor-and-panel-repairs}, docs/evidence/poloidal-convergence-atlas.html, docs/evidence/archive/playable-forward-solve-landed.html, docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html) lies inside the eight write paths the reviewed manifest declares."
+  },
+  "plan": "nova:playable-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the dispatched NODE goal (make the limited-anchor, centroid-attribution, batched-labeller and early-frame-placement figures state the data they draw per three f-fsaudit followups); the diff re-renders 11 panels from committed receipts and reconciles the atlas and landed captions, meeting the figure clauses but not the compensator-line or throughput-by-refusal clauses.\nVERDICT done_when: read the prompt's FENCE-EVIDENCE measure; the gate is the two render drivers recorded at render-gate.log (revision 77b300406, all 11 figures written, EXIT=0), which proves the panels render but executes neither the caption/receipt assertion nor the refusal clauses.\nVERDICT write_paths: read the eight declared write paths (four figure dirs, the atlas, the landed archive, the fragment, the node figure dir); every changed path is inside them.\nVERDICT manifest: read; status complete, names render-gate.log with EXIT=0, and records the compensator-scope and throughput deviations under follow_ons.\nVERDICT diff: read commits 3581cf133, ef65f0881 and 77b300406 against base 9ac842a60: two new render drivers, 11 re-rendered PNGs, and three caption edits.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the three f-fsaudit followups are delivered for their in-scope clauses: render_panels.py:43-170 redraws the seven census panels (rows 11-14 refusals, rows 15-17 at the receipt's level) and render_attribution.py:35-165 redraws the class, throughput and parity panels; the done-when's compensator-line and throughput-by-refusal clauses are not met.\nSCORE evidence: 13\nJUSTIFICATION evidence: render-gate.log:1 names revision 77b300406 and EXIT=0 with all 11 figures written and the receipt numbers reconcile (level_fraction 0.0138/0.1223/0.2385; arms 1.06/2.34/3.18; denominator 48; 6/7), but the drivers run no assertion and render-gate.log:4 states 'every census caption matches its receipt' as an intention render_panels.py never executes.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff against 9ac842a60 lies inside the eight write paths the reviewed manifest declares.\nSCORE durability: 5\nJUSTIFICATION durability: the change adds no test or executable assertion \u2014 render_panels.py and render_attribution.py carry no assert and the manifest declares negative_control 'none' \u2014 so nothing reddens if a caption drifts from its receipt.\nSCORE fit: 17\nJUSTIFICATION fit: the drivers reuse the repository painters (nova.media.poloidal draw_flux_contours/draw_wall/draw_nulls/draw_boundary, nova.media.ink poloidal_axes/trace_axes) at render_panels.py:21-22 and render_attribution.py:22 and name every colour as a module constant.\nFINDING docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html:54 follow-on: the node was dispatched 'SPEC exact' and its done-when requires the throughput curve be replaced by the refusal, but the panel is drawn from the measured arms instead; disclosed in the fragment yet blockers: none, so the literal done-when is unmet though the deviation is physically justified.\nFINDING docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html:52 follow-on: the done-when's compensator-line split and nine-of-ten reconciliation were not done because compensator-authority lies outside the node's write scope; correctly recorded under follow_ons.\nFINDING docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html:47 follow-on: the fragment attributes ratios 1.370 and 1.544 to 'the conditioned arms' but early-frame-placement.json holds them on the conditioned_warm arm (1.3696, 1.5444), so the landing prose mislabels which arm crosses the wall.\n",
+  "review_run_id": "r-20261002T080832010688-review-of-pfs-anchor-and-panel-repairs",
+  "reviewed_base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "reviewed_head_sha": "77b3004067ccc83be495991e82c8fdf63d799caf",
+  "reviewed_revision": "77b3004067ccc83be495991e82c8fdf63d799caf",
+  "reviewed_run_id": "r-20261002T064009690857-pfs-anchor-and-panel-repairs",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-anchor-and-panel-repairs",
+  "reviewer_node": "review-of-pfs-anchor-and-panel-repairs",
+  "reviewer_run_id": "r-20261002T080832010688-review-of-pfs-anchor-and-panel-repairs",
+  "scores": {
+    "durability": 5,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "section": "8",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:04:20.931086+00:00",
+  "total": 71,
+  "verdict": "pass"
+}

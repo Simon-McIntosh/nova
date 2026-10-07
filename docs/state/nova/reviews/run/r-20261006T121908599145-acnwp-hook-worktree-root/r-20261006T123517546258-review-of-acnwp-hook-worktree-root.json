@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "1c023858f308f13adbf7290c318434afbb5e0b31",
+  "blocking_finding_count": 0,
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/git-hooks/pre-commit:2 (hook_root resolution; invoked by git as the pre-commit hook through core.hooksPath=scripts/git-hooks)",
+    "tests/test_commit_hook_in_worktree.py:22 (DEFAULT_HOOK = REPO_ROOT / \"scripts\" / \"git-hooks\" / \"pre-commit\")"
+  ],
+  "completed_at": "2026-10-06T12:47:05.339Z",
+  "dispatched_at": "2026-10-06T12:35:36Z",
+  "findings": [
+    {
+      "file": "scripts/git-hooks/pre-commit",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the shim resolves hook_root to the checkout that contains the hook file (realpath -e of $0, then its directory's parent twice via cd/pwd -P), so it still requires that checkout to carry .venv and an importable nova package. A linked worktree created without the symlinked .venv fails exactly as the base did (python not found), but nova's worktree-provisioning rule supplies the symlink and the new test mirrors it by symlinking .venv and nova into the scratch worktree, so this is a coupling to the provisioning rule rather than a defect in the fix. Recorded so the requirement is explicit: the shim's correctness is coupled to the .venv symlink, not to git resolving the checkout itself."
+    }
+  ],
+  "follow_on_finding_count": 1,
+  "gate_logs": {
+    "base": {
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/test_commit_hook_in_worktree.py::test_clean_commit_admitted_in_linked_worktree",
+        "tests/test_commit_hook_in_worktree.py::test_worktree_path_refused_in_linked_worktree"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121908599145-acnwp-hook-worktree-root/negative_control.log",
+      "revision": "1c023858f308f13adbf7290c318434afbb5e0b31"
+    },
+    "head": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121908599145-acnwp-hook-worktree-root/gate.log",
+      "revision": "a8ec8e5073d6d74a5031b67fd710f9e4e0af8516"
+    }
+  },
+  "head_log_revision": "a8ec8e507",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 call site(s): the git hook invocation of scripts/git-hooks/pre-commit (core.hooksPath=scripts/git-hooks) and tests/test_commit_hook_in_worktree.py:22 which names the hook path",
+    "diff": "read commit by commit against base 1c023858f \u2014 a8ec8e507 is a single commit carrying scripts/git-hooks/pre-commit (shim re-resolution, +3/-2), tests/test_commit_hook_in_worktree.py (new, 102 lines) and the evidence fragment (new, 33 lines); git diff --stat 1c023858f a8ec8e507 = 3 files, +138/-2, every changed path inside the declared write scope.",
+    "done_when": "the node's measure is a commit shim that resolves its own checkout so a linked worktree admits a clean commit and refuses a worktree path; the new test's four arms show both from the primary checkout and a linked worktree, gate 4 passed (head) and 2 failed/2 passed (base hook), and this review independently reproduced the mechanism (review-mechanism.log).",
+    "goal": "the node goal is the \u00a76 follow-on that the commit hook refuses every worktree commit; the base shim resolved hook_root with `git -C dirname(realpath -e -- $0) rev-parse --show-toplevel`, which under a hook returns the hooks directory, so <root>/.venv/bin/python3 did not exist and every linked-worktree commit was refused. The fix at scripts/git-hooks/pre-commit:2 resolves the root from the script path alone.",
+    "manifest": "read; it names commit a8ec8e507, the gate command and its 4-passed result, the negative control (same test against the base hook via NOVA_COMMIT_HOOK), records core.hooksPath left UNSET in the checkout, and states no follow-ons or blockers.",
+    "write_paths": "read the manifest's declared paths; the three paths the diff changes (scripts/git-hooks/pre-commit, tests/test_commit_hook_in_worktree.py, docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-hook-worktree-root.html) are all inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_commit_hook_in_worktree.py exercises the defect end to end in real scratch repositories, from both the primary checkout and a linked worktree, covering a clean commit admitted and a worktree-path file refused (4 arms); the linked-worktree refusal arm asserts the offending filename appears, which discriminates a real refusal from the base hook's python-not-found error, so the regression guard is genuine rather than shape-matching. The review could not re-run the arms in its fenced tree, which is the only reason this is not 20.",
+    "evidence": "the added-failure count is 0, read from the reviewed run's own gate.log (4 passed, EXIT=0, head hook) and negative_control.log (2 failed/2 passed, EXIT=1, base hook, failing exactly the two linked-worktree arms); this review independently reproduced the base defect read-only (a hook-like GIT_DIR makes `git -C <hooks-dir> rev-parse --show-toplevel` return the hooks directory) and ran the fixed hook's payload (relativize --check) against the clean head tree (EXIT=0), both in review-mechanism.log.",
+    "fit": "the shim stays a POSIX-sh shim and resolves its root purely by path (realpath -e, then cd/pwd -P), which matches nova's worktree-provisioning rule (a symlinked .venv per ~/.agents and nova AGENTS.md); the test follows the repo's pytest idiom (tmp_path scratch repos, Path, subprocess) and imports the shared WORKTREE_ROOT constant.",
+    "goal_fidelity": "the node goal \u2014 a commit shim that finds its own checkout so a linked worktree admits a clean commit and refuses a worktree path \u2014 is met: scripts/git-hooks/pre-commit:2 no longer consults git for its root, and the head arm passes while the base arm fails on the two worktree arms; the only residual is that the shim still needs a provisioned .venv (recorded as a follow-on, not a defect).",
+    "reuse": "no new abstraction is introduced: the shim keeps the existing `nova.database.scripts relativize --check` payload, and the test composes its offending path from the shared WORKTREE_ROOT constant instead of a literal, so the guard keeps one decision.",
+    "scope_discipline": "every path changed by the diff (git diff --stat 1c023858f a8ec8e507: scripts/git-hooks/pre-commit, tests/test_commit_hook_in_worktree.py, docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-hook-worktree-root.html) is inside the manifest's declared write paths."
+  },
+  "limitations": [
+    "The four-arm pytest was not re-run end to end by this review: the reviewer's worktree is fenced, so a scratch `git init`/`commit` run from the test is refused before it reaches the hook (review-head-arm.log shows 4 failed on scaffolding), and that re-run is not a valid arm. The gate result is read from the reviewed run's own gate.log (4 passed EXIT=0) and negative_control.log (2 failed/2 passed EXIT=1).",
+    "The head arm's gate.log header records revision 1c023858f (the worktree base) while the tree it exercised is the head worktree (its module_under_test and rootdir name the a8ec8e507 worktree); the header revision does not name the head commit.",
+    "The base-hook defect was reproduced read-only by setting GIT_DIR and observing rev-parse return the hooks directory, rather than by invoking scripts/git-hooks/pre-commit end to end through a real commit."
+  ],
+  "node": "review-of-acnwp-hook-worktree-root",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the \u00a76 follow-on that the commit hook refuses every worktree commit; the base shim resolved hook_root with `git -C dirname(realpath -e -- $0) rev-parse --show-toplevel`, which under a hook returns the hooks directory, so <root>/.venv/bin/python3 did not exist and every linked-worktree commit was refused. The fix at scripts/git-hooks/pre-commit:2 resolves the root from the script path alone.\nVERDICT done_when: the node's measure is a commit shim that resolves its own checkout so a linked worktree admits a clean commit and refuses a worktree path; the new test's four arms show both from the primary checkout and a linked worktree, gate 4 passed (head) and 2 failed/2 passed (base hook), and this review independently reproduced the mechanism (review-mechanism.log).\nVERDICT write_paths: read the manifest's declared paths; the three paths the diff changes (scripts/git-hooks/pre-commit, tests/test_commit_hook_in_worktree.py, docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-hook-worktree-root.html) are all inside them.\nVERDICT manifest: read; it names commit a8ec8e507, the manifest gate command and its 4-passed result, the negative control (same test against the base hook via NOVA_COMMIT_HOOK), records core.hooksPath left UNSET in the checkout, and states no follow-ons or blockers.\nVERDICT diff: read commit by commit against base 1c023858f \u2014 a8ec8e507 is a single commit carrying scripts/git-hooks/pre-commit (shim re-resolution, +3/-2), tests/test_commit_hook_in_worktree.py (new, 102 lines) and the evidence fragment (new, 33 lines); git diff --stat 1c023858f a8ec8e507 = 3 files, +138/-2, every changed path inside the declared write scope.\nCALL_SITES: scripts/git-hooks/pre-commit:2, tests/test_commit_hook_in_worktree.py:22\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the node goal \u2014 a commit shim that finds its own checkout so a linked worktree admits a clean commit and refuses a worktree path \u2014 is met: scripts/git-hooks/pre-commit:2 no longer consults git for its root, and the head arm passes while the base arm fails on the two worktree arms; the only residual is that the shim still needs a provisioned .venv (recorded as a follow-on, not a defect).\nSCORE evidence: 18\nJUSTIFICATION evidence: the added-failure count is 0, read from the reviewed run's own gate.log (4 passed, EXIT=0, head hook) and negative_control.log (2 failed/2 passed, EXIT=1, base hook, failing exactly the two linked-worktree arms); this review independently reproduced the base defect read-only (a hook-like GIT_DIR makes rev-parse --show-toplevel return the hooks dir) and ran the fixed hook's payload (relativize --check) against the clean head tree (EXIT=0), both in review-mechanism.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path changed by the diff (git diff --stat 1c023858f a8ec8e507: scripts/git-hooks/pre-commit, tests/test_commit_hook_in_worktree.py, docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-hook-worktree-root.html) is inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_commit_hook_in_worktree.py exercises the defect end to end in real scratch repositories, from both the primary checkout and a linked worktree, covering a clean commit admitted and a worktree-path file refused (4 arms); the linked-worktree refusal arm asserts the offending filename appears, which discriminates a real refusal from the base hook's python-not-found error, so the regression guard is genuine; the review could not re-run the arms in its fenced tree, which is the only reason this is not 20.\nSCORE fit: 19\nJUSTIFICATION fit: the shim stays a POSIX-sh shim and resolves its root purely by path (realpath -e, then cd/pwd -P), which matches nova's worktree-provisioning rule (a symlinked .venv per ~/.agents and nova AGENTS.md); the test follows the repo's pytest idiom (tmp_path scratch repos, Path, subprocess) and imports the shared WORKTREE_ROOT constant.\nSCORE reuse: 19\nJUSTIFICATION reuse: no new abstraction is introduced: the shim keeps the existing `nova.database.scripts relativize --check` payload, and the test composes its offending path from the shared WORKTREE_ROOT constant instead of a literal, so the guard keeps one decision.\nFINDING scripts/git-hooks/pre-commit:2 follow-on: the shim resolves hook_root to the checkout that contains the hook file (realpath -e of $0, then its directory's parent twice via cd/pwd -P), so it still requires that checkout to carry .venv and an importable nova package. A linked worktree created without the symlinked .venv fails exactly as the base did (python not found), but nova's worktree-provisioning rule supplies the symlink and the new test mirrors it by symlinking .venv and nova into the scratch worktree, so this is a coupling to the provisioning rule rather than a defect in the fix.\nreviewed_base_sha: 1c023858f308f13adbf7290c318434afbb5e0b31\nreviewed_head_sha: a8ec8e5073d6d74a5031b67fd710f9e4e0af8516",
+  "review_run_id": "r-20261006T123517546258-review-of-acnwp-hook-worktree-root",
+  "review_scope": "Independent review of the \u00a76 commit-hook node: the pre-commit shim's checkout-root resolution and the new tests/test_commit_hook_in_worktree.py. Read-only, outside the reviewed worktree: the diff was read from the shared object store, the base defect reproduced read-only by setting GIT_DIR as git does during a hook, the fixed shim's payload run against the clean head tree, and the manifest and both gate logs read.",
+  "reviewed_base_sha": "1c023858f308f13adbf7290c318434afbb5e0b31",
+  "reviewed_commits": [
+    "a8ec8e5073d6d74a5031b67fd710f9e4e0af8516"
+  ],
+  "reviewed_head_sha": "a8ec8e5073d6d74a5031b67fd710f9e4e0af8516",
+  "reviewed_run_id": "r-20261006T121908599145-acnwp-hook-worktree-root",
+  "reviewer": "review-of-acnwp-hook-worktree-root",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T12:53:00+00:00",
+  "total": 113,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T123517546258-review-of-acnwp-hook-worktree-root/review-mechanism.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T123517546258-review-of-acnwp-hook-worktree-root/review-head-arm.log"
+  ]
+}

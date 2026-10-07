@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites_verified": 3,
+  "completed_at": "2026-10-03T06:20:35.526Z",
+  "dispatched_at": "2026-10-03T05:37:49Z",
+  "entry_points_unchanged": [
+    "build_construction",
+    "measure_pair",
+    "oracle_probe._topology"
+  ],
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T053730219145-fsapi-clip-mode-shared-helpers/manifest.md",
+      "line": "tests/caveat (slow-inclusive arms)",
+      "text": "the manifest's caveat classifies both slow-inclusive failures as 'environment timeouts, not semantic'. The test_outboard_hole_census_gate.py failure is not a timeout: its log shows 'AssertionError: exact booked total 15491539.124767 A is outside 1e-06 of the committed state's 14013835.43717596 A ... assert 0.10544605680692104 <= 1e-06'. It fails identically in the baseline and head arms with the same numbers, so the no-added-failure conclusion is unaffected; only the characterisation of the failure is wrong."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "existing call signatures remain valid. New parameters are keyword-only with default None (_problem, _seed_row, _build_context, _operator_with_both_exteriors, build_construction). Cross-module callers pass positionally and keep prior behaviour: net_current_scaling_census.py:209 and tests/test_exact_clip_seed_bracket.py:42 call _problem without clip_mode; centroid_field_response_probe.py:403 calls stiffness._build_context(CASE_NAME, REQUESTED_CELLS) without clip_mode. Importers of the changed modules use only unchanged symbols (oracle_probe._topology, FIXED_POINT_TOLERANCE) or the unchanged build_construction/measure_pair entry points. No test reads the renamed receipt keys.",
+    "diff": "The single commit 9dd7669df (parent 8c4d11f89, so self-contained) changes exactly the ten benchmarks plus docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-shared-helpers.html. The two large hunks in oracle_start_newton_probe.py and plasma_cell_terminal_state.py are reindentation from deleting the try/finally wrapper: `git diff -w` shows only the semantic lines.",
+    "done_when": "verified by file and line. Every former set-and-restore site now hands its mode to the solved object: exact_support_floor_attribution.py:335, plasma_cell_map_fidelity.py:299 and unit_amplitude_current_census.py:300,483 rebind a local mode_operator used by every downstream read; fixture_positional_stiffness.py:1027,1041 and exact_clip_seed_amplitude.py:612,617 pass clip_mode='exact' into the context/seed builder which threads it to .with_clip_mode at 218,254 / 136,142; oracle_start_newton_probe.py:820,971 rebind per mode, 1866,1877,1901,1920 thread chord/exact/mode, and 2057 passes clip_mode=mode into the solve request; plasma_cell_terminal_state.py:469,475,491 and plasma_cell_fixed_point_attribution.py:157,163,177,590,676 thread exact; plasma_cell_trip_panels.py:122 and plasma_cell_first_step_directions.py:301 pass clip_mode=args.clip / 'exact'. ForwardFluxOperator.with_clip_mode (forward_operator.py:2732) returns a fresh copy (no mutation), and the request field is consumed at forward.py:2593 (_with_source(..., clip_mode=request.clip_mode)) and 2693,2728.",
+    "goal": "verified. The node's goal - ten shared benchmark helpers stop mutating the process-global support clip mode and instead thread the mode explicitly to the operator, profile or request that is actually solved - holds at head 9dd7669df. A head grep of all ten files for 'set_support_clip_mode' and 'support_clip_mode' returns no match (comments and receipts included); at base 8c4d11f89 each of the ten carried one or more of those references.",
+    "receipt": "no receipt records support_clip_mode(). At head none of the ten files contains the string 'support_clip_mode'; the two receipt keys that recorded it at base (plasma_cell_terminal_state.py:453 and plasma_cell_fixed_point_attribution.py:291) now read 'clip_mode', and plasma_cell_fixed_point_attribution.py:608 records operator.clip_mode from the solving operator rather than reading the global back.",
+    "write_paths": "the commit touches only the ten declared benchmark paths plus the declared evidence fragment; it matches orientation_write_paths with no extra file."
+  },
+  "justifications": {
+    "durability": "The refactor is a single conventional commit with a full body; the evidence fragment is committed and the gate logs persist under the run directory. Deductions: the baseline arm's tree was a transient /tmp clone that no longer exists, and the manifest's structured baseline_suite/after_suite keys are null, so the two-arm record survives only as prose plus log files rather than as a machine-readable pair.",
+    "evidence": "Baseline and head gate logs persist under the run's tests/ directory for five importing modules, with a summary.txt and zero added failures reconcilable by test id: the two slow-inclusive failures (test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier, a >300s pytest-timeout; test_booked_totals_reproduce_the_committed_state, an identical AssertionError) reproduce unaltered at both arms. The grep and py_compile gates are stated with their results. Held below maximum because the manifest's caveat mischaracterises one pre-existing failure as a timeout, the base arm ran in a transient /tmp clone, and no arm demonstrates that a differing mode produces differing output (equivalence is the target of a pure refactor, so this is acceptable but not maximally probative).",
+    "fit": "The change adopts the codebase's own seam rather than inventing one: ForwardFluxOperator.with_clip_mode and the ForwardSolveRequest.clip_mode field already exist at the base, the certificate helpers (_case, _case_machine, _certificate_solve_request, _measure) already carry the additive clip_mode keyword from the prior certificate-hub migration, and this commit simply consumes them. The additive keyword-only default-None pattern matches that reference exactly.",
+    "goal_fidelity": "The goal is delivered as written. I re-derived the absence claim from the head tree (git show 9dd7669df:<file> | grep) rather than from the manifest, and the threading is real rather than cosmetic: with_clip_mode copies the operator, _active_support_clip_mode resolves the explicit field first, and the solve request's clip_mode is applied to the operator by _with_source. Held one point below maximum because end-to-end runtime equivalence was shown only for the five importing test modules, not the whole benchmark surface.",
+    "scope_discipline": "The commit changes exactly the ten declared benchmark paths and the declared evidence fragment, nothing more; the two large diffs are whitespace-only reindentation (verified with git diff -w) forced by deleting the set-and-restore wrapper. No unrelated file, index, or plan state was touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: delivered. At head 9dd7669df none of the ten shared benchmark helpers references set_support_clip_mode or support_clip_mode, while each did at base 8c4d11f89; every former set-and-restore of the global now threads the mode explicitly to the operator, profile or solve request that is actually used, and the request field is consumed at forward.py:2593 via _with_source.\nVERDICT done_when: met. Verified by file and line across all ten modules; additive clip_mode keywords default to None and preserve prior behaviour for the positional callers (net_current_scaling_census, test_exact_clip_seed_bracket, centroid_field_response_probe); no receipt records support_clip_mode(); existing call signatures stay valid.\nVERDICT evidence: five importing modules were run at base and head in fresh CPU pytest processes; added_failure_count=0 with added_failure_ids=[] derived from the run's tests/ logs, where both slow-inclusive failures reproduce identically at both arms. One manifest caveat mislabels an AssertionError as a timeout; conclusion unaffected.\nVERDICT scores: goal_fidelity 19, evidence 17, fit 18, durability 16, scope_discipline 20; total 90.",
+  "review_run_id": "legacy-f5737104ec3c",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "8c4d11f89d6f6390087b06af9d71e89586cc4a16",
+  "reviewed_head_sha": "9dd7669dfc39c57226d8f305d0046fd6755b3152",
+  "reviewed_run_id": "r-20261003T053730219145-fsapi-clip-mode-shared-helpers",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261003T062154341121-review-of-fsapi-clip-mode-shared-helpers"
+  },
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T06:38:00+00:00",
+  "total": 90
+}

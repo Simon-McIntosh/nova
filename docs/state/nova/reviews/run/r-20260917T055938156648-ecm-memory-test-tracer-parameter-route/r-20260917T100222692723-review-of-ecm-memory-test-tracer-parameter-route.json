@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T10:02:22.692723+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/memory-test-repair/logs/jobA_collect.log",
+      "line": "12",
+      "text": "the log the manifest names for the collection carries no count (line 10 is only head_collect_exit=0) and records an unmentioned failed base step: collect_and_import.sh line 30 `cd /tmp/base26` died and srun exited 9 at line 13, so the head count must be read from logs/collect_head.txt and the base count from jobB, and the manifest's \"one all_debug job (jobA, jobB)\" understates two jobs and a discarded first base attempt."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route/manifest.md",
+      "line": "54",
+      "text": "the manifest lists logs/collect_base.txt under test_logs but no such file exists anywhere under the reports fence; the base collection output is in logs/jobB_collect_base.log, which the tests block names, so the citation is wrong rather than the evidence absent."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/memory-test-repair/summary.txt",
+      "line": "49",
+      "text": "the twelve per-test logs and the summary carry pytest output only, with no host or partition header, so the all_debug allocation rests on run_tests.sh:19 rather than on the logs the measure names, and the summary holds thirteen entries for twelve tests because the primal test appears at line 41 and again at 49 with no SKIP line to say why it was re-run."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/memory-test-repair/logs/jobC_poison_route.log",
+      "line": "1",
+      "text": "the structural poison-route check ran three times as inline heredocs (the first two attempts could not locate the production method), so the disassembly behind the \"rebind visible at the module the call site reads: True\" claim is not reproducible from the reports fence alone."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route/manifest.md",
+      "line": "41",
+      "text": "the reason given for leaving the two hour-scale tests unrun (their walls exceed one 59-minute allocation) is narrower than the section's own earlier record, which found at reports/nova/s19-local/arc-tracer/logs/test_exact_clip_memory.log that the run reached test 13 as an F and that one weak exact solve alone exceeded 2700 s, so a larger lane may still not make test 13 green and a persisting per-arm driver is needed."
+    }
+  ],
+  "justifications": {
+    "durability": "a test fails if this change regresses: tests/test_exact_clip_memory.py:462 hands a displaced tracer to the same entry point and asserts the result moves, so the bit-identity assertion at tests/test_exact_clip_memory.py:447 cannot pass by the clip ignoring its argument; the residual deduction is that the whole-cell guard driver changed at tests/test_exact_clip_memory.py:81 is exercised only by the two hour-scale tests left unrun, its refusal path verified structurally (LOAD_GLOBAL at the call site) and not end to end.",
+    "evidence": "the gate's facts hold under independent reading: logs/collect_head.txt records 14 collected at head against 49 lines later in logs/jobB_collect_base.log at the base revision whose tree is byte-identical to `git show 26c45542:tests/test_exact_clip_memory.py`, all twelve per-test logs end in a pass line, and the base revision was reproduced from git (lines 24, 81 and 450 carry the import, the `__globals__` rebind and the clone call that were removed).",
+    "fit": "the repair reuses the existing keyword-only `arc_tracer` at nova/equilibrium/separatrix_clip.py:1758 instead of inventing a seam, the renamed id test_implicit_level_arc_primal_is_bit_identical names the mechanism rather than the deleted wrapper, and no plan label, version suffix or attribution appears in the changed source.",
+    "goal_fidelity": "the landed change does what the goal states: at 59d09275 a grep for `__globals__` and `_implicit_traced_clip` over tests/, nova/ and benchmarks/ returns nothing while the retained tracer is reached through the keyword-only `arc_tracer` at tests/test_exact_clip_memory.py:445 and the production call site nova/equilibrium/forward_operator.py:2845, and the module collects 14 tests where it previously failed at import.",
+    "scope_discipline": "`git log --name-only 1e6e90b2..59d09275` shows three commits touching exactly tests/test_exact_clip_memory.py, docs/evidence/archive/cut-cell-current-attribution-landed.html and docs/plans/cut-cell-current-attribution.html, all inside the declared write paths, each body-bearing and free of AI attribution."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the landed change does what the goal states: at 59d09275 a grep for `__globals__` and `_implicit_traced_clip` over tests/, nova/ and benchmarks/ returns nothing while the retained tracer is reached through the keyword-only `arc_tracer` at tests/test_exact_clip_memory.py:445 and the production call site nova/equilibrium/forward_operator.py:2845, and the module collects 14 tests where it previously failed at import.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate's facts hold under independent reading: logs/collect_head.txt records 14 collected at head against 49 lines later in logs/jobB_collect_base.log at the base revision whose tree is byte-identical to `git show 26c45542:tests/test_exact_clip_memory.py`, all twelve per-test logs end in a pass line, and the base revision was reproduced from git (lines 24, 81 and 450 carry the import, the `__globals__` rebind and the clone call that were removed).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git log --name-only 1e6e90b2..59d09275` shows three commits touching exactly tests/test_exact_clip_memory.py, docs/evidence/archive/cut-cell-current-attribution-landed.html and docs/plans/cut-cell-current-attribution.html, all inside the declared write paths, each body-bearing and free of AI attribution.\nSCORE durability: 18\nJUSTIFICATION durability: a test fails if this change regresses: tests/test_exact_clip_memory.py:462 hands a displaced tracer to the same entry point and asserts the result moves, so the bit-identity assertion at tests/test_exact_clip_memory.py:447 cannot pass by the clip ignoring its argument; the residual deduction is that the whole-cell guard driver changed at tests/test_exact_clip_memory.py:81 is exercised only by the two hour-scale tests left unrun, its refusal path verified structurally (LOAD_GLOBAL at the call site) and not end to end.\nSCORE fit: 20\nJUSTIFICATION fit: the repair reuses the existing keyword-only `arc_tracer` at nova/equilibrium/separatrix_clip.py:1758 instead of inventing a seam, the renamed id test_implicit_level_arc_primal_is_bit_identical names the mechanism rather than the deleted wrapper, and no plan label, version suffix or attribution appears in the changed source.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/memory-test-repair/logs/jobA_collect.log:12 the log the manifest names for the collection carries no count (line 10 is only head_collect_exit=0) and records an unmentioned failed base step: collect_and_import.sh line 30 `cd /tmp/base26` died and srun exited 9 at line 13, so the head count must be read from logs/collect_head.txt and the base count from jobB, and the manifest's \"one all_debug job (jobA, jobB)\" understates two jobs and a discarded first base attempt.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route/manifest.md:54 the manifest lists logs/collect_base.txt under test_logs but no such file exists anywhere under the reports fence; the base collection output is in logs/jobB_collect_base.log, which the tests block names, so the citation is wrong rather than the evidence absent.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/memory-test-repair/summary.txt:49 the twelve per-test logs and the summary carry pytest output only, with no host or partition header, so the all_debug allocation rests on run_tests.sh:19 rather than on the logs the measure names, and the summary holds thirteen entries for twelve tests because the primal test appears at line 41 and again at 49 with no SKIP line to say why it was re-run.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/memory-test-repair/logs/jobC_poison_route.log:1 the structural poison-route check ran three times as inline heredocs (the first two attempts could not locate the production method), so the disassembly behind the \"rebind visible at the module the call site reads: True\" claim is not reproducible from the reports fence alone.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T055938156648-ecm-memory-test-tracer-parameter-route/manifest.md:41 the reason given for leaving the two hour-scale tests unrun (their walls exceed one 59-minute allocation) is narrower than the section's own earlier record, which found at reports/nova/s19-local/arc-tracer/logs/test_exact_clip_memory.log that the run reached test 13 as an F and that one weak exact solve alone exceeded 2700 s, so a larger lane may still not make test 13 green and a persisting per-arm driver is needed.\n",
+  "review_run_id": "r-20260917T100222692723-review-of-ecm-memory-test-tracer-parameter-route",
+  "reviewed_run_id": "r-20260917T055938156648-ecm-memory-test-tracer-parameter-route",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260917T100222692723-review-of-ecm-memory-test-tracer-parameter-route",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T10:50:24.859858+00:00",
+  "total": 95
+}

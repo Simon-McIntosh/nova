@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:54:02.732Z",
+  "dispatched_at": "2026-10-05T15:43:02Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/plasma_cell_map_fidelity.py:1",
+      "id": "reuse_search-1",
+      "reason": "the author should either extend `analytic_operator_ladder` to carry the Solov'ev clip-mode \u00d7 rung mismatch or state in the node why its per-region refinement ladder cannot be extended, instead of adding a second parallel map-at-analytic-field benchmark.",
+      "text": "the map-fidelity node (\"the map evaluated once at the analytic state, with no solve\") duplicates the mechanism `benchmarks/analytic_operator_ladder.py:1` already provides (\"The exact production map is applied once at the analytic field, with no seed, nonlinear solve, continuation, or fixed-point basin\"), which predates the node (authored 2026-08-25, node landed 2026-09-23) and is cited nowhere in the plan",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/measurement_provenance.py:53",
+      "id": "duplicate_owner-1",
+      "reason": "this is the exact class of defect two of the plan's own reviews keep recording (seed-policy review \"three provenance defects\"; first-step \"final JSON assembled by an uncommitted inline script\"); naming the owner and requiring receipts to carry its stamp retires the recurring finding rather than re-recording it.",
+      "text": "every measurement node hand-assembles receipt provenance (job id, revision, imported-module path) rather than routing through `measurement_stamp()`, which has owned \"the measured commit SHA, refusing an unclean checkout\" since 2026-08-13",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:3608",
+      "id": "duplicate_owner-2",
+      "reason": "the node should name one owner for the support-current/plasma-validity criterion and have the benchmark read it, so a threshold change cannot leave the route and the receipt disagreeing.",
+      "text": "\u00a74 `pcrf-support-current-refusal` adds a refusal on the route *and* gives \"the receipt's plasma check the same criterion\", specifying one validity rule in two consumers with no single owner named, while the existing normalisation guard `current_normalisation_amplitude` and `SCALAR_CURRENT_AMPLITUDE_BAND` (`nova/equilibrium/source.py:116`) already live here",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/plasma-cell-read-fidelity.html#s4",
+      "id": "interface_budget-1",
+      "reason": "the section must state whether the band constant is retired outright or kept as the roundoff floor beside the new stated-fraction refusal, so the added refusal surface is accounted for in its own text.",
+      "text": "\u00a74 `pcrf-support-current-refusal` adds a new member to the refusal family (supplied count 0) and names no retirement or merge: it says it \"replaces reliance on SCALAR_CURRENT_AMPLITUDE_BAND (1e-6, 1e6), which refuses nothing\", yet that constant stays live at `nova/equilibrium/source.py:116`",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "01e8bcd725060c467b3221068c5651e4bea69f16ad588e2638c57a4dfdbf349d",
+  "plan_slug": "plasma-cell-read-fidelity",
+  "plan_version": 68,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T154207962975-plan-review-of-plasma-cell-read-fidelity",
+  "reviewed_blob_sha": "4f7cf1c093f3d21e21f9c71edd8c8903b06c5afa",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `nova/equilibrium/topology.py:69` `private_wall_node_read` hides the flux-side \u00d7 X-point-height-band rule behind a seven-key dict and `_representative_merge_radius` (`forward_operator.py:1199`) hides the pitch+roundoff composition behind one function; no proposed module spreads its complexity across shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 the receipt-producing nodes hand-assemble provenance instead of extending `benchmarks/measurement_provenance.py`, and the support-current refusal is specified in two consumers with no single owner.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 `pcrf-support-current-refusal` adds a route refusal without naming what it retires or merges.",
+    "reuse_search": "a finding \u2014 the plan cites the topology read it extends and the test files it rewrites, but the map-fidelity node (`benchmarks/plasma_cell_map_fidelity.py`) rebuilds a map-at-analytic-field measurement that `benchmarks/analytic_operator_ladder.py` already provides.",
+    "thin_wrapper": "pass \u2014 the ladder and map-fidelity nodes add the clip-mode \u00d7 rung matrix, support accounting and mismatch field the nearest existing mechanism (`analytic_operator_ladder`) does not carry, so they are not pure forwards and the wrapper item does not bite."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:39.107630+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T06:28:17.894Z",
+  "dispatched_at": "2026-10-06T06:22:28Z",
+  "findings": [
+    {
+      "anchor": "imas_ambix/gs/operator.py:1",
+      "id": "reuse_search-1",
+      "reason": "recording ambix's gs/ as a distinguished non-reuse would complete the mandated prior-art record but would not alter any of the four signatures, the acceptance table or a done-when.",
+      "text": "the plan's \u00a74 proposes gs.apply as nova's Grad-Shafranov forward operator but its reuse map, exhaustive over nova, never cites imas-ambix, the coupled repo whose gs/ package already holds a forward GS operator (operator.py, residual.py, grounding.py) \u2014 the nearest prior art is in fact a distinct object (a sensor-space linear soft-prior map G_pf\u00b7I_pf + G_plasma\u00b7c_plasma on a limiter-masked grid, whose own docstring records that solving belongs to the solver, and which imports nothing from nova), not the nonlinear \u03c8 = \u03c8_ext + G\u00b7J(\u03c8) fixed-point map the plan builds",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "ff6cea807004f3c93c64eb205e59c9eb9842f9f3f4c571ddade298ce7eb0d727",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 93,
+  "project": "nova",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "plan comment c-s21-gs-apply-ambix-scout on section 4 (plan version 94, commit 6c46324c9) records the imas-ambix search: gs/operator.py is a linear sensor-space soft-prior map and is not reused by gs.apply",
+      "when": "2026-10-06T06:29:57.308825+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T062213148233-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "8a09fff5ecb5b5934ae506cdcc80d69e0f7a5768",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four modules (topology.read, current.book, gs.apply, solve.fixed_point) each hide substantial behaviour behind a single narrow function, replacing the 54-file/54k-line sprawl and the 17 null-role and 23 region-role scattered authorities.",
+    "duplicate_owner": "pass \u2014 every duplicate-prone mechanism names the owner to extend rather than fork: constraint.py:1843 (row scale), polygon_moments.py (polygon integration), contour_tree.py (the tree), nova/database/filepath.py:175 (receipt placement), scripts/h200_test_lane/cache_guard.py (compile count), solve_request.py (policy and receipt).",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72\u2013\u00a75 each name the mechanism they replace, \u00a75 lands SolvePolicy inside ForwardSolvePolicy rather than beside it, and \u00a76 records the ForwardSolvePolicy before/after field counts plus the SolveRoute (six\u2192one, solve_request.py:27) and SupportClipMode (three\u2192one, solve_request.py:35) collapses as the accounting the zero-count claim rests on.",
+    "reuse_search": "a finding \u2014 the plan's reuse map over nova is exhaustive (every named candidate verified at its stated home, ~40 symbols) but it cites no search of imas-ambix, the coupled repo the repo AGENTS.md requires be scouted in both directions before authoring new machinery.",
+    "thin_wrapper": "pass \u2014 each proposed module is stated as a replacement of a named mechanism, not a layer over it: \u00a72 replaces Topology.read and read_with_connectivity, \u00a73 replaces clipped_support_current_moments (clip_quadrature.py:714) and the support partition in forward_operator.py, \u00a74 \"replaces the map ForwardFluxOperator performs today rather than wrapping it\", \u00a75 replaces newton_krylov (fixed_point.py:5003), picard (fixed_point.py:2874) and operator_request_body; the retained forward.py is justified as the request/receipt adapter."
+  },
+  "section_digests": {
+    "_document": "42b1f08018ffa324953b21a35ebd6a9812b63b0acb5ae8a73262344045a125c1",
+    "s0": "66bed59341ceddd2b2d61465f1233d35c4d59c22234d867f09b1e4a337b0b482",
+    "s1": "e3926ed31983268b83ff4f7fe6feb947700172eb86a0d601549966b9cd8f4e20",
+    "s2": "254b21ab4574a4654af4914ed85cd161db29a25975ca66c1cadc0169b816d17d",
+    "s3": "bfa74835b32e89f1d009029df7d262e2ff3a2ec8c1b385240ffd1944e826f14c",
+    "s4": "7d23b7b52a53c7baf79319043739e7f1a16c13c17507bb66d13c97607c5eed19",
+    "s5": "7d065f3d2a0cd7837dbcc5e5df468c3df2a608776346c22c209ab7a7595cc0ce",
+    "s6": "7d71ea2158135f26f4d2ad95e6f32e582e3479791b56228cae60d5cb4b3fad9d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T06:29:23.372363+00:00"
+}

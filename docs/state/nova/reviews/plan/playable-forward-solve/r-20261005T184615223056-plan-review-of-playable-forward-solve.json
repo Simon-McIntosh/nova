@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T18:50:46.572Z",
+  "dispatched_at": "2026-10-05T18:46:41Z",
+  "findings": [
+    {
+      "anchor": "scripts/labeller_parallel/scheduler.py:47",
+      "id": "duplicate_owner-1",
+      "reason": "a second writer over the same file shape is the measured cause of the rolled-back relaunch, so the plan should name shard.py as the single owner the parallel engine extends.",
+      "text": "the plan introduces scripts/labeller_parallel/ as a writer \"disjoint from scripts/labeller_batch/\" that nevertheless produces the same per-shot session layout by re-implementing shard.py's label_shot admission/solve/persist path, and the fork already drifted: production job 1263815 ran HostRouteEngine and wrote two shots with zero converged slices (93 of 107 raising NoQualifiedAxisError) where shard.py converges about 65 percent, which f-pfs-045 then had to repair by proving identity against shard.py \u2014 the honest change is to extend scripts/labeller_batch/shard.py (which already has label_shot and is imported by the scheduler) with the batched/host engine and one writer, not to maintain two writers over one contract",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/shape_inverse.py:583",
+      "id": "duplicate_owner-2",
+      "reason": "the plan's own \u00a72 names InverseDesign as the mechanism; the design should either extend it or factor one regularised-solve helper that both the pulse-design app and the shape inverse call, rather than a third copy per call site.",
+      "text": "\u00a72 signals reuse of the pulse-design inverse step (InverseDesign.solve_current in nova/equilibrium/inverse.py) but the landed 1743-line shape_inverse.py does not extend it, re-deriving the Tikhonov-regularised least-squares solve with the same nova.linalg.regression.MoorePenrose call in at least three separate places (_turning_point_current_update at line 583, and two inline solves at lines 1425 and 1436), so the shared solving and row-assembly machinery is duplicated rather than lifted",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "apps/playable/main.py:280",
+      "id": "duplicate_owner-3",
+      "reason": "placement is one of the named recurring duplicates; the app and launcher should resolve through FilePath so the run directory has one owner and one override.",
+      "text": "the app resolves its session directory and the launcher its allocation record with bare Path.home()/\".local/share/nova/...\" paths (apps/playable/main.py:280, scripts/playable_server/run.sh:75) although nova/database/filepath.py FilePath owns user-scoped path resolution and is what the rest of nova's stores use, so the playable app forks path handling",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/playable-forward-solve.html#s7",
+      "id": "interface_budget-1",
+      "reason": "each section that grows the CLI or public-definition surface must account for that growth in its own text, or the plan cannot show the interface budget is being held.",
+      "text": "with the supplied counts at public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, \u00a77 adds three launcher options (--decoder, --machine, --view) and \u00a78 adds --engine, and neither section states what it retires or merges or why nothing can be; the same sections add new public modules (shape_inverse, batched_labeller) with no retirement of the machinery they supersede",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7feee610cc00bc0d827cf7ce5ac2679c8a152831e49a0ff0fd98dd63f081ff0e",
+  "plan_slug": "playable-forward-solve",
+  "plan_version": 355,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-05T18:53:55.620866+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-05T18:53:57.327084+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-05T18:53:57.951636+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-05T18:53:58.491542+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T184615223056-plan-review-of-playable-forward-solve",
+  "reviewed_blob_sha": "f7bdae942a50c2ddf6d9a5fca54f97239bb5bf7f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 nova/equilibrium/batched_labeller.py (890 lines) hides the vmap/shard/branch-guard/masked-conditioning-pass over the compiled slice route behind a small engine interface, and apps/playable/session.py hides the solve/assemble/push/record keyframe lifecycle behind one session holder.",
+    "duplicate_owner": "a finding \u2014 the plan adds a second labeller writer scripts/labeller_parallel/ that re-implements the per-slice admission, solve and persist contract owned by scripts/labeller_batch/shard.py.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a77 and \u00a78 add CLI options (apps/playable/main.py --decoder/--machine/--view, scripts/labeller_parallel --engine) without naming anything they retire or merge, or why nothing can be.",
+    "reuse_search": "pass \u2014 the design sections cite the existing mechanism each new piece extends (InverseDesign.solve_current in nova/equilibrium/inverse.py, ControlPoints in nova/geometry/plasmapoints.py, nova/biot/contour.py Contour, FluxSurfaceGeometry in nova/equilibrium/flux_surface_geometry.py, the compiled slice route in nova/equilibrium/reduced_newton.py, and the pulse-design Bokeh view), and each of those mechanisms is present in the checkout.",
+    "thin_wrapper": "pass \u2014 the one genuinely thin layer, the FrameDecoder protocol in apps/playable/camera.py with its placeholder, carries its justification in \u00a77 (the decoder is imas-ambix's, nova must not import imas-ambix), so it is not a wrapper that could have been an extension."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T18:52:41.234850+00:00"
+}

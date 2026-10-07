@@ -1,0 +1,41 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T20:36:02.646461+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/solve_program_size_gate.py",
+      "line": "680",
+      "text": "when no earlier dump is named (no previous receipt, or one without hlo_text_path) the sentence prints \"(None)\" in the path slot and says the earlier census dump \"was not on disk when this ran\", asserting an absence the run never measured, which is the same class of unmeasured claim this change removes."
+    },
+    {
+      "file": "tests/test_solve_program_size.py",
+      "line": "605",
+      "text": "the absent case is built as a named path that is not on disk, so the None-path rendering above and the \"of a different size\" relation branch are unpinned; passing None for previous_path would show the \"(None)\" text and keep the branch honest."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_solve_program_size.py:580 pins the differing count and the 1-based offset on two files and :619 pins the rendered report's measured values with \"byte-identical\" asserted absent, though the previous-path-None and unequal-size branches have no pinning test.",
+    "evidence": "I re-measured the two dumps the committed receipt names (sha256sum and cmp reproduced 219637882 bytes each, first difference at byte 2937, 1094 differing bytes) and re-ran tests/test_solve_program_size.py at the head, reproducing the recorded after-arm result of 2 failed, 22 passed with the same two pre-existing ids.",
+    "fit": "the private helpers _sha256_file, _byte_differences and _dump_comparison follow benchmarks/solve_program_size_gate.py's existing receipt-and-render idiom, the history-shaped docstring prose was rewritten to mechanism in 6ec0300f, and no forbidden name is introduced.",
+    "goal_fidelity": "the derivation at benchmarks/solve_program_size_gate.py:795 renders only the measured comparison, and docs/figures/millisecond-converged-solve/marker-census/report.md:42 and docs/evidence/archive/millisecond-converged-solve-landed.html:716 now carry that measurement in place of the byte-identity clause, though the branch at line 680 states \"was not on disk\" for a run that named no earlier dump.",
+    "scope_discipline": "the four commits touch only the declared write paths under benchmarks/, tests/, docs/figures/millisecond-converged-solve/marker-census/, the landed anchor and the plan record, the last including one predecessor-comment correction disclosed in the manifest's follow_ons."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the derivation at benchmarks/solve_program_size_gate.py:795 renders only the measured comparison, and docs/figures/millisecond-converged-solve/marker-census/report.md:42 and docs/evidence/archive/millisecond-converged-solve-landed.html:716 now carry that measurement in place of the byte-identity clause, though the branch at line 680 states \"was not on disk\" for a run that named no earlier dump.\nSCORE evidence: 19\nJUSTIFICATION evidence: I re-measured the two dumps the committed receipt names (sha256sum and cmp reproduced 219637882 bytes each, first difference at byte 2937, 1094 differing bytes) and re-ran tests/test_solve_program_size.py at the head, reproducing the recorded after-arm result of 2 failed, 22 passed with the same two pre-existing ids.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the four commits touch only the declared write paths under benchmarks/, tests/, docs/figures/millisecond-converged-solve/marker-census/, the landed anchor and the plan record, the last including one predecessor-comment correction disclosed in the manifest's follow_ons.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_solve_program_size.py:580 pins the differing count and the 1-based offset on two files and :619 pins the rendered report's measured values with \"byte-identical\" asserted absent, though the previous-path-None and unequal-size branches have no pinning test.\nSCORE fit: 19\nJUSTIFICATION fit: the private helpers _sha256_file, _byte_differences and _dump_comparison follow benchmarks/solve_program_size_gate.py's existing receipt-and-render idiom, the history-shaped docstring prose was rewritten to mechanism in 6ec0300f, and no forbidden name is introduced.\nFINDING benchmarks/solve_program_size_gate.py:680 when no earlier dump is named (no previous receipt, or one without hlo_text_path) the sentence prints \"(None)\" in the path slot and says the earlier census dump \"was not on disk when this ran\", asserting an absence the run never measured, which is the same class of unmeasured claim this change removes.\nFINDING tests/test_solve_program_size.py:605 the absent case is built as a named path that is not on disk, so the None-path rendering above and the \"of a different size\" relation branch are unpinned; passing None for previous_path would show the \"(None)\" text and keep the branch honest.",
+  "review_run_id": "r-20260917T203602646461-review-of-msc-census-byte-identity-claim",
+  "reviewed_run_id": "r-20260917T183042361304-msc-census-byte-identity-claim",
+  "reviewer_node": "review-of-msc-census-byte-identity-claim",
+  "reviewer_run_id": "r-20260917T203602646461-review-of-msc-census-byte-identity-claim",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T21:13:34.650380+00:00",
+  "total": 93
+}

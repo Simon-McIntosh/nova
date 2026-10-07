@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:46:30.151Z",
+  "dispatched_at": "2026-10-05T15:32:55Z",
+  "findings": [
+    {
+      "anchor": "nova/biot/polygonanalytic.py:1787",
+      "id": "reuse_search-1",
+      "reason": "the design's stated prior art is not the mechanism it needs, so the reuse citation cannot justify the new module and the plan should cite and extend the actual geometric-moment owner.",
+      "text": "\u00a72 (plan.html:42) names polygon_analytic_flux_moments as the machinery that \"integrates the geometric moments of the region exactly\", but opening the function shows it returns fixed-section flux-kernel blocks (uniform, radial and vertical rows of the Biot kernel over the polygon's edges) and computes only a centroid; no polygon area/first/second moment integrator lives in nova/biot.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/separatrix_clip.py:850",
+      "id": "duplicate_owner-1",
+      "reason": "extending the existing moment owner rather than forking a module removes a whole parallel implementation and the drift risk between three moment tables.",
+      "text": "_traced_polygon_moments already computes the polygon's area and first and second moments in JAX with the same orientation handling the design is proposing to write again; the plan introduces nova/equilibrium/polygon_moments.py (polygon_monomial_moments, line 141) as a parallel body, and a third body (_straight_edge_monomial_moments, clip_quadrature.py:155) carries production. A duplicate of shared infrastructure is a finding naming the owner to extend: separatrix_clip._traced_polygon_moments.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/polygon_moments.py:141",
+      "id": "duplicate_owner-2",
+      "reason": "the plan should either extend the owner the production path uses, or state why a second module is needed, rather than land two implementations of one reduction.",
+      "text": "the landed design locked decision moment-integration to \"closed-form polygon moments\" in the new module, yet production reaches the endpoint-recurrence body in clip_quadrature.py:155 and the new module is imported only by benchmarks/exact_clip_closed_form_floor.py; the plan therefore authored a mechanism decision that its own shipped path did not take, leaving a tested but unused parallel module.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/polygon_moments.py:141",
+      "id": "deep_module-1",
+      "reason": "collapsing to one owner behind one interface is the depth the design claims and does not deliver while three copies stand.",
+      "text": "three separate polygon-moment reductions now coexist (separatrix_clip.py:850, clip_quadrature.py:155, polygon_moments.py:141), each with its own edge-weight/binomial/orientation logic and its own tests, so the moment machinery is spread across parallel bodies rather than buried behind one interface.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/polygon_moments.py:45",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the public surface it adds in its own text, and retiring the duplicate moment modules would discharge it.",
+      "text": "the section adds a public module (__all__ exporting LOCAL_MONOMIAL_POWERS, QUADRATIC_POWERS, PolygonDensityMoments, polygon_density_moments, polygon_monomial_moments) and its text retires only internal constants (the per-edge Gauss order and the 500-evaluation ceiling); no public definition is named as retired or merged, and the section does not state why none can be.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5016de95e2fd8a91cad38c2a71e1e539e2175aca78fa0191e0f31199e473df13",
+  "plan_slug": "exact-clip-moment-quadrature",
+  "plan_version": 88,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153227020626-plan-review-of-exact-clip-moment-quadrature",
+  "reviewed_blob_sha": "bfa6847f8dde010c091b44adc65beddf1ff855df",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 after the design the package carries three parallel polygon-moment bodies over the same machinery: separatrix_clip._traced_polygon_moments (geometric moments), clip_quadrature._straight_edge_monomial_moments (the production endpoint recurrence), and the new polygon_moments.polygon_monomial_moments; each hides its own reduction and none is the single owner, so the design added surface without adding depth.",
+    "duplicate_owner": "a finding \u2014 nova/equilibrium/separatrix_clip.py already owns polygon area/first/second moment integration (_traced_polygon_moments, line 850, JAX, orientation-aware) and nova/equilibrium/clip_quadrature.py owns the exact monomial table (_straight_edge_monomial_moments, line 155); the plan adds nova/equilibrium/polygon_moments.py as a third implementation rather than extending either owner.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds the public module nova/equilibrium/polygon_moments.py with five public symbols and its text names no public definition it retires or merges, nor why none can be.",
+    "reuse_search": "a finding \u2014 \u00a72 cites nova/biot/polygonanalytic.py polygon_analytic_flux_moments as the polygon-analytic machinery that \"integrates the geometric moments of the region exactly\", but that function (line 1787) computes flux-kernel blocks (G_0, G_R, G_Z) at target points, not area/first/second moments of a region; the geometric-moment owner the plan needs already exists as separatrix_clip._traced_polygon_moments (line 850) and is named in the reuse map comment but is not the mechanism the design extends.",
+    "thin_wrapper": "pass \u2014 the design replaces the fan quadrature with boundary integration rather than layering a thin pass-through over existing machinery; no unjustified wrapper is proposed."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.357526+00:00"
+}

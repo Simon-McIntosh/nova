@@ -1,0 +1,83 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:06:21.988Z",
+  "dispatched_at": "2026-10-04T16:58:00Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/batched_labeller.py:120",
+      "id": "reuse_search-1",
+      "reason": "\u00a71 and \u00a72 collapse from \"build it\" to \"measure and tune the existing BatchedLabeller against shot 22086\", which changes the effort and the done-when of the plan's two largest sections.",
+      "text": "the plan proposes \u00a71 (\u00a71 \"the whole slice solve inside one compiled program with a fixed trip budget and masked convergence instead of the host ladder\") and \u00a72 (a batch of slices read in one fixed-shape program) as new machinery, but _make_solver already builds a dynamic-argument copy of the production trip loop with masked convergence and jax.vmap(one) at batched_labeller.py:725 already runs a fixed-shape batch and returns labelled_flux per element",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/flux_surface_connectivity.py:47",
+      "id": "reuse_search-2",
+      "reason": "the plan should name this kernel and state what the slower vmap probe measured, rather than leave the reader to discover the existing batched read.",
+      "text": "the plan's \u00a72 proposes to \"re-cast the pass so a batch of slices reads in one fixed-shape program\", but this file already declares itself \"the GPU inner-loop kernel for the batched corpus labeller (a jax.vmap over slices sharing one campaign grid)\"",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/forward_operator.py:3719",
+      "id": "reuse_search-3",
+      "reason": "\u00a75 is an extension of this method, so the plan should cite the owner it edits instead of describing the change as new behaviour.",
+      "text": "\u00a75 proposes to \"read the first iterate twice, the second read shadowed by the first\", but the cold-start shadow it wants to give is the wall mask this method already returns (\"the prior iterate's wall mask, or no mask on a cold start\")",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/reduced_newton.py:3013",
+      "id": "thin_wrapper-1",
+      "reason": "if _compiled_program already carries the trip, \u00a71 is a tuning change to it rather than a new program, which removes a node from the plan.",
+      "text": "\u00a71 wraps the whole-slice solve in a new compiled program, but _compiled_program already builds the compiled trip kernel and batched_labeller._make_solver already drives it; the plan adds a thin layer over both without saying why either cannot be extended",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/batched_labeller.py:476",
+      "id": "deep_module-1",
+      "reason": "the plan should name one module that serves both single and batched slices, or it will maintain two compile paths that drift.",
+      "text": "\u00a71 (one call is one slice) and \u00a72 (a batch in one program) would add two entry points over the same _make_solver/_compiled_program machinery that BatchedLabeller already hides behind a single solve(), so the surface grows without a stated module boundary",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/shape_inverse.py:1201",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73's done-when (elongation and upper-point commands achieving within 5 percent) is a measurement of solve_shape_inverse(..., forward_solve=...) with the existing turning_point_relative_tolerance, so the section should extend or retune that owner rather than build a parallel outer loop.",
+      "text": "\u00a73 proposes exactly what solve_shape_inverse already implements: \"a bounded outer Newton loop refreshes the local current-to-turning-point tangent at that state, corrects the physical shape residual, and sends every correction through the same axis-admission line search\" (module docstring line 29; the 20 kA ceiling and halving line search at lines 81 and 1224; the tolerance-bounded corrected loop at lines 1248-1255)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/scripts/labeller_batch/receipt.py:2",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a76 reduces to pointing the existing sharded job at the decoder shot list and adding the digest-manifest field if it is absent, which is far smaller than the plan implies and must name these three owners.",
+      "text": "\u00a76 asks for \"one sharded job writing every shot's session as it lands with the per-slice conditioning flag and target source and a digest manifest, resumable by shot, with a completion receipt counting shots, slices, converged and qualified fractions and GPU-hours\", which is already what scripts/labeller_batch/shard.py (writes steering sessions for one shard of MAST shots), scripts/labeller_batch/receipt.py (aggregates shot manifests into a completion receipt with the qualified fraction), and scripts/labeller_parallel/scheduler.py do",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "dbdd7070b32cf0301fd6731a04046cbb3fbb89e146ae34e5738c6336b85a0bd0",
+  "plan_slug": "labeller-throughput-and-shape-inverse",
+  "plan_version": 4,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T165747701308-plan-review-of-labeller-throughput-and-shape-inverse",
+  "reviewed_blob_sha": "c9b5578fb2571043af6061d8baf2a2aeaa55a8d5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a71 and \u00a72 ask for a per-slice compiled program and a separate batched read over the same solver that BatchedLabeller already hides behind one solve(), so the design names no seam and would carry two parallel compile paths.",
+    "duplicate_owner": "a finding \u2014 \u00a73 duplicates the outer Newton loop that shape_inverse.solve_shape_inverse already owns under the same 20 kA ceiling and admission line search.",
+    "reuse_search": "a finding \u2014 the plan cites no existing mechanism at all, while every section it proposes already has an owner in the tree (batched_labeller, shape_inverse, flux_surface_connectivity, the labeller_batch shard/receipt stack, forward_operator's cold-start wall mask).",
+    "thin_wrapper": "a finding \u2014 \u00a71's \"whole slice solve inside one compiled program\" layers over reduced_newton._compiled_program and batched_labeller._make_solver without saying why those cannot be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.430534+00:00"
+}

@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "de54856c72490b216e69506c8f9fdcd7d839fedb",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T04:17:59.078Z",
+  "dispatched_at": "2026-10-06T04:07:02Z",
+  "findings": [
+    {
+      "file": "nova/biot/elliptic.py",
+      "line": "1185",
+      "severity": "follow-on",
+      "text": "follow-on: this _held_tangent duplicates nova/biot/completeelliptic.py:379 byte for byte while the same import block already pulls five sibling tangent helpers from that owner, so the copy can drift from the owner it declines to extend."
+    },
+    {
+      "file": "tests/biot/test_elliptic_tangent_recurrences.py",
+      "line": "397",
+      "severity": "follow-on",
+      "text": "follow-on: the CLASSICAL cross-check divides by a near-zero reference and prints scanned_max=1.074e+279 and base_jvp_max=7.003e+278 in identity-head-scanned.log, so it cannot substantiate the fragment's quoted \"1.2e-10 and 4.7e-6\" and those numbers appear in no committed gate log, leaving the second-kind qualification asserted but not reproducible."
+    },
+    {
+      "file": "tests/biot/test_elliptic_tangent_recurrences.py",
+      "line": "366",
+      "severity": "follow-on",
+      "text": "follow-on: the same identity row holds 1e-9 against jax.jvp of the base on only 4,096 of its 10,000 samples for complete_kind because 5,904 are masked out below a complement of 1e-7, so the row's coverage of the declared domain is 41 percent and a regression confined to that sub-domain would not redden it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T022907188945-cfs-elliptic-tangent-recurrences/compile-gate-scanned.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate log names revision 29c70dc56 whose committed source (elliptic.py blob 9454185276) differs from the reviewed head (blob ad294c3e72), so the compile evidence is bound to the final code only by its +worktree marker and a reader checking the named revision reproduces a different source."
+    }
+  ],
+  "head_log_revision": "4bee3896bb238029654387e2e2e361db844cd8b3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit: 0a105dc2c and 54e3aa23e add the tangent vocabulary and the complete-elliptic and harmonic recurrences, 3a45a584d the truncation controls, 3ea123557 the scanned forms for the three slow families, 4bee3896b the second-kind resolved-domain handling.",
+    "done_when": "the done_when asks for the 1e-13 identity (refined to 1e-9 for scanned forms by the plan decision tangent-identity-tolerance at docs/plans/converged-forward-solve.html:160), a truncation control, a cold compile within 3x the primal, primal bit-identity, the test module and the fragment; the manifest records every one, in identity-head-scanned.log, negative-control-scanned.log, compile-gate-scanned.log and suite-head-scanned.log.",
+    "goal": "the node goal is a private tangent for each of the 15 elliptic helpers the point jet's jaxpr reaches, matching jax.jvp of the base without calling autodiff; the diff adds one tangent per helper in nova/biot/elliptic.py:1284 (harmonic_moments, its rising/ratio steps) and nova/biot/completeelliptic.py:617 (complete_kind and the descent/accumulate/finite-part helpers), and no new source calls jax.jvp, jax.grad or jax.jacfwd on a primal it differentiates.",
+    "manifest": "read; it records status complete, eight commits, per-row identity, truncation, compile and primal numbers with their logs, and a suite delta from five base failures to zero head failures.",
+    "write_paths": "the manifest declares four source and doc paths; git diff de54856c..8794c425e touches exactly nova/biot/completeelliptic.py, nova/biot/elliptic.py, tests/biot/test_elliptic_tangent_recurrences.py and the fragment, every one inside the declared scope and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_elliptic_tangent_recurrences.py:366 compares each tangent against jax.jvp of the base-revision function (an independent source, not a value the test passed in), and negative-control-scanned.log shows the one-term truncation reddening all nine identity ids.",
+    "evidence": "identity-head-scanned.log and suite-head-scanned.log record the identity, truncation, compile and delta rows the done_when asserts, but the second-kind CLASSICAL line at tests/biot/test_elliptic_tangent_recurrences.py:397 prints 1.074e+279 against a near-zero reference, so the fragment's quoted 1.2e-10 and 4.7e-6 are not the logged figure, and the complete_kind identity row excludes 5,904 of 10,000 samples.",
+    "fit": "the tangent helpers follow the module's private-helper idiom and carry no plan or stage label, matching the surrounding style of nova/biot/completeelliptic.py:335.",
+    "goal_fidelity": "nova/biot/elliptic.py:1284 and nova/biot/completeelliptic.py:617 give every helper the jet reaches its own recurrence and the primal is bit-identical, but four of nine rows sit at about 1e-10 under the plan's relaxed 1e-9 bound (docs/plans/converged-forward-solve.html:160) rather than the goal's literal 1e-13.",
+    "reuse": "no owner of elliptic tangent machinery existed to fork (searched nova/biot and the package for derivative or tangent helpers), but the change declares the same _held_tangent twice, at nova/biot/elliptic.py:1185 and nova/biot/completeelliptic.py:379.",
+    "scope_discipline": "git diff de54856c..8794c425e touches only the four declared paths, all inside the manifest write scope, with nothing outside the goal and no uncommitted file in the reviewed worktree."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a private tangent for each of the 15 elliptic helpers the point jet's jaxpr reaches, matching jax.jvp of the base without calling autodiff; the diff adds one tangent per helper in nova/biot/elliptic.py:1284 (harmonic_moments, its rising/ratio steps) and nova/biot/completeelliptic.py:617 (complete_kind and the descent/accumulate/finite-part helpers), and no new source calls jax.jvp, jax.grad or jax.jacfwd on a primal it differentiates.\nVERDICT done_when: the done_when asks for the 1e-13 identity (refined to 1e-9 for scanned forms by the plan decision tangent-identity-tolerance at docs/plans/converged-forward-solve.html:160), a truncation control, a cold compile within 3x the primal, primal bit-identity, the test module and the fragment; the manifest records every one, in identity-head-scanned.log, negative-control-scanned.log, compile-gate-scanned.log and suite-head-scanned.log.\nVERDICT write_paths: the manifest declares four source and doc paths; git diff de54856c..8794c425e touches exactly nova/biot/completeelliptic.py, nova/biot/elliptic.py, tests/biot/test_elliptic_tangent_recurrences.py and the fragment, every one inside the declared scope and nothing else.\nVERDICT manifest: read; it records status complete, eight commits, per-row identity, truncation, compile and primal numbers with their logs, and a suite delta from five base failures to zero head failures.\nVERDICT diff: read commit by commit: 0a105dc2c and 54e3aa23e add the tangent vocabulary and the complete-elliptic and harmonic recurrences, 3a45a584d the truncation controls, 3ea123557 the scanned forms for the three slow families, 4bee3896b the second-kind resolved-domain handling.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/elliptic.py:1284 and nova/biot/completeelliptic.py:617 give every helper the jet reaches its own recurrence and the primal is bit-identical, but four of nine rows sit at about 1e-10 under the plan's relaxed 1e-9 bound (docs/plans/converged-forward-solve.html:160) rather than the goal's literal 1e-13.\nSCORE evidence: 14\nJUSTIFICATION evidence: identity-head-scanned.log and suite-head-scanned.log record the identity, truncation, compile and delta rows the done_when asserts, but the second-kind CLASSICAL line at tests/biot/test_elliptic_tangent_recurrences.py:397 prints 1.074e+279 against a near-zero reference, so the fragment's quoted 1.2e-10 and 4.7e-6 are not the logged figure, and the complete_kind identity row excludes 5,904 of 10,000 samples.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff de54856c..8794c425e touches only the four declared paths, all inside the manifest write scope, with nothing outside the goal and no uncommitted file in the reviewed worktree.\nSCORE durability: 19\nJUSTIFICATION durability: tests/biot/test_elliptic_tangent_recurrences.py:366 compares each tangent against jax.jvp of the base-revision function (an independent source, not a value the test passed in), and negative-control-scanned.log shows the one-term truncation reddening all nine identity ids.\nSCORE fit: 19\nJUSTIFICATION fit: the tangent helpers follow the module's private-helper idiom and carry no plan or stage label, matching the surrounding style of nova/biot/completeelliptic.py:335.\nSCORE reuse: 16\nJUSTIFICATION reuse: no owner of elliptic tangent machinery existed to fork (searched nova/biot and the package for derivative or tangent helpers), but the change declares the same _held_tangent twice, at nova/biot/elliptic.py:1185 and nova/biot/completeelliptic.py:379.\nFINDING nova/biot/elliptic.py:1185 follow-on: this _held_tangent duplicates nova/biot/completeelliptic.py:379 byte for byte while the same import block already pulls five sibling tangent helpers from that owner, so the copy can drift from the owner it declines to extend.\nFINDING tests/biot/test_elliptic_tangent_recurrences.py:397 follow-on: the CLASSICAL cross-check divides by a near-zero reference and prints scanned_max=1.074e+279 and base_jvp_max=7.003e+278 in identity-head-scanned.log, so it cannot substantiate the fragment's quoted \"1.2e-10 and 4.7e-6\" and those numbers appear in no committed gate log, leaving the second-kind qualification asserted but not reproducible.\nFINDING tests/biot/test_elliptic_tangent_recurrences.py:366 follow-on: the same identity row holds 1e-9 against jax.jvp of the base on only 4,096 of its 10,000 samples for complete_kind because 5,904 are masked out below a complement of 1e-7, so the row's coverage of the declared domain is 41 percent and a regression confined to that sub-domain would not redden it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T022907188945-cfs-elliptic-tangent-recurrences/compile-gate-scanned.log:1 follow-on: the gate log names revision 29c70dc56 whose committed source (elliptic.py blob 9454185276) differs from the reviewed head (blob ad294c3e72), so the compile evidence is bound to the final code only by its +worktree marker and a reader checking the named revision reproduces a different source.",
+  "review_run_id": "r-20261006T040642346894-review-of-cfs-elliptic-tangent-recurrences",
+  "reviewed_base_sha": "de54856c72490b216e69506c8f9fdcd7d839fedb",
+  "reviewed_head_sha": "8794c425e8f7ffc49ce021ded0c1df243c555f87",
+  "reviewed_run_id": "r-20261006T022907188945-cfs-elliptic-tangent-recurrences",
+  "scores": {
+    "durability": 19,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T04:15:59.042617+00:00",
+  "total": 105
+}

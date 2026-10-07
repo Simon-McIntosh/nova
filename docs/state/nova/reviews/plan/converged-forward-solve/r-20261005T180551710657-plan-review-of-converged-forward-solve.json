@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T18:11:31.210Z",
+  "dispatched_at": "2026-10-05T18:06:16Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/forward_operator.py:147",
+      "id": "reuse_search-1",
+      "reason": "\u00a74 needs the same reuse-or-justify ruling \u00a795/\u00a796/\u00a797 carry for the other nodes, else gs.py either forks forward_operator.py's operand/pytree flattening or silently depends on it without the plan saying so.",
+      "text": "\u00a74 has gs.apply take \"geometry (mesh, coupling blocks, stencils) as traced operands\" and \u00a76 keeps forward_operator.py's \"geometry and polynomial helpers\" as private dependencies, but the plan names no reuse candidate for the machinery that actually builds and flattens those traced operands (forward_operator.py:_flatten_shared_flux_stencil at 147, _flatten_interior_moment_stencil at 159, _flatten_moment_geometry at 187, _SourceLayout at 2122, _CallableLayout at 2079, _OperatorPytreeAux at 2239), whereas \u00a795/\u00a796 gave \u00a75 and \u00a72 an explicit reuse-or-justify ruling \u2014 leaving \u00a74's \"one compiled program serves two geometries of the same shape\" resting on operand-identity machinery with no named owner",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ab7c2ba9bdfc24d6b06bbc7384c83f0443122a61acdcd81e1432e26030b53c56",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 24,
+  "project": "nova",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T18:13:04.352938+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T180551710657-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "86f88cf4317572f23d1d9fc8076788a44eb0ad9f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 topology.read, current.book, gs.apply and solve.fixed_point each expose a single entry point over a large hidden body (tree kernel, exact-clip quadrature, traced map operands, one lax.scan state machine), with compact signatures in the design returning a receipt.",
+    "duplicate_owner": "pass \u2014 the recurring duplicates are routed to an owner rather than forked: forward_operator.py:_FixedDesignNull2D and _support_partition \u2192 topology.read/current.book, fixed_point.py:_active_set_newton_krylov \u2192 deleted, and the design's closing note names contour_tree_mesh.py, source.py/rotation.py profile evaluation and generic polygon algebra as helpers only, never additional authorities.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each of \u00a72\u2013\u00a76 names in its own text the mechanism it replaces (Topology.read/read_with_connectivity and the other bound null/region authorities; clipped_support_current_moments plus the support partition; the map ForwardFluxOperator performs; newton_krylov/picard/operator_request_body) or the routes retired in \u00a76, so no section adds interface surface unaccounted for.",
+    "reuse_search": "pass \u2014 the design document (docs/research/converged-forward-solve-design.html) carries the 40-row source inventory binding each null-role and region-role implementation to a destination, and plan \u00a795\u2013\u00a797 name the GMRES kernel (fixed_point.py:_single_site_krylov at 2619, _krylov_machine at 2216, _serve_krylov_stream at 2394, _krylov_outputs at 2371, _steepest_descent_promotion at 1672), the biot null kernels (biot/null.py Null1D/Null2D/inside_or_near_source_cell, biot/fieldnull.py FieldNull) and the labeller consumer (batched_labeller.py:18 `from nova.equilibrium import reduced_newton`) as reuse candidates; every one of those symbols is present in the tree.",
+    "thin_wrapper": "pass \u2014 \u00a74 states gs.apply replaces the map ForwardFluxOperator performs \"rather than wrapping it\"; \u00a73 merges clip_quadrature.py:clipped_support_current_moments and forward_operator.py:_support_partition into one booking path; \u00a75's reuse of the existing GMRES kernel is justified in \u00a795 (carry it as private helpers, or state why it fails the scan contract), so no layer is added without either justification."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T18:13:03.508248+00:00"
+}

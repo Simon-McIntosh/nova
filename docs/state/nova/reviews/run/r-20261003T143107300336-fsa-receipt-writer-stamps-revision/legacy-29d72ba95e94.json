@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T15:12:50.079Z",
+  "delta_note": "This record covers only the two commits the run gained since its prior review at d90730fad: 5d94508a9 (test) and f0d841ac9 (evidence fragment), range d90730fad..f0d841ac9, 33 insertions across the two granted paths. The scores are the run's dimension scores at the new head f0d841ac9, carried from the prior record with the two effects of the delta applied (see justifications); they are not a second independent score of the pre-delta work.",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:31:26Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/figure-and-solver-audit/fsa-receipt-writer-stamps-revision.html",
+      "line": 44,
+      "severity": "follow-on",
+      "text": "The Measure section gives the final gate result as '18 passed, EXIT=0 at the repair head' without naming the revision f0d841ac9, while it names d90730fad explicitly for the reviewed-head arm. A reader of the fragment alone cannot tie the 18-passed result to a revision; the run manifest names it, so this is a naming omission in the evidence fragment, not a defect in the work."
+    }
+  ],
+  "gate_arms_note": "added_failure_ids is the after_suite failure_ids minus the baseline_suite failure_ids, both read from the reviewed run's own JSON. baseline_suite (revision a42dc665cf41a4a698ba95df16fee43cfe3c4a32, command runs only tests/test_production_solver_receipt_trip_alignment.py, 15 passed, EXIT=0, completed=true) and after_suite (revision f0d841ac9c1144821c50c305bca6899d4a818d48, command runs tests/test_production_solver_receipt_stamp.py plus tests/test_production_solver_receipt_trip_alignment.py, 18 passed, EXIT=0, completed=true) both ran to their summary lines. Both failure_id lists are empty, so added_failure_count is 0. The separate reviewed-head arm after_suite_reviewed_head.log names revision d90730fad49120cdc5b8278691f4e8f5d6b5e148 and reports 17 passed, EXIT=0; it is not the baseline/after delta pair but closes the prior arm-scope finding. after_suite now names the reviewed tree head f0d841ac9, so the prior mismatch is resolved.",
+  "justifications": {
+    "durability": "Raised from 17 to 18: the prior durability deduction was the partly-tautological contract, now fixed, so a future refactor that echoed the caller's revision would redden. The stamp still sits at payload-assembly time inside the writer that persists the receipt, so a regenerated receipt carries source_revision automatically. One point remains withheld for the same structural reason the prior reviewer gave: the commits are local detached-HEAD commits reachable only from the reviewed worktree and not on any shared ref until the coordinator promotes them.",
+    "evidence": "Raised from 18 to 20: the prior evidence deduction was the partly-tautological equality test, which the delta removes. Independently reproduced first-hand in this review. (1) The full gate re-run in the reviewed worktree at the reviewed head f0d841ac9 gives 18 passed, EXIT=0, matching after_suite.log. (2) The new discrimination claim was falsified by me directly: I built a copy of measure.py whose payload construction echoes the revision argument into source_revision (replacing the stamp_source_revision call), loaded it by spec_from_file_location, and built a payload with the 40-zero sentinel; the stamped value came out the sentinel and NOT the live tree revision (f0d841ac9...), so both assertions of the new test fail and the guard is shown to fire. The reviewed run's own negative-control-echo.log (revision 5d94508a9, 1 failed 17 passed, EXIT=1, failing exactly test_source_revision_is_rederived_not_echoed_from_the_revision_argument) and negative-control.log (revision 5d94508a9, 3 failed 15 passed, EXIT=1) both end with a bare EXIT line and are admissible. Reviewed-head arm at d90730fad logged separately.",
+    "fit": "Unchanged at 19. The delta is minimal and additive: _payload gains one optional kwarg and the test module gains one focused case exercising the existing build_payload builder; the fragment update restates the result and the two mutations. No new machinery, no dead code, and the new case has a single purpose it states.",
+    "goal_fidelity": "Unchanged from the prior record at 19. The run's goal (plan nova:figure-and-solver-audit section 3, follow-up f-fsa-production-solver-receipt-writer-revision: route the production-solver receipt writer's payload through the shared source-revision stamp and regenerate nothing) remains met exactly, and the delta adds nothing to or away from that goal: 5d94508a9 strengthens the guard and f0d841ac9 records the evidence. The one carried deduction is the same the prior reviewer stated - the module-importability repair and the change of the revision source are adjacent behaviour changes beyond the literal request, disclosed and necessary but still more than stamping alone.",
+    "scope_discipline": "Raised from 19 to 20 for the delta, which touches exactly two paths, both inside the node's granted write paths (tests/test_production_solver_receipt_stamp.py and docs/evidence/fragments/figure-and-solver-audit/fsa-receipt-writer-stamps-revision.html); no product source, plan, index or concurrent path. The reviewed worktree is clean at f0d841ac9 (git status --porcelain empty). Both delta commits carry a conventional subject with an explanatory body."
+  },
+  "node": "review-of-fsa-receipt-writer-stamps-revision",
+  "previous_review_record": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T143107300336-fsa-receipt-writer-stamps-revision.at-d90730fad49120cdc5b8278691f4e8f5d6b5e148.json",
+  "prior_findings_answered": [
+    {
+      "answered_by": "5d94508a9f5dcc1e9c691008e6ff0e37d7ef606c",
+      "finding": "test_source_revision equality was partly tautological: it passed revision=certificate._source_revision() while stamp_source_revision independently called the same helper, so it could not catch a caller assembling revision from a different tree.",
+      "how": "_payload gained a revision kwarg defaulting to certificate._source_revision(); the new test_source_revision_is_rederived_not_echoed_from_the_revision_argument builds the payload with a 40-zero sentinel and asserts the stamped source_revision equals a fresh certificate._source_revision() AND differs from the sentinel."
+    },
+    {
+      "answered_by": "f0d841ac9c1144821c50c305bca6899d4a818d48",
+      "finding": "after_suite.log named the code commit 53bab014c while the reviewed head was the later fragment commit d90730fad, so the gate arm was not literally at the reviewed tree HEAD.",
+      "how": "A gate arm was run literally at d90730fad and recorded in after_suite_reviewed_head.log (17 passed, EXIT=0), and the fragment now states both the reviewed-head arm and the final arm at the repair head."
+    }
+  ],
+  "project": "nova",
+  "reproduction": {
+    "gate_command": "JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_production_solver_receipt_stamp.py tests/test_production_solver_receipt_trip_alignment.py",
+    "gate_result_at_f0d841ac9": "18 passed, EXIT=0",
+    "reviewer_echo_mutation": "built a measure.py copy echoing revision into source_revision; stamped value came out the 40-zero sentinel, not the live tree revision f0d841ac9, so the new test's two assertions both fail - guard fires",
+    "reviewer_head_clean": "git status --porcelain at f0d841ac9 is empty",
+    "reviewer_scratch": "/tmp/fsa-review-scratch/"
+  },
+  "review_base_sha": "71643ba3b6f731b0d12f14e8a808b6a108dd1825",
+  "review_run_id": "legacy-29d72ba95e94",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "d90730fad49120cdc5b8278691f4e8f5d6b5e148",
+  "reviewed_commit": "5d94508a9f5dcc1e9c691008e6ff0e37d7ef606c",
+  "reviewed_commits": [
+    "5d94508a9f5dcc1e9c691008e6ff0e37d7ef606c",
+    "f0d841ac9c1144821c50c305bca6899d4a818d48"
+  ],
+  "reviewed_head_sha": "f0d841ac9c1144821c50c305bca6899d4a818d48",
+  "reviewed_run_id": "r-20261003T143107300336-fsa-receipt-writer-stamps-revision",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-receipt-writer-stamps-revision",
+  "run_base_sha": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:20:00Z",
+  "total": 96,
+  "verdict": "pass"
+}

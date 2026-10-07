@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/unit_amplitude_current_census.py:502",
+    "benchmarks/unit_amplitude_current_census.py:802"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T12:08:13.754618+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/cut-cell-current-attribution/census-after-bank-repair/run_census.py",
+      "line": "32",
+      "text": "the reported bank-overflow count is the count of non-finite per-cell currents, summed into total_overflow and reprinted as nonfinite_cell_current_signatures at run_census.py:57, so the done_when's two terminal readings are one instrument and the zero-overflow verdict carries no information the finite-total verdict does not."
+    },
+    {
+      "file": "tests/test_outboard_hole_census_gate.py",
+      "line": "121",
+      "text": "the pin block is edited outside the run's declared write paths, so the landed diff leaves its declared scope even though the manifest states coordinator direction for the edit."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T092847056643-cca-census-partition-probe-reads-the-full-state/manifest.md",
+      "line": "11",
+      "text": "the commits field names only the two repair commits and not the five commits of the pass this run landed (87d11db6c, abd30a39b, 4b7b59ad6, 5840fcd44, 237e3e931), so the manifest alone does not cover the reviewed range."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read all seven commits against b1940ff25; the code change is the one-line widening at benchmarks/unit_amplitude_current_census.py:304 plus the per-cell row index and overflow read in the driver, and the two repair commits re-pin tests/test_outboard_hole_census_gate.py:121, delete docs/figures/cutnie and revert plan-version to 192 at docs/plans/cut-cell-current-attribution.html:29.",
+    "done_when": "the done_when names one all_debug job at main HEAD reporting the bank overflow count and whether the exact total is finite; census-after-bank-repair/unit-amplitude-census.log:1-5 records revision 4b7b59ad6, exit 0, overflow_by_state_mode all zero and exact_total_finite=True, gate-after-repin.log records the three gate modules green at 247e5aa4a, and negative-control.log:5 reproduces the declared refusal, but the two terminal readings are one instrument.",
+    "goal": "the goal is that _partition_probe hands the whole state vector to operator._fixed_design_read, and benchmarks/unit_amplitude_current_census.py:304 now passes jnp.asarray(state) un-sliced, which census-after-bank-repair/negative-control.log:3-4 shows as full_state_rows=772 against physical_node_number=256.",
+    "manifest": "read; status complete, its test line records the cache-guard wall-clock-reliable 3 passed in 161.63 s at 247e5aa4a, and its negative_control_log resolves on disk, but its commits line at manifest.md:11 names only the two repair commits.",
+    "write_paths": "the manifest declares five paths under benchmarks/ and docs/; the head diff keeps to them except tests/test_outboard_hole_census_gate.py:121 the manifest states was edited at explicit coordinator direction."
+  },
+  "justifications": {
+    "durability": "tests/test_outboard_hole_census_gate.py:257 compares the recomputed totals against the literal BOOKED_TOTALS_A at a 1e-6 relative tolerance and was red before the re-pin (gate-before-repin.log, 2 failed 1 passed), so reinstating the slice at benchmarks/unit_amplitude_current_census.py:304 reddens or errors it.",
+    "evidence": "the census, negative-control and gate logs are committed and green, but docs/figures/cut-cell-current-attribution/census-after-bank-repair/run_census.py:32 reads the bank overflow count off the same per-cell non-finite test reprinted as nonfinite_cell_current_signatures at run_census.py:57, and the exact total lands at 0.859 of the analytic target without the run separating the two changes that moved it.",
+    "fit": "the widening follows the module idiom and its docstring at benchmarks/unit_amplitude_current_census.py:296-302 states the constraint, introducing no name the repository rules forbid.",
+    "goal_fidelity": "benchmarks/unit_amplitude_current_census.py:304 passes jnp.asarray(state) un-sliced into operator._fixed_design_read, and census-after-bank-repair/negative-control.log:3 records full_state_rows=772 against physical_node_number=256.",
+    "scope_discipline": "every path in the head diff is inside the manifest's declared paths except tests/test_outboard_hole_census_gate.py:121 and the reverted plan-version meta at docs/plans/cut-cell-current-attribution.html:29, which now reads 192."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: b1940ff25bd0942e1bb841493c34b05a2256bcc9\nreviewed_head_sha: 386e6833af8ca5d51c822e695a7fc99d992a895f\nVERDICT goal: the goal is that _partition_probe hands the whole state vector to operator._fixed_design_read, and benchmarks/unit_amplitude_current_census.py:304 now passes jnp.asarray(state) un-sliced, which census-after-bank-repair/negative-control.log:3-4 shows as full_state_rows=772 against physical_node_number=256.\nVERDICT done_when: the done_when names one all_debug job at main HEAD reporting the bank overflow count and whether the exact total is finite; census-after-bank-repair/unit-amplitude-census.log:1-5 records revision 4b7b59ad6, exit 0, overflow_by_state_mode all zero and exact_total_finite=True, gate-after-repin.log records the three gate modules green at 247e5aa4a, and negative-control.log:5 reproduces the declared refusal, but the two terminal readings are one instrument.\nVERDICT write_paths: the manifest declares five paths under benchmarks/ and docs/; the head diff keeps to them except tests/test_outboard_hole_census_gate.py:121 the manifest states was edited at explicit coordinator direction.\nVERDICT manifest: read; status complete, its test line records the cache-guard wall-clock-reliable 3 passed in 161.63 s at 247e5aa4a, and its negative_control_log resolves on disk, but its commits line at manifest.md:11 names only the two repair commits.\nVERDICT diff: read all seven commits against b1940ff25; the code change is the one-line widening at benchmarks/unit_amplitude_current_census.py:304 plus the per-cell row index and overflow read in the driver, and the two repair commits re-pin tests/test_outboard_hole_census_gate.py:121, delete docs/figures/cutnie and revert plan-version to 192 at docs/plans/cut-cell-current-attribution.html:29.\nCALL_SITES: benchmarks/unit_amplitude_current_census.py:502, benchmarks/unit_amplitude_current_census.py:802\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: benchmarks/unit_amplitude_current_census.py:304 passes jnp.asarray(state) un-sliced into operator._fixed_design_read, and census-after-bank-repair/negative-control.log:3 records full_state_rows=772 against physical_node_number=256.\nSCORE evidence: 16\nJUSTIFICATION evidence: the census, negative-control and gate logs are committed and green, but docs/figures/cut-cell-current-attribution/census-after-bank-repair/run_census.py:32 reads the bank overflow count off the same per-cell non-finite test reprinted as nonfinite_cell_current_signatures at run_census.py:57, and the exact total lands at 0.859 of the analytic target without the run separating the two changes that moved it.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every path in the head diff is inside the manifest's declared paths except tests/test_outboard_hole_census_gate.py:121 and the reverted plan-version meta at docs/plans/cut-cell-current-attribution.html:29, which now reads 192.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_outboard_hole_census_gate.py:257 compares the recomputed totals against the literal BOOKED_TOTALS_A at a 1e-6 relative tolerance and was red before the re-pin (gate-before-repin.log, 2 failed 1 passed), so reinstating the slice at benchmarks/unit_amplitude_current_census.py:304 reddens or errors it.\nSCORE fit: 18\nJUSTIFICATION fit: the widening follows the module idiom and its docstring at benchmarks/unit_amplitude_current_census.py:296-302 states the constraint, introducing no name the repository rules forbid.\nFINDING docs/figures/cut-cell-current-attribution/census-after-bank-repair/run_census.py:32 the reported bank-overflow count is the count of non-finite per-cell currents, summed into total_overflow and reprinted as nonfinite_cell_current_signatures at run_census.py:57, so the done_when's two terminal readings are one instrument and the zero-overflow verdict carries no information the finite-total verdict does not.\nFINDING tests/test_outboard_hole_census_gate.py:121 the pin block is edited outside the run's declared write paths, so the landed diff leaves its declared scope even though the manifest states coordinator direction for the edit.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T092847056643-cca-census-partition-probe-reads-the-full-state/manifest.md:11 the commits field names only the two repair commits and not the five commits of the pass this run landed (87d11db6c, abd30a39b, 4b7b59ad6, 5840fcd44, 237e3e931), so the manifest alone does not cover the reviewed range.",
+  "review_run_id": "r-20260923T120813754618-review-2-of-cca-census-probe",
+  "reviewed_base_sha": "b1940ff25bd0942e1bb841493c34b05a2256bcc9",
+  "reviewed_head_sha": "386e6833af8ca5d51c822e695a7fc99d992a895f",
+  "reviewed_run_id": "r-20260923T092847056643-cca-census-partition-probe-reads-the-full-state",
+  "reviewer": "review-2-of-cca-census-probe",
+  "reviewer_run_id": "r-20260923T120813754618-review-2-of-cca-census-probe",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T12:29:02.123778+00:00",
+  "total": 88
+}

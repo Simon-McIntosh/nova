@@ -1,0 +1,52 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-18T12:14:31.723283+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/bank_drift_anchor_bisect.py",
+      "line": "727",
+      "text": "the else branch reports \"the override did not take effect\" when an arm is merely absent, because _load_arm:619 returns an exception stub whose hook_names list is empty and the verdict keys on hook_names alone; bisect-run1-chdir-defect.log shows both classes printing that finding at exit 0 with traced_residual=None, and the branch additionally reports profile_support_invariant=true and terminal_residual_differ=false over arms that never ran, so a receipt that measures nothing reads as a receipt that refutes the hook."
+    },
+    {
+      "file": "docs/figures/null-identification-authority/anchor-bisect/receipt-21978-35-anchor-bisect.json",
+      "line": "426",
+      "text": "the mixed class's generated finding reads \"the anchor partition is the carrier: holding the three anchors constant changes the terminal state\" for a gap at the round-off floor (2.2041968427410595e-16 against 3.0996518101046146e-16, both converged), which alone contradicts the node's own exoneration and needs the prose in receipt.html:61-66 to be read correctly."
+    },
+    {
+      "file": "docs/figures/null-identification-authority/anchor-bisect/receipt.html",
+      "line": "142",
+      "text": "the instrument table states the slowest compile was \"4m18s\" while bisect.log's slowest slow-compile alarm is 4m30.589312894s, so the record understates the worst compile it reports on."
+    }
+  ],
+  "justifications": {
+    "durability": "no test imports or pins the driver's receipt join or its missing-arm branch (only tests/test_bank_drift_paired_probe.py references bank_drift at all, importing benchmarks.bank_drift_paired_probe), while the sibling driver's join is pinned by a committed test in the same campaign, so the campaign precedent for a pinning test is unmet here.",
+    "evidence": "every verdict field of receipt-21978-35-anchor-bisect.json is exactly reproducible from the four committed arm JSONs and the committed bank reference (recomputed in review, all equal), the job record matches sacct 1273425 (gres/gpu=1, 8 cores, 128G, 52m51s, COMPLETED, one allocation not an array), and the traced arm bit-matches the committed bank operands (structure 0fe0dcdf920a9b66, values 35c0be67ae2abdd8, support 5683f88ca97c076e); the three findings sit in the receipt's interpretation layer against numbers that all verify.",
+    "fit": "the driver compiles under the project 3.14 interpreter, ruff passes path-scoped, its helpers (_digest, _partition_report, _hollow_after) mirror benchmarks/bank_drift_paired_probe.py:147-233, and no plan, stage or ticket identifier appears in the diff.",
+    "goal_fidelity": "benchmarks/bank_drift_anchor_bisect.py:385-435 solves 21978/35 pure and mixed under both anchor treatments in one job, and receipt-21978-35-anchor-bisect.json records the pure arms landing on the identical 2.4506488565449e-03 under active_set_cycle_detected with the cause placed downstream of the hook.",
+    "scope_discipline": "git show --name-only over 78b8d9a7, b3c5c2f8 and 4bb66038 lists only the declared write paths, git diff 54b554ce..HEAD is empty for nova/, tests/, scripts/ and AGENTS.md, and the plan edit is additive (16 insertions, 0 deletions)."
+  },
+  "pass": 2,
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/bank_drift_anchor_bisect.py:385-435 solves 21978/35 pure and mixed under both anchor treatments in one job, and receipt-21978-35-anchor-bisect.json records the pure arms landing on the identical 2.4506488565449e-03 under active_set_cycle_detected with the cause placed downstream of the hook.\nSCORE evidence: 17\nJUSTIFICATION evidence: every verdict field of receipt-21978-35-anchor-bisect.json is exactly reproducible from the four committed arm JSONs and the committed bank reference (recomputed in review, all equal), the job record matches sacct 1273425 (gres/gpu=1, 8 cores, 128G, 52m51s, COMPLETED, one allocation not an array), and the traced arm bit-matches the committed bank operands (structure 0fe0dcdf920a9b66, values 35c0be67ae2abdd8, support 5683f88ca97c076e); the three findings sit in the receipt's interpretation layer against numbers that all verify.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --name-only over 78b8d9a7, b3c5c2f8 and 4bb66038 lists only the declared write paths, git diff 54b554ce..HEAD is empty for nova/, tests/, scripts/ and AGENTS.md, and the plan edit is additive (16 insertions, 0 deletions).\nSCORE durability: 10\nJUSTIFICATION durability: no test imports or pins the driver's receipt join or its missing-arm branch (only tests/test_bank_drift_paired_probe.py references bank_drift at all, importing benchmarks.bank_drift_paired_probe), while the sibling driver's join is pinned by a committed test in the same campaign, so the campaign precedent for a pinning test is unmet here.\nSCORE fit: 19\nJUSTIFICATION fit: the driver compiles under the project 3.14 interpreter, ruff passes path-scoped, its helpers (_digest, _partition_report, _hollow_after) mirror benchmarks/bank_drift_paired_probe.py:147-233, and no plan, stage or ticket identifier appears in the diff.\nFINDING benchmarks/bank_drift_anchor_bisect.py:727 the else branch reports \"the override did not take effect\" when an arm is merely absent, because _load_arm:619 returns an exception stub whose hook_names list is empty and the verdict keys on hook_names alone; bisect-run1-chdir-defect.log shows both classes printing that finding at exit 0 with traced_residual=None, and the branch additionally reports profile_support_invariant=true and terminal_residual_differ=false over arms that never ran, so a receipt that measures nothing reads as a receipt that refutes the hook.\nFINDING docs/figures/null-identification-authority/anchor-bisect/receipt-21978-35-anchor-bisect.json:426 the mixed class's generated finding reads \"the anchor partition is the carrier: holding the three anchors constant changes the terminal state\" for a gap at the round-off floor (2.2041968427410595e-16 against 3.0996518101046146e-16, both converged), which alone contradicts the node's own exoneration and needs the prose in receipt.html:61-66 to be read correctly.\nFINDING docs/figures/null-identification-authority/anchor-bisect/receipt.html:142 the instrument table states the slowest compile was \"4m18s\" while bisect.log's slowest slow-compile alarm is 4m30.589312894s, so the record understates the worst compile it reports on.\n",
+  "review_run_id": "r-20260918T121431723283-review-of-nia-anchor-trace-bisect",
+  "reviewed_commits": [
+    "78b8d9a7",
+    "b3c5c2f8",
+    "4bb66038"
+  ],
+  "reviewed_run_id": "r-20260917T224621772891-nia-anchor-trace-bisect",
+  "reviewer_node": "review-of-nia-anchor-trace-bisect",
+  "reviewer_run_id": "r-20260918T121431723283-review-of-nia-anchor-trace-bisect",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-18T12:28:01.958811+00:00",
+  "total": 85
+}

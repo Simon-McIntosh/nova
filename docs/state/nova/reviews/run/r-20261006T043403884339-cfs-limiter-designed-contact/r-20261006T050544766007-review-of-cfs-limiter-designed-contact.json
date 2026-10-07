@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "dcfbaed2aede953baf842b19559c33716d549385",
+  "call_site_count": 3,
+  "call_sites": [
+    "tests/test_topology_limiter_contact.py:126 (test helper delegates)",
+    "benchmarks/limiter_read_resolution_audit.py:1484 (_limiter_node_construction)",
+    "benchmarks/wall_at_cell_pitch.py:113 (_wall_metrics outboard panel)"
+  ],
+  "completed_at": "2026-10-06T05:17:14.195Z",
+  "dispatched_at": "2026-10-06T05:06:03Z",
+  "findings": [
+    {
+      "file": "logs/benchmark_contact_probe.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the partial full-machine probe's header line declares `rev dcfbaed2a` (the base revision) while its body prints head-only keys (`contact_rz_m`, `nearest_node_index`), so the log's declared revision does not match the code it exercised; the probe is explicitly superseded by logs/benchmark_contact_lookup.log, whose header correctly names head 0923d9782, so the benchmark evidence is bound elsewhere and this is a record-hygiene note rather than an unbound claim."
+    },
+    {
+      "file": "docs/figures/cut-cell-current-attribution/limiter-read/receipt.json",
+      "line": "40",
+      "severity": "follow-on",
+      "text": "follow-on: the committed receipt still carries the pre-change keys `tangency_node_index` and `angle_formula_index_hits_pi` that `_limiter_node_construction` no longer emits, so a reader consulting it reads a contact read the benchmark has abandoned; it lives under a different plan's figure directory and outside this node's grant, and the manifest lists it honestly as follow-on (a)."
+    },
+    {
+      "file": "tests/test_topology_limiter_contact.py",
+      "line": "168",
+      "severity": "follow-on",
+      "text": "follow-on: the base arm of the suite ran from a scratch extraction under /tmp/reckon-crew-scratch/r-20261006T043403884339-cfs-limiter-designed-contact/base-tree (its module_under_test names that path), not from one shared tree, so base and head arms differ in import path and working directory; the summary counts match (9/10/3 passed against 9/10/3 passed) with no deselection on either arm, so the delta is zero and the mismatch is a provenance note, not a selectable-difference risk of the kind a missing root conftest produces."
+    }
+  ],
+  "head_log_revision": "0923d97827d4b5cf07b00c7bfd9568a6d9a30c7a",
+  "item_aggregate": 112,
+  "item_verdicts": {
+    "call_sites": "three consumers, all in the node's declared paths: the test's `_designed_tangency` helper, `limiter_read_resolution_audit._limiter_node_construction`, and `wall_at_cell_pitch._wall_metrics`; a git grep of tests/, benchmarks/ and scripts/ at head finds no remaining `(n-1)//2`/`(wall_nodes-1)//2` contact reader and no consumer of the removed `tangency_node_index`/`node_flux_wb`/`angle_formula_index_hits_pi` keys.",
+    "diff": "read at head 0923d9782 by inspection and against base dcfbaed2a: the single commit adds `designed_contact` to scripts/analytic_oracle_fixtures/measure.py, points all three consumers at it, replaces the 241-to-481 convergence assertion with `test_weak_contact_position_is_exact_at_both_wall_resolutions` on `CONTACT_ROUNDOFF_BOUND_M = 1e-9`, and adds the evidence fragment; git diff --stat touches exactly the five declared paths, 94 insertions and 59 deletions.",
+    "done_when": "the five clauses are met: measure.py exposes `designed_contact(wall)` documented with its construction; the test helper and both benchmarks delegate to it and the repeat grep finds no other index reader; the second-order assertion is replaced by the exact-by-construction bound with a docstring that says so; the three gate modules record 9/10/3 passed at head equal to 9/10/3 at base (added failures 0) and the 121-node benchmark contact reads R = 7.80139579 m; the negative control reddens the contact assertions.",
+    "goal_fidelity": "the node goal is one owner for the analytic limiter's designed contact that every test and benchmark reads; the diff gives `scripts/analytic_oracle_fixtures/measure.py:236` that owner and routes the test helper and both benchmark contact readers through it, with no consumer left reading a vertex index.",
+    "manifest": "read; it records status complete, the one commit 0923d9782, the three gate arms with their logs, the negative control with its red log, the R = 7.80139579 m contact for the weak wall at every sampled count, and the stale-receipt follow-on.",
+    "reuse": "the node is itself a consolidation: it deletes the duplicated `_designed_tangency` body from the test and routes test and both benchmarks through the one fixture function, removing the pre-existing duplication the rebaseline review recorded.",
+    "write_paths": "git diff dcfbaed2a..0923d9782 touches exactly scripts/analytic_oracle_fixtures/measure.py, tests/test_topology_limiter_contact.py, benchmarks/limiter_read_resolution_audit.py, benchmarks/wall_at_cell_pitch.py and the fragment, every one inside the declared scope and nothing else; the reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "the new assertion compares the topology solver's read contact (`read.wall_point`, derived from the flux state) against a reference derived independently from the wall polygon geometry, so it is not self-referential, and the negative control demonstrates it is sensitive: restoring the old `(len(wall)-1)//2` index against the repaired wall reddens `test_limiter_contact_is_spline_authored_at_analytic_tangency` and `test_weak_contact_position_is_exact_at_both_wall_resolutions` (2 failed, 7 passed, EXIT=1); the bound replaces a convergence claim the operating point cannot exercise, so the test now states the strongest contract the geometry supports.",
+    "evidence": "the six gate logs carry proper headers (revision, module_under_test, cwd, literal command), the after arm names head 0923d9782 and the base arm names dcfbaed2a with its scratch tree; the negative control is red with two failing ids the head arm does not fail; I independently reproduced `tests/test_topology_limiter_contact.py` at head with 9 passed, EXIT=0; the benchmark probes show contact_R=7.80139579 for the weak wall at 121/241/481/961 nodes and panel 120 of 121 selected. Weakened by the superseded probe log's base-revision header, the stale committed receipt, and the base arm's scratch-tree provenance.",
+    "fit": "`designed_contact` is a small public function placed beside `limiter_contour` in the fixture module, follows the module's array-in/array-out idiom, and the test helper becomes a one-line delegation; comments are rewritten to state the mechanism (exact by construction, flux rounding along the stationary edge) rather than the discarded convergence claim, with no plan, stage or ticket label.",
+    "goal_fidelity": "all five done-when clauses verified at head 0923d9782: the owner exists and is documented, the test and both benchmarks delegate to it, the repeat grep finds no other index-based contact reader, the second-order assertion is replaced by the exact-by-construction bound with a truthful docstring, the gate is green at 9/10/3 against base 9/10/3, and the negative control reddens the new assertion.",
+    "reuse": "the change removes a duplicated construction (the test's own `_designed_tangency` body) and installs a single owner that the test and both benchmarks share, which is the node's whole purpose and the fix for the divergence the rebaseline review recorded; `_limiter_node_construction` still computes its nearest node by an argmin of its own, but that is a distinct query, not a re-implementation of the contact.",
+    "scope_discipline": "git diff dcfbaed2a..0923d9782 touches exactly the five declared paths and nothing else; the reviewed worktree is clean; the only stale artifact found (the cut-cell-current-attribution receipt) lies outside the grant and is reported as a follow-on rather than edited."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is one owner for the analytic limiter's designed contact that every test and benchmark reads; the diff gives scripts/analytic_oracle_fixtures/measure.py:236 that owner and routes the test helper and both benchmark contact readers through it, with no consumer left reading a vertex index.\nVERDICT done_when: the five clauses are met; measure.py exposes designed_contact(wall), the test helper and both benchmarks delegate to it, the repeat grep finds no other index reader, the second-order assertion is replaced by the exact-by-construction bound, the gate is 9/10/3 passed at head against 9/10/3 at base (added failures 0), and the negative control reddens the contact assertions.\nVERDICT write_paths: git diff dcfbaed2a..0923d9782 touches exactly the five declared paths and nothing else; the reviewed worktree is clean.\nVERDICT manifest: read; status complete, one commit 0923d9782, three gate arms with logs, negative control red, contact R = 7.80139579 m at every sampled count, stale-receipt follow-on recorded.\nVERDICT diff: read by inspection and against base; the single commit adds designed_contact, points all three consumers at it, replaces the convergence assertion with the roundoff bound, and adds the fragment.\nCALL_SITES: three\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all five done-when clauses verified at head; the owner exists and is documented, the test and both benchmarks delegate to it, no other index reader remains, the assertion is replaced truthfully, the gate is green by delta, and the negative control reddens it.\nSCORE evidence: 17\nJUSTIFICATION evidence: six properly-headed gate logs, a red negative control with two failing ids the head does not fail, an independent 9-passed reproduction, and benchmark probes at 7.80139579 m; weakened by the superseded probe's base-revision header, the stale committed receipt, and the base arm's scratch-tree provenance.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches exactly the five declared paths and nothing else; the worktree is clean; the one stale artifact is outside the grant and reported as a follow-on rather than edited.\nSCORE durability: 18\nJUSTIFICATION durability: the assertion compares the solver's flux-derived read against a geometry-derived reference, is not self-referential, and the negative control shows it fires (2 failed, EXIT=1); the bound states the strongest contract the operating point supports instead of an unexercisable convergence order.\nSCORE fit: 19\nJUSTIFICATION fit: designed_contact is a small public function beside limiter_contour following the module idiom, the test helper is a one-line delegation, comments state mechanism not changelog, and no plan or stage label appears.\nSCORE reuse: 19\nJUSTIFICATION reuse: the node removes a duplicated construction and installs one owner shared by the test and both benchmarks, which is its purpose and the repair for the recorded divergence.\nFINDING logs/benchmark_contact_probe.log:1 follow-on: header declares a base revision while printing head-only keys; superseded by benchmark_contact_lookup.log.\nFINDING docs/figures/cut-cell-current-attribution/limiter-read/receipt.json:40 follow-on: stale tangency_node_index keys; outside grant, listed honestly.\nFINDING tests/test_topology_limiter_contact.py:168 follow-on: base arm ran from a scratch extraction, so base/head import paths differ; counts match, delta zero.",
+  "review_run_id": "r-20261006T050544766007-review-of-cfs-limiter-designed-contact",
+  "reviewed_base_sha": "dcfbaed2aede953baf842b19559c33716d549385",
+  "reviewed_head_sha": "0923d97827d4b5cf07b00c7bfd9568a6d9a30c7a",
+  "reviewed_run_id": "r-20261006T043403884339-cfs-limiter-designed-contact",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T05:24:00+00:00",
+  "total": 112
+}

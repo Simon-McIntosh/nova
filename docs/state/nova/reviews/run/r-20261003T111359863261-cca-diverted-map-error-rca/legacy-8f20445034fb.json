@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T12:31:07Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T11:14:34Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/diverted_map_error_decomposition.py",
+      "line": "244",
+      "severity": "follow-on",
+      "text": "[fidelity gap, non-blocking] Substitutions (b) contour-tree region and (c) X-point wedge are not independently measured. The report's contour_tree_region block copies row['mismatch']['sup_relative'] and the exact xpoint_wedge block copies row['mismatch']['sup_relative'] verbatim, so in report.json contour_tree_region.sup_relative == production.sup_relative for every row and xpoint_wedge.sup_relative == production.sup_relative in exact mode. Only (a) analytic_membership runs distinct machinery. The plan asked for each of the three substitutions to be reported as an independently run arm; the fragment's three-column table therefore overstates how many counterfactuals were tested."
+    },
+    {
+      "file": "benchmarks/diverted_map_error_decomposition.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The node's step 0 asked for a table of sup_relative, rms_relative, dR and dZ for every certificate rung against remeasure-2026-10-02. The fragment carries only the 132- and 550-cell rows; the full five-rung comparison is available only in the raw receipt and lane log, so the delivered fragment cannot be read as the step-0 result without opening the run directory."
+    },
+    {
+      "file": "docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The reviewed worktree is left dirty: about fifty untracked per-row scratch files (.json/.npz/.svg) and a superseded map-fidelity/ directory from the abandoned first attempt sit beside the committed deliverables inside the granted figures tree. A later reader cannot tell the committed receipt from the superseded one without reading mtimes."
+    },
+    {
+      "file": "docs/evidence/fragments/cut-cell-current-attribution/cca-diverted-map-error-rca.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The X-point-wedge finding asserts that the production exact path already consumes the wedge via saddle_vertex=topology.x_point, which contradicts the \u00a711 followup f-cca-rereview-xpoint-wedge-oracle-passes-production-does-not-consume-it. The source line is verified, but the coordinator should reconcile the followup's premise before treating the X-point wedge as an open critical-path item."
+    }
+  ],
+  "gate_arms_note": "The reviewed run is a measurement node and is not suite-armed: its committed manifest carries baseline_suite=null and after_suite=null (confirmed in classification.json manifest.data), and no *suite* log exists in the run directory. Its gate logs are the two H200 measurement lanes map-fidelity-h200-stable.log (job 1280601, 10 rows, EXIT_STATUS=0) and diverted-map-decomposition-h200-null-offsets.log (job 1280608, 4 rows, EXIT_STATUS=0). Both completed with exit 0 and neither is a pytest arm, so there are no suite failure ids to difference; added_failure_count=0 and added_failure_ids=[] are read from the absence of any readable baseline/after suite arm rather than from two green arms.",
+  "justifications": {
+    "durability": "The durable deliverables are committed: the decomposition report.json and four per-row JSONs, the evidence fragment, the two contour panels, the 20-row stable receipt with its negative control, and the declared negative-control log. Both H200 lane logs are preserved under the run directory. The node required a resume to finish: attempt-1 and attempt-2 ended NEEDS-HELP (final.txt) and the completion is the product of resume-1. Commits are local and not merged into the review base, which is expected for a worker node. Untracked scratch artifacts remain in the worktree.",
+    "evidence": "Two H200 lanes completed at EXIT_STATUS=0. The stable receipt (source_revision 372c604914acda4cf25bfca797a1d95e6afae8ee, completed true, 20 rows) reconciles with the fragment and manifest at the 132 and 550 rungs: exact 0.180568/0.138457, chord 0.0950848/0.0338673. The declared negative control is committed and detects a one-pitch vertical displacement in both norms on all 20 case/mode/rung rows, so the instrument is shown to see a displaced plasma. Both panels are unfilled line contours on shared physical levels with the vessel drawn and both null sets marked (blue analytic, red mapped), satisfying the repository plotting rules; the fragment's /nova/ figure srcs resolve to committed PNGs. Weakness: the 'Oracle support substitutions' table carries three substitution columns of which two reproduce the production column verbatim, which can read as three independent null results when only one arm was run.",
+    "fit": "The work extends existing benchmark machinery it already depends on (benchmarks/plasma_cell_map_fidelity.py for the receipt and panels, benchmarks/chord_booking_operation_trace.py for analytic_condition_moments), adds one scoped driver, and changes no product code, which fits \u00a711's measurement-first RCA intent. Its re-reading of the X-point wedge - that the production exact path already supplies topology.x_point as the traced clip's saddle_vertex (verified at nova/equilibrium/forward_operator.py:3424) - is a defensible interpretation of \u00a73, but the report presents that identity as a substitution arm rather than as a claim about production.",
+    "goal_fidelity": "The node's question - which plasma-region or X-point substitution closes the diverted Solov'ev map error - is answered with a reproducible negative and one positive lever. Step 0 re-measured every requested rung of both cases in both clip modes on H200 job 1280601 (EXIT_STATUS=0); the receipt shows diverted chord first passing 1e-2 only at 2500 requested cells and diverted exact never passing down to 2616 realised (0.06580). Step 1 decomposes the 132-cell diverted map in exact and chord, attributes sup by cell class, names dominant cells, and draws shared-level line-contour panels with both null sets and the wall. Step 2 is partial: of the three requested substitutions only (a) analytic plasma-region membership is an independent measurement (diverted exact 0.07124 at 132 and 0.01525 at 550; diverted chord 0.06119 at 132 and 0.00705 at 550 - the one substitution that puts chord inside the bound). Substitutions (b) contour-tree region and (c) X-point wedge are reported as production-equivalent by reusing the production row's own mismatch values, not by running distinct arms. Step 0's requested comparison table against remeasure-2026-10-02 is not in the fragment; the raw rows live only in the receipt and lane logs.",
+    "scope_discipline": "All eight commits change only the granted paths: benchmarks/diverted_map_error_decomposition.py, docs/evidence/fragments/cut-cell-current-attribution/cca-diverted-map-error-rca.html, and the docs/figures/cut-cell-current-attribution/cca-diverted-map-error-rca tree. No nova/ product source and no tests were edited, matching the plan's 'with no edit to nova/'. Subjects are conventional and every commit carries an explanatory body; none carries AI attribution or a plan/sprint/ticket identifier. The one blemish is that the reviewed worktree is left with roughly fifty untracked scratch files (per-row .json/.npz/.svg) plus a whole superseded map-fidelity/ directory from the abandoned first run, all inside the granted figures tree but uncommitted."
+  },
+  "node": "review-of-cca-diverted-map-error-rca",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 16\nSCORE evidence: 17\nSCORE scope_discipline: 18\nSCORE durability: 17\nSCORE fit: 17\nTOTAL: 85\nVERDICT: pass-with-follow-ons\nCHECKS: base 8f475ae23620206e833b7f92347dccf64a7e46d3, head 1aa4b84e104d3a4b393bc87cd75e9cc7587802a0; H200 job 1280601 (step 0) and 1280608 (decomposition) both EXIT_STATUS=0; receipt source_revision 372c604914acda4cf25bfca797a1d95e6afae8ee completed true; diverted chord 0.0950848 and exact 0.180568 at 132, 0.0338673 and 0.138457 at 550, exact never below 1e-2 to 2616; negative control detects displacement in all 20 rows; panels are shared-level line contours with wall and both null sets; eight commits change only granted paths, bodies present, no attribution; worktree carries untracked scratch.\nFOLLOW-ONS: report contour-tree region and X-point wedge as assertions rather than as two more measured substitution arms; add the step-0 five-rung comparison table to the fragment; clean or commit the untracked scratch and the superseded map-fidelity/ directory; reconcile the X-point-wedge finding against the \u00a711 followup premise.",
+  "review_base_sha": "8b149152abd28de233465cc189c9f2ae0fc5defb",
+  "review_run_id": "legacy-8f20445034fb",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "8f475ae23620206e833b7f92347dccf64a7e46d3",
+  "reviewed_commit": "1aa4b84e104d3a4b393bc87cd75e9cc7587802a0",
+  "reviewed_head_sha": "1aa4b84e104d3a4b393bc87cd75e9cc7587802a0",
+  "reviewed_run_id": "r-20261003T111359863261-cca-diverted-map-error-rca",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-diverted-map-error-rca",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T12:07:31Z",
+  "total": 85
+}

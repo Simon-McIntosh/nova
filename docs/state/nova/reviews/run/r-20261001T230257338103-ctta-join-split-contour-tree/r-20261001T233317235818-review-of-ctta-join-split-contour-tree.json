@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "after_suite is completed with failure_count 0 and failure_ids []; no head failure can therefore be newly added, but the reviewed manifest's baseline_suite is empty and cannot validate the full two-arm comparison.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T233317235818-review-of-ctta-join-split-contour-tree/review-gate.log: 12 passed, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T233317235818-review-of-ctta-join-split-contour-tree/review-multi-region-wall.log: saddle_count=1, expected 2, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/evidence/contour-tree-merge.log: 6 passed, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/evidence/contour-tree-merge-no-sos.log: 1 failed, EXIT=1"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "cc8883adcdd2d647b1edec225f3089988a798c35",
+    "2ef31f1d715a6e3cb2d1ad455e32c2672adae281",
+    "2118e335aaa3e913e66edce37123906afe0b9599",
+    "cffdb55979f11611db95b955479b6780f862dae3",
+    "dce30cab15fab11c155510b01e90a61ed2a655a2",
+    "ccce28720376b1eab447c59aaf4807811665d6a1",
+    "a126966ffcdc60671c5a750e3090e3e80ba0e854"
+  ],
+  "completed_at": "2026-10-01T23:43:34Z",
+  "dispatched_at": "2026-10-01T23:33:34Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "139",
+      "severity": "blocking",
+      "text": "blocking: wall_seen is global, so only the first descending wall vertex in the entire carrier is an outside join; the review probe with two disconnected wall-bearing regions observed saddle_count=1 rather than the two \u00a72 requires."
+    },
+    {
+      "file": "tests/test_contour_tree_merge.py",
+      "line": "95",
+      "severity": "blocking",
+      "text": "blocking: the only wall test has one region, so it cannot guard the plan requirement that every region joins the virtual outside node at its own highest wall vertex."
+    },
+    {
+      "file": "manifest.md",
+      "line": "20",
+      "severity": "blocking",
+      "text": "blocking: baseline_suite is empty, so the reviewed run did not supply the completed baseline arm required for a reproducible baseline-to-after failure comparison."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/tree/contour-tree-merge-no-sos.log",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: git diff --check reports trailing whitespace in the committed negative-control receipt."
+    },
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "220",
+      "severity": "follow-on",
+      "text": "follow-on: no production call site currently reaches build_contour_tree; the reviewed manifest names ContourMesh integration and merged-state validation as later work."
+    }
+  ],
+  "gate_arms_note": "Reviewed manifest line 21 supplies one completed after arm at ccce28720 with exit_status 0 and no failure IDs; line 20 supplies no baseline arm. Independent repeat at head a126966ff passed 12 tests with EXIT=0 in review-gate.log.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Seven commits from f9603c3b through a126966f add the JAX tree, six synthetic tests, and receipts; diff --check also reports trailing whitespace in the committed negative-control log.",
+    "done_when": "The manifest's focused gate passes, but it does not test the required per-region wall event, real hex-carrier connectivity, or the plan's Solovev and MAST fixtures.",
+    "goal": "The dispatched goal is a fixed-capacity join/split contour tree with simulation-of-simplicity and virtual outside joins; nova/equilibrium/contour_tree.py implements the sweeps but only one global wall join.",
+    "manifest": "The source manifest reports a completed 12-test confirmation, a passing after_suite with zero failures, and an empty baseline_suite at line 20, so the requested baseline-to-after comparison is incomplete.",
+    "write_paths": "All five changed paths shown by git diff are inside the declared paths in the reviewed manifest line 3."
+  },
+  "justifications": {
+    "durability": "tests/test_contour_tree_merge.py:86 proves the simulation-of-simplicity control, but its sole wall assertion at line 95 cannot fail when the global wall_seen state drops a second disconnected region.",
+    "evidence": "The independently repeated declared gate recorded 12 passed at a126966ff, but tests/test_contour_tree_merge.py:95 covers one wall branch only and the source manifest has no readable baseline_suite arm at line 20.",
+    "fit": "The JAX fixed-shape receipt and vmap test follow nova's accelerator idiom, but contour_tree.py:122-124 documents a single real-wall substitute rather than modelling the per-region virtual-outside semantics required by \u00a72.",
+    "goal_fidelity": "nova/equilibrium/contour_tree.py:139 makes wall contact a single global event, so the landed join/split sweep does not implement \u00a72's outside join at the highest wall vertex of each region.",
+    "scope_discipline": "git diff --name-only f9603c3b..a126966f contains only the five paths granted in the reviewed manifest at lines 3 and 12."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The dispatched goal is a fixed-capacity join/split contour tree with simulation-of-simplicity and virtual outside joins; nova/equilibrium/contour_tree.py implements the sweeps but only one global wall join.\nVERDICT done_when: The manifest's focused gate passes, but it does not test the required per-region wall event, real hex-carrier connectivity, or the plan's Solovev and MAST fixtures.\nVERDICT write_paths: All five changed paths shown by git diff are inside the declared paths in the reviewed manifest line 3.\nVERDICT manifest: The source manifest reports a completed 12-test confirmation, a passing after_suite with zero failures, and an empty baseline_suite at line 20, so the requested baseline-to-after comparison is incomplete.\nVERDICT diff: Seven commits from f9603c3b through a126966f add the JAX tree, six synthetic tests, and receipts; diff --check also reports trailing whitespace in the committed negative-control log.\nCALL_SITES: none\nSCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree.py:139 makes wall contact a single global event, so the landed join/split sweep does not implement \u00a72's outside join at the highest wall vertex of each region.\nSCORE evidence: 11\nJUSTIFICATION evidence: The independently repeated declared gate recorded 12 passed at a126966ff, but tests/test_contour_tree_merge.py:95 covers one wall branch only and the source manifest has no readable baseline_suite arm at line 20.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only f9603c3b..a126966f contains only the five paths granted in the reviewed manifest at lines 3 and 12.\nSCORE durability: 8\nJUSTIFICATION durability: tests/test_contour_tree_merge.py:86 proves the simulation-of-simplicity control, but its sole wall assertion at line 95 cannot fail when the global wall_seen state drops a second disconnected region.\nSCORE fit: 15\nJUSTIFICATION fit: The JAX fixed-shape receipt and vmap test follow nova's accelerator idiom, but contour_tree.py:122-124 documents a single real-wall substitute rather than modelling the per-region virtual-outside semantics required by \u00a72.\nFINDING nova/equilibrium/contour_tree.py:139 blocking: wall_seen is global, so only the first descending wall vertex in the entire carrier is an outside join; the review probe with two disconnected wall-bearing regions observed saddle_count=1 rather than the two \u00a72 requires.\nFINDING tests/test_contour_tree_merge.py:95 blocking: the only wall test has one region, so it cannot guard the plan requirement that every region joins the virtual outside node at its own highest wall vertex.\nFINDING manifest.md:20 blocking: baseline_suite is empty, so the reviewed run did not supply the completed baseline arm required for a reproducible baseline-to-after failure comparison.\nFINDING docs/figures/contour-tree-topology-authority/tree/contour-tree-merge-no-sos.log:22 follow-on: git diff --check reports trailing whitespace in the committed negative-control receipt.\nFINDING nova/equilibrium/contour_tree.py:220 follow-on: no production call site currently reaches build_contour_tree; the reviewed manifest names ContourMesh integration and merged-state validation as later work.\n",
+  "review_run_id": "r-20261001T233317235818-review-of-ctta-join-split-contour-tree",
+  "reviewed_base_sha": "f9603c3be1e2ced6d06bc28bdff8598b6cc153ed",
+  "reviewed_head_sha": "a126966ffcdc60671c5a750e3090e3e80ba0e854",
+  "reviewed_revision": "a126966ffcdc60671c5a750e3090e3e80ba0e854",
+  "reviewed_run_id": "r-20261001T230257338103-ctta-join-split-contour-tree",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree",
+  "reviewer_node": "review-of-ctta-join-split-contour-tree",
+  "reviewer_run_id": "r-20261001T233317235818-review-of-ctta-join-split-contour-tree",
+  "scores": {
+    "durability": 8,
+    "evidence": 11,
+    "fit": 15,
+    "goal_fidelity": 9,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T01:39:26+02:00",
+  "total": 63,
+  "verdict": "fail"
+}

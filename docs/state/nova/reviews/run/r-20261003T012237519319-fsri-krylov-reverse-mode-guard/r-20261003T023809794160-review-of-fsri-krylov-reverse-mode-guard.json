@@ -1,0 +1,89 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest declares no baseline_suite key. Its only suite arm is after_suite: revision 74acfe4a3447cbab168f109ab5da2e0789c48215, completed=true, exit_status=0, failure_count=0, failure_ids=[]. The node's gate is a focused five-test file, not a whole-suite baseline/after pair, so the after-arm is the sole declared arm and it reports zero failures; the added-failure id set is empty. An independent re-run of the extracted test file at the same revision over the reviewed module exits 0 with 5 passed, corroborating the arm.",
+  "added_failure_ids": [],
+  "changed_paths": [
+    "tests/test_krylov_reverse_mode_guard.py",
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-krylov-reverse-mode-guard.html"
+  ],
+  "commits_read": [
+    "d7e149b6a209d08be16b66976eb120be248f3d9b",
+    "74acfe4a3447cbab168f109ab5da2e0789c48215"
+  ],
+  "completed_at": "2026-10-03T02:47:00.770Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T02:38:48Z",
+  "evidence_inputs": {
+    "census_population": "Independent probe of _census_calls over the package at 74acfe4a3 found 4 callers of _qualified_krylov_step across 5 sites (2+1+1+1), all in equilibrium/fixed_point.py, all forward-only and allowlisted; no other module under nova/ calls the step.",
+    "independent_gate": "Extracted the reviewed revision with git archive 74acfe4a3 (nova/ + tests/) into $TMPDIR and ran tests/test_krylov_reverse_mode_guard.py against the module it imported (module_file=.../krylov-rev-74acfe4a3/nova/equilibrium/fixed_point.py): 5 passed, EXIT=0.",
+    "independent_mutation": "Injected my own mutant: a function invoking jax.lax.custom_linear_solve in its body but calling the step outside the rule subject classifies covered=False (uncovered), while a step inside an @jax.custom_jvp subject and a step inside a solve= argument both classify covered=True. The fix closes the prior false negative and its positive controls are live.",
+    "reproduction_of_prior_defect": "The prior review's falsifying case is now a committed regression test (test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step) and is also reproduced by the run's negative control 2, which fails naming equilibrium/fixed_point.py::_differentiates_step_though_a_rule_is_present.",
+    "reviewed_increment": "74acfe4a3 (parent d7e149b6a, base a51a137af) rewrites the caller census in tests/test_krylov_reverse_mode_guard.py to classify coverage by call site and updates the evidence fragment. It replaces the earlier fail-open that accepted any derivative rule invoked anywhere in the enclosing function chain."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_krylov_reverse_mode_guard.py",
+      "line": "138-159",
+      "severity": "follow-on",
+      "text": "_rule_subject_ids captures custom_linear_solve subject functions only for the first positional argument (node.args[:1]) and the keyword arguments named matvec/solve/transpose_solve. jax.lax.custom_linear_solve(matvec, b, solve, transpose_solve=None) also admits solve/transpose_solve positionally, so a rule subject passed positionally would not be marked and its inner call would classify uncovered. This errs toward a loud failure (an allowlist entry is then required) rather than a silent pass, so it does not reopen the fail-open; none of the current callers is affected."
+    },
+    {
+      "file": "tests/test_krylov_reverse_mode_guard.py",
+      "line": "189-198",
+      "severity": "follow-on",
+      "text": "The census population is the nova package only; tests/ and benchmarks/ are documented out of scope. tests/test_single_site_krylov.py and several benchmarks already call _qualified_krylov_step directly, so a reverse-mode caller introduced there would not be enumerated. This is a deliberate, documented scope decision, not a silent gap."
+    }
+  ],
+  "follow_ons": [
+    "Cover custom_linear_solve's positional solve/transpose_solve arguments in _rule_subject_ids, or document why only the keyword form is recognised.",
+    "If production risk justifies it, extend the census population to benchmarks/* and tests/* that call _qualified_krylov_step, or keep them out of scope with the current one-line note."
+  ],
+  "gate_arms_note": "Reviewed manifest declares after_suite only: revision 74acfe4a3447cbab168f109ab5da2e0789c48215, completed=true, exit_status=0, failure_count=0, failure_ids=[]. No baseline_suite key is present. Independent exact-revision re-run of the extracted test file (git archive of 74acfe4a3): 5 passed, EXIT=0.",
+  "item_verdicts": {
+    "baseline_failure_delta": "pass: the reviewed manifest declares no baseline_suite; its completed after_suite reports zero failures, so the added-failure set is empty.",
+    "caller_census": "pass: coverage is judged by call site; a step call counts only when it sits lexically inside a function that is itself the rule subject (custom_jvp/custom_vjp decorator, defjvp/defvjp registration, or a matvec/solve/transpose_solve argument of custom_linear_solve). The falsifying case now classifies uncovered.",
+    "census_population": "pass: the census rglobs every *.py under the nova package (pathlib.Path(nova.__file__).parent.rglob), so a new caller anywhere in nova/ is enumerated; tests and benchmarks are documented out of scope.",
+    "liveness_and_staleness": "pass: the census asserts it sees the four known forward-only callers, requires >=5 call sites, and flags any allowlist entry that no longer calls the step.",
+    "picard_positive_case": "pass: jax.grad of the imported Picard fixture returns finite gradient 1.25 (atol 1e-10); the test imports _solve from tests/test_picard_implicit_derivative.py instead of redeclaring it.",
+    "raw_step_refusal": "pass: a direct jax.grad through _qualified_krylov_step raises and the assertion matches the linearisation wording."
+  },
+  "justifications": {
+    "durability": "The test file is committed and re-runs green. The census re-reads the package from disk at collection time, so it must be re-run after any caller is added, which is inherent to a static census. Two residual, non-blocking limits: the custom_linear_solve subject detection omits positional solve/transpose_solve arguments (loud failure, not silent), and tests/benchmarks are out of scope (documented).",
+    "evidence": "Reproduced at the exact pinned revision on an independent git-archive extraction: 5 passed EXIT=0 with the imported module's __file__ printed (module under test = 74acfe4a3 fixed_point.py). Both declared negative controls are red naming their offender (NC1 unclassified caller line 5646, NC2 rule-elsewhere line 5651), each from a full scratch copy reached via --import-mode=importlib with PYTHONPATH on the scratch tree. My own independent mutant reproduces covered=False for the rule-elsewhere shape and covered=True for two positive controls, so the absence check is shown to mean something. The guard refuses the exact thing it exists to catch.",
+    "fit": "The test lives beside the existing equilibrium Krylov tests, reuses the shared Picard fixture instead of duplicating it, and its docstring and the evidence fragment state the coverage rule and the out-of-scope population in plain language. It matches the surrounding test layout and the plan's re-based-per-slice certificate discipline.",
+    "goal_fidelity": "The node closes the reverse-mode boundary guard for _qualified_krylov_step: a caller that reverse-differentiates the step without a derivative rule is now caught by classifying coverage at the call site rather than by rule-name presence anywhere in the enclosing chain. The exact false-negative the prior review falsified (a rule invoked in the body, the step outside it) is now a committed regression test and a negative control that both fail naming the offender. All original spec clauses remain: Picard positive tangent 1.25, package-wide census with allowlist, and raw-step grad refusal.",
+    "scope_discipline": "The fix commit 74acfe4a3 changes exactly two paths: tests/test_krylov_reverse_mode_guard.py and its evidence fragment (git show --stat: 213 insertions, 109 deletions). No solver, source-module, or unrelated path is touched; tests are out of the package census by design. No branches, no plan-state edits. The declared changed_paths match the diff."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass: the reviewed run's fix commit 74acfe4a3 replaces the fail-open caller census in tests/test_krylov_reverse_mode_guard.py with call-site classification, closing the exact false-negative the prior review falsified. Independently reproduced at the pinned revision: the extracted test file against the reviewed module passes 5/5 EXIT=0, both of the run's negative controls fail naming their offender (NC1 unclassified caller, NC2 rule-elsewhere-in-body), and my own independent mutation of the classifier reproduces uncovered=False for a rule invoked in the body while two positive controls report covered=True. The reviewed manifest declares only an after_suite arm (revision 74acfe4a3, completed, exit 0, failure_count 0), so the added-failure set is empty. All three follow-ons from the earlier review are addressed: call-site coverage, package-wide census population, and the shared Picard fixture. Two minor residual scope notes are recorded as non-blocking follow-ons.\nSCORE goal_fidelity: 19\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 19\n",
+  "review_run_id": "r-20261003T023809794160-review-of-fsri-krylov-reverse-mode-guard",
+  "reviewed_base_sha": "a51a137af4b354968bdc5f371842a1f57c686398",
+  "reviewed_commit": "74acfe4a3447cbab168f109ab5da2e0789c48215",
+  "reviewed_head_sha": "74acfe4a3447cbab168f109ab5da2e0789c48215",
+  "reviewed_revision": "74acfe4a3447cbab168f109ab5da2e0789c48215",
+  "reviewed_run_id": "r-20261003T012237519319-fsri-krylov-reverse-mode-guard",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-krylov-reverse-mode-guard",
+  "reviewer_node": "review-of-fsri-krylov-reverse-mode-guard",
+  "reviewer_run_id": "r-20261003T023809794160-review-of-fsri-krylov-reverse-mode-guard",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T02:44:00Z",
+  "total": 95,
+  "verdict": "pass"
+}

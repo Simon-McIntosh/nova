@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-19T07:11:03.282439+00:00",
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "611",
+      "text": "Publishing the spline value at the fitted contact as the boundary level leaves the plasma floating: at the published level 0.2585036006159728 the level set has 3 components inside the vessel (raw 33x33 lattice: 3 components, the axis-carried one 135 nodes with R (0.2419,1.0300) Z (-0.7500,0.7500), and the contact 3 nodes with R (0.4844,0.5450) Z (1.6250,1.7500)), so the contact is on a detached wall-side lobe and the axis-enclosing contour's distance to it is 0.892871 m."
+    },
+    {
+      "file": "tests/test_limited_boundary_touches_wall.py",
+      "line": "134",
+      "text": "The wall-contact assertion `_polyline_distance(contour, wall) < pitch` with pitch 0.125 m is satisfied by the axis-enclosing contour's closest approach of 0.012811640 m to the wall (trace point R=0.208056 Z=-0.048327 to the inboard wall at R=0.195244) and never asserts the traced contour reaches the published contact (which is 0.892871 m away), so the test passes for a plasma that floats."
+    },
+    {
+      "file": "tests/test_limited_boundary_touches_wall.py",
+      "line": "124",
+      "text": "The assertion `contact[2] == surface(contact[0], contact[1])` re-derives the production assignment at nova/equilibrium/topology.py:611, so it is tautological and cannot fail while the seam holds."
+    },
+    {
+      "file": "docs/figures/null-identification-authority/limited-touch/receipt.json",
+      "line": "55",
+      "text": "`contour_min_wall_distance_m` 0.012811640333972418 measures the axis-enclosing component (its closest approach R=0.208056 Z=-0.048327 to the wall at R=0.195244), a different object from the contact in the same row, so a reader takes the pair as a wall contact while the plasma floats."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T201949355073-nia-limited-boundary-touches-wall-2/manifest.md",
+      "line": "13",
+      "text": "The recorded gate 'collected 33: 30 passed, 3 failed' belongs to a four-file run; the fence's three named files collect 27 first-hand (24 passed, 3 failed, job 1273855, same three failure ids), so the ledger line conflates the three-file and four-file sets."
+    }
+  ],
+  "justifications": {
+    "durability": "The certifying assertion at tests/test_limited_boundary_touches_wall.py:134 is a one-pitch (0.125 m) bound a floating plasma satisfies, so the guard cannot distinguish wall contact from float and will not fire again.",
+    "evidence": "Every receipt number reproduces independently from the two persisted fixtures without a new solve (route W 0.2869457556700514, route S 0.2545340048648416, disagreement 0.032411750805210) and the figure obeys the plotting rules, but the receipt's own gap (docs/figures/null-identification-authority/limited-touch/receipt.json:55 = 0.012811640333972418 m) is measured from the axis-enclosing component, not from the contact, and the record reads the two numbers together as a wall contact the fixture falsifies.",
+    "fit": "The one-authority change fits the plan thesis, but the lead's rule that a limited boundary must touch the wall is violated in fact on the persisted row, and the manifest headline that every new limited-boundary test passed rests on that loose bound.",
+    "goal_fidelity": "The seam change is implemented as written (nova/equilibrium/topology.py:611 makes the spline value at the fitted contact the published level and the route W/S disagreement 0.032411750805210 Wb collapses to relative error 1.503183090240073e-15), but the physical goal the new test's docstring claims is not achieved on the persisted fixture: the axis-enclosing boundary level set at the published level 0.2585036006159728 floats 0.012811640 m from the wall and sits 0.892871 m from the published contact.",
+    "scope_discipline": "Writes stay inside the paths the run declared, the two commits 8fdc71ef and ffc979e5 each carry a conventional subject and a body with no attribution, and no shared index, sprint state or plan document was mutated beyond the landing comment."
+  },
+  "node": "review-of-nia-limited-boundary-touches-wall-2",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 9\nJUSTIFICATION goal_fidelity: The seam change is implemented as written (nova/equilibrium/topology.py:611 makes the spline value at the fitted contact the published level and the route W/S disagreement 0.032411750805210 Wb collapses to relative error 1.503183090240073e-15), but the physical goal the new test's docstring claims is not achieved on the persisted fixture: the axis-enclosing boundary level set at the published level 0.2585036006159728 floats 0.012811640 m from the wall and sits 0.892871 m from the published contact.\nSCORE evidence: 12\nJUSTIFICATION evidence: Every receipt number reproduces independently from the two persisted fixtures without a new solve (route W 0.2869457556700514, route S 0.2545340048648416, disagreement 0.032411750805210) and the figure obeys the plotting rules, but the receipt's own gap (docs/figures/null-identification-authority/limited-touch/receipt.json:55 = 0.012811640333972418 m) is measured from the axis-enclosing component, not from the contact, and the record reads the two numbers together as a wall contact the fixture falsifies.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: Writes stay inside the paths the run declared, the two commits 8fdc71ef and ffc979e5 each carry a conventional subject and a body with no attribution, and no shared index, sprint state or plan document was mutated beyond the landing comment.\nSCORE durability: 10\nJUSTIFICATION durability: The certifying assertion at tests/test_limited_boundary_touches_wall.py:134 is a one-pitch (0.125 m) bound a floating plasma satisfies, so the guard cannot distinguish wall contact from float and will not fire again.\nSCORE fit: 11\nJUSTIFICATION fit: The one-authority change fits the plan thesis, but the lead's rule that a limited boundary must touch the wall is violated in fact on the persisted row, and the manifest headline that every new limited-boundary test passed rests on that loose bound.\nFINDING nova/equilibrium/topology.py:611 Publishing the spline value at the fitted contact as the boundary level leaves the plasma floating: at the published level 0.2585036006159728 the level set has 3 components inside the vessel (raw 33x33 lattice: 3 components, the axis-carried one 135 nodes with R (0.2419,1.0300) Z (-0.7500,0.7500), and the contact 3 nodes with R (0.4844,0.5450) Z (1.6250,1.7500)), so the contact is on a detached wall-side lobe and the axis-enclosing contour's distance to it is 0.892871 m.\nFINDING tests/test_limited_boundary_touches_wall.py:134 The wall-contact assertion `_polyline_distance(contour, wall) < pitch` with pitch 0.125 m is satisfied by the axis-enclosing contour's closest approach of 0.012811640 m to the wall (trace point R=0.208056 Z=-0.048327 to the inboard wall at R=0.195244) and never asserts the traced contour reaches the published contact (which is 0.892871 m away), so the test passes for a plasma that floats.\nFINDING tests/test_limited_boundary_touches_wall.py:124 The assertion `contact[2] == surface(contact[0], contact[1])` re-derives the production assignment at nova/equilibrium/topology.py:611, so it is tautological and cannot fail while the seam holds.\nFINDING docs/figures/null-identification-authority/limited-touch/receipt.json:55 `contour_min_wall_distance_m` 0.012811640333972418 measures the axis-enclosing component (its closest approach R=0.208056 Z=-0.048327 to the wall at R=0.195244), a different object from the contact in the same row, so a reader takes the pair as a wall contact while the plasma floats.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260918T201949355073-nia-limited-boundary-touches-wall-2/manifest.md:13 The recorded gate 'collected 33: 30 passed, 3 failed' belongs to a four-file run; the fence's three named files collect 27 first-hand (24 passed, 3 failed, job 1273855, same three failure ids), so the ledger line conflates the three-file and four-file sets.\n",
+  "review_run_id": "r-20260919T071103282439-review-of-nia-limited-boundary-touches-wall-2",
+  "reviewed_run_id": "r-20260918T201949355073-nia-limited-boundary-touches-wall-2",
+  "reviewer_run_id": "r-20260919T071103282439-review-of-nia-limited-boundary-touches-wall-2",
+  "scores": {
+    "durability": 10,
+    "evidence": 12,
+    "fit": 11,
+    "goal_fidelity": 9,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-19T07:37:26.715796+00:00",
+  "total": 59
+}

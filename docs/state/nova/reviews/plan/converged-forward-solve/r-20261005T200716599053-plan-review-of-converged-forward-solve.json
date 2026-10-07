@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T20:10:50.062Z",
+  "dispatched_at": "2026-10-05T20:07:29Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:479",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a73 node must name that second builder (subsume it into current.book, or retire it with \u00a76's chord route) or the consolidation reintroduces the duplicate this plan exists to remove.",
+      "text": "`_ExactClipLevel` (with `_polished_level_root`/`_implicit_level_root`/`_implicit_traced_level_arc` and `_substitute_chord_cell_supports`, used at forward_operator.py:3398,3431) is a second exact-clip support/level builder beside `clip_quadrature.py`'s `clipped_support_quadrature`/`_quadratic_support_vertices`; \u00a73's \"exact clip as the one booking\" and its reuse ruling name only the `clip_quadrature.py` copy, so two clipping implementations would survive under two owners after \u00a76 unless the `forward_operator.py` builder is explicitly subsumed or retired",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/biot/null.py:45",
+      "id": "reuse_search-1",
+      "reason": "the ruling already permits the \u00a72 node to \"state in its evidence why each fails the traced, fixed-shape contract\", so the mismatch is absorbed by the node's justification rather than changing the design.",
+      "text": "the field-null owner ruling names `Null1D`/`Null2D` as reuse candidates for the Biot-derivative null evaluation \u00a72 requires, but `Null2D.__call__` takes a mesh-flux stencil (`psi_stencil = psi[self.stencil]`) and fits extrema in it, which is exactly the mesh-flux differentiation the design forbids; it supplies neither the analytic field gradient nor the Hessian",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "a3837bc0075d44dc757a9777e7de7ce0a354c6f94d3f0ca839d7c8003d69f8bc",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 33,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T20:12:51.751833+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "The reviewer's own verdict is WOULD_CHANGE_THE_PLAN: no. The field-null owner ruling on section 2 already requires the node to state why Null2D fails the traced contract; Null2D fits extrema in a mesh-flux stencil, which is the mesh-flux differentiation the design forbids, so the section 2 node declines it on exactly that ground in its evidence and evaluates nulls through the kernel derivatives and the ExteriorField evaluator, as the run's fragment already records.",
+      "when": "2026-10-05T20:12:52.300862+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T200716599053-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "05da1f269b41bac3a5c2befc8fb30bc40ff5bd29",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the four proposed entry points (topology.read, current.book, gs.apply, solve.fixed_point) replace a 54-file, 54,102-line surface in which the axis is found in 17 files and the region in 23; one interface hides far more behaviour than it exposes, which is depth rather than spread.",
+    "duplicate_owner": "a finding \u2014 \u00a73's one-booking ruling names only `clip_quadrature.py`'s exact-clip machinery and the support partition in `forward_operator.py`, leaving `forward_operator.py`'s own second exact-clip support builder unnamed.",
+    "interface_budget": "pass \u2014 supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each section that adds surface names what it retires or merges in its own text (\u00a72 replaces `Topology.read`/`read_with_connectivity` in place, \u00a73 replaces `clipped_support_current_moments` + the support partition, \u00a74 replaces the `ForwardFluxOperator` map, \u00a75 replaces `newton_krylov`/`picard`/`operator_request_body`, \u00a76 gives the full module deletion list), so no section adds to a family without accounting for it.",
+    "reuse_search": "pass \u2014 the plan ran the reuse map and it survives opening the code: the \u00a75 GMRES/line-search candidates exist (`_single_site_krylov` fixed_point.py:2619, `_krylov_machine` :2216, `_serve_krylov_stream` :2394, `_krylov_outputs` :2371, `_steepest_descent_promotion` :1672), the \u00a72 field-null kernels exist (`Null1D`/`Null2D`/`inside_or_near_source_cell` nova/biot/null.py:32,45,232), the \u00a74 operand-identity machinery exists (`_flatten_shared_flux_stencil` forward_operator.py:147, `_flatten_interior_moment_stencil` :159, `_flatten_moment_geometry` :187), the \u00a72 contour-tree authority exists (`contour_tree.build_contour_tree`), the \u00a73 quadrature and \u00a76 moment owners exist (`clip_quadrature.py`, `polygon_moments.polygon_monomial_moments`), and each is bound with a cite-or-justify ruling.",
+    "thin_wrapper": "pass \u2014 each new module's text states that it replaces, not wraps, the machinery it supersedes (\u00a74: `gs.apply` \"replaces the map `ForwardFluxOperator` performs in `forward_operator.py`\" rather than wrapping it; \u00a76 repeats the statement for retirement), and the carried helpers (\u00a75 GMRES, \u00a74 operand flatteners, \u00a73 quadrature, \u00a72 null kernels) move under the new owner before the old file is deleted."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T20:12:51.186732+00:00"
+}

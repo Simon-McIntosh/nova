@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T22:09:50.641Z",
+  "dispatched_at": "2026-10-05T22:06:27Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:223",
+      "id": "reuse_search-1",
+      "reason": "the ruling's stated disqualifier is the \"traced, fixed-shape contract\", which `Null2D` passes (fixed `maxsize` capacity, `@jax.jit`), so a \u00a72 node applying the plan's own test would adopt a flux-stencil null and silently contradict the locked `field-representation` decision (\"never by differentiating the mesh flux\"); the ruling must name the real incompatibility or withdraw the candidate.",
+      "text": "the field-null owner ruling names `nova/biot/null.py` (`Null2D`, `Null1D`, `inside_or_near_source_cell`) and `nova/biot/fieldnull.py` as reuse candidates for \"position, gradient and Hessian of the total field from the kernels' analytic derivatives\", but `Null2D` (nova/biot/null.py:45) is a mesh-flux stencil locator \u2014 its `__call__(self, psi)` fits a local quadratic to the flux samples on a vertex ring (`crossing_count` + `select.traced_subnull`) and `FieldNull` is an xarray/numpy subgrid fitter \u2014 neither evaluates nulls from Biot coupling kernels' analytic derivatives",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:94",
+      "id": "reuse_search-2",
+      "reason": "the plan's own retention rule (\"whatever \u00a75 carries over moves before \u00a76 deletes the file\") is applied to every helper set except this one, so a reusable Newton direction is deleted without the stated reason the rule requires, or is needlessly reimplemented in solve.py.",
+      "text": "\u00a75's cite-or-justify rulings cover the GMRES kernel, the backtracking search and the operand/clip/moment/tree helpers, but never name `reduced_newton.py`'s Newton machinery (`newton_direction` at nova/equilibrium/reduced_newton.py:970, `jacobian_request`, `residual_request`, `step_scores`, `linearized_constraint_response_matrix`) even though \u00a76 deletes that 3443-line module and Newton-GMRES needs exactly a Newton step, a Jacobian-vector request and a constraint-response row",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b28d1a2d9e1784368190a40b26bc94c2b46dba32896cc095c4789aa55b38a7d9",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 41,
+  "project": "nova",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T22:11:26.843944+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T22:11:27.310761+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T220614829506-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "4f87ca2afba16a44828f253946567fc492b6a401",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four modules (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`) each hide a substantial mechanism (topology.read alone absorbs 17 null-authority sites) behind a single entry point, and the retention rule keeps the surviving helpers private behind those call sites.",
+    "duplicate_owner": "pass \u2014 the owners the design touches are named and extended rather than forked: `polygon_moments.py` owns exact moments, `constraint.py` owns the row scale, `solve_request.py` owns the request policy, `contour_tree.py` owns the tree.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each of \u00a72\u2013\u00a75 names in its own text the surface it replaces (topology.py's old read, `clipped_support_current_moments` and the support partition, the operator map, `newton_krylov`/`picard`/`operator_request_body`) and \u00a76 states the before/after field counts as its accounting.",
+    "reuse_search": "a finding \u2014 the plan's prior-art search is extensive (six cite-or-justify rulings) but two candidates are wrong or missing: the \u00a72 field-null ruling cites a mesh-flux stencil fitter as its Biot-derivative evaluator, and the Newton machinery in the module \u00a76 deletes is never cited.",
+    "thin_wrapper": "pass \u2014 each new function is stated as replacing an existing mechanism rather than layering over it (`gs.apply` replaces the map `ForwardFluxOperator` performs, `current.book` replaces the clip and support partition, `solve.fixed_point` replaces the Newton/Picard bodies), and the chord route is demoted to a quadrature degree rather than kept as a parallel path."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T22:11:26.228070+00:00"
+}

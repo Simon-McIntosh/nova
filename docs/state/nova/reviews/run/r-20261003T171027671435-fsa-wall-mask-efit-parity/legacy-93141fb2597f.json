@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T17:31:05.019Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T17:10:48Z",
+  "findings": [
+    {
+      "file": "benchmarks/efit_forward_parity_slice.py",
+      "line": 3317,
+      "severity": "follow-on",
+      "text": "The three repaired builders _attribution_figure (3317), _composition_figure (3426) and _passive_inclusive_figure (3672) are orphaned: grep finds only their definition lines, no call site anywhere in the file (the driver's main never invokes them). Both the head scanner gate and the 122-test regression arm pass without ever executing the new poloidal.draw_scattered_contours calls, so the runtime correctness of the three edits is untested by the node. The run's report honestly records this and states the committed PNGs cannot regenerate without re-wiring plus a solve. Consequence: the repaired renderers are inert until a regeneration node re-wires them; the fix is a code-level repair whose user-visible effect (masked figures) does not yet exist."
+    },
+    {
+      "file": "scratch/head_scan.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The head gate log's first line records revision=68762d3639852b0d4fc87c4beab07b6298a3b384 - the BASE commit - although the run it validates is ca26a532. The log was written at 19:20, before the 19:27 commit, so HEAD still named base while the working tree held the edits the scanner read; the tree path is correct and the scan is therefore valid, but a reader cannot reconcile the head arm to the head commit from the log alone. The run's manifest after_suite does carry revision ca26a532, so the content revision is recorded, just not on the gate log's own header."
+    },
+    {
+      "file": "docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-efit-parity.html",
+      "line": 0,
+      "severity": "follow-on",
+      "text": "The run's granted write path docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-efit-parity.html does not exist. The node delivered only the crew report (~/.config/reckon/crew/reports/nova/s22/fsa-wall-mask-efit-parity.md) and does not claim the fragment in its landing, so nothing is misrepresented, but the evidence fragment the granted path anticipates is absent."
+    },
+    {
+      "file": "reports/nova/s22/fsa-wall-mask-efit-parity.md",
+      "line": 27,
+      "severity": "follow-on",
+      "text": "The report's pre-existing-failure line names test_moment_sep.py (2), but the suite logs (base_suite.log and after_suite.log) list tests/test_moment_seed.py for both failures (5 occurrences of the name in the log). A minor documentation inaccuracy only; the failure ids themselves are correctly carried in the manifest."
+    }
+  ],
+  "gate_arms_note": "Derived from the reviewed run's own arms in its manifest and reproduced independently. baseline_suite: revision 68762d3639852b0d4fc87c4beab07b6298a3b384, command '/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m \"not slow\" -q <14 importing test files>', exit_status 1, completed true, failure_count 7. after_suite: revision ca26a5321200f2cca1a23e53a7f27e039d3b9d82, same command and paths, exit_status 1, completed true, failure_count 7. The two failure id lists are identical test-for-test: test_moment_seed.py::test_seed_integrates_to_its_declared_current_and_centroid, test_moment_seed.py::test_seed_calls_the_public_constrained_seam, test_recovery_frozen_partition.py::test_recovery_and_rebuild_reuse_the_frozen_partition_bit_identically, test_forward_solve_request.py::test_request_path_is_bit_identical_and_defaults_round_trip_through_json, test_forward_solve_request.py::test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch, test_forward_solve_request.py::test_compilation_cache_receipt_observes_reuse_not_the_request_field, test_forward_parity_constrained_arm.py::test_reference_native_grid_interpolates_the_stored_map. added_failure_ids = after minus base = [] and added_failure_count = 0. I read both logs at .../r-20261003T171027671435-fsa-wall-mask-efit-parity/scratch/base_suite.log and after_suite.log; each ends '7 failed, 115 passed, 6 deselected' (79.62 s and 71.77 s), EXIT=1. Every failure is pre-existing and unrelated to the changed driver: a driver-only edit cannot reach test_moment_seed, test_recovery_frozen_partition or test_forward_solve_request, and the constrained-arm failure is an AttributeError on parity.REFERENCE_NATIVE_GRID_POINTS, present at base.",
+  "justifications": {
+    "durability": "The repair is durable in kind: the scanner's _classify returns None for a draw_scattered_contours call, so the guard recognises the masked route and a future revert to tricontourf would re-report the three sites - the rule is falsifiable and the node satisfies it. Weaknesses. The scanner is a standalone script (tests/renderer_wall_scan.py), wired to nothing in pyproject or conftest, so only a manual invocation exercises it and a regression would not redden the suite. The three repaired builders are orphaned, so nothing at all executes the new painter calls today - a runtime defect in the call (wrong argument order, an early return, an exception) would pass every arm this node ran; I established the call is correct only by an independent probe I wrote. The fill-to-line style change also moves the colourbar source from the filled contour to the wall scatter, which preserves the +-limit scale here but is an unasserted coupling.\n",
+    "evidence": "Strong and independently checked. The declared negative control reproduced exactly: base scan EXIT=1 over exactly 3338/3437/3684 tricontourf, head scan EXIT=0, both rerun by me in the two worktrees. The regression arms are identical at base and head (7 failed, 115 passed each, identical failure sets), so added_failure_count=0. Because the gate is a static ast scan that never executes the painter, I wrote the runtime probe it lacks: draw_scattered_contours on the DINA machine grid with machine.wall_node masks 97/4388 triangles and draws 9 level sets, and coerce_wall_units returns one closed vessel unit with 99.95% of grid nodes inside. Deductions: no arm the node ran executes the three edited calls (orphaned builders), and the head gate log's own header names the base revision, so the head arm cannot be reconciled to the head commit from the log alone.\n",
+    "fit": "Minimal and idiomatic. The node reuses the existing wall-masked painter rather than adding one, adds no dependency, no abstraction and no plan-order coupling; the import (from nova.media import poloidal) and the six-argument positional call match the painter's declared signature (axes, radius, height, flux, levels, wall). The three sites each keep the levels array already computed from the same limit, and the style change (filled tricontourf to unfilled lines on stated levels) is what the repo's plotting rules require for a scalar map. The colourbar is re-attached to the wall scatter, which carries the same +-limit vmin/vmax the contour used, so the field scale stays readable. No naming, comment or symbol carries a plan/ticket/version token.\n",
+    "goal_fidelity": "The followed-up repair - route the scattered-field renderers in benchmarks/efit_forward_parity_slice.py behind the wall mask - is met. I reproduced the gate in both trees: at base 68762d3 my own worktree reports exactly the three unguarded sites (3338, 3437, 3684, tricontourf) EXIT=1; at head ca26a53 the reviewed worktree reports none, EXIT=0. The three calls now pass fields['wall_coordinate'] as the required wall argument of nova.media.poloidal.draw_scattered_contours, and I verified at runtime that this argument is a valid closed vessel: for the DINA reference machine coerce_wall_units(machine.wall_node) yields one closed vessel unit, 99.95% of the 2214 grid nodes fall inside it, and feeding the real machine grid and wall to draw_scattered_contours masks 97 of 4388 triangles (2.2%) and returns 9 contour level sets without raising. Not full marks because the three repaired builders (_attribution_figure:3317, _composition_figure:3426, _passive_inclusive_figure:3672) are orphaned - grep finds only their def lines, no call site in the driver's main - so the repaired code path never runs.\n",
+    "scope_discipline": "The reviewed range 68762d3..ca26a53 touches exactly one tracked path, benchmarks/efit_forward_parity_slice.py (16 insertions, 15 deletions), inside the run's granted write paths; git status in the reviewed worktree is clean. No file under nova/ is edited, so the painter and wall machinery are reused read-only. The single commit carries a conventional subject ('fix(media): mask the EFIT parity scattered-field renderers to the wall') and an explanatory body; a trailer check on the full message is clean, and the message carries no plan/sprint/ticket identifier or stage label. Deduction: the granted fragment path docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-efit-parity.html was not written (absent on disk), though the run wrote its report under crew/reports/nova/s22/ and does not claim the fragment in its landing.\n"
+  },
+  "node": "review-of-fsa-wall-mask-efit-parity",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: The followed-up repair - route the scattered-field renderers in benchmarks/efit_forward_parity_slice.py behind the wall mask - is met. I reproduced the gate in both trees: at base 68762d3 my own worktree reports exactly the three unguarded sites (3338, 3437, 3684, tricontourf) EXIT=1; at head ca26a53 the reviewed worktree reports none, EXIT=0. The three calls now pass fields['wall_coordinate'] as the required wall argument of nova.media.poloidal.draw_scattered_contours, and I verified at runtime that this argument is a valid closed vessel: coerce_wall_units(machine.wall_node) yields one closed vessel unit with 99.95% of the 2214 DINA grid nodes inside it, and feeding the real machine grid and wall to draw_scattered_contours masks 97 of 4388 triangles (2.2%) and returns 9 contour level sets. Not full marks because the three repaired builders are orphaned (no call site), so the repaired code path never runs.\nSCORE evidence: 16\nJUSTIFICATION evidence: The declared negative control reproduced exactly: base EXIT=1 over exactly 3338/3437/3684 tricontourf, head EXIT=0, both rerun by me. The regression arms are identical at base and head (7 failed, 115 passed each; identical failure sets), so added_failure_count=0. I added the runtime probe the gate lacks (an ast scan never executes the painter): draw_scattered_contours on the DINA machine masks 97/4388 triangles and draws 9 level sets. Deductions: the gate is purely static and no arm executes the edited calls; the head_scan.log header names the base revision.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: One tracked file changed (benchmarks/efit_forward_parity_slice.py, 16+/15-), inside the granted paths; reviewed worktree clean; no nova/ source edited; conventional subject with body, no AI trailer, no plan/ticket token. The granted fragment path went unused.\nSCORE durability: 14\nJUSTIFICATION durability: The scanner recognises draw_scattered_contours as guarded, so the rule is falsifiable and a revert would re-report the sites. But the scanner is wired to nothing automatic, and the repaired builders are orphaned so no gate executes the new calls; a runtime defect in the call would pass every arm the node ran.\nSCORE fit: 18\nJUSTIFICATION fit: Reuses the existing wall-masked painter, no new dependency or abstraction, correct positional signature, levels preserved, colourbar reattached to the wall scatter at the same +-limit scale, style change matches the repo's unfilled-solve contour rule.\nFINDING benchmarks/efit_forward_parity_slice.py:3317 Three repaired builders are orphaned; no gate executes the new painter calls; committed PNGs stay stale until a regeneration wave re-wires them.\nFINDING scratch/head_scan.log:1 Head gate log header names the base revision 68762d3, not the reviewed head ca26a53.\nFINDING docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-efit-parity.html:0 Granted fragment path not written.\nFINDING reports/nova/s22/fsa-wall-mask-efit-parity.md:27 Report typo test_moment_sep.py for test_moment_seed.py.\n",
+  "review_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "review_run_id": "legacy-93141fb2597f",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "reviewed_commit": "ca26a5321200f2cca1a23e53a7f27e039d3b9d82",
+  "reviewed_commits": [
+    "ca26a5321200f2cca1a23e53a7f27e039d3b9d82"
+  ],
+  "reviewed_head_sha": "ca26a5321200f2cca1a23e53a7f27e039d3b9d82",
+  "reviewed_run_id": "r-20261003T171027671435-fsa-wall-mask-efit-parity",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-wall-mask-efit-parity",
+  "reviewer_node": "review-of-fsa-wall-mask-efit-parity",
+  "reviewing_run_id": "r-20261003T173418358880-review-of-fsa-wall-mask-efit-parity",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T17:45:51Z",
+  "total": 83,
+  "verdict": "pass"
+}

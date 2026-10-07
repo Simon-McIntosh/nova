@@ -1,0 +1,101 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's manifest records no baseline_suite and no after_suite arm (its write paths reach no test file, negative_control_log is none, and both suite fields are absent). There are therefore no readable suite arms from which a failure delta can be computed, so added_failure_count 0 and added_failure_ids [] record the absence of readable arms, not a measured zero. The node's own gate (the --span-offset-receipt CPU re-read) exited 0 with the CENTROID_SPAN_OFFSET summary line in span-offset-cpu.log, and this reviewer independently reproduced it (EXIT=0, offset_wb=+4.517667660e+00).",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json (landing_merge b470e1fbb9adb013a1c034218cd086556d8182ad, source_revision 211d75798c58c167bbb66b177147f7d0ce62ef6b, source_receipt docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json; gauge_free_flux_offset_wb=+4.517667659749549, of_solved_span=+8.296782922901276e-2, compensator_span_of_solved_span=+2.715932775388238e-2, compensator_span_of_analytic_span=+2.9616548491475932e-2, error_pitches=+8.4270663891465e-12)",
+    "benchmarks/centroid_constrained_fixture_receipt.py:1836 DEFAULT_SPAN_OFFSET_RECEIPT = ROOT / (...); _landing_merge and _root_relative added; source_receipt emitted ROOT-relative",
+    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html (two number slips corrected)",
+    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-span-offset-record-repairs.html (landing fragment, data-node cco-span-offset-record-repairs)",
+    "gate log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181517700608-cco-span-offset-record-repairs/span-offset-cpu.log (headered: revision 8647f5e2d, tree, cwd, module, command; EXIT=0; CENTROID_SPAN_OFFSET line below)",
+    "report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-span-offset-record-repairs.md"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "e40342d3a",
+    "8647f5e2de2af235e98d6962482ff16e7ef5bd02",
+    "6b8d62e94851645122537da00d1dd8c1be749802"
+  ],
+  "completed_at": "2026-10-02T20:49:44.595Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T20:26:16Z",
+  "evidence_inputs": "Reviewed 5ad2f3555..6b8d62e94 (three commits e40342d3a/8647f5e2d/6b8d62e94; 4 files, 98 insertions, 8 deletions; git diff --check clean; reviewed worktree clean). All four done-when repairs verified in the committed tree. Provenance: git rev-list --merges --ancestry-path --reverse 211d75798c..HEAD returns b470e1fbb first, a real two-parent merge (parents 5179ab0fb, b17968fe1) that is an ancestor of the reviewed head; both 211d75798c and b470e1fbb resolve as commit objects. Path repair: control-positive.json is tracked in-repo and DEFAULT_SPAN_OFFSET_RECEIPT resolves from the worktree module's ROOT (module.__file__ under the worktree), so the receipt read resolves from a checkout that is not the operator's main tree. Arithmetic recomputed independently: offset/solved = 8.296782922901276e-2, offset/analytic = 9.047428418924305e-2, compensator/solved = 2.715932775388238e-2 (8.487x the 3.2e-3), compensator/analytic = 2.9616548491475932e-2 (9.255x the 3.2e-3), error/pitch = 8.4270663891465e-12 pitches, error/ulp = 4422.025. Independent gate re-run: JAX_PLATFORMS=cpu python -m benchmarks.centroid_constrained_fixture_receipt --span-offset-receipt --span-offset-root <scratch> returned EXIT=0 and CENTROID_SPAN_OFFSET offset_wb=+4.517667660e+00, of_solved_span=+8.296782923e-02, compensator_span_wb=+1.478848100e+00, error_pitches=+8.427066389e-12, clause=False -- the same figures as the node's committed log. Follow-ons: the fragment's 2.717e-2 vs the receipt's 2.716e-2; pre-existing fragment centroid-error figures (8.4232e-12 pitches) that disagree with the receipt; the new fragment's missing trailing newline; the negative-control string that is not demonstrable on this host. The reviewed worktree was reclaimed (removed) by the coordinator during this review, after the diff, git queries and receipt reads above were captured; the repaired module later merged into the main checkout at dadc94611 was verified to carry _landing_merge, _root_relative and the ROOT-relative DEFAULT_SPAN_OFFSET_RECEIPT, and a CPU re-run launched from that checkout is recorded in the manifest. An earlier ad-hoc CPU re-run from a checkout that predates the repair produced the identical CENTROID_SPAN_OFFSET offset_wb=+4.517667660e+00, confirming the repair changed schema and path only, never a number.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "the fragment now writes the compensator's solved-span fraction as 2.717e-2, but the committed receipt's own compensator_span_of_solved_span is 0.02715932775388238, which renders 2.716e-2; the 1-in-last-digit display value is carried over from the done-when's wording and left uncorrected, so the fragment and the receipt it cites disagree in the fourth significant figure. The 8.5x multiplier derived from it is correct (0.0271593/3.2e-3 = 8.487)."
+    },
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "pre-existing and outside this node's named two-slip scope: the fragment renders the centroid error as 8.4232e-12 pitches / 3.92575e-12 m / 4420 ulp, while the committed receipt records error_pitches 8.4270663891465e-12 and error_norm_m 3.927547300640607e-12 (error_radius_ulps 4422.025, which the fragment's 4420 is a 3-significant-figure rounding of). The pitch and metre figures disagree with the receipt; the node's done-when named only the two slips it repaired, so this is reported for a later repair rather than held against the node."
+    },
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-span-offset-record-repairs.html",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "the new landing fragment is committed with no terminating newline (git reports no-newline-at-end-of-file), unlike the fragment it repairs."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181517700608-cco-span-offset-record-repairs/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the declared negative-control string (running the default receipt path from a checkout other than the operator's main tree raises FileNotFoundError before the repair and resolves after it) is not demonstrable on this host: the legacy absolute path /home/ITER/mcintos/Code/nova/docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json exists, so the pre-repair default did not raise here. The repair's mechanism is demonstrated only by construction (the ROOT-relative default resolves from the worktree module), not by a red log."
+    }
+  ],
+  "gate_arms_note": "No suite arm was armed by the reviewed node (its write paths reach no test file) and its manifest carries neither baseline_suite nor after_suite, so no baseline/after delta exists. This review did not re-run a suite: the node changes no product source under test, so there is no regression surface a suite could reach; the only executable surface is the benchmark driver's CLI, which the node re-ran and this review re-ran.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production runtime call site reaches the change; the only entry is the benchmark module's own CLI (python -m benchmarks.centroid_constrained_fixture_receipt --span-offset-receipt), so CALL_SITES is none.",
+    "diff": "read commit by commit against base 5ad2f3555: e40342d3a resolves DEFAULT_SPAN_OFFSET_RECEIPT through ROOT and adds _landing_merge; 8647f5e2d records source_receipt ROOT-relative via _root_relative; 6b8d62e94 banks the regenerated receipt and the landing fragment. 4 files, 98 insertions, 8 deletions, git diff --check clean, worktree clean.",
+    "done_when": "each of the four done-when items is satisfied: (1) docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html now reads the second reproduced receipt as -0.8267 Wb and names the compensator over-drive 8.5x on the solved-span basis (2.717e-2) and 9.3x on the analytic-span basis (2.962e-2); (2) benchmarks/centroid_constrained_fixture_receipt.py:1836 DEFAULT_SPAN_OFFSET_RECEIPT = ROOT / (...), with no absolute home path; (3) docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json carries landing_merge b470e1fbb beside source_revision 211d75798c5; (4) span-offset-cpu.log opens with revision/tree/cwd/module/command header lines and reproduces CENTROID_SPAN_OFFSET offset_wb=+4.517667660e+00 with EXIT=0.",
+    "goal": "the node's goal is to correct the span-offset record's two number slips, its hard-coded receipt path and its provenance; all four named defects are repaired in the reviewed range.",
+    "manifest": "read; it reports status complete, commits e40342d3a/8647f5e2d/6b8d62e94, the --span-offset-receipt gate command with EXIT=0 and the CENTROID_SPAN_OFFSET summary line, test_logs span-offset-cpu.log, measurement_module and measurement_cwd of the worktree driver under the worktree, and negative_control_log none (write paths reach no test file).",
+    "write_paths": "read the node's six declared write paths; the four changed repo files (benchmarks/centroid_constrained_fixture_receipt.py, docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html, docs/evidence/fragments/centroid-constrained-oracle-solve/cco-span-offset-record-repairs.html, docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json) are all inside them, as is the report under the run's reports path."
+  },
+  "justifications": {
+    "durability": "the node's write paths reach no test file and it declares negative_control none for that reason, so neither the new _landing_merge/_root_relative helpers nor the ROOT-relative default has any committed assertion that reddens if the path or the landing-merge derivation regresses; the only guard is the node's own one-off gate re-run rather than a persistent check. This matches the prior node's shape (a documentation/provenance repair with no test surface), so the deduction is the same class, not a regression the node introduced.",
+    "evidence": "the headerless-log follow-on is closed: span-offset-cpu.log opens with revision, tree, cwd, module and command lines and its last two lines are the CENTROID_SPAN_OFFSET summary and EXIT=0. The provenance repair is backed by a real instrument -- git rev-list --merges --ancestry-path --reverse 211d75798c..HEAD returns b470e1fbb as the earliest merge, a genuine merge commit (parents 5179ab0fb, b17968fe1) that is an independent ancestor of the reviewed head. Deductions: the node's declared negative-control string (running the default receipt path from a checkout other than the operator's main tree raises FileNotFoundError before the repair) is not reproducible on this host -- the legacy absolute path /home/ITER/mcintos/Code/nova/docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json still exists -- so the repair is confirmed by construction (ROOT resolves from the worktree module) rather than by a red demonstration; and no baseline/after suite arms were armed, so the only measured line is the node's own gate, which I independently reproduced on CPU (EXIT=0, offset_wb=+4.517667660e+00).",
+    "fit": "the change reuses the existing driver idiom: DEFAULT_SPAN_OFFSET_RECEIPT is rebased on the module-level ROOT defined at :56 beside DEFAULT_SPAN_OFFSET_ROOT, _landing_merge shells out to git once at receipt-generation and returns None on OSError/CalledProcessError rather than failing the read, and _root_relative falls back to the resolved path outside the tree. No symbol, filename or comment carries a plan label or version identifier, and all three commit subjects are conventional with bodies. Deductions: the new landing fragment ends without a trailing newline, and the git shell-out adds a subprocess dependency to receipt generation (documented and guarded, so a style rather than a correctness deduction).",
+    "goal_fidelity": "all four defects the done-when names are repaired and each verified in the committed tree: the fragment's -0.8267e-2 slip is corrected to -0.8267 Wb; the 9.3x over-drive now names its basis on both sides (8.5x on the 2.717e-2 solved-span fraction, 9.3x on the 2.962e-2 analytic-span fraction; reconfirmed 0.0271593/3.2e-3 = 8.487 and 0.0296165/3.2e-3 = 9.255); DEFAULT_SPAN_OFFSET_RECEIPT at benchmarks/centroid_constrained_fixture_receipt.py:1836 is ROOT-relative and the tracked artifact docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json resolves; span-offset.json records landing_merge b470e1fbb, which an independent git query confirms is the earliest merge on 211d75798c's ancestry path to the tip and a true two-parent merge inside HEAD's history. Deduction is small: the gate log's revision line names 8647f5e2d (the code revision) while the head 6b8d62e94 is docs-only, and the fragment carries a 2.717e-2 display where the receipt's own field is 2.716e-2 -- but the done-when itself names 2.717e-2, so the node wrote what it was asked to.",
+    "scope_discipline": "the range 5ad2f3555..6b8d62e94 changes exactly four files, every one inside the node's six declared write paths, 98 insertions and 8 deletions; git diff --check is clean, the reviewed worktree reports no dirty or untracked entry, and the worktree HEAD is exactly the reviewed head. No plan meta line, no test file and no tolerance is touched."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 5ad2f3555804ed87ee28ce5e439837dcda46447b\nREVIEWED_HEAD_SHA: 6b8d62e94851645122537da00d1dd8c1be749802\nVERDICT goal: to correct the span-offset record's two number slips, its hard-coded receipt path and its provenance; all four are repaired in the reviewed range.\nVERDICT done_when: the fragment reads -0.8267 Wb and names the 8.5x/9.3x bases; DEFAULT_SPAN_OFFSET_RECEIPT = ROOT/(...); span-offset.json records landing_merge b470e1fbb beside source_revision 211d75798c5; the headered gate log reproduces offset_wb=+4.517667660e+00 with EXIT=0.\nVERDICT write_paths: all four changed files lie inside the node's six declared write paths, as does the report.\nVERDICT manifest: read; status complete, three commits, EXIT=0 gate with the CENTROID_SPAN_OFFSET line, negative_control_log none.\nVERDICT diff: base 5ad2f3555..head 6b8d62e94 changes 4 files, 98 insertions, 8 deletions; git diff --check clean; worktree clean.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all four named defects repaired and verified -- fragment -0.8267 Wb and the 8.5x/9.3x bases, ROOT-relative DEFAULT_SPAN_OFFSET_RECEIPT with the artifact tracked in-repo, landing_merge b470e1fbb confirmed a real merge on 211d75798c's ancestry path, and the headered gate log reproducing the number; deductions small (the gate header names the code revision 8647f5e2d and the fragment keeps the done-when's own 2.717e-2 display).\nSCORE evidence: 15\nJUSTIFICATION evidence: the headerless-log follow-on is closed and the provenance repair is backed by an independent git query; deductions are the negative-control string that is not demonstrable on this host and the absence of any armed suite arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the four changed files are all inside the declared write paths, 98 insertions and 8 deletions, git diff --check clean, worktree clean.\nSCORE durability: 14\nJUSTIFICATION durability: no test surface -- the helpers and the ROOT-relative default have no committed assertion, only the node's one-off gate re-run.\nSCORE fit: 17\nJUSTIFICATION fit: reuses the driver's ROOT/default idiom with documented failure-tolerant helpers and no plan labels; deductions are the missing trailing newline and the git shell-out dependency.\nFINDING docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html:28 follow-on: the fragment writes 2.717e-2 for the solved-span compensator fraction while the receipt's own field is 2.716e-2.\nFINDING docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html:33 follow-on: pre-existing centroid-error figures (8.4232e-12 pitches / 3.92575e-12 m) disagree with the receipt (8.4270663891465e-12 pitches / 3.927547300640607e-12 m); outside this node's two-slip scope.\nFINDING docs/evidence/fragments/centroid-constrained-oracle-solve/cco-span-offset-record-repairs.html:36 follow-on: the landing fragment has no terminating newline.\nFINDING manifest.md:1 follow-on: the declared negative-control string is not demonstrable on this host (the legacy absolute path exists), so the repair is confirmed by construction only.\n",
+  "review_base_sha": "11985735c020a39df74f76c75cbe6354e0e67d36",
+  "review_run_id": "r-20261002T202558804788-review-of-cco-span-offset-record-repairs",
+  "reviewed_base_sha": "5ad2f3555804ed87ee28ce5e439837dcda46447b",
+  "reviewed_commit": "6b8d62e94851645122537da00d1dd8c1be749802",
+  "reviewed_head_sha": "6b8d62e94851645122537da00d1dd8c1be749802",
+  "reviewed_revision": "6b8d62e94851645122537da00d1dd8c1be749802",
+  "reviewed_run_id": "r-20261002T181517700608-cco-span-offset-record-repairs",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-span-offset-record-repairs",
+  "reviewer_node": "review-of-cco-span-offset-record-repairs",
+  "reviewer_run_id": "r-20261002T202558804788-review-of-cco-span-offset-record-repairs",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T20:45:00+00:00",
+  "total": 85,
+  "verdict": "pass-with-follow-ons"
+}

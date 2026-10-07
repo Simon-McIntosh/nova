@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-03T19:08:52.118Z",
+  "dispatched_at": "2026-10-03T19:02:20Z",
+  "findings": [
+    {
+      "file": "tests/test_renderer_contours_inside_wall.py",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "follow-on: the tree-wide guard asserts an empty scan but carries no in-test positive control proving scan_paths traverses the real roots and reports a known record, so a regression that makes it return [] silently would leave the guard green; its non-vacuity rests on the separate negative-control log and the crafted unit controls rather than on the guard test itself."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base ced863db2; tests/renderer_wall_scan.py:115 gains _passes_wall (and _is_none_literal) replacing the two weaker guard checks, tests/test_renderer_contours_inside_wall.py is newly added, and the two stale corpus controls at tests/test_renderer_wall_scan.py:55 and :65 become crafted tmp_path controls with a wall=None and real-wall pair.",
+    "done_when": "the done-when names the guard over both roots, the wall=None rule with a control, a scratch-copy negative control, and a zero-added-failure gate; the manifest records baseline_suite (exit 1, 2 failed) and after_suite (exit 0, 14 passed), each naming its log, and I confirmed independently that tests/renderer_wall_scan.py run over benchmarks/ and docs/figures/ returns empty at head.",
+    "goal": "the node was dispatched to pin the clean renderer wall scan with a tree-wide guard test; the landed commit 05458fea8 adds tests/test_renderer_contours_inside_wall.py, which scans benchmarks/ and docs/figures/ through tests/renderer_wall_scan.py:463 scan_paths and asserts an empty result, so the goal's deliverable is present.",
+    "manifest": "read; status complete, one commit 05458fea8, baseline_suite and after_suite both completed=true with readable logs, negative_control_log named as a bare path, and measurement_module and measurement_cwd recorded for the scratch base arm.",
+    "write_paths": "the declaration is tests/test_renderer_contours_inside_wall.py, tests/renderer_wall_scan.py, tests/test_renderer_wall_scan.py, the evidence fragment and a figures directory; the commit's changed files are exactly the three test files plus the fragment, all inside the fence."
+  },
+  "justifications": {
+    "durability": "tests/test_renderer_wall_scan.py:134 reddens if wall=None is treated as a guard and the negative-control log shows the tree-wide guard fails with the wall removed from a scratch driver, though the guard test itself carries no in-test positive control over the real roots.",
+    "evidence": "logs/gate.log records \"14 passed\" with EXIT=0 and logs/base-arm.log:1-2 carry the revision, tree and command, so the result is a receipt rather than a claim, and I reproduced the empty scan from the CLI.",
+    "fit": "tests/renderer_wall_scan.py:115 _passes_wall follows the module's predicate-helper idiom and states the mechanism, and the diff carries no plan or ticket identifier.",
+    "goal_fidelity": "tests/test_renderer_contours_inside_wall.py:53 raises unless the tree-wide scan over benchmarks/ and docs/figures/ is empty, which is exactly the invariant the goal asks to pin.",
+    "scope_discipline": "git diff ced863db2..05458fea8 --stat names only the four declared paths, and no figure or unrelated source was written."
+  },
+  "node": "fsa-renderer-wall-guard-test",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node was dispatched to pin the clean renderer wall scan with a tree-wide guard test; the landed commit 05458fea8 adds tests/test_renderer_contours_inside_wall.py, which scans benchmarks/ and docs/figures/ through tests/renderer_wall_scan.py:463 scan_paths and asserts an empty result, so the goal's deliverable is present.\nVERDICT done_when: the done-when names the guard over both roots, the wall=None rule with a control, a scratch-copy negative control, and a zero-added-failure gate; the manifest records baseline_suite (exit 1, 2 failed) and after_suite (exit 0, 14 passed), each naming its log, and I confirmed independently that tests/renderer_wall_scan.py run over benchmarks/ and docs/figures/ returns empty at head.\nVERDICT write_paths: the declaration is tests/test_renderer_contours_inside_wall.py, tests/renderer_wall_scan.py, tests/test_renderer_wall_scan.py, the evidence fragment and a figures directory; the commit's changed files are exactly the three test files plus the fragment, all inside the fence.\nVERDICT manifest: read; status complete, one commit 05458fea8, baseline_suite and after_suite both completed=true with readable logs, negative_control_log named as a bare path, and measurement_module and measurement_cwd recorded for the scratch base arm.\nVERDICT diff: read commit by commit against base ced863db2; tests/renderer_wall_scan.py:115 gains _passes_wall (and _is_none_literal) replacing the two weaker guard checks, tests/test_renderer_contours_inside_wall.py is newly added, and the two stale corpus controls at tests/test_renderer_wall_scan.py:55 and :65 become crafted tmp_path controls with a wall=None and real-wall pair.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: tests/test_renderer_contours_inside_wall.py:53 raises unless the tree-wide scan over benchmarks/ and docs/figures/ is empty, which is exactly the invariant the goal asks to pin.\nSCORE evidence: 19\nJUSTIFICATION evidence: logs/gate.log records \"14 passed\" with EXIT=0 and logs/base-arm.log:1-2 carry the revision, tree and command, so the result is a receipt rather than a claim, and I reproduced the empty scan from the CLI.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff ced863db2..05458fea8 --stat names only the four declared paths, and no figure or unrelated source was written.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_renderer_wall_scan.py:134 reddens if wall=None is treated as a guard and the negative-control log shows the tree-wide guard fails with the wall removed from a scratch driver, though the guard test itself carries no in-test positive control over the real roots.\nSCORE fit: 19\nJUSTIFICATION fit: tests/renderer_wall_scan.py:115 _passes_wall follows the module's predicate-helper idiom and states the mechanism, and the diff carries no plan or ticket identifier.\nFINDING tests/test_renderer_contours_inside_wall.py:53 follow-on: the tree-wide guard asserts an empty scan but carries no in-test positive control proving scan_paths traverses the real roots and reports a known record, so a regression that makes it return [] silently would leave the guard green; its non-vacuity rests on the separate negative-control log and the crafted unit controls rather than on the guard test itself.\n",
+  "review_run_id": "r-20261003T190204159037-review-of-fsa-renderer-wall-guard-test",
+  "reviewed_base_sha": "ced863db223d2697bf417566d4d267872db8d88d",
+  "reviewed_head_sha": "05458fea8851251bd05995b9ee8dc17444d7993d",
+  "reviewed_run_id": "r-20261003T184731236639-fsa-renderer-wall-guard-test",
+  "reviewer_node": "review-of-fsa-renderer-wall-guard-test",
+  "reviewer_run_id": "r-20261003T190204159037-review-of-fsa-renderer-wall-guard-test",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T19:08:24.873428+00:00",
+  "total": 95
+}

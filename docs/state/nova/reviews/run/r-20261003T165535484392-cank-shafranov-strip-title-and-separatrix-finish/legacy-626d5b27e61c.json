@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T17:25:17.198Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T16:55:55Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/constraint-augmented-newton-krylov/shafranov/row-21985-51.json",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The row separatrix guard reads the receipt's self-reported figure.saddle_contour_distance_px (tests/test_shafranov_discriminator_render.py:165-167) and the receipt's figure.sha256 is recorded but asserted against the file by no test, so a regenerated PNG edited away from its receipt would still pass, and no test recomputes the saddle-to-contour gap from the drawn SVG. The declared negative control also fires on absent keys rather than on a wrong value: the 12a894f23 base receipts raise KeyError on 'reference_topology' and 'suptitle_lines' (negative-control.log, reproduced id-for-id at logs/review-negctrl-repro.log), which shows the checks read fields the base did not write more than that they reject a receipt recording a saddle standing off its contour. Repair: add a case that reconstructs a receipt with an intact reference_topology but a saddle_contour_distance_px above one pixel, and assert the test fails on the value rather than the key."
+    },
+    {
+      "file": "benchmarks/shafranov_pair_receipt.py",
+      "line": 77,
+      "severity": "follow-on",
+      "text": "RASTER_SAMPLES is raised 181 -> 601 as a value measured to bring every row inside one pixel, and the evidence fragment records the gap as non-monotone in the sample count (0.145 px at 601, 0.546 px at 901 for row 21985/51), so 601 is a threshold that happens to pass rather than one derived from the canvas geometry. A future bank row or a different panel canvas could stand more than a pixel from its separatrix at 601 with nothing in the code to catch it beyond the six parametrised rows. Repair: derive the sample count from the canvas pixel size and the panel's physical extent (the fragment states the step is about 0.8 canvas px at 601) rather than from a fixed constant, or add a guard that asserts the grid step is below one canvas pixel for whatever resolution is chosen."
+    },
+    {
+      "file": "manifest.md",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The reviewed run's manifest declares baseline_suite and after_suite both null (confirmed in its classified manifest data), so its claim of 'zero added failures against the base was not backed by a recorded base-arm log; the reviewer had to reconstruct the base arm at 89f181b1e (3 failed) to make the added-failure arithmetic auditable. Repair: have a gate node record both arms (or state the base failure ids it removed) so added_failure_count and added_failure_ids can be read from the run's own logs rather than reconstructed by the review."
+    }
+  ],
+  "gate_arms_note": "The reviewed run declared no baseline_suite/after_suite keys (both null in its classified manifest); its own three-file gate log at run/gate.log is the after arm. after arm: revision eb6361107, command 'JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-shafranov-strip-title-and-separatrix-finish /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_shafranov_discriminator_render.py tests/test_shafranov_pair_receipt.py tests/test_shafranov_combination_discriminator.py', exit_status 0, completed true, failure_count 0, failure_ids [], log gate.log (its last line 'EXIT=0'). baseline arm reconstructed by the reviewer at the run's own base revision 89f181b1e (the predecessor's blocked commit) by extracting benchmarks/, tests/, nova/, pyproject.toml and the figure receipts at that revision into a scratch tree; command same three-file gate with PYTHONPATH=<scratch>, exit_status 1, completed true, failure_count 3, failure_ids [test_shafranov_row_panel_separatrix_reaches_the_marked_saddle[row-21985-51.json], test_shafranov_row_panel_separatrix_reaches_the_marked_saddle[row-21986-46.json], test_combination_strip_suptitle_fits_the_canvas], log logs/review-gate-base.log. added_failure_ids = after_suite.failure_ids minus baseline_suite.failure_ids = [] minus [3 ids], i.e. [] because the head arm is fully green; added_failure_count 0. Independent reproduction at head: the reviewer re-ran the same gate in the reviewed worktree at eb6361107 and got 51 passed, EXIT=0 (logs/review-gate-head.log), matching the declared after arm. The two base saddle failures are exactly the two rows (21985-51 at 1.393 px, 21986-46 at 1.0698 px) the run names as over the one-pixel threshold, and the base strip-title failure is the title the run wrapped, so the three base failures are precisely the two defects the run repaired.",
+  "justifications": {
+    "durability": "Each regenerated figure's receipt is refreshed with its new keys and sha256 together, and the reviewer verified the sha256 values match the committed files: the six row receipts carry figure.saddle_contour_distance_px beside a fresh png sha256, and the strip receipt carries figure.suptitle_lines, figure.suptitle_widest_inches and canvas_width_inches beside fresh png and svg sha256. The renders are redrawn from committed receipts and banked states through render-only paths (render_row_panels and the strip render path), so no equilibrium is solved and the figures are reproducible from the repository; the strip receipt's figure.source_revision (c3f82561) is the source banked receipt's revision, a deliberate provenance field, while the row receipts carry the bank revision adcd846f. Deducted because the property the tests pin is self-attested: the row receipt records the saddle-to-contour distance it measured and the strip receipt records the extent it measured, and no test recomputes either from the drawn SVG or the PNG, so a receipt that drifted from its figure still passes; and the fix's resolution constant RASTER_SAMPLES=601 is a measured threshold whose adequacy is not monotone in the sample count (a probe the fragment records as non-monotone), so nothing guarantees a future row or topology cannot exceed one pixel at 601.",
+    "evidence": "Independently reproduced first-hand. The head gate was re-run in the reviewed worktree at eb6361107 and gives 51 passed, EXIT=0 (logs/review-gate-head.log), matching the after arm; the imported benchmark module resolves to the worktree's benchmarks/shafranov_pair_receipt.py, so the worktree's code, not the editable install behind it, is what ran. The declared negative control was independently re-derived rather than trusted: the 12a894f23 figures were reconstructed with 'git archive' into a scratch root (38 files) and the head render test run against them with NOVA_SHAFRANOV_FIGURE_ROOT gives 7 failed, 23 passed, EXIT=1 (logs/review-negctrl-repro.log), matching the reviewed run's negative-control.log failure ids exactly (the six test_shafranov_row_panel_separatrix_reaches_the_marked_saddle parametrisations and test_combination_strip_suptitle_fits_the_canvas). The base arm the reviewed run did not declare was reconstructed by the reviewer at 89f181b1e (logs/review-gate-base.log, 3 failed) and confirms the two-row saddle defect and the strip-title defect the run repaired. Receipt integrity was checked: each row receipt's figure.sha256 equals the sha256 of the committed PNG it names, and the strip receipt's png/svg sha256 equals the committed files (verified by hashing the worktree files). Deductions: (a) the run's manifest declares baseline_suite and after_suite both null, so its 'zero added failures against the base' rests on the run's assertion and the predecessor's recorded blockers rather than a recorded base-arm log until the reviewer reconstructed it; (b) the negative control fires on absent receipt keys (KeyError: reference_topology, suptitle_lines) rather than on a receipt that records a large saddle gap, so it shows the checks read fields the base did not write more than that they reject a wrong value; (c) the row guard reads the receipt's self-reported saddle_contour_distance_px and the receipt's own figure sha256 is not asserted against the file by any test, so a figure edited away from its receipt would pass.",
+    "fit": "The change reuses the committed nova.media painters (poloidal.draw_flux_contours, draw_nulls, draw_wall, contour_levels with the boundary flux named) and adds render-only paths to the existing benchmark driver rather than new scripts, so repairing a caption or a series costs a render rather than a solve. The anchored-saddle mechanism - pinning the interpolant at the admitted saddle to the boundary flux so the separatrix reaches the marker - is a clean way to make the drawn contour pass through the null the panel marks, and it is documented at the point it is applied; the strip's measured title extent is recorded rather than assumed, consistent with the sibling row subtitle measurement. Deducted for a small asymmetry: the row panels record both the caption extent and the saddle distance, but the saddle distance is a signal only of raster fineness once the anchor has forced the boundary value at the saddle, so the row panel's legibility and topology guarantees are recorded at different strengths, and RASTER_SAMPLES is raised to a value that happens to pass rather than one tied to the canvas pixel size in the code.",
+    "goal_fidelity": "Plan nova:constraint-augmented-newton-krylov \u00a74; the node's done-when has four items, all met. (1) 'Re-render the six refused-row panels with the anchored-saddle contour at a resolution that brings every marked admitted saddle within one pixel of a drawn contour, and record each row distance in pixels in the render receipt': the six receipts carry figure.saddle_contour_distance_px 0.0847 (21978/35), 0.2420 (21983/35), 0.1233 (21985/51), 0.0605 (21986/46), 0.0445 (21989/55), 0.2626 (22086/43), every one below 1.0, and the base arm shows the two rows that exceeded it (21985-51, 21986-46) now pass (logs/review-gate-base.log 3 failed vs gate.log 0 failed). Opening row-21985-51.png shows the reference contour passing through the filled-cross saddle marker, the axis drawn as a solid triangle and the vessel drawn unit-faithfully. (2) 'Re-render the combination strip so its receipt carries suptitle_lines and suptitle_widest_inches inside the canvas width': the strip receipt figure carries suptitle_lines (2 lines) and suptitle_widest_inches 6.7206 against canvas_width_inches 7.2; the strip PNG shows the two-line title fully inside the canvas. (3) 'Run the three-file gate ... passes with zero added failures against the base': verified, 51 passed at head against 3 failed at base, so the change adds none. (4) negative control run as declared, 7 failed. Deducted for a soft edge: the run's own manifest states the figure content only in one landing sentence and the full 'what they show' narrative lives in the evidence fragment rather than the manifest, and RASTER_SAMPLES=601 is an empirically chosen value (the fragment itself records the gap is non-monotone in sample count) rather than a value derived from the canvas geometry, so the repair is a measured threshold rather than a principled one.",
+    "scope_discipline": "The two commits change 30 distinct paths, every one inside the granted fence. eb6361107 (29 files) changes benchmarks/shafranov_pair_receipt.py and figures under docs/figures/constraint-augmented-newton-krylov/{shafranov,shafranov-discriminator}; 910204312 (1 file) adds docs/evidence/fragments/constraint-augmented-newton-krylov/cank-shafranov-strip-title-and-separatrix-finish.html. No plan file, shared sprint/index state, or concurrent-node path is touched; the commits are not on origin/main (expected worker flow - the coordinator owns merge). The reviewed worktree is clean at its head (git status --short empty apart from the .venv symlink). Both commits carry a conventional subject with an explanatory body (10 and 5 non-empty body lines), no AI trailer and no plan/ticket identifier (checked with a case-insensitive grep for co-authored-by/generated-with/claude/copilot and for phase/stage/wave/plan). No test file was changed by this run (the new checks were added by the predecessor 89f181b1e), which is in scope and fine."
+  },
+  "node": "review-of-cank-shafranov-strip-title-and-separatrix-finish",
+  "project": "nova",
+  "review_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "review_run_id": "legacy-626d5b27e61c",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "89f181b1e47a78f39ea25be30f0da34ff8d8e809",
+  "reviewed_commit": "910204312b56aebebc46562e4727f3bcb1fb0b2a",
+  "reviewed_commits": [
+    "eb6361107d8f8b5ec60eb5346c7df4fd088e37fd",
+    "910204312b56aebebc46562e4727f3bcb1fb0b2a"
+  ],
+  "reviewed_head_sha": "910204312b56aebebc46562e4727f3bcb1fb0b2a",
+  "reviewed_run_id": "r-20261003T165535484392-cank-shafranov-strip-title-and-separatrix-finish",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-shafranov-strip-title-and-separatrix-finish",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T17:58:00Z",
+  "total": 86,
+  "verdict": "pass"
+}

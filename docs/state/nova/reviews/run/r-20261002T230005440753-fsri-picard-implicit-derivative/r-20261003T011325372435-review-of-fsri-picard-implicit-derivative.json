@@ -1,0 +1,84 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest declares completed baseline_suite f3ce0410b179d816220384eea0dea946a870154b and completed after_suite 3b4902e9e2f951afc0ebe64aa07b7f3b76ad30bb. Both have exit_status 0, failure_count 0, and failure_ids []; their after-minus-baseline failure-id set is empty.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T011325372435-review-of-fsri-picard-implicit-derivative/review-picard-implicit-derivative-f2ca6aa0.log: 5 passed in 14.02s, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/picard-derivative-witness.log: probe 3, GMRES information 0, EXIT_STATUS=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/unrolled-negative-control-test.log: 1 failed, EXIT=1"
+  ],
+  "changed_paths": [
+    "benchmarks/picard_derivative_contract.py",
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-picard-implicit-derivative.html",
+    "tests/test_picard_implicit_derivative.py"
+  ],
+  "commits_read": [
+    "58c44f09338334c5eb537fb1d9fea6666974f885",
+    "f2ca6aa0e0c86d525480795c6d2c0de1fc48f7f7"
+  ],
+  "completed_at": "2026-10-03T01:20:40Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T01:13:50Z",
+  "evidence_inputs": {
+    "reproduction": "Archived unrolled control red; H200 repaired witness green.",
+    "reviewed_increment": "58c44f09 witness selection/receipt link; f2ca6aa0 transpose-solve regression."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_picard_implicit_derivative.py",
+      "line": "79-121",
+      "severity": "follow-on",
+      "text": "Add driver-level parsing and receipt-value coverage for the published physical witness."
+    },
+    {
+      "file": "tests/test_picard_implicit_derivative.py",
+      "line": "96-121",
+      "severity": "follow-on",
+      "text": "Record an executed reverse-mode transpose action as well as its supplied configuration."
+    }
+  ],
+  "follow_ons": [
+    "Test the driver-level argument-to-receipt path.",
+    "Observe an executed reverse transpose action.",
+    "Keep the separate moment and map-tangent ladders with their owning nodes."
+  ],
+  "gate_arms_note": "baseline_suite and after_suite are readable/completed with zero failures; independent exact-head gate: 5 passed in 14.02s, EXIT=0.",
+  "justifications": {
+    "durability": "The exact f2ca6aa0 source archive passes all 5 focused tests in 14.02 s, while the receipt link is retained in the evidence fragment. No driver-level receipt assertion is committed.",
+    "evidence": "The completed H200 receipt records probe 3, all three published absolute steps, matching forward and implicit current tangents, GMRES information 0, and EXIT_STATUS=0. The archived unrolled control remains red at 11.313969220425736 relative error.",
+    "fit": "The new test observes one Picard custom linear solve with a supplied transpose_solve and retains the scalar JVP value 1.25. It does not trace a reverse request through that action.",
+    "goal_fidelity": "The increment preserves automatic selection while making the published probe-3 physical witness and absolute finite-difference steps explicit and tested. Its unit test stops at helpers rather than argparse-to-receipt execution.",
+    "scope_discipline": "Exactly the three declared paths changed from 4d319ffc through f2ca6aa0; diff --check is clean."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-on: focused witness and transpose-solve regressions are sound; parser-level and executed-adjoint coverage remain follow-ons.\nSCORE goal_fidelity: 19\nSCORE evidence: 20\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 19\n",
+  "review_run_id": "r-20261003T011325372435-review-of-fsri-picard-implicit-derivative",
+  "reviewed_base_sha": "4d319ffcc0a12d1b5bf8390759bc4b1154fdfc3b",
+  "reviewed_head_sha": "f2ca6aa0e0c86d525480795c6d2c0de1fc48f7f7",
+  "reviewed_revision": "f2ca6aa0e0c86d525480795c6d2c0de1fc48f7f7",
+  "reviewed_run_id": "r-20261002T230005440753-fsri-picard-implicit-derivative",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-picard-implicit-derivative",
+  "reviewer_node": "review-of-fsri-picard-implicit-derivative",
+  "reviewer_run_id": "r-20261003T011325372435-review-of-fsri-picard-implicit-derivative",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T01:16:11Z",
+  "total": 96,
+  "verdict": "pass-with-follow-on"
+}

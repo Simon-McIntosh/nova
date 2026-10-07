@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/geometry/volume.py:20",
+    "nova/imas/coils_non_axisymmetric.py:16",
+    "nova/geometry/polyline.py:657",
+    "nova/frame/coil.py:88",
+    "nova/biot/polybow.py:65",
+    "nova/biot/bow.py:28"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T10:48:50.956000+00:00",
+  "findings": [
+    {
+      "file": "tests/test_section_imports_without_vedo.py",
+      "line": "27",
+      "text": "the advertised positive control is dead code: sys.modules['vedo'] = None at line 20 makes `import vedo` raise ImportError unconditionally, so the else branch's AssertionError can never fire and proves nothing about the block being in force, yet docs/evidence/archive/forward-solve-api-landed.html credits it with showing the block was actually present rather than silently absent."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T094923779940-fsapi-section-imports-vedo-only-to-render/logs/section-suite.log",
+      "line": "1",
+      "text": "the importer-suite result the manifest cites as tests/test_volume.py 21 passed comes from a run whose header names the base revision b1940ff25 rather than the appraised tree ede455961, so the header does not identify the content the run exercised and the 21-passed figure cannot be tied to the landed change by its own log."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit against b1940ff25; ede455961 defers the module-level vedo and VtkFrame imports and adds `from __future__ import annotations` with a TYPE_CHECKING import in nova/geometry/section.py, and adds tests/test_section_imports_without_vedo.py; b72551cd adds a plan comment and an evidence anchor.",
+    "done_when": "the done_when names tests/test_section_imports_without_vedo.py, the module-level import removal with a viz-extra comment, a recorded failing negative control, and the still-passing section importers; the manifest records gate-green.log (1 passed) and negative-control.log (1 failed at section.py line 11) and tests/test_volume.py (21 passed), and I reproduced the import check directly.",
+    "goal": "the node goal is that a consumer without the viz extra can import nova/geometry/section.py; the landed diff moves the module-level vedo import into Section.plot (section.py:249-251) and I independently reproduced the import with sys.modules['vedo']=None returning SECTION-IMPORT-OK.",
+    "manifest": "read; it reports status complete with the commit list, both gate logs, a negative_control_note locating the failure at section.py line 11, and the VtkFrame import blocker disclosed under evidence_inputs.",
+    "write_paths": "the manifest declares nova/geometry/section.py, tests/test_section_imports_without_vedo.py, docs/plans/forward-solve-api.html and docs/evidence/archive/forward-solve-api-landed.html; both commits ede455961 and b72551cd touch exactly those four paths, all inside the fence."
+  },
+  "justifications": {
+    "durability": "the declared negative control is genuine and reproduced red by restoring `import vedo` at module scope (section.py line 11), but the test's own advertised positive control is unreachable dead code at tests/test_section_imports_without_vedo.py:26 and the guard covers the import path only, not a viz-free construction of Section.",
+    "evidence": "gate-green.log records 1 passed at revision ede455961 and negative-control.log records the declared mutation failing at section.py line 11, but the \"positive control\" the evidence record credits cannot fail and section-suite.log is headed with the base revision b1940ff25 rather than the tree it appraised.",
+    "fit": "the future-annotations import and TYPE_CHECKING VtkFrame at nova/geometry/section.py:3,15-16 follow the repository's prevailing idiom and no name introduces a forbidden label.",
+    "goal_fidelity": "nova/geometry/section.py:249 now imports vedo inside Section.plot, the only call at line 251, and the module now imports with sys.modules['vedo']=None as reproduced directly and by tests/test_section_imports_without_vedo.py.",
+    "scope_discipline": "both commits touch only the four declared paths, and the VtkFrame import deferral stays inside nova/geometry/section.py where the goal implies it."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is that a consumer without the viz extra can import nova/geometry/section.py; the landed diff moves the module-level vedo import into Section.plot (section.py:249-251) and I independently reproduced the import with sys.modules['vedo']=None returning SECTION-IMPORT-OK.\nVERDICT done_when: the done_when names tests/test_section_imports_without_vedo.py, the module-level import removal with a viz-extra comment, a recorded failing negative control, and the still-passing section importers; the manifest records gate-green.log (1 passed) and negative-control.log (1 failed at section.py line 11) and tests/test_volume.py (21 passed), and I reproduced the import check directly.\nVERDICT write_paths: the manifest declares nova/geometry/section.py, tests/test_section_imports_without_vedo.py, docs/plans/forward-solve-api.html and docs/evidence/archive/forward-solve-api-landed.html; both commits ede455961 and b72551cd touch exactly those four paths, all inside the fence.\nVERDICT manifest: read; it reports status complete with the commit list, both gate logs, a negative_control_note locating the failure at section.py line 11, and the VtkFrame import blocker disclosed under evidence_inputs.\nVERDICT diff: read commit by commit against b1940ff25; ede455961 defers the module-level vedo and VtkFrame imports and adds `from __future__ import annotations` with a TYPE_CHECKING import in nova/geometry/section.py, and adds tests/test_section_imports_without_vedo.py; b72551cd adds a plan comment and an evidence anchor.\nCALL_SITES: nova/geometry/volume.py:20, nova/imas/coils_non_axisymmetric.py:16, nova/geometry/polyline.py:657, nova/frame/coil.py:88, nova/biot/polybow.py:65, nova/biot/bow.py:28\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/geometry/section.py:249 now imports vedo inside Section.plot, the only call at line 251, and the module now imports with sys.modules['vedo']=None as reproduced directly and by tests/test_section_imports_without_vedo.py.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-green.log records 1 passed at revision ede455961 and negative-control.log records the declared mutation failing at section.py line 11, but the \"positive control\" the evidence record credits cannot fail and section-suite.log is headed with the base revision b1940ff25 rather than the tree it appraised.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both commits touch only the four declared paths, and the VtkFrame import deferral stays inside nova/geometry/section.py where the goal implies it.\nSCORE durability: 16\nJUSTIFICATION durability: the declared negative control is genuine and reproduced red by restoring `import vedo` at module scope (section.py line 11), but the test's own advertised positive control is unreachable dead code at tests/test_section_imports_without_vedo.py:26 and the guard covers the import path only, not a viz-free construction of Section.\nSCORE fit: 19\nJUSTIFICATION fit: the future-annotations import and TYPE_CHECKING VtkFrame at nova/geometry/section.py:3,15-16 follow the repository's prevailing idiom and no name introduces a forbidden label.\nFINDING tests/test_section_imports_without_vedo.py:27 the advertised positive control is dead code: sys.modules['vedo'] = None at line 20 makes `import vedo` raise ImportError unconditionally, so the else branch's AssertionError can never fire and proves nothing about the block being in force, yet docs/evidence/archive/forward-solve-api-landed.html credits it with showing the block was actually present rather than silently absent.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T094923779940-fsapi-section-imports-vedo-only-to-render/logs/section-suite.log:1 the importer-suite result the manifest cites as tests/test_volume.py 21 passed comes from a run whose header names the base revision b1940ff25 rather than the appraised tree ede455961, so the header does not identify the content the run exercised and the 21-passed figure cannot be tied to the landed change by its own log.\n",
+  "review_run_id": "r-20260923T104850956000-review-of-fsapi-section-imports-vedo-only-to-render",
+  "reviewed_base_sha": "b1940ff25bd0942e1bb841493c34b05a2256bcc9",
+  "reviewed_head_sha": "b72551cd123f007612931e25e51f2a644774269e",
+  "reviewed_revision": "b72551cd123f007612931e25e51f2a644774269e",
+  "reviewed_run_id": "r-20260923T094923779940-fsapi-section-imports-vedo-only-to-render",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260923T104850956000-review-of-fsapi-section-imports-vedo-only-to-render",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T12:57:36+02:00",
+  "total": 90
+}

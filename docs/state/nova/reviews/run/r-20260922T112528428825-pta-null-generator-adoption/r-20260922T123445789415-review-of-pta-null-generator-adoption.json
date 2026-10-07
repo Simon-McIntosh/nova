@@ -1,0 +1,109 @@
+{
+  "absent": [
+    "same-device production-read cost receipt at 550, 1074 and 2616 realised cells; explicitly delegated by the reviewed node contract",
+    "two-grid MAST 22086/43 edit-index-10 frame and outcome; explicitly delegated by the reviewed node contract",
+    "repairs for the six own-node-capable callers listed in consumer-migration.json; explicitly delegated after the one authorized benchmark repair"
+  ],
+  "absent_items": [
+    {
+      "disposition": "follow-on required before section 5 can close; not part of this reviewed node's dispatched done-when",
+      "item": "section-5 device cost gate"
+    },
+    {
+      "disposition": "follow-on required before section 5 can close; not part of this reviewed node's dispatched done-when",
+      "item": "section-5 two-grid MAST frame"
+    },
+    {
+      "disposition": "pair before promotion because one production caller and five benchmark callers can reach direct-sample carriers and still truncate the state",
+      "item": "remaining full-state census consumer migration"
+    }
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "benchmarks/xpoint_cell_allocation_rca.py:769-771",
+    "benchmarks/topology_read_resolution_ladder.py:310-315",
+    "benchmarks/null_census_assertion.py:189-191,552",
+    "benchmarks/global_spline_read_on_hex.py:485-491",
+    "benchmarks/limiter_read_resolution_audit.py:781-786",
+    "nova/equilibrium/forward.py:1371-1374"
+  ],
+  "commits_read": [
+    "68112f59ad6e642e0a7d8420de0bff46fb248524",
+    "08dd0dda16ac938205753234f06a53f4e194dca2",
+    "f4e8d6bc677e4702532c3624f80090c8774ed135",
+    "ee17f9570d5cca3184729f5d260b2bd77c90db2b",
+    "1aa83f45c6689e1a4f861c2fadf083a088358051",
+    "e46e5378bf28252e3f4e4f86bd6fd00473dcfb5c"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T12:34:45.789415+00:00",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "1025",
+      "severity": "high",
+      "text": "the new nonsingularity test uses an absolute determinant floor of 1e-12, so admission is not invariant to multiplying the same flux field by a nonzero scalar. An independent known-root check on psi=(R-0.2)^2-(Z-0.1)^2 retained the saddle at scales 1, 1e-3 and 1e-6 but rejected the identical finite indefinite root at 1e-9. The plan requires a finite nonsingular Hessian; the scaled determinant is nonzero, so this threshold can erase a real topology solely because the flux unit amplitude changed. Use a scale-conditioned singularity test and pin flux-rescaling invariance."
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "1371",
+      "severity": "high",
+      "text": "ForwardProfile._secondary_x_point still truncates flux at physical_node_number and calls the adopted locator with grid_flux only. On an own-node carrier the locator requires the direct sampling suffix and raises ValueError('own-node null census requires the direct sampling flux values'). The reviewed run's consumer.log contains the positive control retained_count=[1,3] followed by that refusal, and consumer-migration.json identifies this production caller plus five benchmark callers that can reach own-node carriers. The one repaired DIII-D benchmark does not make the input-contract migration complete; pair these callers before promotion."
+    },
+    {
+      "file": "tests/test_plasma_cell_topology_read.py",
+      "line": "98",
+      "severity": "medium",
+      "text": "the advertised 0/646 raster oracle obtains its stationary candidates from the same modified candidate_table_status implementation as the production read. Its independent reconstruction of edges, flood and DomainMasks is useful downstream parity evidence, but it is self-agreement for the candidate-generator admission rule and cannot validate the new quadratic authority. The analytic ladder and its crossing-gate negative control provide that independent generator evidence instead."
+    },
+    {
+      "file": "docs/figures/plasma-cell-topology-authority/bank-replay.json",
+      "line": "1",
+      "severity": "medium",
+      "text": "the 12-row replay is a real historical regression comparison, not a second derivation of null truth: it compares the changed production read with committed labels and reports 0 differing cells over 13,068. Six rows still have marginal_solver_basin=null and the receipt marks them pending while passes=true is supported by only four governed non-marginal rows. Preserve the 0/13068 observation, but do not promote it as a fully governed twelve-row gate until the adjacent harness supplies those six flags."
+    },
+    {
+      "file": "docs/evidence/archive/plasma-cell-topology-authority-landed.html",
+      "line": "186",
+      "severity": "medium",
+      "text": "the record explicitly delegates the same-device cost gate and two-grid MAST frame, although both remain mandatory section-5 evidence. That is honest node scoping, not a defect in this worker's delivery, but this six-commit chain cannot by itself close section 5 or support the claimed <=1.10 cost bound and independent resolution-axis corroboration."
+    }
+  ],
+  "item_aggregate": 8,
+  "item_verdicts": {
+    "admission_rule": "PARTIAL PASS: both carriers use the own-node quadratic root, finite/type/source-cell/wall filters, and the crossing count is diagnostic; the absolute 1e-12 determinant floor makes the finite-nonsingular rule flux-scale dependent.",
+    "capacity_and_order": "PASS for the changed surface: maxsize, retained_count, overflow/truncated and DomainMasks vector order remain fixed-shape; the three-root/two-work-slot case now reports census_slots_exhausted=true while a capacity-three control is false.",
+    "diff": "read all six commits and the complete edc04e8c..e46e5378 range; twelve paths changed, each inside the original or coordinator-extended scope, and all six commits have conventional subjects and explanatory bodies with no attribution trailer.",
+    "done_when": "PARTIAL at plan level, PASS for the dispatched node gate: 154 passed, the same four baseline failure IDs remained enabled, three skipped, 0/646 raster labels, 0/13068 bank labels, and the negative mutation failed 132 and 340 while 550 passed. Device cost and the two-grid frame remain follow-ons by dispatch.",
+    "evidence_independence": "the ladder uses an analytic X-point reference and the negative control restores the retired gate, so they could fail independently and are strong evidence. Raster 0/646 reuses the changed candidate table and is independent only below that seam. Bank 0/13068 compares against committed historical labels but six marginal flags are pending.",
+    "goal": "the production read now admits the missed 132- and 340-cell saddles, preserves the crossing receipt, and applies spline polish only after quadratic type/containment compaction; the central node goal is met subject to the scale-conditioned Hessian repair.",
+    "input_contract": "FAIL for integration completeness: null_flux_pool carries centroid plus sampling values and repairs the authorized DIII-D and forward-census consumers, but six own-node-capable callers still discard the suffix, including ForwardProfile._secondary_x_point.",
+    "manifest": "PASS: terminal status is the recognized value complete, all six commits and twelve changed paths are explicit, baseline/after suites are armed and comparable, the negative_control_log is a bare path, and the follow-ons state the deferred consumer, cost, frame and marginal-flag work."
+  },
+  "justifications": {
+    "durability": "six incremental commits, whole CPU/negative/replay logs, a baseline-versus-after failure-id comparison, committed machine-readable replay and consumer censuses, and a valid terminal manifest preserve the work. The evidence honestly retains four enabled baseline failures and six pending marginal flags.",
+    "evidence": "the analytic ladder and exact crossing-gate mutation are strong aimed instruments: the adopted path finds all three rungs below 0.10 pitch and the mutation removes only the two historically missed saddles. The evidence score is reduced because the raster oracle shares candidate authority, six bank rows are not governed, no scale-invariance control exists, and the plan-level device/frame measures remain absent from this node.",
+    "fit": "the design cleanly separates quadratic admission, crossing diagnostics, representative compaction and polish, and it preserves fixed-shape tables and DomainMasks order. Fit is materially reduced by the absolute Hessian determinant floor and by introducing a full-state contract that still breaks six reachable callers, including one production method.",
+    "goal_fidelity": "the six commits satisfy the dispatched node's central generator, regression, negative-control, parity and zero-added-failure goals, and explicitly leave device cost and the MAST frame to the named follow-on. Promotion still needs the scale-conditioned nonsingularity repair and the remaining caller migration before section 5 can be considered integrated.",
+    "scope_discipline": "git diff edc04e8c..e46e5378 touches only the original paths and the three paths in scope-extension-authorization.json; the worker did not edit the fourteen censused follow-on callers, and documented them with file-line reachability evidence as instructed."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the cell-centred own-node quadratic root is production authority on raster and plasma-cell carriers, crossing count is diagnostic, representative polish and map-value authority are retained, and the 132/340/550 ladder passes below 0.10 pitch; a flux-scale-dependent determinant floor remains a correctness defect.\nVERDICT done_when: the dispatched node gate is met with 154 passed, the same 4 baseline failure IDs, 3 skipped, raster 0/646, bank 0/13068, and a negative mutation failing 132 and 340 while 550 passes. The section-5 device-cost and two-grid MAST gates were explicitly delegated and remain required before plan closure.\nVERDICT write_paths: all twelve changed paths are within the original or recorded coordinator extension.\nVERDICT manifest: complete and structurally sound; six commits, twelve paths, real commands/logs, bare negative-control path, baseline/after JSON and explicit follow-ons are present.\nVERDICT diff: read commits 68112f59, 08dd0dda, f4e8d6bc, ee17f957, 1aa83f45 and e46e5378 in full-range context.\nCALL_SITES: six own-node-capable consumers remain on the truncated grid-only contract, including nova/equilibrium/forward.py:1371-1374.\nREVIEWED_REVISION: e46e5378bf28252e3f4e4f86bd6fd00473dcfb5c\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the central generator, diagnostic, polish, ladder, parity and negative-control goals are present, but scale-conditioned nonsingularity and paired consumer integration remain.\nSCORE evidence: 15\nJUSTIFICATION evidence: the analytic ladder and exact negative mutation are independent and aimed; raster 0/646 shares candidate authority, bank 0/13068 has six pending marginal flags, and the device/frame measures are follow-ons.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path is authorized by the initial fence or scope-extension receipt and deferred callers were only inventoried.\nSCORE durability: 18\nJUSTIFICATION durability: six commits, whole logs, machine-readable receipts, failure-id deltas and a valid manifest preserve all measured outcomes and caveats.\nSCORE fit: 12\nJUSTIFICATION fit: the authority separation and fixed-shape semantics are coherent, but the absolute Hessian floor rejects an unchanged topology after flux rescaling and the new full-state contract still breaks six reachable callers.\nFINDING nova/equilibrium/forward_operator.py:1025 absolute determinant_floor=1e-12 makes finite-nonsingular admission flux-scale dependent; the same analytic saddle passes at scales 1, 1e-3 and 1e-6 and fails at 1e-9.\nFINDING nova/equilibrium/forward.py:1371 _secondary_x_point strips the direct-sample suffix; one production and five benchmark callers can reach own-node carriers and still raise the explicit missing-sampling-values refusal.\nFINDING tests/test_plasma_cell_topology_read.py:98 the 0/646 oracle reads candidates from the modified production candidate table, so it independently checks only the downstream label construction.\nFINDING docs/figures/plasma-cell-topology-authority/bank-replay.json:1 the 0/13068 historical regression is genuine, but six marginal rows remain pending while passes=true is governed by four non-marginal rows.\nFINDING docs/evidence/archive/plasma-cell-topology-authority-landed.html:186 the device-cost and two-grid MAST gates are honestly delegated, so this node cannot close section 5 by itself.",
+  "review_run_id": "r-20260922T123445789415-review-of-pta-null-generator-adoption",
+  "reviewed_base_sha": "edc04e8c42c7575649bf9f11834083e2508cbd8d",
+  "reviewed_revision": "e46e5378bf28252e3f4e4f86bd6fd00473dcfb5c",
+  "reviewed_run_id": "r-20260922T112528428825-pta-null-generator-adoption",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-null-generator-adoption",
+  "reviewer_run_id": "r-20260922T123445789415-review-of-pta-null-generator-adoption",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 12,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T12:47:05.567063+00:00",
+  "total": 81
+}

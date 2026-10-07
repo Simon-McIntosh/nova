@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:08:49.390Z",
+  "dispatched_at": "2026-10-04T16:57:44Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/efit_reproduction_gate.py:154",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73's artifact consumes both receipts and the pin asserts against both, so naming one shared receipt/timing/schema owner (currently absent from `benchmarks/`) is the difference between one interface and two that drift; the plan already carries a stated divergence between the two gates' qualification rules.",
+      "text": "`_strict` is byte-identical to `benchmarks/solovev_certificate.py:236` and both modules re-declare `_timed_stage`; each builds a `{\"schema\": ..., \"data\": ...}` receipt, one hand-validating via `receipt[\"schema\"][\"required\"]` and the other via `jsonschema.Draft202012Validator` \u2014 two receipt owners for the two halves of one certificate",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_certificate_pin.py:53",
+      "id": "thin_wrapper-1",
+      "reason": "the two pin tests already disagree on this one receipt (`test_pinned_certificate_retains_its_census_and_render_integrity` asserts `unqualified_rows: 15`, `test_pinned_certificate_refuses_unqualified_production_rows` asserts none), which is exactly the failure a third reader of one receipt produces; extending the existing certificate tests or the harness's own verdict surface would remove the fork.",
+      "text": "the \u00a73 pin re-derives per-row qualification (`_unqualified_rows` over `case[\"rows\"]`) that the receipt already exposes as `verdict` (`qualified_rows`/`unqualified_rows`) and validates itself, and it re-reads the same receipt `tests/test_certificate_baseline_revision.py` and `tests/test_certificate_gate_live.py` already read; the plan gives no reason the pin could not extend those",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/accuracy_cost_ladder/measure.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "naming `scripts/accuracy_cost_ladder` (or the receipt's own timing fields) as the cost owner turns \u00a73's open \"record the cost\" into \"extend the existing cost record\", which is also what the `millisecond-converged-solve` consumer reads.",
+      "text": "\u00a73's done-when \"records what an accuracy re-certification costs (wall time and lanes) so it can be repeated per release\" restates the job `scripts/accuracy_cost_ladder/measure.py` already does (profiling closed-form oracle build and fixed-point solve cost, banked in `scripts/accuracy_cost_ladder/results.json`), and the certificate receipt already stamps per-row wall and `stage_timings`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/evidence/gs-absolute-accuracy-certificate.html",
+      "id": "deep_module-1",
+      "reason": "the evidence-page form is mandated by the plan system and the test readers serve CI while the pages serve a human, so consolidation would fight the plan-artifact contract; the reuse that matters here is the receipt owner (see the duplicate_owner findings), not a merged interface.",
+      "text": "\u00a73 realises the certificate as a receipt plus a render-data schema plus an artifact page plus two per-machine EFIT-match pages plus three test modules, each a thin reader of the same receipt, so no single interface hides the receipt shape",
+      "type": "deep_module",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "e4e53475077e48a78e93e80d3c15928e51519b2766a9e667b4c885924db8d524",
+  "plan_slug": "gs-absolute-accuracy-gates",
+  "plan_version": 56,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T165730770113-plan-review-of-gs-absolute-accuracy-gates",
+  "reviewed_blob_sha": "a8df6cc3661381622a754c517423cab11243a547",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the certificate's behaviour is spread across one receipt, a render-data schema, an evidence page, two per-machine EFIT-match pages and three test modules, each a small reader of the same receipt, rather than one module exposing the certificate behind a small interface.",
+    "duplicate_owner": "a finding \u2014 the plan authored two gate harnesses (`benchmarks/solovev_certificate.py`, `benchmarks/efit_reproduction_gate.py`) that each fork the same receipt scaffolding (`_timed_stage`, `_strict`, `_sha256`) and their own receipt schema/validation; \u00a73 assembles both into one certificate while the two owners are left to drift.",
+    "reuse_search": "pass \u2014 the plan ran a reuse scout and cites it (`docs/research/forward-accuracy-reuse-map.html`, 45-row inventory across nova/ambix/reckon) and names the mechanisms it extends (`benchmarks/analytic_operator_ladder.py` regional norms and order fit as the aggregation skeleton, `RotatingEquilibrium`, `split_fit_jump_field.py`, the `tests/test_solovev_recovery_gates.py` reduced-oracle path) rather than proposing a parallel subsystem.",
+    "thin_wrapper": "a finding \u2014 the \u00a73 pin (`tests/test_certificate_pin.py`) adds a further lane over the certificate receipt that the harness already self-validates and that `tests/test_certificate_baseline_revision.py` already reads, with no statement of why those cannot be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.416357+00:00"
+}

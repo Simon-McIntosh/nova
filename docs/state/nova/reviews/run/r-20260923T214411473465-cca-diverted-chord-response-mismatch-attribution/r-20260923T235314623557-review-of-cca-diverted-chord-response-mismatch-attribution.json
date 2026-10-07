@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "assertion_audit": [
+    "Archived relative sup/RMS and total-map norm checks fail when recomputed fields differ from their independently stored receipt metrics by more than 1e-9.",
+    "Coordinate equality fails if the reconstructed mesh differs from the input archive; finite quadrature fails on NaN or infinity.",
+    "Current-moment reconstruction fails if an altered moment image differs from the archived plasma error by more than 1e-9 of its peak; this protects reconstruction of fixed evidence, not the correctness of the upstream archived current booking.",
+    "Class closure fails if a class contribution is dropped or duplicated; its sum alone cannot detect exchanging class labels, so it does not fully protect causal attribution.",
+    "X-point nonzero analytic-current assertion fails for an identified saddle cell without a definable centroid; no assertion requires a saddle cell to have been detected, although the saved diverted rows each detect one and weak rows detect zero.",
+    "Weak-control assertion fails above 1e-4; audit one-percent perturbation deliberately falsifies the norm equality and records ten refusals, but is not a mutation of the measurement implementation.",
+    "Summary completed/count assertion fails on missing completion or fewer than ten rows; it does not independently enforce the exact case/rung census."
+  ],
+  "assessment": "Scientific attribution supported with a reproducibility repair required before implementation-worktree cleanup; upstream booking cause and exact-default gate remain open.",
+  "call_site_count": 2,
+  "call_sites": [
+    "docs/figures/cut-cell-current-attribution/diverted-chord-response/run.sh:10",
+    "benchmarks/diverted_chord_response_attribution.py:570"
+  ],
+  "commits_read": [
+    "c07565b0d28d6b2698b7eeb68ebd284e905f4b85",
+    "6315abefa8a3d7cf38037aa0a3848fe891403e88",
+    "1a6c3c519dd4ac02a4adb412d7126deb3fbad385"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T23:53:14.623557+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/cut-cell-current-attribution/diverted-chord-response/audit.py",
+      "line": "20",
+      "text": "[P2] The audit opens row['input_archive'] as an absolute implementation-worktree path emitted by benchmarks/diverted_chord_response_attribution.py:377, while run.sh:5 hardcodes the same worktree; after normal cleanup the committed evidence cannot be audited or rerun from main even though its input archives are versioned there. Resolve archive and launcher paths from the current repository, retain the recorded source path as provenance, and verify the stored input digest."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read the new driver and launcher, the field-norm repair in 6315abefa8a3d7cf38037aa0a3848fe891403e88, and the final summary/audit/evidence changes in 1a6c3c519dd4ac02a4adb412d7126deb3fbad385; both cumulative HTML edits only add the node's landing, preserve metadata, and keep section and followup open.",
+    "done_when": "docs/figures/cut-cell-current-attribution/diverted-chord-response/job.log records ten reproduced rows, CUDA x64 and ATTRIBUTION_COMPLETE; audit.log records ten closure checks and ten refused one-percent perturbations; negative-control.log records five weak rows below 1e-4, and the inspected mismatch-field.png carries the wall, stated line levels and both null sets.",
+    "goal": "benchmarks/diverted_chord_response_attribution.py:231 reconstructs all five diverted chord plasma errors and partitions them by geometry; report.md:3 excludes the two requested candidates while explicitly leaving the upstream moment-booking operation unresolved.",
+    "manifest": "The target run manifest names the three observed commits c07565b0d28d6b2698b7eeb68ebd284e905f4b85, 6315abefa8a3d7cf38037aa0a3848fe891403e88 and 1a6c3c519dd4ac02a4adb412d7126deb3fbad385, retains the first pointwise refusal and the successful H200 receipt, and reports the unresolved upstream attribution honestly.",
+    "write_paths": "The f8c24a819fc821e6549b791892295da30323d2f9..1a6c3c519dd4ac02a4adb412d7126deb3fbad385 diff changes 34 paths, all inside the source node's declared benchmark, figure, evidence and plan paths; no nova/ source changed."
+  },
+  "justifications": {
+    "durability": "docs/figures/cut-cell-current-attribution/diverted-chord-response/audit.py:27-55 can reject norm and decomposition corruption but consumes saved arrays rather than exercising future driver changes, and :20 resolves a disposable absolute worker path that will break after cleanup.",
+    "evidence": "docs/figures/cut-cell-current-attribution/diverted-chord-response/job.log reproduces the five requested values and audit.log records the 1e-9 reconstruction gate and ten refusals; the 6315abefa8a3d7cf38037aa0a3848fe891403e88 measurement predates only the final reporting helper, and quadrature sensitivity is explicitly distinguished from a rigorous error bound.",
+    "fit": "benchmarks/diverted_chord_response_attribution.py:25 sets x64 before fixture imports and :188 uses Nova media painters with mechanism-based source names, but the committed run.sh:5 binds execution to the implementation worktree instead of the checkout containing the script.",
+    "goal_fidelity": "benchmarks/diverted_chord_response_attribution.py:363 preserves X-cell current while substituting its analytic centroid and :397 computes refined same-current Green images; report.md:7 correctly limits the result to class cancellation and does not identify the upstream booking operation.",
+    "scope_discipline": "The 34-path diff at 1a6c3c519dd4ac02a4adb412d7126deb3fbad385 stays within the five declared path prefixes, with append-only plan/evidence text and no production-source changes."
+  },
+  "plan_read": {
+    "method": "canonical working-tree HTML; localhost plan endpoint unavailable",
+    "path": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html",
+    "section": "s6",
+    "version": 197
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: f8c24a819fc821e6549b791892295da30323d2f9\nreviewed_head_sha: 1a6c3c519dd4ac02a4adb412d7126deb3fbad385\nVERDICT goal: benchmarks/diverted_chord_response_attribution.py:231 reconstructs all five diverted chord plasma errors and partitions them by geometry; report.md:3 excludes the two requested candidates while explicitly leaving the upstream moment-booking operation unresolved.\nVERDICT done_when: docs/figures/cut-cell-current-attribution/diverted-chord-response/job.log records ten reproduced rows, CUDA x64 and ATTRIBUTION_COMPLETE; audit.log records ten closure checks and ten refused one-percent perturbations; negative-control.log records five weak rows below 1e-4, and the inspected mismatch-field.png carries the wall, stated line levels and both null sets.\nVERDICT write_paths: The f8c24a819fc821e6549b791892295da30323d2f9..1a6c3c519dd4ac02a4adb412d7126deb3fbad385 diff changes 34 paths, all inside the source node's declared benchmark, figure, evidence and plan paths; no nova/ source changed.\nVERDICT manifest: The target run manifest names the three observed commits c07565b0d28d6b2698b7eeb68ebd284e905f4b85, 6315abefa8a3d7cf38037aa0a3848fe891403e88 and 1a6c3c519dd4ac02a4adb412d7126deb3fbad385, retains the first pointwise refusal and the successful H200 receipt, and reports the unresolved upstream attribution honestly.\nVERDICT diff: Read the new driver and launcher, the field-norm repair in 6315abefa8a3d7cf38037aa0a3848fe891403e88, and the final summary/audit/evidence changes in 1a6c3c519dd4ac02a4adb412d7126deb3fbad385; both cumulative HTML edits only add the node's landing, preserve metadata, and keep section and followup open.\nCALL_SITES: docs/figures/cut-cell-current-attribution/diverted-chord-response/run.sh:10, benchmarks/diverted_chord_response_attribution.py:570\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/diverted_chord_response_attribution.py:363 preserves X-cell current while substituting its analytic centroid and :397 computes refined same-current Green images; report.md:7 correctly limits the result to class cancellation and does not identify the upstream booking operation.\nSCORE evidence: 19\nJUSTIFICATION evidence: docs/figures/cut-cell-current-attribution/diverted-chord-response/job.log reproduces the five requested values and audit.log records the 1e-9 reconstruction gate and ten refusals; the 6315abefa8a3d7cf38037aa0a3848fe891403e88 measurement predates only the final reporting helper, and quadrature sensitivity is explicitly distinguished from a rigorous error bound.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 34-path diff at 1a6c3c519dd4ac02a4adb412d7126deb3fbad385 stays within the five declared path prefixes, with append-only plan/evidence text and no production-source changes.\nSCORE durability: 14\nJUSTIFICATION durability: docs/figures/cut-cell-current-attribution/diverted-chord-response/audit.py:27-55 can reject norm and decomposition corruption but consumes saved arrays rather than exercising future driver changes, and :20 resolves a disposable absolute worker path that will break after cleanup.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/diverted_chord_response_attribution.py:25 sets x64 before fixture imports and :188 uses Nova media painters with mechanism-based source names, but the committed run.sh:5 binds execution to the implementation worktree instead of the checkout containing the script.\nFINDING docs/figures/cut-cell-current-attribution/diverted-chord-response/audit.py:20 [P2] The audit opens row['input_archive'] as an absolute implementation-worktree path emitted by benchmarks/diverted_chord_response_attribution.py:377, while run.sh:5 hardcodes the same worktree; after normal cleanup the committed evidence cannot be audited or rerun from main even though its input archives are versioned there. Resolve archive and launcher paths from the current repository, retain the recorded source path as provenance, and verify the stored input digest.\n",
+  "review_run_id": "r-20260923T235314623557-review-of-cca-diverted-chord-response-mismatch-attribution",
+  "reviewed_base_sha": "f8c24a819fc821e6549b791892295da30323d2f9",
+  "reviewed_head_sha": "1a6c3c519dd4ac02a4adb412d7126deb3fbad385",
+  "reviewed_run_id": "r-20260923T214411473465-cca-diverted-chord-response-mismatch-attribution",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-24T01:14:51.616983+00:00",
+  "total": 89
+}

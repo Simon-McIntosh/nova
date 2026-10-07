@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T21:17:13.396Z",
+  "dispatched_at": "2026-10-05T21:14:14Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:1270",
+      "id": "reuse_search-1",
+      "reason": "the plan's own seven cite-or-justify rulings require the \u00a75 node to carry an existing helper into `solve.py` or state in its evidence why it fails the fixed-capacity scan contract; this one is unnamed, so the node has no ruling to act on and the reuse map is inconsistent with itself.",
+      "text": "`\u00a75` writes a new backtracking line search in `solve.py` (\"backtracking on \u03c6 = \u00bd\u2016F\u2016\u00b2 along the GMRES direction, initial factor 1, shrink factor \u00bd, fixed capacity\") while `fixed_point.py` already contains fixed-factor backtracking-search machinery \u2014 `_backtracking_scores` (1270) evaluates state+factor\u00b7step candidates off a `_BACKTRACKING_FACTORS` ladder and scores them on a merit, `_select_backtracking_candidate` (1147) applies a sufficient-decrease authority, and `_backtracked_promotion` (1333) wraps both; the 2026-10-05 correction ruling withdrew `_steepest_descent_promotion` but said nothing about these, and `\u00a76` deletes `fixed_point.py` without naming them, so they are discarded rather than carried or justified",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "d919f0de42f74825249044cb0d54be07f37cfb97265e5d355fa6b1967b90b379",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 37,
+  "project": "nova",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T21:18:57.850866+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T211401762161-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "380081a42fb1db4a19e2344f6ba174a82fba99f9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four pure functions each hide substantial behaviour: `topology.read` subsumes the 17 null-locating and 23 region-classifying authorities, `solve.fixed_point` hides GMRES, the line search and the per-step history behind one call site served from a `lax.scan`, and `gs.apply` hides the composed read\u2192book\u2192Picard/moment-map/boundary-envelope derivative chain; the plan consolidates surface rather than spreading it.",
+    "duplicate_owner": "pass \u2014 the plan is itself the de-duplication (17 null + 23 region authorities retired to one read), and it names the owner to extend for each consolidated piece: `polygon_moments.py` for polygon moments, `constraint.py` `ConstraintPair`/`ConstraintRecord` for the row scale, `gs.py` for the current-moment-map derivative, `topology.py` for the contour-tree call, `solve_request.py` `ForwardSolvePolicy` (extended, not duplicated) for the two new policy operands. `current_moment_observation` is a single owner already (`forward.py:1239`, called as `profile.current_moment_observation` from `shape_inverse.py`, `constraint.py`, `batched_labeller.py`), so no fork is introduced there.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every adding section names what it retires (`\u00a72` the old `Topology.read`/`read_with_connectivity`, `\u00a73` `clipped_support_current_moments`, `\u00a74` the `ForwardFluxOperator` map, `\u00a75` `newton_krylov`/`picard`/`operator_request_body`) and `\u00a76` carries the full module deletion list and import/attribute census, so no section adds interface surface without accounting for the retirement.",
+    "reuse_search": "a finding \u2014 the plan's own cite-or-justify discipline names the GMRES kernel helpers and withdraws the steepest-descent promotion, but does not name the existing Armijo/backtracking-search helpers in `fixed_point.py` (`_backtracking_scores`, `_select_backtracking_candidate`, `_backtracked_promotion`), which `\u00a75`'s new line search duplicates.",
+    "thin_wrapper": "pass \u2014 the retained `ForwardProfile.operator` candidate is justified in the snapshot (2026-10-05 ruling) as the request/receipt adapter over `topology.read`/`current.book`/`gs.apply`, with its ~436 duck-typed `.operator.` call sites re-pointed and enumerated by the \u00a76 census, and `gs.apply` is stated to replace the `ForwardFluxOperator` map rather than wrap it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T21:18:57.208425+00:00"
+}

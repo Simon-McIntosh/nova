@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb",
+  "call_site_count": 109,
+  "call_sites": [
+    "nova/biot/completeelliptic.py",
+    "nova/biot/elliptic.py",
+    "nova/biot/gradedresidual.py",
+    "nova/biot/momentchannel.py"
+  ],
+  "completed_at": "2026-10-06T08:47:52.057Z",
+  "dispatched_at": "2026-10-06T08:36:44Z",
+  "findings": [
+    {
+      "file": "nova/biot/elliptic.py",
+      "line": "54",
+      "severity": "follow-on",
+      "text": "follow-on: nova/biot/elliptic.py is changed without being named in the reviewed run's declared write-path fence, though the homing compels it -- the four helpers move out of completeelliptic and elliptic must import them from rangefunction instead -- so the fence under-declares a path the goal requires."
+    },
+    {
+      "file": "nova/biot/elliptic.py",
+      "line": "1187",
+      "severity": "follow-on",
+      "text": "follow-on: this _held_tangent(condition, tangent, xp) is byte-identical to nova/biot/completeelliptic.py:351 while the same change homes eight sibling tangent helpers into one owner, so this tenth helper is the one the homing left duplicated and the copy can drift; it predates this node and is carried forward."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's plan-commits meta names only 4554bb6f4,58a811d7d,ccb46cfab while the run carries five commits, so 5562b5207 (the reviewed head's own compile-and-delta evidence commit) and baa697669 are absent from the fragment's commit list at the reviewed head."
+    },
+    {
+      "file": "nova/biot/momentchannel.py",
+      "line": "628",
+      "severity": "follow-on",
+      "text": "follow-on: the renamed _across_the_range_differential keeps a docstring cross-reference to nova/biot.rangefunction._across_the_range_tangent (momentchannel.py:633) for the primal-and-tangent companion, so a reader following the tangent-only name lands on the primal map; the reference is correct but the two similarly named maps invite confusion in one module."
+    }
+  ],
+  "head_log_revision": "5562b520709767221cd9a42c949b1df17ffb06a6",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "109 production call expressions of the homed helpers outside their owner: completeelliptic 33, elliptic 53, gradedresidual 20, momentchannel 9; every helper is defined once, only in rangefunction.py, and no consumer redefines one.",
+    "diff": "read commit by commit: 4554bb6f4 refactor(biot) homes the eight tangent helpers in rangefunction.py and repoints the four consumers, 58a811d7d test(biot) shares the identity/truncation/compile harness across the three tangent modules, ccb46cfab docs(evidence) records the tangent-helper home, 5562b5207 docs(evidence) records the compile gate and suite delta.",
+    "done_when": "the done_when asks for the helpers homed once and imported, the identity rows at jax.jvp of the base, the NOVA_TANGENT_TRUNCATION negative control, the cold-compile gate under 3x, primal bit-identity, the shared harness across the three tangent modules and the evidence fragment; the manifest records every one, in logs/identity-final.log (74 passed), logs/negative-control.log (29 failed, EXIT=1), logs/compile-run-1.log and logs/compile-run-2.log (29 rows each, all ratios under 3.0) and logs/suite2-status.json.",
+    "goal": "the node goal is to home the point-jet shared tangent helpers once and import them everywhere, so nova/biot/rangefunction.py gains _tangent_sum, _tangent_difference, _product_tangent, _quotient_tangent, _scale_tangent, _harmonic_multiply_tangent, _deflate_tangent and _contract_tangent (rangefunction.py:548-844) and each is defined exactly once in the package; momentchannel's tangent-only map is renamed _across_the_range_differential at nova/biot/momentchannel.py:628 against the primal rangefunction.py:747, and no new source calls jax.jvp, jax.grad or jax.jacfwd on a primal it differentiates.",
+    "manifest": "read; status complete, five commits, per-row identity, truncation, compile and primal numbers with their logs, and a tests/biot suite delta whose baseline_suite and after_suite both carry exit_status 0, failure_count 0 and empty failure_ids over logs/suite2-base.log and logs/suite2-head.log.",
+    "write_paths": "the manifest declares ten paths -- rangefunction, completeelliptic, momentchannel, gradedresidual, tests/biot/tangent_identity.py, the three tangent test modules and the fragment; git diff fd44f630b..5562b5207 touches those ten plus nova/biot/elliptic.py, which is the import repoint the homing requires (the four helpers move from completeelliptic to rangefunction) but is not named in the declared fence, and it leaves the declared docs/figures/converged-forward-solve/cfs-tangent-helper-home directory untouched."
+  },
+  "justifications": {
+    "durability": "tests/biot/tangent_identity.py differentiates against jax.jvp of the base revision loaded out of git (an independent source, not a value the test passed in), the NOVA_TANGENT_TRUNCATION control reddens every identity row, and the cold compile is measured cache-disabled on the median of seven fresh processes with the expanded equation count recorded beside the wall.",
+    "evidence": "the identity, truncation and compile gates are each logged and reproducible -- 74 identity rows pass, the truncation control reddens all 29 identity rows with EXIT=1, and 29 cold-compile rows sit under 3.0 in two separate runs -- and the suite delta reads exit_status 0 with empty failure_ids in both arms from logs/suite2-status.json; the reviewed manifest still lists only the identity and compile logs under test_logs while the suite-delta evidence sits under evidence_inputs.",
+    "fit": "the helpers carry their module's private-underscore idiom and no plan, stage or ticket label appears in any symbol, filename or comment added by the change, so the code reads by mechanism alone.",
+    "goal_fidelity": "every one of the eight homed helpers is defined exactly once, only in nova/biot/rangefunction.py, and the four consumers import them with no redefinition, so the declared homing goal is met; the rename is complete (momentchannel.py:628 _across_the_range_differential, no residual _across_the_range_tangent outside its primal owner).",
+    "reuse": "the change is itself the reuse fix: eight duplicate helper definitions collapse to one home consumed by 109 production call expressions across four modules, removing about 137 duplicated lines; the only residual duplication is the pre-existing _held_tangent(condition, tangent, xp) one-liner, unchanged by this node, still declared twice at nova/biot/completeelliptic.py:351 and nova/biot/elliptic.py:1187.",
+    "scope_discipline": "git diff fd44f630b..5562b5207 touches nine of the ten declared paths plus nova/biot/elliptic.py, which the declared fence omits though the homing compels it; the reviewed worktree is clean and nothing outside the goal was changed, so the deviation is a brief under-declaration rather than incidental scope."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to home the point-jet shared tangent helpers once and import them everywhere, so nova/biot/rangefunction.py gains _tangent_sum, _tangent_difference, _product_tangent, _quotient_tangent, _scale_tangent, _harmonic_multiply_tangent, _deflate_tangent and _contract_tangent (rangefunction.py:548-844) and each is defined exactly once in the package; momentchannel's tangent-only map is renamed _across_the_range_differential at nova/biot/momentchannel.py:628 against the primal rangefunction.py:747, and no new source calls jax.jvp, jax.grad or jax.jacfwd on a primal it differentiates.\nVERDICT done_when: the done_when asks for the helpers homed once and imported, the identity rows at jax.jvp of the base, the NOVA_TANGENT_TRUNCATION negative control, the cold-compile gate under 3x, primal bit-identity, the shared harness across the three tangent modules and the evidence fragment; the manifest records every one, in logs/identity-final.log (74 passed), logs/negative-control.log (29 failed, EXIT=1), logs/compile-run-1.log and logs/compile-run-2.log (29 rows each, all ratios under 3.0) and logs/suite2-status.json.\nVERDICT write_paths: the manifest declares ten paths -- rangefunction, completeelliptic, momentchannel, gradedresidual, tests/biot/tangent_identity.py, the three tangent test modules and the fragment; git diff fd44f630b..5562b5207 touches those ten plus nova/biot/elliptic.py, which is the import repoint the homing requires (the four helpers move from completeelliptic to rangefunction) but is not named in the declared fence, and it leaves the declared docs/figures/converged-forward-solve/cfs-tangent-helper-home directory untouched.\nVERDICT manifest: read; status complete, five commits, per-row identity, truncation, compile and primal numbers with their logs, and a tests/biot suite delta whose baseline_suite and after_suite both carry exit_status 0, failure_count 0 and empty failure_ids over logs/suite2-base.log and logs/suite2-head.log.\nVERDICT diff: read commit by commit: 4554bb6f4 refactor(biot) homes the eight tangent helpers in rangefunction.py and repoints the four consumers, 58a811d7d test(biot) shares the identity/truncation/compile harness across the three tangent modules, ccb46cfab docs(evidence) records the tangent-helper home, 5562b5207 docs(evidence) records the compile gate and suite delta.\nCALL_SITES: nova/biot/completeelliptic.py; nova/biot/elliptic.py; nova/biot/gradedresidual.py; nova/biot/momentchannel.py\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every one of the eight homed helpers is defined exactly once, only in nova/biot/rangefunction.py, and the four consumers import them with no redefinition, so the declared homing goal is met; the rename is complete (momentchannel.py:628 _across_the_range_differential, no residual _across_the_range_tangent outside its primal owner).\nSCORE evidence: 18\nJUSTIFICATION evidence: the identity, truncation and compile gates are each logged and reproducible -- 74 identity rows pass, the truncation control reddens all 29 identity rows with EXIT=1, and 29 cold-compile rows sit under 3.0 in two separate runs -- and the suite delta reads exit_status 0 with empty failure_ids in both arms from logs/suite2-status.json; the reviewed manifest still lists only the identity and compile logs under test_logs while the suite-delta evidence sits under evidence_inputs.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: git diff fd44f630b..5562b5207 touches nine of the ten declared paths plus nova/biot/elliptic.py, which the declared fence omits though the homing compels it; the reviewed worktree is clean and nothing outside the goal was changed, so the deviation is a brief under-declaration rather than incidental scope.\nSCORE durability: 19\nJUSTIFICATION durability: tests/biot/tangent_identity.py differentiates against jax.jvp of the base revision loaded out of git (an independent source, not a value the test passed in), the NOVA_TANGENT_TRUNCATION control reddens every identity row, and the cold compile is measured cache-disabled on the median of seven fresh processes with the expanded equation count recorded beside the wall.\nSCORE fit: 19\nJUSTIFICATION fit: the helpers carry their module's private-underscore idiom and no plan, stage or ticket label appears in any symbol, filename or comment added by the change, so the code reads by mechanism alone.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change is itself the reuse fix: eight duplicate helper definitions collapse to one home consumed by 109 production call expressions across four modules, removing about 137 duplicated lines; the only residual duplication is the pre-existing _held_tangent(condition, tangent, xp) one-liner, unchanged by this node, still declared twice at nova/biot/completeelliptic.py:351 and nova/biot/elliptic.py:1187.\nFINDING nova/biot/elliptic.py:54 follow-on: follow-on: nova/biot/elliptic.py is changed without being named in the reviewed run's declared write-path fence, though the homing compels it -- the four helpers move out of completeelliptic and elliptic must import them from rangefunction instead -- so the fence under-declares a path the goal requires.\nFINDING nova/biot/elliptic.py:1187 follow-on: follow-on: this _held_tangent(condition, tangent, xp) is byte-identical to nova/biot/completeelliptic.py:351 while the same change homes eight sibling tangent helpers into one owner, so this tenth helper is the one the homing left duplicated and the copy can drift; it predates this node and is carried forward.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html:1 follow-on: follow-on: the fragment's plan-commits meta names only 4554bb6f4,58a811d7d,ccb46cfab while the run carries five commits, so 5562b5207 (the reviewed head's own compile-and-delta evidence commit) and baa697669 are absent from the fragment's commit list at the reviewed head.\nFINDING nova/biot/momentchannel.py:628 follow-on: follow-on: the renamed _across_the_range_differential keeps a docstring cross-reference to nova/biot.rangefunction._across_the_range_tangent (momentchannel.py:633) for the primal-and-tangent companion, so a reader following the tangent-only name lands on the primal map; the reference is correct but the two similarly named maps invite confusion in one module.",
+  "review_run_id": "r-20261006T083626651184-review-of-cfs-tangent-helper-home",
+  "reviewed_base_sha": "fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb",
+  "reviewed_head_sha": "5562b520709767221cd9a42c949b1df17ffb06a6",
+  "reviewed_run_id": "r-20261006T065301705492-cfs-tangent-helper-home",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T08:47:08.684927+00:00",
+  "total": 111
+}

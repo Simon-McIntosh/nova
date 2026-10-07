@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_source": "Derived from the reviewed run's own gate logs, which both target tests/test_route_solve_requests.py. base_route_solve_requests.log (revision a6fe0d05, tree /tmp/fsapi-route-request-base) ends '1 failed, 7 passed in 4.42s' / 'EXIT=1' with the single id tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture. head_route_solve_requests.log (revision 4cd4b0ace) ends '8 passed in 11.07s' / 'EXIT=0' with no failing ids. The head failure id set is empty, so its set difference against the base is empty: the reviewed change adds zero failures and removes the one base failure. The sibling module tests/test_prescribed_current_solve.py still reports 2 failed / 5 passed at the base (logs/siblings_base.log) with the same AttributeError; that module is outside the reviewed node's write scope and is carried under follow_ons, not counted as an added failure.",
+  "completed_at": "2026-10-03T10:16:36.192Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T10:09:33Z",
+  "findings": [],
+  "fixture_consistency": {
+    "null_locator": "None on both grid and wall targets; the modelled _LinearTarget exposes only a response matrix and owns no stationary-point locator, and None is the attribute _compute_geometry_identity reads at nova/equilibrium/forward_operator.py:2599-2600. Semantically consistent with a linear conductor that admits no stationary point.",
+    "operator_geometry": "area = jnp.zeros(grid.node_number) = jnp.zeros(2), matching the two-node grid target; cell_average_stencil/cell_average_weight/inside_material/moment_geometry/wall_unit_offsets/wall_unit_closed/wall_unit_kinds set to None and use_linear_moments False, matching a single-polarity linear target and the members this route does not exercise. Neutral stand-ins, not a physically complete operator; appropriate for a path-equivalence unit fixture.",
+    "verified_by": "probe of the arrays and the operator members at head 4cd4b0ace"
+  },
+  "follow_ons": [
+    "Shared-fixture extraction: tests/test_route_solve_requests.py reaches into tests/test_prescribed_current_solve.py's private _LinearTarget (via a module-handle import plus monkeypatch) to complete the shared _profile. Extracting _profile and a target-class parameter into a conftest fixture or a tests/ helper module would remove the private-global coupling; it needs a write scope covering tests/test_prescribed_current_solve.py.",
+    "Out of scope, pre-existing: tests/test_prescribed_current_solve.py::test_solve_none_reproduces_the_stored_vector_bit_identically and ::test_solve_and_solve_branch_trace_prescribed_current_replacements fail at base 2 failed/5 passed with the same AttributeError: '_LinearTarget' object has no attribute 'null' (logs/siblings_base.log). They consume the same incomplete fixture; repairing the shared fixture covers them.",
+    "Full-suite delta at the merged head is not settled here: the reviewed run's gate is the single module tests/test_route_solve_requests.py, so a whole-suite run at the integrated head belongs to the separately dispatched test node."
+  ],
+  "import_coupling_judgement": {
+    "disposition": "follow_on, not a blocking finding",
+    "preferred_shape": "a shared fixture (conftest fixture or tests/ helper module) owning _profile and a target-class parameter, so neither test module reaches into the other's private globals.",
+    "verdict": "coupling is real and a minor design wart, not a correctness defect",
+    "what_couples": "tests/test_route_solve_requests.py imports tests.test_prescribed_current_solve (module handle added by this change; _profile was already imported at :31) and monkeypatches its private class _LinearTarget.",
+    "why_accepted": "the write scope excluded tests/test_prescribed_current_solve.py, so completing the fixture from the consuming module was the only scope-respecting route; the monkeypatch is pytest-scoped and does not leak."
+  },
+  "independent_checks": [
+    {
+      "check": "head focused gate re-run",
+      "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-route-request-fixture-null uv run --no-sync python -m pytest -p no:cacheprovider tests/test_route_solve_requests.py -q",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T100912791327-review-of-fsapi-route-request-fixture-null/head_verify.log",
+      "result": "8 passed in 11.45s; EXIT=0",
+      "revision": "4cd4b0acedf7f0f70c656399841824b29eb6a0ae",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-route-request-fixture-null"
+    },
+    {
+      "check": "probe of the compared arrays at the bit-identity assertion",
+      "command": "JAX_PLATFORMS=cpu UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=<reviewed-tree> uv run --no-sync python <scratch>/probe.py <reviewed-tree>",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T100912791327-review-of-fsapi-route-request-fixture-null/probeArrays.txt",
+      "result": "keyword.flux == receipt.equilibrium.flux == [12.625, -11.625, -20.375, 9.625] (float64, 4/4 nonzero), np.array_equal True, max abs diff 0.0; grid.null and wall.null are NoneType; area=[0., 0.], grid.node_number=2. Confirms the assertion compares real solved arrays and that the added locator/geometry are the neutral stand-ins the docstring describes.",
+      "revision": "4cd4b0acedf7f0f70c656399841824b29eb6a0ae",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-route-request-fixture-null"
+    }
+  ],
+  "item_verdicts": {
+    "assertion_on_real_arrays": "PASS, verified by direct probe. At head the two compared arrays are float64 and fully populated: keyword.flux = receipt.equilibrium.flux = [12.625, -11.625, -20.375, 9.625], 4 of 4 nonzero, np.array_equal True, max abs difference 0.0. The comparison is therefore over a real, non-degenerate solved state rather than zeros or a degenerate vector.",
+    "assertion_present": "PASS by file and line. tests/test_route_solve_requests.py:198 reads 'np.testing.assert_array_equal(receipt.equilibrium.flux, keyword.flux)'; :199-200 assert the receipt is a ForwardSolveReceipt and that ResolvedForwardSolveDefaults round-trips through JSON. The diff to 4cd4b0ace does not touch lines 197-200, so the bit-identity assertion is carried over from the pre-existing test, not weakened.",
+    "durability": "PASS. Commit 4cd4b0ace carries a conventional subject ('test(equilibrium): complete the route-request fixture before the solve') and a non-empty body explaining what changed and why, is the reviewed worktree HEAD, and is accompanied by a committed evidence fragment and readable gate logs.",
+    "fixture_consistency": "PASS with a note. The added _RouteLinearTarget carries null=None; the shared _LinearTarget models a linear conductor target exposing only a fixed response matrix (tests/test_prescribed_current_solve.py:20-31), which admits no stationary-point locator, so None is the semantically honest representation of the locator that class never had, and it is exactly the attribute _compute_geometry_identity reads (nova/equilibrium/forward_operator.py:2599-2600). The operator geometry members are set to neutral values consistent with a single-polarity linear target: area=jnp.zeros(grid.node_number) with grid.node_number=2 matching the two-node grid target, and the cell-average, material, moment and wall-unit entries set to None/False, none of which this route exercises. The probe reads grid.null and wall.null as NoneType and area as [0., 0.], consistent with the docstring. The values are stand-ins tuned to reach the solve rather than a physically complete operator, which is appropriate for a unit fixture whose contract is path equivalence, not physics.",
+    "goal": "PASS. The reviewed node's goal -- make tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture pass while it still asserts bit identity between request execution and the keyword fixture -- is met at head 4cd4b0ace. The focused gate runs 8 passed against a base of 1 failed / 7 passed, and the assertion is preserved unchanged.",
+    "import_coupling": "JUDGED: coupling exists and is a minor design wart, not a correctness defect. The change adds 'from tests import test_prescribed_current_solve as _prescribed_current_solve' solely to monkeypatch that module's private class _LinearTarget so its _profile() helper builds the route module's target. This couples two test modules through a private global and makes the shared fixture non-parameterisable: a caller cannot choose the target class without patching module internals. The cleaner shape is a shared fixture (a conftest fixture or a tests/ helper module) owning _profile and a target-class parameter, imported by both modules. Weighing against that: the coupling is not introduced here in kind -- the module already imported _profile from the same file (tests/test_route_solve_requests.py:31, present at both base and head) -- and the reviewed node's write scope excluded tests/test_prescribed_current_solve.py, so monkeypatching from the consuming module was the only scope-respecting way to complete the fixture without editing a shared file. The monkeypatch is context-scoped (pytest undo), so it does not leak into the sibling module's own tests or the other route-module tests, which call _profile() unpatched and pass. Recorded as a follow_on (extract the shared fixture), not a finding.",
+    "scope": "PASS. The reviewed commit changes exactly two paths, both inside the node's declared write scope: tests/test_route_solve_requests.py and docs/evidence/fragments/forward-solve-api/fsapi-route-request-fixture-null.html (git show --stat 4cd4b0ace: 2 files, 82 insertions, 2 deletions). No product source, no shared fixture, no plan HTML, no shared index is touched.",
+    "suite_delta": "PASS. Readable base and after gate logs for the reviewed module both complete at their summary line with identical commands; head failing-id set is empty against a base of one, giving added_failure_count 0."
+  },
+  "justifications": {
+    "durability": "The reviewed commit has a conventional bodied message, is the reviewed worktree HEAD, and is durable alongside the committed evidence fragment and gate logs.",
+    "evidence": "The record rests on the run's readable base and after gate logs (both complete, added_failure_count 0), an independent head re-run (8 passed), a direct probe showing the compared arrays are real and exactly equal, and a negative-control log whose last line is EXIT=1 with the expected failure. The one point not independently reproduced is the base arm at /tmp/fsapi-route-request-base, which no longer exists; the base log itself is readable and matches the manifest, and a full-suite arm at the merged head is the separately dispatched test node's remit.",
+    "fit": "The fixture-completion pattern (module-level lightweight profile plus a scoped monkeypatch) matches the existing test idiom and leaves the product untouched. The one deduction is the test-module-to-test-module private-global coupling introduced by the monkeypatch, which a shared parameterisable fixture would remove.",
+    "goal_fidelity": "The node's stated goal is met: the previously failing route-request bit-identity test now passes and still asserts exact array equality between the request path and the keyword fixture on a real, non-degenerate solved state ([12.625, -11.625, -20.375, 9.625]). The repair completes the synthetic fixture rather than weakening the comparison, which is the correct contract for this test.",
+    "scope_discipline": "The change is confined to the reviewed module and the assigned evidence fragment; it edits no product source, no shared fixture and no plan file, exactly as the node's declared write scope required."
+  },
+  "node": "review-of-fsapi-route-request-fixture-null",
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT pass (92/100). The reviewed run at head 4cd4b0ace (base a6fe0d05) repairs tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture, which failed at base with AttributeError: '_LinearTarget' object has no attribute 'null'. The fix completes the shared lightweight fixture locally: a registered-pytree _RouteLinearTarget supplies the absent null locator (None), the operator receives neutral geometry members (area zeros of the two-node grid, the cell-average/material/moment/wall-unit entries None or False), and configure_dtypes() runs before any array is built. The gate runs 8 passed against a base of 1 failed / 7 passed, so the node fixes one failure and adds none (added_failure_count 0). The bit-identity assertion is preserved unchanged at tests/test_route_solve_requests.py:198 (np.testing.assert_array_equal(receipt.equilibrium.flux, keyword.flux)); an independent probe shows both arrays equal [12.625, -11.625, -20.375, 9.625] as float64, 4/4 nonzero, max abs diff 0.0 -- real arrays, exact identity. The added null and geometry are consistent with the linear target the fixture models. The added import of tests.test_prescribed_current_solve to monkeypatch its private _LinearTarget couples two test modules and would be cleaner as a shared parameterisable fixture, but it is scope-respecting here and does not leak; recorded as a follow_on. Scope is exactly the two declared paths; durability holds.",
+  "review_run_id": "r-20261003T100912791327-review-of-fsapi-route-request-fixture-null",
+  "review_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-fsapi-route-request-fixture-null",
+  "reviewed_base_sha": "a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47",
+  "reviewed_commit": "4cd4b0acedf7f0f70c656399841824b29eb6a0ae",
+  "reviewed_head_sha": "4cd4b0acedf7f0f70c656399841824b29eb6a0ae",
+  "reviewed_node": "fsapi-route-request-fixture-null",
+  "reviewed_run_id": "r-20261003T095229804071-fsapi-route-request-fixture-null",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-route-request-fixture-null",
+  "reviewer_node": "review-of-fsapi-route-request-fixture-null",
+  "reviewer_run_id": "r-20261003T100912791327-review-of-fsapi-route-request-fixture-null",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T10:20:00.000000+00:00",
+  "total": 92,
+  "verdict": "pass"
+}

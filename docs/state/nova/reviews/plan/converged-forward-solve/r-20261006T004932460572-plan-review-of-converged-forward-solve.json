@@ -1,0 +1,25 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T00:54:40.280Z",
+  "dispatched_at": "2026-10-06T00:49:45Z",
+  "findings": [],
+  "plan_fingerprint": "e9f7b97884b24bb5418abd4e8031fbd2c47a64fcef5656177165ef3ffe421673",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 62,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T004932460572-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "f800cba91ce7545412711e1d0fb93c30d6aa8b1d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design concentrates depth rather than spreading it: four pure entry points (topology.read, current.book, gs.apply, solve.fixed_point) hide the topology read, the exact-clip booking, the coupling-matrix map with three carried derivative families, and Newton-GMRES with a line search, each behind a single signature, with the reused helpers carried in as private helpers behind the one call site rather than re-exported.",
+    "duplicate_owner": "pass \u2014 the recurring duplicate classes are each bound to a single named owner to extend: the row scale to ConstraintPair.binding.scale surfaced by ConstraintRecord.scaled_residual (nova/equilibrium/constraint.py:237,1843, verified the binding carries scale and the record surfaces the scaled residual), the booked current moments to current.book (observation.py:295 re-pointed to a consumer), the moment-map derivative to gs.apply (forward.py:1239/1276/1292 carried, no second copy), polygon monomial integration to polygon_moments.py:141, the contour tree to contour_tree.py:384, and the GPFS receipt path to nova/database/filepath.py:62/134 (FilePath/repository_relative) rather than a repeated literal; the compile-count instrument is the existing scripts/h200_test_lane/cache_guard.py, not a new counter.",
+    "interface_budget": "pass \u2014 supplied figures public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every section that adds surface names, in its own text, what it retires or merges \u2014 \u00a72 retires Topology.read/read_with_connectivity and the design inventory's null/region authorities, \u00a73 retires clipped_support_current_moments and the forward_operator support partition, \u00a74 retires the ForwardFluxOperator map, \u00a75 retires newton_krylov/picard/operator_request_body and the ladders/frozen-live split, \u00a76 collapses SolveRoute (six members) and SupportClipMode to the one solve and removes the eight retired ForwardSolvePolicy fields, a net reduction of public surface consistent with the zero counts.",
+    "reuse_search": "pass \u2014 the plan names an existing owner for every new module and function it adds and, in \u00a76, an explicit deletion list: topology.read replaces Topology.read/read_with_connectivity (nova/equilibrium/topology.py:1396,1376), current.book replaces clipped_support_current_moments (clip_quadrature.py:714) plus the support partition, gs.apply replaces the map ForwardFluxOperator performs (forward_operator.py:2323), solve.fixed_point replaces newton_krylov/picard/operator_request_body (fixed_point.py:5003,2874,972), and it cites reuse candidates (the single-site GMRES kernel fixed_point.py:2619, the backtracking helpers fixed_point.py:1147/1270/1333, the operand layouts forward_operator.py:147/159/187/2079/2122/2239, contour_tree.build_contour_tree, polygon_moments.polygon_monomial_moments) \u2014 all verified present; candidates with the wrong contract were withdrawn with reasons (Null2D/Null1D are mesh-flux stencil fitters, `_steepest_descent_promotion` chooses its own direction).",
+    "thin_wrapper": "pass \u2014 every proposed module is stated to replace its owner rather than wrap it (\u00a76: \"gs.apply replaces the map ForwardFluxOperator performs today rather than wrapping it\"; topology.py \"replaced in place\"; current.py/solve.py new and owning their functions), and the operators each layer forwards over (read, book, G@) are distinct machinery, not one owner behind several shells."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T00:55:22.349937+00:00"
+}

@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T15:39:13.210Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:37:45Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-parts/chord/diverted-single-null-production-route-cells-500.json",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The fourth chord panel in the same directory is not re-rendered: its receipt still has no figure.panel_title, render_source is 'fresh_production_solve', and its drawn title ends in the bare qualification 'qualified'. The followup text says 'put relative_rms and relative_sup in each title', so the directory now mixes three panels carrying the honest read-status title with one carrying the old one. The node's rationale (its relative_rms is 4.6e-15, so the bare word was never a false accuracy claim there) is recorded in the fragment and evidence_inputs, and the followup's file list named only the three 1000-cell panels, so this is a scoping judgement rather than an error - but it leaves the four-panel set inconsistent for a reader comparing them."
+    },
+    {
+      "file": "tests/test_solovev_certificate_panel_titles.py",
+      "line": 74,
+      "severity": "follow-on",
+      "text": "test_panel_receipt_describes_the_drawn_panel asserts only that the panel's sha256 equals the digest the receipt records, not that the text drawn on the panel matches figure.panel_title. A panel re-rendered with the old title while the receipt was updated to the new title with a refreshed digest would pass all four tests. The driver writes the title and the digest from the same render call, so they are coupled in practice, but the test does not pin that coupling - the one defect this node exists to prevent (a drawn title that overstates) is guarded in the receipt, not on the image."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143720361037-pfs-solovev-certificate-panel-titles/negative-control.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The run's baseline_suite records revision 0dfce2a0d, but tests/test_solovev_certificate_panel_titles.py did not exist at that revision; the arm is the head test run against the pre-repair artifacts (figure.panel_title absent), which is exactly the negative control, and negative-control.log serves as both logs. The manifest's negative_control_note states this plainly and the added-failure count is derived from the failing ids the log actually carries, so the number is sound; only the revision label on the baseline arm names a tree in which the test could not have run."
+    }
+  ],
+  "gate_arms_note": "baseline_suite (revision 0dfce2a0d, command runs tests/test_solovev_certificate_panel_titles.py, completed=true, 9 failed / 3 passed, EXIT=1, log negative-control.log) and after_suite (revision df0687b01539d2c19c16003c10411eba459a6564, same command, completed=true, 0 failed / 12 passed, EXIT=0, log gate-after.log) both ran to their summary lines and both name their log on disk. added_failure_ids is after_suite.failure_ids minus baseline_suite.failure_ids; the after arm is empty and the baseline arm carries 9 ids, so added_failure_count is 0. Independently reproduced: the head gate re-run in the reviewed worktree at df0687b0 gives 12 passed, EXIT=0 (review-gate-head.log), and the same head test run against the pre-repair receipts and panels (extracted from the reviewed run's base into a scratch tree) gives exactly the 9 baseline failure ids, exit 1 (review-negctrl-repro.log). The after_suite arm ran at the code commit 4720f395b while the reviewed tree HEAD is the later fragment commit df0687b0, which changes only a trailing newline in the evidence fragment, so the delta is unaffected. One semantic caveat: the baseline_suite revision 0dfce2a0d is the tree the reviewed worktree started from, but the test file did not exist at that revision, so the arm is the head test against the pre-repair artifacts (i.e. the negative control) rather than a run of that revision's own tree; the manifest's negative_control_note says so plainly and the quantity that matters, the added-failure count, is unaffected.",
+  "justifications": {
+    "durability": "The title is now persisted where the data is produced: figure.panel_title is written back into each part receipt beside a refreshed figure.sha256, render_source is renamed to 'persisted_part_receipt_panel_title', and a stale .svg companion is unlinked when rendering, so the receipt and the panel on disk are refreshed together. The added test re-derives the title from the receipt's own keys (solovev_panel_title) and pins the digest, so a receipt edited to disagree with the panel or a title drifted from its source keys goes red, and the test drives the same function the driver uses rather than a copy. The evidence fragment cites the three panels, so they are no longer uncited (part of followup item 5). The commits are local detached-HEAD commits reachable only from the reviewed worktree (origin/main does not contain them), which is the expected worker flow - the coordinator owns merge and push - but the work is not durable in any shared ref until promoted. Deducted for the drawn-vs-recorded coverage gap noted under evidence.",
+    "evidence": "Independently reproduced first-hand. The head gate re-run in the reviewed worktree at df0687b0 gives 12 passed, EXIT=0 (review-gate-head.log), matching after_suite. The declared negative control is independently re-run in a scratch tree built from the reviewed run's base: the head test file with the pre-repair receipts (figure.panel_title absent, render_source 'fresh_production_solve') and the pre-repair panels gives 9 failed / 3 passed, EXIT=1 (review-negctrl-repro.log), and the 9 failing ids are exactly baseline_suite.failure_ids - test_panel_title_is_not_the_bare_qualification, test_panel_title_re_derives_from_receipt_keys and test_panel_title_reads_the_receipt_error_keys on each of the three cases; the 3 passing are test_panel_receipt_describes_the_drawn_panel, which passes only because the pre-repair panel digest still matches the pre-repair receipt. So the guard is shown to fire on the exact defect it names. The receipts are coherent with the fragment and the manifest: figure.panel_title equals solovev_panel_title(row) for each of the three, figure.sha256 matches the head PNG on disk, and the title numbers (relative_rms 0.1178/0.1176/0.1155, relative_sup 0.2098/0.2093/0.2038, residuals 1.388e-15/5.875e-16/2.913e-16, converged=yes) re-derive from the receipt's analytic_flux_regions.all_carrier_cells and solver keys. benchmarks.solovev_certificate._plot passes its title argument to figure.suptitle, so the recorded title is the drawn one. Deducted for one coverage gap that the added test cannot close (finding 1, second finding): the suite checks the receipt's recorded title and that the panel digest matches the receipt, but nothing reads the drawn panel, so a panel re-rendered with the old title while the receipt carried the new title and a refreshed digest would pass every test; the driver writes title and digest from the same render call so they are coupled in practice, but the test does not pin the coupling. Deducted also for the baseline-arm revision labelling noted in gate_arms_note.",
+    "fit": "The change reuses the committed benchmarks.solovev_certificate._plot painter and the ._slug helper the certificate family already uses rather than adding a second rendering path, and it adds a render-only subcommand to the existing benchmark driver instead of a new script - the same shape as the sibling render-only regeneration the plan already established for topic-batch figures. No forward operator is constructed and no solve is entered, so a title repair costs a render rather than a solve. The title is only as wide as the receipt's own keys. One style note: the driver reaches into two private members of benchmarks.solovev_certificate (._plot and ._slug, plus NORM_FIELDS), which couples the two benchmark modules through their underscore surface; that is the conventional way these sibling benchmark modules already share the painter, so it is a minor coupling rather than a defect.",
+    "goal_fidelity": "Plan nova:playable-forward-solve section 8, followup f-fsaudit-repair-solovev-certificate-qualified-title, defect (1): the three 1000-cell chord panels were titled bare '{case} - qualified', banked_read.read_status='qualified_axis', an axis-admission verdict, over a relative RMS flux error near 0.12, so the word read as an accuracy claim. The node repairs exactly this: each panel is re-rendered from its persisted part receipt through the committed benchmarks.solovev_certificate._plot painter with a two-line title carrying the read status with the explicit gloss '(axis admission; not an accuracy verdict)', the relative_rms and relative_sup, the terminal residual and the converged flag, all read from the receipt. It also carries followup defect (4) (terminal residual and converged flag, which the panel previously lacked) into the same title, and the evidence fragment cites the three panels, partially addressing (5). Defects (2) and (3) are recorded under follow_ons as a re-render of the error fields outside this node's write scope, and the node leaves the driving followup open. Not full marks because the followup's repair text says 'put relative_rms and relative_sup in each title' and the fourth panel in the same directory (diverted-single-null-production-route-cells-500) still carries the bare 'qualified' title with its receipt unchanged, so the directory now mixes three honest titles with one unchanged panel (see finding 1); the node's own rationale for sparing it (its relative_rms is 4.6e-15, not a false claim) is recorded in the fragment and evidence_inputs and the followup file list named only the three 1000-cell panels, so the narrower reading is defensible but is a scoping judgement the node made rather than a limit the brief set.",
+    "scope_discipline": "The review range 0dfce2a0d..df0687b0 touches exactly the node's granted paths: benchmarks/parallel_components_read.py, tests/test_solovev_certificate_panel_titles.py, docs/evidence/fragments/playable-forward-solve/pfs-solovev-certificate-panel-titles.html, the three solve-parts/chord/*-cells-1000.json receipts and the three solve-panels/chord/*-cells-1000.png. No other product source, test, plan, shared index or concurrent-node path is touched. The reviewed worktree is clean (git status shows nothing outside .venv) and sits at the reviewed head. Both commits carry conventional subjects with explanatory bodies and no plan/ticket identifiers. The added --render-solovev-panels operand and _render_solovev_panels are inside the granted driver path and follow the repo's existing render-only pattern (a benchmark subcommand that rebuilds figures from committed receipts with no device and no solve). The one panel left unchanged (diverted-single-null-production-route-cells-500) is inside the granted directory but is inside the write fence, so leaving it is a scoping choice, not a fence breach."
+  },
+  "node": "review-of-pfs-solovev-certificate-panel-titles",
+  "project": "nova",
+  "review_base_sha": "ce718d4d72522ac059927d722f27847755824439",
+  "review_run_id": "legacy-124c5eaf2064",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "reviewed_commit": "4720f395bcd61c6aadc2935ad3b413e4c82e46b8",
+  "reviewed_commits": [
+    "4720f395bcd61c6aadc2935ad3b413e4c82e46b8",
+    "df0687b01539d2c19c16003c10411eba459a6564"
+  ],
+  "reviewed_head_sha": "df0687b01539d2c19c16003c10411eba459a6564",
+  "reviewed_run_id": "r-20261003T143720361037-pfs-solovev-certificate-panel-titles",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-solovev-certificate-panel-titles",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:16:00Z",
+  "total": 89,
+  "verdict": "pass"
+}

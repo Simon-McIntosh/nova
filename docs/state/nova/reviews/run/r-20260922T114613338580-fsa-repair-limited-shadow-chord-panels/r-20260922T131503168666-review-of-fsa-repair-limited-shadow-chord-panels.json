@@ -1,0 +1,33 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T13:15:03.168666+00:00",
+  "findings": [],
+  "justifications": {
+    "durability": "the guard reads the committed render receipt and the persisted solve-parts receipts rather than pinning literals, and a second pair of tests (test_a_sub_floor_panel_is_blank_and_says_why, test_every_poloidal_panel_draws_both_null_sets) rebuilds the control panel in memory and inspects the returned panel records plus the matplotlib axes' own marker colours, so a renderer regression is caught even if the committed receipt goes stale; I independently reran the full file twice (plain and under the declared mutation) and got the identical pass/fail split both times.",
+    "evidence": "I independently reproduced both the gate (4 passed in 43.07s locally vs the node's 13.64s, same outcome) and the negative control (1 failed, 3 passed, with the exact same AssertionError text 'diverted-single-null/psi: contour levels below the round-off floor 1e-12: [4.72e-20]') by running pytest myself in the untouched fsa-repair-limited-shadow-chord-panels worktree at its recorded commit; every number quoted in the plan comment and the evidence section (residual=2.423e-17/5.875e-16/2.913e-16/1.388e-15, max_absolute 8.153e-17, levels_suppressed_below_floor 8, 16 total panels with the claimed 2/2 vs 1/1 null-glyph split, PNG byte count 391251) matches the raw render-receipt.json and the committed PNG exactly, and the diverted-single-null title residual matches the underlying solve-parts receipt's solver.terminal_fixed_point_residual bit for bit.",
+    "fit": "the four declared write paths plus the driver, test file, plan comment and evidence section are exactly what changed (git show --stat lists exactly 8 files, matching changed_paths); no plan/stage/sprint label or version suffix appears anywhere in the diff, and the node correctly follows the 2026-09-22 lane ruling cited in its own plan comment (painter-only repair with no solve, eligible for the local lane behind a bookend review) rather than re-deriving or restating it.",
+    "goal_fidelity": "the three faults the reviewer scored against these four panels (52/60/60/60: missing residual/converged in the title, un-floored round-off contoured as a structured psi-error map, only one null set drawn) are each named in the repair commit message and each independently verified fixed above \u2014 title fields present and receipt-sourced, the round-off panel now contours nothing and states the floor, and both null sets are drawn with their glyph counts published per panel.",
+    "scope_discipline": "git show --stat 485e4df3b touches only benchmarks/limited_row_shadow_census.py, tests/test_limited_row_shadow_render.py, the four named PNGs, render-receipt.json, and the plan/evidence docs \u2014 no other figure directory or source file is touched, and the follow_ons field correctly defers the sibling five-template repair (benchmarks/solovev_certificate.py::_plot) rather than reaching for it out of scope."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the three faults the reviewer scored against these four panels (52/60/60/60: missing residual/converged in the title, un-floored round-off contoured as a structured psi-error map, only one null set drawn) are each named in the repair commit message and each independently verified fixed above \u2014 title fields present and receipt-sourced, the round-off panel now contours nothing and states the floor, and both null sets are drawn with their glyph counts published per panel.\nSCORE evidence: 20\nJUSTIFICATION evidence: I independently reproduced both the gate (4 passed in 43.07s locally vs the node's 13.64s, same outcome) and the negative control (1 failed, 3 passed, with the exact same AssertionError text 'diverted-single-null/psi: contour levels below the round-off floor 1e-12: [4.72e-20]') by running pytest myself in the untouched fsa-repair-limited-shadow-chord-panels worktree at its recorded commit; every number quoted in the plan comment and the evidence section (residual=2.423e-17/5.875e-16/2.913e-16/1.388e-15, max_absolute 8.153e-17, levels_suppressed_below_floor 8, 16 total panels with the claimed 2/2 vs 1/1 null-glyph split, PNG byte count 391251) matches the raw render-receipt.json and the committed PNG exactly, and the diverted-single-null title residual matches the underlying solve-parts receipt's solver.terminal_fixed_point_residual bit for bit.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 485e4df3b touches only benchmarks/limited_row_shadow_census.py, tests/test_limited_row_shadow_render.py, the four named PNGs, render-receipt.json, and the plan/evidence docs \u2014 no other figure directory or source file is touched, and the follow_ons field correctly defers the sibling five-template repair (benchmarks/solovev_certificate.py::_plot) rather than reaching for it out of scope.\nSCORE durability: 19\nJUSTIFICATION durability: the guard reads the committed render receipt and the persisted solve-parts receipts rather than pinning literals, and a second pair of tests (test_a_sub_floor_panel_is_blank_and_says_why, test_every_poloidal_panel_draws_both_null_sets) rebuilds the control panel in memory and inspects the returned panel records plus the matplotlib axes' own marker colours, so a renderer regression is caught even if the committed receipt goes stale; I independently reran the full file twice (plain and under the declared mutation) and got the identical pass/fail split both times.\nSCORE fit: 20\nJUSTIFICATION fit: the four declared write paths plus the driver, test file, plan comment and evidence section are exactly what changed (git show --stat lists exactly 8 files, matching changed_paths); no plan/stage/sprint label or version suffix appears anywhere in the diff, and the node correctly follows the 2026-09-22 lane ruling cited in its own plan comment (painter-only repair with no solve, eligible for the local lane behind a bookend review) rather than re-deriving or restating it.",
+  "review_run_id": "r-20260922T131503168666-review-of-fsa-repair-limited-shadow-chord-panels",
+  "reviewed_run_id": "r-20260922T114613338580-fsa-repair-limited-shadow-chord-panels",
+  "reviewer": {
+    "backend": "claude",
+    "model": "claude-sonnet-5"
+  },
+  "reviewer_run_id": "r-20260922T131503168666-review-of-fsa-repair-limited-shadow-chord-panels",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T13:20:00+00:00",
+  "total": 99
+}

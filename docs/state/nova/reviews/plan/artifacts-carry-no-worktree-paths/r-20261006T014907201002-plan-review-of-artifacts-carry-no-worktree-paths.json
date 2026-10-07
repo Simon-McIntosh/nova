@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:55:04.267Z",
+  "dispatched_at": "2026-10-06T01:49:26Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/artifacts-carry-no-worktree-paths.html:46",
+      "id": "reuse_search-1",
+      "reason": "a census the plan presents as its basis and that every node is told to re-derive is materially incomplete, so \u00a72/\u00a73's scope and the \u00a74 guard's blast radius are understated by whole directories the author's search never listed.",
+      "text": "the \u00a71 census enumerates docs/figures, scripts/, docs/evidence, tests/ and docs/research but omits `benchmarks/` and `nova/`, which at the plan's own revision 88a14b2ad hold 3 and 1 tracked worktree-path files respectively (`benchmarks/backend_divergence_forensics.py`, `benchmarks/constraint_centroid_receipt.py`, `benchmarks/pure_arm_comparison_figure.py`, `nova/scripts/render_misfit_figures.py`); the plan's headline count (1,146) and its `.py` count (64 = 48 `.sh` + 10 `.sbatch` + 6 `.py`) do not reproduce against that revision either (measured: scripts/ 58, tests/ 2, not 62 and 1)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/scripts.py:17",
+      "id": "duplicate_owner-1",
+      "reason": "by the plan's own \"the rule has one owner\" argument the command surface should have one owner too, and the honest change is a subcommand on the existing group (or an explicit statement of why the hook cannot reach it) rather than a parallel CLI.",
+      "text": "the plan puts the rewrite CLI in `scripts/relativize_worktree_paths.py`, but `nova/database/scripts.py` already declares the `filepath` click group (`filepath = \"nova.database.scripts:filepath\"` in `[project.scripts]`, pyproject.toml:138) whose single job is to command `nova.database.filepath`, the very module the plan extends; the plan never mentions it",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f0e97bee99e393e48a529d378c5ca00e80abae6280b89511c7d4bb0797cc7df4",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 22,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:58:30.747966+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:58:29.419109+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T014907201002-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "5efef3b6da06c866450fb2e3a8c55fc364a67672",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `relativize_worktree_paths(text)` hides pattern-matching over two roots and four spellings, the two mapping rules, idempotence and the unmapped-span report behind one entry point that returns `(text, unmapped)`.",
+    "duplicate_owner": "a finding \u2014 the plan adds `scripts/relativize_worktree_paths.py` as a second command surface over `nova/database/filepath.py` without citing the existing `filepath` click group that already owns that module's CLI.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 accounts for the surface it adds (one function, two constants, one two-mode command) and states nothing retires; \u00a74 names the two tests it deletes and states the hook is nova's one commit-time check that later checks merge into.",
+    "reuse_search": "a finding \u2014 the plan cites and extends `repository_relative`, `tests/test_filepath.py`, the superseded `tests/test_render_receipt_paths.py` scan and the launcher idiom, but the artifact census the plan rests on omits `benchmarks/` and `nova/`.",
+    "thin_wrapper": "pass \u2014 the script and the hook are a file-adapter and a shim over the one matcher, and the plan states why each exists (\"the command is the only way to run the function over files\"; the hook \"adds no logic of its own\")."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "12f7221fb9667808b3669af3eb8c8362417c8f82654faeea51b215c7cb15ced5",
+    "s2": "7ad4f2d102fe53a488efe94a6dd0d8e15bcd2277349bb6bcdf3b86a32fbdf5b8",
+    "s3": "af55126bd0713335b2716da37306ca4e7716c52a12337e9d50c6a6e28ad05475",
+    "s4": "f11d0182b3de8474f59c3c07a78fa1d9fa6d396f8055fd48e84684d7f3ff6b1c",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:58:15.386505+00:00"
+}

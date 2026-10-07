@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_source": "derived from the run's six gate logs (gate/base and gate/head for test_production_solver_receipt_trip_alignment, test_forward_profile_arguments, test_sol_ledger_render) via reckon.crew.review.added_failures_from_gate_logs -> (0, []); both arms are green. The reviewed manifest names no structured baseline_suite/after_suite field, so reckon.crew.review.read_review re-annotates the count as unmeasured; the stored record carries the measured 0 directly.",
+  "completed_at": "2026-10-03T07:15:01.168Z",
+  "dispatched_at": "2026-10-03T06:32:57Z",
+  "findings": [
+    {
+      "file": "benchmarks/net_current_scaling_census.py",
+      "line": "271",
+      "severity": "follow-on",
+      "text": "follow-on: the new stale-receipt guard raises a ValueError but is not exercised by any test; no repository test imports net_current_scaling_census, so the fail-loud behaviour is verified only by this review's independent reproduction (and the run's own gate cannot add an arm for it). The gate's coverage arm still reaches only three of the ten migrated files (plasma_cell_production_ladder, profile_coefficients_recompile_audit, sol_ledger_current_census); the other seven, including this one, have no importing test, so their with_clip_mode threading remains argued structurally rather than measured as a chord bit-identity row."
+    },
+    {
+      "file": "benchmarks/net_current_scaling_census.py",
+      "line": "271",
+      "severity": "follow-on",
+      "text": "follow-on: the committed receipt docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json still carries the retired support_clip_mode key and not clip_mode (verified: keys include support_clip_mode, clip_mode absent), so _read_sol_ledger now raises until the producer benchmarks/sol_ledger_current_census.py regenerates that receipt. This is the intended fail-loud replacement for the prior silent None, and the receipt file is outside this node's write scope; it is a regeneration prerequisite, not a solve behaviour change."
+    },
+    {
+      "file": "benchmarks/net_current_scaling_census.py",
+      "line": "262",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's manifest records its gate command and log paths as prose under tests: and test_logs: rather than as structured baseline_suite/after_suite JSON, so reckon's read-time added-failure derivation (which reads those two fields) reports the count unmeasured for this run; the review record therefore carries the derived added_failure_count 0 and empty ids itself. Recording the two suite observations in the dispatch contract's shape would let the count be re-derived by any reader."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "git diff --stat eb3388585 6d8fc6290 returns only benchmarks/net_current_scaling_census.py: 7 insertions, 1 deletion, all inside _read_sol_ledger. Commit 6d8fc6290 is the head reviewed; eb3388585 (the migration commit, parent of 406b740b1) is otherwise byte-identical. The batch is a sibling of main HEAD 5f0b7e876 and is not merged.",
+    "done_when": "Independently reproduced. git show 6d8fc6290:benchmarks/net_current_scaling_census.py lines 271-276 raise a ValueError naming SOL_LEDGER_RECEIPT and benchmarks/sol_ledger_current_census.py when the clip_mode key is absent, and line 281 reads receipt[clip_mode]; importing the module from the run worktree, the committed receipt (support_clip_mode present, clip_mode absent) makes _read_sol_ledger raise that ValueError verbatim, while a control receipt carrying clip_mode='chord-control' reads it back with status 'read-from-committed-receipt'. The prior review's finding at net_current_scaling_census.py:275 (a silent None return) is therefore closed: the same stale receipt now refuses loudly. grep for set_support_clip_mode and support_clip_mode across the ten files at head returns no line. added_failure_count 0 and added_failure_ids [] derived from the run's six gate logs via reckon.crew.review.added_failures_from_gate_logs (base 23 passed, head 23 passed).",
+    "goal": "The reviewed head keeps the ten leaf benchmarks off the process-global support clip mode and closes the prior review's silent-stale-receipt defect: every operator is built through with_clip_mode, every ForwardSolveRequest carries clip_mode, receipts record the solving operator's mode or its pinning constant, and the census read-back refuses a receipt written before the key rename rather than returning None.",
+    "manifest": "The manifest reads complete with commits eb3388585 and 6d8fc6290, matching changed_paths and test_logs; its tests prose carries the per-module base and head commands and results; negative_control_log is 'none: ...' with a stated inapplicability for a refactor. The structured baseline_suite/after_suite fields are absent, so the added-failure count is carried by this review record itself, derived from the six gate logs the manifest names under test_logs.",
+    "write_paths": "git show --stat eb3388585 lists exactly the ten scoped benchmark files; 6d8fc6290 touches only benchmarks/net_current_scaling_census.py; no evidence fragment, figure, receipt or plan edit is written by either commit, matching the brief."
+  },
+  "justifications": {
+    "durability": "Both commits are reachable in the shared object store and the six gate logs persist under the reviewed run directory; the batch is not yet on main (promotion is the coordinator's step). The fail-loud guard improves durability over the prior silent None: a stale receipt can no longer be read as a value, at the cost of a regeneration prerequisite that the manifest declares.",
+    "evidence": "The six gate logs exist, their summaries reproduce, and the added-failure count derived from them is 0; grep and import gates reproduce independently; the current head's guard is reproduced firing on the stale receipt and reading a control receipt that carries the key. The evidence remains a base/head equivalence over a refactor whose test arm covers only three of ten files, and the newly added guard carries no test of its own, so its behaviour rests on this review's reproduction rather than on the run's suite.",
+    "fit": "The fix is a conventional commit with a subject and a body and no plan, sprint or ticket identifier; it follows the fail-loud house idiom rather than a silent default, and threads the mode through the already-merged additive clip_mode idiom.",
+    "goal_fidelity": "Per-file inspection confirms the previous pinned mode is preserved (plasma_cell_seed_policy stays exact, the chord files stay chord, net_current_scaling_census and plasma_cell_production_ladder thread their argument mode), the retired accessors are absent from all ten files, and the prior review's highest finding is closed by a guard that names both the stale receipt and its producer.",
+    "scope_discipline": "git show --stat returns exactly the ten assigned paths for the migration commit and exactly one path for the fix commit; no concurrent node's path is touched, no plan is edited, and the commits carry no AI attribution or banned labels."
+  },
+  "prior_finding_status": "closed: net_current_scaling_census._read_sol_ledger at 6d8fc6290 lines 271-276 raises a ValueError naming the stale receipt and its producer when clip_mode is absent, replacing the prior eb3388585 line 275 silent None return; reproduced by direct import and call.",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The reviewed head keeps the ten leaf benchmarks off the process-global support clip mode and closes the prior review's silent-stale-receipt defect: every operator is built through with_clip_mode, every ForwardSolveRequest carries clip_mode, receipts record the solving operator's mode or its pinning constant, and the census read-back refuses a receipt written before the key rename rather than returning None.\nVERDICT done_when: Independently reproduced. git show 6d8fc6290:benchmarks/net_current_scaling_census.py lines 271-276 raise a ValueError naming SOL_LEDGER_RECEIPT and benchmarks/sol_ledger_current_census.py when the clip_mode key is absent, and line 281 reads receipt[clip_mode]; importing the module from the run worktree, the committed receipt (support_clip_mode present, clip_mode absent) makes _read_sol_ledger raise that ValueError verbatim, while a control receipt carrying clip_mode=chord-control reads it back with status read-from-committed-receipt. The prior review's finding at net_current_scaling_census.py:275 (a silent None return) is therefore closed. grep for set_support_clip_mode and support_clip_mode across the ten files at head returns no line. added_failure_count 0 and added_failure_ids [] derived from the run's six gate logs (base 23 passed, head 23 passed).\nVERDICT write_paths: git show --stat eb3388585 lists exactly the ten scoped benchmark files; 6d8fc6290 touches only benchmarks/net_current_scaling_census.py; no evidence fragment, figure or plan edit is written by either commit.\nVERDICT manifest: The manifest reads complete with commits eb3388585 and 6d8fc6290, matching changed_paths and test_logs; its tests prose carries the per-module base and head commands and results; negative_control_log is 'none: ...' with a stated inapplicability; the structured baseline_suite/after_suite fields are absent so the added-failure count is carried by this review record itself.\nVERDICT diff: 6d8fc6290 (parent eb3388585) changes one file, 7 insertions and 1 deletion, all within _read_sol_ledger; the reviewed migration base is 406b740b1, and the batch is a sibling of main HEAD 5f0b7e876, not merged.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 18\nJUSTIFICATION goal_fidelity: Per-file inspection confirms the previous pinned mode is preserved (plasma_cell_seed_policy stays exact, the chord files stay chord, net_current_scaling_census and plasma_cell_production_ladder thread their argument mode), the retired accessors are absent from all ten files, and the prior review's highest finding is closed by a guard naming both the stale receipt and its producer.\nJUSTIFICATION evidence: The six gate logs exist, their summaries reproduce, and the added-failure count derived from them is 0; grep and import gates reproduce independently; the current head's guard is reproduced firing on the stale receipt and reading a control receipt that carries the key. The evidence remains a base/head equivalence over a refactor whose test arm covers only three of ten files, and the newly added guard carries no test of its own.\nJUSTIFICATION scope_discipline: git show --stat returns exactly the ten assigned paths for the migration commit and exactly one path for the fix commit; no concurrent node's path is touched and no plan is edited.\nJUSTIFICATION durability: Both commits are reachable in the shared object store and the six gate logs persist under the reviewed run directory; the batch is not on main. The fail-loud guard improves durability over the prior silent None, at the cost of a regeneration prerequisite the manifest declares.\nJUSTIFICATION fit: The fix is a conventional commit with a subject and a body and no plan, sprint or ticket identifier; it follows the fail-loud house idiom and the merged additive clip_mode idiom.\nFINDING benchmarks/net_current_scaling_census.py:271 follow-on: the new stale-receipt guard raises a ValueError but is not exercised by any test; no repository test imports net_current_scaling_census, so the fail-loud behaviour is verified only by this review's independent reproduction, and the gate's coverage arm still reaches only three of the ten migrated files.\nFINDING benchmarks/net_current_scaling_census.py:271 follow-on: the committed receipt docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json still carries the retired support_clip_mode key and not clip_mode, so _read_sol_ledger now raises until the producer benchmarks/sol_ledger_current_census.py regenerates it; the receipt is outside this node's write scope and this is the intended fail-loud replacement, a regeneration prerequisite rather than a solve behaviour change.\nFINDING benchmarks/net_current_scaling_census.py:262 follow-on: the reviewed run's manifest records its gate command and log paths as prose under tests: and test_logs: rather than as structured baseline_suite/after_suite JSON, so reckon's read-time added-failure derivation reports the count unmeasured for this run; the review record therefore carries the derived added_failure_count 0 and empty ids itself.\n",
+  "review_run_id": "legacy-7945d85e4d02",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "406b740b1ac26c285cbc2c9a5dbd1daea0e39219",
+  "reviewed_head_sha": "6d8fc6290bd6e40bdaa1616387df74a75379dd6e",
+  "reviewed_run_id": "r-20261003T063237045907-fsapi-clip-mode-leaves-b",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261003T071547662243-review-2-of-fsapi-clip-mode-leaves-b"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T07:22:00.000000+00:00",
+  "total": 89
+}

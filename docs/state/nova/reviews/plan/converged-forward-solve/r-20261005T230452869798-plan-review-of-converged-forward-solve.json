@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:08:41.586Z",
+  "dispatched_at": "2026-10-05T23:05:05Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:298",
+      "id": "duplicate_owner-1",
+      "reason": "the census is the \u00a76 deletion gate, so as worded it either blocks the retirement or is silently weakened at execution; the clause must be scoped to the booked, axis-connected support or name `moment.py`'s estimator as a retained, re-pointed consumer.",
+      "text": "the \u00a76 census clause \"after retirement no module other than `current.py` integrates current over a support\" is broader than the moment-producer ruling it guards (which scopes the booked moments to the axis-connected support), while the design inventory at `docs/research/converged-forward-solve-design.html:146` retains `moment.py`'s inverse-current estimator (`predict_profile_moments`, `nova/equilibrium/moment.py:645`), which integrates a density over a `CurrentIntegralSupport` and emits a `MomentSeed` with `current_support`/`centroid_support`; a \u00a76 node running the census as the deletion gate will therefore find `moment.py` trips a clause the plan elsewhere says must survive",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "73402fcadcfd53fab25c49b432c3fdf8264141628c494e49c42f83efd443f149",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 44,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:10:05.212836+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T230452869798-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "701d5b9f118f816f63b1bc007114cd6df156a599",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the four proposed functions each hide substantial behaviour behind one call: `topology.read` (null census, membership fractions, qualification verdict, normal-form saddle support, IFT differentiability), `current.book` (sub-cell axis-connected exact-clip booking), `gs.apply` (traced geometry operands over `\u03c8_ext + G\u00b7book(\u03c8, read(\u03c8))` with the implicit/Picard, moment-map and boundary-flux derivatives), and `solve.fixed_point` (Newton-GMRES applied at one `lax.scan` site). No spread of shallow wrappers over one machinery.",
+    "duplicate_owner": "a finding \u2014 the \u00a76 census clause that would guard the moment owner is written broader than the ruling it serves and is tripped by a module the same design inventory explicitly retains.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan touches no reckon interface family, and \u00a76 accounts for the nova-internal surface it changes by naming the retirement of the whole route/clip-mode/policy-field set (`SolveRoute`, `SupportClipMode`, and the retired plumbing fields) as its interface-budget accounting, so no section adds surface without naming what it retires.",
+    "reuse_search": "pass \u2014 the design's source inventory (40 source rows) plus the per-section \"replaces X\" clauses are grounded: every named reuse candidate exists (`fixed_point.py` `_single_site_krylov`/`_backtracking_scores`/`_select_backtracking_candidate`, `polygon_moments.py` `polygon_monomial_moments`, `contour_tree.py` `build_contour_tree`, `reduced_newton.py` `newton_direction`, `forward_operator.py` `_flatten_*`/`_SourceLayout`, `clip_quadrature.py` `clipped_support_quadrature`, `nova/biot/elliptic.py` `harmonic_pole_moments`, `solve_request.py` `ForwardSolvePolicy`), the withdrawn candidates (`nova/biot/null.py` `Null2D`, `_steepest_descent_promotion`) were withdrawn correctly, and the analytic oracles (`analytic_single_null.py`, the Solov'ev cases) are cited as retained.",
+    "thin_wrapper": "pass \u2014 the plan states the replacement explicitly rather than layering: \u00a76 \"`gs.apply` replaces the map `ForwardFluxOperator` performs today rather than wrapping it\", and the `ForwardProfile.operator` \"composed seam\" is the re-pointing of an existing duck-typed attribute onto the four modules, not a new layer added beside the old one."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:10:04.586078+00:00"
+}

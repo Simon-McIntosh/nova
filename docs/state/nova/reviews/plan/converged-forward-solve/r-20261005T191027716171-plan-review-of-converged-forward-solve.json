@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T19:14:29.534Z",
+  "dispatched_at": "2026-10-05T19:10:51Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:94",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a76 is the node that lands the retirement the whole plan is named for, and an enumerable deletion list that omits the authority modules lets the new read and the old read coexist, which is the exact duplicate-owner defect the \"17 null / 23 region authority\" inventory was written to resolve; the fix is to extend \u00a76's list to name each authority module's destination (deleted, or kept as a private dependency of `topology.read`).",
+      "text": "\u00a72 states it replaces \"every other null or region authority the design inventory binds\", but \u00a76's retirement paragraph deletes only `topology.py`, `fixed_point.py`, `reduced_newton.py`, and the solver and booking authority in `forward_operator.py` and the `clip_quadrature.py` entry; the modules that actually hold the remaining read authorities \u2014 `nova/equilibrium/stencil_nulls.py` (critical points of a scalar field), `nova/equilibrium/separatrix_clip.py` (polygonal supports cut by a moving separatrix), `nova/equilibrium/separatrix_branches.py`, `nova/equilibrium/morphology.py`, `nova/equilibrium/connectivity_boundary.py`, `nova/equilibrium/flux_surface_connectivity.py`, `nova/equilibrium/cell_partition.py`, `nova/equilibrium/manifold_advance.py` \u2014 are not named in the deletion list, so the second read authority the plan exists to remove stays importable beside `topology.read`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e531aa703fc05b6079d4ffbab53ccefb5d2a66bf79e9f940751c1582ddad34bf",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 28,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T19:15:48.706801+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T191027716171-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "f73e79c3310449bcb2b58acea167fe37afbe4372",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four pure functions hide the read, the booking, the map and the solve behind one call site each; \u00a72's `topology.read` alone replaces the 17 null-finding and 23 region-finding authorities, which is depth rather than surface.",
+    "duplicate_owner": "a finding \u2014 \u00a76's retirement deletion list leaves the modules that hold the region and null authorities in place, so a second read authority survives beside `topology.read`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each of \u00a72\u2013\u00a75 names in its own text the mechanism it retires (`Topology.read`/`read_with_connectivity`; `clipped_support_current_moments`; the `ForwardFluxOperator` map; `newton_krylov`/`picard`/`operator_request_body`), and the two new policy types are stated as extensions of `ForwardSolvePolicy`, so nothing is added without a named retirement or merge.",
+    "reuse_search": "pass \u2014 the plan carries named reuse candidates for every new function (GMRES kernel and Armijo search in fixed_point.py, field-null kernels in nova/biot/, operand-identity machinery in forward_operator.py, clip_quadrature helpers, contour_tree, ConstraintPair/ConstraintRecord, ForwardSolvePolicy), and each was verified present at the cited path.",
+    "thin_wrapper": "pass \u2014 every new module is stated as a replacement, not a wrapper (`gs.apply` \"replaces the map ForwardFluxOperator performs ... rather than wrapping it\"; \u00a73/\u00a74/\u00a75 each carry a cite-or-justify rule for the helpers they reuse), so no new layer stands over an existing mechanism without justification."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:15:48.099840+00:00"
+}

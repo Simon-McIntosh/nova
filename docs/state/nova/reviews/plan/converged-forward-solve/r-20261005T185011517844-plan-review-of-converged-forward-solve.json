@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T18:55:35.271Z",
+  "dispatched_at": "2026-10-05T18:50:33Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/converged-forward-solve.html:52",
+      "id": "reuse_search-1",
+      "reason": "it adds the residue ruling \u00a73/\u00a74/\u00a75 already have (carry the existing kernel into `topology.read` as a private helper, or state why it fails the traced fixed-shape contract), which changes \u00a72's node scope and forces \u00a76 to say whether `contour_tree.py` is retained or deleted.",
+      "text": "\u00a72 requires implementing the contour-tree authority on hex cells but carries no reuse ruling for `contour_tree.build_contour_tree` (nova/equilibrium/contour_tree.py:384) and `contour_tree_mesh.build_contour_mesh` (nova/equilibrium/contour_tree_mesh.py:193) \u2014 a traced, fixed-capacity, deterministic-tie-ordering contour-tree builder and its wall-clipped hex-carrier triangulation, which is precisely \u00a72's stated contract (\"contour-tree authority on hex cells\", \"pure, traced\", \"fixed-capacity buffers\"); `stencil_nulls.py`'s `critical_point_candidates_batch`/`xpoint_candidates`/`magnetic_axis_subgrid` (a quadratic-fit stationary-point evaluator, production-reachable via `profile.py` and `connectivity_boundary.py`) is likewise unnamed. \u00a72 currently names only the `nova/biot` null kernels, so the \u00a72 node would rebuild a kernel the tree already contains",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/equilibrium/contour_tree.py:384",
+      "id": "duplicate_owner-1",
+      "reason": "it names the owner to extend rather than fork, the same rule the plan already applied to `nova/biot/null.py`; forking a second contour-tree reader splits the authority the lead locked (contour tree on hex cells) across two implementations that will drift, and \u00a76 must then reconcile which one the retirement leaves standing.",
+      "text": "the contour-tree authority \u00a72 proposes has an existing owner: `build_contour_tree(vertex_psi, vertex_valid, vertex_is_wall, edges, edge_valid, sigma)` already builds a fixed-capacity contour tree whose join/split sweeps are traceable through `jax.jit` and `jax.vmap` with deterministic vertex-index tie ordering, and `contour_tree_mesh.build_contour_mesh` already builds the clipped hex-centre triangulation carrying it; today its only non-test importer is `nova/imas/contour_tree_layout.py`, so it is an exercised kernel awaiting an equilibrium caller, not a competing implementation",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8156c967090facd85b7730b0c6c32192cd00b88196b5c66582d43a800b43680a",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 26,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T18:59:43.450443+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T18:59:42.905361+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T185011517844-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "7a53dfa8210b420b5b3f516860b09a9c7994bcad",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the four proposed entry points (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`) each hide an entire subsystem behind one call, replacing the 54,102-line sprawl rather than spreading it across shallow wrappers; \u00a71's landed design and \u00a75's single-`ladder.scan`-site contract carry that intent.",
+    "duplicate_owner": "a finding \u2014 \u00a72 would build a second contour-tree authority beside `nova/equilibrium/contour_tree.py`, which already owns one.",
+    "interface_budget": "pass \u2014 the supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 and \u00a75 each state their new policy type is carried by the existing `ForwardSolvePolicy` \"extended rather than duplicated\" (a named merge), and \u00a76 names the routes, ladders, frozen/live split and owners it retires, so no adding section leaves its surface unaccounted for.",
+    "reuse_search": "a finding \u2014 \u00a72 (\"the contour tree on hex cells\") is the only implementation section with no cite-or-justify reuse ruling, and it builds a mechanism the codebase already owns a traced kernel for.",
+    "thin_wrapper": "pass \u2014 every section replaces its predecessor rather than layering on it (\u00a74 states \"`gs.apply` replaces the map `ForwardFluxOperator` performs today rather than wrapping it\"; \u00a72/\u00a73/\u00a75 each name the modules replaced, and \u00a76 deletes them), so no wrapper is added over machinery that could have been extended."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T18:59:41.747990+00:00"
+}

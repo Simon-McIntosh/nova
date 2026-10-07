@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:3665 current_moments_and_observation - the fused linear route the goal names; reached from nova/equilibrium/forward.py:1385 via _integral_state",
+    "nova/equilibrium/forward_operator.py:3677 normalised_current_moments_and_observation - the normalised fused linear route; reached from nova/equilibrium/forward.py:1390",
+    "nova/equilibrium/forward_operator.py:3609 cell_current_moments linear branch - the current-moment request of the two-read decomposition; now sharing the guard"
+  ],
+  "commits_read": [
+    "571f4e8cc7e7916423e4baace06c33acd4245834"
+  ],
+  "completed_at": "2026-10-02T08:04:20.166Z",
+  "dispatched_at": "2026-10-02T07:34:53Z",
+  "findings": [
+    {
+      "file": "tests/test_fused_same_state_read.py",
+      "line": "208",
+      "severity": "follow-on",
+      "text": "the new refusal test replaces, rather than adds to, the deleted solve-level identity test for the fused linear route (base tests/test_fused_same_state_read.py:200), so the only surviving fused-linear-vs-two-read equality assertion is the single-state test at :153; the deletion is forced because the fixture's relaxed map now leaves the qualified region and the two-read comparator raises, but solve-level identity coverage the goal did not ask to remove is gone."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "3327",
+      "severity": "follow-on",
+      "text": "the changed function _support_partition is reached by four test modules (test_fused_same_state_read.py, test_forward_operator_domain.py, test_sol_support_selection.py, test_two_branch_batch_cost.py) plus many use_linear_moments tests, but the gate ran only test_fused_same_state_read.py among them, so the done-when's no-added-failure clause is not shown for every module that reaches the guard."
+    },
+    {
+      "file": "benchmarks/exact_clip_low_state_discriminator.py",
+      "line": "530",
+      "severity": "follow-on",
+      "text": "the new host raise in _support_partition is reachable from measurement drivers that call it directly on states their fixtures may not have qualified (benchmarks/exact_clip_low_state_discriminator.py:530 and the other module-level callers), and no benchmark invocation is part of the gate, so a driver that deliberately drives a low or unqualified state now raises where it previously returned a partition; flagged for a coordinator rather than verified here."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against d786948c; the production change is one line (capture admitted, then require_qualified_axis(admitted)) in _support_partition, and the test change drops the NoQualifiedAxisError fallback in _unfused_linear_read and the solve-level terminal-state identity test, adding the input-level refusal test instead; no other production path is touched.",
+    "done_when": "the done-when's three clauses are each evidenced - the divergence is exercised in tests/test_fused_same_state_read.py:208 where read, current_moments_and_observation and _unfused_linear_read all raise NoQualifiedAxisError on one identical state; removing the enforcement reddens the fused assertion only (negative_control.log, EXIT=1); and the head gate against d786948c adds no failing id (fused 4 passed, topology 2 failed/4 passed identical at both revisions, reference file 22 identical ids at both).",
+    "goal": "the node goal is to make the fused linear read through current_moments_and_observation enforce the same axis qualification as the two-read route it replaces; nova/equilibrium/forward_operator.py:3327 now calls require_qualified_axis(admitted) inside _support_partition, and every linear read (current_moments_and_observation at :3665, normalised_current_moments_and_observation at :3677, cell_current_moments at :3609) routes through it, so the goal is met.",
+    "manifest": "read in full; status complete, one commit 571f4e8, changed_paths exactly the two source/test files, the fused arm 4 passed, topology 2 failed/4 passed at both revisions, the H200 reference file 571f4e8 vs base d786948c shows 22 identical failure ids, and a specific negative control is recorded.",
+    "write_paths": "the reviewed manifest declares nova/equilibrium/forward_operator.py and tests/test_fused_same_state_read.py plus two unused docs paths; the diff touches only the first two, both inside the fence, with no stray file."
+  },
+  "justifications": {
+    "durability": "the added guard is genuinely tested - reinstating the regression by removing :3327 reddens tests/test_fused_same_state_read.py:208 - but the change deletes the solve-level fused-linear identity test (base tests/test_fused_same_state_read.py:200) rather than replacing it, and the new test raises a bare AssertionError at :120 if the fixture stops reaching an unqualified state.",
+    "evidence": "the negative control is specific - with the :3327 call removed, tests/test_fused_same_state_read.py:232 reports DID NOT RAISE NoQualifiedAxisError (EXIT=1) while the read assertion at :231 still holds - but the gate ran only three test modules while _support_partition is reached by four, and no benchmark caller was exercised.",
+    "fit": "the change reuses the existing require_qualified_axis at nova/equilibrium/topology.py:216 exactly as read does at :3185, and the new symbols (_first_unqualified_map_state and the new test name) are mechanism-named with no plan label or ticket reference.",
+    "goal_fidelity": "nova/equilibrium/forward_operator.py:3327 applies the same require_qualified_axis(admitted) that read applies at :3185, on the same _fixed_design_read output, and require_qualified_axis (nova/equilibrium/topology.py:216) returns immediately on a jax.core.Tracer, so the traced hot path gains no host round trip and both linear routes now refuse identically.",
+    "scope_discipline": "the diff touches only the two declared paths, nova/equilibrium/forward_operator.py and tests/test_fused_same_state_read.py, adding no stray file, fixture, figure or plan edit."
+  },
+  "plan": "millisecond-converged-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the fused linear read through current_moments_and_observation enforce the same axis qualification as the two-read route it replaces; nova/equilibrium/forward_operator.py:3327 now calls require_qualified_axis(admitted) inside _support_partition, and every linear read (current_moments_and_observation at :3665, normalised_current_moments_and_observation at :3677, cell_current_moments at :3609) routes through it, so the goal is met.\nVERDICT done_when: the done-when's three clauses are each evidenced - the divergence is exercised in tests/test_fused_same_state_read.py:208 where read, current_moments_and_observation and _unfused_linear_read all raise NoQualifiedAxisError on one identical state; removing the enforcement reddens the fused assertion only (negative_control.log, EXIT=1); and the head gate against d786948c adds no failing id (fused 4 passed, topology 2 failed/4 passed identical at both revisions, reference file 22 identical ids at both).\nVERDICT write_paths: the reviewed manifest declares nova/equilibrium/forward_operator.py and tests/test_fused_same_state_read.py plus two unused docs paths; the diff touches only the first two, both inside the fence, with no stray file.\nVERDICT manifest: read in full; status complete, one commit 571f4e8, changed_paths exactly the two source/test files, the fused arm 4 passed, topology 2 failed/4 passed at both revisions, the H200 reference file 571f4e8 vs base d786948c shows 22 identical failure ids, and a specific negative control is recorded.\nVERDICT diff: read commit by commit against d786948c; the production change is one line (capture admitted, then require_qualified_axis(admitted)) in _support_partition, and the test change drops the NoQualifiedAxisError fallback in _unfused_linear_read and the solve-level terminal-state identity test, adding the input-level refusal test instead; no other production path is touched.\nCALL_SITES: nova/equilibrium/forward_operator.py:3665 current_moments_and_observation - the fused linear route the goal names; reached from nova/equilibrium/forward.py:1385 via _integral_state, nova/equilibrium/forward_operator.py:3677 normalised_current_moments_and_observation - the normalised fused linear route; reached from nova/equilibrium/forward.py:1390, nova/equilibrium/forward_operator.py:3609 cell_current_moments linear branch - the current-moment request of the two-read decomposition; now sharing the guard\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/forward_operator.py:3327 applies the same require_qualified_axis(admitted) that read applies at :3185, on the same _fixed_design_read output, and require_qualified_axis (nova/equilibrium/topology.py:216) returns immediately on a jax.core.Tracer, so the traced hot path gains no host round trip and both linear routes now refuse identically.\nSCORE evidence: 16\nJUSTIFICATION evidence: the negative control is specific - with the :3327 call removed, tests/test_fused_same_state_read.py:232 reports DID NOT RAISE NoQualifiedAxisError (EXIT=1) while the read assertion at :231 still holds - but the gate ran only three test modules while _support_partition is reached by four, and no benchmark caller was exercised.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches only the two declared paths, nova/equilibrium/forward_operator.py and tests/test_fused_same_state_read.py, adding no stray file, fixture, figure or plan edit.\nSCORE durability: 17\nJUSTIFICATION durability: the added guard is genuinely tested - reinstating the regression by removing :3327 reddens tests/test_fused_same_state_read.py:208 - but the change deletes the solve-level fused-linear identity test (base tests/test_fused_same_state_read.py:200) rather than replacing it, and the new test raises a bare AssertionError at :120 if the fixture stops reaching an unqualified state.\nSCORE fit: 18\nJUSTIFICATION fit: the change reuses the existing require_qualified_axis at nova/equilibrium/topology.py:216 exactly as read does at :3185, and the new symbols (_first_unqualified_map_state and the new test name) are mechanism-named with no plan label or ticket reference.\nFINDING tests/test_fused_same_state_read.py:208 follow-on: the new refusal test replaces, rather than adds to, the deleted solve-level identity test for the fused linear route (base tests/test_fused_same_state_read.py:200), so the only surviving fused-linear-vs-two-read equality assertion is the single-state test at :153; the deletion is forced because the fixture's relaxed map now leaves the qualified region and the two-read comparator raises, but solve-level identity coverage the goal did not ask to remove is gone.\nFINDING nova/equilibrium/forward_operator.py:3327 follow-on: the changed function _support_partition is reached by four test modules (test_fused_same_state_read.py, test_forward_operator_domain.py, test_sol_support_selection.py, test_two_branch_batch_cost.py) plus many use_linear_moments tests, but the gate ran only test_fused_same_state_read.py among them, so the done-when's no-added-failure clause is not shown for every module that reaches the guard.\nFINDING benchmarks/exact_clip_low_state_discriminator.py:530 follow-on: the new host raise in _support_partition is reachable from measurement drivers that call it directly on states their fixtures may not have qualified (benchmarks/exact_clip_low_state_discriminator.py:530 and the other module-level callers), and no benchmark invocation is part of the gate, so a driver that deliberately drives a low or unqualified state now raises where it previously returned a partition; flagged for a coordinator rather than verified here.",
+  "review_run_id": "r-20261002T073439477227-review-of-msc-fused-route-enforces-axis-qualification",
+  "reviewed_base_sha": "d786948c468d01c1ffb87718758ed60483ea4910",
+  "reviewed_head_sha": "571f4e8cc7e7916423e4baace06c33acd4245834",
+  "reviewed_revision": "571f4e8cc7e7916423e4baace06c33acd4245834",
+  "reviewed_run_id": "r-20261002T052807496384-msc-fused-route-enforces-axis-qualification",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-fused-route-enforces-axis-qualification",
+  "reviewer_node": "review-of-msc-fused-route-enforces-axis-qualification",
+  "reviewer_run_id": "r-20261002T073439477227-review-of-msc-fused-route-enforces-axis-qualification",
+  "reviewing_run_id": "r-20261002T073439477227-review-of-msc-fused-route-enforces-axis-qualification",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T08:01:55.042756+00:00",
+  "total": 88
+}

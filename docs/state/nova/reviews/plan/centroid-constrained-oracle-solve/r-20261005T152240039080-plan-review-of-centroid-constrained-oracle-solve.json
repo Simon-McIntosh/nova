@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:38:29.347Z",
+  "dispatched_at": "2026-10-05T15:22:59Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/constraint.py:489",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to lift the bound onto the existing unknown family's step policy (the plan already half-does this with the `getattr(unknown, \"damped_step\")` hook in `compensator_step`) rather than introduce a second unknown that duplicates the first's actuation body.",
+      "text": "`BoundedExteriorFieldUnknown` (489) carries the same actuation as `CircuitCurrentUnknown` (330): `direction @ physical_value(normalized)` pushed through `profile.operator.prescribed_current_field.flux_delta`, with the same `(column_count, row_count)` direction convention and the same `scale * normalized` physical anisotropy. The only new behaviour is the bound \u2014 `field_bound`, `bound_refusal`, `damped_step`, `field_bound_applies`. The plan writes a whole new unknown class for that one behaviour beside the existing one rather than extending the existing step policy, and does not justify the parallel class.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/reduced_newton.py:2644",
+      "id": "duplicate_owner-1",
+      "reason": "the finding names the file that owns the compensating-step cap today, so the plan should either route the reduced cap through the unknown's step policy or say in its \u00a72 text why the reduced route must cap differently; as written the \"no solver branch\" claim is only half true.",
+      "text": "`solve_constrained_reduced_newton` caps the compensating step with its own `constraint_current_step_cap` (default `CONSTRAINT_CURRENT_CHANGE_CAP`, line 152) and bounds it with `constraint_current_ceiling`/`_compensating_current_ceiling` (2341), while the plan's \u00a72 states that \"the bounded route is a property of the unknown rather than a branch in the solver\" (`constraint.py:467`) and puts that property on `BoundedExteriorFieldUnknown.damped_step` (590), consumed by `compensator_step` (471) only inside `constraint.py`. The two mechanisms do not meet: `reduced_newton` never calls `damped_step`/`bound_refusal`, so the plan's boundary-refusal record exists on the augmented route only, and the reduced route \u2014 the route the plan's \u00a72 names in its own text \u2014 keeps a private cap.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/centroid-constrained-oracle-solve.html#s2",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the public surface it adds in its own text \u2014 either that these are members of the one existing `CompensatingUnknown`/`ConstraintFunctional` family (constraint family is the extension point, so nothing is retired) or what the new fixture module replaces.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72's design adds three public names to `nova/equilibrium/constraint.py.__all__` (`BoundedExteriorFieldUnknown`, `CurrentCentroidConstraint`, `FluxLevelConstraint`) plus the fixture-side builder `scripts/analytic_oracle_fixtures/centroid_row.py`, and names nothing it retires or merges.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "775af717c937a4f3385e254beed4500b0372fff3796a5f6496031257a10b88a6",
+  "plan_slug": "centroid-constrained-oracle-solve",
+  "plan_version": 80,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152240039080-plan-review-of-centroid-constrained-oracle-solve",
+  "reviewed_blob_sha": "10b6daee9cbda73411b2625f6c8f9734f6921a62",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `ConstraintPair(functional, unknown, binding)` hides the functional, the compensator, the imposed/eliminated solve, the damped step, the dual flux image and the row-slice bookkeeping behind one small interface, so the new rows are members of a deep module rather than shallow wrappers",
+    "duplicate_owner": "a finding \u2014 the reduced route caps and ceilings the compensating unknown with its own solver arguments (`constraint_current_step_cap`, `constraint_current_ceiling` in `nova/equilibrium/reduced_newton.py`) instead of the unknown-owned `damped_step`/`bound_refusal` the plan's \u00a72 design names, so the bound logic has two owners.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. The plan's \u00a72 adds three public types to `nova/equilibrium/constraint.py.__all__` (`BoundedExteriorFieldUnknown`, `CurrentCentroidConstraint`, `FluxLevelConstraint`) and a second fixture-side constraint-builder module, and its text names nothing it retires or merges, and does not state why nothing can be.",
+    "reuse_search": "pass \u2014 the plan names the constraint protocol family in `nova/equilibrium/constraint.py`, the reduced-route pairs in `nova/equilibrium/reduced_newton.py`, and the bounded compensating unknown it extends, and the code confirms genuine reuse: `CurrentCentroidConstraint.observed` calls `profile.current_moment_observation` (constraint.py:961), `FluxLevelConstraint.observed` reads through the shared lattice sampler, and `derive_reduced_constraint_pairs` (reduced_newton.py:2569) already owns compensator selection.",
+    "thin_wrapper": "a finding \u2014 `BoundedExteriorFieldUnknown` re-implements the actuation body of the existing `CircuitCurrentUnknown` verbatim and adds only a bound; the plan does not say why the existing unknown's step policy could not have carried that bound"
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.282486+00:00"
+}

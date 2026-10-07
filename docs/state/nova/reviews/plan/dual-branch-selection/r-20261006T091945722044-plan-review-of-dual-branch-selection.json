@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:37:47.397Z",
+  "dispatched_at": "2026-10-06T09:20:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dual-branch-selection.html#s6",
+      "id": "reuse_search-1",
+      "reason": "a node dispatched from \u00a76 would build an arming observable and its catalog-frame economics for a fork the plan has already measured as paying nothing, whereas the plan's own answer (one pinned solve + flood-filled post-hoc classification) needs no new arming machinery at all.",
+      "text": "\u00a76 still presents the fork policy as open (\"nova's arming rule must come from its own margin: fork where |class_margin| is small \u2026 measure the armed fraction on real catalog frames before locking the policy\"), but the plan's own coreachability result (`docs/figures/dual-branch-selection/class-coreachability.json`, commit `a9ea090c`) and the `fork-arming` decision `superseded-by-measurement: single pinned solve + post-hoc classification` (plan.html decisions block) already close it; \u00a76 cites neither, and the section is where the first implementation node reads its scope",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/branch_selection.py:355",
+      "id": "deep_module-1",
+      "reason": "",
+      "text": "\u2014 the whole selector semantics live in one array core (`_advance_traced_selection` at `:355`), yet the module now exposes five public entry points over it \u2014 `forward_branch_selection_input` (`:123`), `traced_select_forward_branch` (`:507`), `scan_forward_branch_selection` (`:520`), `select_forward_branch` (`:588`) and `select_achieved_forward_branch` (`:638`) \u2014 and \u00a75's \"one public, traced, batched seam\" retains all of them (the host `SelectionReceipt` \"retained as the egress\"); WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: the section's stated goal is consolidation to one seam, but as written the module's interface does not shrink; naming which of the five is the seam and which are internal would let the implementing node collapse the other four instead of adding beside them.",
+      "type": "deep_module",
+      "would_change": null
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:3154",
+      "id": "duplicate_owner-1",
+      "reason": "re-deriving the webers margin inside `branch_selection.py` would put a second owner beside `forward_operator.py`, and the followup should say it extends that owner (and that the connectivity/stencil sites at `:2019/:2226` must move with it) rather than restating the conversion in the selection module.",
+      "text": "the exact signed class margin has a single owner, `ForwardFluxOperator.topology_margin` (`:3154`) built on `_connectivity_class_margin` (`:3066`; also `class_margin = class_u_wall - class_u_x` at `nova/equilibrium/connectivity_boundary.py:2019`, `:2226`, and `nova/equilibrium/stencil_nulls.py:1222`), but followup `f-dbs-margin-in-signed-webers` directs re-expressing `class_margin` \"here\" in the selection path and removing normalised-flux quantities there, without naming the owner to extend",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dual-branch-selection.html#s5",
+      "id": "interface_budget-1",
+      "reason": "",
+      "text": "\u2014 \u00a75 adds public traced-selection surface (`TracedSelectionInput`, `TracedSelectionState`, `TracedSelectionStep, forward_branch_selection_input`, `traced_select_forward_branch`, `scan_forward_branch_selection` \u2014 see `nova/equilibrium/branch_selection.py:25-33`, re-exported through `nova/equilibrium/__init__.py:321,449` and consumed at `nova/transport/coupled_window.py:42,1655`) with all four families at 0 this week, and its text names no function it retires or merges; WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: the section must state what it retires or merges \u2014 e.g. that the host `select_forward_branch` remains the egress and which traced symbol is the seam \u2014 or why nothing can be, per the interface-budget rule.",
+      "type": "interface_budget",
+      "would_change": null
+    }
+  ],
+  "plan_fingerprint": "c4393841db714b6bd4047767ec80114201a8da3d0e95de99ad55725af6b2f35b",
+  "plan_slug": "dual-branch-selection",
+  "plan_version": 15,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T091945722044-plan-review-of-dual-branch-selection",
+  "reviewed_blob_sha": "e25446cc4702a55311231df29d5043993ac2aebd",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 one core, `_advance_traced_selection` (`nova/equilibrium/branch_selection.py:355`), is currently surfaced through five public entry points, and \u00a75 promises \"one public \u2026 seam\" while retaining every one of them.",
+    "duplicate_owner": "a finding \u2014 the margin's owner is `nova/equilibrium/forward_operator.py` (`topology_margin` at `:3154`, `_connectivity_class_margin` at `:3066`), yet `f-dbs-margin-in-signed-webers` says to re-express `class_margin` \"here\" (the selection path), which would fork the definition rather than extend its owner.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 adds a public traced selection seam (`nova/equilibrium/branch_selection.py:25-33`, re-exported at `nova/equilibrium/__init__.py:321,449`) without naming in its own text what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a76 still specifies a margin-armed/always-fork policy and a catalog-frame arming measurement, while the plan's own landed coreachability artifact and its `fork-arming` decision close the fork as not load-bearing; the post-hoc connectivity classifier that replaces it is cited nowhere in \u00a76.",
+    "thin_wrapper": "pass \u2014 the host adapters that wrap the array core are justified in-file (`nova/equilibrium/branch_selection.py:646-654` records why the achieved-branch path bypasses a portfolio-shaped shim), and \u00a75 introduces no new unjustified wrapper."
+  },
+  "section_digests": {
+    "_document": "ca3f482b8e9f8d7cf2ac1d125c7761d040cbc0491fc596febfebd65e7657541f",
+    "coreachability": "117a9e74256c7f96cae20f3b0e48a7dbc12b4ce1a25113546b64e7dc580bc9b2",
+    "s1": "484d6037132ed3f8541c226df6771d6e8effc725d74fd664bdcf89182b8cc567",
+    "s2": "1a228a4fa41055367c393c8212fcb0475c077587709ba8ab88bdbd3fec9e5afa",
+    "s3": "bff03960df75b89689ce42d62666ba034c8dcde5026fd6477227ef25f6acca72",
+    "s4": "206da393c7d08cc1b1ed5006efaf8b1b13a6781e8e6f992a4fd102e8668e749f",
+    "s5": "5d7b52b3257a6b0ece8bae55aedab6a7c00a6c98f2b33e3e647ac3655cea0467",
+    "s6": "506dd18c70eaf1f72fa702ef3a5745f40175a460a2f1f6523d5cc90aacd1bd4e",
+    "s7": "283b73b8886f4928b2cb4bc16990fdda4881fcaab201e3b8add052cd18688461"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T09:39:34.246789+00:00"
+}

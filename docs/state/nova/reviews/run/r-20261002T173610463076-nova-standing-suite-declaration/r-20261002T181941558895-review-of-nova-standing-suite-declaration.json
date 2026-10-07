@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own completed gate log gate-wrapper-test.log: revision 5ff6f6de1315bf463158ac5fc6c31d0f1d9e394e, 3 passed in 23.59s, EXIT=0, with no FAILED or ERROR identifiers. The reviewed manifest declares no baseline_suite arm, so no base differential is available; the only subsequent commit to 90529c613 changes the evidence fragment, not tested runtime paths. Independent head execution likewise reports 3 passed and no failure identifiers.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/state/nova/flight.yaml: review.suite command [bash, scripts/nova_lane/standing_suite.sh] and budget 3h",
+    "scripts/nova_lane/standing_suite.sh: 538 CPU-pass files, seven H200 routes, one all-category aggregate summary, and collection-error reporting",
+    "scripts/nova_lane/run.sh dry run: H200 payload ends tests/test_standing_suite_wrapper.py --timeout 3600",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181941558895-review-of-nova-standing-suite-declaration/review-wrapper-gate-retry.log: 3 passed in 19.34s, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181941558895-review-of-nova-standing-suite-declaration/review-wrapper-negative-control.log: 1 failed, 2 passed, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181941558895-review-of-nova-standing-suite-declaration/review-static-contract.log: wrapper list, timeout dry-run, cancellation scan, EXIT=0"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "f1e9f8f4b",
+    "5ff6f6de1",
+    "90529c613d19c93132b471d699cf2fcfe2b4d001"
+  ],
+  "completed_at": "2026-10-02T18:29:17Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T18:20:05Z",
+  "evidence_inputs": "Read live plan nova:nova-portfolio-replan \u00a74. Reviewed 9a7af04e2e2f4ac6ae05fe239968cf28fb2f85ee..90529c613d19c93132b471d699cf2fcfe2b4d001 (three commits, 455 additions, no diff-check errors) and the reviewed run's manifest, gate, negative control, and draft. The external parser is /home/ITER/mcintos/Code/reckon/reckon/crew/standing_suite.py; the independent gate log records that imported path and reviewed-tree cwd.",
+  "failure_attribution": {},
+  "findings": [],
+  "gate_arms_note": "Reviewed run gate: gate-wrapper-test.log, completed 3 passed in 23.59s, EXIT=0. Independent reviewed-head gate: review-wrapper-gate-retry.log, 3 passed in 19.34s, EXIT=0. Independent negative control: review-wrapper-negative-control.log runs the reviewed run's summary-removal wrapper mutation and produces FAILED tests/test_standing_suite_wrapper.py::test_summary_line_carries_every_category, 1 failed / 2 passed, EXIT=1.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read 9a7af04e2..90529c613: 455 additions across the declared flight configuration, wrapper, wrapper test, and evidence fragment; git diff --check is clean. The committed paths all lie within the reviewed run's declared write set.",
+    "done_when": "At clean reviewed head 90529c613, the wrapper gate passed 3 tests in 19.34s. Its real fixture run proves the final aggregate summary contains passed, failed, errors, skipped, xfailed and xpassed; it also proves a timed-out unrunnable file produces ERROR plus an errors-during-collection line that reckon.crew.standing_suite parses as a collection failure.",
+    "goal": "The declaration at docs/state/nova/flight.yaml selects [bash, scripts/nova_lane/standing_suite.sh] with a 3h budget. The wrapper plans 538 CPU-pass files and seven H200-routed files at the reviewed head, matching the draft's corrected 545-target / 538-CPU-session accounting.",
+    "manifest": "The reviewed manifest names base 9a7af04e2, commits f1e9f8f4b/5ff6f6de1/90529c613, the completed three-test gate, and the red summary-removal control. Its recorded gate revision 5ff6f6de1 predates head only by 90529c613's one-line evidence-fragment update, leaving wrapper and test content unchanged.",
+    "parser_contract": "Read scripts/nova_lane/standing_suite.sh against reckon/crew/standing_suite.py. The parser stores exactly six outcome categories and the wrapper's emit_summary prints all six on its final pytest-style line, including zero counts. The guard imports that parser and asserts one pass, one fail, and collection failure for the killed fixture.",
+    "route_timeout_and_cancellation": "The reviewed-head launcher dry run emits the H200 payload with --timeout 3600 explicitly appended. The wrapper contains no scancel, pkill, killall, or user-selected cancellation form. run.sh's sole scancel form is scancel ${job_id}, limited to the single just-submitted job after admission_refused; it is neither a pattern nor a user cancellation."
+  },
+  "justifications": {
+    "durability": "The test invokes the actual shell wrapper on passing, failing, and timed-out temporary files, then uses reckon.crew.standing_suite._build_counts on its output. Removing emit_summary makes the test red, so loss of the aggregate parser contract cannot silently pass.",
+    "evidence": "Independent reviewed-head execution of tests/test_standing_suite_wrapper.py passed 3 in 19.34s (EXIT=0). The review also reran the recorded summary-removal mutation: it failed test_summary_line_carries_every_category with no aggregate line, 1 failed / 2 passed (EXIT=1), demonstrating that the guard fires rather than merely existing.",
+    "fit": "The declaration follows reckon's suite schema, the command is shell-explicit, the wrapper honors per-file process isolation and routes its measured heavy tail through the project launcher, and the launcher dry-run gives every routed pytest invocation an explicit timeout.",
+    "goal_fidelity": "This implements the plan's fast-lane restoration requirement as a declared, bounded, runnable command rather than a prose-only recommendation. The live --list result is revision 90529c613 with 538 CPU files and the exact seven routed files named by the draft.",
+    "scope_discipline": "The reviewed range adds only docs/state/nova/flight.yaml, scripts/nova_lane/standing_suite.sh, tests/test_standing_suite_wrapper.py, and the declared evidence fragment. No unrelated path, plan state, or SLURM control surface is changed."
+  },
+  "plan": "nova:nova-portfolio-replan",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 9a7af04e2e2f4ac6ae05fe239968cf28fb2f85ee\nREVIEWED_HEAD_SHA: 90529c613d19c93132b471d699cf2fcfe2b4d001\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: declared bounded standing suite, live list has 538 CPU files and seven draft-confirmed H200 routes.\nSCORE evidence: 20\nJUSTIFICATION evidence: independent head gate 3 passed EXIT=0 and summary-removal control 1 failed 2 passed EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: reviewed range changes only declared configuration, wrapper, test, and evidence paths.\nSCORE durability: 20\nJUSTIFICATION durability: real wrapper test imports the production parser and reddens when the aggregate summary is removed.\nSCORE fit: 20\nJUSTIFICATION fit: H200 dry-run appends explicit --timeout 3600 and wrapper cancellation scan is empty; run.sh only cancels its explicit just-submitted job id.\n",
+  "review_base_sha": "a0e5ee3550121b970e2dcb7774cb08aa83ecbc68",
+  "review_run_id": "r-20261002T181941558895-review-of-nova-standing-suite-declaration",
+  "reviewed_base_sha": "9a7af04e2e2f4ac6ae05fe239968cf28fb2f85ee",
+  "reviewed_commit": "90529c613d19c93132b471d699cf2fcfe2b4d001",
+  "reviewed_head_sha": "90529c613d19c93132b471d699cf2fcfe2b4d001",
+  "reviewed_revision": "90529c613d19c93132b471d699cf2fcfe2b4d001",
+  "reviewed_run_id": "r-20261002T173610463076-nova-standing-suite-declaration",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/nova-standing-suite-declaration",
+  "reviewer_node": "review-of-nova-standing-suite-declaration",
+  "reviewer_run_id": "r-20261002T181941558895-review-of-nova-standing-suite-declaration",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:26:30Z",
+  "total": 100,
+  "verdict": "pass"
+}

@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T14:50:20.372027+00:00",
+  "findings": [
+    {
+      "file": "tests/test_centroid_constrained_fixture.py",
+      "line": "32",
+      "text": "the two new tests exercise only the closed-form re-read, so a regression restoring a hardcoded authored zero or dropping the terminal reader wiring in benchmarks/oracle_start_newton_probe.py:2087-2090 would pass the suite while the fixed-point clause went back to a confounded comparison."
+    },
+    {
+      "file": "benchmarks/centroid_constrained_fixture_receipt.py",
+      "line": "905",
+      "text": "a missing or non-finite compensating_field_t is coerced to zeros unconditionally, so a corrupt positive receipt re-reads as a zero actuator contribution rather than refusing; the constrained flag is already read from the same stored record and the fallback could be limited to the unconstrained arm."
+    },
+    {
+      "file": "benchmarks/oracle_start_newton_probe.py",
+      "line": "1130",
+      "text": "the analytic_authored_axis_flux_wb and analytic_authored_boundary_flux_wb keys fall back via .get to the read's own axis and boundary levels, so the key name asserts a basis the value may not carry; on the only live call path the state is analytic so the figures are correct, but the substitution is unmarked for a later reader."
+    },
+    {
+      "file": "docs/evidence/archive/centroid-constrained-oracle-solve-landed.html",
+      "line": "380",
+      "text": "the split \"the compensator's own field accounts for 0.1597 Wb of it; the remaining 0.6670 Wb is the equilibrium the row reached\" is first-order: the receipt subtracts the closed-form column at the two points, and nothing separates the plasma's own response to the applied 2.4 mT field, so the residual also carries that response and is an upper estimate rather than a measured separation."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_centroid_constrained_fixture.py:49 pins gauge invariance with rtol=0.0 and atol=0.0 and :32 pins the compensator anchor and the pi B (R squared minus R0 squared) column, but nothing fails if the hardcoded authored zero returns to benchmarks/oracle_start_newton_probe.py:319 or if the reader wiring at :2087 is dropped, leaving the goal's primary artifact unprotected against regression.",
+    "evidence": "gauge-reread.json, gauge-reread.md and reread.log under the reports fence record the re-read and the manifest's three headline numbers (-0.8267158876132186 Wb, -0.15971061810604376 Wb, 1.3398458394898267e-3) reproduce to 1e-12, but the probe-versus-receipt agreement is asserted in docs/evidence/archive/centroid-constrained-oracle-solve-landed.html:389 rather than recorded as a run, and the test log at reports/nova/s19-local/centroid-gauge/all_debug_test.log carries only \"5 passed in 6.74s\" with no invocation line.",
+    "fit": "the new names and docstrings follow the surrounding idiom at scripts/analytic_oracle_fixtures/measure.py:715-800 and carry no forbidden label, but the analytic_authored_* keys emitted at benchmarks/oracle_start_newton_probe.py:1130-1136 can carry the read's own levels under an authored-basis name.",
+    "goal_fidelity": "the re-read at scripts/analytic_oracle_fixtures/measure.py:742 replaces the level read against the authored zero with the axis-to-boundary span at the solved read's own two points, and my pure-stdlib re-derivation of both banked control receipts reproduced every stored value in gauge-reread.json, so the goal's replacement figure is computed, recorded and independently confirmed.",
+    "scope_discipline": "the single commit touches six files, all inside the declared write paths (benchmarks, scripts/analytic_oracle_fixtures, tests, docs/evidence/archive, docs/plans) and the new receipts land in the fenced reports/nova/s19-local/centroid-gauge directory, with nothing carried by the goal not implied."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge\n(commit d2e0c68e, base db0c5806) against plan nova:centroid-constrained-oracle-solve \u00a73.\n\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the re-read at scripts/analytic_oracle_fixtures/measure.py:742 replaces the level read against the authored zero with the axis-to-boundary span at the solved read's own two points, and my pure-stdlib re-derivation of both banked control receipts reproduced every stored value in gauge-reread.json, so the goal's replacement figure is computed, recorded and independently confirmed.\n\nSCORE evidence: 17\nJUSTIFICATION evidence: gauge-reread.json, gauge-reread.md and reread.log under the reports fence record the re-read and the manifest's three headline numbers (-0.8267158876132186 Wb, -0.15971061810604376 Wb, 1.3398458394898267e-3) reproduce to 1e-12, but the probe-versus-receipt agreement is asserted in docs/evidence/archive/centroid-constrained-oracle-solve-landed.html:389 rather than recorded as a run, and the test log at reports/nova/s19-local/centroid-gauge/all_debug_test.log carries only \"5 passed in 6.74s\" with no invocation line.\n\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit touches six files, all inside the declared write paths (benchmarks, scripts/analytic_oracle_fixtures, tests, docs/evidence/archive, docs/plans) and the new receipts land in the fenced reports/nova/s19-local/centroid-gauge directory, with nothing carried by the goal not implied.\n\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_centroid_constrained_fixture.py:49 pins gauge invariance with rtol=0.0 and atol=0.0 and :32 pins the compensator anchor and the pi B (R squared minus R0 squared) column, but nothing fails if the hardcoded authored zero returns to benchmarks/oracle_start_newton_probe.py:319 or if the reader wiring at :2087 is dropped, leaving the goal's primary artifact unprotected against regression.\n\nSCORE fit: 16\nJUSTIFICATION fit: the new names and docstrings follow the surrounding idiom at scripts/analytic_oracle_fixtures/measure.py:715-800 and carry no forbidden label, but the analytic_authored_* keys emitted at benchmarks/oracle_start_newton_probe.py:1130-1136 can carry the read's own levels under an authored-basis name.\n\nFINDING tests/test_centroid_constrained_fixture.py:32 the two new tests exercise only the closed-form re-read, so a regression restoring a hardcoded authored zero or dropping the terminal reader wiring in benchmarks/oracle_start_newton_probe.py:2087-2090 would pass the suite while the fixed-point clause went back to a confounded comparison.\nFINDING benchmarks/centroid_constrained_fixture_receipt.py:905 a missing or non-finite compensating_field_t is coerced to zeros unconditionally, so a corrupt positive receipt re-reads as a zero actuator contribution rather than refusing; the constrained flag is already read from the same stored record and the fallback could be limited to the unconstrained arm.\nFINDING benchmarks/oracle_start_newton_probe.py:1130 the analytic_authored_axis_flux_wb and analytic_authored_boundary_flux_wb keys fall back via .get to the read's own axis and boundary levels, so the key name asserts a basis the value may not carry; on the only live call path the state is analytic so the figures are correct, but the substitution is unmarked for a later reader.\nFINDING docs/evidence/archive/centroid-constrained-oracle-solve-landed.html:380 the split \"the compensator's own field accounts for 0.1597 Wb of it; the remaining 0.6670 Wb is the equilibrium the row reached\" is first-order: the receipt subtracts the closed-form column at the two points, and nothing separates the plasma's own response to the applied 2.4 mT field, so the residual also carries that response and is an upper estimate rather than a measured separation.",
+  "review_run_id": "r-20260917T145020372027-review-of-cco-fixed-point-clause-in-one-gauge",
+  "reviewed_base_sha": "db0c58063739055172b0916e6ca32e8bc020602a",
+  "reviewed_commit": "d2e0c68e6a2b628024dd58fddc2109b531b94f25",
+  "reviewed_run_id": "r-20260917T095016652314-cco-fixed-point-clause-in-one-gauge",
+  "reviewer_run_id": "r-20260917T145020372027-review-of-cco-fixed-point-clause-in-one-gauge",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T16:34:35.766892+00:00",
+  "total": 88,
+  "verification": {
+    "commit_scope_check": "single commit d2e0c68e against parent db0c5806 touches exactly the six declared write paths",
+    "gauge_agreement": "probe _analytic_gauge_levels and receipt gauge_free_flux_read both take the axis-minus-boundary span at the solved read's own axis/boundary points, with the compensator column anchored at case.magnetic_axis[0]",
+    "gauge_reread": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-gauge/gauge-reread.json",
+    "hardcoded_zero_reader_check": "no remaining reader of the removed authored-zero key across benchmarks/ scripts/ tests/ nova/ apps/",
+    "headline_numbers_reproduced": {
+      "compensator_span_contribution_wb": -0.15971061810604376,
+      "gauge_free_flux_offset_wb": -0.8267158876132186,
+      "row_scaled_residual_sup": 0.0013398458394898267
+    },
+    "method": "pure-stdlib re-derivation from the banked control receipts (independent-check.py, no nova import); all 18 stored values on both arms reproduced within 1e-12 relative, in the reviewed code's axis-minus-boundary convention"
+  }
+}

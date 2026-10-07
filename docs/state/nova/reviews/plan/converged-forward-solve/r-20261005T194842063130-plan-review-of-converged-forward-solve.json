@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T19:52:06.458Z",
+  "dispatched_at": "2026-10-05T19:48:54Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/polygon_moments.py:141",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73's cite-or-justify list and \u00a76's deletion/import census must bind polygon_moments.py (extend it as \u00a73's moment owner, or retire it), or current.book becomes the third such implementation rather than the one.",
+      "text": "the plan's \u00a73 \"one booking\" needs exact clip-to-cell polygon moments, which polygon_moments.polygon_monomial_moments/polygon_density_moments already implement, yet the plan names only clip_quadrature's private copy and never mentions polygon_moments.py at all, so a third moment implementation (separatrix_clip.py's _traced_polygon_moments:850 is the second) would survive the retirement the plan exists to achieve",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "91335141acbcd50fab91fa6e4bf8d494a113d5b95d27bc21cf5c7b4294bdcce8",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 31,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T19:53:38.291635+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T194842063130-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "588d29e378f4d26324c344c5d1a531a0368b3d85",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each new owner is a single module exporting one entry point (\u00a72 topology.read, \u00a73 current.book, \u00a74 gs.apply, \u00a75 solve.fixed_point) hiding the field representation, the clip, the traced geometry operands and the Newton-GMRES kernel behind that one interface, replacing 54,102 lines spread across 54 files; the interface is smaller than what each hides.",
+    "duplicate_owner": "a finding \u2014 \u00a73 current.book adds the \"one booking\" over the read's membership but does not name nova/equilibrium/polygon_moments.py, which already owns generic polygon monomial and density moments (polygon_monomial_moments:141, polygon_density_moments:187) \u2014 the exact clip-to-cell-moment operation \u00a73 needs; the plan binds only clip_quadrature.py's private _integrate_current_polynomial (clip_quadrature.py:635), so the codebase would carry a third moment implementation after \u00a76.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every section that adds surface names what it retires or merges: \u00a72 retires Topology.read/read_with_connectivity and carries TopologyPolicy inside the existing ForwardSolvePolicy; \u00a73 retires clipped_support_current_moments and the forward_operator support partition; \u00a74 retires the ForwardFluxOperator map; \u00a75 retires newton_krylov/picard and carries SolvePolicy inside ForwardSolvePolicy; \u00a76 supplies the module deletion list and an import census over the whole nova package.",
+    "reuse_search": "pass \u2014 the plan (and the design document it binds, docs/research/converged-forward-solve-design.html) searches the named codebase and cites the existing mechanisms it extends: Topology.read/read_with_connectivity (topology.py:1376,1396), clipped_support_current_moments (clip_quadrature.py:714), ForwardFluxOperator (forward_operator.py:2323), newton_krylov/picard (fixed_point.py:5003,2874), stencil_mesh.flux_field_polynomial (stencil_mesh.py:449), contour_tree.build_contour_tree, nova/biot/null.py, nova/biot/fieldnull.py, and the operand-identity flatteners (forward_operator.py:147,159,187). Nine recorded reuse rulings bind each candidate cite-or-justify. One mechanism is missed (see duplicate_owner).",
+    "thin_wrapper": "pass \u2014 every section states that it replaces rather than wraps: \u00a74 \"replaces the map ForwardFluxOperator performs in forward_operator.py rather than wrapping it\"; \u00a75 \"replaces newton_krylov, picard and operator_request_body\"; \u00a73 replaces clipped_support_current_moments; \u00a72 replaces Topology.read and read_with_connectivity. The GMRES kernel (\u00a75) and the quadrature helpers (\u00a73) are carried as private helpers behind the new call site, not exposed as a parallel public layer, and each is bound to a cite-or-justify ruling."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:53:37.620559+00:00"
+}

@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "7701396385bc5991cb419f8f30904da0ca7f7b7f",
+    "848544972e32e9d5456319781c37a737c377e26f"
+  ],
+  "completed_at": "2026-10-01T21:09:59.516Z",
+  "dispatched_at": "2026-10-01T20:39:01Z",
+  "findings": [
+    {
+      "file": "docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md",
+      "line": "18",
+      "severity": "blocking",
+      "text": "blocking: the efit row states the closed-boundary symmetric RMS 0.029163585 m PASS (bound 0.55) and the fragment repeats RMS PASS at line 56, but the cited receipt gates.closed_boundary_symmetric_rms records passes=false because disqualifying_exclusion is true (16 of 17 declared rows non-converged or missing the predicted boundary, eligible_row_count 1), so the report understates the demonstration's failing gates from two of three to one of three."
+    },
+    {
+      "file": "docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: the diiid-forward-onboarding row cites test evidence tests/test_diiid_machine_description.py, which does not exist; the file is at tests/imas/test_diiid_machine_description.py."
+    },
+    {
+      "file": "docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: the dual-branch row states select_achieved_forward_branch is exported via nova/transport/__init__.py:30, but line 30 opens the coupled_window import block and that symbol is not re-exported there; it reaches the coupled path only through nova/transport/coupled_window.py:42, which the same cell already cites."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits against the base a71934910; 77013963 adds the report and the fragment (118 insertions) and 84854497 amends one line of the efit row to state the deferred and held sections, and no source path is touched.",
+    "done_when": "s1 of docs/plans/nova-portfolio-replan.html requires one row per assigned plan with every field and each claim citing a file, line or commit; the manifest records a row audit (rows=6, slugs_missing=none, sha_tokens=34, file_line_citations=21, EXIT=0), and the six rows are present, though two citation defects remain at lines 14 and 17.",
+    "goal": "the node goal is report B \u2014 one row per each of the six assigned plans recording what landed with commits and files, whether status and impl agree with the code, implementation depth with call sites and test evidence, each open followup's done-when status, and the next critical node; docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md carries exactly those six rows, and section s1 of docs/plans/nova-portfolio-replan.html names these six plans for this node.",
+    "manifest": "read the source manifest.md; it records status complete, two commits (77013963, 84854497), the six covered plans, a row-audit gate exiting 0, and the DIII-D tolerance follow-on, and it agrees with the committed report.",
+    "write_paths": "the manifest declares docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html, and the diff of a71934910 to 84854497 lists exactly those two files, both inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the only check is the manifest's row audit (gate-report-check.log), an uncommitted python3 row-audit token counter that neither re-runs from the tree nor verifies a citation resolves, so it cannot catch the path defect at line 14 or the value defect at line 18.",
+    "evidence": "the efit row at docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md:18 reports the closed-boundary RMS gate PASS while the cited receipt docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json records it passes=false, so the gate state asserted is contradicted by the source the same cell cites.",
+    "fit": "the fragment docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html:10 declares plan-verifies \"nova:nova-portfolio-replan#s1\", an id present in docs/plans/nova-portfolio-replan.html, and both files follow the surrounding docs/evidence markup with no forbidden name.",
+    "goal_fidelity": "docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md:14-19 carries one row per each of the six plans named for this node in docs/plans/nova-portfolio-replan.html s1, with commits and files.",
+    "scope_discipline": "the diff of a71934910 to 84854497 lists only docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html, both inside the declared write paths, with no source changed."
+  },
+  "limits": [
+    "Read-only review; the reviewed run changed documentation only, so no suite was re-run and no GPU or SLURM job was used.",
+    "Every cited path was resolved from this worktree at base a71934910: all 14 distinct backticked file paths resolve except tests/test_diiid_machine_description.py, and the 21 file:line citations and 30 distinct sha tokens were read against their sources.",
+    "The receipt gates were read from docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json directly rather than from the report's account of them, which is how the RMS gate mislabel was found.",
+    "The six plan assignments were confirmed against section s1 of docs/plans/nova-portfolio-replan.html, which names exactly these six plans for this node."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is report B \u2014 one row per each of the six assigned plans recording what landed with commits and files, whether status and impl agree with the code, implementation depth with call sites and test evidence, each open followup's done-when status, and the next critical node; docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md carries exactly those six rows, and section s1 of docs/plans/nova-portfolio-replan.html names these six plans for this node.\nVERDICT done_when: s1 of docs/plans/nova-portfolio-replan.html requires one row per assigned plan with every field and each claim citing a file, line or commit; the manifest records a row audit (rows=6, slugs_missing=none, sha_tokens=34, file_line_citations=21, EXIT=0), and the six rows are present, though two citation defects remain at lines 14 and 17.\nVERDICT write_paths: the manifest declares docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html, and the diff of a71934910 to 84854497 lists exactly those two files, both inside the declared scope.\nVERDICT manifest: read the source manifest.md; it records status complete, two commits (77013963, 84854497), the six covered plans, a row-audit gate exiting 0, and the DIII-D tolerance follow-on, and it agrees with the committed report.\nVERDICT diff: read both commits against the base a71934910; 77013963 adds the report and the fragment (118 insertions) and 84854497 amends one line of the efit row to state the deferred and held sections, and no source path is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md:14-19 carries one row per each of the six plans named for this node in docs/plans/nova-portfolio-replan.html s1, with commits and files.\nSCORE evidence: 12\nJUSTIFICATION evidence: the efit row at docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md:18 reports the closed-boundary RMS gate PASS while the cited receipt docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json records it passes=false, so the gate state asserted is contradicted by the source the same cell cites.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff of a71934910 to 84854497 lists only docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html, both inside the declared write paths, with no source changed.\nSCORE durability: 12\nJUSTIFICATION durability: the only check is the manifest's row audit (gate-report-check.log), an uncommitted python3 row-audit token counter that neither re-runs from the tree nor verifies a citation resolves, so it cannot catch the path defect at line 14 or the value defect at line 18.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html:10 declares plan-verifies \"nova:nova-portfolio-replan#s1\", an id present in docs/plans/nova-portfolio-replan.html, and both files follow the surrounding docs/evidence markup with no forbidden name.\nFINDING docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md:18 blocking: the efit row states the closed-boundary symmetric RMS 0.029163585 m PASS (bound 0.55) and the fragment repeats RMS PASS at line 56, but the cited receipt gates.closed_boundary_symmetric_rms records passes=false because disqualifying_exclusion is true (16 of 17 declared rows non-converged or missing the predicted boundary, eligible_row_count 1), so the report understates the demonstration's failing gates from two of three to one of three.\nFINDING docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md:14 follow-on: the diiid-forward-onboarding row cites test evidence tests/test_diiid_machine_description.py, which does not exist; the file is at tests/imas/test_diiid_machine_description.py.\nFINDING docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md:17 follow-on: the dual-branch row states select_achieved_forward_branch is exported via nova/transport/__init__.py:30, but line 30 opens the coupled_window import block and that symbol is not re-exported there; it reaches the coupled path only through nova/transport/coupled_window.py:42, which the same cell already cites.",
+  "recommendation": "correct the efit row's closed-boundary symmetric RMS gate label from PASS to the receipt's FAIL before the report is folded into plan writeback, since the demonstration's own receipt records two of three gates failing, not one; the two citation defects (the missing tests/imas prefix and the misplaced transport export) are cheap corrections the same pass should carry",
+  "review_run_id": "r-20261001T203848067558-review-of-replan-currency-depth-b",
+  "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "reviewed_head_sha": "848544972e32e9d5456319781c37a737c377e26f",
+  "reviewed_run_id": "r-20261001T191426544316-replan-currency-depth-b",
+  "reviewing_run_id": "r-20261001T203848067558-review-of-replan-currency-depth-b",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-01T21:05:02.610114+00:00",
+  "total": 80
+}

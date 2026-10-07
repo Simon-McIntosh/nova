@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Completed reviewed-run base arm boundary-flux-test.log has two fixed-point derivative failures; completed head arm final-boundary-flux-test.log has none. The head-minus-base delta is zero.",
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T00:38:22Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T00:34:08Z",
+  "evidence_inputs": {
+    "base_reproduction": "H200 base arm failed two focused derivative tests with EXIT_STATUS=1.",
+    "head_receipt": "H200 head arm passed all three focused tests in 115.58s with EXIT=0.",
+    "negative_control": "Restored-path H200 control failed three focused tests, including terminal relative error 0.39382554237027145, with EXIT=1."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/forward-solver-route-integrity/fsri-boundary-flux-derivative/stage-derivatives.png",
+      "line": "rendered canvas",
+      "severity": "follow-on",
+      "text": "Six upper-stage direct labels collide at the leftmost point; re-render with collision-free labels or a frameless legend."
+    },
+    {
+      "file": "manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "The completed base gate remains only in a durable log rather than the manifest's baseline_suite field."
+    }
+  ],
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass (87/100). Correctly wired held-point derivative repair with reproducible base failure, negative-control refusal, and clean completed H200 head gate; figure-label overlap and missing structured base-arm declaration remain follow-ons.",
+  "review_run_id": "r-20261003T003345405727-review-of-fsri-boundary-flux-derivative",
+  "reviewed_base_sha": "d4b108a760f8eef4a0cfcb603fcc5ffa582b7d7b",
+  "reviewed_commit": "eea822be8f3121f4427469f9c50288091cb2335d",
+  "reviewed_head_sha": "eea822be8f3121f4427469f9c50288091cb2335d",
+  "reviewed_revision": "eea822be8f3121f4427469f9c50288091cb2335d",
+  "reviewed_run_id": "r-20261002T235930681038-fsri-boundary-flux-derivative",
+  "reviewer_node": "review-of-fsri-boundary-flux-derivative",
+  "reviewer_run_id": "r-20261003T003345405727-review-of-fsri-boundary-flux-derivative",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 12,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T00:36:53+00:00",
+  "total": 87,
+  "verdict": "pass"
+}

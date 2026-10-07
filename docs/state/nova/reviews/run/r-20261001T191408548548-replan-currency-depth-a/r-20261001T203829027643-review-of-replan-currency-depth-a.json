@@ -1,0 +1,52 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "blocking_findings": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-01T21:05:08.853Z",
+  "dispatched_at": "2026-10-01T20:38:42Z",
+  "findings": [
+    {
+      "file": "docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the report's only verifier is the scratch census the manifest names (python -c over the markdown), and it checks structure - row count and that each row carries a citation token - not that the citation resolves against the code, so no committed artifact fails if a later edit turns a row's citation onto unrelated code or drops a field."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read the single commit 958ff2e3e against base a71934910 file by file; it adds the 7-row markdown report and a 20-line evidence fragment, both new files, and nothing else.",
+    "done_when": "Read the node done_when and the census gate log logs-currency-depth-a.txt (it names revision a71934910, the worktree, the command, then rows 7, every row cited, GATE PASS, EXIT=0) and re-read the report to confirm seven rows each carrying all five required columns.",
+    "goal": "Read the node goal and the delivered report docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md; it is a currency-and-depth audit of the seven assigned plans, one row each with landed commits and files, status-impl agreement, depth with call sites and tests, followup done-when state, and the next node or close recommendation.",
+    "manifest": "Read the run manifest.md; it reports seven rows and seven cited with a GATE PASS and names its census log, and its headline readings (four deep, three shallow or none, one gate open in code, two impl numbers stale) agree with the report body; baseline_suite and after_suite are absent because no runtime source changed.",
+    "write_paths": "Compared the three declared write roots with the single commit 958ff2e3e; the changed paths are docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-a.html, both allowed, and the figures root is unused while the done_when names no figure."
+  },
+  "justifications": {
+    "durability": "Nothing in the tree fails if this report regresses - the only assertion is the uncommitted python -c census the manifest names, so a later edit could corrupt a citation or drop a row with no test reddening; a one-shot audit carries no re-derivation guard.",
+    "evidence": "The census gate is recorded (logs-currency-depth-a.txt names the revision, worktree and command and ends GATE PASS and EXIT=0) but it asserts only that each row carries a citation token, not that the citation resolves against the code, so the accuracy the done_when demands is unguarded and is confirmed here only by independent reading.",
+    "fit": "The fragment follows the evidence-fragment idiom of its siblings (docs-project, plan-slug, plan-evidence-for meta and project-* absolute /nova links) and the commit is conventional with a body and carries no attribution or plan identifiers.",
+    "goal_fidelity": "All seven rows carry the five required fields and every spot-checked citation resolves - nova/equilibrium/forward_operator.py:107 is _SUPPORT_CLIP_MODE = \"chord\", nova/equilibrium/topology.py:80 is the node-flux wall rule, nova/equilibrium/flux_surface_connectivity.py:916 is polish_stationary_points, and all 28 cited commits are ancestors of a71934910 - the only looseness being that the report names the code revision a71934910 as HEAD while the run's own HEAD is its docs commit.",
+    "scope_discipline": "Commit 958ff2e3e changes exactly docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-a.html, both inside the declared roots, and the audit is read-only as required, touching no source, plan or state file."
+  },
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: a71934910d2a0835dd9f6ab35576eef5c2f44754\nREVIEWED_HEAD_SHA: 958ff2e3e1ce339f8e430920c25ed2ea087621db\nVERDICT goal: The node goal is a currency-and-depth report for seven pending nova plans; docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md carries exactly seven rows, one per assigned plan, each naming what landed with commits and files, status-impl agreement, depth with call site and test evidence, followup done-when state, and the next node or close recommendation.\nVERDICT done_when: Read the node done_when against the census gate log logs-currency-depth-a.txt (revision a71934910, worktree, command, rows 7, every row cited, GATE PASS, EXIT=0) and re-read the report: seven rows, one per assigned plan, every required column populated.\nVERDICT write_paths: The single commit 958ff2e3e changes only docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-a.html, both inside the three declared roots; the figures root is unused and the done_when names no figure.\nVERDICT manifest: The manifest reports seven rows and seven cited with a GATE PASS and names its census log; its headline readings match the report body; baseline_suite and after_suite are absent because the node changed no runtime source.\nVERDICT diff: Read the single commit 958ff2e3e against base a71934910: it adds the 7-row markdown report and a 20-line evidence fragment and nothing else; both files are new and no source, plan or state file is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: All seven rows carry the five required fields and every spot-checked citation resolves - nova/equilibrium/forward_operator.py:107 is _SUPPORT_CLIP_MODE = \"chord\", nova/equilibrium/topology.py:80 is the node-flux wall rule, nova/equilibrium/flux_surface_connectivity.py:916 is polish_stationary_points, and all 28 cited commits are ancestors of a71934910 - the only looseness being that the report names the code revision a71934910 as HEAD while the run's own HEAD is its docs commit.\nSCORE evidence: 16\nJUSTIFICATION evidence: The census gate is recorded (logs-currency-depth-a.txt names the revision, worktree and command and ends GATE PASS and EXIT=0) but it asserts only that each row carries a citation token, not that the citation resolves against the code, so the accuracy the done_when demands is unguarded and is confirmed here only by independent reading.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Commit 958ff2e3e changes exactly docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-a.html, both inside the declared roots, and the audit is read-only as required, touching no source, plan or state file.\nSCORE durability: 6\nJUSTIFICATION durability: Nothing in the tree fails if this report regresses - the only assertion is an uncommitted python -c census named in the manifest, so a later edit could corrupt a citation or drop a row with no test reddening; a one-shot audit carries no re-derivation guard.\nSCORE fit: 18\nJUSTIFICATION fit: The fragment follows the evidence-fragment idiom of its siblings (docs-project, plan-slug, plan-evidence-for meta and project-absolute /nova links) and the commit is conventional with a body and no attribution or plan identifiers.\nFINDING docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md:1 follow-on: the report's only verifier is an uncommitted census that checks structure rather than citation accuracy, so no committed test fails if a row's citation is later changed to point at unrelated code.\n",
+  "review_run_id": "r-20261001T203829027643-review-of-replan-currency-depth-a",
+  "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "reviewed_commit": "958ff2e3e1ce339f8e430920c25ed2ea087621db",
+  "reviewed_head_sha": "958ff2e3e1ce339f8e430920c25ed2ea087621db",
+  "reviewed_run_id": "r-20261001T191408548548-replan-currency-depth-a",
+  "scores": {
+    "durability": 6,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-01T20:56:22.040921+00:00",
+  "total": 79
+}

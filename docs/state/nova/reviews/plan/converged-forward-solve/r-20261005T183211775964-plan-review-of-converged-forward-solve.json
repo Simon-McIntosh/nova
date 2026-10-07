@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T18:37:15.303Z",
+  "dispatched_at": "2026-10-05T18:32:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/converged-forward-solve.html#s3",
+      "id": "reuse_search-1",
+      "reason": "it adds to \u00a73 the same carry-or-justify clause that \u00a72/\u00a74/\u00a75 already carry for their helper machinery, which is the mechanism the sibling sections use to prevent a duplicate implementation.",
+      "text": "\u00a73 `current.book` names only the entry function it replaces (`clipped_support_current_moments` in `clip_quadrature.py`) and carries no reuse ruling for the helper machinery it depends on (`clipped_support_quadrature:415`, `_quadratic_support_vertices`/`_quadratic_support_vertices_jvp:852-862`, `_integrate_field_polynomial:446`, `_integrate_current_polynomial:635`); \u00a76 deletes only \"the solver and booking authority in `forward_operator.py`\" and says nothing about `clip_quadrature.py`, so the \u00a73 node could reimplement quadrature the tree already owns",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/constraint.py:1843",
+      "id": "duplicate_owner-1",
+      "reason": "naming `ConstraintRecord` as the owner to extend keeps the row scale in one place, the same ownership rule \u00a76 applies to every other mechanism (GMRES kernel, operand machinery, field-null kernels, labeller).",
+      "text": "\u00a75 declares that \"each constraint row's scale is declared with the row ... and recorded in the receipt\" as new acceptance machinery, but `ConstraintPair` already holds `target`, `tolerance`, `scale` and `initial_unknown` (constraint.py:202/223/257) and surfaces them through `ConstraintRecord` (constraint.py:1843), whose docstring already states the row is scaled \"by one declared scale\" (constraint.py:877); the plan names no owner for the scale",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "6c4449185e067acfaa5fbebd9df785da6f1c76fd26d5ffec123f9e871cd45af0",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 25,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T18:39:45.280450+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T18:39:43.422024+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T183211775964-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "8def7fca306da265794217131f7ce49456c5a779",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four pure functions (`read`, `book`, `apply`, `fixed_point`) each hide a whole pipeline stage (null finding + axis-connected membership; exact-clip booking; compensated map; Newton-GMRES) behind one signature, and \u00a76 keeps geometry and polynomial helpers as private dependencies rather than new surfaces.",
+    "duplicate_owner": "a finding \u2014 \u00a75 re-declares the constraint row scale as new machinery, but `constraint.py` already owns per-row target/tolerance/scale.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the only surface the sections add is the `TopologyPolicy`/`SolvePolicy` operands, each stated as \"carried by the existing `ForwardSolvePolicy` ... extended rather than duplicated\", and \u00a76 names the retirement (promotion ladders, frozen/live split, live-read fallback, active-set and anderson/reduced-Newton/chord routes, `fixed_point.py`, `reduced_newton.py`), so the added operands are accounted for by a named merge.",
+    "reuse_search": "a finding \u2014 \u00a73 is the only one of \u00a72\u2013\u00a75 whose section text names no reuse candidate for the helper machinery it will sit beside, while \u00a72/\u00a74/\u00a75 each carry a cite-or-justify carry ruling.",
+    "thin_wrapper": "pass \u2014 every replacement states why the existing mechanism cannot be extended: \u00a74 \"replaces the map ForwardFluxOperator performs today rather than wrapping it\", \u00a72/\u00a75 \"extended rather than duplicated\"."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T18:39:41.083017+00:00"
+}

@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json",
+      "line": "1",
+      "text": "commit 0797f64f rewrote this receipt outside the node's declared write paths, replacing the 4c7529ce run (median warm 525.58 ms) that docs/plans/forward-solve-api.html:54 cites, so the plan's earlier paragraph now contradicts the file it cites and the old figures survive only in git history; the driver's --output and --figure flags made the rewrite avoidable."
+    },
+    {
+      "file": "docs/plans/forward-solve-api.html",
+      "line": "55",
+      "text": "the paragraph attributes the 353.0 ms warm median to docs/figures/forward-solve-api/coil-edit-nonconvergence/, where no stored file carries a median (the forensics receipt keeps per-edit walls only), so a reader following the pointer to check the number does not reach it; the median lives in the latency receipt."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json",
+      "line": "1",
+      "text": "summary.groups persists only the termination-word grouping active_set_settled, so the three mechanism groups the record asserts are not readable as data and must be re-derived from the per-trip traces; a consumer that trusts the prose cannot check it."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html",
+      "line": "151",
+      "text": "the caption names the reference nulls as hollow markers while benchmarks/coil_edit_latency.py draws them with the ink defaults '.' and 'x', the filled styles '^' and 'X' belonging to the solved set, so the caption mis-describes the glyphs it asks the reader to find."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html",
+      "line": "94",
+      "text": "the contrast says the converged edit shows mask motion in every trip (18, 34, 6, 0) while that trace's last entry is the zero that ends the compiled loop, so the parenthetical contradicts every trip and blurs the exit rule the paragraph explains."
+    },
+    {
+      "file": "benchmarks/coil_edit_latency.py",
+      "line": "981",
+      "text": "the panel discards the drawn/dropped tally poloidal.draw_nulls returns (also at line 991), so the record cannot show that every reference and solved null was kept; all six nulls here are inside the wall, so the discard hides a future drop rather than a present one."
+    }
+  ],
+  "justifications": {
+    "durability": "no test references benchmarks/coil_edit_latency.py (zero hits in tests/), while tests/test_batched_throughput_receipts.py:6 imports another benchmark driver, so a regression here fails nothing and the record's check is the manual H200 re-run.",
+    "evidence": "the gate is recorded, not claimed: /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T163636652426-fsa-coil-edit-nonconvergence/logs/coil-edit-latency-1273204.log carries 20 EDIT_DONE lines, the PANEL line and EXIT_MARKER=2, and the committed panel re-renders bit-identically to itself from panel-states.npz (0 of 955,696 pixels differ); the mechanism grouping is not itself persisted (see the finding on coil-edit-nonconvergence.json).",
+    "fit": "benchmarks/coil_edit_latency.py draws through the nova.media painters and the review's naming greps over it return no forbidden label, matching the benchmark idiom of benchmarks/diiid_batched_throughput.py.",
+    "goal_fidelity": "docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json tables every edit with its per-trip residual, step, mask and rejection traces, and this review re-derived all three mechanism groups the goal names from those traces alone.",
+    "scope_discipline": "two of the nine landed files, docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json and its .png, sit outside the declared write paths and replace the 4c7529ce receipt cited at docs/plans/forward-solve-api.html:54."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json tables every edit with its per-trip residual, step, mask and rejection traces, and this review re-derived all three mechanism groups the goal names from those traces alone.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate is recorded, not claimed: /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T163636652426-fsa-coil-edit-nonconvergence/logs/coil-edit-latency-1273204.log carries 20 EDIT_DONE lines, the PANEL line and EXIT_MARKER=2, and the committed panel re-renders bit-identically to itself from panel-states.npz (0 of 955,696 pixels differ); the mechanism grouping is not itself persisted (see the finding on coil-edit-nonconvergence.json).\nSCORE scope_discipline: 11\nJUSTIFICATION scope_discipline: two of the nine landed files, docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json and its .png, sit outside the declared write paths and replace the 4c7529ce receipt cited at docs/plans/forward-solve-api.html:54.\nSCORE durability: 8\nJUSTIFICATION durability: no test references benchmarks/coil_edit_latency.py (zero hits in tests/), while tests/test_batched_throughput_receipts.py:6 imports another benchmark driver, so a regression here fails nothing and the record's check is the manual H200 re-run.\nSCORE fit: 17\nJUSTIFICATION fit: benchmarks/coil_edit_latency.py draws through the nova.media painters and the review's naming greps over it return no forbidden label, matching the benchmark idiom of benchmarks/diiid_batched_throughput.py.\nFINDING docs/figures/forward-solve-api/coil-edit-latency/coil-edit-latency.json:1 commit 0797f64f rewrote this receipt outside the node's declared write paths, replacing the 4c7529ce run (median warm 525.58 ms) that docs/plans/forward-solve-api.html:54 cites, so the plan's earlier paragraph now contradicts the file it cites and the old figures survive only in git history; the driver's --output and --figure flags made the rewrite avoidable.\nFINDING docs/plans/forward-solve-api.html:55 the paragraph attributes the 353.0 ms warm median to docs/figures/forward-solve-api/coil-edit-nonconvergence/, where no stored file carries a median (the forensics receipt keeps per-edit walls only), so a reader following the pointer to check the number does not reach it; the median lives in the latency receipt.\nFINDING docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.json:1 summary.groups persists only the termination-word grouping active_set_settled, so the three mechanism groups the record asserts are not readable as data and must be re-derived from the per-trip traces; a consumer that trusts the prose cannot check it.\nFINDING docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:151 the caption names the reference nulls as hollow markers while benchmarks/coil_edit_latency.py draws them with the ink defaults '.' and 'x', the filled styles '^' and 'X' belonging to the solved set, so the caption mis-describes the glyphs it asks the reader to find.\nFINDING docs/figures/forward-solve-api/coil-edit-nonconvergence/coil-edit-nonconvergence.html:94 the contrast says the converged edit shows mask motion in every trip (18, 34, 6, 0) while that trace's last entry is the zero that ends the compiled loop, so the parenthetical contradicts every trip and blurs the exit rule the paragraph explains.\nFINDING benchmarks/coil_edit_latency.py:981 the panel discards the drawn/dropped tally poloidal.draw_nulls returns (also at line 991), so the record cannot show that every reference and solved null was kept; all six nulls here are inside the wall, so the discard hides a future drop rather than a present one.\n",
+  "review_run_id": "legacy-4b972ae1649b",
+  "review_run_id_source": "derived",
+  "reviewed_run_id": "r-20260917T163636652426-fsa-coil-edit-nonconvergence",
+  "reviewer_node": "review-of-fsa-coil-edit-nonconvergence",
+  "reviewing_run_id": "r-20260917T200249761652-review-of-fsa-coil-edit-nonconvergence",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 11
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-17T21:11:38.576632+00:00",
+  "total": 72
+}

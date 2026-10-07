@@ -1,0 +1,44 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T05:59:38.156515+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/arc-tracer-clone/clone-deletion-moments.json",
+      "line": "124",
+      "text": "controls.negative_control_reads_as_same is computed in clone_deletion_moment_identity.py:278-282 as np.array_equal(head_exact[\"clip_area\"], head_exact[\"clip_area\"]), one arm compared against itself, so it reads like a negative control while being true for any input; the anchor does not cite it and the worker reported it, but the field should be removed or replaced with a genuine no-change comparison so a later reader of the receipt is not misled."
+    },
+    {
+      "file": "tests/test_exact_clip_memory.py",
+      "line": "24",
+      "text": "the module fails at import at 4bfbb18c, reproduced with pytest --collect-only as ImportError: cannot import name '_implicit_traced_clip' from nova.equilibrium.forward_operator, because the deletion removed the name it imports; it is outside this node's fence and owned by the in-flight node ecm-memory-test-tracer-parameter-route, and until that lands the implicit tracer's primal bit-identity check at line 450 is offline."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_equilibrium_forward_operator.py:148 builds a patched-globals clone in-test and shows the detector flags it before asserting the operator module holds none, and :172 spies every traced clip call in a fresh process asserting the exact mode carries the implicit tracer while the committed chord control raises zero calls, so a reintroduced clone or a dropped tracer fails; the one residual is that the former direct behavioral test of the implicit tracer, tests/test_exact_clip_memory.py:450, is offline until the repair node lands.",
+    "evidence": "the receipt reports equal shapes, dtypes and sha256 with max absolute difference exactly 0.0 on all six arrays over 135 cells (121 clipped), its base arm's two watched modules are byte-identical to the base revision by an empty git diff, the exact-vs-chord areas disagree (21.20135866955972 against 23.893661380085774) so the clip was exercised, the one-ulp probe is real, and both module gates are banked at reports/nova/s19-local/arc-tracer-clone/logs/ (23 passed, 3 passed) \u2014 the deduction is controls.negative_control_reads_as_same, a field that carries no evidence, and a base arm that is the main checkout rather than a base-revision checkout.",
+    "fit": "arc_tracer=_implicit_traced_level_arc is passed in the same keyword idiom as curve_evaluator and participating_cell at nova/equilibrium/forward_operator.py:2846, the retained _implicit_traced_level_arc is still used by benchmarks/exact_clip_memory_scaling.py and the types import by the digest helper at nova/equilibrium/forward_operator.py:1585, and no plan label or superseded-name suffix appears.",
+    "goal_fidelity": "the clone is gone on both checks the goal names \u2014 grep for _implicit_clip_globals over nova/ and tests/ at 4bfbb18c returns nothing (git grep at 26c45542 finds it at nova/equilibrium/forward_operator.py:647, 648, 651) \u2014 and the operator's only traced-clip call site, nova/equilibrium/forward_operator.py:2846, passes arc_tracer=_implicit_traced_level_arc, which nova/equilibrium/separatrix_clip.py:1110 honours.",
+    "scope_discipline": "git log --name-only over 26c45542..4bfbb18c shows the four commits touch exactly nova/equilibrium/forward_operator.py, tests/test_equilibrium_forward_operator.py, docs/evidence/archive/cut-cell-current-attribution-landed.html and docs/plans/cut-cell-current-attribution.html, all inside the declared write paths, and the one outside-fence consequence is disclosed in the manifest's follow_ons with a repair node in flight."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the clone is gone on both checks the goal names \u2014 grep for _implicit_clip_globals over nova/ and tests/ at 4bfbb18c returns nothing (git grep at 26c45542 finds it at nova/equilibrium/forward_operator.py:647, 648, 651) \u2014 and the operator's only traced-clip call site, nova/equilibrium/forward_operator.py:2846, passes arc_tracer=_implicit_traced_level_arc, which nova/equilibrium/separatrix_clip.py:1110 honours.\nSCORE evidence: 18\nJUSTIFICATION evidence: the receipt reports equal shapes, dtypes and sha256 with max absolute difference exactly 0.0 on all six arrays over 135 cells (121 clipped), its base arm's two watched modules are byte-identical to the base revision by an empty git diff, the exact-vs-chord areas disagree (21.20135866955972 against 23.893661380085774) so the clip was exercised, the one-ulp probe is real, and both module gates are banked at reports/nova/s19-local/arc-tracer-clone/logs/ (23 passed, 3 passed) \u2014 the deduction is controls.negative_control_reads_as_same, a field that carries no evidence, and a base arm that is the main checkout rather than a base-revision checkout.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git log --name-only over 26c45542..4bfbb18c shows the four commits touch exactly nova/equilibrium/forward_operator.py, tests/test_equilibrium_forward_operator.py, docs/evidence/archive/cut-cell-current-attribution-landed.html and docs/plans/cut-cell-current-attribution.html, all inside the declared write paths, and the one outside-fence consequence is disclosed in the manifest's follow_ons with a repair node in flight.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_equilibrium_forward_operator.py:148 builds a patched-globals clone in-test and shows the detector flags it before asserting the operator module holds none, and :172 spies every traced clip call in a fresh process asserting the exact mode carries the implicit tracer while the committed chord control raises zero calls, so a reintroduced clone or a dropped tracer fails; the one residual is that the former direct behavioral test of the implicit tracer, tests/test_exact_clip_memory.py:450, is offline until the repair node lands.\nSCORE fit: 20\nJUSTIFICATION fit: arc_tracer=_implicit_traced_level_arc is passed in the same keyword idiom as curve_evaluator and participating_cell at nova/equilibrium/forward_operator.py:2846, the retained _implicit_traced_level_arc is still used by benchmarks/exact_clip_memory_scaling.py and the types import by the digest helper at nova/equilibrium/forward_operator.py:1585, and no plan label or superseded-name suffix appears.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/arc-tracer-clone/clone-deletion-moments.json:124 controls.negative_control_reads_as_same is computed in clone_deletion_moment_identity.py:278-282 as np.array_equal(head_exact[\"clip_area\"], head_exact[\"clip_area\"]), one arm compared against itself, so it reads like a negative control while being true for any input; the anchor does not cite it and the worker reported it, but the field should be removed or replaced with a genuine no-change comparison so a later reader of the receipt is not misled.\nFINDING tests/test_exact_clip_memory.py:24 the module fails at import at 4bfbb18c, reproduced with pytest --collect-only as ImportError: cannot import name '_implicit_traced_clip' from nova.equilibrium.forward_operator, because the deletion removed the name it imports; it is outside this node's fence and owned by the in-flight node ecm-memory-test-tracer-parameter-route, and until that lands the implicit tracer's primal bit-identity check at line 450 is offline.",
+  "review_run_id": "r-20260917T055938156515-review-of-cca-delete-clip-globals-clone",
+  "reviewed_run_id": "r-20260917T042807085151-cca-delete-clip-globals-clone",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260917T055938156515-review-of-cca-delete-clip-globals-clone",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T06:26:41.169092+00:00",
+  "total": 96
+}

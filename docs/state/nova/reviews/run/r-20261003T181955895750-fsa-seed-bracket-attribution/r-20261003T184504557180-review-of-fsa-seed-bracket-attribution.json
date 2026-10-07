@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-03T18:51:59.265Z",
+  "dispatched_at": "2026-10-03T18:45:25Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the headline \"Failure message: there is none\" is under-qualified \u2014 the reported failure the goal names is \"Failed: Timeout (>300.0s) from pytest-timeout\" at logs/after_suite.log:307 of the batch head run r-20261003T170817801139, while the re-run passed only at 333.80 s / 328.97 s with the tree's timeout = 300 config absent, so under the failing run's own config the test would still time out and the pass attributes the failure to the timeout budget rather than proving it absent."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "follow-on: the report never quotes the reported failure message, so a reader cannot see what was attributed; the done_when asks the report to state the failure message, and the original timeout wording is available in the batch head run's logs/after_suite.log without being carried here."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "the run committed nothing, so its own diff is empty; the change it measured is the batch 68762d363..11541380e, whose only edit to the test's imported module benchmarks/exact_clip_seed_amplitude.py is a reflow of _problem and wall= keywords added inside _draw_production_route and _draw_solve_comparison (git diff verified, and scripts/ is byte-identical at both revisions).",
+    "done_when": "the done_when names tests/test_exact_clip_seed_bracket.py::test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier run in the foreground at 68762d3639852b0d4fc87c4beab07b6298a3b384 and 11541380efc7ea9c2aeaec2ddf37dca31b03e16f; the manifest records baseline_suite and after_suite, both completed with EXIT=0 and zero failures, each naming its log.",
+    "goal": "the goal is to attribute the seed-bracket test failure seen at the exact-and-centroid wall-mask head to that batch or to its base; the reviewed report (/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md:9-25) concludes the failure does not reproduce at either revision (base 68762d363 and head 11541380e both 1 passed, EXIT=0), and I confirmed from tests/test_exact_clip_seed_bracket.py:30-43 that the batch's only edits to its imported module are unreachable from the test's path.",
+    "manifest": "read; status complete, commits none (test role), baseline_suite and after_suite both completed true with failure_count 0, difficulty named in evidence_inputs.",
+    "write_paths": "the manifest declares the single report path; the run is read-only and no source, figure, plan or test file was edited."
+  },
+  "justifications": {
+    "durability": "the role is an attribution over an unchanged tree, so no test is added that fails on a regression and the batch's own guard tests/renderer_wall_scan.py was not exercised here; the run's deliverable is evidence of a non-reproduction, not a new guard.",
+    "evidence": "logs/seed-bracket-base.log:1-8 and logs/seed-bracket-head.log name each arm's revision, command, cwd and module.__file__ under its own tree, both ending EXIT=0 with 1 passed; the run also falsified its own first instrument (module.__file__ proving worktree shadowing) and preserved it under logs/invalid-cwd-shadowing/.",
+    "fit": "the report states the mechanism (the timeout and the unreachable draw calls) rather than a plan, and the gate logs follow the header contract with no version suffix or deliverable id in any written path.",
+    "goal_fidelity": "the report (/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md:9-25) attributes the failure to neither arm \u2014 it is a pytest-timeout that does not reproduce \u2014 and the claim is mechanistically supported because tests/test_exact_clip_seed_bracket.py:30 calls only benchmark._problem and certificate._production_seed, never the draw functions the batch edited.",
+    "scope_discipline": "no commit was made and no file outside the declared report, manifest and run-directory logs was written, with the extracted trees removed as the done_when required."
+  },
+  "node": "fsa-seed-bracket-attribution",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to attribute the seed-bracket test failure seen at the exact-and-centroid wall-mask head to that batch or to its base; the reviewed report (/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md:9-25) concludes the failure does not reproduce at either revision (base 68762d363 and head 11541380e both 1 passed, EXIT=0), and I confirmed from tests/test_exact_clip_seed_bracket.py:30-43 that the batch's only edits to its imported module are unreachable from the test's path.\nVERDICT done_when: the done_when names tests/test_exact_clip_seed_bracket.py::test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier run in the foreground at 68762d3639852b0d4fc87c4beab07b6298a3b384 and 11541380efc7ea9c2aeaec2ddf37dca31b03e16f; the manifest records baseline_suite and after_suite, both completed with EXIT=0 and zero failures, each naming its log.\nVERDICT write_paths: the manifest declares the single report path; the run is read-only and no source, figure, plan or test file was edited.\nVERDICT manifest: read; status complete, commits none (test role), baseline_suite and after_suite both completed true with failure_count 0, difficulty named in evidence_inputs.\nVERDICT diff: the run committed nothing, so its own diff is empty; the change it measured is the batch 68762d363..11541380e, whose only edit to the test's imported module benchmarks/exact_clip_seed_amplitude.py is a reflow of _problem and wall= keywords added inside _draw_production_route and _draw_solve_comparison (git diff verified, and scripts/ is byte-identical at both revisions).\nCALL_SITES: none\nreviewed_base_sha: b4a5897f0124cbaab701273cf3851bed68c61a32\nreviewed_head_sha: b4a5897f0124cbaab701273cf3851bed68c61a32\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the report (/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md:9-25) attributes the failure to neither arm \u2014 it is a pytest-timeout that does not reproduce \u2014 and the claim is mechanistically supported because tests/test_exact_clip_seed_bracket.py:30 calls only benchmark._problem and certificate._production_seed, never the draw functions the batch edited.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/seed-bracket-base.log:1-8 and logs/seed-bracket-head.log name each arm's revision, command, cwd and module.__file__ under its own tree, both ending EXIT=0 with 1 passed; the run also falsified its own first instrument (module.__file__ proving worktree shadowing) and preserved it under logs/invalid-cwd-shadowing/.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: no commit was made and no file outside the declared report, manifest and run-directory logs was written, with the extracted trees removed as the done_when required.\nSCORE durability: 12\nJUSTIFICATION durability: the role is an attribution over an unchanged tree, so no test is added that fails on a regression and the batch's own guard tests/renderer_wall_scan.py was not exercised here; the run's deliverable is evidence of a non-reproduction, not a new guard.\nSCORE fit: 19\nJUSTIFICATION fit: the report states the mechanism (the timeout and the unreachable draw calls) rather than a plan, and the gate logs follow the header contract with no version suffix or deliverable id in any written path.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md:21 follow-on: the headline \"Failure message: there is none\" is under-qualified \u2014 the reported failure the goal names is \"Failed: Timeout (>300.0s) from pytest-timeout\" at logs/after_suite.log:307 of the batch head run r-20261003T170817801139, while the re-run passed only at 333.80 s / 328.97 s with the tree's timeout = 300 config absent, so under the failing run's own config the test would still time out and the pass attributes the failure to the timeout budget rather than proving it absent.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-seed-bracket-attribution.md:23 follow-on: the report never quotes the reported failure message, so a reader cannot see what was attributed; the done_when asks the report to state the failure message, and the original timeout wording is available in the batch head run's logs/after_suite.log without being carried here.\n",
+  "review_run_id": "r-20261003T184504557180-review-of-fsa-seed-bracket-attribution",
+  "reviewed_base_sha": "b4a5897f0124cbaab701273cf3851bed68c61a32",
+  "reviewed_head_sha": "b4a5897f0124cbaab701273cf3851bed68c61a32",
+  "reviewed_run_id": "r-20261003T181955895750-fsa-seed-bracket-attribution",
+  "reviewer_node": "review-of-fsa-seed-bracket-attribution",
+  "reviewer_run_id": "r-20261003T184504557180-review-of-fsa-seed-bracket-attribution",
+  "scores": {
+    "durability": 12,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T18:51:17.090216+00:00",
+  "total": 86
+}

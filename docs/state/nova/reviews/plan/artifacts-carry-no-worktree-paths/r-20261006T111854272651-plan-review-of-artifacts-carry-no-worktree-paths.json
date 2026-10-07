@@ -1,0 +1,91 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T11:25:41.417Z",
+  "dispatched_at": "2026-10-06T11:19:08Z",
+  "findings": [
+    {
+      "anchor": "tests/test_artifacts_carry_no_worktree_paths.py:34",
+      "id": "thin_wrapper-1",
+      "reason": "the plan must state that the reader or the predicate is changed to see binary content, or the guard does not actually cover the file \u00a76 exists to cover.",
+      "text": "\u00a76 says taking candidates from `git grep -l -a -F WORKTREE_ROOT` makes binary files \"covered\", but the predicate is still handed `_working_tree_reader`, which returns `''` for any file carrying a NUL byte in its opening block (lines 29-38); the one non-exempt candidate, `production-solve.pstats`, therefore reads as empty and is never reported as an offender, so the section's own done-when (\"the guard test fails on a scratch tracked binary file carrying a worktree path\") cannot hold as written",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_artifacts_carry_no_worktree_paths.py:53",
+      "id": "thin_wrapper-2",
+      "reason": "the section should add a committed assertion that a synthetic worktree-carrying file is *reported*, so the guard's decision is shown to fire rather than only shown to run.",
+      "text": "the positive control \u00a76 relies on (the candidate search returns `nova/database/filepath.py`) is a search-level check on an **exempt** module that `worktree_path_offenders` skips before it ever reads it, so the predicate's offending branch is exercised by no committed test; the file's existing control (`test_the_scan_reaches_every_top_level_directory`, lines 53-69) only proves the reader sees content, and once \u00a76 repairs the sole non-exempt candidate the tree is clean, so a predicate that always returned `[]` would pass",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/production_solve_host_profile.py:414",
+      "id": "thin_wrapper-3",
+      "reason": "relativize at write time in the producer, or say in the section why artifact-only repair plus the (repaired) binary guard is sufficient and by what tool a future dump is rewritten.",
+      "text": "\u00a76 repairs the committed `production-solve.pstats` artifact but never addresses its producer, which writes absolute frame paths on every run via `profiler.dump_stats(stats_path)`, and describes the rewrite as a manual load-rewrite-write-back step with no committed tool, so a regenerated dump (a crew run inside a worktree is the likely producer) re-introduces the defect and has no programmatic repair path",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_artifacts_carry_no_worktree_paths.py:20",
+      "id": "duplicate_owner-1",
+      "reason": "give the owner module one candidate-enumeration entry point so the hook, the test and any later scan share it and the candidate set cannot drift from the predicate it feeds.",
+      "text": "\u00a76 adds a second enumeration of tracked files (`git grep -l -a -F`) beside `_tracked_files` (`git ls-files`) at lines 20-26 and `_staged_files` in `nova/database/scripts.py:37`, none of which lives in the module that owns the scan, `nova/database/filepath.py`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e4fb438445f6218d44480ecdf46634b2533aa0d058802d8bcbd4c16cecefbfdc",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 47,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:27:39.189808+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:27:37.485539+00:00"
+    },
+    "thin_wrapper-2": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:27:38.067821+00:00"
+    },
+    "thin_wrapper-3": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T11:27:38.687682+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T111854272651-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "c8db9c674bd062985b3b987ef6dfb6a4fbbbb470",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a76 introduces no new module; it edits the existing owner module and its test, and the rule/predicate/constants stay behind small functions. The complexity is not spread across new shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a76 adds a second tracked-file enumeration inside the guard test while the scan's owner module (`nova/database/filepath.py`, which owns `worktree_path_offenders`) offers no enumeration entry point, and a third such helper already exists in `nova/database/scripts.py:37`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 (read 2026-10-06T11:18:54Z). \u00a76 adds no public definition, CLI option, MCP view or refusal family: the two benchmark roots move from a default to a required argument, which removes a defaulted interface rather than adding a new one, and the pstats repair is described as a node action, not a new exported symbol or command.",
+    "reuse_search": "pass \u2014 \u00a76 reuses the one rewrite rule (`relativize_worktree_paths`) and the one scanning predicate (`worktree_path_offenders`) owned by `nova/database/filepath.py:72` and `:115`, and cites that owner, rather than adding a second rule or a second predicate.",
+    "thin_wrapper": "a finding \u2014 the section adds a `git grep` candidate layer over `worktree_path_offenders` and claims coverage its mechanism cannot deliver, and it patches an artifact without naming how the producer is to be fixed. Three instances below."
+  },
+  "section_digests": {
+    "_document": "2ef8b7a57de154e8e7aca236a612afcc0b7934b729a8c7488e7324330d783a61",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "0391cba326b1fc80516ff770fbaa656f6d1a1ac9f2f9394de0a78cc02dfdf265",
+    "s3": "53237d5d24293dce23c291a9ae8509b4507b5c63e879ea07ef804bc3862a43b5",
+    "s4": "20494cf065ef7899a5e3c7ace93b3afcc0ec3d03613a4dd566446a54c46448ac",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b",
+    "s6": "05f647dff51a55a7cf6502a5b7a5118bd633ccaed1636c25ed6077b726ce008a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T11:27:24.831064+00:00"
+}

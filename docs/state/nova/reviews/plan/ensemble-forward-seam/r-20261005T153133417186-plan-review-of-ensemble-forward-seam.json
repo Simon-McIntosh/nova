@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:44:45.655Z",
+  "dispatched_at": "2026-10-05T15:32:16Z",
+  "findings": [
+    {
+      "anchor": "scripts/assimilation_seam_survey/report.md:258",
+      "id": "reuse_search-1",
+      "reason": "the search should have named the existing member-axis owner before new batch types were authored, so the plan either extended it or justified a second one.",
+      "text": "the survey's \"Concrete scope for Nova's next plans\" recommends building the ensemble coupled forward without citing nova's own `nova/transport/ensemble.py`, whose `EnsembleForwardTransport`/`EnsembleTransportState`/`EnsembleTransportReceipt` (landed 2026-08-20, commits c792f7d2c and cc542659c) already implement identity-preserving member batching and are documented as \"the batched member form\" in `nova/transport/AGENTS.md:19`",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/transport/window_batch.py:53",
+      "id": "duplicate_owner-1",
+      "reason": "a second member-axis family drifts from the owner while carrying the same identity contract, and the plan should extend `nova/transport/ensemble.py` or state why the window payloads cannot use it.",
+      "text": "`MemberArrayBatch` and `BatchedWaveform` re-implement the typed identified leading member axis (member_ids validation, read-only freezing, identity-based `member()` lookup) that `nova/transport/ensemble.py:51-116` already owns as `EnsembleTransportState`, and `WindowMemberReceipt`/`WindowBatchReceipt` (window_batch.py:271-334) duplicate `EnsembleMemberReceipt`/`EnsembleTransportReceipt` (ensemble.py:137-161)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/transport/window_batch.py:409",
+      "id": "duplicate_owner-2",
+      "reason": "two live copies of the window convergence policy mean a change to one silently diverges from the other, and the plan should extract a shared per-member exchange-step policy or extend `solve_window`.",
+      "text": "`solve_window_batch` copies the convergence control policy of `solve_window` (`nova/transport/coupled_window.py:1413-1515`): the convergence-receipt construction, the conservation-residual check, the four-way refusal decision (hard ceiling / contraction unavailable / stalled at floor / cap needs measurement), the halving damping backoff, the continuation sampling and the blend are reproduced line-for-line in the per-member loop",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/transport/window_batch.py:337",
+      "id": "duplicate_owner-3",
+      "reason": "the batch genuinely needs a per-member refusal carrier that names the member identity, so wrapping the owner's typed errors is a reasonable extension.",
+      "text": "`WindowRefusalReason`/`WindowMemberRefusal`/`WindowBatchError` introduce a refusal taxonomy beside the existing `WindowConvergenceError`/`WindowConservationError` (`nova/transport/coupled_window.py:1183`, raised at :1490) rather than extending the owner's error family",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "16c1395d85111e11feb71a290d4dcf0bc506c2d639d5a37e9d00a1a68645986e",
+  "plan_slug": "ensemble-forward-seam",
+  "plan_version": 12,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153133417186-plan-review-of-ensemble-forward-seam",
+  "reviewed_blob_sha": "52782816a8e285c77055e33dafb6f0909641d1f5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `solve_window_batch` hides the entire batched fixed-point exchange, host-side receipt assembly and fail-closed per-member refusal behind one call, and `observation_kernels` hides units/COCOS/support/error receipts behind three functions.",
+    "duplicate_owner": "a finding \u2014 `nova/transport/window_batch.py` re-implements the identified leading member axis and its identity receipts already owned by `nova/transport/ensemble.py`, and `solve_window_batch` copies the convergence/backoff/ceiling policy owned by `solve_window` in `nova/transport/coupled_window.py`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds a CLI option, MCP views or refusal family, and the additions are Python symbols inside the transport and equilibrium modules.",
+    "reuse_search": "a finding \u2014 the plan's cross-repo survey searched the ambix estimator machinery but not nova's own existing batched-member module `nova/transport/ensemble.py`, which already owned the member-axis batch contract three days before the plan's batch work landed.",
+    "thin_wrapper": "pass \u2014 \u00a73's virtual flux-loop and probe kernels compose the existing `nova.biot` loop/probe factories and `sample_chord_psi_norm` and add a measured error bound and a receipt the factories lack."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.348638+00:00"
+}

@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline-gate.log (5 passed at 5d3fecad4) and final-gate.log (5 passed at 78d4633f1); the reviewed manifest's structured baseline_suite/after_suite fields are empty so the store's read-time derivation is unmeasured",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-04T13:42:04.830Z",
+  "dispatched_at": "2026-10-04T13:30:48Z",
+  "findings": [
+    {
+      "file": "tests/test_renderer_contours_inside_wall.py",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: the named wall guard is a static scan of renderer source under benchmarks/ and docs/figures/ (DEFAULT_ROOTS at line 30) for contour calls on scattered data; this node changed no source, so the guard is byte-identical across base and head and cannot fail on any of the 34 regenerated figures, leaving the done-when's substantive property (no contour leaves the vessel) unchecked by the gate."
+    },
+    {
+      "file": "tests/test_frozen_current_flux_image_gate.py",
+      "line": "73",
+      "severity": "follow-on",
+      "text": "follow-on: the second gate test reproduces only the gate-b panel pair (FIGURES at line 16), and gate-b was inherited at 161ecd587 before this node's base 5d3fecad4, so it too does not read any figure this node regenerated; the two tests together assert nothing about the eight topic directories the diff touches."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the structured baseline_suite and after_suite fields are empty, so the review store's read-time added-failure derivation reads unmeasured even though baseline-gate.log and final-gate.log exist and both pass; recording the two arms would let any reader tie the zero count to the two named revisions without re-running."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the regenerated receipts record absolute worktree paths for png, svg and receipt, so the committed evidence stops resolving once this worktree is removed; a project-relative path would keep the receipt a durable location, and the node itself flags this under follow_ons."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 5d3fecad4; nine commits, all under docs/figures/<topic>, docs/evidence/fragments, plus the out-of-repo report; subjects and bodies are mechanism-worded with no trailer.",
+    "done_when": "the done-when names tests/test_frozen_current_flux_image_gate.py and tests/test_renderer_contours_inside_wall.py with zero added failures against base, both arms logged; the manifest records both arms at base 5d3fecad4 and head 78d4633f1, each 5 passed EXIT=0.",
+    "goal": "the goal is to finish regenerating the solve-free wall-masked figures within named topic directories only; the diff regenerates 34 figures across eight granted topic directories and records 16 inherited, verified against reports/nova/s22/fsa-regenerate-wall-masked-figures-scoped.md.",
+    "manifest": "read; it carries the commit list, the per-figure render route table and the gate result, but its structured baseline_suite and after_suite fields are empty (manifest.md:21-22).",
+    "write_paths": "every one of the 56 changed paths lies inside the granted topic directories, the report, or the landing fragment; no path under nova/ or benchmarks/ is touched."
+  },
+  "justifications": {
+    "durability": "no assertion added anywhere fails if a regenerated figure regresses, and the named wall guard tests/test_renderer_contours_inside_wall.py:30 scans only source under benchmarks/ and docs/figures/, which this node did not change, so a future regeneration that re-admits an outside-wall contour would leave the gate green.",
+    "evidence": "both gate arms are logged with results (baseline-gate.log, final-gate.log), but tests/test_renderer_contours_inside_wall.py:49 scans renderer source while tests/test_frozen_current_flux_image_gate.py:73 reproduces only the unmodified gate-b pair, so neither test can fail on any figure this node regenerated and the report wall verdict rests on visual inspection not a gate.",
+    "fit": "the work follows house convention (focused CPU gate through the shared interpreter, receipt shas updated, vector companions regenerated), but the committed receipts at docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json embed the absolute worktree path, so they stop resolving once this worktree is removed.",
+    "goal_fidelity": "the outboard-hole contour bounding box moved inside the wall (docs/figures/cut-cell-current-attribution/outboard-hole/booked-versus-analytic.svg contour x-max 1106.24->1100.85 against wall x-max 1101.82) and the discriminator lobe at docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.svg was trimmed, so the masking the goal names is present in the artifacts.",
+    "scope_discipline": "all 56 changed paths are inside the granted topic directories, the report at reports/nova/s22/fsa-regenerate-wall-masked-figures-scoped.md, or the landing fragment docs/evidence/fragments/figure-and-solver-audit/fsa-regenerate-wall-masked-figures-scoped.html, and no source under nova/ or benchmarks/ is edited."
+  },
+  "node": "review-of-fsa-regenerate-wall-masked-figures-scoped",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to finish regenerating the solve-free wall-masked figures within named topic directories only; the diff regenerates 34 figures across eight granted topic directories and records 16 inherited, verified against reports/nova/s22/fsa-regenerate-wall-masked-figures-scoped.md.\nVERDICT done_when: the done-when names tests/test_frozen_current_flux_image_gate.py and tests/test_renderer_contours_inside_wall.py with zero added failures against base, both arms logged; the manifest records both arms at base 5d3fecad4 and head 78d4633f1, each 5 passed EXIT=0.\nVERDICT write_paths: every one of the 56 changed paths lies inside the granted topic directories, the report, or the landing fragment; no path under nova/ or benchmarks/ is touched.\nVERDICT manifest: read; it carries the commit list, the per-figure render route table and the gate result, but its structured baseline_suite and after_suite fields are empty (manifest.md:21-22).\nVERDICT diff: read commit by commit against 5d3fecad4; nine commits, all under docs/figures/<topic>, docs/evidence/fragments, plus the out-of-repo report; subjects and bodies are mechanism-worded with no trailer.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the outboard-hole contour bounding box moved inside the wall (docs/figures/cut-cell-current-attribution/outboard-hole/booked-versus-analytic.svg contour x-max 1106.24->1100.85 against wall x-max 1101.82) and the discriminator lobe at docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-21978-35-state.svg was trimmed, so the masking the goal names is present in the artifacts.\nSCORE evidence: 12\nJUSTIFICATION evidence: both gate arms are logged with results (baseline-gate.log, final-gate.log), but tests/test_renderer_contours_inside_wall.py:49 scans renderer source while tests/test_frozen_current_flux_image_gate.py:73 reproduces only the unmodified gate-b pair, so neither test can fail on any figure this node regenerated and the report wall verdict rests on visual inspection not a gate.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all 56 changed paths are inside the granted topic directories, the report at reports/nova/s22/fsa-regenerate-wall-masked-figures-scoped.md, or the landing fragment docs/evidence/fragments/figure-and-solver-audit/fsa-regenerate-wall-masked-figures-scoped.html, and no source under nova/ or benchmarks/ is edited.\nSCORE durability: 10\nJUSTIFICATION durability: no assertion added anywhere fails if a regenerated figure regresses, and the named wall guard tests/test_renderer_contours_inside_wall.py:30 scans only source under benchmarks/ and docs/figures/, which this node did not change, so a future regeneration that re-admits an outside-wall contour would leave the gate green.\nSCORE fit: 14\nJUSTIFICATION fit: the work follows house convention (focused CPU gate through the shared interpreter, receipt shas updated, vector companions regenerated), but the committed receipts at docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json embed the absolute worktree path, so they stop resolving once this worktree is removed.\nFINDING tests/test_renderer_contours_inside_wall.py:49 follow-on: the named wall guard is a static scan of renderer source under benchmarks/ and docs/figures/ (DEFAULT_ROOTS at line 30) for contour calls on scattered data; this node changed no source, so the guard is byte-identical across base and head and cannot fail on any of the 34 regenerated figures, leaving the done-when's substantive property (no contour leaves the vessel) unchecked by the gate.\nFINDING tests/test_frozen_current_flux_image_gate.py:73 follow-on: the second gate test reproduces only the gate-b panel pair (FIGURES at line 16), and gate-b was inherited at 161ecd587 before this node's base 5d3fecad4, so it too does not read any figure this node regenerated; the two tests together assert nothing about the eight topic directories the diff touches.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped/manifest.md:21 follow-on: the structured baseline_suite and after_suite fields are empty, so the review store's read-time added-failure derivation reads unmeasured even though baseline-gate.log and final-gate.log exist and both pass; recording the two arms would let any reader tie the zero count to the two named revisions without re-running.\nFINDING docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-render.json:1 follow-on: the regenerated receipts record absolute worktree paths for png, svg and receipt, so the committed evidence stops resolving once this worktree is removed; a project-relative path would keep the receipt a durable location, and the node itself flags this under follow_ons.",
+  "review_run_id": "r-20261004T133029686694-review-of-fsa-regenerate-wall-masked-figures-scoped",
+  "reviewed_base_sha": "5d3fecad4830e1cd7ae1753479059e280ff9085c",
+  "reviewed_commit": "dad6fc98e9bc8ffd3954f6109c21b480e7ee5dc1",
+  "reviewed_head_sha": "dad6fc98e9bc8ffd3954f6109c21b480e7ee5dc1",
+  "reviewed_run_id": "r-20261004T123226395584-fsa-regenerate-wall-masked-figures-scoped",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-regenerate-wall-masked-figures-scoped",
+  "scores": {
+    "durability": 10,
+    "evidence": 12,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-04T13:39:54.315206+00:00",
+  "total": 71
+}

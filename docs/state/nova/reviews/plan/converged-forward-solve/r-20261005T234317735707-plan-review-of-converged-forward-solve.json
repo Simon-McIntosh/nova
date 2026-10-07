@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:46:14.884Z",
+  "dispatched_at": "2026-10-05T23:43:30Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/domain.py:194",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a72/\u00a73 must state `domain.py`'s disposition (absorbed into `topology.read`, or retained-with-reason like the `moment.py` exception) or the \u00a76 deletion gate has a collision the node will discover only at retirement.",
+      "text": "`domain.py` is the plasma-region classification authority (`classify_domains`, `axis_connected_component` at :172, `saddle_qualified_domains` at :222) and is imported by ten modules including `topology.py` (being replaced in place) and `forward_operator.py`; the plan's text never mentions it (0 occurrences of `domain` in the plan HTML), yet \u00a72 requires the read to decide membership \"sub-cell and axis-connected\" and \u00a73 requires private-flux exclusion \"because membership is axis-connected before any sub-cell polygon is clipped\" \u2014 the precise computation `axis_connected_component` owns today. The \u00a76 census clause as written (\"no module under `nova/equilibrium` other than `topology.py` locates a null or classifies a region\") would fail outright on `domain.py` at retirement, and \u00a72 could re-implement axis-connectivity behind `topology.read` rather than absorb or explicitly retain the owner.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7193e26334a4a39ae26358b71a2b3e334362b7e990025f9424b19f92fe2528ff",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 47,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:47:57.420415+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T234317735707-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "d81d16486b0510c23e818f2c678721cee67e8c4a",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design hides substantial behaviour (the sub-cell axis-connected membership read, the exact-clip booking, the composed map with its implicit Picard, moment-map and boundary-envelope derivatives, and Newton-GMRES with one line search) behind four functions `read`/`book`/`apply`/`fixed_point`, one call site each; this is depth, not a fan of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan names no disposition for `nova/equilibrium/domain.py`, the module that owns plasma-region classification (`classify_domains`, `axis_connected_component`, `saddle_qualified_domains`, `PlasmaDomain`, `DomainMasks`), while \u00a73's booking and \u00a72's membership clause are both defined in terms of exactly that axis-connected region.",
+    "interface_budget": "pass \u2014 the supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the sections that could grow a family name their retirements in their own text (\u00a76's request-surface ruling collapses `SolveRoute`'s six members to one solve, deletes `SupportClipMode` with the chord modes, and removes eight plumbing fields from `ForwardSolvePolicy`; \u00a72 and \u00a75 state their policy operands are carried by `ForwardSolvePolicy` \"extended rather than duplicated\"). No section adds surface to a counted family without accounting for it.",
+    "reuse_search": "pass \u2014 the plan searched both codebases it names and cites the mechanism each new module extends: the GMRES kernel, the line-search scoring, the Newton machinery, `polygon_moments.py`, `contour_tree.py`, the clip helpers, the operand layouts and the moment-map derivative are each named candidates carried into the new module or declined with a stated contract failure; the cited files (`fixed_point.py`, `reduced_newton.py`, `clip_quadrature.py`, `polygon_moments.py`, `contour_tree.py`, `forward_operator.py`, `topology.py`) all exist at the stated sizes.",
+    "thin_wrapper": "pass \u2014 every added layer states what it replaces rather than what it wraps: `gs.apply` \"replaces the map `ForwardFluxOperator` performs today rather than wrapping it\", `forward.py` shrinks to the request/receipt adapter, and each cite-or-justify ruling directs the node to extend the owning mechanism or justify declining it, never to sit a parallel layer beside it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:47:56.704753+00:00"
+}

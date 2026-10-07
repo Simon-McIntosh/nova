@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:03:03.387Z",
+  "dispatched_at": "2026-10-06T01:56:27Z",
+  "findings": [
+    {
+      "anchor": "scripts/h200_test_lane/cache_reuse_summary.py:63",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a74 design must either specify that the count enumerates `<name>-cache` keys across each `runtime-*` subdirectory (extending `cache_reuse_summary.served_keys` to do so) or name the layout and drop the claim that the existing owner already answers it.",
+      "text": "`served_keys(digest)` enumerates one directory non-recursively with `os.listdir` and strips only the `-cache` suffix. The guard's served directory (`jax.config.jax_compilation_cache_dir`) is the PARENT of several `runtime-<hash>` subdirectories; measured on the pin at `/work/projects/imas_gpu/sophelio/jax-cache/nova-prewarm/nova/jax-compilation`, that parent holds 4 `runtime-*` directories, each holding a `python`-key set of paired `<name>-cache`/`<name>-atime` files (315 top-level files in `runtime-0745ecebea4cb264e054`) beside an `xla_gpu_per_fusion_autotune_cache_dir` subtree (17,761 files). Reusing `served_keys` verbatim would therefore (a) return the 4 `runtime-*` directory NAMES if handed the parent, not the program keys; (b) count every `<name>-atime` companion as a distinct key (its suffix is not `-cache`); and (c) admit the autotune directory's own name \u2014 so it reproduces neither the program-key count nor the autotune exclusion \u00a74's \"Done when\" demands (\"served_entries equals the count of program-key entries on disk\").",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "25c1581441564313bdae3668379a575cda276ff335ab9e33010148d88b6129d9",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 118,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T02:12:02.686029+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-forward-solver-route-integrity.v118.json",
+  "review_run_id": "r-20261006T015609480293-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "b5677341ba472392b2addea70512e47cc9470fce",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73's landed machinery is one traced body (`operator_request_body`, `nova/equilibrium/fixed_point.py:972` and the serving scan at `:1026`) behind a compact `lax.switch`-on-`request.kind` interface, and \u00a74's change extends the guard's own `served_directory_state` rather than adding a module.",
+    "duplicate_owner": "a finding \u2014 the \u00a74 owner note routes `served_entries` through `scripts/h200_test_lane/cache_reuse_summary.py::served_keys`, but that function does not compute the \u201cprogram-key entries on disk\u201d \u00a74 requires, so the plan's claimed reuse is not actually available from the owner it names.",
+    "interface_budget": "pass \u2014 supplied counts this week `public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0`; \u00a74 adds a receipt field (`served_entries`) and an internal pytest-plugin count, no public definition, CLI option, MCP view or refusal family, so there is no surface to retire or merge.",
+    "reuse_search": "pass \u2014 the plan searched: \u00a71 lands into `nova/equilibrium/{fixed_point,forward,forward_operator,reduced_newton}.py`, \u00a73's request machine into `fixed_point.py::operator_request_body`/`run_operator_requests`, \u00a72 onto the existing gate `benchmarks/solve_program_size_gate.py`, and \u00a74's owner notes (2026-10-06 comments) name `cache_reuse_summary.py`, `prewarm_row.py`, `publish_prewarm_pool.py`\u2026 (the pin/row machinery) \u2014 no subsystem is added without naming what it extends.",
+    "thin_wrapper": "pass \u2014 the H200 launcher is an explicit thin caller of `scripts/nova_lane/run.sh` and the plan states the generalisation that justifies it (comment at plan line 838); \u00a74's `served_entries` change edits the owner function, it does not wrap it."
+  },
+  "section_digests": {
+    "_document": "58e5165e82aeebabee9d2d0a0caa60e10b7d414ca3efb55d4d1898ae55d69d32",
+    "s-contract": "83d8d14d75c0216f84acbbb9ef71204975cc6134348d26b5158c593c9abfc624",
+    "s0": "80f310e76317b26c373d1244865223433df267fb8337045d575fe833c75b5858",
+    "s1": "80571c0e208f8095726792cc9d0029962c3966fed6f04e6dcb2ed1a5f352581b",
+    "s2": "f632de7fadccd34387c95c830a73120eb5234de722730bee800322a62a31db41",
+    "s3": "2912ba532e01c1f8a0dd30b1773900e600828c6bbb1cd315c7976868d2a940e5",
+    "s4": "da5c69a471b7ca2d81f157f637c5eda274244e01477238d60f1488532a220978"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:12:02.677845+00:00"
+}

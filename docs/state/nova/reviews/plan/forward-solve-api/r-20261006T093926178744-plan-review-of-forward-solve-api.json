@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-06T09:39:51Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/solve_request.py:468",
+      "id": "reuse_search-1",
+      "reason": "`ExplicitSolveSeed` is defined as \"an explicitly supplied total-flux state used as the solve seed\" and its `resolve` returns that state unchanged, which is precisely seeding an edit from the previous terminal `ForwardEquilibrium.flux`; \u00a75 should state the warm start is an `ExplicitSolveSeed` of the previous terminal flux and add no policy type, so an author does not author a parallel `WarmStartPolicy`.",
+      "text": "\u00a75 demand (2) proposes a new \"warm-start policy\" (\"Seed each edit from the previous edit's converged state rather than the cold portfolio\") without naming the seed-policy seam that already does exactly this",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_route_default_wiring.py:1",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a72 says \"The default-wiring test landed by `solve-default-wiring` is rewritten\", but a second module was created beside the owner, both landed on 2026-09-04 within 80 minutes (`384d759ec` created `tests/test_route_default_wiring.py`, 120 lines; `31ed5d2d5` created `tests/test_default_wiring.py`, 263 lines), so the \"every production cell reads DEFAULT-ON\" check can drift between them; the section should name `tests/test_default_wiring.py` as the single owner and fold the route wiring assertions in place. Census of the type, every instance with its site: `tests/test_route_default_wiring.py:31` and `tests/test_default_wiring.py:42` declare the same nine-field `REQUIRED_DEFAULTS` tuple by hand (`current_pin`, `settled_exit`, `own_mask_acceptance`, `continuation`, `best_iterate_retention`, `stagnation_stop`, `exact_kernels`, `cached_machine`, `compilation_cache`); `tests/test_route_default_wiring.py:44` and `tests/test_default_wiring.py:55` each define a near-identical `RecordingProfile`; `tests/test_route_default_wiring.py:61` and `tests/test_default_wiring.py:207` each expose a `production*_receipts` accessor over the same seven-or-more producers; `tests/test_route_default_wiring.py:103` and `tests/test_default_wiring.py:228` each parametrize a test over `REQUIRED_DEFAULTS` asserting every declared default resolved on; and `tests/test_route_seam_execution.py:103,120` asserts a third facet of the same contract \u2014 that a production route body passes its `ForwardSolveRequest` to the public solve and serializes `resolved_defaults` from the returned receipt \u2014 so that module should be named too, so the rewritten wiring test does not become a fourth owner.",
+      "text": "the plan's \u00a72 default-wiring check has two owners that assert the same mechanism",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c21a221ad8fe9b6cee541765fb0f7328c1579ecf32356fc675b5f254cd0ec11f",
+  "plan_slug": "forward-solve-api",
+  "plan_version": 150,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T093926178744-plan-review-of-forward-solve-api",
+  "reviewed_blob_sha": "afe76010684a471ce7212c98c719575b675d82e4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `nova/equilibrium/solve_request.py` (768 lines) hides the version-keyed default table, deviation computation, seed policies, pytree plumbing and receipt telemetry behind one small interface: build a `ForwardSolveRequest`, call `ForwardProfile.solve(request)`, read a `ForwardSolveReceipt`.",
+    "duplicate_owner": "a finding \u2014 \u00a72's default-wiring acceptance (\"the wiring audit rerun reads DEFAULT-ON in every production cell\") has two owners in the committed tree, `tests/test_default_wiring.py` and `tests/test_route_default_wiring.py`, both asserting the same mechanism with identical `REQUIRED_DEFAULTS`, `RecordingProfile` and `production_*_receipts` scaffolding.",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section of this revision adds to any of the four families, so no section carries an unaccounted interface addition.",
+    "reuse_search": "a finding \u2014 the plan's design searches its own history well (the lede cites the capability-wiring audit and the 737-site budget-drift inventory; \u00a75 cites `ForwardFluxOperator` as the holder of the raster target), but \u00a75 proposes a \"warm-start policy\" without naming the seed-policy seam that already carries that capability in `nova/equilibrium/solve_request.py`.",
+    "thin_wrapper": "pass \u2014 \u00a73's transport design extends rather than wraps: the coupling seam embeds the existing `ForwardSolveRequest` in `ForwardTransportInput` (`nova/transport/forward.py:208`) and derives `ForwardTransportReceipt.equilibrium_resolved_defaults` from the embedded request's policy (`_equilibrium_resolved_defaults`, `nova/transport/forward.py:342`) instead of re-declaring defaults; and \u00a75's raster followup explicitly declines a new holder (\"no new holder is needed\")."
+  },
+  "section_digests": {
+    "_document": "45b912eabff4fbf7333ac2792c02b23d1de2928d8e7d91bd7f60922a9e712113",
+    "s1": "15b140d9bfa92a8c1b5a9f2958b79468405f9375f2c62195a350a8f0378045d1",
+    "s2": "5ee351f40278f0a5290dd1ca86ce1e55e3fb9bc04310a1d343bd193207f00742",
+    "s3": "b1ff02f5ca8699b8f88270fc10b62ffcb3ee8e9772de4c4adcfead2bc4ec48b3",
+    "s4": "83822b14a2b02467715017811a9cc6eb6124f709c56b71467fd19a407f9a67c4",
+    "s5": "828c3198cd7bde5fe019c028f4b179b9ab382430aaddc29bd9c8e9687c6fcc9d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.383028+00:00"
+}

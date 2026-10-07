@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_observations": [
+    "no baseline_suite / after_suite arm: the reviewed run is documentation-only and declared neither, so added_failure_count=0 and added_failure_ids=[] are derived from absence rather than a measured set identity",
+    "no negative control declared because the reviewed write paths contain no test file; the delivered refusal_detector_control.py is a positive control for the census's own absence claim, not a suite-arm negative control",
+    "no committed instrument for the saddle-wedge claims: the 0-call and wedge-arithmetic logs name no revision, tree or command, and no script that produced them is in changed_paths",
+    "the bank carries no double-null diverted analytic case, so the double-null arm of Section 5's done-when is discharged by absence of the case rather than by a measurement"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "b12cb22cc21946e85211979b626c3f7009ae629a",
+    "ab9f816a81e67e569d74f3fb0177b34a89a12882"
+  ],
+  "completed_at": "2026-10-02T14:55:16.045Z",
+  "dispatched_at": "2026-10-02T14:19:05Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-one-arc-census-diverted-rows.html",
+      "line": "Saddle wedges paragraph",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment and the report present the saddle-wedge conclusion (0 wedge calls during the census build; wedge maxima 160/152/146 against one-run capacities 162/154/148) as verified evidence, citing saddle-wedge-arithmetic.log and wedge-instrumentation.log. Neither log carries a header naming the revision, tree or command that produced it - both are bare output lines - and no script in the reviewed changed_paths produced them, so neither log contains what is needed to tell which input was measured. I re-instrumented _expand_spline_saddle_wedges myself and reproduced the 0-call claim (calls=0), which shows the claim is true and that its delivered record is merely unverifiable in place. A header line naming the commit and the command, and committing the small instrument, would close the gap."
+    },
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py",
+      "line": "84",
+      "severity": "follow-on",
+      "text": "follow-on: the census measures the diverted row only through the analytic certificate bank, whose CASES (benchmarks/exact_clip_moment_floor.py:78) carry exactly one diverted entry, diverted-single-null. Section 5's verdict retires the two-run wiring for every diverted layout, but the only support that would exercise a widened support array is measured on one geometry at three resolutions, and no production or machine-derived diverted frame is measured. The record states the bank's single row openly, and Section 5 permits its scope, so this is a coverage note rather than a defect: it is the reason the retirement is asserted at 134 vs 162 and not across a population."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "gate_arms_note": "Derived from the reviewed run's own manifest and gate logs. The reviewed run carries no baseline_suite and no after_suite key (both null); it is a documentation-only change under docs/figures/ and docs/evidence/ that touches no module and no test, and its changed_paths contain no test file. The added-failure count is therefore 0 and the id set empty by ABSENCE OF ANY CODE ARM, not by a measured before/after set identity. Its gate logs (census-110/300/1000.log, refusal-detector-control.log) are standalone census drivers, not a pytest suite, and carry no baseline/after pair. This review did not run the pytest suite because neither arm was declared and there is no source change to gate.",
+  "justifications": {
+    "durability": "The census driver, its positive control and the receipt are all committed, and re-running the driver regenerates the receipt from the same arithmetic; I re-ran the control and the driver and got the recorded numbers. Held from full because the wedge instrumentation that produced the 0-call and wedge-arithmetic claims is not delivered (no committed script, no header on its logs), and no automated guard pins the retirement decision against a later change reintroducing the wiring.",
+    "evidence": "The result is independently reproducible and I reproduced it. refusal_detector_control.py at head prints forced_bound_refused_cell_count 38, true_bound_refused_cell_count 0, realised_maximum_vertex_count 134, and names the same 38 refused cells at forced bound 100; a control that forces a known refusal and shows the detector naming it is exactly the instrument an absence claim needs. The census numbers reproduce exactly through floor._build over the reviewed code: at 110/300/1000 cells, realised max 134, bound 162/154/148, refused 0, included 86/212/652, straight 34/26/20. The build path reaches operator._profile_support (scripts/analytic_oracle_fixtures/measure.py:1039) with no level_run_count, so it is the production support builder the wiring edits, not a side path. Held below full because the two logs cited as evidence for the saddle-wedge claims (saddle-wedge-arithmetic.log and wedge-instrumentation.log) carry no provenance header and the instrumenting code that produced them is not committed, so those claims are not reproducible from the delivered record alone.",
+    "fit": "The change sits in the docs/figures receipt tree it maintains, reuses the moment-floor builder and the committed clip, and ships one census driver plus a positive control and a build-evidence fragment. The commit subject is conventional and carries a body; no plan, sprint or ticket identifier and no AI attribution appears in the commit message or the new source. Symbols and docstrings state mechanism; the only version-looking tokens are the schema ids nova.exact-clip-one-arc-census.v1, which are wire-format identifiers rather than plan labels.",
+    "goal_fidelity": "Section 5's done-when is met end to end: one_arc_census.py runs the diverted analytic certificate row at 110, 300 and 1000 requested cells under the one-arc bound (traced_polygon_vertex_capacity at its one-run default), and one receipt under capacity/one-arc-census/ records per row the realised maximum live vertex count (134 at every count), the bound (162/154/148 = 128 + straight 34/26/20) and the refused-cell count (0), and states the Section 5 verdict that retires the held two-run wiring 61b291089 with the receipt as its evidence. The census reaches the production operator._profile_support (the method the held wiring edits) through the moment-floor builder, so it measures the layout the wiring would widen. Held from full because the retirement rests on one geometry at three resolutions: the analytic bank carries exactly one diverted row (exact_clip_moment_floor.py:78 CASES) and no double-null diverted case, which the receipt states explicitly. Section 5 allows this ('wherever the bank carries them'), so the coverage is compliant, but it is thin.",
+    "scope_discipline": "git diff base..head is seven files, 426 insertions, 0 deletions, every path inside a declared write path (docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/ and docs/evidence/fragments/exact-clip-moment-quadrature/). No module, no test and no plan HTML is touched: nova/ and benchmarks/ are byte-identical base..head, so the census runs against unchanged production code. The diff is purely additive."
+  },
+  "notes": "The reviewed node is a documentation/receipt change with no code arm: it censuses the diverted analytic certificate row against the one-arc bound at three cell counts and, finding no refused cell, retires the held two-run wiring. The substance is sound and independently verified: the census numbers reproduce exactly (134 vs 162/154/148, refused 0), the positive control fires (38 refused cells at forced bound 100, 0 at the true bound), the build reaches the production _profile_support, and the 0-wedge-call claim reproduces under independent instrumentation. Two evidence-practice gaps keep the score at 88, neither of which lands outside the declared scope or changes a recorded number: (1) the two saddle-wedge logs are cited as evidence but carry no revision/tree/command header and their instrument is not committed, so they are unverifiable in place; (2) the retirement is asserted from one geometry at three resolutions, the bank carrying a single diverted row. Scores: goal_fidelity 18, evidence 15, scope_discipline 20, durability 16, fit 19; total 88.",
+  "plan": "nova:exact-clip-moment-quadrature",
+  "project": "nova",
+  "review_run_id": "r-20261002T141846092209-review-of-ecq-one-arc-census-diverted-rows",
+  "reviewed_base_sha": "b12cb22cc21946e85211979b626c3f7009ae629a",
+  "reviewed_head_sha": "ab9f816a81e67e569d74f3fb0177b34a89a12882",
+  "reviewed_revision": "ab9f816a81e67e569d74f3fb0177b34a89a12882",
+  "reviewed_run_id": "r-20261002T132703747699-ecq-one-arc-census-diverted-rows",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-one-arc-census-diverted-rows",
+  "reviewer_node": "review-of-ecq-one-arc-census-diverted-rows",
+  "reviewer_run_id": "r-20261002T141846092209-review-of-ecq-one-arc-census-diverted-rows",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T14:50:00+00:00",
+  "total": 88,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha ab9f816a81e67e569d74f3fb0177b34a89a12882 has parent b12cb22cc21946e85211979b626c3f7009ae629a, so the reviewed range is exactly the one commit claimed; git diff base..head is 7 files, 426 insertions, 0 deletions, every path under docs/",
+    "nova/ and benchmarks/ are unchanged base..head, so the census runs against unchanged production code",
+    "the reviewed worktree is clean at head (git status --porcelain empty) and its HEAD is ab9f816a81e67e569d74f3fb0177b34a89a12882",
+    "reproduced refusal_detector_control.py at head: forced_bound 100 -> forced_bound_refused_cell_count 38 with 38 named cells (4,9,11,\u2026,123), true bound 162 -> 0, realised_maximum_vertex_count 134",
+    "reproduced the census numbers through floor._build over the reviewed code: 110/300/1000 cells give realised max 134, bounds 162/154/148, refused 0, included 86/212/652, straight 34/26/20",
+    "the build path reaches operator._profile_support via scripts/analytic_oracle_fixtures/measure.py:1039 with no level_run_count argument, so the census measures the production support builder at its one-run default",
+    "independently instrumented _expand_spline_saddle_wedges during the diverted build at 110 cells: calls=0, reproducing the fragment's claim",
+    "CASES (benchmarks/exact_clip_moment_floor.py:78) carries one diverted row (diverted-single-null); the certificate module (benchmarks/solovev_certificate.py:123) defines diverted-single-null and no double-null diverted case",
+    "revisions 8ee75d50b ('Merge ecq-per-layout-vertex-capacity (mechanism): a level-run count on the traced capacity') and 61b291089 ('feat(equilibrium): derive the traced clip capacity per layout at the production caller') exist with the stated subjects",
+    "commit ab9f816a8 subject is conventional and carries a body; no AI attribution in the message"
+  ]
+}

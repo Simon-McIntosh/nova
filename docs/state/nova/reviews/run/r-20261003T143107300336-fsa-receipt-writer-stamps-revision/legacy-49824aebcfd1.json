@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T15:12:50.079Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:31:26Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_production_solver_receipt_stamp.py",
+      "line": 58,
+      "severity": "follow-on",
+      "text": "test_source_revision_equals_the_recorded_revision passes revision=certificate._source_revision() as the payload's revision while stamp_source_revision internally calls the same _source_revision(), so the equality is partly tautological; it would not catch a caller that assembled revision from a different tree than the stamp. Not a defect in the shipped writer (main() uses the same source for both), a coverage weakness in the pinning test."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143107300336-fsa-receipt-writer-stamps-revision/after_suite.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "after_suite.log names revision 53bab014c (the code commit) while the reviewed head is the later fragment commit d90730fad; the later commit touches only the evidence fragment, so the gate result transfers, but the arm is not literally the reviewed tree HEAD."
+    }
+  ],
+  "gate_arms_note": "baseline_suite (revision a42dc665cf41a4a698ba95df16fee43cfe3c4a32, command runs only tests/test_production_solver_receipt_trip_alignment.py, 0 failed/15 passed, EXIT=0, completed=true) and after_suite (revision 53bab014ceae8b97bb33b3da4394d2496e32e011, command runs tests/test_production_solver_receipt_stamp.py plus tests/test_production_solver_receipt_trip_alignment.py, 0 failed/17 passed, EXIT=0, completed=true) both ran to their summary lines and both name their log on disk. added_failure_ids is the after_suite failure_ids minus the baseline_suite failure_ids; both are empty, so added_failure_count is 0. The after_suite arm ran at the code commit 53bab014c while the reviewed tree HEAD is the later fragment commit d90730fad, which changes only the evidence fragment, so the delta is unaffected.",
+  "justifications": {
+    "durability": "The stamp is now applied at payload-assembly time inside the writer that persists the receipt, so a regenerated receipt carries source_revision automatically and the existing trip-alignment pin (test_committed_production_receipt_names_its_source_revision) cannot go red on regeneration for a missing field. tests/test_production_solver_receipt_stamp.py drives the writer's own build_payload builder, so the contract survives refactor of main(). The commits are local detached-HEAD commits reachable only from the reviewed worktree (origin/main does not contain them), which is the expected worker flow - the coordinator owns merge and push - but the work is not durable in any shared ref until promoted. Deducted for the partly tautological equality contract noted under evidence. Contrasted against the earlier 15-passed trip-alignment gate that pinned only the committed receipt, this move puts the guarantee where the data is produced.",
+    "evidence": "Independently reproduced first-hand. Head gate re-run in the reviewed worktree at d90730fad (full gate command) gives 17 passed, EXIT=0 (review-gate-head.log), matching after_suite.log. The base defect is reproduced without the reviewed tree: importing the base measure.py's line from nova.equilibrium.forward_operator raises ImportError: cannot import name 'set_support_clip_mode', so the module was unimportable at base exactly as claimed. The declared negative control is independently re-run in a scratch tree with the stamp call removed from build_payload: review-negctrl-repro.log ends with a bare EXIT=1 and fails exactly test_payload_carries_a_source_revision and test_source_revision_equals_the_recorded_revision, the two ids the head arm does not fail, so the log is admissible and the guard is shown to fire. Deducted for one weakness in the added test: test_source_revision_equals_the_recorded_revision passes revision=certificate._source_revision() as the argument while stamp_source_revision independently calls the same _source_revision(), so the equality assertion is partly tautological and does not stress a caller passing a mismatched revision; and the baseline arm covers only the trip-alignment module, not the new stamp file, though the stamp file did not exist at base.",
+    "fit": "The change reuses the exact shared helper every other production-route receipt writer uses (certificate.stamp_source_revision) rather than adding a second stamping mechanism, and introduces one small build_payload builder in the writer in place of the previous inline dict literal - the same pattern the other writers expose so their tests can drive them. The clip_mode='chord' carried on the request matches the documented production default, so it reproduces the retired process-global selector's effect without reinstating global state - it moves the setting to request-owned state, the direction the codebase already moved. Minimal, no new machinery, no dead code.",
+    "goal_fidelity": "Plan nova:figure-and-solver-audit section 3, follow-up f-fsa-production-solver-receipt-writer-revision: route docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py's payload through the same stamp the benchmark writers use so source_revision is written where the receipt is written, and regenerate nothing until a measurement needs it. The node meets this exactly: build_payload assembles the payload then returns certificate.stamp_source_revision(payload), and main() reads revision through certificate._source_revision() so the revision key and the stamped field agree. The committed receipt.json is not regenerated (not among the changed files), honouring 'regenerate nothing'. The node also repaired a pre-existing stale import of set_support_clip_mode; I confirmed the symbol is absent from nova/equilibrium/forward_operator.py at the reviewed head and that ForwardSolveRequest carries a clip_mode field defaulting to 'chord' (solve_request.py:495,556), so the module was unimportable at base and the repair is necessary to drive the goal at all. Not full marks because the goal paragraph asked only for stamping; the module-importability repair and the change of the revision source are adjacent behaviour changes that, while necessary and disclosed, go beyond the literal request.",
+    "scope_discipline": "The review range a42dc665..d90730fad touches exactly three paths: docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py, tests/test_production_solver_receipt_stamp.py and docs/evidence/fragments/figure-and-solver-audit/fsa-receipt-writer-stamps-revision.html - all inside the node's granted write paths. No product source file, no other test, no plan, no shared index, no concurrent node path is touched. The reviewed worktree is clean (git status shows nothing outside .venv). Both commits carry conventional subjects with explanatory bodies. The one clip outside the literal follow-up text (the stale-import repair) is inside the granted measure.py path and is required to make the file importable, so it does not breach the fence."
+  },
+  "node": "review-of-fsa-receipt-writer-stamps-revision",
+  "project": "nova",
+  "review_base_sha": "4ca2045cf9b1b03ca13c8bd71b78a4ba83459513",
+  "review_run_id": "legacy-49824aebcfd1",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "reviewed_commit": "53bab014ceae8b97bb33b3da4394d2496e32e011",
+  "reviewed_commits": [
+    "53bab014ceae8b97bb33b3da4394d2496e32e011",
+    "d90730fad49120cdc5b8278691f4e8f5d6b5e148"
+  ],
+  "reviewed_head_sha": "d90730fad49120cdc5b8278691f4e8f5d6b5e148",
+  "reviewed_run_id": "r-20261003T143107300336-fsa-receipt-writer-stamps-revision",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-receipt-writer-stamps-revision",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:02:00Z",
+  "total": 92,
+  "verdict": "pass"
+}

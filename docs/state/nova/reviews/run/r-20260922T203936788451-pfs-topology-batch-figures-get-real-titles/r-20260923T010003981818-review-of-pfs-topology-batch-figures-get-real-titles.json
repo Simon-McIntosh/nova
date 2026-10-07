@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T01:00:03.981818+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T203936788451-pfs-topology-batch-figures-get-real-titles/gate_green.log",
+      "line": "1",
+      "text": "the gate log's first line names revision 547b98f8, while the manifest states the gate ran \"at head 196e4493\"; the test file is unchanged after 547b98f8 so the result transfers, but a reader auditing the named check against the delivered head finds a header for a different revision."
+    },
+    {
+      "file": "docs/evidence/archive/figure-and-solver-audit-landed.html",
+      "line": "892",
+      "text": "the done_when requires \"every citing document is updated\", and this record still cites the renamed arm as topology-batch-after2.png and topology-batch-after2.json; the node reports it under follow_ons as outside its fence and correctly does not fix it, but the done_when's clause is therefore not fully satisfied by the landed change."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit (872eccce5 the probe and test, 547b98f89 the plan record and anchor, 196e44937 a counts correction) against base b1f649d7; the only deletions are the eleven lines of replaced suptitle/legend code and the after2-to-corrected rename, and the plan and anchor edits are pure appends.",
+    "done_when": "the done_when names tests/test_topology_batch_render.py reading the render receipt, passing with a log recorded and the negative control observed to fail; the manifest records that run (8 passed, EXIT=0) and names gate_green.log, and I re-ran the named test and the control myself.",
+    "goal": "the node goal is that the three topology-batch arm figures carry real titles, a readable middle panel and no version suffix in a served name; the landed change at benchmarks/topology_batch_probe.py:478 composes each suptitle from the arm's tag and source_commit, sets both per-element wall panels to a log ordinate, and renames the third arm corrected and the harness run_topology_batch_probe.sh, which I read in the diff and the receipt.",
+    "manifest": "read; it states the gate result, names gate_green.log and negative_control.log, lists three commits and records the untouched stale citation as a follow_on.",
+    "write_paths": "read the manifest's declared paths; every path in the diff against base b1f649d7 is inside them -- the probe, the new test, the topology-batch figure directory, the plan landing comment and the playable-forward-solve evidence anchor."
+  },
+  "justifications": {
+    "durability": "tests/test_topology_batch_render.py:76 reddens on a title that omits the arm or revision, :85 on a comma-integer title, :114 on a linear middle panel and :133 on a missing file, and the negative control reinstates the row-index title and linear ordinate to show all four fire.",
+    "evidence": "I re-ran tests/test_topology_batch_render.py at HEAD 196e4493 (8 passed, EXIT=0) and the negative control against a mutated receipt (5 failed/3 passed, EXIT=1), but gate_green.log:1 names revision 547b98f8 rather than the delivered head 196e44937.",
+    "fit": "the new names are mechanism-based (render, _figure_title, WALL_PANEL_SCALES in benchmarks/topology_batch_probe.py:94) and the rename removes the version suffix after2 and the harness stem's trailing digit.",
+    "goal_fidelity": "benchmarks/topology_batch_probe.py:478 delivers the titled, log-ordinate figures and the corrected rename, but the done_when's clause that every citing document is updated is not closed because figure-and-solver-audit-landed.html:892 still names the after2 arm.",
+    "scope_discipline": "every path in the diff against base b1f649d7 is inside the declared write paths -- benchmarks/topology_batch_probe.py, tests/test_topology_batch_render.py, docs/figures/playable-forward-solve/topology-batch, the plan and the evidence anchor -- and no nova/ or peer path is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is that the three topology-batch arm figures carry real titles, a readable middle panel and no version suffix in a served name; the landed change at benchmarks/topology_batch_probe.py:478 composes each suptitle from the arm's tag and source_commit, sets both per-element wall panels to a log ordinate, and renames the third arm corrected and the harness run_topology_batch_probe.sh, which I read in the diff and the receipt.\nVERDICT done_when: the done_when names tests/test_topology_batch_render.py reading the render receipt, passing with a log recorded and the negative control observed to fail; the manifest records that run (8 passed, EXIT=0) and names gate_green.log, and I re-ran the named test and the control myself.\nVERDICT write_paths: read the manifest's declared paths; every path in the diff against base b1f649d7 is inside them -- the probe, the new test, the topology-batch figure directory, the plan landing comment and the playable-forward-solve evidence anchor.\nVERDICT manifest: read; it states the gate result, names gate_green.log and negative_control.log, lists three commits and records the untouched stale citation as a follow_on.\nVERDICT diff: read commit by commit (872eccce5 the probe and test, 547b98f89 the plan record and anchor, 196e44937 a counts correction) against base b1f649d7; the only deletions are the eleven lines of replaced suptitle/legend code and the after2-to-corrected rename, and the plan and anchor edits are pure appends.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/topology_batch_probe.py:478 delivers the titled, log-ordinate figures and the corrected rename, but the done_when's clause that every citing document is updated is not closed because figure-and-solver-audit-landed.html:892 still names the after2 arm.\nSCORE evidence: 18\nJUSTIFICATION evidence: I re-ran tests/test_topology_batch_render.py at HEAD 196e4493 (8 passed, EXIT=0) and the negative control against a mutated receipt (5 failed/3 passed, EXIT=1), but gate_green.log:1 names revision 547b98f8 rather than the delivered head 196e44937.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff against base b1f649d7 is inside the declared write paths -- benchmarks/topology_batch_probe.py, tests/test_topology_batch_render.py, docs/figures/playable-forward-solve/topology-batch, the plan and the evidence anchor -- and no nova/ or peer path is touched.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_topology_batch_render.py:76 reddens on a title that omits the arm or revision, :85 on a comma-integer title, :114 on a linear middle panel and :133 on a missing file, and the negative control reinstates the row-index title and linear ordinate to show all four fire.\nSCORE fit: 19\nJUSTIFICATION fit: the new names are mechanism-based (render, _figure_title, WALL_PANEL_SCALES in benchmarks/topology_batch_probe.py:94) and the rename removes the version suffix after2 and the harness stem's trailing digit.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T203936788451-pfs-topology-batch-figures-get-real-titles/gate_green.log:1 the gate log's first line names revision 547b98f8, while the manifest states the gate ran \"at head 196e4493\"; the test file is unchanged after 547b98f8 so the result transfers, but a reader auditing the named check against the delivered head finds a header for a different revision.\nFINDING docs/evidence/archive/figure-and-solver-audit-landed.html:892 the done_when requires \"every citing document is updated\", and this record still cites the renamed arm as topology-batch-after2.png and topology-batch-after2.json; the node reports it under follow_ons as outside its fence and correctly does not fix it, but the done_when's clause is therefore not fully satisfied by the landed change.",
+  "review_run_id": "r-20260923T010003981818-review-of-pfs-topology-batch-figures-get-real-titles",
+  "reviewed_revision": "196e449377cf3653737ffd91b1463050a0bc562a",
+  "reviewed_run_id": "r-20260922T203936788451-pfs-topology-batch-figures-get-real-titles",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260923T010003981818-review-of-pfs-topology-batch-figures-get-real-titles",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T01:11:31.346161+00:00",
+  "total": 95
+}

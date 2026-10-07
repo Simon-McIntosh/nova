@@ -1,0 +1,67 @@
+{
+  "absent": [
+    "per-active-set-pass inner Newton/Krylov qualification histories"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-02T14:27:51Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T13:32:59Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/centroid_constrained_fixture_receipt.py",
+      "line": "331",
+      "severity": "follow-on",
+      "text": "The H200 receipt records all eight active-set residuals, but the benchmark explicitly says the per-promotion Newton/Krylov rows describe only the last frozen-mask pass. The receipt therefore cannot literally show whether each of the seven earlier passes reported NONFINITE_LINEAR_ACTION; its aggregate counters report 72 attempted and 72 accepted promotions, and the last pass has two ACCEPTED qualifications, but the done-when's per-pass inner-history record remains absent."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "The newly banked receipt retains the pre-existing provenance contradiction: field_identity.field_scale_t is 0.001 T while solve.field_scale_t and unit_leverage.field_scale_t are 0.25 T. The worker disclosed this accurately under follow_ons, and the H200 command, solve block, and unit_leverage block support 0.25 T, but a reader using the identity block alone gets the wrong measured normalization."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/manifest.md",
+      "line": "commits",
+      "severity": "follow-on",
+      "text": "The reviewed commits 211d75798 and b17968fe1 are clean, locally committed deliverables but are not ancestors of review base 5179ab0fb. The prerequisite diagnostic commit edf04ca11 is already reachable from that base, so coordinator integration needs only the two reviewed commits and must preserve the cap-factor marker and both committed receipts."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's baseline_suite and after_suite are both complete and readable. Baseline edf04ca11 records 2 failed and 25 passed; head 211d75798 records the same two failure ids and 26 passed. Therefore added_failure_count is 0 and added_failure_ids is empty. The declared negative-control mutation is independently readable: it fails only test_bounded_exterior_step_has_finite_zero_residual_tangent with a NaN tangent and ends EXIT=1.",
+  "justifications": {
+    "durability": "The regression is pinned by a focused test whose declared old-cap mutation fails. Baseline and head gates have complete headers, summaries, failure ids and exit receipts; the diagnostic and H200 receipt are committed separately; the external quantitative report reconciles with the receipt and does not overclaim convergence. Both commits have conventional subjects, substantive bodies, no attribution trailer, and no plan label. Deductions remain because the two reviewed commits await coordinator integration, the committed H200 receipt carries the known field-scale identity contradiction, and it lacks per-pass inner qualification detail for the first seven active-set passes.",
+    "evidence": "The load-bearing behavior could fail and is well instrumented. The parent banked-state diagnostic at digest f1097ebd...fbd gives JVP [1,-1,NaN] against finite central difference [1,-1,0.1]; the repaired diagnostic gives [1,-1,0.1], its field entries are unchanged, and the declared old-cap mutation makes the new test fail with EXIT=1. Both complete CPU suite receipts yield zero added failures. H200 job 1280380 records the correct device, allocation, exact clip, seed, input budgets, eight descending active-set residuals, 72 attempted and 72 accepted promotions, two ACCEPTED qualifications in the retained final-pass history, no bound refusal, and a byte-identical committed/run-directory receipt. Evidence is reduced because earlier passes' inner qualification rows are not retained and because the receipt's field_identity scale contradicts the measured solve scale.",
+    "fit": "The repair is the smallest mechanism-level change: it reuses the already validated positive step limit as the denominator floor, removes the inactive overflow path, and leaves refusal, backtracking, bounds and solver budgets untouched. The test exercises the public damped_step behavior directly at the problematic exact-zero residual. The diagnostic and control records stay under the existing cap-factor evidence directory and the scientific report clearly distinguishes solver-history convergence from certificate qualification.",
+    "goal_fidelity": "The node implements the exact required cap factor, step_limit / maximum(step_limit, abs(raw)), with the class's existing positive-limit guard preserving algebraic equivalence. It adds the exact-zero JVP-versus-central-difference test, reproduces the parent defect, commits the repaired diagnostic, and runs the required one-job H200 positive control with the unchanged 0.25 T scale, seed digest, 10-step Newton budget and 30 GMRES iterations. The outcome is reported without claiming certificate qualification: terminal residual is 8.491385577e-13, while the row residual is 8.423207074e-12 and qualified/row_qualified are false. The deduction is for the literal per-active-set-pass inner-history clause: all pass residuals are present, but detailed Newton/Krylov qualifications are retained only for the last frozen-mask pass.",
+    "scope_discipline": "The two commits change only the granted solver source, granted test, and the explicitly requested cap-factor diagnostic and positive-control receipt directory. The source/test/diagnostic commit is 42 insertions and 4 deletions; the large machine-readable H200 receipt is isolated in its own commit. The generated state and PNG/SVG remain in the run directory, no plan or evidence fragment was edited, no tolerance/default/budget changed, and the target worktree is clean."
+  },
+  "node": "review-of-cco-cap-factor-finite-tangent",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: Exact cap algebra, exact-zero derivative test, parent reproduction, repaired banked diagnostic and the required H200 positive control are delivered. The receipt honestly records terminal residual 8.491385577e-13 but row residual 8.423207074e-12 with qualified=false. Deduction: detailed Newton/Krylov history is retained only for the last frozen-mask pass, not every active-set pass.\nSCORE evidence: 17\nJUSTIFICATION evidence: Parent JVP [1,-1,NaN] becomes [1,-1,0.1] and matches central difference; the declared mutation fails; complete suite arms add zero failures; H200 job 1280380 and the committed receipt reconcile. Deduction: earlier-pass inner qualifications are absent and field_identity.field_scale_t=0.001 contradicts the measured 0.25 T solve scale.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Only granted solver, test and cap-factor receipt paths changed; generated state and panels stayed in the run directory; no solver default, tolerance, budget, plan or evidence fragment changed.\nSCORE durability: 17\nJUSTIFICATION durability: The behavioral test, negative control, complete suite receipts, committed diagnostic, committed H200 receipt and quantitative report are durable and consistent. The reviewed commits await integration, and the receipt retains the identity-scale contradiction and last-pass-only inner history.\nSCORE fit: 19\nJUSTIFICATION fit: The repair is the exact minimal algebraic change, guarded by the existing positive step-limit invariant and exercised through damped_step itself. Records fit the existing cap-factor directory and distinguish internal convergence from certificate qualification.\nFINDING benchmarks/centroid_constrained_fixture_receipt.py:331 follow-on: active_set_residuals records eight passes, but the benchmark states the detailed promotion/Krylov arrays describe only the last frozen-mask pass; per-pass inner histories remain absent.\nFINDING docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json:24 follow-on: field_identity.field_scale_t is 0.001 T while solve.field_scale_t and unit_leverage.field_scale_t are 0.25 T.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T133233397975-cco-cap-factor-finite-tangent/manifest.md:commits follow-on: 211d75798 and b17968fe1 are not yet ancestors of review base 5179ab0fb; prerequisite edf04ca11 already is.\nCHECKS\nDiff: edf04ca11..b17968fe1 changes four granted paths, 722 insertions and 4 deletions; target worktree clean; git diff --check clean.\nFormula marker: target HEAD contains factor = step_limit / jnp.maximum(step_limit, magnitude) at nova/equilibrium/constraint.py:600; __post_init__ requires a positive step limit.\nIndependent focused head check: with NUMBA_CACHE_DIR under TMPDIR, test_bounded_exterior_step_has_finite_zero_residual_tangent passed, 1 passed in 9.04s.\nNegative control: restored old cap fails the new test on tangent [NaN], 1 failed, EXIT=1.\nSuite delta: baseline 2 failed/25 passed and head 2 failed/26 passed; identical two eliminated-constraint failure ids; zero added failures.\nH200 receipt: job 1280380, H200 NVL, exact clip, 135 cells, seed 062b465a..., 0.25 T, Newton 10, GMRES 30, eight active-set residuals, attempted=accepted=72, terminal 8.491385577e-13, row 8.423207074e-12, qualified=false, row_qualified=false.\nReceipt provenance: committed and run-directory control-positive.json are byte-identical at SHA-256 a57fb82818506ce4f76302d14eb64d6266882ed30deeabfb1224b30f0380e06b.\nReachability: edf04ca11 is an ancestor of review base 5179ab0fb; 211d75798 and b17968fe1 are not.",
+  "review_base_sha": "5179ab0fb37ca58b9863a956be0d4c91e63fc46e",
+  "review_run_id": "legacy-980e98453537",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "edf04ca11ba3c2ba08585ea32644a9310b00e8cf",
+  "reviewed_commit": "b17968fe1ad04122140c08935a1df54fac7610c1",
+  "reviewed_head_sha": "b17968fe1ad04122140c08935a1df54fac7610c1",
+  "reviewed_run_id": "r-20261002T133233397975-cco-cap-factor-finite-tangent",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-cap-factor-finite-tangent",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T14:37:21Z",
+  "total": 91
+}

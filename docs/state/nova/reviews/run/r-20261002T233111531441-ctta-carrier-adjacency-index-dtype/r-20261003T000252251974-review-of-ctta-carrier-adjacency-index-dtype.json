@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own gate logs. baseline_suite (revision f7f823c6): base-test_contour_tree_merge.log 11 passed, base-test_contour_tree_mesh.log 8 passed, base-test_contour_tree_conventions.log 6 passed, base-test_contour_tree_brute_force.log 8 passed; each ran to its summary line at EXIT=0, no FAILED ids. after_suite (revision f7f823c6 + working tree a8874ffa): head-test_contour_tree_merge.log 11 passed, head-test_contour_tree_mesh.log 8 passed, head-test_contour_tree_conventions.log 6 passed, head-test_contour_tree_brute_force.log 8 passed; each ran to its summary line at EXIT=0, no FAILED ids. Set difference of failure ids is empty, so added_failure_count=0 and added_failure_ids=[].",
+  "added_failure_ids": [],
+  "artifacts": [
+    "nova/equilibrium/contour_tree.py CARRIER_INDEX_DTYPE=jnp.int32; _carrier_adjacency casts edges once and builds neighbours/counts at that dtype",
+    "tests/test_contour_tree_merge.py two capacity tests carry @pytest.mark.filterwarnings(\"error::FutureWarning\")",
+    "docs/evidence/fragments/contour-tree-topology-authority/ctta-carrier-adjacency-index-dtype.html evidence fragment",
+    "head arm four-file gate: 11/8/6/8 passed, EXIT=0; base arm: 11/8/6/8 passed, EXIT=0",
+    "negative control: restoring edges.astype(jnp.int64) fails both tests, 2 failed, EXIT=1"
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/contour_tree.py:203",
+    "nova/equilibrium/contour_tree.py:205",
+    "nova/equilibrium/contour_tree.py:208",
+    "nova/equilibrium/contour_tree.py:221",
+    "nova/equilibrium/contour_tree.py:224",
+    "nova/equilibrium/contour_tree.py:233"
+  ],
+  "commits_read": [
+    "a8874ffa9ff5a3c9c1edf5b4ca167f861103941c"
+  ],
+  "completed_at": "2026-10-03T00:16:16.518Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T00:03:31Z",
+  "evidence_inputs": "Reviewed f7f823c667f9b65740a04d5de40d991e60a2cd4e..a8874ffa9ff5a3c9c1edf5b4ca167f861103941c (single commit a8874ffa), one source file, one test file, one evidence fragment. base-repro.log reproduces the defect: FutureWarning 'cannot safely cast value from dtype=int64 to dtype=int32' at contour_tree.py:208 scatter inside _carrier_adjacency, 2 failed, EXIT=1. head-carrier-adjacency.log: 2 passed, EXIT=0. negative-control.log: library-side int64 restored, 2 failed at contour_tree.py:221, EXIT=1. Four-file gate both arms 0 failures. Independent reviewer re-run of the two marked tests at the reviewed head under -W error::FutureWarning: 2 passed, EXIT=0.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/contour-tree-topology-authority/ctta-carrier-adjacency-index-dtype.html",
+      "line": "13",
+      "severity": "follow-on",
+      "text": "The fragment says both capacity tests fail at the dispatch base 'under the mark', but the mark is introduced by this same commit; the base arm (base-repro.log) promoted the warning with the command-line flag -W error::FutureWarning against the base test file, which carries no mark. Reword to 'with FutureWarning promoted to an error' so the two mechanisms are not conflated; the negative-control log is what closes the loop that the mark alone catches the regression."
+    }
+  ],
+  "gate_arms_note": "Both suite arms are armed and readable. The two marked capacity tests are not part of the four-file pass counts at the base revision's own gate because the base test file lacks the mark; their base failure is demonstrated separately by base-repro.log under -W error::FutureWarning and by the library-side negative control.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "git diff f7f823c6..a8874ffa (base..head) changes three files, +57/-4. In _carrier_adjacency the caller edges is cast once to CARRIER_INDEX_DTYPE and neighbours/counts are built at that dtype; the append body now reads left,right from carrier_edges. In the test file the two capacity tests gain @pytest.mark.filterwarnings(\"error::FutureWarning\") and test 2's own branch construction is narrowed to int32 so its failure is the library's.",
+    "done_when": "At the dispatch base f7f823c6 the two marked capacity tests fail under a warnings-as-errors promotion (base-repro.log, EXIT=1) with the traceback at the int64-into-int32 scatter inside _carrier_adjacency; at the reviewed head a8874ffa both pass (head-carrier-adjacency.log, EXIT=0; independently re-run read-only by this reviewer at the reviewed revision, EXIT=0). The four-file gate adds no failure: base 11/8/6/8 passed, head 11/8/6/8 passed, both arms ran to their summary lines at EXIT=0.",
+    "goal": "The follow-on item asked for one integer dtype across the carrier adjacency index and the tables it scatters into, and for the JAX FutureWarning (int64 value into int32 table) to fail durably. The commit adds CARRIER_INDEX_DTYPE=jnp.int32, casts the caller edge array once in _carrier_adjacency, builds neighbours/counts at that dtype, and marks the two capacity tests filterwarnings(\"error::FutureWarning\"). Both halves of the item are delivered and nothing broader.",
+    "manifest": "The reviewed manifest is complete, status complete, one commit, changed_paths matching the diff, and carries baseline_suite and after_suite JSON arms (both completed=true, exit_status=0, failure_count=0, failure_ids=[]), a negative_control_log with a bare path, measurement_module and measurement_cwd for the in-place base swap, and no follow-ons or blockers.",
+    "source": "In nova/equilibrium/contour_tree.py at head, line 203 carrier_edges = edges.astype(CARRIER_INDEX_DTYPE), line 205 neighbours int32, line 208 counts int32; the scatters at lines 221/224/227/230 then write int32 values into int32 tables at int32 indices, so no dtype promotion warning. At base the identical scatter read int64 endpoints from the caller's edge array and wrote int32 tables (base-repro.log traceback at contour_tree.py:208).",
+    "write_paths": "The single commit touches exactly nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py and the evidence fragment docs/evidence/fragments/contour-tree-topology-authority/ctta-carrier-adjacency-index-dtype.html. No solver, plan, or tolerance path changed; the reviewed worktree is clean at HEAD a8874ffa."
+  },
+  "justifications": {
+    "durability": "The durable artefact is the in-test filterwarnings mark, which protects against the warning being promoted to an error by a later JAX regardless of the CLI, plus the committed evidence fragment. The base/head receipts, the negative-control log and the heavy brute-force logs live only under the run directory and are not committed, which is the same gap the sibling follow-on item already tracks; this node's own deliverable does not depend on them.",
+    "evidence": "The reviewed run supplies a base reproduction (EXIT=1 with the int64->int32 FutureWarning traceback), a head pass (EXIT=0), a library-side negative control that restores int64 and fails both tests (EXIT=1), and a four-file base/head gate that adds no failure. This reviewer independently re-ran the two marked tests at the reviewed head under -W error::FutureWarning and got 2 passed, EXIT=0, confirming the head arm and the guard on the reviewed bytes. The only weakness is a wording imprecision in the fragment (see findings), not in the measurements.",
+    "fit": "The cast-down direction matches the module's existing index convention (_sweep_tree builds int32 index arrays throughout) and the docstring justifies int32 as exact because carrier vertex indices are bounded by the mesh size. The change is a dtype normalisation at the seam, not a contract change; the public neighbours/counts dtypes are unchanged. No figure is warranted for a dtype fix under the representation test.",
+    "goal_fidelity": "Both halves of the named follow-on are complete: the index and the tables it scatters into share CARRIER_INDEX_DTYPE, and the two capacity tests promote FutureWarning to an error so the regression cannot silently reappear. Nothing beyond the item was added.",
+    "scope_discipline": "One commit, exactly the three declared paths, worktree clean at head, no plan or shared index touched, no unrelated refactor. The test-only narrowing of test 2's own branches array is confined to the test file and is necessary to isolate the library's warning from the test's own scatter."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: f7f823c667f9b65740a04d5de40d991e60a2cd4e\nREVIEWED_HEAD_SHA: a8874ffa9ff5a3c9c1edf5b4ca167f861103941c\nVERDICT: pass-with-follow-ons; carrier adjacency index and its tables now share CARRIER_INDEX_DTYPE.\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 18\nADDED_FAILURES: 0 (base and head four-file arms both 0 failures at EXIT=0).",
+  "review_base_sha": "4654eb30106d68b092116b5700c35871c2c63cb0",
+  "review_run_id": "r-20261003T000252251974-review-of-ctta-carrier-adjacency-index-dtype",
+  "reviewed_base_sha": "f7f823c667f9b65740a04d5de40d991e60a2cd4e",
+  "reviewed_commit": "a8874ffa9ff5a3c9c1edf5b4ca167f861103941c",
+  "reviewed_head_sha": "a8874ffa9ff5a3c9c1edf5b4ca167f861103941c",
+  "reviewed_revision": "a8874ffa9ff5a3c9c1edf5b4ca167f861103941c",
+  "reviewed_run_id": "r-20261002T233111531441-ctta-carrier-adjacency-index-dtype",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-carrier-adjacency-index-dtype",
+  "reviewer_node": "review-of-ctta-carrier-adjacency-index-dtype",
+  "reviewer_run_id": "r-20261003T000252251974-review-of-ctta-carrier-adjacency-index-dtype",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "Followups / f-ctta-sweep-durability-and-placement (item 2)",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T00:12:32Z",
+  "total": 92,
+  "verdict": "pass-with-follow-ons"
+}

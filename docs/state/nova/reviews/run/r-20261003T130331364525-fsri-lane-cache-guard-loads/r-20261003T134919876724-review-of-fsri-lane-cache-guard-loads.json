@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/h200_test_lane/run.sh",
+    "scripts/nova_lane/standing_suite.sh"
+  ],
+  "completed_at": "2026-10-03T13:58:04.114Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T13:49:38Z",
+  "evidence_inputs": {
+    "added_failures_derived": "head-focused.log reports 0 FAILED/ERROR ids, base-focused.log reports 1 (test_payload_prelude_exports_reach_the_target), so the set difference over the reviewed run's own suite fields is 0.",
+    "base_log_revision_named": "9808e6f7 (base-arm scratch tree; scripts from 9300a7714)",
+    "head_log_revision_named": "09ac4b0adb0ad84476f7554dd8e392432bf21869",
+    "independent_rerun": "reran tests/test_nova_lane_launcher.py at reviewed head 2e1ffb4e5: 9 passed, exit 0."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-cache-guard-loads/scripts/nova_lane/run.sh",
+      "line": "160",
+      "severity": "follow-on",
+      "text": "the evaluated prelude inherits the `set +e` set at line 155, where the previous `bash -euo pipefail -c \"${prelude}\"` ran it with errexit on, so a prelude whose early command fails now continues and the recorded status is only the last command's; the H200 prelude's `JAX_COMPILATION_CACHE_DIR=\"$(... cache_guard.pinned_cache_directory())\"` (scripts/h200_test_lane/run.sh:27) would no longer abort the lane on a failed pin computation."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-cache-guard-loads/docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-cache-guard-loads.html",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "the vetted done_when criterion \"cache_guard on the pytest plugins line\" is not met; the fragment substitutes the guard's header/rows/marker and a dummy-plugin control, a justified correction because pytest's plugins: line lists only entry-point plugins, but the deviation means the gate as dispatched was not literally satisfied and a reader comparing criterion to evidence must read the substitution here."
+    }
+  ],
+  "follow_ons": [
+    "the node wrote a 66-line evidence fragment although its dispatch's LANDING YOUR RECORD block states \"this node writes no figure and no evidence prose\"; the fragment is inside the granted paths and the block's first paragraph designates the fragment as the evidence anchor, so this reads as a dispatch-template inconsistency to reconcile rather than a landing defect.",
+    "scripts/h200_test_lane/run.sh:27 computes JAX_COMPILATION_CACHE_DIR through a command substitution inside the prelude; with errexit now off during eval it no longer aborts on failure (see the first finding)."
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "scripts/h200_test_lane/run.sh:40-47 execs scripts/nova_lane/run.sh with --prelude \"${PAYLOAD_PRELUDE}\", and scripts/nova_lane/standing_suite.sh:43 invokes the same launcher.",
+    "diff": "read commit by commit: b091aa8d8 changes one line of scripts/nova_lane/run.sh and adds the launcher test case, 09ac4b0ad adds the fragment, 2e1ffb4e5 edits the fragment's job citations; no product source or test changes after b091aa8d8.",
+    "done_when": "the focused-arm measure ran: base scripts at 9300a7714 record 1 failed/8 passed with the new case reading MISSING (base-focused.log), and head 09ac4b0ad records 9 passed (head-focused.log); the H200-job criterion is met by the guard's header/rows/marker (job 1280627, positive.log) rather than the literal \"pytest plugins line\" the done-when names, which the fragment shows is unsatisfiable for a -p-loaded plugin.",
+    "goal": "read the node goal (\"Make the H200 lane payload prelude exports reach the pytest process so the cache guard plugin loads\") against the landed head 2e1ffb4e5; scripts/nova_lane/run.sh:160 now evaluates the prelude in the payload shell (`{ eval \"${prelude}\"; }`) instead of a `bash -c` subshell, so its exports reach the pytest target, and H200 job 1280627 prints the CACHE_GUARD header, rows and marker the guard emits only when it runs.",
+    "manifest": "the reviewed manifest.md records status complete, commits b091aa8d8/09ac4b0ad/2e1ffb4e5, the three changed paths, paired base/head suite records, four test_logs, a negative_control_log naming negative-h200.log with a declared mutation, and a landing line; I opened the four logs and each matches what the manifest quotes.",
+    "write_paths": "git diff 9300a771470c97ca268927933c98d9ead604cd09..2e1ffb4e576c9bf9dc260c518152293cfec5db5d --name-only is exactly scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-cache-guard-loads.html, all inside the five granted write paths."
+  },
+  "justifications": {
+    "durability": "tests/test_nova_lane_launcher.py:172 test_payload_prelude_exports_reach_the_target reddens on exactly the regression \u2014 the base arm reinstates the `bash -c` subshell and the probe reads MISSING (base-focused.log:200) \u2014 and it compares the target's environment against a value independent of the implementation.",
+    "evidence": "the paired base/head arms and the positive/negative H200 jobs are recorded on disk and reconcile with the manifest; the gate's literal \"plugins line\" criterion is unmet and replaced by header/rows/marker evidence (fsri-lane-cache-guard-loads.html:57-65).",
+    "fit": "run.sh:156-160 follows the surrounding shell style with a mechanism-focused comment carrying no plan, ticket or attribution label, and the test matches the file's existing structure.",
+    "goal_fidelity": "scripts/nova_lane/run.sh:160 evaluates the prelude in the payload shell so its exports reach the target, and H200 job 1280627 (positive.log:15-21) is the guard running that the goal asked for.",
+    "scope_discipline": "git diff 9300a771470c97ca268927933c98d9ead604cd09..2e1ffb4e576c9bf9dc260c518152293cfec5db5d --name-only stays inside the five granted paths, adding only the launcher line, the regression case and the evidence fragment."
+  },
+  "node": "fsri-lane-cache-guard-loads",
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal (\"Make the H200 lane payload prelude exports reach the pytest process so the cache guard plugin loads\") against the landed head 2e1ffb4e5; scripts/nova_lane/run.sh:160 now evaluates the prelude in the payload shell (`{ eval \"${prelude}\"; }`) instead of a `bash -c` subshell, so its exports reach the pytest target, and H200 job 1280627 prints the CACHE_GUARD header, rows and marker the guard emits only when it runs.\nVERDICT done_when: the focused-arm measure ran: base scripts at 9300a7714 record 1 failed/8 passed with the new case reading MISSING (base-focused.log), and head 09ac4b0ad records 9 passed (head-focused.log); the H200-job criterion is met by the guard's header/rows/marker (job 1280627, positive.log) rather than the literal \"pytest plugins line\" the done-when names, which the fragment shows is unsatisfiable for a -p-loaded plugin.\nVERDICT write_paths: git diff 9300a771470c97ca268927933c98d9ead604cd09..2e1ffb4e576c9bf9dc260c518152293cfec5db5d --name-only is exactly scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py and docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-cache-guard-loads.html, all inside the five granted write paths.\nVERDICT manifest: the reviewed manifest.md records status complete, commits b091aa8d8/09ac4b0ad/2e1ffb4e5, the three changed paths, paired base/head suite records, four test_logs, a negative_control_log naming negative-h200.log with a declared mutation, and a landing line; I opened the four logs and each matches what the manifest quotes.\nVERDICT diff: read commit by commit: b091aa8d8 changes one line of scripts/nova_lane/run.sh and adds the launcher test case, 09ac4b0ad adds the fragment, 2e1ffb4e5 edits the fragment's job citations; no product source or test changes after b091aa8d8.\nCALL_SITES: scripts/h200_test_lane/run.sh, scripts/nova_lane/standing_suite.sh\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/nova_lane/run.sh:160 evaluates the prelude in the payload shell so its exports reach the target, and H200 job 1280627 (positive.log:15-21) is the guard running that the goal asked for.\nSCORE evidence: 17\nJUSTIFICATION evidence: the paired base/head arms and the positive/negative H200 jobs are recorded on disk and reconcile with the manifest; the gate's literal \"plugins line\" criterion is unmet and replaced by header/rows/marker evidence (fsri-lane-cache-guard-loads.html:57-65).\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 9300a771470c97ca268927933c98d9ead604cd09..2e1ffb4e576c9bf9dc260c518152293cfec5db5d --name-only stays inside the five granted paths, adding only the launcher line, the regression case and the evidence fragment.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_nova_lane_launcher.py:172 test_payload_prelude_exports_reach_the_target reddens on exactly the regression \u2014 the base arm reinstates the `bash -c` subshell and the probe reads MISSING (base-focused.log:200) \u2014 and it compares the target's environment against a value independent of the implementation.\nSCORE fit: 18\nJUSTIFICATION fit: run.sh:156-160 follows the surrounding shell style with a mechanism-focused comment carrying no plan, ticket or attribution label, and the test matches the file's existing structure.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-cache-guard-loads/scripts/nova_lane/run.sh:160 follow-on: the evaluated prelude inherits the `set +e` set at line 155, where the previous `bash -euo pipefail -c \"${prelude}\"` ran it with errexit on, so a prelude whose early command fails now continues and the recorded status is only the last command's; the H200 prelude's `JAX_COMPILATION_CACHE_DIR=\"$(... cache_guard.pinned_cache_directory())\"` (scripts/h200_test_lane/run.sh:27) would no longer abort the lane on a failed pin computation.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-cache-guard-loads/docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-cache-guard-loads.html:57 follow-on: the vetted done_when criterion \"cache_guard on the pytest plugins line\" is not met; the fragment substitutes the guard's header/rows/marker and a dummy-plugin control, a justified correction because pytest's plugins: line lists only entry-point plugins, but the deviation means the gate as dispatched was not literally satisfied and a reader comparing criterion to evidence must read the substitution here.\n",
+  "review_run_id": "r-20261003T134919876724-review-of-fsri-lane-cache-guard-loads",
+  "reviewed_base_sha": "9300a771470c97ca268927933c98d9ead604cd09",
+  "reviewed_commit": "2e1ffb4e576c9bf9dc260c518152293cfec5db5d",
+  "reviewed_head_sha": "2e1ffb4e576c9bf9dc260c518152293cfec5db5d",
+  "reviewed_run_id": "r-20261003T130331364525-fsri-lane-cache-guard-loads",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-cache-guard-loads",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T13:56:42.354732+00:00",
+  "total": 91
+}

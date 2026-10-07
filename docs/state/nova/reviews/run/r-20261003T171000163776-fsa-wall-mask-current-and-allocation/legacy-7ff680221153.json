@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T17:34:12.569Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T17:10:19Z",
+  "findings": [
+    {
+      "file": "tests/test_renderer_wall_scan.py",
+      "line": 62,
+      "severity": "follow-on",
+      "text": "test_control_flags_direct_tricontour_on_scattered_nodes pins (benchmarks/sol_ledger_current_census.py, 415) as a control site that must be flagged, but this node's charter is to guard exactly that site, so the repair turns the scanner's own test file red - reproduced at the reviewed head: 1 failed in 21.37s EXIT=1. The module docstring (tests/renderer_wall_scan.py:6-8) claims a repair that fixes a call site cannot turn the file red, which this contradicts. The reviewed run discloses this under follow_ons and is fenced out of tests/; a tests/ owner must repoint the control to a site still unguarded after the batch or replace it with a crafted-source example as test_reports_a_wall_less_painter is."
+    },
+    {
+      "file": "benchmarks/unit_amplitude_current_census.py",
+      "line": 689,
+      "severity": "follow-on",
+      "text": "Routing the negative-level arm through draw_scattered_contours introduces a hard ValueError where the previous bare ax.tricontour drew: when every per-cell difference is zero, _figure_levels (line 643) returns [0.0], so levels[levels > 0.0] is empty and draw_scattered_contours (nova/media/poloidal.py:255) raises 'at least one contour level is required', whereas ax.tricontour(levels=numpy.array([])) auto-selects levels and draws (probe: bare tricontour with empty levels draws one collection). Degenerate but reachable, and it converts a rendered panel into a crash; guard the empty level array or let the painter treat an empty level list as 'no contour'."
+    },
+    {
+      "file": "tests/test_null_generator_admission.py",
+      "line": 266,
+      "severity": "follow-on",
+      "text": "This existing test file imports a changed module (from benchmarks import xpoint_cell_allocation_rca at line 266) but was neither named nor logged by the run's gate, contrary to the done-when's 'Every existing test file that imports a changed module passes with zero added failures against the base (name them and log both arms)'. The other two importing modules (tests/test_sol_ledger_render.py, tests/test_renderer_wall_scan.py) were covered. Consequence: the largest change, xpoint_cell_allocation_rca._draw_figure_two, is exercised only by the static scanner - no test executes its paint path, so the raster-to-scattered-representation switch in the error panel is verified only by import and AST. Run the third arm or state why it is out of the gate."
+    }
+  ],
+  "gate_arms_note": "The reviewed run is not armed: its manifest records baseline_suite: none and after_suite: none (classification.json confirms manifest/data/baseline_suite = None), so it logged no structured baseline_suite/after_suite arms and the read path (reckon/crew/review.py added_failures_from_gate_logs) would mark the count unmeasured. Derived instead from the base/head gate arms the run did log under test_logs: base arm import-tests-base.log (rev 68762d3, cmd 'JAX_PLATFORMS=cpu <venv>/bin/python -m pytest -m \"slow or not slow\" -p no:cacheprovider -q tests/test_sol_ledger_render.py tests/test_outboard_hole_census_gate.py', exit 1, completed true, failure_ids [test_receipt_names_the_revision_it_was_solved_at]); after arm import-tests-head.log (exit 0, completed true, 7 passed, failure_ids []). The lone base failure is an environment artifact (the base arm ran in the scratch base-tree, which is not a git repository, so git rev-parse HEAD returns 128), not a code defect; added_failure_ids = after - base = [] and added_failure_count = 0. Separately, the scanner's own test module is NOT one of the run's arms: at the reviewed head tests/test_renderer_wall_scan.py::test_control_flags_direct_tricontour_on_scattered_nodes fails (independently reproduced, 1 failed EXIT=1), a pass->fail regression the run discloses under follow_ons; it is reported as a finding rather than folded into added_failure_ids because the reviewed run logged no base arm for that module. The base/head scanner arms (base-scan.log EXIT=1 with five sites, head-scan.log EXIT=0) also give added = 0.",
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against 68762d3; one commit 82bede2a touches four files and routes the five named call sites, with a conventional subject, a body, and no AI trailer.",
+    "done_when": "the done_when names the scanner CLI as the gate; the manifest records head EXIT=0 and base EXIT=1 listing exactly the five sites, and both arms were reproduced first-hand.",
+    "goal": "the node goal is to route every unguarded scattered-field renderer call in this batch through the wall mask; all five sites now call the wall-masked painters and the scanner exits clean.",
+    "manifest": "read; it records head EXIT=0/base EXIT=1, the two import-test arms, the commit 82bede2aa, and honestly files the scanner-test regression under follow_ons; baseline_suite/after_suite are none because the node is not armed.",
+    "write_paths": "read the manifest's declared paths; every path in the diff (three benchmark drivers plus the evidence fragment) is inside them, and the report is the run-directory artifact."
+  },
+  "justifications": {
+    "durability": "The repair routes to painters whose mask is real and demonstrable (probe: 77 of 128 triangles outside a concave wall masked, and draw_flux_contours(wall=) blanks outside points), so the guarding is structural rather than a scanner-appeasing edit. Weaknesses: the scanner's own file has no durable control for this change - its test_control_flags_direct_tricontour_on_scattered_nodes pins benchmarks/sol_ledger... :415, the very site this node guards, so the repair turns tests/test_renderer_wall_scan.py red (reproduced, 1 failed EXEIT=1), contradicting the module docstring's claim that a repair cannot turn the file red (finding 1); and no test executes the change, so a regression in _draw_figure or _draw_figure_two would not be caught (finding 3); and the empty-level case at unit_amplitude:689 now raises where it previously drew (finding 2).",
+    "evidence": "The gate is reproduced rather than merely read: scanner head EXIT=0 (no records), scanner base EXIT=1 with exactly the five named sites; the mask mechanism was reproduced directly (triangles_outside_wall masks 77 of 128 triangles for a concave wall, draw_scattered_contours and draw_flux_contours(wall=) both draw). The run's negative control is real and falsifiable. Deductions: the run named only two of the three existing test files that import a changed module - tests/test_null_generator_admission.py:266 imports xpoint_cell_allocation_rca and was neither named nor logged, against the done-when's 'name them and log both arms' (finding 3); and the manifest leaves baseline_suite/after_suite as none, so the structured suite arms the done-when's zero-added-failures clause rests on are absent and the third module's arm is unread.",
+    "fit": "Minimal and idiomatic: the change reuses the existing nova.media.poloidal wall-masked painters and the wall each driver already holds, adds no abstraction and no dependency, and the xpoint change removes a genuinely-dead LinearNDInterpolator result while keeping radius_grid/height_grid for the flux raster below. No plan, sprint or ticket identifier appears in the changed symbols, comments or commit subject. Deductions: the xpoint error panel switches representation from an interpolated 181x181 raster contour to a tricontour over scattered cell centres, a behavioural change beyond pure masking that the spec's rule does not strictly require (finding 3 context); and the unit_amplitude empty-level edge (finding 2).",
+    "goal_fidelity": "The goal - route every unguarded scattered-field renderer call in this batch through the wall mask - is met: the scanner at the reviewed head 82bede2a exits 0 with no records (reproduced), and the same command at the base 68762d3 exits 1 listing exactly the five sites benchmarks/unit_amplitude_current_census.py:681,689, benchmarks/sol_ledger_current_census.py:415 and benchmarks/xpoint_cell_allocation_rca.py:1493,1531 (reproduced). Each driver's wall (a bare (N,2) ndarray that coerce_wall_units reads as one closed vessel unit, matching how each driver draws its own wall) is passed to draw_scattered_contours (wall required) or draw_flux_contours(wall=...). Not full marks for the empty-level behaviour change at benchmarks/unit_amplitude_current_census.py:689 (finding 2) and the unexecuted paint path (finding 3).",
+    "scope_discipline": "The diff touches only benchmarks/unit_amplitude_current_census.py, benchmarks/sol_ledger_current_census.py, benchmarks/xpoint_cell_allocation_rca.py and docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-current-and-allocation.html - all inside the granted write paths - and the regeneration report lives under the run outside the repository; no source under nova/, no plan, and no test file is edited. The run correctly leaves the tests/ regression to a follow-on rather than editing out of scope. The single commit 82bede2a carries a conventional subject and a body, has no AI trailer, and a label scan over the three changed sources is clean save a hex colour literal."
+  },
+  "node": "review-of-fsa-wall-mask-current-and-allocation",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to route every unguarded scattered-field renderer call in this batch through the wall mask; all five sites now call the wall-masked painters and the scanner exits clean.\nVERDICT done_when: the done_when names the scanner CLI as the gate; the manifest records head EXIT=0 and base EXIT=1 listing exactly the five sites, and both arms were reproduced first-hand.\nVERDICT write_paths: read the manifest's declared paths; every path in the diff (three benchmark drivers plus the evidence fragment) is inside them.\nVERDICT manifest: read; it records head EXIT=0/base EXIT=1, the two import-test arms, commit 82bede2aa, and honestly files the scanner-test regression under follow_ons; baseline_suite/after_suite are none because the node is not armed.\nVERDICT diff: read commit by commit against 68762d3; one commit 82bede2a touches four files and routes the five named call sites, with a conventional subject, a body, and no AI trailer.\nCALL_SITES: benchmarks/unit_amplitude_current_census.py:_draw_figure, benchmarks/sol_ledger_current_census.py:_draw_panel, benchmarks/xpoint_cell_allocation_rca.py:_draw_figure_two\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the scanner at the reviewed head 82bede2a exits 0 with no records (reproduced) and at the base 68762d3 exits 1 listing exactly the five sites benchmarks/unit_amplitude_current_census.py:681,689, benchmarks/sol_ledger_current_census.py:415 and benchmarks/xpoint_cell_allocation_rca.py:1493,1531 (reproduced), so the batch is fully guarded. Not full marks for the empty-level behaviour change at benchmarks/unit_amplitude_current_census.py:689 (finding 2) and the unexecuted paint path (finding 3).\nSCORE evidence: 15\nJUSTIFICATION evidence: scanner head EXIT=0 and base EXIT=1 (five sites) were reproduced, and the mask mechanism was reproduced directly (triangles_outside_wall masks 77/128 triangles for a concave wall; draw_scattered_contours and draw_flux_contours(wall=) both draw); deductions because the run named only two of three importing test files (tests/test_null_generator_admission.py:266 unlogged, finding 3) and left baseline_suite/after_suite as none.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches only the three benchmark drivers and the evidence fragment, all inside the granted write paths, edits no nova/ source, no plan and no test file, and the commit benchmarks/unit_amplitude_current_census.py carries a conventional subject and body with no AI trailer and only a hex-colour literal flagged by a label scan.\nSCORE durability: 15\nJUSTIFICATION durability: the routing masks for real (probe: 77/128 triangles outside a concave wall masked), but the scanner's own control tests/test_renderer_wall_scan.py:62 pins the guarded site and turns red on this repair (reproduced, 1 failed EXIT=1), no test executes the changed paint paths, and the empty-level case at unit_amplitude:689 now raises where it drew.\nSCORE fit: 17\nJUSTIFICATION fit: the change reuses the existing wall-masked painters nova/media/poloidal.py:223,262 and the wall each driver already holds, adds no abstraction or dependency, and removes a dead LinearNDInterpolator at benchmarks/xpoint_cell_allocation_rca.py:1483; deduction for the raster-to-scattered representation switch and the empty-level edge at benchmarks/unit_amplitude_current_census.py:689.\nFINDING tests/test_renderer_wall_scan.py:62 follow-on: the control pins benchmarks/sol_ledger_current_census.py:415, the site this node guards, so the repair turns the scanner's own file red (reproduced 1 failed EXIT=1), contradicting the module docstring at tests/renderer_wall_scan.py:6-8; a tests/ owner must repoint the control to a still-unguarded site or a crafted source.\nFINDING tests/test_null_generator_admission.py:266 follow-on: this file imports xpoint_cell_allocation_rca but was neither named nor logged by the run's gate, against the done-when's 'name them and log both arms', so the largest change (_draw_figure_two) is exercised only by the static scanner and no test executes its paint path.\nFINDING benchmarks/unit_amplitude_current_census.py:689 follow-on: when all differences are zero, _figure_levels returns [0.0] and levels[levels > 0.0] is empty, which draw_scattered_contours (nova/media/poloidal.py:255) rejects with a ValueError where the previous bare ax.tricontour(levels=[]) auto-selected levels and drew, converting a rendered panel into a crash.\n",
+  "review_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "review_run_id": "legacy-7ff680221153",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "reviewed_commit": "82bede2aac98bb49a472dfdd5f1d345660c16d74",
+  "reviewed_commits": [
+    "82bede2aac98bb49a472dfdd5f1d345660c16d74"
+  ],
+  "reviewed_head_sha": "82bede2aac98bb49a472dfdd5f1d345660c16d74",
+  "reviewed_run_id": "r-20261003T171000163776-fsa-wall-mask-current-and-allocation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-wall-mask-current-and-allocation",
+  "reviewer_node": "review-of-fsa-wall-mask-current-and-allocation",
+  "reviewing_run_id": "r-20261003T173529592837-review-of-fsa-wall-mask-current-and-allocation",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T17:58:00Z",
+  "total": 84,
+  "verdict": "pass"
+}

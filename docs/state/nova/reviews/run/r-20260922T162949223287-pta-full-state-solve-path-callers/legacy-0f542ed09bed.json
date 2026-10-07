@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/forward.py:2680 complete state into read_qualification",
+    "nova/equilibrium/forward.py:1463 LCFS slice audited raster-only",
+    "nova/equilibrium/forward.py:1537 strike-point slice audited no census",
+    "nova/equilibrium/forward_operator.py:3120 shared-node slice no census",
+    "nova/equilibrium/reduced_newton.py:2329 claim-blocked caller allowlisted"
+  ],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "tests/test_solve_path_census_inputs.py",
+      "line": "47",
+      "text": "_prefix_sources requires node.slice.lower to be None and the upper bound to be an attribute named physical_node_number, so a probe measured state[0:operator.physical_node_number] and a limit bound to a local variable as zero findings while the canonical form is found; the pin that exists because a grep missed prefix-slicing callers can be escaped by writing 0:."
+    },
+    {
+      "file": "tests/test_solve_path_census_inputs.py",
+      "line": "20",
+      "text": "_CENSUS_READS is a fixed seven-name list that omits entry points reaching the census behind an internal callee, so the site the record itself names as reaching the raster census through _connectivity_read (forward.py:1463) is outside the scanner and its disposition rests on prose."
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "1463",
+      "text": "no control constructs the moment_geometry-is-None branch, so the claim that this carrier has no direct-sampling suffix is a reading of the construction sites rather than a measured property; a sampling carrier without moment geometry would still truncate here."
+    },
+    {
+      "file": "docs/figures/plasma-cell-topology-authority/consumer-migration.json",
+      "line": "292",
+      "text": "the safe_prefix_audit row for forward.py:1463 carries a string under reaches_census while its siblings carry a boolean beside a separate reason, so a consumer reading that key as a boolean gets prose for exactly the row whose disposition is subtle."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "Sound. The production change is exactly the two terminal-receipt lines; a diff of bb076f460 against the final head over nova and tests is empty, so the tested revision's code and test blobs are the delivered ones, and the eleven-path diff is confined to the source pair, the plan, the anchor, the inventory, the four device artefacts and the flow diagram.",
+    "done_when": "Met in the authorized seam form. The two-line repair, the 1463 and 1537 audits, reduced_newton.py:2329 left untouched behind the scanner allowlist, forward_operator.py:3120 recorded as needing no patch, the new regression file, the migration inventory rows, the CPU lane and the H200 arm with logs are all present. The declared negative control was exercised against the terminal seam rather than the full solve under the coordinator's recorded lane split, so the clause that the solve regression be observed to fail holds in its seam form only.",
+    "goal": "Met. forward.py:2680 passes the complete terminal state to read_qualification, and the recorded 730-value and 772-value own-node carriers now reach the receipt without the direct-sampling refusal.",
+    "manifest": "Complete and checkable. The reviewed manifest carries status complete, 13 commits, 11 changed paths, 17 test log paths, both suite JSONs with identical failure id sets and added ids none, the wait keys, and an in-process audit that is clean.",
+    "write_paths": "Respected. The eleven changed paths match the declared write paths; no file under another node's fence appears in the diff, and forward_operator.py, reduced_newton.py and tests/test_null_generator_admission.py are absent from it."
+  },
+  "justifications": {
+    "durability": "The fix is minimal and the artefacts are committed, but the source pin that guards it has measured blind spots: a slice written as state[0:operator.physical_node_number] or bounded through a local variable draws no finding, and census reads reached behind an internal callee are outside its name list.",
+    "evidence": "The base arm runs a source overlay that asserts the pre-repair prefix is present, so the 170-versus-176 comparison is against the failing code; the device archives reproduce the headline table to the last digit (730 and 772 values, 132 and 135 cells, residuals 0.15210159579534352 and 0.04707896271873737, two and one finite landmarks, converged false in both), and the negative log opens with the declared mutation verbatim.",
+    "fit": "Matches the plan contract: the caller is repaired rather than the reader, the pool constructor stays canonical, and the plan and anchor records are appended without touching plan status or sprint state.",
+    "goal_fidelity": "The repair lands at the caller the plan named, leaves the reader owning pool construction, and closes the main-branch regression that blocked every exact-mode own-node solve.",
+    "scope_discipline": "Eleven declared paths only, claim-blocked files untouched, and the one departure from the done-when was authorized on the record before it was taken rather than silently re-scoped."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: Met. forward.py:2680 passes the complete terminal state to read_qualification, and the recorded 730-value and 772-value own-node carriers now reach the receipt without the direct-sampling refusal.\nVERDICT done_when: Met in the authorized seam form. The two-line repair, the 1463 and 1537 audits, reduced_newton.py:2329 left untouched behind the scanner allowlist, forward_operator.py:3120 recorded as needing no patch, the new regression file, the migration inventory rows, the CPU lane and the H200 arm with logs are all present. The declared negative control was exercised against the terminal seam rather than the full solve under the coordinator's recorded lane split, so the clause that the solve regression be observed to fail holds in its seam form only.\nVERDICT write_paths: Respected. The eleven changed paths match the declared write paths; no file under another node's fence appears in the diff, and forward_operator.py, reduced_newton.py and tests/test_null_generator_admission.py are absent from it.\nVERDICT manifest: Complete and checkable. The reviewed manifest carries status complete, 13 commits, 11 changed paths, 17 test log paths, both suite JSONs with identical failure id sets and added ids none, the wait keys, and an in-process audit that is clean.\nVERDICT diff: Sound. The production change is exactly the two terminal-receipt lines; a diff of bb076f460 against the final head over nova and tests is empty, so the tested revision's code and test blobs are the delivered ones, and the eleven-path diff is confined to the source pair, the plan, the anchor, the inventory, the four device artefacts and the flow diagram.\nCALL_SITES: nova/equilibrium/forward.py:2680 complete state into read_qualification, nova/equilibrium/forward.py:1463 LCFS slice audited raster-only, nova/equilibrium/forward.py:1537 strike-point slice audited no census, nova/equilibrium/forward_operator.py:3120 shared-node slice no census, nova/equilibrium/reduced_newton.py:2329 claim-blocked caller allowlisted\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The repair lands at the caller the plan named, leaves the reader owning pool construction, and closes the main-branch regression that blocked every exact-mode own-node solve.\nSCORE evidence: 19\nJUSTIFICATION evidence: The base arm runs a source overlay that asserts the pre-repair prefix is present, so the 170-versus-176 comparison is against the failing code; the device archives reproduce the headline table to the last digit (730 and 772 values, 132 and 135 cells, residuals 0.15210159579534352 and 0.04707896271873737, two and one finite landmarks, converged false in both), and the negative log opens with the declared mutation verbatim.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: Eleven declared paths only, claim-blocked files untouched, and the one departure from the done-when was authorized on the record before it was taken rather than silently re-scoped.\nSCORE durability: 15\nJUSTIFICATION durability: The fix is minimal and the artefacts are committed, but the source pin that guards it has measured blind spots: a slice written as state[0:operator.physical_node_number] or bounded through a local variable draws no finding, and census reads reached behind an internal callee are outside its name list.\nSCORE fit: 18\nJUSTIFICATION fit: Matches the plan contract: the caller is repaired rather than the reader, the pool constructor stays canonical, and the plan and anchor records are appended without touching plan status or sprint state.\nFINDING tests/test_solve_path_census_inputs.py:47 _prefix_sources requires node.slice.lower to be None and the upper bound to be an attribute named physical_node_number, so a probe measured state[0:operator.physical_node_number] and a limit bound to a local variable as zero findings while the canonical form is found; the pin that exists because a grep missed prefix-slicing callers can be escaped by writing 0:.\nFINDING tests/test_solve_path_census_inputs.py:20 _CENSUS_READS is a fixed seven-name list that omits entry points reaching the census behind an internal callee, so the site the record itself names as reaching the raster census through _connectivity_read (forward.py:1463) is outside the scanner and its disposition rests on prose.\nFINDING nova/equilibrium/forward.py:1463 no control constructs the moment_geometry-is-None branch, so the claim that this carrier has no direct-sampling suffix is a reading of the construction sites rather than a measured property; a sampling carrier without moment geometry would still truncate here.\nFINDING docs/figures/plasma-cell-topology-authority/consumer-migration.json:292 the safe_prefix_audit row for forward.py:1463 carries a string under reaches_census while its siblings carry a boolean beside a separate reason, so a consumer reading that key as a boolean gets prose for exactly the row whose disposition is subtle.\nREVISION: 110ecf8f2f52aae3b82d14ed7cfd9b6a78d38438\n",
+  "review_run_id": "legacy-0f542ed09bed",
+  "review_run_id_source": "derived",
+  "reviewed_revision": "110ecf8f2f52aae3b82d14ed7cfd9b6a78d38438",
+  "reviewed_run_id": "r-20260922T162949223287-pta-full-state-solve-path-callers",
+  "reviewer_node": "review-of-pta-full-state-solve-path-callers",
+  "reviewing_run_id": "r-20260922T175501524870-review-of-pta-full-state-solve-path-callers",
+  "scores": {
+    "durability": 15,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-22T18:08:32.786478+00:00",
+  "total": 88
+}

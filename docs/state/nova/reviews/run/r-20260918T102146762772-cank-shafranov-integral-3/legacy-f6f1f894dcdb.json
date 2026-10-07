@@ -1,0 +1,45 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
+      "line": "514",
+      "text": "the claim that the member residuals fall monotonically with the grid is contradicted by the record's own table and by the committed receipt.json, where the toroidal member residual rises from 2.91e-6 at 641 contour points to 5.64e-5 at 1281."
+    },
+    {
+      "file": "docs/evidence/archive/constraint-augmented-newton-krylov-landed.html",
+      "line": "544",
+      "text": "the claim that the figure's title and its receipt both say the grid-imaged route is not exercised is unsupported, because receipt.json carries no statement at all and the figure's title names only the missing build-once timing."
+    },
+    {
+      "file": "docs/plans/constraint-augmented-newton-krylov.html",
+      "line": "26",
+      "text": "the plan-version meta line was advanced by hand in two commits, 74 to 75 in 783b2688 and 75 to 76 in 09ab9437, so the plan's provenance is ambiguous between hand edits and reckon's own bookkeeping."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_equilibrium_diagnostics.py:425-510 fails on a regression of the contour-against-volume identity residual, the fitted fall-off order, or the positive control that drops the toroidal volume from the assembly.",
+    "evidence": "the analytic gate re-ran first-hand in one all_debug job on JAX_PLATFORMS=cpu through the shared interpreter, 62 passed with EXIT=0 recorded in gate-rerun.log and matching the node's virial-gate.log, though two sentences of the evidence record assert more than the committed receipt and the figure title carry.",
+    "fit": "the frozen ShafranovContourIntegrals receipt at nova/equilibrium/diagnostics.py:130 mirrors VerticalConditioningReceipt at the same file:29, shares MU0 with nova.biot.greens, and the diff's naming checks are clean.",
+    "goal_fidelity": "nova/equilibrium/diagnostics.py:173-340 lands the exact contour functional and the volume assembly with the analytic gate, but the goal's Biot poloidal field imaged once on the grid and interpolated to the boundary contour is not landed, and the node defers it in its manifest's follow_ons, so the delivered functional cannot yet consume the Biot operator's output as the goal's wording implies.",
+    "scope_discipline": "every path in the six commits lies inside the node's declared write paths, but docs/plans/constraint-augmented-newton-krylov.html was edited by direct HTML in 783b2688 and 09ab9437, against the plan system's rule that plan files are edited only through the reckon tools."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/equilibrium/diagnostics.py:173-340 lands the exact contour functional and the volume assembly with the analytic gate, but the goal's Biot poloidal field imaged once on the grid and interpolated to the boundary contour is not landed, and the node defers it in its manifest's follow_ons, so the delivered functional cannot yet consume the Biot operator's output as the goal's wording implies.\nSCORE evidence: 15\nJUSTIFICATION evidence: the analytic gate re-ran first-hand in one all_debug job on JAX_PLATFORMS=cpu through the shared interpreter, 62 passed with EXIT=0 recorded in gate-rerun.log and matching the node's virial-gate.log, though two sentences of the evidence record assert more than the committed receipt and the figure title carry.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in the six commits lies inside the node's declared write paths, but docs/plans/constraint-augmented-newton-krylov.html was edited by direct HTML in 783b2688 and 09ab9437, against the plan system's rule that plan files are edited only through the reckon tools.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_equilibrium_diagnostics.py:425-510 fails on a regression of the contour-against-volume identity residual, the fitted fall-off order, or the positive control that drops the toroidal volume from the assembly.\nSCORE fit: 18\nJUSTIFICATION fit: the frozen ShafranovContourIntegrals receipt at nova/equilibrium/diagnostics.py:130 mirrors VerticalConditioningReceipt at the same file:29, shares MU0 with nova.biot.greens, and the diff's naming checks are clean.\nFINDING docs/evidence/archive/constraint-augmented-newton-krylov-landed.html:514 the claim that the member residuals fall monotonically with the grid is contradicted by the record's own table and by the committed receipt.json, where the toroidal member residual rises from 2.91e-6 at 641 contour points to 5.64e-5 at 1281.\nFINDING docs/evidence/archive/constraint-augmented-newton-krylov-landed.html:544 the claim that the figure's title and its receipt both say the grid-imaged route is not exercised is unsupported, because receipt.json carries no statement at all and the figure's title names only the missing build-once timing.\nFINDING docs/plans/constraint-augmented-newton-krylov.html:26 the plan-version meta line was advanced by hand in two commits, 74 to 75 in 783b2688 and 75 to 76 in 09ab9437, so the plan's provenance is ambiguous between hand edits and reckon's own bookkeeping.\n\nCHECKS (the evidence behind the scores; no other prefixed lines follow)\nderived: all three virial identities were re-derived independently from div T = 0 with T = (B x B - B^2 I / 2) / mu0 - p I and each holds with mu0 explicit: xi = R e_R gives T_xx + T_yy = -(B_Z^2/mu0 + 2p), xi = R e_R + Z e_Z gives tr T = -(B^2/2mu0 + 3p), and xi = e_R gives T_phiphi/R = [(B_phi^2 - B_p^2)/2mu0 - p]/R.\nelements: dS = 2 pi R dl is applied consistently to all three members at nova/equilibrium/diagnostics.py:262-269 and dV = 2 pi R dA on the matching volume sides; no member mixes the two weights.\nassembly: W = -2 mu0 S_v - 6 mu0 P - Z and beta_p + l_i/2 = (4P + W/mu0)/(mu0 Rbar Ip^2) are exact algebra matching nova/equilibrium/observation.py:543-562, with W = integral B_p^2 dV confirmed at nova/equilibrium/clip_quadrature.py:412 and nova/equilibrium/forward.py:1352.\nnot-alone: the claim that no single xi yields the combination is corroborated, because matching the pressure coefficient forces tr grad xi = -4 and the toroidal diagonal then forces xi_R = -2R, contradicting the poloidal diagonal -1.\nreceipt: the receipt, evidence and plan numbers match the logs (cancellation 5.8810737 against 5.8737563, one part in 7.3e3; fitted orders 1.2262 over 201-801 and 0.3529 over 321-1281, shaped bias 1.3991e-1); receipt.json is byte-identical to the measured certificate.json; the committed SVG carries no text (path glyphs), so the title was read from render_certificate.py:114.\ncommits: all six commits carry bodies and no AI attribution and touch only the node's fence paths; the naming checks over the diff are clean.\n",
+  "review_run_id": "legacy-f6f1f894dcdb",
+  "review_run_id_source": "derived",
+  "reviewed_run_id": "r-20260918T102146762772-cank-shafranov-integral-3",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-18T20:25:04.458697+00:00",
+  "total": 82
+}

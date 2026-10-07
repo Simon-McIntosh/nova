@@ -1,0 +1,129 @@
+{
+  "absent": [
+    "The reviewed manifest has empty baseline_suite and after_suite fields, and the CPU reproduction log stops after collection without a pytest summary. There is no paired, completed suite comparison from which a failure-id delta can be calculated.",
+    "The benchmark records terminal residual-shadow Hamming distances, not the shadow-mask history at each of the 80 Picard trips. Its matched live and fixed-shadow arms nevertheless bound the net effect of any unrecorded transient selection for these fixtures."
+  ],
+  "absent_items": [
+    {
+      "item": "paired baseline and after suite arms",
+      "why": "The measurement changes no product source or test path and its reviewed manifest leaves both suite declarations empty; the only completed gate is the H200 benchmark receipt."
+    },
+    {
+      "item": "per-trip residual-shadow history",
+      "why": "Only terminal masks are recorded, as specified by the measurement gate. A future continuous-dependency investigation would need the carried mask sequence to distinguish a transient selection change from another non-smooth dependency."
+    }
+  ],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest's baseline_suite and after_suite are both empty and neither names a completed gate log. Therefore no paired reviewed-run failure-id set difference exists: added_failure_count is null and added_failure_ids is empty by the unmeasured rule, rather than a claimed zero-failure delta.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "replays Picard with a constant unperturbed terminal shadow and emits live, held and reverse values for all three fixtures",
+      "path": "benchmarks/picard_shadow_crossing.py"
+    },
+    {
+      "headline": "live and held finite differences coincide while reverse references remain separated",
+      "path": "docs/figures/forward-solver-route-integrity/picard-shadow-crossing/finite-difference-comparison.png"
+    },
+    {
+      "headline": "records zero terminal-shadow Hamming distance for every signed perturbation and identifies the remaining continuous-dependency investigation",
+      "path": "docs/evidence/fragments/forward-solver-route-integrity/fsri-picard-shadow-crossing-measurement.html"
+    }
+  ],
+  "commits_read": [
+    "d8bc23881be8933ef969ee4148458053e2fbc3bc",
+    "03c745932160aee6e29acc5e67630c4876b1f968"
+  ],
+  "completed_at": "2026-10-02T22:16:21Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T22:09:38Z",
+  "evidence_inputs": {
+    "H200_receipt": "Job 1280498 completed at d8bc23881be8933ef969ee4148458053e2fbc3bc with EXIT_STATUS=0; it reports every requested perturbation row and the stated reverse-versus-held errors.",
+    "mechanism_result": "Terminal residual-shadow crossings are absent in all measured signs and steps, and holding the terminal residual shadow changes neither finite-difference disagreement enough to explain the failures nor the large reverse mismatch.",
+    "reviewed_range": "d8bc23881be8933ef969ee4148458053e2fbc3bc..03c745932160aee6e29acc5e67630c4876b1f968 changes only the declared measurement artifacts.",
+    "suite_delta": "Unmeasured: the reviewed run records no completed baseline_suite or after_suite arms, so no candidate failure delta is asserted."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/forward-solver-route-integrity/picard-shadow-crossing/finite-difference-comparison.png",
+      "line": "rendered canvas",
+      "severity": "follow-on",
+      "text": "The left y-axis label and right x-axis label are clipped in the committed raster, and the panels have titles. Re-render with sufficient horizontal margin and move panel identity into the fragment caption so the figure meets the repository data-ink presentation contract."
+    },
+    {
+      "file": "benchmarks/picard_shadow_crossing.py",
+      "line": "_current_arm and _moment_arm",
+      "severity": "follow-on",
+      "text": "The measurement records only terminal shadow-mask Hamming distances. The present fixed-shadow comparison rules out a material net residual-shadow effect, but an investigation of the remaining continuous Picard, adjoint or observation-map dependency should record the carried mask at every Picard trip to make any transient crossing directly observable."
+    }
+  ],
+  "follow_ons": [
+    "Re-render the comparison figure with unclipped axis labels and caption-led identity before using it as a polished plan visual.",
+    "Instrument the carried residual-shadow sequence per Picard trip while investigating the remaining continuous Picard, adjoint or observation-map dependency; do not treat a terminal-only zero as a general no-crossing proof.",
+    "For a future measurement rerun, capture completed paired suite receipts when a test delta is relevant; this measurement-only node cannot establish one from its incomplete CPU attempt."
+  ],
+  "gate_arms_note": "The reviewed run's completed arm is RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --force-submit --rungs h200 --mode script benchmarks/picard_shadow_crossing.py, recorded in picard-shadow-crossing-h200.log as job 1280498 with EXIT_STATUS=0. Its separate CPU pytest reproduction stops after collection and is not a readable completed suite arm.",
+  "item_verdicts": {
+    "goal": "Met. The committed benchmark measures all three named derivative fixtures at their stated perturbations, records sign, step, Picard-trip count, terminal residual and terminal-shadow Hamming distance, and compares live and fixed-terminal-shadow finite differences with reverse derivatives.",
+    "mechanism": "Refuted for these fixtures. All six moment-map sign/step rows have zero Picard trips and zero terminal-shadow Hamming distance. Both conductor observables use \u00b1293.18627897744824 at probe 3 for 80 trips, their plus/minus terminal residuals are 0.001128204908600261 and 0.0011267771940676795, and every terminal-shadow Hamming distance is zero. Fixed-shadow finite differences match live values within 7.367479022690748e-15 for flux-squared and 1.986188991054405e-13 for plasma current, while held reverse relative errors remain 63.47875093046983 and 11.313969220446987.",
+    "receipt": "Readable. The H200 lane receipt names source revision d8bc23881be8933ef969ee4148458053e2fbc3bc, worktree, interpreter, command, job 1280498, all machine-readable values, and ends EXIT_STATUS=0. The summary log agrees with its three moment relative errors and two held reverse errors.",
+    "route_wiring": "Verified. fixed_point.picard binds both supplied shadow callbacks, carries previous_shadow into mapped_with_shadow, and promotes it after each relaxed candidate. forward_operator._exclude_shadow_residual returns jnp.where(shadow, psi, mapped). The benchmark's fixed callbacks always return the unperturbed terminal mask, so its held arm exercises the proposed selection seam rather than merely relabelling the result.",
+    "scope": "Met. The reviewed base-to-head range changes exactly the declared benchmark, evidence fragment, and named figure path. It changes no solver source, test file, plan, or undeclared product path; git diff --check reports no whitespace error."
+  },
+  "justifications": {
+    "durability": "The benchmark, landing fragment and rendered figure are committed at the reviewed head, and the run directory preserves both the H200 receipt and its JSON report. Replay remains weaker than it should be because the structured report is not committed beside the figure and the incomplete CPU pytest attempt does not provide a final summary or exit line.",
+    "evidence": "The committed benchmark uses the actual fixture module and Picard callback injection, and the completed H200 receipt contains the literal command, revision, job, environment, emitted JSON and EXIT_STATUS=0. The committed fragment, sibling JSON and summary reconcile numerically. The record does not contain a completed paired pytest suite, so it cannot independently calculate a base-to-head test delta.",
+    "fit": "A three-panel comparison is appropriate for live, held and reverse derivatives, and direct labels identify every coloured series. Visual inspection found no grid or decorative shading. The rendered PNG clips the far-left and far-right axis-label text and adds panel titles despite the repository plotting rule that captions carry identity; these are presentation defects, not a numerical contradiction.",
+    "goal_fidelity": "The run delivers precisely the requested discrimination. The direct moment-map arm reports zero Picard trips at 1e-3, 3e-5 and 1e-5 and retains relative errors 3.191773819587116, 3.148232920862968 and 3.1474466496648974. The two conductor arms show that holding the unperturbed residual shadow leaves central differences unchanged while reverse derivatives remain far away. This supports the bounded conclusion that a finite perturbation crossing the carried residual-shadow selection does not explain these three failures. The score reserves one point because the CPU attempt did not finish the named pytest reproduction; the successful H200 benchmark is the reproducible measurement evidence.",
+    "scope_discipline": "The one-commit range is limited to benchmarks/picard_shadow_crossing.py, the assigned landing fragment and the assigned figure directory. It is a measurement-only change, leaves solver source and tests untouched, and its exact range passes git diff --check."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass (91/100; goal_fidelity 19, evidence 18, scope_discipline 20, durability 17, fit 17). The reviewed benchmark is correctly wired into Picard's carried-shadow callback route and its H200 receipt is complete. All measured terminal masks have Hamming distance zero; holding the unperturbed terminal residual shadow changes finite differences only by 0.0, 7.37e-15 and 1.99e-13 across the three observables, while reverse-versus-held errors remain 3.15, 63.48 and 11.31. That refutes the proposed residual-shadow crossing mechanism on these fixtures. The record has no paired completed baseline/after suite arms, so added_failure_count is null rather than zero. The committed figure has clipped axis labels, recorded as a presentation follow-on.",
+  "review_base_sha": "e6aaf182eea7587a1ec71678bc830d899f701971",
+  "review_run_id": "r-20261002T220910298754-review-of-fsri-picard-shadow-crossing-measurement",
+  "reviewed_base_sha": "d8bc23881be8933ef969ee4148458053e2fbc3bc",
+  "reviewed_commit": "03c745932160aee6e29acc5e67630c4876b1f968",
+  "reviewed_head_sha": "03c745932160aee6e29acc5e67630c4876b1f968",
+  "reviewed_revision": "03c745932160aee6e29acc5e67630c4876b1f968",
+  "reviewed_run_id": "r-20261002T213957060519-fsri-picard-shadow-crossing-measurement",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-picard-shadow-crossing-measurement",
+  "reviewer_node": "review-of-fsri-picard-shadow-crossing-measurement",
+  "reviewer_run_id": "r-20261002T220910298754-review-of-fsri-picard-shadow-crossing-measurement",
+  "reviewing_run_id": "r-20261002T220910298754-review-of-fsri-picard-shadow-crossing-measurement",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T213957060519-fsri-picard-shadow-crossing-measurement/picard-shadow-crossing-h200.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T213957060519-fsri-picard-shadow-crossing-measurement/picard-shadow-crossing-summary.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T213957060519-fsri-picard-shadow-crossing-measurement/reproduce-target-tests.log"
+  ],
+  "tests": [
+    {
+      "command": "RECKON_ALLOW_NESTED_LAUNCH=1 scripts/nova_lane/run.sh --force-submit --rungs h200 --mode script benchmarks/picard_shadow_crossing.py",
+      "result": "job 1280498; source revision d8bc23881be8933ef969ee4148458053e2fbc3bc; EXIT_STATUS=0; live-held components 0.0 for moment map, 7.367479022690748e-15 for flux-current and 1.986188991054405e-13 for plasma-current"
+    },
+    {
+      "command": "git diff --check d8bc23881be8933ef969ee4148458053e2fbc3bc 03c745932160aee6e29acc5e67630c4876b1f968",
+      "result": "exit 0 with no whitespace errors"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T22:13:00+00:00",
+  "total": 91,
+  "verdict": "pass"
+}

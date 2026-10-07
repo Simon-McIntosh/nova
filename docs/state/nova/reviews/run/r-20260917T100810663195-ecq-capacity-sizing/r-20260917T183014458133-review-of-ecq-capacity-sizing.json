@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T18:30:14.458133+00:00",
+  "findings": [
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": "1185",
+      "text": "the narrower bound refuses any layout above 128+straight with included 0 and no error, where the superseded product admitted up to 3840 vertices; the one-arc premise is measured only on the three weak-rotation rows (max live 134), so any case realising a second traced arc is now silently excluded rather than reported, and no other case is measured."
+    },
+    {
+      "file": "docs/figures/exact-clip-capacity/receipts.md",
+      "line": "52",
+      "text": "the sentence credits the per-row allocations with the pairwise comparison, but row-{110,300,1000}.slurm.log each end in TypeError (boolean subtract) with ROW_IDENTITY_EXIT=1 and identity-NNN.json missing; the delivered receipts came from separate compare-only reruns (compare-{110,300,1000}.log after the driver fix) that neither this document nor the final manifest's test_logs names, so the record's provenance does not match the logs even though the identity claim itself holds."
+    },
+    {
+      "file": "docs/figures/exact-clip-capacity/receipts.md",
+      "line": "68",
+      "text": "the memory receipts' dimensions block still reports exact_support_capacity 3840 (and its (capacity-2)*64 quadrature budget) on both sides because benchmarks/solovev_certificate.py:3654 computes its own chord_capacity*chain_samples, so the tables show the capacity dimension unchanged where the compiled clip capacity actually moved to 158; the section does not say the dimension is a stale declaration rather than the compiled bound."
+    },
+    {
+      "file": "docs/figures/exact-clip-capacity/receipts.md",
+      "line": "88",
+      "text": "the done-when asks for the peak and largest allocation; largest_array_intermediates is empty on both sides by the --skip-hlo choice, so the largest-allocation half has no receipt (declared in the same paragraph)."
+    },
+    {
+      "file": "docs/figures/exact-clip-capacity/receipts.md",
+      "line": "93",
+      "text": "the named instrument benchmarks/exact_clip_warm_cost.py produced no receipt - all four arms exit 2 at argparse, confirmed in wall-{base,current}-*.log - and the reported wall is substituted from the memory instrument's per-rung compile_wall_seconds (848.188/965.073/1210.914 before, 847.235/970.609/1212.967 after); the substitution is declared and the numbers verify, but the named driver remains unrun."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_equilibrium_separatrix_clip.py:693 pins the derived capacity at 158 and its ValueError floor, and :704 pins the refusal by presenting 258 live vertices against a fixture capacity of 136, so a return of the superseded product or the loss of the overflow gate fails the suite; both ran green in the 25-passed all_debug module log.",
+    "evidence": "every named receipt corroborates against its artefact - identity-{110,300,1000}.json carry maximum_absolute_difference 0.0 and mismatch_count 0 on the moments, the coupled image, the included mask and the vertex count; memory-{base,current}.json give the 1000-cell peak 9.0065 to 8.0192 GiB with identical argument (32168) and output (32201) bytes and executed false on both sides; the row job logs' own SNAPSHOT digests equal the delivered identity hashes - with the three coverage gaps recorded in the findings below.",
+    "fit": "the sum form mirrors the curved sibling branch at separatrix_clip.py:1216, the new names and docstring state mechanism without plan or ticket tokens, and both commit messages are conventional with bodies and no attribution.",
+    "goal_fidelity": "nova/equilibrium/separatrix_clip.py:61 derives the traced-polygon capacity as _SPLINE_BOUNDARY_SEGMENTS + straight_vertex_capacity (158/152/150 on the three rows) in place of the 3840/3072/2816 product, docs/figures/exact-clip-capacity/layout-panel.json records a realised maximum of 134 live vertices under that bound, and the fail-closed refusal is retained at separatrix_clip.py:1252-1253, so the section's goal is met end to end.",
+    "scope_discipline": "the two commits touch only declared write paths (f7fefbd7: nova/equilibrium/separatrix_clip.py and tests/test_equilibrium_separatrix_clip.py; 128f5f57: docs/figures/exact-clip-capacity/* and the plan HTML), the peer-owned clip_quadrature.py is untouched, and the added refusal masking at separatrix_clip.py:1256-1261 stays inside the clip it governs."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20260917T100810663195-ecq-capacity-sizing (node ecq-capacity-sizing, plan nova:exact-clip-moment-quadrature section 4).\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/separatrix_clip.py:61 derives the traced-polygon capacity as _SPLINE_BOUNDARY_SEGMENTS + straight_vertex_capacity (158/152/150 on the three rows) in place of the 3840/3072/2816 product, docs/figures/exact-clip-capacity/layout-panel.json records a realised maximum of 134 live vertices under that bound, and the fail-closed refusal is retained at separatrix_clip.py:1252-1253, so the section's goal is met end to end.\n\nSCORE evidence: 17\nJUSTIFICATION evidence: every named receipt corroborates against its artefact - identity-{110,300,1000}.json carry maximum_absolute_difference 0.0 and mismatch_count 0 on the moments, the coupled image, the included mask and the vertex count; memory-{base,current}.json give the 1000-cell peak 9.0065 to 8.0192 GiB with identical argument (32168) and output (32201) bytes and executed false on both sides; the row job logs' own SNAPSHOT digests equal the delivered identity hashes - with the three coverage gaps recorded in the findings below.\n\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the two commits touch only declared write paths (f7fefbd7: nova/equilibrium/separatrix_clip.py and tests/test_equilibrium_separatrix_clip.py; 128f5f57: docs/figures/exact-clip-capacity/* and the plan HTML), the peer-owned clip_quadrature.py is untouched, and the added refusal masking at separatrix_clip.py:1256-1261 stays inside the clip it governs.\n\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_equilibrium_separatrix_clip.py:693 pins the derived capacity at 158 and its ValueError floor, and :704 pins the refusal by presenting 258 live vertices against a fixture capacity of 136, so a return of the superseded product or the loss of the overflow gate fails the suite; both ran green in the 25-passed all_debug module log.\n\nSCORE fit: 19\nJUSTIFICATION fit: the sum form mirrors the curved sibling branch at separatrix_clip.py:1216, the new names and docstring state mechanism without plan or ticket tokens, and both commit messages are conventional with bodies and no attribution.\n\nFINDING nova/equilibrium/separatrix_clip.py:1185 the narrower bound refuses any layout above 128+straight with included 0 and no error, where the superseded product admitted up to 3840 vertices; the one-arc premise is measured only on the three weak-rotation rows (max live 134), so any case realising a second traced arc is now silently excluded rather than reported, and no other case is measured.\n\nFINDING docs/figures/exact-clip-capacity/receipts.md:52 the sentence credits the per-row allocations with the pairwise comparison, but row-{110,300,1000}.slurm.log each end in TypeError (boolean subtract) with ROW_IDENTITY_EXIT=1 and identity-NNN.json missing; the delivered receipts came from separate compare-only reruns (compare-{110,300,1000}.log after the driver fix) that neither this document nor the final manifest's test_logs names, so the record's provenance does not match the logs even though the identity claim itself holds.\n\nFINDING docs/figures/exact-clip-capacity/receipts.md:68 the memory receipts' dimensions block still reports exact_support_capacity 3840 (and its (capacity-2)*64 quadrature budget) on both sides because benchmarks/solovev_certificate.py:3654 computes its own chord_capacity*chain_samples, so the tables show the capacity dimension unchanged where the compiled clip capacity actually moved to 158; the section does not say the dimension is a stale declaration rather than the compiled bound.\n\nFINDING docs/figures/exact-clip-capacity/receipts.md:88 the done-when asks for the peak and largest allocation; largest_array_intermediates is empty on both sides by the --skip-hlo choice, so the largest-allocation half has no receipt (declared in the same paragraph).\n\nFINDING docs/figures/exact-clip-capacity/receipts.md:93 the named instrument benchmarks/exact_clip_warm_cost.py produced no receipt - all four arms exit 2 at argparse, confirmed in wall-{base,current}-*.log - and the reported wall is substituted from the memory instrument's per-rung compile_wall_seconds (848.188/965.073/1210.914 before, 847.235/970.609/1212.967 after); the substitution is declared and the numbers verify, but the named driver remains unrun.\n",
+  "review_run_id": "r-20260917T183014458133-review-of-ecq-capacity-sizing",
+  "reviewed_run_id": "r-20260917T100810663195-ecq-capacity-sizing",
+  "reviewer_node": "review-of-ecq-capacity-sizing",
+  "reviewer_run_id": "r-20260917T183014458133-review-of-ecq-capacity-sizing",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T19:41:09.449544+00:00",
+  "total": 93
+}

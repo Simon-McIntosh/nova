@@ -1,0 +1,78 @@
+{
+  "absent": [
+    "the reviewed run's own review record (this review supplies it)",
+    "a base-arm measurement at the pre-qualification revision to evidence the axis-move attribution",
+    "any declared negative control (the node applies no mutation and declares none; not a test-role node)"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T14:55:04.329Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:30:36Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-diverted-oracle-census-regeneration/docs/evidence/fragments/millisecond-converged-solve/msc-diverted-oracle-census-regeneration.html",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "The caption attributes the read-axis move to 'the linear read's magnetic-axis qualification' landing, but no base-arm measurement at the pre-qualification revision is offered. The move is real and code-attributable (the archived driver uses the identical _census_arm route and measured (1.78507, 0.04669) at rev 1f9fe3cf against (1.78656, 0.04671) now), but the specific causing change is asserted, not bisected. A base-arm run of the same driver at the archived revision would settle the attribution."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143012212849-msc-diverted-oracle-census-regeneration/logs/census.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The measurement log carries no header naming the revision it ran at, the tree, module.__file__ or the resolved cwd, so the exact measured tree is not reconstructible from the log alone. The receipt is byte-identically reproducible, which mitigates, but a header line would make the log a standalone receipt."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/nova/docs/evidence/archive/millisecond-converged-solve-landed.html",
+      "line": "954",
+      "severity": "follow-on",
+      "text": "The archived caption (and its row table at line 949) still quotes the stale read axis (1.78507, 0.04669) m; the node correctly left the archive outside its write scope and reported this as a follow-on for the coordinator to repoint or annotate."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's own manifest records baseline_suite and after_suite as null (manifest fields absent) because its commit changes no product source and no test file: it touches only docs/figures/millisecond-converged-solve/diverted-oracle-census/{diverted-oracle-census-fine.png,diverted-oracle-census.json,regenerate.py} and docs/evidence/fragments/millisecond-converged-solve/msc-diverted-oracle-census-regeneration.html. With both arms absent there are no gate logs to difference, so added_failure_ids is the empty set and added_failure_count is 0. This is consistent with the reviewed manifest's own note, 'no test file changed (no suite gate on this node)'. The review supplied an independent reproduction of the figure's measurement driver instead (see review_logs).",
+  "justifications": {
+    "durability": "The receipt is byte-identically reproducible from the committed driver at the reviewed head, so the figure is regenerable rather than a frozen artifact, and the corrected caption lives in the committed fragment (the archive is left untouched by design). Deducted because the commit is a local detached-HEAD commit not present in origin/main (merge-base --is-ancestor 287ab83aa origin/main fails; origin/main tip 3f69179ab), the expected worker flow but meaning the work is not durable in any shared ref until the coordinator promotes it, and because the census.log lacks a revision header so the exact measured tree cannot be reconstructed from the log alone.",
+    "evidence": "Independently reproduced first-hand: the same driver run at the reviewed head (PYTHONPATH=<reviewed-worktree>, JAX_PLATFORMS=cpu, /home/ITER/mcintos/Code/nova/.venv/bin/python regenerate.py <scratch>) exits 0 and emits a receipt byte-identical to the committed one (sha256 a85b0addfcd41aecfc12f7931effde5331045adefd34b6421598509efd3fdd67) and a PNG byte-identical to the committed one (sha256 7e73763e140b2af4ef5f5f97d1ed83a98f5ec5bd01a61ff0494b87d8505de8d6), with read_axis (1.7865568205004578, 0.04670728374574534) matching the receipt field axis.read_rz_m. Every caption number re-derives from the receipt by named path, confirmed by a row-by-row check. Two deductions. First, the node's attribution of the axis move - 'the read moved when the linear read's magnetic-axis qualification landed' - is asserted rather than evidenced by a base-arm measurement at the pre-qualification revision; I did confirm the move is code-attributable and not route-attributable by reading the archived run's driver (reports/nova/s19-local/msc-diverted-oracle-census-linearring/measure_rows.py _census_arm uses the identical route) which measured (1.78507, 0.04669) at rev 1f9fe3cf, but the specific causing change is not bisected. Second, census.log carries no header naming the revision, tree, module.__file__ or cwd, so the exact measured tree is not reconstructible from the log alone; the byte-identical reproduction mitigates this.",
+    "fit": "The driver reuses exactly the committed nova.media painters the repository's plotting rules fix (draw_flux_contours for unfilled line contours on one stated level array, draw_wall over the fixture's own closed limiter contour, draw_nulls for the axis/saddle/other vocabulary), carries the caption numbers in a named-JSON-path receipt rather than in the picture, and is minimal (one 213-line driver, no new machinery). The panel obeys the binding rules: no axes on the s2D panel, unfilled contours, wall drawn, nulls marked. It leaves the third path in the node's write grant (docs/figures/millisecond-converged-solve/msc-diverted-oracle-census-regeneration) unused, which is permitted rather than required.",
+    "goal_fidelity": "The node's exact goal - regenerate diverted-oracle-census-fine.png through the committed painters and emit the receipt its caption reads from - is met precisely. The panel is drawn through nova.media.poloidal.draw_flux_contours, draw_wall and draw_nulls (verified by reading regenerate.py:107-115 and by opening the committed PNG: a solid red triangle at the read axis with an overlapping hollow cross at the analytic axis, one hollow cross on the wall at the analytic X-point, no filled cross, a closed solid black wall, and unfilled grey line contours). The receipt docs/figures/millisecond-converged-solve/diverted-oracle-census/diverted-oracle-census.json carries every number the caption quotes under a named JSON path (342 cells, 25 stated/26 levels, psi -0.021932..0.005710 Wb, the three coordinates, the two hollow crosses), and the corrected caption is written to the full fragment, not the archive. Both stated defects (axis drawn with the saddle glyph and no receipt) are repaired. Deducted one point because the done-when names draw_nulls giving 'an admitted saddle a filled cross', and the receipt records saddle_drawn false because the read x-point is non-finite - which the caption handles explicitly, but the node had no rung on which to demonstrate the positive saddle glyph.",
+    "scope_discipline": "The reviewed commit 287ab83aa touches exactly four paths, all inside the node's granted write grants: docs/figures/millisecond-converged-solve/diverted-oracle-census/diverted-oracle-census-fine.png, docs/figures/millisecond-converged-solve/diverted-oracle-census/diverted-oracle-census.json, docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py, and docs/evidence/fragments/millisecond-converged-solve/msc-diverted-oracle-census-regeneration.html. 398 insertions, no product source, no test file, no plan edit, no shared index, no concurrent-node path. The reviewed worktree is clean (git status --porcelain empty). The commit carries a conventional subject with a body explaining the mechanism."
+  },
+  "node": "review-of-msc-diverted-oracle-census-regeneration",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the exact goal - regenerate diverted-oracle-census-fine.png through the committed painters and emit the receipt the caption reads from - is met precisely; the panel is drawn through nova.media.poloidal.draw_flux_contours/draw_wall/draw_nulls (read regenerate.py:107-115, opened the PNG: solid triangle at the read axis, hollow crosses at the analytic axis and X-point, no filled cross, closed black wall, unfilled grey contours); the receipt carries every caption number by named JSON path (342 cells, 25 stated/26 levels, psi -0.021932..0.005710 Wb, three coordinates, two hollow crosses); the corrected caption is in the full fragment, not the archive. Deducted one point because the done-when's positive saddle glyph could not be shown (saddle_drawn false, x-point non-finite).\nSCORE evidence: 17\nJUSTIFICATION evidence: independently reproduced the driver at the reviewed head (exit 0), yielding a receipt byte-identical to the committed one (sha256 a85b0add...) and a PNG byte-identical to the committed one (sha256 7e73763e...), read_axis 1.7865568205004578/0.04670728374574534 matching axis.read_rz_m; every caption number re-derives by named path. Deducted because the axis-move attribution to magnetic-axis qualification is asserted not evidenced (the move is real and code-attributable - the archived identical-route driver gave 1.78507 at rev 1f9fe3cf - but not bisected), and census.log carries no revision/tree/module/cwd header.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: commit 287ab83aa touches exactly four paths, all inside the granted write scope (diverted-oracle-census/{png,json,regenerate.py} and the fragment), 398 insertions, no source, no test, no plan, no shared index; worktree clean; conventional commit with a body.\nSCORE durability: 17\nJUSTIFICATION durability: the receipt is byte-identically reproducible from the committed driver so the figure is regenerable, and the corrected caption is committed in the fragment; deducted because the commit is a local detached-HEAD commit absent from origin/main (expected worker flow) and census.log lacks a revision header.\nSCORE fit: 19\nJUSTIFICATION fit: reuses exactly the committed nova.media painters, carries caption numbers in a named-path receipt rather than the picture, obeys the no-axes/unfilled-contour/wall/null-marking rules, minimal 213-line driver.\nTOTAL: 92\nVERDICT: pass\nCHECKS: reviewed head 287ab83aa reproduced first-hand - receipt sha256 a85b0addfcd41aecfc12f7931effde5331045adefd34b6421598509efd3fdd67 and PNG sha256 7e73763e140b2af4ef5f5f97d1ed83a98f5ec5bd01a61ff0494b87d8505de8d6 both byte-identical to the committed artifacts; every caption number re-derived by named JSON path; axis move shown code-attributable via the archived identical-route driver; added_failure_count 0 with both gate arms null (no test file changed).\nFINDINGS: axis-move attribution asserted not bisected; census.log lacks a revision header; archive still carries the stale read axis (node's own reported follow-on).\nABSENT: the reviewed run's own review record; a pre-qualification base-arm run; a declared negative control.",
+  "review_base_sha": "ce718d4d72522ac059927d722f27847755824439",
+  "review_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T145538011744-review-of-msc-diverted-oracle-census-regeneration/scratch-census-repro/repro.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T145538011744-review-of-msc-diverted-oracle-census-regeneration/scratch-census-repro/diverted-oracle-census.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T145538011744-review-of-msc-diverted-oracle-census-regeneration/scratch-census-repro/diverted-oracle-census-fine.png"
+  ],
+  "review_run_id": "legacy-ebf68d31def8",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "reviewed_commit": "287ab83aa2fa6d85a96030397c89be1517538ec3",
+  "reviewed_commits": [
+    "287ab83aa2fa6d85a96030397c89be1517538ec3"
+  ],
+  "reviewed_head_sha": "287ab83aa2fa6d85a96030397c89be1517538ec3",
+  "reviewed_run_id": "r-20261003T143012212849-msc-diverted-oracle-census-regeneration",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-diverted-oracle-census-regeneration",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:08:00Z",
+  "total": 92,
+  "verdict": "pass"
+}

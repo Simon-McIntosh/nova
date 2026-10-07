@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest records baseline_suite: null and after_suite: null; neither arm is readable, so there is no empirical suite failure delta. added_failure_count 0 and added_failure_ids [] encode no observed added failures, not a measured zero. The changed paths contain no product or test source; the reviewed measurement and rendering gates each have EXIT=0, and the independent receipt audit has EXIT=0.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/map-residual.json (772-node residual, 135-cell slice, shifted control, historical comparison and centroid leverage)",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/field-response.json (two 772-point unit columns, analytic controls, full-exterior comparisons and bound refusals)",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/analytic-map-residual.png and .svg (visually opened)",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/unit-field-closed-forms.png and .svg (visually opened)",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/panels.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T205149229797-review-of-cco-root-cause-map-and-compensator-closed-forms/review-check.log",
+    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-root-cause-map-and-compensator-closed-forms.html",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-map-and-compensator-closed-forms.md"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "137b7fb5fd932daea41fdb87d4ea9c7d52824c7b",
+    "6e9fc7db443948fcc3ef8648506cd1e03441f85d",
+    "f754b31fa064da057ac1a4b7f0ec4557787ba71f"
+  ],
+  "completed_at": "2026-10-02T21:00:25Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T20:52:12Z",
+  "evidence_inputs": "Reviewed 11985735c020a39df74f76c75cbe6354e0e67d36..f754b31fa064da057ac1a4b7f0ec4557787ba71f (three commits, ten repository paths; worktree clean). Map sup=0.008246175112624599 Wb, prior same-fixture sup=0.008246175112880394 Wb, difference=-2.5579538487363607e-13 Wb; 772 residual values, 135 cells, signed spatial residual and shifted-state positive control. Both unit field columns match closed forms at all 772 values exactly, full exterior <=2.842170943040401e-14 Wb, scale +1; reversed sign and missing 2pi are rejected and the 1 T bound is refused. Local cancellation +0.003786835506145709 T vs banked -0.021255810528996315 T (ratio -5.613079969937949). These checks do not validate the Green kernel independently because the analytic exterior is built from the same plasma-image operator, and do not establish the nonlinear constrained terminal state. Follow-ons: add physical axes to panels, remove generated SVG whitespace, correct the pre-existing plan radial-response sign, then interpret the terminal-state gallery/centroid first-moment work before any ladder.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/render.py",
+      "line": "59",
+      "severity": "follow-on",
+      "text": "Both published PNG panels omit R and Z coordinate labels and tick scales. The wall and contour shapes are visible, but a reader cannot locate the reported extrema at (6.0595, 0) m and (7.1280, 3.0987) m from the panels alone. Add physical coordinate axes on the next figure revision."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/closed-forms/analytic-map-residual.svg",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "Matplotlib emitted trailing whitespace on SVG path-command lines in both committed vector panels; git diff --check over the reviewed range exits 2 with these generated-artifact findings. Configure or post-process SVG serialization before committing a future regenerated pair."
+    },
+    {
+      "file": "docs/plans/centroid-constrained-oracle-solve.html",
+      "line": "44",
+      "severity": "follow-on",
+      "text": "The existing plan prose says the vertical-centroid response to positive radial field is +4.916664 m/T. The earlier signed field-response rows and this fresh direct measurement give a negative response (-4.917235863686753 m/T); coordinator should correct the plan prose when integrating the evidence."
+    }
+  ],
+  "gate_arms_note": "No baseline or after suite was armed in the reviewed run. Its declared write paths contained no test file. This review did not run a product suite because the node added only measurement/documentation artifacts and the separate merged-head test belongs to a later node.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "The new scripts are artifact generation entry points; they do not change a production call site. measure.py invokes the existing benchmark fixture driver, BoundedExteriorFieldUnknown.flux_delta and the production operator map; render.py reads only persisted receipts.",
+    "diff": "Three commits from 11985735c020a39df74f76c75cbe6354e0e67d36 to f754b31fa064da057ac1a4b7f0ec4557787ba71f add ten repository files: two JSON receipts, one panel metadata JSON, two reproducible scripts, four PNG/SVG panels and one fragment. The reviewed worktree HEAD is the declared head and git status --short -uno was clean. Git diff --check reports whitespace solely in generated SVG path commands.",
+    "done_when": "At the requested weak-rotation-reactor-static -110 fixture, 135 realised cells and 772 total nodes, the stored map sup is 0.008246175112624599 Wb (0.008154124995250811 Wb on cell nodes), versus prior 0.008246175112880394 Wb; vertical and radial unit columns have scale +1, zero stored pointwise error and complete-exterior errors at most 2.842170943040401e-14 Wb. Fresh cancellation is +0.003786835506145709 T versus banked converged -0.021255810528996315 T, ratio -5.613079969937949. Both named PNG panels were opened visually and show the wall and the reported contours.",
+    "goal": "The analytic-state production map, both bounded-unknown flux columns, local cancellation estimate, persisted receipts, panels and report all address the dispatched goal. The result correctly stops short of claiming terminal-state correctness or a solver fix.",
+    "manifest": "The reviewed manifest is complete with three real commits, explicit changed paths, a landing line, CPU measurement and render commands, readable log paths and a no-test-file negative-control explanation. It declares baseline_suite and after_suite null.",
+    "write_paths": "The ten changed repository paths are the declared closed-forms figure directory and evidence fragment. The separate report is in its granted reports path. No product, test, plan or tolerance file changed."
+  },
+  "justifications": {
+    "durability": "The receipt arrays, generation scripts, metadata, log and vector/raster panels are banked in three commits. The numerical checks are executable in measure.py and the saved controls expose sign, 2pi and bound mistakes. No persistent test file was granted or changed, so future changes to the map or columns do not automatically rerun this expensive fixture audit.",
+    "evidence": "Opened map and unit-field PNGs, inspected scripts, fragment and report, and independently audited the JSON arrays in review-check.log (EXIT=0). The 772 residual entries reproduce the global and 135-cell sup; the shifted-input control is 20.74513763855609 Wb; both unit columns span positive and negative flux and agree pointwise; reversed-sign and missing-2pi controls fail; both inadmissible 1 T commands trigger the declared bound refusal. Read the original earlier map and converged-field receipts to confirm embedded provenance. No baseline/after suite arms exist, so the failure delta is unmeasured rather than a demonstrated green suite.",
+    "fit": "The report gives the right physical flux convention and the radial field solenoidal completion B_Z=-B_R Z/R. The figures are directly readable for shape and agreement, but omit R/Z coordinate labels and ticks, making the quoted extrema hard to locate from the panels themselves; generated SVG whitespace also prevents a clean whole-range diff --check.",
+    "goal_fidelity": "All three quantitative clauses were delivered. The measured map sup matches the prior same-fixture H200 receipt to 2.5579538487363607e-13 Wb; the two unit-field responses and full exterior agree with independently integrated total-flux forms; direct centroid leverage predicts +3.78684 mT rather than the banked -21.25581 mT. The report explicitly distinguishes direct response from coupled fixed-point susceptibility and makes no unsupported repair claim.",
+    "scope_discipline": "All ten repository changes are within granted paths, the report is in its granted reports path, and the reviewed tree is clean. The generated SVGs contain trailing path-command whitespace, causing git diff --check to fail; it is a generated-artifact hygiene finding, not a scope breach."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 11985735c020a39df74f76c75cbe6354e0e67d36\nREVIEWED_HEAD_SHA: f754b31fa064da057ac1a4b7f0ec4557787ba71f\nVERDICT goal: all three dispatched numerical clauses and both panels delivered; no solver correctness claim.\nVERDICT done_when: map sup 0.008246175112624599 Wb; prior delta -2.5579538487363607e-13 Wb; columns scale +1 and pointwise error zero; local cancellation +3.786835506 mT versus converged -21.255810529 mT.\nVERDICT write_paths: ten repository paths inside scope plus the granted report.\nVERDICT manifest: complete, three commits, CPU measurement EXIT=0, rendering EXIT=0, suite arms null.\nVERDICT diff: reviewed tree clean; generated SVGs produce trailing-whitespace findings in git diff --check.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 15\n",
+  "review_base_sha": "d8d417286ec7e0c0ade25d03ef714a4cdeb34814",
+  "review_run_id": "r-20261002T205149229797-review-of-cco-root-cause-map-and-compensator-closed-forms",
+  "reviewed_base_sha": "11985735c020a39df74f76c75cbe6354e0e67d36",
+  "reviewed_commit": "f754b31fa064da057ac1a4b7f0ec4557787ba71f",
+  "reviewed_head_sha": "f754b31fa064da057ac1a4b7f0ec4557787ba71f",
+  "reviewed_revision": "f754b31fa064da057ac1a4b7f0ec4557787ba71f",
+  "reviewed_run_id": "r-20261002T202646209095-cco-root-cause-map-and-compensator-closed-forms",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-map-and-compensator-closed-forms",
+  "reviewer_node": "review-of-cco-root-cause-map-and-compensator-closed-forms",
+  "reviewer_run_id": "r-20261002T205149229797-review-of-cco-root-cause-map-and-compensator-closed-forms",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T20:58:47.646930+00:00",
+  "total": 88,
+  "verdict": "pass-with-follow-ons"
+}

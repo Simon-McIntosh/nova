@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T16:56:52.706Z",
+  "dispatched_at": "2026-10-04T16:45:26Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dual-branch-selection.html:130",
+      "id": "reuse_search-1",
+      "reason": "correcting the island count to two removes a non-existent deliverable from the node's scope and stops the plan understating its own impl fraction.",
+      "text": "\u00a73 still lists three host islands \"blocking a compiled catalog verdict\" and counts select_forward_branch as one, but that island is already closed: the host selector delegates to the traced array core (nova/equilibrium/branch_selection.py:588-635) and \u00a75 of the same plan states only two islands remain \u2014 a reader sizing the first implementation node from \u00a73 prices work already landed",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/dual-branch-selection.html:127",
+      "id": "reuse_search-2",
+      "reason": "the node's \"consume the existing smooth read unchanged\" premise rests on the citation; a wrong pointer sends the implementer to the wrong function and the same \u00a75 \"no private attribute access\" claim should be checked against the real symbol.",
+      "text": "the p_diverted citation points at nova/equilibrium/connectivity_boundary.py:877-886, which is compact_reachability code, whereas p_diverted is defined at connectivity_boundary.py:2424 and emitted at :2465 inside traced_smooth_boundary_read \u2014 a claim about prior art that does not survive opening the file",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward.py:704",
+      "id": "duplicate_owner-1",
+      "reason": "naming forward.py:704/828/1062 as the owner to make array-only (rather than a new kernel) is a one-line plan edit that prevents a forked seed path which would then drift from the production cold seed.",
+      "text": "island 1 (\"seed construction becomes an array-only kernel\") does not name the seed owner it must transform, and the seed path already has owners: cold_seed_portfolio (forward.py:704) and moment_seed (forward.py:828) built on ReconstructMoment.uniform_disc / centroid_disc plus the traced operator.current_moment_image, with the diverted cubic built at _saddle_geometry_seed (forward.py:1062) \u2014 a node can satisfy the plan by writing a parallel traced seed kernel and leaving the host one in place, which is the duplicate the item exists to prevent",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "naming fixed_point.py as the ladder to extend, and deleting the \"bootstrap\" term, removes an ambiguous deliverable and stops the node authoring a second ladder beside the shared one.",
+      "text": "island 3 (\"the admitted-state bootstrap becomes a fixed ladder with device selection\") names a subsystem the codebase does not carry: no symbol named bootstrap exists under nova/, while a shared device fixed-point ladder already exists (fixed_point.py; forward.py:1940 \"Drive the map with the shared fixed-point ladder\") \u2014 so the plan asks to build a ladder beside the shared owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a4f1526f976535bb8db0bf640fad1f75c990a44b1f59a8c56f625732a057f61c",
+  "plan_slug": "dual-branch-selection",
+  "plan_version": 15,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T164513388785-plan-review-of-dual-branch-selection",
+  "reviewed_blob_sha": "e25446cc4702a55311231df29d5043993ac2aebd",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the selection seam is one module (nova/equilibrium/branch_selection.py) hiding transition, persistence, admissibility and degrade accounting behind a six-array TracedSelectionInput and a single step function, with the host SelectionReceipt as the egress boundary; that is depth, not surface.",
+    "duplicate_owner": "a finding \u2014 the plan's two remaining islands are named as kernels without binding them to the existing owners, so a node could fork a second seed path beside cold_seed_portfolio (forward.py:704) and a second ladder beside the shared fixed-point ladder (fixed_point.py).",
+    "reuse_search": "a finding \u2014 the plan searched the codebase and cites the mechanisms it extends (p_diverted, class_margin, ForwardProfile.solve_portfolio, branch_selection.py), but its \u00a73 island inventory is stale against the code it names and its p_diverted line citation points at the wrong lines.",
+    "thin_wrapper": "pass \u2014 the remaining implementation (seed kernel, bootstrap ladder) extends forward.py and the existing ladder in place rather than adding a layer; the host select_forward_branch already delegates its transition semantics to the traced core (branch_selection.py:627) instead of duplicating them."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.324705+00:00"
+}

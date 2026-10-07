@@ -1,0 +1,43 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:05:21.983Z",
+  "dispatched_at": "2026-10-04T16:44:52Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html:67",
+      "id": "deep_module-1",
+      "reason": "naming one owner for the clipped-region geometry lets \u00a73/\u00a74/\u00a77 extend it rather than have each consumer re-derive the polygon, which is precisely the defect \u00a77 hit when its independent oracle rebuilt the region pairing and got it wrong.",
+      "text": "\u00a74 states the clip must make \"the boundary the read returns, the region the current integrates over and the polynomial space the density is evaluated in ... the same object per cell\", but names no module that owns that object: the clipped region is produced independently by the production carrier (`nova/equilibrium/clip_quadrature.py` `_flux_selected_current_moments`), the flux read (`nova/equilibrium/separatrix_clip.py` `_traced_clip`), and \u00a77's deliberately-independent oracle, whose reconstruction pairing \u00a77 records as measured wrong (core-current relative error 1.388e-01 against a 1e-13 limit, plan.html:1355).",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/plan-review-of-cut-cell-current-attribution/nova/equilibrium/forward_operator.py:3275",
+      "id": "duplicate_owner-1",
+      "reason": "a node dispatched on \u00a79 as written would re-land the per-trip clipped-polygon blocks that the frozen-matrix decision removed and rebuild Biot geometry each trip; the section should either extend the frozen-block path (`coupling_current_moments`/`current_moment_image`) or be re-scoped to the moment-order evaluation on the frozen-current oracle that the plan itself names as \u00a79's replacement.",
+      "text": "\u00a79 (plan.html:597) rebuilds each cut cell's kernel blocks as \"polygon-analytic integrals over that clipped polygon about its own centroid\", rebuilt once per trip: a second source-representation path beside the frozen-block matmul in `coupling_current_moments` (`forward_operator.py:3275`) into `current_moment_image` (`forward_operator.py:3885`). The lead locked this out on 2026-09-14 \u2014 \"the interaction matrix stays frozen and the clip enters through the current moments as a matmul, so there are no per-trip clipped blocks to move on device\" (plan.html:723) \u2014 and the plan carries that supersession note for the same item while the live \u00a79 stands unchanged. The direct-integration arm \u00a79 describes also already exists as a measurement, `benchmarks/clipped_coupling_order.py` (\"the repair arm instead integrates every clipped support directly with the exact polygon flux kernel\", rejected in favour of the frozen-matrix path).",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8fc23ba8437a294e31defcf3ace703947c2ca111e3c7b108e915707fd8fa656b",
+  "plan_slug": "cut-cell-current-attribution",
+  "plan_version": 234,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T164439405426-plan-review-of-cut-cell-current-attribution",
+  "reviewed_blob_sha": "c557a503d2c4d3216df3bb1c1850dce3a3c3f3af",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a74 promises \"one discretisation\" (the flux read and the current placement from the same clipped geometry) but names no module that owns the clipped region, and \u00a77's own evidence shows the cost of that gap: its \"independent\" reconstruction re-derived the region pairing and measured it wrong.",
+    "duplicate_owner": "a finding \u2014 \u00a79 re-introduces per-trip clipped-polygon kernel blocks beside the frozen-block moment matmul in `coupling_current_moments`/`current_moment_image` that a locked lead directive (recorded in the same plan) replaced, so it forks a source-representation path the owner already covers.",
+    "reuse_search": "pass \u2014 the plan's own code map (plan.html:1598) names the mechanisms it extends (`_traced_clip` in `separatrix_clip.py`, `_ordered_saddle_wedges`, `SaddleCellWedges`, `linear_current_moments`/`padded_linear_current_moments`, `_traced_polygon_moments`, and the closed-form `polygon_moments` module) and explicitly rejects \"a new wedge module\" and \"closed-form moments as the production route\", so the reuse search was run and its result is recorded rather than left implicit.",
+    "thin_wrapper": "pass \u2014 neither rung A nor \u00a77 adds a wrapper over existing machinery; \u00a72/\u00a76 rung A restores `_profile_support` to the pre-`c9a89e58` signed-flux clip (an existing mechanism) and \u00a77 passes the existing typed census saddle into the existing `_traced_clip` spline-chain route."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.297777+00:00"
+}

@@ -1,0 +1,111 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "arithmetic_scope": "No arithmetic or solver formulas are touched; this is a read-only census node. Every count in the report was independently re-run at the reviewed base and reproduced exactly (413 figure JSONs carrying a worktree path; 177 such lines across 63 files; 119 files / 177 lines of hard-coded GPFS paths split 10/12 nova, 97/148 benchmarks, 12/17 tests; 44 files referencing the clip-mode global; 1210 lines in scripts/h200_test_lane; 21 files carrying sbatch/srun in scripts+benchmarks; 5 test files pinning partition literals; 0 local-lane tokens with a positive control of 236 URL hits; h5py confined to nova/imas/hdf5_read.py lines 1 and 16). Two reported figures do not match their own stated command as written and are recorded as findings.",
+  "assertion_audit": [
+    {
+      "fails_when": "the grep over docs/figures returns a count other than 413; reproduced 413 at a71934910d",
+      "path": "docs/evidence/replan-2026-09-24/thin-interfaces.md:53"
+    },
+    {
+      "fails_when": "the worktree-path grep returns a line/file count other than 177/63; reproduced 177 lines across 63 files",
+      "path": "docs/evidence/replan-2026-09-24/thin-interfaces.md:55"
+    },
+    {
+      "fails_when": "the stated command returns 15; it returns 16 because it lacks --include='*.py' and counts nova/imas/AGENTS.md (finding 2)",
+      "path": "docs/evidence/replan-2026-09-24/thin-interfaces.md:238"
+    },
+    {
+      "fails_when": "the GPFS grep returns a count other than 119/177; reproduced 119 files / 177 lines",
+      "path": "docs/evidence/replan-2026-09-24/thin-interfaces.md:278"
+    },
+    {
+      "fails_when": "the clip-mode grep over nova/ tests/ benchmarks/ scripts/ returns a count other than 44; reproduced 44",
+      "path": "docs/evidence/replan-2026-09-24/thin-interfaces.md:339"
+    },
+    {
+      "fails_when": "h5py appears in nova/ outside nova/imas/hdf5_read.py; reproduced only lines 1 and 16 there",
+      "path": "docs/evidence/replan-2026-09-24/thin-interfaces.md:259"
+    },
+    {
+      "fails_when": "a local-lane token appears in the named subtrees; reproduced 0 with a positive control of 236 hits, so the absence is instrument-backed",
+      "path": "docs/evidence/replan-2026-09-24/thin-interfaces.md:138"
+    }
+  ],
+  "call_site_count": 4,
+  "call_sites": [
+    "docs/plans/forward-solve-api.html:182:f-fsapi-clip-mode-is-a-request-field",
+    "docs/plans/forward-solver-route-integrity.html:512:f-fsri-one-nova-lane-launcher",
+    "docs/plans/cut-cell-current-attribution.html:1179:f-cca-slim-committed-attribution-receipts",
+    "docs/plans/forward-solve-api.html:145:f-fsa-repair-coil-edit-latency-numbers"
+  ],
+  "commits_read": [
+    "71adc8e6821898b7b00a97616c13ae854c8e7cfa"
+  ],
+  "completed_at": "2026-10-01T19:52:47.235Z",
+  "created_at": "2026-10-01T20:52:00+00:00",
+  "dispatched_at": "2026-10-01T19:15:33Z",
+  "findings": [
+    {
+      "file": "docs/evidence/replan-2026-09-24/thin-interfaces.md",
+      "line": "238",
+      "severity": "follow-on",
+      "text": "follow-on: [P3] The \u00a74.1 census command as stated \u2014 grep -rEc 'imas\\.DBEntry|import imas' nova/ | grep -v ':0$' \u2014 omits --include='*.py', so it matches nova/imas/AGENTS.md (2 lines) and returns 16 files, not the reported 15. The narrative's '15 modules' is the Python-only set and is correct; append --include='*.py' so the command and its result agree."
+    },
+    {
+      "file": "docs/evidence/replan-2026-09-24/thin-interfaces.md",
+      "line": "93",
+      "severity": "follow-on",
+      "text": "follow-on: [P3] The \u00a71.2 owner citation gives docs/plans/forward-solve-api.html:147 for f-fsa-repair-coil-edit-latency-numbers; that followup's <article> begins at line 145 (the article at 140 is f-fsa-repair-raster-flux-panels, closing at 144). The owner is open and the substance is right; the line is off by two."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 owning followups open at their cited plan lines; all 15 Python modules referencing imas.DBEntry/import imas enumerated",
+    "diff": "Reviewed 71adc8e6821898b7b00a97616c13ae854c8e7cfa against a71934910d2a0835dd9f6ab35576eef5c2f44754; the delta is two documentation files only.",
+    "done_when": "The report lists each coupling with files, line counts, refactor and done-when (verified); the second clause, 'each refactor is owned by a live plan followup', is met for the handoff-named refactors (owners verified open at forward-solve-api.html:182, forward-solver-route-integrity.html:512, cut-cell-current-attribution.html:1179, forward-solve-api.html:145) but six newly discovered couplings are correctly reported as unowned and deferred to follow_ons because the node is fenced from plan writes.",
+    "goal": "Read the source prompt.txt and live nova-portfolio-replan \u00a72; the node wrote docs/evidence/replan-2026-09-24/thin-interfaces.md, a census of nova's coupling to shared machinery \u2014 the reckon crew and plan layer, the local model lane, fleet and SLURM placement, imas-python access and hard-coded GPFS paths \u2014 with a thin-interface refactor, done-when and owner per coupling.",
+    "manifest": "Read the source manifest.md and census.log; the record's headline counts reconcile with census.log, the census carries the revision/tree/command header, and the sole follow-on (four unowned source-edit couplings) is stated. status is a recognised value (complete).",
+    "write_paths": "Commit 71adc8e68 changes only the two declared evidence paths; git show --stat reports 390 insertions, 0 deletions across thin-interfaces.md and its fragment."
+  },
+  "justifications": {
+    "durability": "The report and a landing fragment are committed at 71adc8e68 and the census.log is retained beside them; each row is re-derivable from a stated command and revision, so a later reader can re-measure without the producing worktree. Held below full because the two instrument blemishes are baked into the committed text.",
+    "evidence": "Every headline count reproduced exactly under independent re-execution at a71934910d, and the census carries revision, tree, command and date in census.log; the lane-absence claim carries a positive control. Two blemishes lower this: the \u00a74.1 command as written returns 16 not 15, and one owner citation is off by two lines.",
+    "fit": "The report matches plan \u00a72's deliverable and the repo's read-only evidence convention; the fragment carries plan/node/revision meta, and the node reuses existing followup ids (f-fsapi-clip-mode-is-a-request-field, f-fsri-one-nova-lane-launcher, f-cca-slim-committed-attribution-receipts, f-fsa-repair-coil-edit-latency-numbers) instead of inventing new ones or editing the plan.",
+    "goal_fidelity": "docs/evidence/replan-2026-09-24/thin-interfaces.md covers all five \u00a72 areas plus the handoff cross-reference, each coupling row carrying per-file line counts, a named thin-*, done-when and an owner; the one shortfall against f-replan-004's stated done-when ('each refactor is owned by a live plan followup') is that six discovered couplings are marked unowned, which the node could not resolve because it is fenced from plan writes \u2014 it recorded them under follow_ons instead.",
+    "scope_discipline": "The commit 71adc8e68 touches exactly two declared paths (docs/evidence/replan-2026-09-24/thin-interfaces.md and docs/evidence/fragments/nova-portfolio-replan/replan-thin-interfaces.html), 390 insertions and no deletions; read-only over source with no branch, plan or sprint mutation."
+  },
+  "limits": [
+    "Read-only review: no production test suite was run and no source was executed. The node's gate is a bounded-grep census, reproduced here by re-running each stated command at the reviewed base.",
+    "The reviewed run carries baseline_suite=null and after_suite=null in its recorded manifest and streamed manifest (confirmed in classification.json), consistent with its status as a documentation node; added_failure_count=0 and added_failure_ids=[] are therefore derived from the absence of any suite rather than from a pair of gate logs, and are not a regression statement.",
+    "Line citations inside a 15 MB machine-generated crew.json (8673, 201511, 214737) were checked only for the citing plan line, not for the content at that crew.json line, which is out of a read-only review's reach.",
+    "The report's mapping of couplings to owning followups was spot-checked (four owners verified open at the cited article lines); the unowned rows (areas 1.1, 1.3, 4.1, 4.2, 5.1, 5.2) are reported unowned by the node and are not separately verified as unowned across the whole plan set."
+  ],
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: a71934910d2a0835dd9f6ab35576eef5c2f44754\nreviewed_head_sha: 71adc8e6821898b7b00a97616c13ae854c8e7cfa\nVERDICT goal: Read the source prompt.txt and live nova-portfolio-replan \u00a72; the node wrote docs/evidence/replan-2026-09-24/thin-interfaces.md, a census of nova's coupling to shared machinery across the five areas with a thin-interface refactor, done-when and owner per coupling.\nVERDICT done_when: Each coupling row carries files, line counts, refactor and done-when (verified); the ownership clause is met for the handoff-named refactors (four owners open at their cited lines) but six newly discovered couplings are reported unowned and deferred to follow_ons, which the read-only node cannot resolve because plan edits are fenced.\nVERDICT write_paths: Commit 71adc8e68 changes only the two declared evidence paths, 390 insertions and 0 deletions.\nVERDICT manifest: The manifest and census.log reconcile; the census carries revision/tree/command/date; the sole follow-on is stated; status is complete.\nVERDICT diff: 71adc8e6821898b7b00a97616c13ae854c8e7cfa against a71934910d2a0835dd9f6ab35576eef5c2f44754 \u2014 two documentation files only.\nCALL_SITES: docs/plans/forward-solve-api.html:182 (f-fsapi-clip-mode-is-a-request-field, open), docs/plans/forward-solver-route-integrity.html:512 (f-fsri-one-nova-lane-launcher, open), docs/plans/cut-cell-current-attribution.html:1179 (f-cca-slim-committed-attribution-receipts, open), docs/plans/forward-solve-api.html:145 (f-fsa-repair-coil-edit-latency-numbers, open)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: All five \u00a72 areas covered with per-row line counts, refactor, done-when and owner; six discovered couplings are unowned\nSCORE evidence: 18\nJUSTIFICATION evidence: Every headline count reproduced exactly at a71934910d and the census retains revision/command; two instrument blemishes (16-vs-15 command, 145-vs-147 citation)\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Two declared document paths only, 390 insertions, no source or plan mutation\nSCORE durability: 19\nJUSTIFICATION durability: Report and fragment committed at 71adc8e68 with census.log retained; every row re-derivable from a stated command\nSCORE fit: 19\nJUSTIFICATION fit: Matches plan \u00a72 deliverable and repo evidence convention; reuses existing followup ids; fragment carries plan/node/revision meta\nFINDING docs/evidence/replan-2026-09-24/thin-interfaces.md:238 follow-on: [P3] The \u00a74.1 census command as stated lacks --include='*.py', so it counts nova/imas/AGENTS.md and returns 16 files, not the reported 15; the narrative's 15 modules is the Python-only set and is correct.\nFINDING docs/evidence/replan-2026-09-24/thin-interfaces.md:93 follow-on [P3] The \u00a71.2 owner citation gives forward-solve-api.html:147 for f-fsa-repair-coil-edit-latency-numbers, whose article begins at line 145; the owner is open and the substance is right, but the line is off by two.\n",
+  "recommendation": "accept the census report as delivered; correct two P3 citation/count blemishes, which do not change any conclusion",
+  "regression_falsification": {
+    "observed": "Independent re-execution of every stated bounded grep at the reviewed base reproduced the reported counts; no counterexample found. The two exceptions are instrument defects in the report's own commands, not falsified claims.",
+    "restored_condition": "n/a \u2014 read-only documentation node, no source code changed, no mutation applied",
+    "would_fail_original_claim": false
+  },
+  "review_run_id": "legacy-fa9d9043f746",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "reviewed_head_sha": "71adc8e6821898b7b00a97616c13ae854c8e7cfa",
+  "reviewed_run_id": "r-20261001T191520414803-replan-thin-interfaces",
+  "reviewing_run_id": "r-20261001T203907018114-review-of-replan-thin-interfaces",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:38.519176+00:00",
+  "total": 94
+}

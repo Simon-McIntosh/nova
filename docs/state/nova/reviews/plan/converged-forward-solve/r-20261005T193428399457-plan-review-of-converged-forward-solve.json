@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T19:37:29.354Z",
+  "dispatched_at": "2026-10-05T19:34:41Z",
+  "findings": [
+    {
+      "anchor": "nova/transport/coupled_window.py:1658",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a76 must name nova/transport/coupled_window.py and window_batch.py as consumers to re-point onto solve.fixed_point / the new receipt adapter (as it does for the labeller) before fixed_point.py is deleted, or the retirement breaks coupled transport and its window batching.",
+      "text": "\u00a76 retires fixed_point.py and shrinks forward.py to the request/receipt adapter, but nova/transport/coupled_window.py binds equilibrium.fixed_point.residual (:1658), imports ForwardEquilibrium/ForwardProfile from nova.equilibrium.forward (:43) and TopologyClass from nova.equilibrium.topology (:45), and nova/transport/window_batch.py also imports TopologyClass (:21); coupled_window.py additionally runs its own fixed-point driver (implicit_window_state with a fixed_point_map loop, :147-193) that is a second fixed-point owner beside solve.fixed_point; the plan records a consumer ruling re-pointing the batched labeller but names transport nowhere, and \u00a76's import census is scoped to nova/equilibrium only, so the transport bindings would survive the deletion silently",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e5b2c95adadaba4476cd96d6b533339c7ac5dc6aa02cfa485607de662e0b093e",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 30,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T19:38:49.485770+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T193428399457-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "a6c3f811631d01cd7c649f8f21eb6b93113165c1",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design is four pure functions (topology.read, current.book, gs.apply, solve.fixed_point), each hiding a whole subsystem (a connectivity-aware topology read, an exact-clip booking, the map plus its implicit Picard / moment-map / boundary-flux derivatives, and a Newton-GMRES solve) behind a single narrow call site, not a spread of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan adds solve.fixed_point as the fixed-point owner and \u00a76 deletes fixed_point.py, but nova/transport/coupled_window.py already runs its own coupled fixed-point iteration and binds the module being deleted, and the plan names no transport consumer to re-point.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each section that adds an entry point names what it retires or replaces in its own text (\u00a73 clipped_support_current_moments, \u00a74 the ForwardFluxOperator map, \u00a75 newton_krylov/picard/operator_request_body, \u00a76 the module deletion list), so no section adds surface without accounting for the removed surface.",
+    "reuse_search": "pass \u2014 the plan cites a specific mechanism or owner for every subsystem it adds, and each named target exists in the tree: topology.read extends contour_tree.build_contour_tree (nova/equilibrium/contour_tree.py:384) over contour_tree_mesh.build_contour_mesh (:193); current.book cites clip_quadrature.clipped_support_quadrature (:415), _quadratic_support_vertices (:852) and its JVP; gs.apply cites the operand-flattening machinery in forward_operator.py (_flatten_shared_flux_stencil :147, _SourceLayout :2122, _OperatorPytreeAux :2239); solve.fixed_point cites the single-site GMRES kernel in fixed_point.py (_single_site_krylov :2619, _krylov_machine :2216, _steepest_descent_promotion :1672); the row scale is bound to constraint.ConstraintPair (:237); the policy is carried by solve_request.ForwardSolvePolicy (:233); the null kernels are nova/biot/null.py and nova/biot/fieldnull.py.",
+    "thin_wrapper": "pass \u2014 every added module is stated as a replacement, not a parallel layer: \u00a74 says \"gs.apply replaces the map ForwardFluxOperator performs today rather than wrapping it\"; \u00a72 replaces Topology.read and read_with_connectivity in topology.py; \u00a73 replaces clipped_support_current_moments; \u00a75 replaces newton_krylov, picard and operator_request_body; \u00a76 deletes the superseded files."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:38:48.858036+00:00"
+}

@@ -1,0 +1,43 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:14:24.531Z",
+  "dispatched_at": "2026-10-04T17:06:06Z",
+  "findings": [
+    {
+      "anchor": "nova/imas/machine_artifact.py:1230",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is to add a network-fetch capability (oras single-layer blob pull) to the machine_artifact owner and have the validator lane resolve through `resolve_machine_artifact`, rather than stand up a parallel digest cache that will diverge from the one already tested in tests/test_mast_artifact.py.",
+      "text": "\u00a73 proposes a new fetch module that pins OCI layer digests, verifies each blob's sha256, and materializes into a local cache root, but `nova/imas/machine_artifact.py` already owns exactly this: `materialize_machine_artifact`/`resolve_machine_artifact` (digest-addressed `sha256/<digest>` object root via `_verified_object_root`, line 862), `_sha256_bytes` verification, canonical cache-root resolution, and DD-version pinning through `pinned_dd_version`; a second verifier/cache forks the trust boundary and drifts on layout, digest checks and DD-pin semantics",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/docs/plans/forward-profile-validator-set.html:45",
+      "id": "reuse_search-1",
+      "reason": "naming the in-repo owners (machine_artifact for the pinned cache, pf_active/pf_passive for the IDS\u2192coilset build) would let rungs 1 and 3 extend tested code instead of re-deriving it, which is the point of a prior-art search.",
+      "text": "the plan's reuse map names the norma corpus resolver (which lives outside nova; the referenced `nova.assembly.provenance.corpus` path does not exist in this tree) and imas-efit's tooling, but omits `nova/imas/machine_artifact.py` and `nova/imas/pf_active.py`/`pf_passive.py` (rung 3's \"build the machine from the input bundle's own IDSs\" re-derives coilset-from-IDS construction that already exists)",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f6160159fe7f3c0026f6eb53ff75383783997e3dfb042366781e5bdabc337fa2",
+  "plan_slug": "forward-profile-validator-set",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T170554094693-plan-review-of-forward-profile-validator-set",
+  "reviewed_blob_sha": "8bed749f1b95457855c206b55db20ae0ed465bda",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73 hides fetch-by-digest, sha256 verification, NC\u2192HDF5 conversion, DD-pinned open and an availability gate behind one small module interface; the behaviour hidden is substantially larger than the interface.",
+    "duplicate_owner": "a finding \u2014 the fetch/verify/cache-root mechanism \u00a73 builds duplicates the content-addressed cache owner `nova/imas/machine_artifact.py`, which should be extended instead of forked.",
+    "reuse_search": "a finding \u2014 the plan cites external precedents (the norma corpus resolver, imas-efit's comparator/CLI) and the availability-gate test, but never cites nova's own in-repo content-addressed OCI artifact machinery (`nova/imas/machine_artifact.py)`, which already implements the exact digest-pin + sha256-verify + local-cache-root mechanism \u00a73 proposes to rebuild.",
+    "thin_wrapper": "pass \u2014 \u00a73 gives the required justification for not reusing imas-efit's `efit pull` CLI (whole-bundle 286 MB vs ~16 MB of single layers fetched by digest), so the shim is justified rather than a bare parallel wrapper."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.378394+00:00"
+}

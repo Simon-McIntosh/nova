@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T04:23:58.924Z",
+  "dispatched_at": "2026-10-06T04:19:05Z",
+  "findings": [
+    {
+      "anchor": "reckon/crew/promotion.py:1875",
+      "id": "reuse_search-1",
+      "reason": "the targets genuinely differ (`_rewrite_worktree_roots` rewrites a recorded gate command keyed on the manifest's recorded roots with a segment-boundary regex; \u00a72 rewrites committed file bytes by pattern because no roots are recorded), and \u00a71 already discloses the nova-reckon boundary, so the honest change is one citation, not a design change.",
+      "text": "the nearest existing machinery for \u00a72's lexical rewrite of worktree roots is `_rewrite_worktree_roots`, which already rewrites worktree roots during promotion/replay; the plan cites `routing.py` for the layout but never names this function, so the reader cannot see how the nova rule differs from it",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/database/filepath.py:45",
+      "id": "duplicate_owner-1",
+      "reason": "nova carries no reckon runtime dependency (\u00a71), so extending `routing.py` is infeasible and the residual is a named, accepted drift risk; the change worth making is a plan note pinning the pattern to its owner, not a code restructure.",
+      "text": "`_WORKTREE_PROJECT`/`_map_nova_worktree` re-encode reckon's `nova-<hash>/<session>/<node>` worktree layout, which `reckon/crew/routing.py:455` (`_workspace_roots`) owns, so a change to that layout silently stops nova's regex matching and no test here would detect it",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "f3c20ee3b76944a29ae51deb16cbbd36e225ebe25db1c6ba1d4f8438c88692a1",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 43,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Residual drift risk, marked not plan-changing by the review and declined twice before. Nova carries no reckon dependency, section 1 names reckon/crew/routing.py as the layout owner, and the layout lives in one constant and one pattern in nova/database/filepath.py.",
+      "when": "2026-10-06T10:07:46.902802+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Not plan-changing, as the review records. Section 2 cited _rewrite_worktree_roots and stated how the nova rule differs: it matches by layout, writes repository-relative paths and rewrites committed text. That text stood until section 2 landed and was collapsed into its landing card, and the remaining sections do not depend on it.",
+      "when": "2026-10-06T10:07:46.158426+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T041851102994-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "69c5351e7038f1d6c153dde533487548ecd27b6c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one detection predicate `worktree_path_offenders` (`nova/database/filepath.py:115`) and one rewrite function `relativize_worktree_paths` (`nova/database/filepath.py:72`) hide the pattern, the mapping and the exemption set; the subcommand, the guard test and the hook are three entry points over those two, not three copies.",
+    "duplicate_owner": "a finding \u2014 the plan re-encodes reckon's worktree layout rather than extending its owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74's `relativize --check` is a mode on the already-landed `relativize` subcommand and \u00a74 names what it retires in its own text (the directory-limited scan `test_no_receipt_directory_json_records_a_worktree_path` and its control, with helpers `_scanned_json` and `RECEIPT_DIRECTORIES`) and states that later read-only checks join the one hook rather than adding a second mechanism.",
+    "reuse_search": "pass \u2014 the plan cites the mechanism it extends, `nova.database.filepath.repository_relative` (owning file `nova/database/filepath.py:175`, landed 88a14b2ad), the layout owner `reckon/crew/routing.py`, and the existing realpath-first idiom in `scripts/nova_lane/run.sh:299`, `scripts/playable_server/run.sh:71` and `scripts/regenerate_solovev_certificate.sh:5`; all three citations open to the claimed content.",
+    "thin_wrapper": "pass \u2014 no wrapper without justification. The \u00a74 pre-commit hook is a shim over `filepath relativize --check` and \u00a74 states in its own text why the adopted `pre-commit` framework is not used (it stashes and restores unstaged changes, which the workstation policy bans); \u00a73's run-time root resolution adds behaviour the scripts lack rather than forwarding."
+  },
+  "section_digests": {
+    "_document": "cea5c2e330a1dbc8b111b9ff528ca6d5fd6e6478adcb994ffdc35426bd6ed4b9",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "0391cba326b1fc80516ff770fbaa656f6d1a1ac9f2f9394de0a78cc02dfdf265",
+    "s3": "af55126bd0713335b2716da37306ca4e7716c52a12337e9d50c6a6e28ad05475",
+    "s4": "55b94c8f32a70d52064bf6a2f345063f68a3108904f494452b0196a38099c6fd",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T10:07:45.362949+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:35:29.970Z",
+  "dispatched_at": "2026-10-05T15:23:54Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/constraint-augmented-newton-krylov.html:56",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite the existing pin/observation owner and say whether the new functional library extends it or why it must stand beside it; without that the reader cannot tell reused from rebuilt machinery.",
+      "text": "\u00a72 defines a constraint as a functional paired with a compensating unknown, yet `nova/equilibrium/observation.py` already declares `IsofluxPin` (two R-Z points trusted to share one flux value), `MomentPin` (a `centroid_r`/`centroid_z`/`plasma_current` pin) and `ConstraintPinSet`, and `ForwardProfile` already enforces these pins (`constraint_residual`, `constraint_jacobian`, `constraints_satisfied`, `_require_constraints` at `nova/equilibrium/forward.py:1310-1410`, `moment_residual` at `forward.py:3216`); the plan cites none of this, so a reader cannot tell whether \u00a72's `IsofluxConstraint`/`CurrentCentroidConstraint` extend the pin vocabulary or are new beside it.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/constraint-augmented-newton-krylov.html:86",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 still briefs a node to build the retired crossing-inversion path; the section must name `nova/diagnostics/thomson.py` as the owner and either delete the crossing-extractor program or state the edge-constraint demonstration as the separate, already-landed capability.",
+      "text": "\u00a73 makes the Thomson scattering edge crossing a constraint `\u03c8_N(x_c) \u2212 1 = 0` and makes \"the first node ... a scout that inventories what the competition dataset carries for Thomson\" in order to place competition equilibria from the channels; that inversion is the concern of the forward model now landed at `nova/diagnostics/thomson.py`, and the plan's own decision `thomson-crossing-source` supersedes it (\"NOVA DOES NOT INVERT ... Do not build a crossing extractor, an edge finder or any component whose purpose is to produce a target for the solver to match\").",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/constraint-augmented-newton-krylov.html:108",
+      "id": "interface_budget-1",
+      "reason": "the additions are the plan's whole purpose and are justified per class, so the plan should record the exports and their accounting, but the interface budget of 0 does not by itself reverse the library design.",
+      "text": "\u00a74 A\u2013E add a public constraint interface and library without accounting for the added surface: `nova/equilibrium/__init__.py` carries 28 constraint-name references and exports `ConstraintPair`, `ConstraintBinding`, `ConstraintFunctional`, `ConstraintMultiplier`, `IsofluxConstraint`, `XPointConstraint`, `FieldComponentConstraint`, `WallGapConstraint`, `CurrentCentroidConstraint`, `derive_circuit_compensators` and more, and no section names a definition retired or merged, or why nothing can be.",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "30fad071726220267e357a8f291113eda6e96f6d839928412942aa706af542ef",
+  "plan_slug": "constraint-augmented-newton-krylov",
+  "plan_version": 118,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152303383545-plan-review-of-constraint-augmented-newton-krylov",
+  "reviewed_blob_sha": "320d2f81e8355e8afc74611bb6e111f82c5a91e2",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `nova/equilibrium/constraint.py` hides the augmented residual, the compensating-unknown classes, the compensator selection and the receipt record behind one `ConstraintPair` tuple plus one JVP, which is a smaller interface than the behaviour behind it.",
+    "duplicate_owner": "a finding \u2014 \u00a73's Thomson program proposes a Thomson edge-crossing constraint and a scout that inverts Thomson channels to place the plasma, a concern now owned by the forward model at `nova/diagnostics/thomson.py` and retired by the plan's own locked decision `thomson-crossing-source`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; it adds public definitions to `nova.equilibrium` (constraint pairs, unknown classes, seven constraint functionals, selector functions) and does not name what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a72 and \u00a73 propose a constraint library (`ConstraintPair`, `IsofluxConstraint`, `CurrentCentroidConstraint`) and never cite the pre-existing pin/observation vocabulary that already expresses an isoflux pin and a current-centroid pin in `nova/equilibrium/observation.py` (`ConstraintPinSet`, `IsofluxPin`, `MomentPin`).",
+    "thin_wrapper": "pass \u2014 \u00a73's \"route that pair through the interface of \u00a72 rather than leave it a special case in `ForwardProfile.solve`\" is an explicit extension of existing machinery, and \u00a74 A states the empty-tuple bit-identity contract that justifies the wrapper."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.267393+00:00"
+}

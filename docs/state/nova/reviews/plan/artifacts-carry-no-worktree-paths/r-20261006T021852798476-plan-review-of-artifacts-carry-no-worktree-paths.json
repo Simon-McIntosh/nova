@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:25:01.269Z",
+  "dispatched_at": "2026-10-06T02:19:15Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/artifacts-carry-no-worktree-paths.html:127",
+      "id": "deep_module-1",
+      "reason": "the plan's own census is the justification it invokes for coverage, so it should either drop the tilde/other-repo branches or cite a corpus instance, otherwise the module hides branches its contract does not need.",
+      "text": "\u00a72 requires the matcher to cover \"the absolute form, a `~` form, and JSON strings with escaped slashes\" and adds a whole branch mapping another repository's worktree to `/home/ITER/mcintos/Code/<repository>/<rest>`, yet the census the node is mandated to run over all 1,147 files finds zero tilde forms and zero other-repo worktrees (all references are `nova-<hash>` under the two nova roots); the extra branch is unexercised hidden complexity whose output is an absolute machine-specific path",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/artifacts-carry-no-worktree-paths.html:116",
+      "id": "duplicate_owner-1",
+      "reason": "the author should state why the canonical-checkout location cannot be derived (or map it to a checkout-relative form) instead of forking placement knowledge and baking in a workstation-specific absolute path.",
+      "text": "\u00a72 re-encodes worktree placement by hardcoding the canonical-checkout parent `/home/ITER/mcintos/Code/<repository>` and the layout rule that belongs to `reckon/crew/routing.py` (which resolves both the preferred root at `repo.parent/.reckon-worktrees` and the legacy temp-dir root), and writing that absolute path into a committed artifact contradicts the section's own stated rationale that a relative path \"stays valid in any clone\"; the section names the dependency reason for the layout but not for the canonical prefix",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f73707084cc12d5157b9e2b43349f5a9d3b6a1b4bca78b553d120edc5a72b3bd",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 34,
+  "project": "nova",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:28:19.965290+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:28:21.167545+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T021852798476-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "96d598101bfdba6c74745bbcbf102150292542a1",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the matcher carries mapping branches the plan's own mandated census shows no instance of, and one branch's output contradicts the module's stated contract.",
+    "duplicate_owner": "a finding \u2014 the section hardcodes the canonical-checkout parent `/home/ITER/mcintos/Code` and re-encodes worktree placement that `reckon/crew/routing.py` owns.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 names its two functions, two constants and one subcommand on the existing `filepath` group and says what retires, and \u00a74 names the two tests and two helpers it deletes (`tests/test_render_receipt_paths.py:50,45,57,73`) and states that later checks merge into the one script, so both sections account for their surface.",
+    "reuse_search": "pass \u2014 the plan names the mechanisms it extends or replaces and opens each: it delegates `repository_relative`'s worktree case to the new matcher (`nova/database/filepath.py:62`), cites reckon's `_rewrite_worktree_roots` (`reckon/crew/promotion.py:1875`) as the nearest operation and states why it is not importable, and supersedes the directory-limited scan in `tests/test_render_receipt_paths.py:73` rather than adding a parallel one.",
+    "thin_wrapper": "pass \u2014 the `relativize` subcommand and the two-line hook each add a trigger/entry point the `worktree_path_offenders` predicate lacks, and \u00a72/\u00a74 state why (the predicate takes paths and a reader, not files; the hook adds the commit-time trigger), so neither is a wrapper around behaviour the existing machinery already exposes."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "b7a10435fea0b4d7c6f7c2cda13af081b1eb89af2abc234d6f40353d27dec983",
+    "s3": "af55126bd0713335b2716da37306ca4e7716c52a12337e9d50c6a6e28ad05475",
+    "s4": "7750fc32a7cbe1227c32649610d9d06528947b8ff938bc2db975416c88c3ad42",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:28:04.981880+00:00"
+}

@@ -1,0 +1,144 @@
+{
+  "absent": [],
+  "absent_evidence": [
+    "the reviewed run has no readable baseline_suite or after_suite arm of its own, so added failures are unmeasured rather than zero",
+    "six of the seven retained-pass rows have null gate log digests; one of those logs lives in a disposable worktree",
+    "no committed Nova test protects the eight historical row corrections",
+    "the writer-side gate/exit-status agreement guard is deliberately outside this Nova node and remains assigned to Reckon"
+  ],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's manifest carries empty baseline_suite and after_suite fields, so there are no readable base/head gate arms from which to calculate a test delta",
+  "assertion_review": {
+    "note": "The reviewed diff adds no source or test assertion. Its run-local checks are meaningful for the data repair: restoring any of the eight base rows makes the target-set recount report an unexplained passed/nonzero record; perturbing a gate_check field breaks its normalizer equality; and removing or changing the failed row's suite observation breaks the canonical observation or exact failure-id assertion. Because those checks are receipts rather than committed tests, they support evidence but not full durability."
+  },
+  "call_site_count": 4,
+  "call_sites": [
+    "reckon/ledger.py:107",
+    "reckon/ledger.py:1628",
+    "reckon/ledger.py:2613",
+    "reckon/crew/summary.py:563"
+  ],
+  "commits_read": [
+    "4f171b4f73cc72c827b9b9b26420ee10dc61caf6",
+    "a5f886886bb0a2e6ad71c9b7b53322b4b44386cd"
+  ],
+  "completed_at": "2026-10-02T13:25:13Z",
+  "dispatched_at": "2026-10-02T13:09:14Z",
+  "findings": [
+    {
+      "file": "docs/state/nova/crew.json",
+      "line": "217142",
+      "severity": "follow-on",
+      "text": "follow-on: r-20260920T153733162419-cca-repair-the-independent-oracle-reconstruction still cites clip-gate-after.log inside a disposable historical worktree and carries log_digest null. The log exists now and the review matched its 1 failed, 23 passed summary to a base log with the same failure, so landing is sound; preserving or hashing that primary evidence is a separate durability improvement."
+    },
+    {
+      "file": "reckon/ledger.py",
+      "line": "1688",
+      "severity": "follow-on",
+      "text": "follow-on: the implementation corrects historical data but does not add the writer-side invariant that a passed verdict must agree with a recorded exit status or explicit non-gate cause. The live plan assigns that guard to Reckon's crew-runtime-positive-controls work, outside this node's scope."
+    },
+    {
+      "file": "docs/state/nova/crew.json",
+      "line": "131456",
+      "severity": "follow-on",
+      "text": "follow-on: the seven nonzero causes are durable row data but are protected only by the run-local recount, not by a committed regression test. A later textual ledger edit could erase a cause without making the Nova suite red; this limits durability without contradicting the exact data-repair contract."
+    }
+  ],
+  "gate_arms_note": "The reviewed manifest has baseline_suite and after_suite keys but both are empty. Applying reckon.crew.review.added_failures_from_gate_logs to the resulting absent texts returns (null, []), so this review does not turn missing arms into a measured zero. Positive control: the implementation run's gate.log does see all eight target records, and this review independently parsed all eight changed rows plus their historical gate logs; those historical logs are the subject of the data correction, not this reviewed run's own base/head suite arms.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the ledger field vocabulary, promotion writer, record reader and summary reader that consume the corrected row shape",
+    "diff": "Commit a5f886886 over parent 4f171b4f changes one file in eight isolated hunks: seven outcome annotations and one gate plus canonical after-suite observation. No target has an unrelated field change.",
+    "done_when": "Every named log was opened; the report quotes its terminal verdict; the sole true gate failure is failed with one failure id under suite_delta.after_suite.failure_ids; seven other causes are recorded on-row; eight gate checks round-trip; json.load succeeds; the parsed diff changes exactly the eight target rows; and the head recount has zero target rows lacking a cause.",
+    "goal": "The source goal in prompt.txt asks to read eight passed/nonzero rows against their logs and correct every contradicted verdict. Independent review confirms exactly one contradiction and seven justified nonzero observations, and the head records that classification.",
+    "manifest": "The reviewed manifest is terminal and names commit a5f886886bb0a2e6ad71c9b7b53322b4b44386cd, the ledger and report paths, one corrected failure, seven retained verdicts and both closing receipts. Its baseline_suite and after_suite fields are present but empty, so added failures for this data-only run are unmeasured rather than zero.",
+    "write_paths": "The reviewed commit changes only docs/state/nova/crew.json, inside the implementation node's declared write scope. The required report is an external run artifact and exists at the declared absolute path; the unused fragment and figure grants remain untouched."
+  },
+  "justifications": {
+    "durability": "The run-local gate proves JSON loading, eight gate-check round trips, one corrected failure and zero unexplained passed/nonzero targets, but no committed regression check protects the historical rows and the writer-side gate/exit agreement guard remains owned by Reckon's crew-runtime-positive-controls work. The final row also cites a null-digest log inside a disposable worktree.",
+    "evidence": "The review opened all eight gate_check.log_path files, independently read the three required comparison arms, matched every terminal summary and failure identity, re-derived the failed row's sha256 0cc3efef...fd7, parsed both ledger revisions, and ran Reckon's normalizers. One point is withheld because six of the seven retained-pass rows have null log digests, including a log stored only in a disposable historical worktree.",
+    "fit": "The correction uses the ledger's declared fields: outcome for the seven explicit causes and suite_delta.after_suite for the failed gate. All eight gate_check mappings are invariant under reckon.ledger._normalized_gate_check, and the failed suite observation is invariant under normalized_suite_observation.",
+    "goal_fidelity": "The base state reproduced exactly eight rows with gate passed beside exit_status 1. At head, the iteration-count row at docs/state/nova/crew.json:165611 is failed and its canonical after-suite observation at lines 165620-165634 carries the log's one failing node id; the other seven rows retain passed and record the log-specific reason in outcome at lines 131456, 173921, 203316, 205772, 207126, 214018 and 217142.",
+    "scope_discipline": "Parsed comparison of base 4f171b4f and head a5f886886 finds exactly eight changed run objects, byte-for-byte matching the eight ids named by section 5; non-run data is identical and git show reports only docs/state/nova/crew.json with 22 insertions and 9 deletions."
+  },
+  "limitations": [
+    "This review does not rerun the eight historical measurements; it reconciles the ledger with their persisted primary logs and, where needed, the persisted base-arm logs, which is the exact section-5 measure.",
+    "The seven retained-pass causes are semantic adjudications against each original node's done-when. They are stored in outcome as required, but the current ledger schema does not provide a structured cause enum.",
+    "The implementation report is outside the reviewed git commit by design; review verifies its existence and contents as a run artifact."
+  ],
+  "notes": "Pass, 93/100. The defect reproduces quantitatively at base as eight passed/nonzero rows. Independent log reading supports the head adjudication: one genuine failed gate with one canonical failure id, two report/measurement nodes whose negative result is the deliverable, two review nodes whose red rerun is the observed subject, and three implementations with zero added failures against their base arms. The commit is exactly scoped and schema-conforming. The deductions are durability/evidence follow-ons, not blockers.",
+  "plan": "nova:figure-and-solver-audit",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal asks to reconcile eight passed/nonzero rows with their own logs; base 4f171b4f reproduces all eight, and head a5f886886 classifies one as failed and seven as justified nonzero outcomes.\nVERDICT done_when: all eight logs and three comparison arms were opened; the sole gate failure has its exact id under suite_delta.after_suite; seven causes are recorded in outcome; JSON, normalizer, scope and recount checks all pass.\nVERDICT write_paths: the reviewed commit changes only docs/state/nova/crew.json; the required external report exists and no unused fragment or figure path changed.\nVERDICT manifest: the source manifest is complete, names a5f886886 and both check receipts, and agrees with the diff; its empty suite arms make added failures unmeasured.\nVERDICT diff: a5f886886 over 4f171b4f changes exactly eight run objects in eight hunks, with seven outcome annotations and one failed-gate suite observation.\nCALL_SITES: reckon/ledger.py:107, reckon/ledger.py:1628, reckon/ledger.py:2613, reckon/crew/summary.py:563\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/state/nova/crew.json:165611-165634 records the one contradicted gate as failed with its id, and lines 131456, 173921, 203316, 205772, 207126, 214018 and 217142 record the seven log-supported causes.\nSCORE evidence: 19\nJUSTIFICATION evidence: all primary logs and three base arms reconcile; the failed digest was re-derived; six retained rows remain unhashed and one primary log is inside a disposable worktree.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: parsed comparison finds exactly the eight named run ids changed and non-run data identical.\nSCORE durability: 14\nJUSTIFICATION durability: the run-local gate is falsifiable but uncommitted, the writer guard belongs to a separate Reckon followup, and one null-digest log is in a disposable tree.\nSCORE fit: 20\nJUSTIFICATION fit: the changes use declared outcome and suite_delta fields, all gate checks round-trip, and the failed suite observation is canonical.\nFINDING docs/state/nova/crew.json:217142 follow-on: the final row's null-digest primary log lives in a disposable worktree; preserve or hash it separately.\nFINDING reckon/ledger.py:1688 follow-on: the historical repair does not add the separately owned writer-side agreement guard.\nFINDING docs/state/nova/crew.json:131456 follow-on: the corrected data is protected by a run-local recount, not a committed regression test.",
+  "reproduction_of_repaired_defect": [
+    {
+      "after": "At head a5f886886bb0a2e6ad71c9b7b53322b4b44386cd, the parsed scan returns HEAD_FAILED 1 and HEAD_PASSED_NONZERO_WITH_CAUSE 7; all eight gate checks are normalizer-invariant and the target-set recount has no unexplained row.",
+      "before": "At base 4f171b4f73cc72c827b9b9b26420ee10dc61caf6, an independent parsed scan returned BASE_PASSED_NONZERO 8 for exactly the eight named run ids; each had gate passed, gate_check.exit_status 1 and no row-level explanation of why that nonzero observation was compatible with the node verdict.",
+      "finding_id": "all eight section-5 rows recorded passed beside a nonzero exit without an explicit cause"
+    },
+    {
+      "after": "The head row reads failed and suite_delta.after_suite is completed with exit 1, failure_count 1, that exact node id, revision 413393e5be9b38b59133cff71418205f5037c509 and digest 0cc3efef2d6ce1967fdb33b4257a78c84ede27cff7c844e4ae48ca7686d72fd7, which this review re-derived.",
+      "before": "The base row r-20260915T055602091466-cca-newton-krylov-iteration-count read passed with exit 1. Its log ends FAILED tests/test_two_class_recovery.py::test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap, 1 failed and 4 deselected in 226.48s, EXIT=1; achieved classes were [1, 1] instead of [0, 1].",
+      "finding_id": "the Newton-Krylov iteration-count row was a true failed gate"
+    },
+    {
+      "after": "The row retains passed and outcome now states that the red validation result was the report's measured subject rather than a green implementation gate.",
+      "before": "The log ends one discretisation-floor guard failed and two tests passed in 23.19s, naming seven rows outside dr/2. The original done-when requires the base test to run with its pass or fail result stated and a report built from the committed receipt.",
+      "finding_id": "the centroid-radius report's red guard was its requested reported measurement"
+    },
+    {
+      "after": "The row retains passed and outcome records the intentional 50,000,000-byte refusal together with the completed receipt, attribution report and record.",
+      "before": "The log's only terminal record is SOLVE_PROGRAM_SIZE_300 effective_bytes=210150548 generated_code_bytes=0 compile_seconds=369.441 verdict=FAIL followed by exit code 1. The original node's deliverable was the attribution census and HLO-backed report for that oversized program.",
+      "finding_id": "the executable-remainder census intentionally tripped its size verdict"
+    },
+    {
+      "after": "Both rows retain passed and now state that the independent review record was the deliverable while the red suite was the observed subject.",
+      "before": "The limited-boundary review log ends 3 failed, 24 passed in 180.59s, exactly the three failures its review done-when required reproducing. The route-order review log ends 3 failed, 60 passed in 50.33s on the residual-bound finding its done-when required checking.",
+      "finding_id": "two review rows used red first-hand reruns as their evidence"
+    },
+    {
+      "after": "All three rows retain passed and their outcomes name the shared base/head failure identity and zero-added-failure conclusion.",
+      "before": "The census gate after arm has one forward-census failure against a base arm with that failure plus four builder defects; the fallback changed arm has one spline-margin failure against a base arm with the same id plus four repaired failures; the oracle-reconstruction after arm has one missing-topology.x_point failure against a base arm with the same id. Each changed arm exits 1 but adds zero failing ids.",
+      "finding_id": "three implementation rows had pre-existing failures in both measured arms"
+    }
+  ],
+  "review_run_id": "r-20261002T130847636928-review-of-fsa-eight-ledger-rows-read-against-logs",
+  "reviewed_base_sha": "4f171b4f73cc72c827b9b9b26420ee10dc61caf6",
+  "reviewed_head_sha": "a5f886886bb0a2e6ad71c9b7b53322b4b44386cd",
+  "reviewed_revision": "a5f886886bb0a2e6ad71c9b7b53322b4b44386cd",
+  "reviewed_run_id": "r-20261002T124932834128-fsa-eight-ledger-rows-read-against-logs",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-eight-ledger-rows-read-against-logs",
+  "reviewer_node": "review-of-fsa-eight-ledger-rows-read-against-logs",
+  "reviewer_run_id": "r-20261002T130847636928-review-of-fsa-eight-ledger-rows-read-against-logs",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T13:20:11Z",
+  "total": 93,
+  "verdict": "pass",
+  "verified_independently": [
+    "the reviewed worktree is clean and HEAD is exactly a5f886886bb0a2e6ad71c9b7b53322b4b44386cd; its sole parent is reviewed_base_sha 4f171b4f73cc72c827b9b9b26420ee10dc61caf6",
+    "git show reports one changed path, docs/state/nova/crew.json, with 22 insertions and 9 deletions; the commit has a conventional subject, a non-empty body and no attribution trailer",
+    "json.load succeeds for both revisions; both contain 1856 run records",
+    "parsed base-to-head comparison finds exactly eight changed run ids and they equal the plan's target set; members, holds and _version are unchanged",
+    "all eight head gate_check mappings equal reckon.ledger._normalized_gate_check of themselves",
+    "the failed row's suite_delta.after_suite equals normalized_suite_observation of itself and carries exactly one failure id",
+    "sha256sum of the iteration-count log is 0cc3efef2d6ce1967fdb33b4257a78c84ede27cff7c844e4ae48ca7686d72fd7, equal to both stored digests",
+    "the centroid-radius log ends FAILED test_centroid_major_radius_within_the_grid_discretisation_floor and 1 failed, 2 passed in 23.19s; its source done-when explicitly requests a pass-or-fail report",
+    "the executable-size log records effective_bytes=210150548, generated_code_bytes=0, compile_seconds=369.441 and verdict=FAIL before exit 1; its source done-when asks for the census and HLO report rather than a passing size guard",
+    "the limited-boundary review log ends exactly 3 failed, 24 passed and the source review done-when requires those three failures to reproduce",
+    "the route-order review log ends exactly 3 failed, 60 passed and the source review done-when requires the diagnostic rerun and residual-bound interpretation",
+    "the census after arm ends one forward-census failure while its base arm contains the same failure plus two other failures and two errors",
+    "the promotion-fallback changed arm ends one spline-margin failure while its base arm contains the same id plus four other failures",
+    "the oracle-reconstruction after and base logs both fail only test_forward_census_exact_diverted_oracle on missing topology.x_point",
+    "reckon.crew.review.added_failures_from_gate_logs(None, None) returns (None, []), matching the reviewed manifest's empty base/head suite-arm fields"
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived as zero by absence of arms, not from a green run: the reviewed run's classification.json records baseline_suite null and after_suite null, and its manifest test_logs names only a read-only python3 row audit, so no suite arm exists from which a failure delta could be taken. The check that shows the absence is the reviewed run's own classification.json and manifest.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "7701396385bc5991cb419f8f30904da0ca7f7b7f",
+    "848544972e32e9d5456319781c37a737c377e26f",
+    "4f1bfbdda37378e8f1e5e65a058d253c10d69490"
+  ],
+  "completed_at": "2026-10-01T22:25:28.806Z",
+  "dispatched_at": "2026-10-01T21:37:35Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's own manifest cites its third commit as 4f1bfbddae5b8ba3a6d872c94dd72b1496e70fbb in the commits field (manifest.md:6) and three more times in the 'acted ...' annotation lines (manifest.md:7-9), but that sha resolves to no object anywhere in the repository (git cat-file -t fails; the whole object store holds exactly one 4f1bfbdd object, 4f1bfbdda37378e8f1e5e65a058d253c10d69490). The real correction commit is 4f1bfbdda37378e8f1e5e65a058d253c10d69490, which is the tree both worktrees carry as HEAD, so the record is recoverable but a reader cannot verify it from the manifest alone."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found; this is a read-only documentation node",
+    "diff": "read all three commits against the base a71934910: 77013963 adds the report and the fragment (118 insertions); 84854497 amends one efit-row line; 4f1bfbdda (the reviewed head) rewrites the efit row's gate verdict and fixes three citations (7 insertions/7 deletions across the report and the fragment). No source path is touched and no test file is in the write paths.",
+    "done_when": "s1 of docs/plans/nova-portfolio-replan.html requires one row per assigned plan with every field, each claim citing a file, line or commit. The report carries exactly six rows for the six assigned plans, every cited sha resolves, and every file:line citation I opened resolves at the reviewed revision.",
+    "goal": "report B: one row per each of the six assigned plans recording what landed with commits and files, whether status and impl agree with the code, implementation depth with call sites and test evidence, each open followup's done-when status, and the next critical node; the report and fragment carry exactly those fields.",
+    "manifest": "read the source manifest.md: status complete, three commits, the six covered plans, a row-audit gate exiting 0, and the DIII-D tolerance follow-on; it agrees with the committed report except that its commits field cites an unresolvable third sha (manifest.md:6-9). The reviewed run's classification.json records baseline_suite null and after_suite null, so no suite arm exists to derive a failure delta from.",
+    "write_paths": "the manifest declares docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html, and the diff of the base to 4f1bfbdda lists exactly those two files, both inside the declared scope."
+  },
+  "justifications": {
+    "durability": "the report and fragment are committed and their claims resolve against the tree, but the reviewed run's only gate is a non-reproducible python3 row-audit token counter (gate-report-check.log) that neither re-runs from the tree nor resolves a citation, and the record it accompanies cites a commit sha that resolves to nothing, so the run's own record is not independently checkable.",
+    "evidence": "every substantive claim was re-derived from source at the reviewed revision: the efit receipt docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json records closed_boundary_symmetric_rms passes=false with eligible_row_count 1 (the other 16 rows excluded) and declared_row_saddle_distance passes=false at 2.6217069152004004 m against 0.04, so the head commit's 'two of the three gates fail' is correct; the open followups scanned from the plan HTML at a71934910 are exactly the nine the report names and none carries a done-when; all 31 distinct sha tokens in the report resolve. The deduction is for the demonstration running no suite and for the reviewed record's own audit being a non-reproducible token counter.",
+    "fit": "the fragment declares plan-verifies 'nova:nova-portfolio-replan#s1', an id present in docs/plans/nova-portfolio-replan.html, carries meta evidence-verdict pass, and both files follow the surrounding docs/evidence markup with no forbidden name.",
+    "goal_fidelity": "docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md carries exactly six rows, one per each of the six plans named for this node in docs/plans/nova-portfolio-replan.html s1 (diiid-forward-onboarding, machine-description-retirement, diiid-pulse-replay, dual-branch-selection, efit-baseline-demonstration, mast-catalog-gpu-solve), with commits, files, status/impl, depth with call site and test evidence, followups, and next node.",
+    "scope_discipline": "the diff of a71934910 to 4f1bfbdda touches only docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html, both inside the declared write paths, with no source changed."
+  },
+  "limits": [
+    "Read-only review; the reviewed run changed documentation only, so no suite was re-run and no GPU or SLURM job was used.",
+    "Every file:line citation was re-opened against the reviewed revision; this worktree (b65fcbf70) has since diverged for three plan HTML files, so those line numbers were read with git show at a71934910/4f1bfbdda, where they resolve.",
+    "The receipt gates were read from docs/figures/efit-baseline-demonstration/demonstration-score/receipt.json directly rather than from the report's account of them; they confirm the report's corrected FAIL.",
+    "The six plan assignments were confirmed against section s1 of docs/plans/nova-portfolio-replan.html, which names exactly these six plans for this node."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: report B needs one row per each of the six assigned plans with what landed, status/impl vs code, depth with call site and test evidence, each open followup's done-when status, and the next critical node; the report and fragment carry exactly those, and s1 of docs/plans/nova-portfolio-replan.html names these six plans for this node.\nVERDICT done_when: s1 requires one row per assigned plan with every field and each claim citing a file, line or commit; the six rows are present, all 31 sha tokens resolve, and each file:line citation re-opened resolves at the reviewed revision.\nVERDICT write_paths: the manifest declares docs/evidence/replan-2026-09-24/plan-currency-and-depth-b.md and docs/evidence/fragments/nova-portfolio-replan/replan-currency-depth-b.html, and the diff of a71934910 to 4f1bfbdda lists exactly those two files.\nVERDICT manifest: read the source manifest.md; it records status complete, three commits, the six covered plans and a row-audit gate exiting 0, and agrees with the committed report except that its commits field cites an unresolvable third sha.\nVERDICT diff: the head commit 4f1bfbdda rewrites the efit row's gate verdict and fixes three citations (7 insertions/7 deletions across the report and fragment); no source is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: six rows, one per the six plans named for this node in s1, each with commits, files, status/impl, depth with call site and test evidence, followups and next node.\nSCORE evidence: 17\nJUSTIFICATION evidence: the efit receipt records the RMS gate passes=false by disqualifying exclusion and the saddle gate fails at 2.6217069152004004 m, confirming the report's corrected two-of-three FAIL; the nine open followups scanned at a71934910 match the report's list and none carries a done-when; all sha tokens resolve. Deduction: the reviewed record's own audit is a non-reproducible token counter and no suite ran.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff touches only the two declared documentation paths, with no source changed.\nSCORE durability: 14\nJUSTIFICATION durability: the report and fragment are committed and their claims resolve, but the run's only gate is a non-reproducible token counter and the record it accompanies cites a commit sha that resolves to nothing.\nSCORE fit: 18\nJUSTIFICATION fit: the fragment declares plan-verifies nova:nova-portfolio-replan#s1, an id present in the plan, and both files follow the docs/evidence markup with no forbidden name.\nFINDING manifest.md:6 follow-on: the reviewed run's own manifest cites its third commit as 4f1bfbddae5b8ba3a6d872c94dd72b1496e70fbb in the commits field (manifest.md:6) and three more times in the 'acted ...' annotation lines (manifest.md:7-9), but that sha resolves to no object anywhere in the repository (git cat-file -t fails; the whole object store holds exactly one 4f1bfbdd object, 4f1bfbdda37378e8f1e5e65a058d253c10d69490). The real correction commit is 4f1bfbdda37378e8f1e5e65a058d253c10d69490, which is the tree both worktrees carry as HEAD, so the record is recoverable but a reader cannot verify it from the manifest alone.",
+  "recommendation": "accept the report as an accurate currency-and-depth audit of the six plans at the reviewed revision: the head commit's correction is correct and every citation I re-opened resolves. Correct one record defect before promotion: the reviewed manifest's commits field (and its three 'acted ...' annotation lines) must cite the real third commit 4f1bfbdda37378e8f1e5e65a058d253c10d69490 in place of the unresolvable 4f1bfbddae5b8ba3a6d872c94dd72b1496e70fbb.",
+  "review_run_id": "r-20261001T213722627131-review-of-replan-currency-depth-b",
+  "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "reviewed_head_sha": "4f1bfbdda37378e8f1e5e65a058d253c10d69490",
+  "reviewed_run_id": "r-20261001T191426544316-replan-currency-depth-b",
+  "reviewing_run_id": "r-20261001T213722627131-review-of-replan-currency-depth-b",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-01T22:11:27.933115+00:00",
+  "total": 89
+}

@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:34:57.388Z",
+  "dispatched_at": "2026-10-06T09:19:41Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/diiid-forward-onboarding.html:573",
+      "id": "reuse_search-1",
+      "reason": "an author who saw the existing held-out ladder fitter would extend it (and only add the third-mesh term the `c-20260823T0935` circularity note demands) instead of dispatching a fresh instrument.",
+      "text": "the released node `f-dfo-error-estimator-now` asks to \"build the independent same-observable discretisation-error estimator\" but the plan text (grep for `derived_convergence`, `richardson`, `criterion_provenance`, `efit_operator_consolidation` returns 0 hits) never cites the instrument family that already derives exactly this: `benchmarks/derived_convergence_criterion.py` (\"Derive a fixed-point criterion from held-out banked mesh ladders\"), `benchmarks/derived_criterion_family.py` (\"rebuilds ... the DIII-D convergence ... criteria from their measurement domains\"), `benchmarks/efit_parity_criterion_provenance.py:398 richardson_fine_error`, and `benchmarks/efit_operator_consistency_order.py:60 _fit_power_order`; further resolution-ladder machinery already exists in `benchmarks/wall_resolution_ladder.py`, `benchmarks/topology_read_resolution_ladder.py`, `benchmarks/topology_qualified_mesh_convergence.py` and `benchmarks/order_vs_mesh_adjudication.py`",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/derived_convergence_criterion.py",
+      "id": "duplicate_owner-1",
+      "reason": "naming `derived_convergence_criterion.py` as the owner turns the node from \"build an estimator\" into \"add the one missing term to the existing estimator\", which is the change the adjudication actually asked for and avoids a second instrument drifting from the first.",
+      "text": "the estimator node is a second owner of the criterion-derivation mechanism whose existing owner is `benchmarks/derived_convergence_criterion.py` (line 141 `_fit_held_out_ladder`, line 225 `_fit_qualification`), which already fits a power order from held-out banked mesh ladders and refuses the quantity it tests by construction; the plan should extend that owner to add the non-circular third-spacing/`h`-independent estimate the `c-20260823T0935-criterion-correction` comment says is still missing, rather than fork a parallel estimator",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4e3008d16ec035dc360ceae795d6d6572db02bf5f7f4a07ffcb655bbb50efa37",
+  "plan_slug": "diiid-forward-onboarding",
+  "plan_version": 82,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T091918405157-plan-review-of-diiid-forward-onboarding",
+  "reviewed_blob_sha": "2024fa310e87451fdec5ecbe17c42bc54aeb1ef0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the \u00a75 extraction surface is one module (`nova/equilibrium/map_extraction.py`) hiding the \u0394* application, per-surface separation, vacuum-region receipt and chord sampling behind four functions, and the consolidation comment (`c-20260817-extraction-consolidation`) records that it delegates \u0394* to `nova/equilibrium/conservation.py` rather than re-implementing it.",
+    "duplicate_owner": "a finding \u2014 the estimator node duplicates the criterion-derivation owner already in `benchmarks/`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the live nodes add a benchmark instrument and internal modules, not public API, and \u00a77 names the MAST-specific path it retires (`nova/scripts/mast_machine_artifact.py`, generalised onto `nova/imas/machine_artifact.py`).",
+    "reuse_search": "a finding \u2014 the plan ran reuse maps for the solver-stability wave (\u00a75 comments cite `scripts/forward_stability_survey/report.md`, 126 valid citations) and correctly cites the extraction machinery it hardens, but the released estimator node (`f-dfo-error-estimator-now`) proposes a new discretisation-error instrument without citing the benchmark instrument family that already does it, and the plan text names none of those modules.",
+    "thin_wrapper": "pass \u2014 the open nodes do not add a thin layer over a single existing call; the estimator adds measurement, not a forwarding wrapper, so the defect it carries is a duplicate owner rather than a wrapper."
+  },
+  "section_digests": {
+    "_document": "4ead0d289e05300cf26fc3c7fc946c9916e72120f3c072cd38a28bd12746a650",
+    "s1": "93422ba9d21f9babc9db8404d0b5d3baacc2dfcad92746920eafe6ff42ba6c3f",
+    "s10": "5ee1fe9cb9dcf861dfbad8f85760cfa4b0dbefb3578041932893626d3f7be4e9",
+    "s10-scope": "99a32da276a358e2ea6ef26ddfb2cd3cb65fca803e8c6598885c297bdb4cb503",
+    "s2": "6dc707b667cb2b940d5c7398b61ca1e58f11abc9b70857562711b8997b0e5903",
+    "s3": "05a034ec04d583fb2d43ad261a6397912db06afde06e4ce7dc238a482622059a",
+    "s4": "21de21a78d530e113d622d30e73d0d09f5f8ce8286c9770e28e0eff423269639",
+    "s5": "94060ead95779d5308d9858eb8645b45fa4cd508ac4d14067e39f244d37ec939",
+    "s6": "f4c6afb6fed9ae0e7c47256df88c024b9b3b34a1093536c06ad255caabde0b19",
+    "s7": "2393ec96f7265159170a4c5c3f5556a8a420197555e6257edd1507b4f11be511",
+    "s8": "9749656a81898fed5a467452b690521b29cec261ec10fe7b3d1eff63b1f79de3",
+    "s9": "92e83ce527c957fba282edd3688125dde1c3cd41bd6b886ef404db91c6b617ef"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T09:36:44.367541+00:00"
+}

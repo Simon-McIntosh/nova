@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "the reviewed run is a read-only report node: the manifest records tests none and carries no baseline_suite and no after_suite, so neither gate arm exists and the added-failure count is unmeasured rather than a measured zero; base and head are the same commit 9ac842a60 with no commits, so no failing test can have been added.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-closure-verification.md - 4 closure sections; verdicts met (f-ecq-density-promotion-record, f-fsa-audit-mesh-size-threshold) and not-met-as-drafted (f-cca-one-row-per-process-until-the-program-shrinks, f-fsa-audit-certificate-receipt-provenance)"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [],
+  "completed_at": "2026-10-02T08:36:30.554Z",
+  "dispatched_at": "2026-10-02T08:09:12Z",
+  "evidence_inputs": {
+    "added_failure_count_unmeasured": "the reviewed manifest has no baseline_suite and no after_suite; the count is null by the unmeasured rule, not a measured zero.",
+    "ancestors_verified": "899f3cf99, 2710b2ea1, a6b251732, 3785788f7, e7a6a807 and cbd4ae7e are all ancestors of HEAD 9ac842a60.",
+    "reviewed_head_is_base": "9ac842a600928fd88b9b68ff531265be0cbb06d3 for both base and head; the reviewed run made no commits (report-only).",
+    "row1_route_superseded": "the followup at plan:268 names the sampled-arc replacement, but 899f3cf99 (an ancestor of HEAD) landed the closed-form endpoint-moment route at nova/equilibrium/clip_quadrature.py:121-123, and evidence :197 calls the fan and sampled-arc routes reference arms only.",
+    "verified_quotes": "nova/equilibrium/clip_quadrature.py:121-123 returns len(_DENSITY_SAMPLE_LOCAL); benchmarks/solve_program_size_gate.py:1646 relative path, :2146 child_status, :2151-2152 exit_code vs probe_wrapper_exit, :2171 and :2339 _certificate_rows_as_processes; process-per-row/certificate.json execution_mode one-process-per-row, 4 rows, rows[0].candidate_state_array_path absolute, row_processes[0] exit_code 0 probe_exit_code 1 with no probe_wrapper_exit key; gate/receipt.json limits 300_cell_executable_bytes 450000000 and 300_cell_executable_target_bytes 50000000."
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-closure-verification.md",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "follow-on: row 1's closure action says only to mark the followup resolved, but the followup text it quotes (plan:268) names the sampled-arc replacement while production at HEAD carries the closed-form endpoint-moment route (nova/equilibrium/clip_quadrature.py:121-123, commit 899f3cf99) and the fan and sampled-arc routes are reference arms only (evidence :197); the closure edit would leave the plan's stale wiring wording uncorrected unless it names the closed-form route."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-closure-verification.md",
+      "line": "54",
+      "severity": "follow-on",
+      "text": "follow-on: the counter-claim sweep asserts it returns exactly one hit but records neither its pattern nor its command, so the claim is not re-derivable; a broader grep for the token cleared over the plan and landed evidence surfaces plan:247 and evidence :114 ('Budget cleared by every measured row'), which name a different rows-figure budget and are themselves the subject of the open followup f-ecq-repair-rows-svg-captions."
+    }
+  ],
+  "follow_ons": [
+    "the row-1 closure edit should name the closed-form endpoint-moment route (899f3cf99) as the production replacement rather than repeat the plan's stale sampled-arc replacement wording.",
+    "rows 2 and 3 both close on docs/plans/cpu-compile-abort.html and should be one reckon-edit node; row 3 optionally adds a CPU all_debug certificate re-run to mint a post-repair receipt.",
+    "the counter-claim sweep should record its pattern so a reader can re-derive the single-hit claim."
+  ],
+  "gate_arms_note": "no gate arms: the reviewed node ran no test suite (read-only verification), so both baseline_suite and after_suite are absent and added_failure_count is unmeasured.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "base 9ac842a600928fd88b9b68ff531265be0cbb06d3 equals head 9ac842a600928fd88b9b68ff531265be0cbb06d3 with no commits; the deliverable is the report alone.",
+    "done_when": "the FENCE-EVIDENCE names the report path and requires four sections quoting the closure condition from the two triage reports plus the opened committed artifact and the meeting/failing line; all four sections are present, but the report runs no gate, so the measure is evidenced by reading rather than by a recorded run.",
+    "goal": "the goal is to verify the closure condition of four S22 followups and report each met or not met; report:25-211 carries one section each for f-ecq-density-promotion-record, f-cca-one-row-per-process-until-the-program-shrinks, f-fsa-audit-certificate-receipt-provenance and f-fsa-audit-mesh-size-threshold, each ending on a met/not-met verdict.",
+    "manifest": "read; status complete, names the report path and its four rows, commits none (report-only), tests none.",
+    "write_paths": "the manifest declares the single report path; the report declares itself read-only and I found no source, figure or plan edit in the reviewed tree."
+  },
+  "justifications": {
+    "durability": "the report adds no test and nothing pins its verdicts against drift, so a later reader must re-derive each claim by hand; its claims do rest on immutable ancestor commits (899f3cf99, 2710b2ea1, a6b251732, 3785788f7, e7a6a807, cbd4ae7e), which softens but does not remove that gap.",
+    "evidence": "every quoted line the report cites was re-read at HEAD and matched, including nova/equilibrium/clip_quadrature.py:121-123, benchmarks/solve_program_size_gate.py:1646 and :2146 and :2151-2152, and gate/receipt.json limits 450000000/50000000; the counter-claim sweep at report:54 is the one assertion a reader cannot re-derive because the report records no pattern.",
+    "fit": "the report follows the local reports/nova/s22/ convention of the sibling triage files, uses no forbidden source symbol, and cites plans by id rather than embedding plan labels into source; the module is a report, not source.",
+    "goal_fidelity": "all four sections (report:25-211) restate the triage closure condition, open a committed file or receipt or commit and end with a met/not-met verdict, matching the dispatched goal.",
+    "scope_discipline": "the only written path is the declared report path; the reviewed tree HEAD equals its base and no source, figure or plan file was modified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to verify the closure condition of four S22 followups and report each met or not met; report:25-211 carries one section each for f-ecq-density-promotion-record, f-cca-one-row-per-process-until-the-program-shrinks, f-fsa-audit-certificate-receipt-provenance and f-fsa-audit-mesh-size-threshold, each ending on a met/not-met verdict.\nVERDICT done_when: the FENCE-EVIDENCE names the report path and requires four sections quoting the closure condition from the two triage reports plus the opened committed artifact and the meeting/failing line; all four sections are present, but the report runs no gate, so the measure is evidenced by reading rather than by a recorded run.\nVERDICT write_paths: the manifest declares the single report path; the report declares itself read-only and I found no source, figure or plan edit in the reviewed tree.\nVERDICT manifest: read; status complete, names the report path and its four rows, commits none (report-only), tests none.\nVERDICT diff: base 9ac842a600928fd88b9b68ff531265be0cbb06d3 equals head 9ac842a600928fd88b9b68ff531265be0cbb06d3 with no commits; the deliverable is the report alone.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all four sections (report:25-211) restate the triage closure condition, open a committed file or receipt or commit and end with a met/not-met verdict, matching the dispatched goal.\nSCORE evidence: 17\nJUSTIFICATION evidence: every quoted line the report cites was re-read at HEAD and matched, including nova/equilibrium/clip_quadrature.py:121-123, benchmarks/solve_program_size_gate.py:1646 and :2146 and :2151-2152, and gate/receipt.json limits 450000000/50000000; the counter-claim sweep at report:54 is the one assertion a reader cannot re-derive because the report records no pattern.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the only written path is the declared report path; the reviewed tree HEAD equals its base and no source, figure or plan file was modified.\nSCORE durability: 14\nJUSTIFICATION durability: the report adds no test and nothing pins its verdicts against drift, so a later reader must re-derive each claim by hand; its claims do rest on immutable ancestor commits (899f3cf99, 2710b2ea1, a6b251732, 3785788f7, e7a6a807, cbd4ae7e), which softens but does not remove that gap.\nSCORE fit: 17\nJUSTIFICATION fit: the report follows the local reports/nova/s22/ convention of the sibling triage files, uses no forbidden source symbol, and cites plans by id rather than embedding plan labels into source; the module is a report, not source.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-closure-verification.md:58 follow-on: row 1's closure action says only to mark the followup resolved, but the followup text it quotes (plan:268) names the sampled-arc replacement while production at HEAD carries the closed-form endpoint-moment route (nova/equilibrium/clip_quadrature.py:121-123, commit 899f3cf99) and the fan and sampled-arc routes are reference arms only (evidence :197); the closure edit would leave the plan's stale wiring wording uncorrected unless it names the closed-form route.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-closure-verification.md:54 follow-on: the counter-claim sweep asserts it returns exactly one hit but records neither its pattern nor its command, so the claim is not re-derivable; a broader grep for the token cleared over the plan and landed evidence surfaces plan:247 and evidence :114 ('Budget cleared by every measured row'), which name a different rows-figure budget and are themselves the subject of the open followup f-ecq-repair-rows-svg-captions.\nreviewed_base_sha: 9ac842a600928fd88b9b68ff531265be0cbb06d3\nreviewed_head_sha: 9ac842a600928fd88b9b68ff531265be0cbb06d3\n",
+  "review_run_id": "r-20261002T080858790152-review-of-s22-closure-verification",
+  "reviewed_base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "reviewed_head_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "reviewed_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063844467764-s22-closure-verification/manifest.md",
+  "reviewed_revision": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "reviewed_run_id": "r-20261002T063844467764-s22-closure-verification",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/s22-closure-verification",
+  "reviewer_node": "review-of-s22-closure-verification",
+  "reviewer_run_id": "r-20261002T080858790152-review-of-s22-closure-verification",
+  "reviewing_run_id": "r-20261002T080858790152-review-of-s22-closure-verification",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T08:28:00+00:00",
+  "total": 87,
+  "verdict": "pass"
+}

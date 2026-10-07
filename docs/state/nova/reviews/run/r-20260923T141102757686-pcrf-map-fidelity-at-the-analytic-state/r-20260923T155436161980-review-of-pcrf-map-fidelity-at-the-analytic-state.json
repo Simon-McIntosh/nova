@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:ForwardFluxOperator._support_partition",
+    "nova/equilibrium/forward_operator.py:ForwardFluxOperator._partitioned_current_moments",
+    "nova/equilibrium/forward_operator.py:ForwardFluxOperator.residual_shadow_mask",
+    "nova/equilibrium/forward_operator.py:ForwardFluxOperator.current_moment_image",
+    "nova/equilibrium/forward_operator.py:ForwardFluxOperator.traced_flux_map"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T15:54:36.161980+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-exact.json",
+      "line": "10",
+      "text": "the per-row ladder supports a persistent above-gate exact-mode mismatch but not a resolution-independent floor: diverted exact sup/RMS runs 0.447979/0.490527, 0.299535/0.297526, 0.120879/0.073817, 0.149589/0.223683 and 0.120138/0.165754, while reactor-static exact ends 0.025369/0.029156 at 1000 and 0.016333/0.019834 at 2500; the non-monotonic sequence and 20 to 36 percent finest-step changes do not identify an asymptotic constant."
+    },
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-exact.json",
+      "line": "57",
+      "text": "the support/profile-moment attribution carried by the plasma response is supported: independent recomputation over all twenty NPZ archives finds zero non-finite moment elements, maximum exterior absolute disagreement 5.68434188608e-14 Wb, maximum map recomposition closure 5.68434188608e-14 Wb, and each stored plasma-response absolute sup error equals the map's raw absolute sup error; the shared Green operator still limits this to component attribution rather than kernel validation."
+    },
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-exact.npz",
+      "line": "moments",
+      "text": "a ladder-wide claim that the diverted exact mismatch field is dominated by vertical displacement of the support-current centroid is not supported. Centre-weighted support current reproduces the stored analytic centroid to 0.12 mm; at 110 and 300 requested cells the measured vertical centroid shifts are -35.41 and -21.44 mm and a vertical-gradient template explains 0.886 and 0.775 of mismatch variance, but at 500 the vertical template explains 0.036, and at 1000 and 2500 radial-only fits explain 0.430 and 0.506 versus vertical-only 0.269 and 0.141; at 2500 the radial centroid shift is 5.73 mm versus 4.72 mm vertically."
+    },
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.py",
+      "line": "74",
+      "text": "the committed audit checks that detected_in_both_norms agrees with recomputation but never requires that value to be true, and it does not recompute exterior_mismatch, plasma_response_mismatch, scaled_current_l1_relative_error or failure_component; it can therefore print PASS after the declared displacement control stops raising mismatch or after the component-attribution fields drift, so the archive audit is a consistency check rather than a durable guard for the two scientific claims."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read all four commits against 37db018b2a8d5287f8f36172bb1427a65e352474: the first adds the 549-line no-solve benchmark, two focused fixes restore automatic topology selection and correct a counterfactual label, and the final commit adds twenty JSON/NPZ rows, five PNG/SVG pairs, logs, an audit, and append-only plan/evidence records; the range changes 74 files with 79,296 insertions and no deletions.",
+    "done_when": "the quantitative gate is met: H200 job 1276829 completed 0:0 in 00:17:06 and records all twenty case/rung/mode rows at de29a1a303098542006dfe1b96575fce86ba535a, exact passes no declared rung, chord first passes at 2500 for diverted and 110 for reactor-static, every one-pitch control raises both norms, and the five required figure pairs exist; the separate review calculation qualifies the result as persistent above-gate error rather than a demonstrated resolution-independent floor and rejects a ladder-wide vertical-centroid explanation.",
+    "goal": "the node goal is to measure whether the certificate lambda-normalised forward map reproduces the analytic Solovev state at every declared rung in exact and chord modes; benchmarks/plasma_cell_map_fidelity.py:100-331 evaluates one map application with no solve and map-fidelity.json retains all twenty rows, showing neither exact case passes through 2500 while chord first passes at 2500 for diverted and 110 for reactor-static.",
+    "manifest": "read at the source run: status is complete; it names four commits, all 74 changed paths, H200 job 1276829, the twenty-row receipt, the independent archive audit, the negative-control log, five figure pairs, the postprocessed label correction, and the exact-mode follow-on without claiming a solver repair or merged-head verification.",
+    "write_paths": "the declared scope contains the benchmark, the map-fidelity figure directory and its parent, the plan and the cumulative evidence record; every path in 37db018b2a8d5287f8f36172bb1427a65e352474..4a93d1e9e58269d1bf95460625b1d3ea63c708e8 lies inside it, and the plan/evidence edits add lines without deleting or changing plan-version, plan-modified, section status or followup state."
+  },
+  "justifications": {
+    "durability": "docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.py:31-96 preserves a useful twenty-archive integrity check and benchmarks/plasma_cell_map_fidelity.py:70-85 has threshold/non-finite instrument assertions, but no lane test reruns the production map and audit.py:74-75 validates the displacement-control flag only for consistency rather than requiring the declared control to succeed.",
+    "evidence": "docs/figures/plasma-cell-read-fidelity/map-fidelity/job.log records all ten pair completions and the final first-passing sentinel from H200 job 1276829, scheduler.log records job and batch COMPLETED 0:0, and independent recomputation from all twenty NPZ archives reproduces map errors, finite moments, roundoff exterior/closure and the qualified centroid-template conclusions.",
+    "fit": "benchmarks/plasma_cell_map_fidelity.py:100-331 follows the repository's certificate/fixture and nova.media idioms, names code by the measured mechanism rather than a plan stage, keeps the no-solve map and component-attribution limit explicit, and the two corrective commits are narrow and described by conventional subjects with bodies.",
+    "goal_fidelity": "benchmarks/plasma_cell_map_fidelity.py:411-476 enumerates the certificate requests, both cases and both clip modes, derives the first passing rung without filtering failed rows, renders the reduced rows and first pass, and map-fidelity.json reports the complete twenty-row result the goal asks for.",
+    "scope_discipline": "git diff 37db018b2a8d5287f8f36172bb1427a65e352474..4a93d1e9e58269d1bf95460625b1d3ea63c708e8 changes only the five declared path families, with 79,296 insertions and zero deletions; docs/plans/plasma-cell-read-fidelity.html:156-160 and docs/evidence/archive/plasma-cell-read-fidelity-landed.html:266-350 are append-only landing records."
+  },
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 37db018b2a8d5287f8f36172bb1427a65e352474\nreviewed_head_sha: 4a93d1e9e58269d1bf95460625b1d3ea63c708e8\nVERDICT goal: the node goal is to measure whether the certificate lambda-normalised forward map reproduces the analytic Solovev state at every declared rung in exact and chord modes; benchmarks/plasma_cell_map_fidelity.py:100-331 evaluates one map application with no solve and map-fidelity.json retains all twenty rows, showing neither exact case passes through 2500 while chord first passes at 2500 for diverted and 110 for reactor-static.\nVERDICT done_when: H200 job 1276829 completed 0:0 in 00:17:06 and records all twenty rows at de29a1a303098542006dfe1b96575fce86ba535a, exact passes no rung, chord first passes at 2500 for diverted and 110 for reactor-static, every one-pitch control raises both norms, and the five required figure pairs exist; review recomputation qualifies this as persistent above-gate error rather than a demonstrated resolution-independent floor and rejects a ladder-wide vertical-centroid explanation.\nVERDICT write_paths: every path in 37db018b2a8d5287f8f36172bb1427a65e352474..4a93d1e9e58269d1bf95460625b1d3ea63c708e8 lies inside the benchmark, map-fidelity figure directory and parent, plan or cumulative evidence paths declared by the manifest, and the plan/evidence edits are append-only.\nVERDICT manifest: the complete manifest names four commits, all 74 changed paths, H200 job 1276829, the twenty-row receipt, archive audit, negative-control log, five figure pairs, postprocessed label correction and exact-mode follow-on without claiming a solver repair.\nVERDICT diff: four commits add the 549-line no-solve benchmark, restore automatic topology selection, correct a counterfactual label and land twenty JSON/NPZ rows, five PNG/SVG pairs, logs, audit and append-only records; the range has 79,296 insertions and no deletions.\nCALL_SITES: nova/equilibrium/forward_operator.py:ForwardFluxOperator._support_partition, nova/equilibrium/forward_operator.py:ForwardFluxOperator._partitioned_current_moments, nova/equilibrium/forward_operator.py:ForwardFluxOperator.residual_shadow_mask, nova/equilibrium/forward_operator.py:ForwardFluxOperator.current_moment_image, nova/equilibrium/forward_operator.py:ForwardFluxOperator.traced_flux_map\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: benchmarks/plasma_cell_map_fidelity.py:411-476 enumerates the certificate requests, both cases and both clip modes, derives first passing rungs without filtering failures, and renders the reduced rows and first pass.\nSCORE evidence: 18\nJUSTIFICATION evidence: docs/figures/plasma-cell-read-fidelity/map-fidelity/job.log and scheduler.log record the complete H200 run, and independent recomputation from all twenty NPZ archives reproduces errors, finite moments, roundoff exterior/closure and the qualified centroid-template conclusions.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the reviewed range lies inside the manifest's five declared path families, with 79,296 insertions and zero deletions and append-only plan/evidence records.\nSCORE durability: 13\nJUSTIFICATION durability: audit.py:31-96 preserves archive integrity and the driver carries threshold/non-finite controls, but no lane test reruns the production map and audit.py:74-75 accepts a false displacement-control result when the serialized flag agrees.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/plasma_cell_map_fidelity.py:100-331 follows the certificate fixture and nova.media idioms, uses mechanism names, keeps the map no-solve boundary explicit and states the shared-Green attribution limit.\nFINDING docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-exact.json:10 the ladder supports persistent above-gate exact mismatch but not a resolution-independent floor: the exact sequences are non-monotone and still change by 20 to 36 percent at the finest step.\nFINDING docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-exact.json:57 support/profile-moment attribution carried by the plasma response is supported by zero non-finite moments and roundoff exterior/recomposition error across all twenty archives, under the stated shared-Green limitation.\nFINDING docs/figures/plasma-cell-read-fidelity/map-fidelity/diverted-single-null-cells-2500-exact.npz:moments ladder-wide vertical-centroid dominance is not supported: coarse rows are vertical-gradient dominated, but the 500-row vertical fit explains 0.036 of mismatch variance and radial fits exceed vertical at 1000 and 2500.\nFINDING docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.py:74 the audit checks control-flag consistency rather than requiring control success and omits component-norm attribution checks, so it can print PASS after either scientific guard drifts.",
+  "review_run_id": "r-20260923T155436161980-review-of-pcrf-map-fidelity-at-the-analytic-state",
+  "reviewed_base_sha": "37db018b2a8d5287f8f36172bb1427a65e352474",
+  "reviewed_head_sha": "4a93d1e9e58269d1bf95460625b1d3ea63c708e8",
+  "reviewed_run_id": "r-20260923T141102757686-pcrf-map-fidelity-at-the-analytic-state",
+  "reviewer": {
+    "backend": "codex",
+    "model": "gpt-5"
+  },
+  "reviewer_run_id": "r-20260923T155436161980-review-of-pcrf-map-fidelity-at-the-analytic-state",
+  "scores": {
+    "durability": 13,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T16:11:04Z",
+  "total": 90
+}

@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:27:46.677Z",
+  "dispatched_at": "2026-10-04T17:16:28Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/plasma_cell_trip_panels.py:1",
+      "id": "deep_module-1",
+      "reason": "the remaining \u00a74 nodes (per-trip panels, map fidelity, vertical constraint) would be scoped as parameterisations of one shared construction/receipt seam rather than three more parallel modules.",
+      "text": "\u00a71 and \u00a74 each run \"the same construction (exact clip mode, requested 110 cells, both cases)\" through a separate module (`benchmarks/plasma_cell_terminal_state.py`, `plasma_cell_trip_panels.py`, `plasma_cell_first_step_directions.py`, `plasma_cell_map_fidelity.py`, `plasma_cell_seed_policy.py`, `plasma_cell_production_ladder.py`, `plasma_cell_fixed_point_attribution.py`), each re-implementing seed construction, per-trip capture, receipt writing and panel rendering, so the complexity of one certificate-route experiment is spread across many shallow CLI wrappers instead of behind one deep construction module the nodes parameterise",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/bank_revision_reproduction.py:1",
+      "id": "thin_wrapper-1",
+      "reason": "the ladder landed and was retired as an attribution, so no remaining node duplicates it, but the pattern is real and would have been reused had the design cited the owner.",
+      "text": "the \u00a71 node `pcrf-attribute-the-exact-mode-fixed-point` proposes \"each in a detached scratch worktree imported by its own path\" per revision, which is exactly the shadow-tree `spec_from_file_location` pattern already implemented in `benchmarks/bank_revision_reproduction.py` (`DEFAULT_SHADOW_ROOT`, `module_from_spec`), and the plan gives no reason the existing revision-import machinery cannot be extended",
+      "type": "thin_wrapper",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/equilibrium/topology.py:69",
+      "id": "duplicate_owner-1",
+      "reason": "the paragraph's done-when should be rewritten to extend `topology.private_wall_node_read` and delete the containing-cell option, or the next node implements the superseded mechanism.",
+      "text": "the \u00a72 node paragraph still specifies \"the cell that contains the node (point-in-polygon over the committed cell polygons, or the flood evaluated at the node's flux against the admitted saddle flux and the X-point height band)\" as the deliverable, while the accepted decision `wall-node-private-shadow-is-flux-at-the-node` and the landed `private_wall_node_read`/`x_point_height_limits` (same file) supersede it and are consumed by `forward_operator._carrier_shadow_read` (nova/equilibrium/forward_operator.py:3123) and the harness; a reader of the implementable paragraph would rebuild the containing-cell read the decision already rejected",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/solovev_certificate.py:280",
+      "id": "duplicate_owner-2",
+      "reason": "the item is already satisfied by the owner, so the plan should record it as done rather than dispatch work that would add a second field.",
+      "text": "f-pcrf-003 asks to \"add a source-revision field to every production-route receipt\", but `stamp_source_revision`/`_source_revision` in the certificate owner already stamps every receipt (`benchmarks/solovev_certificate.py:896` and the ten call sites), so the item duplicates a field the owner already carries",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "ec1372bc186480e821170a48932a050b7c2870ef9fc66fcbd77d67f0a588e77c",
+  "plan_slug": "plasma-cell-read-fidelity",
+  "plan_version": 68,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T171616419476-plan-review-of-plasma-cell-read-fidelity",
+  "reviewed_blob_sha": "4f7cf1c093f3d21e21f9c71edd8c8903b06c5afa",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the design accretes one bespoke benchmark module per measurement node over one shared certificate construction, so the surface grows while no single module hides the shared behaviour.",
+    "duplicate_owner": "a finding \u2014 the \u00a72 implementable paragraph still names a containing-cell wall read and the \u00a74 receipt item re-adds a source revision already stamped by the certificate owner.",
+    "reuse_search": "pass \u2014 the plan names the mechanisms it extends by file and symbol: `_representative_merge_radius`/`_root_uncertainty` (nova/equilibrium/forward_operator.py), `SCALAR_CURRENT_AMPLITUDE_BAND` (nova/equilibrium/source.py:116), `CurrentCentroidConstraint`/`BoundedExteriorFieldUnknown` (nova/equilibrium/constraint.py), the committed `nova.media` painters, the h200_test_lane recipe, and `tests/test_certificate_pin.py`, and explains why the merge radius cannot stay roundoff-only and why the amplitude band refuses nothing.",
+    "thin_wrapper": "a finding \u2014 the \u00a71 fixed-point attribution node wraps the detached-scratch-tree revision-import pattern that already exists, with no statement of why that machinery cannot be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.463663+00:00"
+}

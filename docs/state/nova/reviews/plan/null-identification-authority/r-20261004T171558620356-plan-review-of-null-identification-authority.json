@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:28:29.122Z",
+  "dispatched_at": "2026-10-04T17:16:12Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/solovev_certificate.py:38",
+      "id": "reuse_search-1",
+      "reason": "the \u00a71 node as written would rebuild fields a cited helper already provides, so the plan should name banked_read_summary as the existing mechanism to extend and scope the producer work to the fields genuinely absent.",
+      "text": "\u00a71 lists solovev_certificate.py as a producer to extend so every row records the banking fields, but the file already imports banked_read_summary, banked_failed_read_summary and candidate_flux_margins from benchmarks/diiid_forward_gs_match and already emits read_status (\"qualified_axis\"/\"analytic_stationary_point_fallback\"/\"no_qualified_axis\"), o/x_candidate_count and o/x_second_best_flux_margin_wb at lines 1774-1808 and 2398-2411",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/figures/primary-xpoint-evidence/efit_topology_corroboration.py:26",
+      "id": "reuse_search-2",
+      "reason": "a reviewer opening the two cited producers finds the banking seam already in place, so the plan's remaining \u00a71 work is narrower than the section states.",
+      "text": "the corroboration producer is named in \u00a71 as needing extension but it already imports banked_read_summary and banked_failed_read_summary (imports at lines 26-27, call sites at 881, 893, 936)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/diiid_forward_gs_match.py:716",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to extend the one adapter (and its unit tests tests/test_banked_null_reads.py) rather than add a serialization layer per producer.",
+      "text": "\u00a71's scope (\"extend the three producers\") implies three parallel emission paths, but banked_read_summary is already the single thin adapter over candidate_flux_margins plus the terminal read and already parameterizes the reference axis and X points, so a per-producer field set is a thin wrapper over machinery that can simply be extended",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/diiid_forward_gs_match.py:669",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should extend banked_read_summary/candidate_flux_margins and consume the topology read's admitted flag for the joint rule, naming those files as the owners rather than forking their behaviour into the certificate.",
+      "text": "candidate_flux_margins is the named existing owner of didactic O/X candidate counting and the second-best signed-flux margin, and \u00a71 proposes re-specifying those fields as new per-row output while \u00a74 proposes a certificate-local joint qualification of topology admission that nova/equilibrium/topology.py:216 already gates via the topology read's read_qualification/require_qualified_axis",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "41f189f9b6fc4066594dc2a798578938f3780b56417ecb05233fed246fb9b37d",
+  "plan_slug": "null-identification-authority",
+  "plan_version": 244,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T171558620356-plan-review-of-null-identification-authority",
+  "reviewed_blob_sha": "c03b34ba612a45ac5f46c81d942751d8c8361b8d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds fields and gates to owners that are already deep (nova/equilibrium/stencil_nulls.py::critical_point_candidates_batch is the single batch kernel for candidate generation, hiding degree, stencil fit and overflow behind one call; nova/equilibrium/topology.py owns admission) and proposes no new module that wraps them.",
+    "duplicate_owner": "a finding \u2014 the per-producer banking emission in \u00a71 would duplicate the shared owner benchmarks/diiid_forward_gs_match.py:716 (banked_read_summary) / :669 (candidate_flux_margins), and \u00a74's joint certificate qualification re-derives topology admission that nova/equilibrium/topology.py:216 (require_qualified_axis) and the terminal read's read_qualification already own.",
+    "reuse_search": "a finding \u2014 \u00a71 names three producers to extend for the stationary-point banking fields without citing the existing shared owner, benchmarks/diiid_forward_gs_match.py::banked_read_summary (line 716) with candidate_flux_margins (line 669), which already emits every listed field (nova axis/X-point positions and flux, reference counterpart, admitted O/X counts, second-best flux margin, read status with exception text) and is already imported by two of the three producers solovev_certificate.py:38 and efit_topology_corroboration.py:26.",
+    "thin_wrapper": "a finding \u2014 the change \u00a71 describes is an emission adapter and the adapter already exists as banked_read_summary, which takes the per-row reference counterparts as parameters; adding a per-producer field set adds serialization surface without new behaviour."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.458576+00:00"
+}

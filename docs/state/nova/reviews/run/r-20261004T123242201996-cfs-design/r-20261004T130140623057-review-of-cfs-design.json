@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "annotate_review_of_run read the reviewed run's own manifest.md: baseline_suite and after_suite are both empty, so neither a base nor a head gate log is named and the added-failure count is unmeasured (null), not a measured zero.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-04T13:16:47.120Z",
+  "dispatched_at": "2026-10-04T13:02:16Z",
+  "findings": [
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "206",
+      "severity": "follow-on",
+      "text": "follow-on: the five DIII-D rows carry joint clauses (null positions, map fidelity) for which the plan defines no analytic comparator, so test_joint_acceptance[diiid-*] is not evaluable until the acceptance owner records a reference qualification; the document surfaces this but does not resolve it."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits against 6598321; c3d6d79 lands the 230-line document and the anchor-only fragment, 6998938 lands the two SVGs; nothing lands outside scope.",
+    "done_when": "the done-when names the document plus the four signatures, the 17/23 inventory, three defect mechanisms with evidence anchors, the section 6 acceptance test list, two figures and audit-doc 0 errors; each is present, and I reproduced audit-doc at exit 0.",
+    "goal": "read the node goal (\"write the design document for the converged forward solve behind the four-function interface\") against docs/research/converged-forward-solve-design.html; the four signatures topology.read, current.book, gs.apply and solve.fixed_point are present at lines 27-33 with their operand/invariant table at 34-44.",
+    "manifest": "read; it states reckon audit-doc OK with 0 errors and a structure PASS, names the four committed paths with their sha256, and records the two conventional commits with bodies.",
+    "write_paths": "the manifest declares docs/research/converged-forward-solve-design.html, docs/figures/converged-forward-solve, docs/evidence/fragments/converged-forward-solve/cfs-design.html and docs/figures/converged-forward-solve/cfs-design; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "no product test guards the document; the recorded audit-doc gate (audit-doc-final.log, exit 0) is the only reproducible integrity check, and the test ids at :165-223 are stated proposals the document does not run.",
+    "evidence": "I independently reproduced reckon audit-doc at exit 0 and verified all 40 source markers, the 9 sampled line anchors, all 9 deep evidence anchors, 26 row ids, 10 clause ids and 44 pinned source links against revision 6598321.",
+    "fit": "the document follows the repository research-doc convention (reckon-type research, plan-informs converged-forward-solve, project-absolute figure src) and introduces no plan-labelled source symbol or forbidden name.",
+    "goal_fidelity": "docs/research/converged-forward-solve-design.html:27-44 gives the four signatures and their operand invariants, and :116-161 the 17 null and 23 region bindings each naming its destination or deletion, matching the plan's four-function interface.",
+    "scope_discipline": "the diff touches only the four declared paths (docs/research/converged-forward-solve-design.html, docs/evidence/fragments/converged-forward-solve/cfs-design.html, and two SVGs under docs/figures/converged-forward-solve/cfs-design)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal (\"write the design document for the converged forward solve behind the four-function interface\") against docs/research/converged-forward-solve-design.html; the four signatures topology.read, current.book, gs.apply and solve.fixed_point are present at lines 27-33 with their operand/invariant table at 34-44.\nVERDICT done_when: the done-when names the document plus the four signatures, the 17/23 inventory, three defect mechanisms with evidence anchors, the section 6 acceptance test list, two figures and audit-doc 0 errors; each is present, and I reproduced audit-doc at exit 0.\nVERDICT write_paths: the manifest declares docs/research/converged-forward-solve-design.html, docs/figures/converged-forward-solve, docs/evidence/fragments/converged-forward-solve/cfs-design.html and docs/figures/converged-forward-solve/cfs-design; every path in the diff is inside them.\nVERDICT manifest: read; it states reckon audit-doc OK with 0 errors and a structure PASS, names the four committed paths with their sha256, and records the two conventional commits with bodies.\nVERDICT diff: read both commits against 6598321; c3d6d79 lands the 230-line document and the anchor-only fragment, 6998938 lands the two SVGs; nothing lands outside scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/research/converged-forward-solve-design.html:27-44 gives the four signatures and their operand invariants, and :116-161 the 17 null and 23 region bindings each naming its destination or deletion, matching the plan's four-function interface.\nSCORE evidence: 18\nJUSTIFICATION evidence: I independently reproduced reckon audit-doc at exit 0 and verified all 40 source markers, the 9 sampled line anchors, all 9 deep evidence anchors, 26 row ids, 10 clause ids and 44 pinned source links against revision 6598321.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches only the four declared paths (docs/research/converged-forward-solve-design.html, docs/evidence/fragments/converged-forward-solve/cfs-design.html, and two SVGs under docs/figures/converged-forward-solve/cfs-design).\nSCORE durability: 12\nJUSTIFICATION durability: no product test guards the document; the recorded audit-doc gate (audit-doc-final.log, exit 0) is the only reproducible integrity check, and the test ids at :165-223 are stated proposals the document does not run.\nSCORE fit: 18\nJUSTIFICATION fit: the document follows the repository research-doc convention (reckon-type research, plan-informs converged-forward-solve, project-absolute figure src) and introduces no plan-labelled source symbol or forbidden name.\nFINDING docs/research/converged-forward-solve-design.html:206 follow-on: the five DIII-D rows carry joint clauses (null positions, map fidelity) for which the plan defines no analytic comparator, so test_joint_acceptance[diiid-*] is not evaluable until the acceptance owner records a reference qualification; the document surfaces this but does not resolve it.\n",
+  "review_run_id": "r-20261004T130140623057-review-of-cfs-design",
+  "reviewed_base_sha": "6598321adb5312ea9420c143d7f9de9cf59f8f00",
+  "reviewed_head_sha": "c3d6d79cc9322e005ed512d0d3863563f71a448b",
+  "reviewed_run_id": "r-20261004T123242201996-cfs-design",
+  "reviewer": "review-of-cfs-design",
+  "scores": {
+    "durability": 12,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-04T13:20:00+00:00",
+  "total": 86
+}

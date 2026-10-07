@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:_cell_banked_current_moments",
+    "nova/equilibrium/clip_quadrature.py:clipped_support_current_moments"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T05:21:42.885261+00:00",
+  "findings": [
+    {
+      "file": "tests/test_continuous_confined_moments.py",
+      "line": "1",
+      "text": "this module and tests/test_moment_path_separatrix_test.py build _FluxSelectedProfile inputs and therefore reach the branch clip_quadrature.py:902 changes, but neither was run in the gate, so the floor was not exercised against their expectations; the recorded suites cover tests/test_exact_clip_moments.py and tests/test_exact_clip_seed.py only, and no added failure could have been observed in the modules that do reach the change."
+    },
+    {
+      "file": "docs/plans/cut-cell-current-attribution.html",
+      "line": "397",
+      "text": "the landing record states the repair while the done-when's terminal census is unmeasured, so a reader of the section sees a landed fix without the observation it was dispatched to make; the record does name the refusal and withholds the verdict."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against base e2edd8775bff; one production line at clip_quadrature.py:902 plus a comment, a 160-line test, gate scripts, receipts and a cumulative landing-record append, with no rewrite of peer evidence.",
+    "done_when": "the done-when has three clauses; the code floor and the two-cell fixture with an inherited capacity of one and a finite-moment assertion are met and recorded, and the third (one all_debug census at the weak 135-cell terminal state reporting zero overflowing bank signatures and a finite exact total, log committed under docs/figures/cut-cell-current-attribution/exact-bank-capacity/) was not produced, because the census stops before current integration on the out-of-scope _partition_probe state slicing.",
+    "goal": "the reviewed node's goal is the callback capacity floor, and nova/equilibrium/clip_quadrature.py:902 raises the bank to max(inherited capacity, leading dimension of support.support_vertices), which is the clause stated verbatim in the dispatch GOAL line; the production caller forward_operator._cell_banked_current_moments:344 passes cut_cell_capacity=1 into the whole-cell branch, which is the value the fixture crosses.",
+    "manifest": "read; it states 3 passed in 25.62 s for the new focused test and records the red control, the two fresh-process suites and the census refusal with logs named on disk.",
+    "write_paths": "the manifest declares six paths and the five commits touch only files inside them (git log --name-only e2edd8775bff..a435f0ccd), and the outside-fence consequence is disclosed under follow_ons rather than edited."
+  },
+  "justifications": {
+    "durability": "the added assertion at tests/test_exact_bank_callback_capacity.py:156 reddens on the reinstated defect and I reproduced that red at revision 22acdbada with the fix absent, and the fixture is a two-cell support only, so the mesh-sized floor's behaviour at the production cell counts the platform refuses to compile is unmeasured.",
+    "evidence": "the red and green receipts exist and I reproduced the red independently, but the done-when's third clause was never measured, so the receipt for the 135-cell terminal state the defect was observed on does not exist and the census exited 1 before current integration.",
+    "fit": "the floor is a single max() at the callback head with a comment stating why the re-derived level can mark more cells than the caller sized for, and it changes no name or signature.",
+    "goal_fidelity": "clip_quadrature.py:902 floors the callback capacity at the leading dimension of support.support_vertices, which is exactly the clause the dispatch GOAL line states and it is the callback entry the terminal-state overflow was traced to.",
+    "scope_discipline": "every path in e2edd8775bff..a435f0ccd lies inside the six declared write paths, the one out-of-scope dependency is reported under follow_ons in the manifest rather than edited, and the landing record is appended, not rewritten."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is the callback capacity floor, and nova/equilibrium/clip_quadrature.py:902 raises the bank to max(inherited capacity, leading dimension of support.support_vertices), which is the clause stated verbatim in the dispatch GOAL line; the production caller forward_operator._cell_banked_current_moments:344 passes cut_cell_capacity=1 into the whole-cell branch, which is the value the fixture crosses.\nVERDICT done_when: the done-when has three clauses; the code floor and the two-cell fixture with an inherited capacity of one and a finite-moment assertion are met and recorded, and the third (one all_debug census at the weak 135-cell terminal state reporting zero overflowing bank signatures and a finite exact total, log committed under docs/figures/cut-cell-current-attribution/exact-bank-capacity/) was not produced, because the census stops before current integration on the out-of-scope _partition_probe state slicing.\nVERDICT write_paths: the manifest declares six paths and the five commits touch only files inside them (git log --name-only e2edd8775bff..a435f0ccd), and the outside-fence consequence is disclosed under follow_ons rather than edited.\nVERDICT manifest: read; it states 3 passed in 25.62 s for the new focused test and records the red control, the two fresh-process suites and the census refusal with logs named on disk.\nVERDICT diff: read commit by commit against base e2edd8775bff; one production line at clip_quadrature.py:902 plus a comment, a 160-line test, gate scripts, receipts and a cumulative landing-record append, with no rewrite of peer evidence.\nCALL_SITES: nova/equilibrium/forward_operator.py:_cell_banked_current_moments, nova/equilibrium/clip_quadrature.py:clipped_support_current_moments\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: clip_quadrature.py:902 floors the callback capacity at the leading dimension of support.support_vertices, which is exactly the clause the dispatch GOAL line states and it is the callback entry the terminal-state overflow was traced to.\nSCORE evidence: 13\nJUSTIFICATION evidence: the red and green receipts exist and I reproduced the red independently, but the done-when's third clause was never measured, so the receipt for the 135-cell terminal state the defect was observed on does not exist and the census exited 1 before current integration.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in e2edd8775bff..a435f0ccd lies inside the six declared write paths, the one out-of-scope dependency is reported under follow_ons in the manifest rather than edited, and the landing record is appended, not rewritten.\nSCORE durability: 17\nJUSTIFICATION durability: the added assertion at tests/test_exact_bank_callback_capacity.py:156 reddens on the reinstated defect and I reproduced that red at revision 22acdbada with the fix absent, and the fixture is a two-cell support only, so the mesh-sized floor's behaviour at the production cell counts the platform refuses to compile is unmeasured.\nSCORE fit: 19\nJUSTIFICATION fit: the floor is a single max() at the callback head with a comment stating why the re-derived level can mark more cells than the caller sized for, and it changes no name or signature.\nFINDING tests/test_continuous_confined_moments.py:1 this module and tests/test_moment_path_separatrix_test.py build _FluxSelectedProfile inputs and therefore reach the branch clip_quadrature.py:902 changes, but neither was run in the gate, so the floor was not exercised against their expectations; the recorded suites cover tests/test_exact_clip_moments.py and tests/test_exact_clip_seed.py only, and no added failure could have been observed in the modules that do reach the change.\nFINDING docs/plans/cut-cell-current-attribution.html:397 the landing record states the repair while the done-when's terminal census is unmeasured, so a reader of the section sees a landed fix without the observation it was dispatched to make; the record does name the refusal and withholds the verdict.\n",
+  "review_run_id": "r-20260923T052142885261-review-of-cca-exact-bank-callback-capacity-from-the-mesh",
+  "reviewed_base_sha": "e2edd8775bff1f89d6ed2d9cd76153d39f440ec2",
+  "reviewed_head_sha": "a435f0ccdec875f0c89dd964f8f9f7193a7078b",
+  "reviewed_run_id": "r-20260923T035145216176-cca-exact-bank-callback-capacity-from-the-mesh",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260923T052142885261-review-of-cca-exact-bank-callback-capacity-from-the-mesh",
+  "scores": {
+    "durability": 17,
+    "evidence": 13,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-10-07T15:55:38.453542+00:00",
+  "total": 87
+}

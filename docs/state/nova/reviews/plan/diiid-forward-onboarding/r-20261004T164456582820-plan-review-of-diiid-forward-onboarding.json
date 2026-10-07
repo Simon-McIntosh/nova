@@ -1,0 +1,35 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T16:56:06.511Z",
+  "dispatched_at": "2026-10-04T16:45:09Z",
+  "findings": [
+    {
+      "anchor": "nova/scripts/diiid_machine_artifact.py:243,252",
+      "id": "duplicate_owner-1",
+      "reason": "it moves the generic half into machine_artifact.py and makes \u00a77's done-when name which parts are per-machine (IDS assembly) versus generic, which is the reusability claim \u00a77 exists to establish.",
+      "text": "machine-agnostic machinery (_ghcr_repository_parts, _write_publication_recipe, _write_and_verify_ids, _artifact_digests) sits in the DIII-D-specific front-end while the shared owner nova/imas/machine_artifact.py holds only the lifecycle; \u00a77's own ruling (\"machine-parameterised and serves both machines through one path, rather than a second machine-specific copy beside it\") is not satisfied for the publication and digest path, so a third machine copies 500 lines",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5aa46b85b8a1f9f707f65c2d0763d28c5de66d15fe0f562256912ab221d90171",
+  "plan_slug": "diiid-forward-onboarding",
+  "plan_version": 82,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T164456582820-plan-review-of-diiid-forward-onboarding",
+  "reviewed_blob_sha": "2024fa310e87451fdec5ecbe17c42bc54aeb1ef0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the \u00a75 kernel library is one module (nova/equilibrium/map_extraction.py) hiding the operator, per-surface separation, masking, chord sampling and their receipts behind four public functions; the layers consume each other rather than repeating.",
+    "duplicate_owner": "a finding \u2014 the \u00a77 design commits to \"one path, not a second machine-specific copy\", but publication-recipe and digest machinery that is not machine-specific lives in the 513-line DIII-D-only script beside a 383x smaller MAST one.",
+    "reuse_search": "pass \u2014 the plan searched before proposing: decision pins cite prior art, followup f-dfo-seam-survey ran a 20-capability cross-repo survey against pinned ambix 2f3dcd0c, and comment c-20260817 recorded a live duplicate audit; the code confirms the consolidations landed.",
+    "thin_wrapper": "pass \u2014 every apparent wrapper carries added behaviour: apply_delta_star adds the uniform-axis validation, interior mask and the -\u0394*/(2\u03c0 \u03bc0 R) current-density conversion, and observation_kernels reuses map_extraction.sample_chord_psi_norm instead of re-deriving chord sampling."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.308505+00:00"
+}

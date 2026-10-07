@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:16:53.685Z",
+  "dispatched_at": "2026-10-04T17:05:34Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/clip_quadrature.py:155",
+      "id": "duplicate_owner-1",
+      "reason": "forking the geometry-moment owner leaves four independent polygon-moment implementations inside `nova/equilibrium` that must stay numerically identical, and every future fix (orientation, padding, capacity) then has to be applied four times.",
+      "text": "`_straight_edge_monomial_moments` re-derives exact polygon monomial moments through the homogeneous recurrence, a mechanism the codebase already owns as `nova/equilibrium/separatrix_clip.py:_traced_polygon_moments` (line 850, the traced/jnp form) and `separatrix_clip._area_moments` (line 125, the host/numpy form); the plan's own reuse map (plan.html line 189) names `separatrix_clip._traced_polygon_moments` as the mechanism to \"Generalise for the density moments\", yet the landed design added two parallel reductions instead of generalising it",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/polygon_moments.py:1",
+      "id": "deep_module-1",
+      "reason": "the plan's headline deliverable module is orphaned from the solve, so the design should either make it the production reduction or consolidate it into the existing owner, since a module that duplicates production algebra without being on the production path adds surface, not depth.",
+      "text": "the module hides the Green's-theorem edge tables and the orientation/padding logic behind `polygon_monomial_moments` and `polygon_density_moments`, but production never calls it: no module under `nova/` imports `polygon_moments` (only `tests/test_polygon_moments.py`, `benchmarks/exact_clip_closed_form_floor.py` and `benchmarks/xpoint_cell_wedge_oracle.py`), while the production clip route runs `clip_quadrature._sampled_arc_polynomial_moments` over `_straight_edge_monomial_moments`",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/biot/polygonanalytic.py:1787",
+      "id": "reuse_search-1",
+      "reason": "the correct prior art is the geometric-moment owner in `separatrix_clip`, so the survey's mis-citation is part of why the design forked a new reduction instead of extending the existing one.",
+      "text": "the plan's \u00a72 asserts the polygon-analytic machinery \"already used for the kernel blocks (nova/biot/polygonanalytic.py, polygon_analytic_flux_moments) integrates the geometric moments of the region exactly\"; opening that function shows it computes the exact fixed-section flux blocks (G_0, G_R, G_Z), the area means of `(R-R_c)K_psi` and `(Z-Z_c)K_psi`, i.e. kernel-weighted integrals, not the density/geometric monomial moments the plan needs, so the reuse survey mis-identified the reusable mechanism",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "6b5e7a1e874fa77cb5bb6c9763932ef843d0512fe1ba9c277751dcbce97e256d",
+  "plan_slug": "exact-clip-moment-quadrature",
+  "plan_version": 88,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T170522621850-plan-review-of-exact-clip-moment-quadrature",
+  "reviewed_blob_sha": "bfa6847f8dde010c091b44adc65beddf1ff855df",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the polygon-moment reduction is spread across three equilibrium modules (`polygon_moments.py`, `clip_quadrature.py`, `separatrix_clip.py`) rather than hidden behind one interface, so the same algebra is carried twice in production and once more as an oracle.",
+    "duplicate_owner": "a finding \u2014 `nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments` and `nova/equilibrium/polygon_moments.py` both re-implement polygon geometric moments already owned by `nova/equilibrium/separatrix_clip.py:_traced_polygon_moments`.",
+    "reuse_search": "a finding \u2014 the plan's \u00a72 cites `polygon_analytic_flux_moments` (nova/biot/polygonanalytic.py:1787) as the mechanism that integrates \"the geometric moments of the region exactly\", but that function returns kernel-weighted flux blocks (G_0, G_R, G_Z), not geometric monomial moments.",
+    "thin_wrapper": "pass \u2014 `polygon_density_moments` adds the quadratic-to-monomial contraction on top of the monomial table; it is a real reduction, not a forwarding layer over existing machinery."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.359102+00:00"
+}

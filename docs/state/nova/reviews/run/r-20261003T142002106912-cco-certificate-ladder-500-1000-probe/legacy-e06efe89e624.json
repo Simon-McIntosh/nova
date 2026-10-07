@@ -1,0 +1,88 @@
+{
+  "absent": [
+    "terminal solve state arrays for the three 1000-cell rows",
+    "readable baseline_suite and after_suite arms"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T16:28:11Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:20:35Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/measure.py",
+      "line": "213",
+      "severity": "follow-on",
+      "text": "Terminal solve states are persisted only for the single-null recovery. The weak, moderate and strong receipts (produced at revision aeb09348387401e16361af81bdd1630ac73587fe, before the d00cff828 state-persistence repair) declare state_sha256_binary64 but no state array exists on disk for any of the three, and their terminal_state_path is absent. A later reader cannot recompute those digests or re-render the solved-minus-analytic panel from persisted data. Persist the terminal state for every row that solves, so each published digest is satisfied by an openable artifact."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe/measure.py",
+      "line": "116",
+      "severity": "follow-on",
+      "text": "Both the analytic and the solved magnetic-axis markers are passed to draw_nulls on the 1000-cell panels, but at an axis error of about 0.02 pitches they are plotted almost coincidentally, so the opened PNG shows one visible triangle per panel and the two null sets are not independently inspectable. Distinguish the marker shapes or offset the solved marker by a legible amount."
+    },
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-certificate-ladder-500-1000-probe.html",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "The section 3 clauses that require one H200 job and a compensating-field amplitude that falls with cell count are not evidenced by this probe: the final four-row record spans two jobs, and three rows carry a zero field because no Newton promotion was accepted. Both are stated plainly in the record (the provenance limit by name, the missing trend by name), so this is a constraint on what the certificate can claim rather than a defect in the node; it should be carried to the section, not repaired here."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's manifest leaves baseline_suite and after_suite null, and it is an unarmed node: its granted write paths include no test file and no suite was run. Its only gate logs are the H200 measurement driver (measure/), the receipt audit and the CPU readout check, none of which is a test-suite baseline/after pair. There are no readable suite arms or failure IDs to difference, so added_failure_count=0 and added_failure_ids=[] record that no added failures can be identified from those absent arms; they do not assert a green suite. No test or nova/ product source path changed in the reviewed base-to-head diff.",
+  "justifications": {
+    "durability": "Deliverables were committed incrementally as they completed (driver, admission note, measurement records, panels, single-null contours, fragment) rather than in one terminal commit, the coordinator-acceptance resume advice is retained in the run directory, and the original single-null failure receipt and log are preserved as diverted-single-null-500.initial.* with an explicit reclassification from the misleading compile-failed label. The gap is the terminal solve state: the driver revision that produced the weak, moderate and strong rows wrote no state array (the d00cff828 repair added persistence), so only the single-null recovery state exists on disk. Three of four receipts therefore advertise a terminal_state_path that does not exist and a state digest that cannot be recomputed, and a later reader cannot re-render or independently check the solved-minus-analytic difference panel for those rows from persisted data; the receipt JSON carries the derived clause numbers but not the state they came from.",
+    "evidence": "I re-derived the load-bearing facts. All four published JSON receipts are byte-identical to their run receipts (sha256 3bc1f9bf54242b23, efe87931f237efbb, 1d4b76bff75f9234, 79f550d525555078). The strong row's clause arithmetic reconciles with its receipt: axis 0.0210191 < 0.1, max-difference/span 0.0619093 > 0.0011, net-boundary/span -0.0274005 > 0.001, global residual 1.59545e-15 <= 1e-12, row residual 2.07386e-16 <= 1e-12, and the seven accepted promotions and 2.73614e-4 T field are present. The three zero-field rows have exactly zero accepted promotions and slope-zero field, so the receipt-audit positive control (strong field and seven promotions present; zero-field rows have zero promotions) is falsifiable and the audit log ends EXIT=0. The readout-check log EXIT=0 reproduces the previously recorded defect verbatim (CerfonFreidbergSingleNull.flux() takes 2 positional arguments but 3 were given in the preserved diverted-single-null-500.initial.log) and asserts the repaired rotating-case span equals the old reader to 1e-12 Wb. The single-null persisted state digest recomputes to its declared 9f56b3d4e2cea0b05a168302 value, a positive control that the digest method sees data. The gap is that the weak, moderate and strong receipts also declare state_sha256_binary64 values but no state array for those rows exists on disk, so those three digests cannot be recomputed by any reader.",
+    "fit": "The driver reuses the existing fixture solve, first-moment row, certificate case adapter and the committed nova.media poloidal painters, and passes clip_mode=exact explicitly with an assertion. The four opened panels obey the plotting rules: unfilled line contours on a shared physical level set with the difference drawn separately, no axes or gridlines, the wall drawn on each panel, and both null sets passed to draw_nulls. Captions in the fragment carry the terminal residual and converged flag per row. The one fit weakness is the near-coincidence of the two magnetic-axis markers on the 1000-cell panels: both the analytic and solved triangle markers are drawn but sit almost on top of each other (the strong row's axis error is 0.021 pitches), so the opened PNG reads as a single visible triangle and the two plotted null sets are not independently inspectable, the same overlap the predecessor review recorded.",
+    "goal_fidelity": "The node's goal was a bounded probe: run the weak, moderate and strong 1000-cell rows and the single-null 500 control under the exact clip from the production seed with the first-moment centroid row on one H200 allocation, each row bounded and each receipt persisted as it lands, and report every row as solved, compile-failed, timed-out or refused with the section 3 clauses. It did exactly that: all four rows compiled and returned a terminal state (job 1280644 for three rows, recovery job 1280651 for the single-null readout), each receipt carries realised cells, compile seconds, solve seconds, compiled program size and peak host RSS, and the report and fragment table all four with quantitative clauses. The verdict is decisive and honest: none of the four rows qualifies the complete section 3 certificate; strong meets the axis and both residual clauses but misses the map and boundary-span clauses by 56x and 27x; weak, moderate and single-null returned unqualified states with zero accepted Newton promotions. Two section-3 clauses the probe cannot evidence are correctly stated rather than glossed: the literal one-H200-job provenance condition is unmet in the final record (the coordinator adjudicated the bounded two-job recovery acceptable, recorded in resume-3-advice.txt), and the compensating-field-amplitude-falls-with-cell-count clause is unmeasurable because three rows carry a zero field, which the report states explicitly.",
+    "scope_discipline": "The reviewed base-to-head diff (7cfda7880..1646daee2) adds exactly eleven files, every one inside a granted write path: the two drivers and four receipt/panel pairs under docs/figures/centroid-constrained-oracle-solve/certificate-ladder-500-1000-probe, and the fragment docs/evidence/fragments/centroid-constrained-oracle-solve/cco-certificate-ladder-500-1000-probe.html. No file under nova/, scripts/, benchmarks/, tests/, no plan file and no shared index was touched; the repair of the single-null readout was made in the node's own driver rather than in the shared scripts/analytic_oracle_fixtures module the traceback named, which is correct scoping. Commit subjects are conventional and every commit carries a body; none carries AI attribution. One granted path (docs/figures/centroid-constrained-oracle-solve/cco-certificate-ladder-500-1000-probe) was never used, which is harmless.",
+    "verdict": "The node met its own bounded-probe done-when and answered its question decisively and honestly; the certificate failing is the scientific result, not a work defect. No blocking finding survived verification. The material weaknesses are durability (three of four terminal states unpersisted, their declared digests unverifiable) and fit (overlapping axis markers), both recorded as follow-ons."
+  },
+  "node": "review-of-cco-certificate-ladder-500-1000-probe",
+  "predecessor": {
+    "note": "Sibling ladder node for the 110/300-cell rungs; not inspected here. The reviewed node is the bounded 500/1000 probe on H200 job 1280644 plus single-null recovery job 1280651.",
+    "run_id": "r-20261003T141823788120-cco-certificate-ladder-110-300"
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 17\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 15\nSCORE fit: 17\nTOTAL: 86\nVERDICT: pass\nCHECKS: reviewed base 7cfda7880..head 1646daee2, nine commits, eleven added files all inside granted paths, no nova/ or test path touched; all four published receipts byte-identical to their run receipts; strong row clauses recomputed against limits (axis 0.02102<0.1, map 0.061909>0.0011, boundary -0.027400>0.001, global 1.59545e-15<=1e-12, row 2.07386e-16<=1e-12); strong row carries 7 accepted promotions and a 2.73614e-4 T field, the three nonconverged rows zero promotions and zero field; readout-check EXIT=0 reproduces the old single-null TypeError and matches the rotating-case span to 1e-12; single-null persisted state digest recomputes; four panels opened, line contours on shared levels, difference panel, wall and null sets drawn.\nFOLLOW-ONS: persist the terminal state for every solved row (three 1000-cell state arrays and their digests are missing); distinguish the near-coincident analytic and solved axis markers on the 1000-cell panels. The one-job provenance condition and the falling-amplitude clause are carried to the section as stated limits, not repaired here.\nBLOCKING: none. The node met its bounded-probe done-when; no row qualifies the complete section 3 certificate, which is the reported scientific result.",
+  "review_base_sha": "391de5a3a65e327eea327734671f31943b0b5fa6",
+  "review_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T162923723516-review-of-cco-certificate-ladder-500-1000-probe/review-check.log"
+  ],
+  "review_run_id": "legacy-e06efe89e624",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "7cfda7880b5da4a29e9b383f823f6d309c840ad1",
+  "reviewed_commit": "1646daee2a6eb7a3dee8fbdc1a13c04b861ca95e",
+  "reviewed_commits": [
+    "93d138b48",
+    "b652257c4",
+    "aeb093483",
+    "d00cff828",
+    "8ff83ec0a",
+    "bb8b31705",
+    "4a8251916",
+    "ea7afcfac",
+    "1646daee2"
+  ],
+  "reviewed_head_sha": "1646daee2a6eb7a3dee8fbdc1a13c04b861ca95e",
+  "reviewed_run_id": "r-20261003T142002106912-cco-certificate-ladder-500-1000-probe",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-certificate-ladder-500-1000-probe",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T16:57:00Z",
+  "total": 86,
+  "verdict": "pass"
+}

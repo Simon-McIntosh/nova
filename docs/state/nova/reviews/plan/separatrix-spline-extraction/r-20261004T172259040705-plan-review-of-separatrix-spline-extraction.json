@@ -1,0 +1,43 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:36:37.270Z",
+  "dispatched_at": "2026-10-04T17:23:12Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/flux_surface_connectivity.py:1105",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a72 candidate-census cutover node must name every census polisher as either the authority or a caller; retiring _refine_selected_vertices without reconciling polish_census_stationary_points leaves the single-authority contract unowned.",
+      "text": "polish_census_stationary_points is a second public position authority built on the same polish_stationary_points kernel (it calls it internally) and is consumed by nova/equilibrium/topology.py:1285 and :1296 for structured census nulls. The plan \u00a72 describes the census position authority as stencil_nulls.xpoint_candidates whose local quadratic _refine_selected_vertices (still live at nova/equilibrium/stencil_nulls.py:1877,1940) \"stops being the position authority\", and never names polish_census_stationary_points. The design's \"one kernel serves three call sites, one position authority\" is therefore not what the tree holds.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/mast_centroid_solve_panels.py:634",
+      "id": "duplicate_owner-2",
+      "reason": "it contains the design-warning anti-pattern (ranking-based boundary selection on grid flux) but lives outside the two banks \u00a74 regenerates, so naming it would widen the plan rather than correct it.",
+      "text": "_solved_boundary selects the closed boundary by largest-area contourpy loop on grid flux, a parallel boundary-selection authority carrying the grid-resolution contour the plan \u00a71 says must stop; but this benchmark appears outside the two EFIT banks (MAST corroboration, DIII-D preregistered match) that \u00a74 scoped.",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "a65f57080de0fb484b1e363952dcde8f5866a73f81d617525acb1d24604480a5",
+  "plan_slug": "separatrix-spline-extraction",
+  "plan_version": 129,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T172259040705-plan-review-of-separatrix-spline-extraction",
+  "reviewed_blob_sha": "ad88c33acf3cfa72621b9be3f96d1434158cc9b4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72 hides Newton, custom_root implicit differentiation and fixed-slot masking behind one kernel; \u00a73 hides graph assembly, saddle splitting and component classification behind one function; \u00a74 is one dataclass plus one function. Verified in the tree: the shipped forms are deep, not a spread of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a72 names stencil_nulls.xpoint_candidates as the sole census boundary, while a second spline position authority for census-selected nulls, polish_census_stationary_points, exists and is not named by the plan.",
+    "reuse_search": "pass \u2014 the plan cites its reuse map (25 candidates over nova and imas-ambix; docs/figures/efit-baseline-demonstration/reuse-map.md is present) and names the existing mechanism each proposal extends. The public polish kernel is reachable at nova/equilibrium/flux_surface_connectivity.py:916, the branch assembler at nova/equilibrium/separatrix_branches.py:269 (assemble_separatrix_branches), and the shared comparator at nova/equilibrium/boundary_comparison.py:140, so the design builds on what it names.",
+    "thin_wrapper": "pass \u2014 no proposal adds a thin layer over machinery that should instead be extended. \u00a74 is the right direction: the DIII-D harness element at benchmarks/diiid_forward_gs_match.py:1426 now delegates to assemble_separatrix_branches rather than carrying its own contour selection, which is the replacement the section claims."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.472640+00:00"
+}

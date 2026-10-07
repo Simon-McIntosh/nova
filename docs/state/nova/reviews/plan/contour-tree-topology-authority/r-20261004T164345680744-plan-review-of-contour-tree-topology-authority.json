@@ -1,0 +1,75 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T16:57:36.510Z",
+  "dispatched_at": "2026-10-04T16:44:01Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/separatrix_branches.py:269",
+      "id": "reuse_search-1",
+      "reason": "the plan should either extend this assembler for tree branches or add it to \u00a75's deletion list, so a reviewer of \u00a74 knows whether the branch read is reused or supersedes separatrix_branches.",
+      "text": "the plan's reuse search (scout c94c95408) records nova's \"two critical-point polish kernels\" and \"no join tree\" but does not record assemble_separatrix_branches, which already splits a level set at its saddle into one closed axis lobe and open legs \u2014 the exact branch structure \u00a74 defines as \"the other branches that join at the primary X-point\"; \u00a74 therefore proposes new private-region machinery over an existing assembler",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/flux_surface_connectivity.py:509",
+      "id": "reuse_search-2",
+      "reason": "naming the owner forces \u00a74 to state whether the tree replaces private_flux_mask or layers over it, which decides whether the mask and its shadow test are deleted in \u00a75.",
+      "text": "private_flux_mask already computes the private-flux region from the flux map, and topology_margin's docstring reads its \"private-flux shadow\" as the exclusion of a wall extremum; \u00a74's \"Private regions ... a wall contact inside a private region can never be a limiter\" restates this concept without citing the existing mask or its consumer",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/contour_tree.py:384",
+      "id": "deep_module-1",
+      "reason": "a design review of a \"one authority\" plan can only judge its depth if the plan names the module that owns \u00a73/\u00a74 and which of these three surfaces is its public interface; without that, \u00a73 and \u00a74 may accrete as wrappers over the landed receipt rather than into it.",
+      "text": "the plan says \"one module that is the sole source of every topology verdict\" and \u00a71 promises \"one result type (a dataclass returned by the read)\", but build_contour_tree returns a device ContourTreeArrays, the \u00a71-contract dataclass ContourTreeResult is produced by no function in the module, and dd_emittable_nodes adds a third host-selection surface; the substantial \u00a73 polish and \u00a74 selection/margin behaviour is given no module or interface in the plan text",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/separatrix_branches.py:269",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner forces \u00a75 to declare whether the branch assembler is retired or re-based on the tree, without which the \"sole source of every topology verdict\" claim is contradicted by a live parallel branch reader.",
+      "text": "assemble_separatrix_branches is the owner of \"one closed axis branch and fixed slots of saddle-ended legs\" and is consumed in production by nova/media/poloidal.py:365 draw_separatrix_branches; \u00a74's branch/private-region read reasons over the same structure off the tree, yet \u00a75's deletion list names only _axis_component_before_level, the sightline test, the raster hex partition and the census contact polish \u2014 not this file",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/flux_surface_connectivity.py:509",
+      "id": "duplicate_owner-2",
+      "reason": "the plan's sole-authority claim is only testable once \u00a75 names private_flux_mask and the topology.py private-shadow reads as replaced by \u00a74's tree region, and the done-when \"a search of the touched modules finds no normalised-flux value feeding a classification\" should extend to a search for a second private-region read.",
+      "text": "private_flux_mask is the owner of the private-flux region and is fed by topology.py's private_wall_node_read/x_point_height_limits private-shadow path (topology.py:52,69); \u00a74 re-derives the private region, and \u00a75's deletion list writes \"the axis, X-point and wall-anchor reads in topology.py\" without naming the private-shadow read, so two private-region implementations survive a plan whose stated purpose is a sole authority",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/topology.py:69",
+      "id": "duplicate_owner-3",
+      "reason": "the plan's \u00a75 must enumerate this owner or the \"no module references the deleted functions\" done-when is false by construction while a shadowed-contact read remains live.",
+      "text": "private_wall_node_read and x_point_height_limits (topology.py:52) are the current private-shadow wall reader that \u00a74's margin definition (\"\u03c3\u03c8 over the wall vertices that do not lie in a private region\") replaces, and \u00a75 does not name them for deletion",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "0835e921ba1033cd7f495dd3ab5fc8170cc77237f857ec9e1d20990905abece2",
+  "plan_slug": "contour-tree-topology-authority",
+  "plan_version": 57,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T164345680744-plan-review-of-contour-tree-topology-authority",
+  "reviewed_blob_sha": "c6d382f21b0c4064dbc5593f3939faa06f4dfe9d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the plan promises one authority module with one result type but names no interface for \u00a73's polished geometry or \u00a74's class/margin, and the landed read exposes three host surfaces (ContourTreeArrays, ContourTreeResult, dd_emittable_nodes) rather than the single dataclass \u00a71 describes.",
+    "duplicate_owner": "a finding \u2014 \u00a74's private-region branch structure duplicates an existing owner, nova/equilibrium/separatrix_branches.py::assemble_separatrix_branches, which \u00a75's deletion list never names.",
+    "reuse_search": "a finding \u2014 \u00a74's private-region and primary-branch read proposes new machinery although nova/equilibrium/separatrix_branches.py::assemble_separatrix_branches and nova/equilibrium/flux_surface_connectivity.py::private_flux_mask already assemble the axis branch plus saddle-ended legs and the private-flux region, and the plan's reuse map cites neither.",
+    "thin_wrapper": "pass \u2014 \u00a75 cuts consumers over to the tree and deletes the raster reads; no thin wrapper over the tree is proposed."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.280965+00:00"
+}

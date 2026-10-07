@@ -1,0 +1,43 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:01:14.394Z",
+  "dispatched_at": "2026-10-04T16:45:47Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/demonstration_threshold_score.py:166",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should route the demonstration scorer onto the existing referee's scorecard so both EFIT-X definitions stay one definition, which removes a second reader rather than adding one.",
+      "text": "the scorer takes the saddle-to-EFIT-X and LCFS distances from hardcoded per-machine bank keys (`binding_to_efit_lcfs_rms_m`, `selected_saddle_to_efit_x_point_m`; DIII-D `closed_boundary_symmetric_rms_distance_m`, `polished_saddle_to_nearest_efit_x_m`) instead of the existing EFIT-parity comparator `nova/imas/mast_efit_referee.py:compare_reference_geometry` (:129\u2013:140), which already emits `X_POINT_DISTANCE_M`, `LCFS_DISTANCE_M` and `TOPOLOGY_CLASS_AGREEMENT_FRACTION` from the same `efm` reads \u2014 a second EFIT-geometry reader will drift from the referee's definition",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/parity_tolerances.py:57",
+      "id": "duplicate_owner-2",
+      "reason": "the receipt already carries the thresholds verbatim and the plan's decision text is the authoritative preregistration, so moving the constants into the registry is tidiness, not a correction to the design.",
+      "text": "the three locked demonstration thresholds (class agreement 7/12, closed-boundary RMS 0.55 m, saddle 0.04 m) live as module constants in the benchmark script rather than extending the pre-registered tolerance registry (`MetricTolerance`, `parity_tolerances.py:94`) that owns every other pre-registered bound",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "c3818f385435561b36732e5cab22584de6450f9c07604bbfcf317dd2df29abb6",
+  "plan_slug": "efit-baseline-demonstration",
+  "plan_version": 57,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T164529751067-plan-review-of-efit-baseline-demonstration",
+  "reviewed_blob_sha": "78538e0bf3b4c7abab85d9bdcf16fafce2fd35d3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the extraction thrust hides curve generation, stationary polish and branch identity behind `traced_spline_contour` + `separatrix_branches` + `boundary_comparison.compare_closed_boundaries`; the comparison is one fail-closed function, so the behaviour hidden exceeds the interface.",
+    "duplicate_owner": "a finding \u2014 the demonstration gate re-reads EFIT geometry through bespoke per-bank JSON field names rather than the existing EFIT referee that owns those same reads.",
+    "reuse_search": "pass \u2014 the design is backed by a 25-candidate reuse map (docs/figures/efit-baseline-demonstration/reuse-map.md) naming `traced_spline_contour`, `stencil_nulls.xpoint_candidates`, `separatrix_clip._traced_clip`, the MAST referee and the DIII-D harness, and it reduces the new surface to one missing contract (the closed/open branch assembler now in nova/equilibrium/separatrix_branches.py).",
+    "thin_wrapper": "pass \u2014 nova/equilibrium/boundary_comparison.py is a small host-only layer, but the reuse map justifies it explicitly (\"their boundary metrics need one common closed-boundary implementation\"), which is the justification the item asks for."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.333708+00:00"
+}

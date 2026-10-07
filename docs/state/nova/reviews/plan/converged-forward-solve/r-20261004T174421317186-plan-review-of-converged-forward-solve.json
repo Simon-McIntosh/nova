@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:48:19.696Z",
+  "dispatched_at": "2026-10-04T17:44:34Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:972",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite `operator_request_body`/`run_operator_requests` as the existing owner of the one-call-site pattern and state whether `solve.fixed_point` extends/moves it or replaces it, instead of re-deriving the property from scratch.",
+      "text": "the design's \u00a7solve requires \"Implement a fixed-capacity `lax.scan` state machine ... Active microsteps submit states and directions through the same `jax.jvp` call site ... The switch chooses a read authority\" as if new, but `operator_request_body` (fixed_point.py:972) already builds one jitted primal/tangent body with a `jax.lax.switch` on `OperatorRequestKind` and both JVP members taken at the request's own state, and `run_operator_requests` (fixed_point.py:1026, `serve` at :1038) already serves a fixed-shape request stream through one traced `lax.scan` body without re-interpreting the caller's linear solve; the design's inventory row for `fixed_point.py` names only `_active_set_newton_krylov` and never mentions this reusable mechanism",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:2718",
+      "id": "reuse_search-2",
+      "reason": "the design already says `gs.apply` replaces rather than wraps `ForwardFluxOperator`, so the mechanism is inherited by construction; naming it would harden the clause but does not change the module design.",
+      "text": "the plan's \u00a74 acceptance clause \"one compiled program serves two geometries of the same shape, counted as compilations\" relies on exact shape-based specialisation, which the design never attributes to a mechanism, yet `ForwardFluxOperator` (forward_operator.py:2321, `tree_flatten` at :2718) and the registered geometry pytrees (forward_operator.py:222\u2013235, shapes carried in aux_data) already implement precisely that: numerical arrays as traced leaves with shapes in aux_data",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:1026",
+      "id": "duplicate_owner-1",
+      "reason": "the design must name `fixed_point.py`'s request machinery as the owner to move or extend (and say so in the retirement row), or the new solve will silently diverge from the tested single-call-site contract that `_operator_scores` and the one-map instrument already exercise.",
+      "text": "`solve.fixed_point` proposes to own the single traced map/booking/read body served by one `lax.scan` while the plan deletes `fixed_point.py`, so the mechanism has no named successor: either the plan duplicates it into a new `solve.py` or it deletes a mechanism it still needs, and neither is stated",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "50d0cd4b9f0084587f995c78e7b2c02d861cdc25c83078a3c69ed9fd4433ca61",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 17,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T174421317186-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "21c136722980ea8c4f6deb1aa77268075f14a56d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each of the four proposed modules hides substantial behaviour (contour-tree read + sub-cell connectivity + clip for `topology.read`; connectivity-before-integration booking for `current.book`; the composed map plus its tangent for `gs.apply`; the scan-driven Newton state machine for `solve.fixed_point`) behind a four-argument signature and a typed result, and the design explicitly keeps geometry/polynomial/linalg helpers private rather than adding public surface.",
+    "duplicate_owner": "a finding \u2014 `solve.fixed_point`'s \"one call site is a program property\" design (design \u00a7solve) re-implements the exact pattern already owned by `fixed_point.py`'s `operator_request_body` / `run_operator_requests`, and the plan does not name that owner or say why it cannot be extended/moved.",
+    "reuse_search": "a finding \u2014 the design's \u00a71 inventory (17 null-role + 23 region-role source bindings) is a genuinely thorough prior-art search of topology, booking and map machinery, but it does not name the existing single-call-site request machinery in `fixed_point.py` that \u00a75 re-derives, nor the shape-specialisation mechanism in `forward_operator.py` that \u00a74's compile-count clause depends on.",
+    "thin_wrapper": "pass \u2014 `current.book`, `gs.apply` and `solve.fixed_point` absorb their owners rather than forward to them (`gs.apply` is stated to replace the map `ForwardFluxOperator` performs \"rather than wrapping it\", \u00a76), and the design line 34 forbids a second public booking or solver."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:50:44.740272+00:00"
+}

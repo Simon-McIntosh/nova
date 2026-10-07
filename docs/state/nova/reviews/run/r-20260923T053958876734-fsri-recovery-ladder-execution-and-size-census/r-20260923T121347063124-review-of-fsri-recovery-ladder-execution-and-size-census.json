@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/solovev_certificate.py:2157",
+    "nova/equilibrium/fixed_point.py:1495",
+    "nova/equilibrium/fixed_point.py:1622",
+    "nova/equilibrium/fixed_point.py:2795"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T12:13:47.063124+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/recovery_ladder_telemetry.py",
+      "line": "1",
+      "text": "a new 99-line module is committed outside the declared fence, which fenced only benchmarks/recovery_ladder_census.py under benchmarks/, and no resume advice in the run directory extends the scope to it."
+    },
+    {
+      "file": "benchmarks/recovery_ladder_census.py",
+      "line": "30",
+      "text": "COUNTED names two of the five promotion and recovery entries nova/equilibrium/fixed_point.py defines, so the report's 19.03 percent instruction share is a lower bound presented as the ladder total."
+    },
+    {
+      "file": "benchmarks/recovery_ladder_census.py",
+      "line": "60",
+      "text": "instrumented() skips a counted path that is absent from the module, so a rename of a counted rung reports zero executions instead of failing, and no test covers the census script."
+    },
+    {
+      "file": "docs/figures/forward-solver-route-integrity/recovery-ladders/report.md",
+      "line": "5",
+      "text": "the receipt names worktree head db634db22, one commit behind the tree that commits it, so the report's own provenance line does not describe the revision it is read at."
+    },
+    {
+      "file": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png",
+      "line": "1",
+      "text": "the reviewed worktree leaves this figure and its .svg modified and uncommitted outside the declared fence, so a reader cannot tell whether the figure's regeneration is intended."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against 52bfefc0; nine commits add benchmarks/recovery_ladder_census.py, benchmarks/recovery_ladder_telemetry.py, row.sh and gate.sh, four row receipts, three scratch figure pairs, and two sections in the cumulative record, whose diff over the range is 82 insertions and zero deletions, so no peer record was displaced.",
+    "done_when": "the done_when asks for a benchmark-side runtime counter on the recovery paths, the per-row execution counts and trips, the instruction share from callers-candidate-300.json, and report.json plus report.md with the log committed beside them; benchmarks/recovery_ladder_census.py:30 names the two paths and lines 45-52 wrap them at trace time with jax.debug.callback, and the four receipts under rows/ carry the live counts, but the coordinator split the single job into four per-row jobs (resume-3 advice) and the three static jobs exited 1, so the receipts rather than the job are the delivery.",
+    "goal": "the goal is a report stating, for each recovery ladder in the 52bfefc0 design state, how often it executes per certificate solve and how many optimised instructions it carries; docs/figures/forward-solver-route-integrity/recovery-ladders/report.json does that for two rungs over the four certificate rows, with per-row executions, executions per trip and the trips each fired in, but no other refused-step path is counted.",
+    "manifest": "read; it declares the nine commits and the changed paths, gives the four slurm job ids and the four row results verbatim, states that no measured row converged, discloses that the diverting receipt predates the convergence field, and leaves the two regenerated gs-absolute-accuracy figures for the coordinator's attention.",
+    "write_paths": "the declared fence is docs/figures/forward-solver-route-integrity/recovery-ladders, benchmarks/recovery_ladder_census.py, docs/evidence/archive/forward-solver-route-integrity-landed.html and docs/plans/forward-solver-route-integrity.html; the diff 52bfefc0..8d9e949a5 changes no file under nova/ and nothing in the plan file, but it adds benchmarks/recovery_ladder_telemetry.py, which is in no fence path and in no resume advice in the run directory."
+  },
+  "justifications": {
+    "durability": "no test references benchmarks/recovery_ladder_census.py, and instrumented() at line 60 skips a counted path that is not an attribute of the module, so a later rename would yield a quiet zero rather than a failure.",
+    "evidence": "the provenance reproduces where I could test it - report.json's fixed_point_digest 0972c5af recomputes from nova/equilibrium/fixed_point.py in this worktree and from 52bfefc0, and each of the four merged rows is byte-identical to its committed receipt - but the three static logs end in ROW-EXIT exit=1 and the diverting row reaches the merged table with null converged and termination.",
+    "fit": "the two new scripts follow the surrounding benchmark idiom (argparse, pathlib, a module docstring, no plan or ticket reference), and the hard-coded revision at line 191 is emitted output data rather than a symbol name.",
+    "goal_fidelity": "benchmarks/recovery_ladder_census.py:30 counts two of the promotion and recovery entries nova/equilibrium/fixed_point.py:1283 and :1688 define, so the 19.03 percent share is a floor rather than the ladder total.",
+    "scope_discipline": "benchmarks/recovery_ladder_telemetry.py:1 is a new committed module outside the declared fence, which fenced only benchmarks/recovery_ladder_census.py under benchmarks/, and two figures under docs/figures/gs-absolute-accuracy are left modified and uncommitted."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is a report stating, for each recovery ladder in the 52bfefc0 design state, how often it executes per certificate solve and how many optimised instructions it carries; docs/figures/forward-solver-route-integrity/recovery-ladders/report.json does that for two rungs over the four certificate rows, with per-row executions, executions per trip and the trips each fired in, but no other refused-step path is counted.\nVERDICT done_when: the done_when asks for a benchmark-side runtime counter on the recovery paths, the per-row execution counts and trips, the instruction share from callers-candidate-300.json, and report.json plus report.md with the log committed beside them; benchmarks/recovery_ladder_census.py:30 names the two paths and lines 45-52 wrap them at trace time with jax.debug.callback, and the four receipts under rows/ carry the live counts, but the coordinator split the single job into four per-row jobs (resume-3 advice) and the three static jobs exited 1, so the receipts rather than the job are the delivery.\nVERDICT write_paths: the declared fence is docs/figures/forward-solver-route-integrity/recovery-ladders, benchmarks/recovery_ladder_census.py, docs/evidence/archive/forward-solver-route-integrity-landed.html and docs/plans/forward-solver-route-integrity.html; the diff 52bfefc0..8d9e949a5 changes no file under nova/ and nothing in the plan file, but it adds benchmarks/recovery_ladder_telemetry.py, which is in no fence path and in no resume advice in the run directory.\nVERDICT manifest: read; it declares the nine commits and the changed paths, gives the four slurm job ids and the four row results verbatim, states that no measured row converged, discloses that the diverting receipt predates the convergence field, and leaves the two regenerated gs-absolute-accuracy figures for the coordinator's attention.\nVERDICT diff: read commit by commit against 52bfefc0; nine commits add benchmarks/recovery_ladder_census.py, benchmarks/recovery_ladder_telemetry.py, row.sh and gate.sh, four row receipts, three scratch figure pairs, and two sections in the cumulative record, whose diff over the range is 82 insertions and zero deletions, so no peer record was displaced.\nCALL_SITES: benchmarks/solovev_certificate.py:2157, nova/equilibrium/fixed_point.py:1495, nova/equilibrium/fixed_point.py:1622, nova/equilibrium/fixed_point.py:2795\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: benchmarks/recovery_ladder_census.py:30 counts two of the promotion and recovery entries nova/equilibrium/fixed_point.py:1283 and :1688 define, so the 19.03 percent share is a floor rather than the ladder total.\nSCORE evidence: 15\nJUSTIFICATION evidence: the provenance reproduces where I could test it - report.json's fixed_point_digest 0972c5af recomputes from nova/equilibrium/fixed_point.py in this worktree and from 52bfefc0, and each of the four merged rows is byte-identical to its committed receipt - but the three static logs end in ROW-EXIT exit=1 and the diverting row reaches the merged table with null converged and termination.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: benchmarks/recovery_ladder_telemetry.py:1 is a new committed module outside the declared fence, which fenced only benchmarks/recovery_ladder_census.py under benchmarks/, and two figures under docs/figures/gs-absolute-accuracy are left modified and uncommitted.\nSCORE durability: 12\nJUSTIFICATION durability: no test references benchmarks/recovery_ladder_census.py, and instrumented() at line 60 skips a counted path that is not an attribute of the module, so a later rename would yield a quiet zero rather than a failure.\nSCORE fit: 16\nJUSTIFICATION fit: the two new scripts follow the surrounding benchmark idiom (argparse, pathlib, a module docstring, no plan or ticket reference), and the hard-coded revision at line 191 is emitted output data rather than a symbol name.\nFINDING benchmarks/recovery_ladder_telemetry.py:1 a new 99-line module is committed outside the declared fence, which fenced only benchmarks/recovery_ladder_census.py under benchmarks/, and no resume advice in the run directory extends the scope to it.\nFINDING benchmarks/recovery_ladder_census.py:30 COUNTED names two of the five promotion and recovery entries nova/equilibrium/fixed_point.py defines, so the report's 19.03 percent instruction share is a lower bound presented as the ladder total.\nFINDING benchmarks/recovery_ladder_census.py:60 instrumented() skips a counted path that is absent from the module, so a rename of a counted rung reports zero executions instead of failing, and no test covers the census script.\nFINDING docs/figures/forward-solver-route-integrity/recovery-ladders/report.md:5 the receipt names worktree head db634db22, one commit behind the tree that commits it, so the report's own provenance line does not describe the revision it is read at.\nFINDING docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png:1 the reviewed worktree leaves this figure and its .svg modified and uncommitted outside the declared fence, so a reader cannot tell whether the figure's regeneration is intended.\n",
+  "review_run_id": "r-20260923T121347063124-review-of-fsri-recovery-ladder-execution-and-size-census",
+  "reviewed_base_sha": "52bfefc0a0f02412d8910aaccb632bfbd9fd43b5",
+  "reviewed_head_sha": "8d9e949a57682f7f010cc7602714f066c26433e5",
+  "reviewed_run_id": "r-20260923T053958876734-fsri-recovery-ladder-execution-and-size-census",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260923T121347063124-review-of-fsri-recovery-ladder-execution-and-size-census",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-10-07T15:55:38.461983+00:00",
+  "total": 72
+}

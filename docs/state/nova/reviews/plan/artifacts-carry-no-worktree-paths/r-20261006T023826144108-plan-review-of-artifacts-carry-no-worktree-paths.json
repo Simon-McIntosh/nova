@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:46:59.659Z",
+  "dispatched_at": "2026-10-06T02:38:44Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/database/filepath.py:62",
+      "id": "duplicate_owner-1",
+      "reason": "nova carries no reckon dependency, so re-encoding the layout is the honest choice and the plan already names routing.py as the owner in \u00a71, leaving only a drift risk that a hard-coded coupling test could not remove.",
+      "text": "the plan re-encodes the worktree-root layout that reckon/crew/routing.py `_workspace_roots` owns as a module constant and a structural matcher, rather than extending the owner; a future change to reckon's layout (a renamed root, a different legacy location, a changed `<repo>-<hash>` shape) would silently unset both the rewrite and the guard with no coupling that reports it",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "4cc88642c0e5425a98bf3aafa54c662781b962393dd8ce3534b7c45bb61a0a4a",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 40,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Residual drift risk, which the review itself marks as not changing the plan: nova carries no reckon dependency, section 1 names reckon/crew/routing.py as the owner of the layout, and section 2 keeps the layout in one constant, so a change in reckon touches one line in nova.",
+      "when": "2026-10-06T02:47:53.906992+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T023826144108-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "1c6346653ae1fb4fe207093eebdb034e79ebc90d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the change extends one existing module (nova/database/filepath.py) with two functions and two constants that hide a multi-root lexical matcher, an idempotent rewrite that preserves bytes and line endings, an unmapped-span report and the exemption set; the hook, the guard test and the CLI all call the one predicate, so the decision is not spread across wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan re-encodes the worktree layout (`reckon-worktrees` root name and the `<repo>-<hash>/<session>/<node>/<rest>` structure) that reckon owns in reckon/crew/routing.py `_workspace_roots` (routing.py:455-474).",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 carries its own accounting (\"two public functions, two module constants, and one subcommand on the module's existing command group, so no new command surface\") and names what retires (\"nothing retires except the receipt-directory scan named in \u00a74\"), so the added surface is declared rather than silent.",
+    "reuse_search": "pass \u2014 the plan names the mechanism it extends in each case: reckon `_rewrite_worktree_roots` (reckon/crew/promotion.py:1875, verified present), `repository_relative` (nova/database/filepath.py:62), the existing `filepath` click group (nova/database/scripts.py:9), the launcher idiom already settled in scripts/nova_lane/run.sh:299-300, scripts/playable_server/run.sh:71-72 and scripts/regenerate_solovev_certificate.sh:5-6 (all verified), and `nova.definitions.root_dir` which it explains it does not use.",
+    "thin_wrapper": "pass \u2014 the `relativize` subcommand and the two-line hook are thin, and the plan justifies why: the module already owns the registered console script (`filepath = \"nova.database.scripts:filepath\"`, pyproject.toml:138), so the subcommand adds no new command surface, and the rewrite carries a text-to-text signature reporting unmapped spans, which is why it cannot be folded into `repository_relative`."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "a050123a63da936e1e84713de647f39ce987e8f3475655086b8a5cec3794a766",
+    "s3": "af55126bd0713335b2716da37306ca4e7716c52a12337e9d50c6a6e28ad05475",
+    "s4": "55b94c8f32a70d52064bf6a2f345063f68a3108904f494452b0196a38099c6fd",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:47:52.769154+00:00"
+}

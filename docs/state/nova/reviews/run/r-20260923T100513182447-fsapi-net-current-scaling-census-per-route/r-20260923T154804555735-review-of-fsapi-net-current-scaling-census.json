@@ -1,0 +1,71 @@
+{
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T15:48:04.555735+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-api/net-current-scaling/report.md",
+      "kind": "reconciliation-attribution",
+      "line": "45",
+      "text": "report.md:45-46 reconciles the banked chord seed 0.930 against the measured 2.0366 and states the two describe the same quantity with one of them wrong about the field it was taken on, but the banked 0.930 is a whole-cell support booking while the census reads lambda under set_support_clip_mode('chord') (benchmarks/net_current_scaling_census.py:199, 213-219) which books about half the seed current, so the two numbers share the formula but not the support: the gap is the instrument (the booking and the reading), not the solver, and a seed lambda is computed before the solve is issued."
+    },
+    {
+      "file": "docs/plans/forward-solve-api.html",
+      "kind": "plan-record-missing",
+      "line": "1",
+      "text": "the node's landing contract required its record in its section of the plan, and the plan holds zero mentions of the census (grep 'net-current-scaling' returns 0), so the run's outcome is absent from the plan even though the cumulative evidence record was spliced."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T100513182447-fsapi-net-current-scaling-census-per-route",
+      "kind": "manifest-absent",
+      "line": "0",
+      "text": "no manifest.md exists in the run directory (only prompt.txt, stderr.log, stream.jsonl and uncommitted-evidence.diff), so the run carries no commits list, no gate line and no negative control; the review reconstructed the range from the worktree log and the evidence record."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/net-current-scaling/report.md",
+      "kind": "route-coverage-gap",
+      "line": "38",
+      "text": "the four exact-clip certificate rows are named in report.md:36-41 as not-run because each of jobs 1276656-1276659 ended CANCELLED DUE TO TIME LIMIT inside a one-hour all_debug allocation (logs/exact-*.log:2), so the measure's exact-clip coverage is absent and the report answers only the chord mode the banked seed 0.930 belongs to."
+    },
+    {
+      "file": "docs/figures/forward-solve-api/net-current-scaling/report.md",
+      "kind": "figure-rule",
+      "line": "3",
+      "text": "the report renders no poloidal flux contour panel for any terminal state, which the repository plotting rule requires of a terminal forward-solve evidence record (solved contours beside the reference on shared levels, both null sets, the wall, and the terminal residual and converged flag in the caption); the landed record notes this as its third follow-on."
+    }
+  ],
+  "gap_attribution": "instrument, not the solver: the 0.930-vs-2.0366 seed gap is the support booking. docs/evidence/archive/figure-and-solver-audit-landed.html:1511 already records the clip booking as 2.05/2.03 for weak 110 against 4d51fba1a whole-cell, so the census's 2.0366 reproduces the chord-clip booking and the banked 0.930 is the whole-cell booking of the same seed; the census sets set_support_clip_mode('chord') at benchmarks/net_current_scaling_census.py:199 before summing the seed currents at :213-219, and a seed lambda is computed before the solve is issued, so no solver outcome can move it.",
+  "item_verdicts": {
+    "diff": "read the five commits against 4d51fba1a: 423672965 adds benchmarks/net_current_scaling_census.py (548 lines), a696630c7 adds the one-row-per-process flush and assemble mode, 26fc98cff reads the terminal converged flag and termination name off the fixed-point history instead of the desyncing trip table, ad4bcb87d keys the reconciliation on route and commits the logs and report, and d7450fffc splices the evidence record (a recovery commit, additions only).",
+    "done_when": "the measure names chord and exact clip modes on the four certificate rows, a cold seed, the reduced-Newton route, the SOL ledger census and the twelve MAST bank rows; report.md:13-20 and report.md:36-41 show the eight chord rows measured and both the exact rows and the SOL and MAST routes reported as not-run-or-not-readable with a reason, and report.md:50-53 states 0/4 converged per chord route so the 'within 0.9 to 1.1 on converged rows' statement is vacuous.",
+    "goal": "a per-route report of lambda at seed and terminal with the banked reconciliation: eight rows over the two chord routes are reported and the banked history is tabled, but the exact-clip mode is absent and two named routes carry no lambda.",
+    "manifest": "read; the file does not exist at the run directory, so no commits, test, gate or negative-control line can be read; the run's range was recovered from the worktree log (423672965..ad4bcb87d) and the recovery splice d7450fffc.",
+    "write_paths": "the manifest is absent so there is no declared path list; the head diff keeps to the node fence, all under benchmarks/ and docs/figures/forward-solve-api/net-current-scaling plus the shared evidence archive, with nova/ untouched."
+  },
+  "justifications": {
+    "durability": "the anti-fragility work is real: the driver flushes one row per process to its own file and merges in an assemble mode (a696630c7, ad4bcb87d), so one JAX materialisation failure costs one row rather than the whole run, and the terminal flag and termination name are read from the fixed-point history to sidestep a trip-table desync in the certificate helper (26fc98cff); but the run ended with no manifest, so there is no committed test line, no commits list and no negative control tying the work to a check, and no test module covers the driver.",
+    "evidence": "the receipts exist on disk and tie to source: report.json's newton_krylov weak chord row reads seed_lambda 2.0366 = target_current_a 16314773.311828371 / seed_support_current_a 8010834.263747128 and terminal_lambda 1.8112 = 16314773.311828371 / terminal_support_current_a 9007823.304123025, with census.log:2-9 printing the same four chord rows, so the numbers are traceable; but the central reconciliation is left unresolved and misframed - report.md:45-46 states the banked 0.930 and the measured 2.0366 describe 'the same quantity' with 'one of them wrong about the field', where the two numbers were booked under different support conventions and neither is a wrong reading of the same field.",
+    "fit": "the driver reuses the production certificate seam (_production_seed and _problem, benchmarks/net_current_scaling_census.py:210, 44), quotes SCALAR_CURRENT_AMPLITUDE_BAND from the production constant rather than restating it (line 66), and names the amplitude definition and the amplitude band in its docstring and report header.",
+    "goal_fidelity": "the goal is a report giving lambda at seed and terminal per forward route and reconciling the banked history: docs/figures/forward-solve-api/net-current-scaling/report.md:13-20 delivers eight rows over the two chord routes (newton_krylov, reduced_newton) at one shared seed per case, and report.md:43-48 tables the banked history, but the four exact-clip certificate rows the measure names did not run at all (all four cancelled; report.md:38-41 records each as not-run) and the SOL ledger census and the twelve MAST bank rows yield no lambda pair, so half the route coverage the measure names is absent.",
+    "scope_discipline": "each commit of the reviewed range keeps to the node fence: benchmarks/net_current_scaling_census.py, docs/figures/forward-solve-api/net-current-scaling/{report.json,report.md,census.log,logs/,rows/,probe_jobs.py} and the evidence splice at docs/evidence/archive/forward-solve-api-landed.html are all inside the declared paths, no file under nova/ changed, and no peer path was touched; the only deviation is an omission (the plan landing record) rather than a stray write."
+  },
+  "measures_same_quantity": "same definition, different support booking. The census lambda is target_current / sum(unscaled cell current) (benchmarks/net_current_scaling_census.py:217-219 and its module docstring), which is the banked declaration 'the scaling applied to hold the net current at its target'; but the banked chord weak -110 seed 0.930 was recorded under a whole-cell support booking while the census reads it under set_support_clip_mode('chord'), so the two numbers share the formula and not the support.",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 4d51fba1af1b1030f90830e63cf0f0ff19e48cab\nreviewed_head_sha: d7450fffc5871f09b05ddb3c5737a95374eeb7da\nMEASURES_SAME_QUANTITY: same definition, different support booking. The census lambda is target_current / sum(unscaled cell current) (benchmarks/net_current_scaling_census.py:217-219 and docstring), the declaration the banked history uses, but the banked chord weak -110 seed 0.930 was booked whole-cell while the census reads it under set_support_clip_mode('chord') at benchmarks/net_current_scaling_census.py:199 before summing at :213-219, so the quantity is read on a different support.\nGAP_ATTRIBUTION: instrument, not the solver. The 0.930-vs-2.0366 seed gap is the support booking; docs/evidence/archive/figure-and-solver-audit-landed.html:1511 records 2.05/2.03 clip booking for weak 110 against 0.93 to 0.90 whole-cell, so 2.0366 reproduces the chord-clip booking and 0.930 is the whole-cell booking of the same seed, and a seed lambda is taken before the solve is issued.\nVERDICT goal: a per-route report of lambda at seed and terminal with the banked reconciliation; report.md:13-20 delivers eight rows over the two chord routes and report.md:43-48 tables the banked history, but the exact-clip certificate rows never ran and the SOL ledger and MAST bank routes yield no lambda.\nVERDICT done_when: jobs 1276656-1276659 ended CANCELLED DUE TO TIME LIMIT (logs/exact-*.log:2) so the four exact-clip rows are absent (report.md:38-41), and the SOL ledger census and the twelve MAST bank rows are read as carrying no lambda pair (report.md:33-34); report.md:50-53 states 0/4 converged per chord route so the neighbourhood statement has no rows to hold over.\nVERDICT write_paths: the head diff keeps to the node fence under benchmarks/ and docs/figures/forward-solve-api/net-current-scaling plus the shared evidence archive; no file under nova/ changed; the plan's landing record was not written.\nVERDICT manifest: no manifest.md exists at the run directory, so no commits, gate or negative-control line can be read.\nVERDICT diff: read all five commits against 4d51fba1af1b1030f90830e63cf0f0ff19e48cab; the driver lands at 423672965 with the one-row-per-process flush, the trip-table-free terminal read, the route-keyed reconciliation and the evidence splice.\nFINDING docs/figures/forward-solve-api/net-current-scaling/report.md:45 the reconciliation compares the chord-clip seed lambda 2.0366 against the whole-cell banked 0.930 without naming the booking change, and its claim that one number is wrong about the field is unsupported: the gap is the instrument (the support booking), not the solver.\nFINDING docs/plans/forward-solve-api.html the plan holds zero mentions of the census, so the node's landing record is absent from the plan.\nFINDING the run directory holds no manifest.md, so the run carries no commits list, no gate line and no negative control.\nFINDING docs/figures/forward-solve-api/net-current-scaling/report.md:38 the four exact-clip certificate rows did not run, so the measure's exact-clip coverage is absent.\nFINDING docs/figures/forward-solve-api/net-current-scaling/report.md the record renders no poloidal flux contour panel for any terminal state, which the plotting rule requires of a terminal forward-solve evidence record.\n",
+  "review_run_id": "r-20260923T154804555735-review-of-fsapi-net-current-scaling-census",
+  "reviewed_base_sha": "4d51fba1af1b1030f90830e63cf0f0ff19e48cab",
+  "reviewed_head_sha": "d7450fffc5871f09b05ddb3c5737a95374eeb7da",
+  "reviewed_run_id": "r-20260923T100513182447-fsapi-net-current-scaling-census-per-route",
+  "reviewer": "review-of-fsapi-net-current-scaling-census",
+  "reviewer_run_id": "r-20260923T154804555735-review-of-fsapi-net-current-scaling-census",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T16:20:00.000000+00:00",
+  "total": 75
+}

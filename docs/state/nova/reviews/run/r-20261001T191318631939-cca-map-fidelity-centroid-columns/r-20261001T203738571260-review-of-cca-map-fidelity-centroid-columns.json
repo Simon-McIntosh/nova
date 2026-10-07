@@ -1,0 +1,87 @@
+{
+  "absent": [
+    "no committed regression guard or test exercises the new support_current_centroid_offset_mm column",
+    "the diverted-single-null rows (where the driving followup's 35 mm vertical offset lives) were not run; the weak-rotation row here is up-down symmetric so dZ is ~0 and settles nothing about that offset",
+    "no reproduced measurement of the exact-mode centroid on any committed (non-stale) receipt: the committed exact receipt weak-rotation-reactor-static-cells-110-exact.json reads sup 0.09308606884252982 while the current tree reads 1.6592289256708336e-04"
+  ],
+  "absent_items": [
+    {
+      "disposition": "not part of this node's dispatched goal; the node adds the column and evidences it on one row. The wider re-measure belongs to the chord-membership repair node.",
+      "item": "full followup gate (4): every certificate rung of diverted and weak, both chord and exact modes"
+    },
+    {
+      "disposition": "the node's goal is only to record the column; the 35 mm vertical-offset question it was added for is owned by f-cca-chord-membership-finish-option-one",
+      "item": "centroid reference on the diverted case"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 1,
+  "call_sites": [
+    "benchmarks/plasma_cell_map_fidelity.py:305"
+  ],
+  "commits_read": [
+    "224f1781778448785daeff727483d3011f69cc4b",
+    "725be129c3dd53956ce8d752c46b61f9428fc0b4"
+  ],
+  "completed_at": "2026-10-01T21:10:49.157Z",
+  "dispatched_at": "2026-10-01T20:37:51Z",
+  "findings": [
+    {
+      "file": "benchmarks/plasma_cell_map_fidelity.py",
+      "line": "196",
+      "severity": "follow-on",
+      "text": "follow-on: the physical-gate guard was relaxed from an exact-GPU assert to an admitting assert over ('gpu','cpu') for the whole benchmark, not scoped to the named CPU preflight. run() can now produce a complete receipt with every row on CPU and set completed=true, removing the guard the plan's H200 routing relies on. Confine the CPU admission to a preflight flag (or assert the backend against the row's declared intent) so a CPU-only full receipt is refused."
+    },
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/weak-chord-smallest.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the gate cannot be re-issued from the record: the preflight log header (line 1-6) names revision=a71934910 (the base commit, while the change was uncommitted) and command=['-'] (a stdin here-doc), and the manifest tests field carries the placeholder '<centroid-preflight dir>'. State the literal command with its absolute output path when the run is captured."
+    },
+    {
+      "file": "benchmarks/plasma_cell_map_fidelity.py",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: the new column has no committed guard. No test imports the benchmark; the benchmark's passes() and the vertical-displacement control do not exercise current_centroid or the inverse second-moment transform, and the node declared negative_control none. A regression in the centroid math would be silent. Add a small analytic round-trip (transform then inverse returns the physical first moments) or pin one support centroid."
+    }
+  ],
+  "gate_arms_note": "the reviewed run declared neither baseline_suite nor after_suite (both null in its manifest); no pytest suite imports benchmarks/plasma_cell_map_fidelity (grep over tests/ is empty), so no gate arm exists and no failure id can be added from them. The reviewed run's own gate is the single weak-rotation chord-110 preflight, reproduced bit-identically here.",
+  "item_verdicts": {
+    "durability": "WEAK: no test or committed guard covers the added column; the benchmark's pre-existing controls do not reach it.",
+    "goal": "MET: support_current_centroid_offset_mm is recorded on every row and independently reproduced bit-identically on weak-rotation chord/exact 110; the add is read-only over existing arrays so no existing number can move.",
+    "math": "CORRECT: the recovery multiplies the coupling basis by [[s0,s2],[s2,s1]] = A^{-1} of ForwardFluxOperator.coupling_current_moments, and CellCurrentMoments fixes the reference at the cell centroid, so booked and analytic are one convention.",
+    "record": "PARTIAL: the log header names the base revision and a stdin command, and the manifest tests field carries an unsubstituted output-dir placeholder.",
+    "scope": "PASS with one unrequested weakening: all commits stay inside the declared write paths and no nova/ source changed, but the GPU assertion in the header of measure_pair was broadened to admit CPU for the whole benchmark."
+  },
+  "justifications": {
+    "durability": "two incremental commits with conventional subjects and bodies, the preflight log and row json committed, and the stale exact-mode receipt disclosed in follow_ons. Reduced because the new column has no guard: no test imports the benchmark and the node's declared negative control is none, so the centroid math is checked only by a run and not by anything that could fail later.",
+    "evidence": "the measurement is real and I reproduced it exactly, including the analytic and booked centroids, and I verified the inverse transform and NamedTuple convention first-hand. Reduced because the record does not carry a reproducible command (base-revision log header, stdin command, manifest placeholder) and because the 'no existing number changed' claim rests on a CPU-vs-GPU comparison rather than the code fact that the column is read-only.",
+    "fit": "the centroid reuses the certificate closed-form idiom, matches the CellCurrentMoments (current, radial, vertical)-about-centroid convention, and introduces no plan label or superseded name; the inverse transform is the exact algebraic inverse of the production coupling conversion.",
+    "goal_fidelity": "the dispatched goal is met and independently reproduced bit-for-bit; the column is added per row and changes no existing number by construction. Reduced one point because the evidence row is the up-down-symmetric weak-rotation case where the offset the column was introduced to settle reads ~0, and the diverted rows are untouched.",
+    "scope_discipline": "git show --name-only over the two commits touches exactly benchmarks/plasma_cell_map_fidelity.py, the centroid-preflight dir and the evidence fragment, all inside the declared write paths; no nova/ source or test changed. One unrequested change rides along: the backend assertion in measure_pair was broadened from exact-GPU to admit CPU for the whole benchmark, not just the named preflight."
+  },
+  "plan": "nova:cut-cell-current-attribution",
+  "project": "nova",
+  "raw_text": "VERDICT goal: benchmarks/plasma_cell_map_fidelity.py records the booked-minus-analytic support-current centroid per row; met and reproduced bit-identically on weak-rotation chord-110 (dR=-0.06981943764028387 mm, dZ=-7.178572898759781e-10 mm, support 121), with the added column read-only over existing arrays.\nVERDICT math: the recovery multipled by second-moment matrix is the exact inverse of ForwardFluxOperator.coupling_current_moments is A^{-1}=[[s0,s2],[s2,s1]], verified; CellCurrentMoments fixes the reference at the cell centroid, so booked and analytic share one convention.\nVERDICT manifest: status complete; commits 224f17817 and 725be129c; changed paths explicit and in scope; the tests field carries the placeholder '<centroid-preflight dir>'.\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the dispatched goal is met and reproduced bit-for-bit; the column is added per row and cannot move an existing number. Reduced one point because the sole evidenced row is the symmetric weak-rotation case where dZ reads ~0 and the diverted rows that carry the offset are untouched.\nSCORE evidence: 16\nJUSTIFICATION evidence: the measurement reproduces exactly and the inverse transform and convention verify first-hand, but the record is not reproducible (base-revision log header, command=['-'], manifest placeholder) and the no-change claim rests on a CPU-vs-GPU comparison rather than the code fact.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: both commits touch only the declared write paths and no nova/ source; the one iffy item is the production backend guard relaxed from exact-GPU to admit CPU for the whole benchmark, with the CPU use only named for a preflight.\nSCORE durability: 15\nJUSTIFICATION durability: two incremental commits, a committed preflight log and row json, and the stale exact receipt disclosed in follow_ons; but the new column has no guard (no test imports the benchmark, negative_control none).\nSCORE fit: 19\nJUSTIFICATION fit: reuses the certificate centroid idiom and the CellCurrentMoments about-centroid convention, no plan label, and the inverse transform is exactly the inverse of the production coupling conversion.\nFINDING benchmarks/plasma_cell_map_fidelity.py:196 the physical-gate GPU assertion was relaxed to admit CPU for the whole benchmark, so run() can emit a complete CPU receipt and set completed=true; scope the CPU admission to the named preflight.\nFINDING docs/figures/plasma-cell-read-fidelity/map-fidelity/centroid-preflight/weak-chord-smallest.log:1 the gate is not reproducible from the record: log header revision=a71934910 (base) with command=['-'], and the manifest tests field holds the placeholder '<centroid-preflight dir>'.\nFINDING benchmarks/plasma_cell_map_fidelity.py:61 no committed guard covers current_centroid or the inverse second-moment transform; no test imports the benchmark, the benchmark's controls do not reach the new column, and the node's declared negative control is none.",
+  "review_run_id": "r-20261001T203738571260-review-of-cca-map-fidelity-centroid-columns",
+  "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "reviewed_head_sha": "725be129c3dd53956ce8d752c46b61f9428fc0b4",
+  "reviewed_revision": "725be129c3dd53956ce8d752c46b61f9428fc0b4",
+  "reviewed_run_id": "r-20261001T191318631939-cca-map-fidelity-centroid-columns",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-centroid-columns",
+  "reviewer_node": "review-of-cca-map-fidelity-centroid-columns",
+  "reviewer_run_id": "r-20261001T203738571260-review-of-cca-map-fidelity-centroid-columns",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-01T21:05:35.641914+00:00",
+  "total": 86,
+  "verdict": "pass"
+}

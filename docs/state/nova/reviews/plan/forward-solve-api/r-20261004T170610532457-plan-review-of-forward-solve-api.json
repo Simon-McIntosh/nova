@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:16:46.893Z",
+  "dispatched_at": "2026-10-04T17:06:23Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/solve_request.py:186",
+      "id": "reuse_search-1",
+      "reason": "a plan that adds a subsystem must cite the mechanism it extends; had the search been run it would have extended the owner instead of forking the placement convention.",
+      "text": "`default_forward_compilation_cache_root` was authored for \u00a71 as a new placement resolver, but no prior-art search of Nova's existing cache-placement machinery is recorded; nova/jax/config.py:103 already owns `default_persistent_compilation_cache_root` and nova/jax/config.py:153 `configure_persistent_compilation_cache`, which versions the cache directory by runtime and topology, so the design rebuilt a mechanism that existed.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/solve_request.py:186",
+      "id": "duplicate_owner-1",
+      "reason": "the design should extend nova/jax/config.py (one root, one variable) rather than add a parallel placement path, which the rubric measures as the recurring duplicate and which drifts silently because the two variables disagree.",
+      "text": "a second compilation-cache root resolver sits beside the owner: this one reads `NOVA_FORWARD_COMPILATION_CACHE_ROOT` and defaults to `~/.cache/nova/forward-compilation-cache/user-<uid>/host-<hostname>`, while nova/jax/config.py:103 reads `NOVA_COMPILATION_CACHE_ROOT` and defaults to `~/.cache`; forward.py:2371 `_configure_solve_compilation_cache` then selects between `jax.config.jax_compilation_cache_dir` and this local resolver, so one concept has two owners and two environment variables. The H200 prewarm lane exports only the owner's variable (scripts/h200_test_lane/run.sh:46, prewarm.sh:53), so a launch pinned that way is not read by the forward resolver.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward.py:2769",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to extend the existing keyword path's default resolution to the seam's contract, or state in the done-when when the keyword input is retired; unbounded coexistence means a route can silently resolve defaults through the path the plan did not migrate.",
+      "text": "`ForwardProfile.solve` accepts either a `ForwardSolveRequest` or ~13 solve keywords, forbids mixing them, and dispatches to `_solve_request` or to `_resolve_solve_defaults`; the request path is a new input surface laid over the keyword machinery it duplicates, and the plan's \u00a72 migration and done-when list no step that deletes the keyword path, leaving two default-resolution paths over the same version-keyed policy.",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "d97181903bbb8548846891c8f6746281b1ae13124269eaa424c032e96472039e",
+  "plan_slug": "forward-solve-api",
+  "plan_version": 150,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T170610532457-plan-review-of-forward-solve-api",
+  "reviewed_blob_sha": "afe76010684a471ce7212c98c719575b675d82e4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 ForwardSolveRequest, ForwardSolvePolicy and ForwardSolveReceipt hide version-keyed default resolution, six-route keyword translation (ForwardSolvePolicy.kernel_options) and receipt provenance behind three types.",
+    "duplicate_owner": "a finding \u2014 the plan re-implements the JAX compilation-cache root resolution rather than extending its owner in nova/jax/config.py.",
+    "reuse_search": "a finding \u2014 the \u00a71 design added a compilation-cache path resolver in nova/equilibrium/solve_request.py without checking nova/jax/config.py, which already owns the persistent JAX compilation cache root and directory versioning.",
+    "thin_wrapper": "a finding \u2014 ForwardProfile.solve keeps a full keyword input path beside the ForwardSolveRequest path, each resolving its own policy, and the plan states no done-when that retires the keyword path."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.389858+00:00"
+}

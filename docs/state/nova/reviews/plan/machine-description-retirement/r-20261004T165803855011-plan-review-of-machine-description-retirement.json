@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:08:58.053Z",
+  "dispatched_at": "2026-10-04T16:58:16Z",
+  "findings": [
+    {
+      "anchor": "imas_ambix/gs/artifact_resolution.py:316",
+      "id": "reuse_search-1",
+      "reason": "the \u00a74 eight-beat coordination and the \"migrate the ambix geometry source and identity tests\" done-when are sized for a test-only coupling; a production reader must migrate first and the inventory row is wrong.",
+      "text": "the plan's \u00a73 \"cross-repo\" row names only ambix *test* files (`tests/gs/test_machine_identity.py`, `tests/gs/test_artifact_resolution.py`), but the live dependency is a production import: `author_pinned_description()` calls `nova.imas.mast_geometry.publish_refined_artifact` (a module \u00a73 marks \"retires\"), and `_resolve_stored()`/`_semantic_identity_of()` call `nova.imas.machine_artifact.{resolve_machine_artifact,MachineArtifactManifest}` at lines 171/268 \u2014 so a deletion here breaks ambix's runtime geometry route, not just its test suite, which changes the cutover sequencing the plan assumes.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine_artifact.py:130",
+      "id": "thin_wrapper-1",
+      "reason": "the plan's core premise (\"replaces all three generically\") fails for the cache/publish third, so the design needs either to keep the owner and expose it, or to name the ambix module that genuinely re-implements it.",
+      "text": "the plan re-homes the machine-generic publication capability (`latest_publication_dd_version()` / `publication_dd_version()`) into the producer, but that function already lives in and is used by the live DIII-D route (`nova/scripts/diiid_machine_artifact.py:349`); ambix's only \"replacement\" candidate, `imas_ambix/gs/artifact_resolution.py`, does not implement any of it and instead forwards to nova's `materialize_machine_artifact` (its own docstring at lines 38\u201340 says so), so the re-home copies a capability into a second repository rather than replacing it and the plan never states why the owner cannot simply be extended in place.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/diiid_machine_ids.py:36",
+      "id": "duplicate_owner-1",
+      "reason": "the re-home inventory is under-counted by exactly the copy the live DIII-D publication path touches, and the plan would retire the one floor it names while leaving a second, unmentioned duplicate serving the live DIII-D path.",
+      "text": "the plan's \u00a72/\u00a73 speak of \"the DDv4 publication floor\" as a single owner-directed capability to re-home, but nova already carries two implementations of it: `latest_publication_dd_version()` (PUBLISHED major 4) at `nova/imas/machine_artifact.py:115`, and `latest_published_dd_version()` (PUBLISHED_DD_MAJOR = 4) here at line 36, used at line 679 in the same module.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "6ca1113ce0b66b7b678d1046e33fa8f305a1c1a487090a1745f300b424c3f857",
+  "plan_slug": "machine-description-retirement",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T165803855011-plan-review-of-machine-description-retirement",
+  "reviewed_blob_sha": "3daecece843f7fcc870867ee978c85f3bf5e9900",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan proposes no new module in nova; its design retires surface rather than adding an abstraction with a hidden interior, so there is no new deep/shallow module to judge (the re-home's placement is scored under thin_wrapper and duplicate_owner).",
+    "duplicate_owner": "a finding \u2014 the DDv4 publication floor the plan treats as one capability to re-home already exists twice in nova, at `nova/imas/machine_artifact.py:115` and `nova/imas/diiid_machine_ids.py:36`.",
+    "reuse_search": "a finding \u2014 the plan searched `imas-ambix` only through its test files, and missed the production module that carries the real cross-repo coupling, `imas_ambix/gs/artifact_resolution.py`.",
+    "thin_wrapper": "a finding \u2014 the plan re-homes nova's publication capability \"into the producer\" without saying why the owner `nova/imas/machine_artifact.py` cannot simply be extended, and the receiving ambix module is itself a forwarding wrapper over nova rather than a replacement."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.435752+00:00"
+}

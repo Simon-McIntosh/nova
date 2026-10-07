@@ -1,0 +1,71 @@
+{
+  "absent": [
+    "no test asserts the sign is physically correct beyond restating the implementation formula: neither an axis-maximum assertion nor a tie to nova's operational polarity",
+    "section 1's explanatory figure (SVG beside PNG under docs/figures/contour-tree-topology-authority/) is not in this node's commits; it is carried by the separate node ctta-explanatory-figure"
+  ],
+  "absent_items": [
+    {
+      "disposition": "out of this node's dispatched scope; the in-flight node ctta-explanatory-figure owns it, so section 1 lands across two nodes",
+      "item": "explanatory figure with SVG beside PNG named in section 1's done-when"
+    },
+    {
+      "disposition": "a follow-on for the section that first consumes sigma in a solve; recorded as a finding rather than a blocker because the formula is correct and matches the corpus identity",
+      "item": "sign identity anchored to the corpus/operational polarity"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "e403c009f32bc0e798c953f99be911ff04668890",
+    "47bd5995e8f8a48293e8e182633596a2ac46a892",
+    "a357490d670fac1bd47fb54da86b4ebad996e4d4"
+  ],
+  "completed_at": "2026-10-01T21:53:29.991Z",
+  "dispatched_at": "2026-10-01T21:27:29Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_conventions.py",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "follow-on: the sigma test asserts sigma_for_state(state) == -current_sign * convention(cocos).sigma_bp, which is the same expression sigma_for_state itself returns at nova/equilibrium/contour_tree.py:124, so the test restates the implementation and cannot fail when the sign derivation is wrong; the done-when item 'sigma ... matches nova.io.cocos' is therefore answered circularly. Anchor the sign independently: assert the axis-maximum property sign(psi_magnetic_axis - boundary_psi) == -sign(Ip) * sigma_bp on corpus states, or cross-check sigma against nova's existing measured identity sign(dp/dpsi) == -sign(Ip)*sigma_bp exercised at tests/test_mastcocos.py:168 and the operational polarity in nova/equilibrium/forward_operator.py."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/conventions/ip-sign-guard-absent.log",
+      "line": "1",
+      "severity": "note",
+      "text": "note: the negative-control log is written at revision e403c009, which already contains the guard, with the guard removed by the stated mutation on its second line. I reproduced the same mutation independently (disabling the 'if flux_sign != expected' refusal at contour_tree.py:60) and the refusal test failed exactly as this log shows, so the guard-absent arm is genuinely demonstrated; the only nuance is that it is a mutation of the guarded revision rather than a run captured before the guard was authored."
+    }
+  ],
+  "gate_arms_note": "derived from the reviewed run's own manifest arms: baseline_suite is ip-sign-guard-absent.log at revision e403c009 (guard removed by mutation), exit_status 1, completed true, failure_ids [tests/test_contour_tree_conventions.py::test_sigma_refuses_current_flux_sign_disagreement]; after_suite is conventions.log at the same revision, exit_status 0, completed true, failure_ids []. after minus baseline is the empty set, so added_failure_count 0 and added_failure_ids []. The module under review is a new file with no prior importing test, so there is no broader suite whose failures could be added; the two arms are the node's gate and its declared negative control.",
+  "justifications": {
+    "durability": "three incremental conventional commits, each with a body, and both the gate and the negative-control logs committed with git add -f. The refusal guard is real and I proved it fires by removing it, and the frozen dataclass validates capacity overflow, boundary type, finiteness and edge indices in __post_init__, so a malformed result is refused rather than truncated. The score is reduced because the sign formula itself has no guard that could fail on a regression: no test asserts the axis-maximum property and none ties sigma to nova's operational polarity.",
+    "evidence": "I reproduced both arms independently in a fresh process at the pinned revision: the gate ran six passed with EXIT=0, and the negative control, with the Ip-sign guard removed, failed only tests/test_contour_tree_conventions.py::test_sigma_refuses_current_flux_sign_disagreement (five passed, one failed, EXIT=1), matching the node's own logs line for line. The gate is a genuine fresh-process run whose committed, force-added log names the revision and the command. The score is reduced because the positive sign claim rests on a test that restates the implementation formula (tests/test_contour_tree_conventions.py:33 against contour_tree.py:124), so the 'matches nova.io.cocos' criterion is not established by an assertion that could have failed, and the guard's notion of an inconsistent state is defined by the same fixture that satisfies it. What does carry the evidence is my independent reproduction of the mutation failure and my cross-check of the formula against the corpus identity, neither of which the node's own record contains.",
+    "fit": "the module reuses the repository's existing idiom rather than inventing one: the sign comes from nova.io.cocos.convention, the result is a frozen slots dataclass like Convention in nova/io/cocos.py, capacities are ClassVars, the state contract is a Protocol, the node/edge rows are TypeAliases, and the new error subclasses ValueError with exception chaining semantics. No plan label, sprint identifier or superseded-name suffix appears in the file, its docstring or its symbols.",
+    "goal_fidelity": "the dispatched goal is met in full. The module docstring states all five section-1 conventions: the sign is derived from the state's declared COCOS sign tuple and the sign of its plasma current through nova.io.cocos so the axis is a maximum of sigma*psi; raw poloidal flux in webers with no normalised operand in any decision; the domain is the interior of the multi-unit vessel polygon by true polygon containment; the carrier is the hex plasma cells with no raster resampling; and the output mapping is DD 4.1.0 under COCOS 17 with the six named paths node and edges (critical_type on raw psi), boundary.type, boundary.psi, global_quantities.psi_magnetic_axis and boundary.closest_wall_point. ContourTreeResult is one frozen slots dataclass carrying node, edges, boundary_type, boundary_psi, psi_magnetic_axis and closest_wall_point, with node_capacity 256 and edge_capacity 255 enforced in __post_init__. I independently confirmed that the multiplier sigma_for_state returns, -sign(Ip)*sigma_bp, equals the identity nova already measures in tests/test_mastcocos.py::test_pressure_gradient_cross_checks_sigma_bp on both current cohorts, so the axis is a maximum of sigma*psi as the section requires. The explanatory figure that section 1 also names is outside this node's dispatched scope (the separate node ctta-explanatory-figure holds it), so nothing is missing that this node was asked to produce.",
+    "scope_discipline": "git show --name-only over the three commits touches exactly nova/equilibrium/contour_tree.py, tests/test_contour_tree_conventions.py, docs/evidence/fragments/contour-tree-topology-authority/ctta-conventions-contract.html and the two conventions logs, all inside the declared write paths. No other module under nova/ is edited, no plan label or ticket identifier appears in a path, symbol or comment, and no AI attribution is present in any message."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the dispatched goal is met in full. The module docstring states all five section-1 conventions: the sign is derived from the state's declared COCOS sign tuple and the sign of its plasma current through nova.io.cocos so the axis is a maximum of sigma*psi; raw poloidal flux in webers with no normalised operand in any decision; the domain is the interior of the multi-unit vessel polygon by true polygon containment; the carrier is the hex plasma cells with no raster resampling; and the output mapping is DD 4.1.0 under COCOS 17 with the six named paths node and edges (critical_type on raw psi), boundary.type, boundary.psi, global_quantities.psi_magnetic_axis and boundary.closest_wall_point. ContourTreeResult is one frozen slots dataclass carrying node, edges, boundary_type, boundary_psi, psi_magnetic_axis and closest_wall_point, with node_capacity 256 and edge_capacity 255 enforced in __post_init__. I independently confirmed that the multiplier sigma_for_state returns, -sign(Ip)*sigma_bp, equals the identity nova already measures in tests/test_mastcocos.py::test_pressure_gradient_cross_checks_sigma_bp on both current cohorts, so the axis is a maximum of sigma*psi as the section requires. The explanatory figure that section 1 also names is outside this node's dispatched scope (the separate node ctta-explanatory-figure holds it), so nothing is missing that this node was asked to produce.\nSCORE evidence: 15\nJUSTIFICATION evidence: I reproduced both arms independently in a fresh process at the pinned revision: the gate ran six passed with EXIT=0, and the negative control, with the Ip-sign guard removed, failed only tests/test_contour_tree_conventions.py::test_sigma_refuses_current_flux_sign_disagreement (five passed, one failed, EXIT=1), matching the node's own logs line for line. The gate is a genuine fresh-process run whose committed, force-added log names the revision and the command. The score is reduced because the positive sign claim rests on a test that restates the implementation formula (tests/test_contour_tree_conventions.py:33 against contour_tree.py:124), so the 'matches nova.io.cocos' criterion is not established by an assertion that could have failed, and the guard's notion of an inconsistent state is defined by the same fixture that satisfies it. What does carry the evidence is my independent reproduction of the mutation failure and my cross-check of the formula against the corpus identity, neither of which the node's own record contains.\nSCORE fit: 19\nJUSTIFICATION fit: the module reuses the repository's existing idiom rather than inventing one: the sign comes from nova.io.cocos.convention, the result is a frozen slots dataclass like Convention in nova/io/cocos.py, capacities are ClassVars, the state contract is a Protocol, the node/edge rows are TypeAliases, and the new error subclasses ValueError with exception chaining semantics. No plan label, sprint identifier or superseded-name suffix appears in the file, its docstring or its symbols.\nSCORE durability: 14\nJUSTIFICATION durability: three incremental conventional commits, each with a body, and both the gate and the negative-control logs committed with git add -f. The refusal guard is real and I proved it fires by removing it, and the frozen dataclass validates capacity overflow, boundary type, finiteness and edge indices in __post_init__, so a malformed result is refused rather than truncated. The score is reduced because the sign formula itself has no guard that could fail on a regression: no test asserts the axis-maximum property and none ties sigma to nova's operational polarity.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --name-only over the three commits touches exactly nova/equilibrium/contour_tree.py, tests/test_contour_tree_conventions.py, docs/evidence/fragments/contour-tree-topology-authority/ctta-conventions-contract.html and the two conventions logs, all inside the declared write paths. No other module under nova/ is edited, no plan label or ticket identifier appears in a path, symbol or comment, and no AI attribution is present in any message.\nFINDING tests/test_contour_tree_conventions.py:33 follow-on: the sigma test asserts sigma_for_state(state) == -current_sign * convention(cocos).sigma_bp, which is the same expression sigma_for_state itself returns at nova/equilibrium/contour_tree.py:124, so the test restates the implementation and cannot fail when the sign derivation is wrong; the done-when item 'sigma ... matches nova.io.cocos' is therefore answered circularly. Anchor the sign independently: assert the axis-maximum property sign(psi_magnetic_axis - boundary_psi) == -sign(Ip) * sigma_bp on corpus states, or cross-check sigma against nova's existing measured identity sign(dp/dpsi) == -sign(Ip)*sigma_bp exercised at tests/test_mastcocos.py:168 and the operational polarity in nova/equilibrium/forward_operator.py.\nFINDING docs/figures/contour-tree-topology-authority/conventions/ip-sign-guard-absent.log:1 note: the negative-control log is written at revision e403c009, which already contains the guard, with the guard removed by the stated mutation on its second line. I reproduced the same mutation independently (disabling the 'if flux_sign != expected' refusal at contour_tree.py:60) and the refusal test failed exactly as this log shows, so the guard-absent arm is genuinely demonstrated; the only nuance is that it is a mutation of the guarded revision rather than a run captured before the guard was authored.",
+  "review_run_id": "r-20261001T212716706471-review-of-ctta-conventions-contract",
+  "reviewed_base_sha": "483b11902fec4231c3af4a066214b269566b4e86",
+  "reviewed_head_sha": "a357490d670fac1bd47fb54da86b4ebad996e4d4",
+  "reviewed_revision": "a357490d670fac1bd47fb54da86b4ebad996e4d4",
+  "reviewed_run_id": "r-20261001T210753112544-ctta-conventions-contract",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-conventions-contract",
+  "reviewer_node": "review-of-ctta-conventions-contract",
+  "reviewer_run_id": "r-20261001T212716706471-review-of-ctta-conventions-contract",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-01T21:45:00+00:00",
+  "total": 87,
+  "verdict": "pass"
+}

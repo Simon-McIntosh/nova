@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_source": "unmeasured: the reviewed run's manifest names no baseline_suite or after_suite gate logs (both fields empty), so no base/head pair was compared; the count is recorded as unmeasured rather than zero",
+  "completed_at": "2026-10-03T10:15:17Z",
+  "dispatched_at": "2026-10-03T06:34:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "follow-on: the record is a forward-solve terminal-state evidence document but carries no poloidal flux contour panel of the terminal state, which the repository plotting rule requires of every GS forward-solve evidence record; docs/figures/forward-solve-api/ holds no outboard/census figure and the fragment contains no img or figure element, so the ten changed supports whose booking moved 1,477,703.687599 A are never drawn and the reader cannot see the geometry the re-pin claim rests on."
+    },
+    {
+      "file": "benchmarks/outboard_census_exact_total.py",
+      "line": "385",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt's machine-readable recommendation is 'repair' in all five committed receipts (bookings-isolated, bookings-all, census-candidate-cells, census-merge-direct, triangle-reference) while the evidence document recommends re-pin; the ternary emits 're-pin' only when one run carried both booking and reference, and every committed receipt was run with a single --component, so current_matches_reference and reference_a are null throughout and a coordinator reading the JSON verdict gets the opposite of the prose."
+    },
+    {
+      "file": "benchmarks/outboard_census_exact_total.py",
+      "line": "295",
+      "severity": "follow-on",
+      "text": "follow-on: error_bound = 0.0 is a literal, so the receipt field quadrature_error_bound_a records a measured-looking zero for a bound that was never computed; the real convergence evidence is the per-level relative_change ladder in quadrature_cells (a reader can and did confirm agreement at 4.9e-9 to 1.4e-7 relative), but the zero field is the unmeasured-recorded-as-zero pattern and should either carry a computed bound or be null."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the plan item f-fsapi-outboard-census-exact-total asks to first establish when the committed state was written and in which clip mode its solve actually ran, and its done-when requires the test to pass against that state with no tolerance widened; this record establishes neither the state's write time nor its solve clip mode, and the gate test is untouched and still red, so the re-pin rests on the route-change explanation alone and the plan half remains open (declared a follow-on, not a silent omission)."
+    }
+  ],
+  "item_aggregate": null,
+  "item_verdicts": {},
+  "justifications": {
+    "durability": "no committed test imports benchmarks/outboard_census_exact_total.py (grep over tests/ returns nothing), so _archive_tree, _measure, _triangle_reference and the archive-isolation logic are exercised only by runs in /tmp and by the run-dir receipts; a regression that reused one arm's module across revisions (the defect the rejected bookings-all receipt shows) would pass the repository green, and the gate that would catch the booking is out of scope and currently red.",
+    "evidence": "every headline reproduces independently from the committed receipts: exact totals 14,013,835.437176 A at 247e5aa4a and 15,491,539.124774866 A at 38b441dad/main; the ten changed cells are exactly 5,7,30,65,74,78,87,110,119,124; their after-sum is 1,477,703.6875989058 A against the triangle reference 1,477,703.686366 A, an 8.3403e-10 relative agreement over a before-sum of 6.146e-10 A; and the archive-isolation correction is verifiable because bookings-all.json shows every arm resolving 247e5aa4a's census module while bookings-isolated.json gives each arm its own path. The evidence fragment at line 57 also cites the cause correctly against the commit diff.",
+    "fit": "the benchmark follows the benchmarks/ idiom of argparse components and typed helpers, its names carry no plan or version label, and the integration is stated as a mechanism (sampled_boundary = count > _WHOLE_CELL_VERTEX_CAPACITY) rather than an author or ticket; it loses points because the evidence record omits the required poloidal flux contour panel and the receipt advises 'repair' against the document's re-pin, and because error_bound is hardcoded rather than measured.",
+    "goal_fidelity": "the substantive question the plan poses -- whether the committed state or the current booking is wrong -- is answered by measurement: the chord total is invariant at 15,875,439.764504 A, the exact total moves 1,477,703.687599 A at 38b441dad, and an independent triangle reference over the ten changed supports reproduces that move to 8.34e-10 relative, so the current booking is right and the pin is stale; the cause is named by file and line (clip_quadrature.py 516-521 and 731-736, the sampled_boundary routing, separate from the custom_jvp at line 851). It is not full credit because the plan's done-when also requires the test to pass against a state whose write time and clip mode are recorded and verified, and this node records neither and leaves the re-pin to a follow-on, so the item remains open.",
+    "scope_discipline": "all twelve commits a7d6e0e39 through 4177f36ee touch only benchmarks/outboard_census_exact_total.py (eleven commits) and docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html (4177f36ee), both inside the declared write paths, with nothing under nova/ or the plan; every commit carries a conventional subject and a body; no plan, sprint, ticket or version label appears in a path, symbol or comment."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261003T063401667067-fsapi-outboard-census-exact-total, node fsapi-outboard-census-exact-total, landed at commits a7d6e0e39, 5d71b1f8e, 78de04310, e86b19e8d, 0a12f31ee, eb8220f07, cdae411cd, 9d6c3ad9a, a61e3922f, 4877bfd34, e78e8b73f, 4177f36ee against base 406b740b1, read from the reviewed worktree at 4177f36ee.\n\nCHECK 1 -- the headline numbers reproduce independently from the committed receipts. bookings-isolated.json gives exact_booked_a 14013835.43717596 at 247e5aa4a and a28a3e880, 15491539.124774866 at 38b441dad and main, with the chord total invariant at 15875439.764504185. From census-candidate-cells.json I recomputed the per-cell exact currents: the values that differ between the two revisions are exactly the ten cells 5,7,30,65,74,78,87,110,119,124; their after-sum is 1477703.6875989058 A, their before-sum is 6.145891734640215e-10 A, and triangle-reference.json carries quadrature_reference_a 1477703.6863664566 A, giving 8.340299949932305e-10 relative. Every number in the evidence fragment matches.\n\nCHECK 2 -- the archive-isolation correction is real and verifiable. bookings-all.json, the rejected first receipt, resolves every arm's census module to the 247e5aa4a archive because the first archive's top-level benchmarks package stayed in sys.modules; bookings-isolated.json gives each arm its own module under its own revision directory, so the manifest's account of the rejection and its repair is corroborated by the artefacts themselves.\n\nCHECK 3 -- the named cause is verified against the commit. git show 38b441dad on nova/equilibrium/clip_quadrature.py shows sampled_boundary = count > _WHOLE_CELL_VERTEX_CAPACITY added to the boundary mask at both hunks (current lines 519 and 733), routing over-capacity supports through the compact cut-cell reduction; the custom_jvp decorator begins at line 851, as the manifest states. The description in the evidence fragment matches the diff.\n\nCHECK 4 -- scope. All twelve commits touch only benchmarks/outboard_census_exact_total.py and the evidence fragment, both inside the declared write paths; every commit has a conventional subject and a body; no plan or version label appears in any path, symbol or comment.\n\nFINDING docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html:30 follow-on: the record is a forward-solve terminal-state evidence document but carries no poloidal flux contour panel of the terminal state, which the repository plotting rule requires of every GS forward-solve evidence record; docs/figures/forward-solve-api/ holds no outboard/census figure and the fragment contains no img or figure element, so the ten changed supports whose booking moved 1,477,703.687599 A are never drawn.\nFINDING benchmarks/outboard_census_exact_total.py:385 follow-on: the receipt's machine-readable recommendation is 'repair' in all five committed receipts while the evidence document recommends re-pin; the ternary emits 're-pin' only when one run carried both booking and reference, and every committed receipt was run with a single --component, so current_matches_reference and reference_a are null throughout.\nFINDING benchmarks/outboard_census_exact_total.py:295 follow-on: error_bound = 0.0 is a literal, so quadrature_error_bound_a records a measured-looking zero for a bound never computed; the real convergence evidence is the per-level relative_change ladder.\nFINDING docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html:57 follow-on: the plan asks to establish when the committed state was written and in which clip mode its solve ran, and its done-when requires the test to pass with no tolerance widened; this node records neither and leaves the re-pin to a follow-on, so the item remains open.\n\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the substantive question the plan poses -- whether the committed state or the current booking is wrong -- is answered by measurement: the chord total is invariant at 15,875,439.764504 A, the exact total moves 1,477,703.687599 A at 38b441dad, and an independent triangle reference over the ten changed supports reproduces that move to 8.34e-10 relative, so the current booking is right and the pin is stale; the cause is named by file and line. It is not full credit because the plan's done-when also requires the test to pass against a state whose write time and clip mode are recorded and verified, and this node records neither and leaves the re-pin to a follow-on.\nSCORE evidence: 17\nJUSTIFICATION evidence: every headline reproduces independently from the committed receipts (14,013,835.437176 -> 15,491,539.124774866 A, ten changed cells summing 1,477,703.6875989058 A against a 1,477,703.686366 A triangle reference at 8.3403e-10 relative), and the archive-isolation repair is corroborated by the rejected bookings-all.json resolving every arm to the 247e5aa4a module while bookings-isolated.json does not.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all twelve commits touch only the two declared paths with nothing under nova/ or the plan, every commit carries a conventional subject and a body, and no plan, sprint, ticket or version label appears in a path, symbol or comment.\nSCORE durability: 8\nJUSTIFICATION durability: no committed test imports benchmarks/outboard_census_exact_total.py, so the archive isolation, triangle reference and component assembly are exercised only by /tmp runs and the run-dir receipts, and the defect the rejected bookings-all receipt shows would pass the repository green.\nSCORE fit: 13\nJUSTIFICATION fit: the benchmark follows the benchmarks/ idiom with mechanism-based names and no plan label, but the evidence record omits the required poloidal flux contour panel, the receipt advises 'repair' against the document's re-pin, and error_bound is a hardcoded zero rather than a measurement.\n",
+  "review_run_id": "legacy-77ded5ab07c0",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "406b740b1ac26c285cbc2c9a5dbd1daea0e39219",
+  "reviewed_head_sha": "4177f36ee93fcd9a46d40b65ba217feddaa96009",
+  "reviewed_run_id": "r-20261003T063401667067-fsapi-outboard-census-exact-total",
+  "reviewer": "r-20261003T090033183609-review-of-fsapi-outboard-census-exact-total",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 13,
+    "goal_fidelity": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T09:06:55.726440925+00:00",
+  "total": 73
+}

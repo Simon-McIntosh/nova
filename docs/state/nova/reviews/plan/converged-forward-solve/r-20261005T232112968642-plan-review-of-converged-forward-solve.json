@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:25:09.462Z",
+  "dispatched_at": "2026-10-05T23:21:26Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/clip_quadrature.py:613",
+      "id": "reuse_search-1",
+      "reason": "the substantive mechanism the ruling points at is real and correctly located (a private current-integration copy beside `polygon_moments.py`), so the stale spelling does not alter the design, only the citation accuracy of the retirement list; it is worth correcting so the \u00a76 deletion gate's name check resolves.",
+      "text": "the \u00a73 helper ruling (composed review c-20261005T195327296038) names `_integrate_current` as the private copy of polygon-moment integration to retire, but no symbol of that name exists in the module; the copies are `_integrate_current_points` (line 613) and `_integrate_current_polynomial` (line 635)",
+      "type": "reuse_search",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "8a5bfb3a557e7b7f560ca21b9d4e2a87a2ea330e735cdaacc4a794e454668a8c",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 45,
+  "project": "nova",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:28:04.913017+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T232112968642-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "55a6a847791961da33a467387662cdfda1a8f07d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design replaces the 1467-line base `topology.py` and the ~17k-line solver/booking surface with four pure functions (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`), each hiding the read, the booking, the map and the Newton solve behind a single operand-carrying call; the interfaces are far smaller than what they hide.",
+    "duplicate_owner": "pass \u2014 the recurring owners are named and extension is required rather than forking: `polygon_moments.py` for exact polygon moments, `constraint.py` (`ConstraintPair`/`ConstraintRecord`) for the constraint-row scale, `contour_tree.py` for the topology tree, `current.py` for moment booking and `gs.py` for the moment-map derivative; the one carve-out (`moment.py`) is named with its reason.",
+    "interface_budget": "pass \u2014 the week's counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72\u2013\u00a75 each name in their own text what they retire (the old `Topology.read`/`read_with_connectivity`, `clipped_support_current_moments`, the `ForwardFluxOperator` map, `newton_krylov`/`picard`/`operator_request_body`), and \u00a76 names the collapse of `SolveRoute` to one route and `SupportClipMode` to the exact clip and the retirement of eight plumbing fields, so the added public functions are each paired with a specified retirement.",
+    "reuse_search": "a finding \u2014 the reuse map is exhaustive (a cite-or-justify ruling for the GMRES kernel, line-search helpers, field-null kernels, operand layouts, clip helpers, polygon moments, contour tree, Newton machinery, moment-map derivative and request surface, each verified to name a real symbol), but one ruling cites a helper name that does not exist.",
+    "thin_wrapper": "pass \u2014 every helper the design keeps is required to be carried into the new module \"as private helpers behind the one call site\" or declined in evidence, `gs.apply` is stated to replace the `ForwardFluxOperator` map \"rather than wrapping it\", and the one retained wrapper (`forward.py` as request/receipt adapter) is given a reason."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:26:59.803766+00:00"
+}

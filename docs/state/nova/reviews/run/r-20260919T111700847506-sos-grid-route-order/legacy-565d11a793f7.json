@@ -1,0 +1,56 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json",
+      "line": "10",
+      "text": "the receipt's errors (0.22186989872446414, 0.2225852728053199, 0.22275965186898267, 0.2228137757917001) converge to its own limit 0.2228137757917001, a 22 per cent offset from exact 1.2325543621162036, so quadrature_order 2.064 is the order of the departure from that plateau rather than of convergence of the route to the volume definition the test name asserts, and neither the receipt, the evidence record, the plan paragraph nor the node manifest states the plateau."
+    },
+    {
+      "file": "tests/test_equilibrium_diagnostics.py",
+      "line": "618",
+      "text": "the docstring's \"seven orders down\" overstates the measured margin, since the receipt's grid_gap 2.870e-6 sits about two and a half orders below the finest quadrature departure 9.4388e-4."
+    },
+    {
+      "file": "tests/test_equilibrium_diagnostics.py",
+      "line": "685",
+      "text": "the test writes the tracked receipt.json inside the repository tree on every run, so a run on another platform silently re-authors a committed shared artefact while the node's manifest does not mention the side effect; my re-run happened to leave it byte-identical (md5 26d261934031f7e1f07009825b448b7e) because the platform matched."
+    },
+    {
+      "file": "docs/plans/shafranov-observed-side.html",
+      "line": "76",
+      "text": "section 2's done-when requires \"the certificate figure shows the ladder\", and the committed SVG is the 2026-09-18T18:27 certificate whose panels are the 2001-point contour route and an assembly-order ladder over 321-1281, with no 21/41/81 grid ladder; the landing paragraph declares the node partial, so the clause is unmet rather than overlooked."
+    },
+    {
+      "file": "docs/evidence/archive/shafranov-observed-side-landed.html",
+      "line": "46",
+      "text": "the stage table carries a malformed </td></td></tr> in the contour-quadrature row, which a browser repairs silently but which breaks any strict reader of the anchor."
+    }
+  ],
+  "justifications": {
+    "durability": "A test exists that fails if this change regresses \u2014 the assertion moved from 0.5 to 1.8, which a first-order rule cannot reach \u2014 the fitted order, its ladder and its mechanism are persisted to the receipt, the three red rungs are left enabled as the visible signal of the named defect, and all four commits are reachable from main at cc650588; one point is withheld because the test rewrites the tracked receipt.json on every run, so the record a reader finds is whatever the last run on that tree wrote rather than a reviewed artefact.",
+    "evidence": "Every number the node reports reproduces first-hand \u2014 a fresh all_debug job (shared interpreter, JAX_PLATFORMS=cpu, no uv on the compute node) rewrote docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json to the same md5 26d261934031f7e1f07009825b448b7e with quadrature_order 2.0643612255761723 and grid_gap 2.870e-6, 2.015e-6, 6.890e-7, the suite reproduced 3 failed and 60 passed in 50.33 s with the same three ids and the same residual arrays, and the probe logs under the run's reports directory carry every cited figure (0.985 against 2.151, 0.824/0.097/0.925, 1.677, 1.714e-3 to 3.532e-6) \u2014 with the deduction that the receipt's own errors converge to its own limit 0.2228137757917001, a 22 per cent offset from exact, and no part of the record states that the fitted order is a departure-from-plateau order.",
+    "fit": "The change matches the module's idiom \u2014 _segment_mean is a pure jnp helper that stays traceable in the field arguments, the mechanism is stated in both docstrings in the vocabulary the existing derivation block uses, and the new names (_segment_mean, GRID_RESOLUTION, QUADRATURE_ORDER_FLOOR, _grid_imaged_contour_field) are named for what they measure with no plan label anywhere in the diff; the two points are withheld for the test docstring's \"seven orders down\" margin and the malformed table cell in the evidence record, and for nothing else.",
+    "goal_fidelity": "The landed change answers the question the goal poses and does what it states \u2014 nova/equilibrium/diagnostics.py now samples the contour metric at the chord midpoint and averages each field to it through _segment_mean (the trapezoidal rule on a closed polyline, second order), against a pre-fix leading-vertex rule confirmed from 3818bd05^ and re-derived independently on an ellipse with a generic smooth field (endpoint rule fitted 1.097/1.221/1.584 with the endpoint-minus-midpoint value difference halving at ratios 1.998, 1.999, 1.9995 and 1.9998, midpoint rule 2.017/2.070/2.322) \u2014 but section 2's third done-when clause, that the certificate figure shows the ladder, is unmet and only declared partial.",
+    "scope_discipline": "The node's worktree holds exactly the four declared paths against its base 902f22db, the plan edit is the single declared main-checkout commit d8377c95, _contour_metric has one caller so the change cannot reach another route, and the naming checks over the added lines return empty for banned plan labels, ticket references and changelog prose."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: The landed change answers the question the goal poses and does what it states \u2014 nova/equilibrium/diagnostics.py now samples the contour metric at the chord midpoint and averages each field to it through _segment_mean (the trapezoidal rule on a closed polyline, second order), against a pre-fix leading-vertex rule confirmed from 3818bd05^ and re-derived independently on an ellipse with a generic smooth field (endpoint rule fitted 1.097/1.221/1.584 with the endpoint-minus-midpoint value difference halving at ratios 1.998, 1.999, 1.9995 and 1.9998, midpoint rule 2.017/2.070/2.322) \u2014 but section 2's third done-when clause, that the certificate figure shows the ladder, is unmet and only declared partial.\nSCORE evidence: 16\nJUSTIFICATION evidence: Every number the node reports reproduces first-hand \u2014 a fresh all_debug job (shared interpreter, JAX_PLATFORMS=cpu, no uv on the compute node) rewrote docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json to the same md5 26d261934031f7e1f07009825b448b7e with quadrature_order 2.0643612255761723 and grid_gap 2.870e-6, 2.015e-6, 6.890e-7, the suite reproduced 3 failed and 60 passed in 50.33 s with the same three ids and the same residual arrays, and the probe logs under the run's reports directory carry every cited figure (0.985 against 2.151, 0.824/0.097/0.925, 1.677, 1.714e-3 to 3.532e-6) \u2014 with the deduction that the receipt's own errors converge to its own limit 0.2228137757917001, a 22 per cent offset from exact, and no part of the record states that the fitted order is a departure-from-plateau order.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The node's worktree holds exactly the four declared paths against its base 902f22db, the plan edit is the single declared main-checkout commit d8377c95, _contour_metric has one caller so the change cannot reach another route, and the naming checks over the added lines return empty for banned plan labels, ticket references and changelog prose.\nSCORE durability: 18\nJUSTIFICATION durability: A test exists that fails if this change regresses \u2014 the assertion moved from 0.5 to 1.8, which a first-order rule cannot reach \u2014 the fitted order, its ladder and its mechanism are persisted to the receipt, the three red rungs are left enabled as the visible signal of the named defect, and all four commits are reachable from main at cc650588; one point is withheld because the test rewrites the tracked receipt.json on every run, so the record a reader finds is whatever the last run on that tree wrote rather than a reviewed artefact.\nSCORE fit: 18\nJUSTIFICATION fit: The change matches the module's idiom \u2014 _segment_mean is a pure jnp helper that stays traceable in the field arguments, the mechanism is stated in both docstrings in the vocabulary the existing derivation block uses, and the new names (_segment_mean, GRID_RESOLUTION, QUADRATURE_ORDER_FLOOR, _grid_imaged_contour_field) are named for what they measure with no plan label anywhere in the diff; the two points are withheld for the test docstring's \"seven orders down\" margin and the malformed table cell in the evidence record, and for nothing else.\nFINDING docs/figures/constraint-augmented-newton-krylov/shafranov-integral/receipt.json:10 the receipt's errors (0.22186989872446414, 0.2225852728053199, 0.22275965186898267, 0.2228137757917001) converge to its own limit 0.2228137757917001, a 22 per cent offset from exact 1.2325543621162036, so quadrature_order 2.064 is the order of the departure from that plateau rather than of convergence of the route to the volume definition the test name asserts, and neither the receipt, the evidence record, the plan paragraph nor the node manifest states the plateau.\nFINDING tests/test_equilibrium_diagnostics.py:618 the docstring's \"seven orders down\" overstates the measured margin, since the receipt's grid_gap 2.870e-6 sits about two and a half orders below the finest quadrature departure 9.4388e-4.\nFINDING tests/test_equilibrium_diagnostics.py:685 the test writes the tracked receipt.json inside the repository tree on every run, so a run on another platform silently re-authors a committed shared artefact while the node's manifest does not mention the side effect; my re-run happened to leave it byte-identical (md5 26d261934031f7e1f07009825b448b7e) because the platform matched.\nFINDING docs/plans/shafranov-observed-side.html:76 section 2's done-when requires \"the certificate figure shows the ladder\", and the committed SVG is the 2026-09-18T18:27 certificate whose panels are the 2001-point contour route and an assembly-order ladder over 321-1281, with no 21/41/81 grid ladder; the landing paragraph declares the node partial, so the clause is unmet rather than overlooked.\nFINDING docs/evidence/archive/shafranov-observed-side-landed.html:46 the stage table carries a malformed </td></td></tr> in the contour-quadrature row, which a browser repairs silently but which breaks any strict reader of the anchor.\n",
+  "review_run_id": "legacy-565d11a793f7",
+  "review_run_id_source": "derived",
+  "reviewed_run_id": "r-20260919T111700847506-sos-grid-route-order",
+  "reviewing_run_id": "r-20260919T115006363350-review-of-sos-grid-route-order",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-19T12:08:57.085076+00:00",
+  "total": 89
+}

@@ -1,0 +1,133 @@
+{
+  "absent": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Unmeasured from the reviewed run's own suite records. baseline_suite is readable at bf8122ae28f481e1ac7eb9194bdfcf21f6f567e5 and exits 1 with test_forward_solve_clip_mode_request.py::test_request_clip_mode_builds_each_operator_and_records_each_receipt failing on TypeError for unexpected keyword argument clip_mode. The claimed after_suite records 1 passed and exit 0, but its persisted log begins revision=working-tree rather than a concrete revision and therefore cannot be paired to the recorded 09a0b9b9022073b1b69562af8a53f2e22007ff37. added_failure_count is null and added_failure_ids is [] rather than a fabricated zero.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "fresh base and request-field H200 chord rows both report sup_relative 9.540289289876033e-05; the historical receipt reports 0.018606337522878408",
+      "path": "docs/figures/forward-solve-api/clip-mode-request-field/map-fidelity-chord-comparison.json"
+    },
+    {
+      "headline": "passes independently, proving request-to-cloned-operator routing and receipt clip_mode serialization, but its key monkeypatch masks production cache-key composition",
+      "path": "tests/test_forward_solve_clip_mode_request.py"
+    },
+    {
+      "headline": "otherwise equivalent chord and exact requests produce equal cache keys; the probe deliberately exits 1",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T180607292170-review-of-fsapi-clip-mode-request-field-core/cache-key-probe.log"
+    }
+  ],
+  "commits_read": [
+    "09a0b9b9022073b1b69562af8a53f2e22007ff37",
+    "b1dd0d12ca766518c73aac12266fcfa0eab2ffea",
+    "8a613df6021f15f636bc5dbe956f1d54f7d57a6b",
+    "e644d69ebadbb7e6618bd9156c25b991e0f35451"
+  ],
+  "completed_at": "2026-10-02T18:15:48Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T18:06:31Z",
+  "evidence_inputs": {
+    "head_behavior": "The head gate passes independently, while its own negative control forces both operators to the legacy exact mode and fails with observed_modes ['exact', 'exact'] instead of ['chord', 'chord_cells']. The reviewed run's persisted after-arm output is not a committed-revision receipt.",
+    "new_review_defect": "The real _request_compilation_cache_key lacks request.clip_mode, and ForwardFluxOperator.program_identity likewise delegates to an identity without clip mode. The independent two-request probe reports KEYS_EQUAL True.",
+    "reproduced_defect": "The run's base log proves the prior API rejection: ForwardSolveRequest.__init__() got an unexpected keyword argument 'clip_mode'.",
+    "reviewed_range": "bf8122ae28f481e1ac7eb9194bdfcf21f6f567e5..e644d69ebadbb7e6618bd9156c25b991e0f35451; 16 paths, 982 insertions, 15 deletions; git diff --check clean"
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "2690-2726",
+      "severity": "blocking",
+      "text": "_request_compilation_cache_key claims to describe static compiled-program inputs but omits request.clip_mode. The request path applies clip_mode through active.operator.with_clip_mode before solving, and clip mode selects distinct static support/moment branches. The independent cache-key probe constructs otherwise identical chord and exact requests and prints KEYS_EQUAL True before exiting 1. Once the chord key is stored, an exact request can set receipt.compilation_cache_hit true even though its clip-specific program has not been observed. Add request.clip_mode (or an identity that includes it) to the key and add a regression that asserts distinct modes have distinct keys and first-use cache misses.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "tests/test_forward_solve_clip_mode_request.py",
+      "line": "55-59",
+      "severity": "blocking",
+      "text": "The only new regression replaces profile._request_compilation_cache_key with lambda request, _initial_flux: request.clip_mode. That makes the tested key discriminator correct by construction and masks the production omission at forward.py:2690-2726. Exercise the real key (with a lightweight program-identity fixture if needed) and assert chord versus exact or chord_cells keys differ; then verify cache-hit provenance is false on each first mode and true only on a repeated same-mode request.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T180607292170-review-of-fsapi-clip-mode-request-field-core/review-focused-clip-mode.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The first independent head-gate attempt exited 2 during collection because Numba attempted to create a cache beside read-only reviewed source. The rerun with NUMBA_DISABLE_JIT=1 completed 1 passed, EXIT=0. This is a review-environment constraint rather than a reviewed-code failure."
+    }
+  ],
+  "follow_ons": [
+    "Repair ForwardProfile._request_compilation_cache_key so clip_mode participates in the key, or make ForwardFluxOperator.program_identity incorporate its request-owned clip mode. Add a focused key/provenance test with no key monkeypatch: two modes must have different keys, their first uses must be cache misses, and only a repeated same mode may report a hit.",
+    "Re-run the focused regression in an execution-capable worktree or configure an isolated writable Numba/JAX cache if an unmodified-JIT replay is required; the NUMBA_DISABLE_JIT replay already proves the logic gate."
+  ],
+  "gate_arms_note": "Independently rerun at the clean reviewed head e644d69ebadbb7e6618bd9156c25b991e0f35451: NUMBA_DISABLE_JIT=1 JAX_PLATFORMS=cpu PYTHONPATH=<reviewed-worktree> python -m pytest --timeout 0 -p no:cacheprovider <reviewed-worktree>/tests/test_forward_solve_clip_mode_request.py -q -> 1 passed, 5 warnings in 5.80s, EXIT=0. The warnings are read-only persistent-cache lockfile attempts. This independent result does not repair the reviewed run's after-arm provenance; its own header is revision=working-tree. Independent cache-key probe at the same head: chord and exact keys are equal, EXIT=1.",
+  "item_verdicts": {
+    "call_sites": "ForwardProfile._solve_imposed_request clones the operator with request.clip_mode at forward.py:2585 and calls _request_compilation_cache_key at forward.py:2605. The cache key at forward.py:2690-2726 includes route, policy, operands, constraints, and enforcement but not request.clip_mode; ForwardFluxOperator.program_identity delegates to _batch_identity at forward_operator.py:2682-2698, which also omits clip_mode.",
+    "diff": "09a0b9b adds the request field, receipt field, cloned-operator selection, and one focused test. b1dd0d12, 8a613df6, and e644d69 add same-device H200 provenance and committed result arrays. Across the full range, 16 paths change by 982 insertions and 15 deletions; source formatting is clean.",
+    "done_when": "The dedicated head regression passes independently: 1 passed in 5.80s, EXIT=0. The reviewed base/head H200 chord arms both completed with exit 0 and report sup_relative 9.540289289876033e-05; the historical 0.018606337522878408 discrepancy therefore predates this code. However, the cache-key probe makes chord and exact requests produce equal keys, despite clip_mode changing the support-moment dispatch; a second mode can be reported as a cache hit before its distinct static executable has been recorded.",
+    "goal": "The base defect reproduces from the reviewed run's baseline log: ForwardSolveRequest.from_defaults(..., clip_mode='chord') raised TypeError because the request had no clip_mode field. The head adds typed request validation, binds the request mode to a cloned operator, resolves the legacy global only when no request owns the mode, and serializes clip_mode in receipt defaults. That core path is present, but its new static program choice is omitted from the request compilation-cache key.",
+    "manifest": "The reviewed manifest is terminal, names all four commits and all changed paths, and preserves a negative control. Its baseline arm is readable and records the missing-field refusal, but the after-suite log begins revision=working-tree rather than the recorded commit, so the reviewed run's own paired failure delta is unmeasured rather than zero. The manifest accurately calls out a separately owned benchmark migration and historical-receipt provenance review, but not the new cache-key omission.",
+    "write_paths": "git diff --name-status bf8122ae..e644d69 lists exactly the three granted equilibrium modules, the granted focused test, and the granted clip-mode evidence directory. The reviewed worktree is clean and git diff --check is clean. No plan, index, or foreign source path was changed."
+  },
+  "justifications": {
+    "durability": "The focused regression proves request-to-cloned-operator routing and receipt serialization, and the reviewed negative control proves the route does not fall back to the legacy global. But the test at lines 55-59 replaces _request_compilation_cache_key with a mode-only lambda, so it cannot detect that the production key omits the mode. It also mocks the accelerated solve, leaving the real compilation-cache-hit accounting untested.",
+    "evidence": "The review read all four commits, the base refusal, the after arm, the negative control, the H200 comparison log, and the committed comparison JSON. It independently reran the focused head gate under NUMBA_DISABLE_JIT=1: 1 passed, EXIT=0. A separate dynamic probe constructs equivalent chord and exact requests, normalizes program_identity to isolate the key composition, and observes KEYS_EQUAL True with EXIT=1; the probe is a positive control for the claimed omission. The reviewed after-suite header does not identify its revision, so its own base/head delta is not treated as measurable.",
+    "fit": "Request-owned state and receipt provenance match the established ForwardSolveRequest/ResolvedForwardSolveDefaults seam, and the compatibility fallback is deliberately preserved for legacy callers. The cache key is the one inconsistent layer: it treats two distinct requested program variants as one observed executable.",
+    "goal_fidelity": "The request and receipt correctly own and expose clip selection, and all five operator decision sites use _active_support_clip_mode. The omitted cache discriminator violates the cache-key helper's own contract to describe static compiled-program inputs, because clip mode selects distinct static branches in the support/moment path.",
+    "scope_discipline": "The declared fence covers every changed source, test, and evidence path. The review's parsed range and clean worktree support that conclusion."
+  },
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT fail (87/100; goal_fidelity 17, evidence 20, scope_discipline 20, durability 13, fit 17). The original missing request field reproduces and the request-owned operator and receipt path are present; the dedicated head test independently passes. The reviewed run's after-suite log has no concrete revision header, so its own paired failure delta is unmeasured rather than zero. The code nevertheless omits request.clip_mode from the in-memory compilation-cache key, although that request field selects distinct static support/moment program branches. An independent chord-versus-exact key probe reports KEYS_EQUAL True and exits 1. The new test replaces the real key builder with a mode-only lambda, masking precisely this defect. Include clip mode in the cache discriminator and test real first-use/reuse receipt provenance before accepting the review.",
+  "review_base_sha": "54b55f57c00fff705701b4f7bd491d3ddf2230c5",
+  "review_run_id": "r-20261002T180607292170-review-of-fsapi-clip-mode-request-field-core",
+  "reviewed_base_sha": "bf8122ae28f481e1ac7eb9194bdfcf21f6f567e5",
+  "reviewed_commit": "e644d69ebadbb7e6618bd9156c25b991e0f35451",
+  "reviewed_head_sha": "e644d69ebadbb7e6618bd9156c25b991e0f35451",
+  "reviewed_revision": "e644d69ebadbb7e6618bd9156c25b991e0f35451",
+  "reviewed_run_id": "r-20261002T170741100631-fsapi-clip-mode-request-field-core",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core",
+  "reviewer_node": "review-of-fsapi-clip-mode-request-field-core",
+  "reviewer_run_id": "r-20261002T180607292170-review-of-fsapi-clip-mode-request-field-core",
+  "reviewing_run_id": "r-20261002T180607292170-review-of-fsapi-clip-mode-request-field-core",
+  "scores": {
+    "durability": 13,
+    "evidence": 20,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "section": "\u00a75",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170741100631-fsapi-clip-mode-request-field-core/baseline-clip-mode-request.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170741100631-fsapi-clip-mode-request-field-core/after-clip-mode-request.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170741100631-fsapi-clip-mode-request-field-core/negative-control-clip-mode-request.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/docs/figures/forward-solve-api/clip-mode-request-field/h200-map-fidelity-chord-comparison.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T180607292170-review-of-fsapi-clip-mode-request-field-core/review-focused-clip-mode-numba-disabled.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T180607292170-review-of-fsapi-clip-mode-request-field-core/cache-key-probe.log"
+  ],
+  "tests": [
+    {
+      "command": "NUMBA_DISABLE_JIT=1 JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest --timeout 0 -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/tests/test_forward_solve_clip_mode_request.py -q",
+      "result": "1 passed, 5 warnings in 5.80s; EXIT=0"
+    },
+    {
+      "command": "NUMBA_DISABLE_JIT=1 JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core /home/ITER/mcintos/Code/nova/.venv/bin/python cache-key-probe",
+      "result": "CLIP_MODES ['chord', 'exact']; KEYS_EQUAL True; EXIT=1, confirming clip_mode is absent from the observed request cache key"
+    },
+    {
+      "command": "reviewed run's H200 chord comparison",
+      "result": "base job 1280467 and head job 1280464 both completed exit 0 with chord_sup_relative=9.540289289876033e-05"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:12:00Z",
+  "total": 87,
+  "verdict": "fail"
+}

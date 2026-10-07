@@ -1,0 +1,76 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "the reviewed run is role implement with an empty suite_command, so it ran no paired baseline/after pytest arms; the reviewed manifest names neither baseline_suite nor after_suite, so the added-failure count is unmeasured (None), never a measured zero",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "artifacts": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure/docs/figures/plasma-cell-read-fidelity/map-fidelity/map-fidelity.json: completed true, slurm_job_id 1279817, source_revision fa8af260e, 20 rows, negative_control_all_rows_detected true",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T235232492919-review-of-cca-map-fidelity-h200-remeasure/review-independent-audit.log: PASS: 20 rows, EXIT=0",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure/docs/figures/plasma-cell-read-fidelity/map-fidelity/remeasure-2026-10-02.md: 20-row table, committed-receipt comparison, verdicts"
+  ],
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "515f74714045f0380502960867cca1044788c451"
+  ],
+  "completed_at": "2026-10-02T00:30:35.311Z",
+  "dispatched_at": "2026-10-01T23:52:46Z",
+  "findings": [
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the independent audit log sitting beside the refreshed receipts still names revision de29a1a3 (job 1276829), so its PASS line describes the superseded receipts; re-running the in-scope auditor at fa8af260e passes (PASS: 20 rows, EXIT=0, reviewer log: review-independent-audit.log), so refreshing it was cheap and its staleness is a provenance hazard."
+    },
+    {
+      "file": "docs/evidence/fragments/cut-cell-current-attribution/cca-map-fidelity-h200-remeasure.html",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the chord regression is carried by the chord-membership merge 92613fd3d, but the committed receipt it compares against is at source_revision de29a1a3, 309 commits before fa8af260e, so no arm isolates 92613fd3d from the other commits in the range (including the moment-reduction repair 427f05e10) and the attribution is a hypothesis the manifest states only as consistent-with."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commit by commit against the base; the single commit 515f74714045f0380502960867cca1044788c451 refreshes the per-row JSON/NPZ/PNG/SVG/log receipts and the aggregate map-fidelity.json, rewrites negative-control.log, and adds remeasure-2026-10-02.md, the centroid-preflight rows and the fragment; no file under nova/ or tests/ changed.",
+    "done_when": "The done-when requires one CPU preflight and one real H200 allocation looping every row, then remeasure-2026-10-02.md with the verdicts and a forced commit; the manifest lines 14-15 name the CPU preflight (preflight_EXIT=0) and H200 job 1279817 (BENCH_EXIT=0, MAP_FIDELITY_COMPLETE), and docs/figures/plasma-cell-read-fidelity/map-fidelity/remeasure-2026-10-02.md:7-28 reproduces the 20 rows and the verdicts.",
+    "goal": "The node goal is the certificate map-fidelity receipt at main after the chord-membership and exact-moment repairs, every certificate rung in both clip modes, with a support-current centroid offset per row; docs/figures/plasma-cell-read-fidelity/map-fidelity/map-fidelity.json holds 20 measured rows (5 rungs x 2 cases x 2 clip modes), each with a support_current_centroid_offset_mm block, and the job log header names the same revision.",
+    "manifest": "Read; it reports status complete, commit 515f74714045f0380502960867cca1044788c451, H200 job 1279817 exit 0, gives the four verdicts, and names the chord regression and the residual diverted-exact failure as follow-ons outside its scope rather than claiming the gate is lifted.",
+    "write_paths": "The declared paths in the reviewed manifest line 3 are the two figure directories and the fragment; git diff --name-only fa8af260e8adb154a7df4191d0c5308e6b675911..515f74714045f0380502960867cca1044788c451 lists only files under docs/figures/plasma-cell-read-fidelity/map-fidelity and the one fragment, so the change is inside the fence."
+  },
+  "justifications": {
+    "durability": "no test file changed and none of the receipt's guards are wired into any test; docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.py:1 re-derives the receipt from the archives but was not re-run, so nothing fails if the receipt is silently corrupted.",
+    "evidence": "docs/figures/plasma-cell-read-fidelity/map-fidelity/h200-remeasure-2026-10-02.log:1 names revision fa8af260e and the receipts reconcile with the table at remeasure-2026-10-02.md:9, but docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.log:1 still attests revision de29a1a3, so the in-scope independent audit is stale, and the fragment attributes the regression to one merge out of 309 commits without an isolating arm.",
+    "fit": "the date-stamped filenames and the fixed-capacity receipt idiom follow the surrounding docs/figures benchmark receipts, but docs/evidence/fragments/cut-cell-current-attribution/cca-map-fidelity-h200-remeasure.html:22 states a single-commit causal attribution the measurement does not isolate.",
+    "goal_fidelity": "docs/figures/plasma-cell-read-fidelity/map-fidelity/map-fidelity.json:1 records source_revision fa8af260e and 20 measured rows whose rows:69 and rows:287 carry the support_current_centroid_offset_mm required per row.",
+    "scope_discipline": "every path shown by git diff --name-only fa8af260e..515f74714 lies inside the declared write paths of the reviewed manifest line 12 (docs/figures/.../map-fidelity plus the cca-map-fidelity-h200-remeasure fragment)."
+  },
+  "plan": "nova:cut-cell-current-attribution",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is the certificate map-fidelity receipt at main after the chord-membership and exact-moment repairs, every certificate rung in both clip modes, with a support-current centroid offset per row; docs/figures/plasma-cell-read-fidelity/map-fidelity/map-fidelity.json holds 20 measured rows (5 rungs x 2 cases x 2 clip modes), each with a support_current_centroid_offset_mm block, and the job log header names the same revision.\nVERDICT done_when: The done-when requires one CPU preflight and one real H200 allocation looping every row, then remeasure-2026-10-02.md with the verdicts and a forced commit; the manifest lines 14-15 name the CPU preflight (preflight_EXIT=0) and H200 job 1279817 (BENCH_EXIT=0, MAP_FIDELITY_COMPLETE), and docs/figures/plasma-cell-read-fidelity/map-fidelity/remeasure-2026-10-02.md:7-28 reproduces the 20 rows and the verdicts.\nVERDICT write_paths: The declared paths in the reviewed manifest line 3 are the two figure directories and the fragment; git diff --name-only fa8af260e8adb154a7df4191d0c5308e6b675911..515f74714045f0380502960867cca1044788c451 lists only files under docs/figures/plasma-cell-read-fidelity/map-fidelity and the one fragment, so the change is inside the fence.\nVERDICT manifest: Read; it reports status complete, commit 515f74714045f0380502960867cca1044788c451, H200 job 1279817 exit 0, gives the four verdicts, and names the chord regression and the residual diverted-exact failure as follow-ons outside its scope rather than claiming the gate is lifted.\nVERDICT diff: Read commit by commit against the base; the single commit 515f74714045f0380502960867cca1044788c451 refreshes the per-row JSON/NPZ/PNG/SVG/log receipts and the aggregate map-fidelity.json, rewrites negative-control.log, and adds remeasure-2026-10-02.md, the centroid-preflight rows and the fragment; no file under nova/ or tests/ changed.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/figures/plasma-cell-read-fidelity/map-fidelity/map-fidelity.json:1 records source_revision fa8af260e and 20 measured rows whose rows:69 and rows:287 carry the support_current_centroid_offset_mm required per row.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/figures/plasma-cell-read-fidelity/map-fidelity/h200-remeasure-2026-10-02.log:1 names revision fa8af260e and the receipts reconcile with the table at remeasure-2026-10-02.md:9, but docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.log:1 still attests revision de29a1a3, so the in-scope independent audit is stale, and the fragment attributes the regression to one merge out of 309 commits without an isolating arm.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path shown by git diff --name-only fa8af260e..515f74714 lies inside the declared write paths of the reviewed manifest line 12 (docs/figures/.../map-fidelity plus the cca-map-fidelity-h200-remeasure fragment).\nSCORE durability: 10\nJUSTIFICATION durability: no test file changed and none of the receipt's guards are wired into any test; docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.py:1 re-derives the receipt from the archives but was not re-run, so nothing fails if the receipt is silently corrupted.\nSCORE fit: 17\nJUSTIFICATION fit: the date-stamped filenames and the fixed-capacity receipt idiom follow the surrounding docs/figures benchmark receipts, but docs/evidence/fragments/cut-cell-current-attribution/cca-map-fidelity-h200-remeasure.html:22 states a single-commit causal attribution the measurement does not isolate.\nFINDING docs/figures/plasma-cell-read-fidelity/map-fidelity/audit.log:1 follow-on: the independent audit log sitting beside the refreshed receipts still names revision de29a1a3 (job 1276829), so its PASS line describes the superseded receipts; re-running the in-scope auditor at fa8af260e passes (PASS: 20 rows, EXIT=0, reviewer log: review-independent-audit.log), so refreshing it was cheap and its staleness is a provenance hazard.\nFINDING docs/evidence/fragments/cut-cell-current-attribution/cca-map-fidelity-h200-remeasure.html:22 follow-on: the fragment states the chord regression is carried by the chord-membership merge 92613fd3d, but the committed receipt it compares against is at source_revision de29a1a3, 309 commits before fa8af260e, so no arm isolates 92613fd3d from the other commits in the range (including the moment-reduction repair 427f05e10) and the attribution is a hypothesis the manifest states only as consistent-with.\n",
+  "review_run_id": "r-20261001T235232492919-review-of-cca-map-fidelity-h200-remeasure",
+  "reviewed_base_sha": "fa8af260e8adb154a7df4191d0c5308e6b675911",
+  "reviewed_head_sha": "515f74714045f0380502960867cca1044788c451",
+  "reviewed_revision": "515f74714045f0380502960867cca1044788c451",
+  "reviewed_run_id": "r-20261001T225921130998-cca-map-fidelity-h200-remeasure",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-map-fidelity-h200-remeasure",
+  "reviewer_node": "review-of-cca-map-fidelity-h200-remeasure",
+  "reviewer_run_id": "r-20261001T235232492919-review-of-cca-map-fidelity-h200-remeasure",
+  "scores": {
+    "durability": 10,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "section": "\u00a76",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:38.566155+00:00",
+  "total": 81,
+  "verdict": "pass"
+}

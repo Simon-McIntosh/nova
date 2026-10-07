@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:14:39.386Z",
+  "dispatched_at": "2026-10-04T17:05:50Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/zero_residual_check.py:96",
+      "id": "thin_wrapper-1",
+      "reason": "the repair wave should route every receipt through the existing writer/stamp so the contract is one implementation, not sixteen near-copies.",
+      "text": "the render-only entry point defines its own `_write_json` (+ `certificate._strict` + `allow_nan` variant) that is copied into its sibling drivers (`benchmarks/limited_row_shadow_census.py:125`, `benchmarks/xpoint_cell_wedge_oracle.py:197`, `benchmarks/exact_clip_seed_amplitude.py:80`, `benchmarks/coupling_moment_order_evaluation.py`), while the owner `benchmarks/solovev_certificate._write_json` at `benchmarks/solovev_certificate.py:250` already performs the same strict JSON write, and none of the six sampled render-only drivers calls the owner's `stamp_source_revision` (`benchmarks/solovev_certificate.py:280`), so the receipt-revision contract forks per driver too",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py:110",
+      "id": "duplicate_owner-1",
+      "reason": "the measured 1002-file extent means the fix belongs in the path owner once, not as a per-directory rewrite of the regenerated receipts.",
+      "text": "render receipts record path fields by ad-hoc string handling rather than through the `FilePath` owner, and 1002 committed files under `docs/figures/` carry absolute `.reckon-worktrees` paths that dangle once the worktree is reclaimed (e.g. `docs/figures/cut-cell-current-attribution/exact-clip-low-state/receipt.json`), while the plan's open followup `f-fsa-render-receipt-relative-paths` scopes the repair only to the regenerated directories",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/solovev_certificate.py:280",
+      "id": "duplicate_owner-2",
+      "reason": "one stamp owner already exists and is already the repair target elsewhere; extending it to render receipts removes a second revision contract rather than adding one.",
+      "text": "the plan's \u00a73 render-receipt mechanism duplicates the existing source-revision stamp instead of extending it: the owner exposes `_source_revision`/`stamp_source_revision` and the production-route writers were repaired (followup `f-fsa-production-route-receipt-revision`) to route through it, yet the render-only receipt writers emit their own revision handling and no render receipt sampled carries the owner's stamp",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4d9858f2b76418d3e54103672110f913674a7ecf1fb31891640b1eefe23854b7",
+  "plan_slug": "figure-and-solver-audit",
+  "plan_version": 102,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T170538395135-plan-review-of-figure-and-solver-audit",
+  "reviewed_blob_sha": "0379422296fc37569b80415ab7a823c675a8ff26",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan's one genuinely new module, `tests/renderer_wall_scan.py` (a scanner exposing a small `scan()` over AST traversal), hides substantial walk-and-classify behaviour behind a narrow interface, and the tree-wide guard `tests/test_renderer_contours_inside_wall.py` consumes that one scanner rather than re-walking the tree.",
+    "duplicate_owner": "a finding \u2014 render receipts re-implement path resolution per driver instead of using the `FilePath` owner, and the defect the plan already tracks as open is measured here at 1002 files, far wider than the followup's scope.",
+    "reuse_search": "pass \u2014 the plan extends the existing owners rather than forking them: `nova/media/poloidal.py` painters (`draw_scattered_contours`, `draw_flux_contours(wall=)`), the `benchmarks/solovev_certificate.py` certificate/stamp machinery, and the standard reckon evidence/ledger conventions; no painter, receipt store or scanner owner is the entry point it duplicates.",
+    "thin_wrapper": "a finding \u2014 the plan's render-only repair wave adds a per-driver receipt builder (`_write_json` plus a schema string) over behaviour the certificate owner already supplies, and the plan never says why the owner cannot be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.364188+00:00"
+}

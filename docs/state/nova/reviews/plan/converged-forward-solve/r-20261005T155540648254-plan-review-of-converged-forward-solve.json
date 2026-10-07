@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T16:00:23.380Z",
+  "dispatched_at": "2026-10-05T15:55:55Z",
+  "findings": [
+    {
+      "anchor": "docs/research/converged-forward-solve-design.html:22",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite imas-ambix's topology and GS machinery and state whether it extends, wraps or deliberately supersedes it, because `nova/AGENTS.md` makes that search mandatory before authoring new machinery and a two-repo parallel topology authority will drift.",
+      "text": "the design's authority section asserts \"Nova owns the equilibrium topology, current booking, GS map and solver\" without citing any prior art outside nova, yet the coupled repository imas-ambix already implements the same two mechanisms this plan authors from scratch: `imas_ambix/latent/topology.py` (919 lines: `read_topology`, `magnetic_axis`, `xpoint_set`, `boundary_flux_robust`, `classify_regions`, with a core/private split decided by connectivity rather than flux height or sign-of-Z \u2014 the exact \u00a72 membership defect) and `imas_ambix/latent/gs_solve.py` (2694 lines: a free-boundary Grad-Shafranov Picard fixed-point solve re-reading topology each iteration, with `converged=False` masking \u2014 the same map and fixed-point structure this plan designs). Neither module imports nova, so neither is a consumer whose needs are already met; the plan searched neither.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_ambix/latent/topology.py:1",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must name imas_ambix/latent/topology.py as the parallel owner and add a reconciliation or explicit supersession item, or the new `topology.read` becomes the third copy of one mechanism.",
+      "text": "five equilibrium module names exist in both repositories: `topology.py`, `flux_surface_connectivity.py`, `connectivity_boundary.py`, `stencil_nulls.py`, `wall_mask.py`; nova is the declared owner of the forward solve (`nova/AGENTS.md`: \"ambix consumes Nova's forwards\"), yet ambix carries a full parallel critical-point/membership/region implementation and its `stencil_nulls.py` states it was \"ported from nova.jax.select\", so the duplication is live and bidirectional. The plan names no owning file across the seam and no reconciliation step, so the retirement in \u00a76 would delete nova's authorities while leaving ambix's parallel read untouched.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e228eaba5f513b614404dd62c60b2f4e9b2e5a326a74b655614fc3526a35541a",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 18,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "Owner named here rather than in the plan body, so the locked plan content stays unchanged. Across the seam the owning files are nova/equilibrium/topology.py (replaced in place by section 2) and the new current.py, gs.py and solve.py; imas_ambix/latent/topology.py and its four siblings are a parallel implementation that predates this plan, imports nothing from nova, and has not changed since July 2026 (imas-ambix-21, 2026-10-05). Reconciliation is an ambix item, not a nova one: once section 6 lands the joint acceptance, ambix retires or re-points its copies onto nova's forward, a decision imas-ambix-21 has handed to the next ambix plan session. The section 6 retirement deletes only nova's own superseded routes and never touches ambix, so the new topology.read is the single nova authority, with the ambix copy a consumer-side duplicate until that session acts.",
+      "when": "2026-10-05T16:30:16.546501+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "Searched, nothing to reuse. imas-ambix-21 confirmed on 2026-10-05 that imas_ambix/latent/topology.py (919 lines, 43 users), flux_surface_connectivity.py, connectivity_boundary.py, stencil_nulls.py and wall_mask.py are standalone: none imports nova and none has changed since July 2026, so they are an independent read ambix relies on, not a consumer of nova forwards. Neither that read nor latent/gs_solve.py (a Picard fixed point on the ambix latent representation) provides what the locked decisions require: one contour-tree authority on the hex cells with axis-connected sub-cell membership, a Biot-derivative saddle rule, and a fixed-capacity Newton/GMRES scan that traces under jit and vmap with the joint acceptance. nova/AGENTS.md names nova the owner of the forward and ambix its consumer, so the plan supersedes rather than extends the ambix copies; this answer is the citation the finding asked for, and the retire-or-keep decision on the ambix copies is owned by the next ambix plan session, to which imas-ambix-21 has passed both asks.",
+      "when": "2026-10-05T16:30:16.041963+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T155540648254-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "5f8ecb1bac172077dc53393a9689d3cc6cddc27e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the four proposed modules each hide substantial behaviour (tree build, axis-connected sub-cell membership and qualification; exact-clip booking; the composed read+book+map; a fixed-capacity Newton/GMRES/line-search scan) behind one call each, and the added operand/result pytrees are data, not thin wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan would build `nova/equilibrium/{topology,current,gs,solve}` as authorities while imas-ambix already carries parallel same-named modules (`latent/topology.py`, `latent/flux_surface_connectivity.py`, `latent/connectivity_boundary.py`, `latent/stencil_nulls.py`, `latent/wall_mask.py`) that were themselves ported from nova (`stencil_nulls.py` says \"ported from nova.jax.select\"); the plan names no owner and no cross-repo reconciliation.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each adding section names what it retires or merges in its own text (\u00a72 replaces `Topology.read`/`read_with_connectivity`; \u00a73 replaces `clipped_support_current_moments` and the `forward_operator` support partition; \u00a74 replaces the `ForwardFluxOperator` map; \u00a75 replaces `newton_krylov`/`picard`/`operator_request_body`; \u00a76 retires the ladders, the frozen/live split, the live-read fallback, the active-set/Anderson/reduced-Newton routes and the separate chord path).",
+    "reuse_search": "a finding \u2014 the plan publishes no census of its own (the design node reconstructs the 17/23 file sets) and neither the plan nor the design ever names or searches imas-ambix, a coupled repository that `nova/AGENTS.md` requires be searched in both directions before authoring new equilibrium machinery here, and which already carries a topology read and a GS solve.",
+    "thin_wrapper": "pass \u2014 \u00a74 states `gs.apply` replaces the map `ForwardFluxOperator` performs rather than wrapping it, \u00a72/\u00a75 extend `ForwardSolvePolicy` rather than adding a second policy family, and \u00a76 names `forward.py` as the retained request/receipt adapter rather than a parallel route."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:29:44.062626+00:00"
+}

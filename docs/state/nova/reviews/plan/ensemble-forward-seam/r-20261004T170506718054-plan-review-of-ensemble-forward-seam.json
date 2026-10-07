@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:14:42.804Z",
+  "dispatched_at": "2026-10-04T17:05:19Z",
+  "findings": [
+    {
+      "anchor": "nova/transport/window_batch.py:54",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is to generalise the existing owner to carry named channel arrays and host the coupling-state family, so member-batch identity lives in one place instead of drifting across two containers that already disagree on the `member()` accessor.",
+      "text": "`MemberArrayBatch` re-derives the identified-leading-member-axis container (member_ids, unique/non-empty identity validation, stack/unstack, member accessor) that `EnsembleTransportState` in `nova/transport/ensemble.py:52` already owns, landed 2026-08-20 (c792f7d2c, cc542659c) before \u00a72's 2026-08-23 (5c448153a); the same package now carries two member-batch owners with divergent accessors (`member(id)` here, `member(index)` there)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/transport/window_batch.py:409",
+      "id": "duplicate_owner-2",
+      "reason": "the convergence policy is now authored twice, so any change to tolerance/summary thresholds or the backoff rule lands on the scalar path and silently not on the batch path; the per-member policy should be one shared function both loops call, with the batch loop differing only in its active-mask and refusal accumulation.",
+      "text": "`solve_window_batch` reimplements the scalar `solve_window` convergence state machine (nova/transport/coupled_window.py:1413-1517): identical `WindowConvergenceReceipt` construction, identical tolerance gate, identical `hard_ceiling_reached / contraction_unavailable / stalled_at_floor / cap_needs_measurement` decision, identical damping backoff and continuation bookkeeping, and it imports the private helpers `_contraction_estimate` and `_window_conservation` across the module boundary (window_batch.py:33-34)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/transport/window_batch.py:374",
+      "id": "thin_wrapper-1",
+      "reason": "the plan should state the extension-versus-parallel case, and the once-per-exchange invocation it cites as justification is a property of the update callable, not a reason the scalar convergence loop cannot be reused.",
+      "text": "the plan adds `WindowBatchInput` + `solve_window_batch` as a parallel entry point without saying why `solve_window`'s update contract cannot be widened to take the batched operator signature (`BatchUpdate` differs from `ExchangeSweepResult` only by the batch axis and the once-per-exchange invocation, window_batch.py:369-371); the plan's own published evidence (batch-8 125.2/134.2 vs scalar 158.3/168.6 member-windows/s, ~21% slower) shows the facade buys API shape and identity, not speed",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "plan \u00a72 (nova/transport/window_batch.py:53)",
+      "id": "reuse_search-1",
+      "reason": "a reuse search that stops at the cross-repo survey is the exact failure mode this rubric exists for; naming the in-repo owners would have changed \u00a72 from \"add a batch container family\" to \"extend the existing one\".",
+      "text": "the plan's reuse map covers the ambix estimator inventory but never cites nova's own prior art: `nova/transport/ensemble.py` (member-batch forward over identified members, 2026-08-20) and `nova/equilibrium/batched_labeller.py` (`BatchedLabeller`, member-axis batching) both already exist in-tree, yet the plan introduces a fresh member-batch vocabulary as if none existed",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "113a5bcdb088ff359028858ab03ab44073c9b7e40f9a9aa0a0a95b66ec57dd3b",
+  "plan_slug": "ensemble-forward-seam",
+  "plan_version": 12,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T170506718054-plan-review-of-ensemble-forward-seam",
+  "reviewed_blob_sha": "52782816a8e285c77055e33dafb6f0909641d1f5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `solve_window_batch` (nova/transport/window_batch.py:374) hides the whole identified-member fixed-point exchange, receipt assembly and fail-closed refusal behind one function and a four-field input record; the interface is smaller than the behaviour it hides.",
+    "duplicate_owner": "a finding \u2014 the plan forked both the member-batch container family (owner nova/transport/ensemble.py) and the window convergence loop (owner nova/transport/coupled_window.py) rather than extending either.",
+    "reuse_search": "a finding \u2014 the plan's reuse search was the cross-repo ambix survey (scripts/assimilation_seam_survey/report.md) and it did not surface `nova/transport/ensemble.py`, which already owns nova's member-batch machinery and landed three days before \u00a72.",
+    "thin_wrapper": "a finding \u2014 the batch entry point is a second, parallel entry beside `solve_window` with no stated reason the scalar signature could not be extended to carry the batched update contract."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.342359+00:00"
+}

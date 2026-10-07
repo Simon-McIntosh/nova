@@ -1,0 +1,99 @@
+{
+  "absent": [
+    "baseline_suite",
+    "after_suite"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": null,
+  "artifacts": [
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.png (613400 bytes, SHA-256 6ccc8e8a9d7471103df640a640cd54de20ce1fd8545e30be7f9062a027c6507b)",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.svg (769215 bytes, SHA-256 554951f9b9bf7cc6e13f3635d70f6d376537e533f92e747e8535b15f2c4602e9)",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/samples.npz (772 coordinates, 121 wall coordinates, SHA-256 bbbe3875f1e476d173d3a7b313057d3efce51850a60bf2120229f3eaa4409e9f)",
+    "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/receipt.json",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-root-cause-flux-map-gallery.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T204631767757-review-of-cco-root-cause-flux-map-gallery/review-check.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T204631767757-review-of-cco-root-cause-flux-map-gallery/source-check.log"
+  ],
+  "baseline_suite": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "b3d8ee15275188512b0614dc08e792099365c997",
+    "d64a5b27b0d4ed9fd126e1d0843b789447537336"
+  ],
+  "completed_at": "2026-10-02T20:57:55Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T20:46:56Z",
+  "evidence_inputs": "Reviewed 11985735c020a39df74f76c75cbe6354e0e67d36..d64a5b27b0d4ed9fd126e1d0843b789447537336 (two commits, four granted repo files; reviewed worktree clean). Opened gallery.png itself. Confirmed visual contraction, earlier-vs-converged order, wall contact and uniform-field shape against persisted arrays. Independent log: contact difference -4.5016782914842866 Wb at [7.801395789307387, 7.611059753448785e-08] m; all wall samples negative; converged RMS 12.634922721788886 Wb, earlier 3.702828461449204 Wb; compensator explicit formula error 0.0 Wb at 772 coordinates. Source binary64 hashes and topology axes agree with archive. Exact 22.197 mm axis shift comes from source topology; nearest sample 0.126452 m away. Both committed figure files breach the 300000-byte bound, so verdict fail pending smaller exports.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.png",
+      "line": "file",
+      "severity": "blocking",
+      "text": "The committed PNG is 613400 bytes and gallery.svg is 769215 bytes. The reviewed dispatch requires every data file above 300000 bytes to live in the run directory, while its done-when also requires a PNG and SVG under this docs figure path. Re-render or compress both below 300000 bytes and refresh their receipt hashes so both requirements hold; the present committed artifacts violate the size fence."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/samples.npz",
+      "line": "coordinates",
+      "severity": "follow-on",
+      "text": "The report's exact +22.197 mm magnetic-axis shift is copied from the source topology receipt and plotted as a marker; the archived 772-point sample grid does not resolve it independently. The nearest sample to the reported converged axis is 0.126452 m away, and the sampled converged maximum is at R=6.348648 m, so the figure and arrays support an outward asymmetry but not the 22 mm magnitude. Label the source-receipt provenance explicitly or bank a denser axis-region sample if that error is to be confirmed from the gallery arrays."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/root-cause/flux-maps/gallery.svg",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "The generated SVG contains trailing whitespace in contour path records (git diff --check reports it). This is a mechanical output issue and does not change the plotted data; a smaller, cleaned vector export can address it with the file-size repair."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's manifest has no baseline_suite or after_suite record and its write paths include no test file. Therefore added_failure_count=0 and added_failure_ids=[] mean no added failures were observable from suite arms, not that a measured baseline/head suite delta was zero. Its own panel-check.log, diagnostic-check.log and landed-check.log end EXIT=0. This review independently ran read-only array, hash and source-receipt checks; both review logs end EXIT=0.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No product source or test file changed; the saved figure is consumed through the report's project-absolute image links.",
+    "diff": "Read both commit messages and the base-to-head name-status diff. Both commits have conventional subjects and explanatory bodies. Git diff --check reports generated SVG path-line trailing whitespace; both committed figures exceed the dispatch data-file limit.",
+    "done_when": "All six named panels, PNG/SVG, persisted samples and receipt exist. The image and arrays confirm a -4.501678291 Wb contact difference, 12.634922722 Wb converged RMS versus 3.702828461 Wb earlier RMS, and a uniform-field compensator formula error of 0.0 Wb. The exact axis shift is supported by the source topology receipt, not by axis-region sample resolution. The dispatch's 300000-byte data-file cap is violated by both committed figures.",
+    "goal": "The requested six-panel gallery and ranked diagnosis are present. I opened gallery.png: the converged ochre contours contract relative to the blue analytic contours; the earlier state is closer; the compensator has near-vertical lines. The report distinguishes numerical convergence from scientific qualification and does not claim a solver fix.",
+    "manifest": "The reviewed manifest is complete, names both commits, all four repo files plus the external report, passing panel/diagnostic/asset checks and no blockers. It records neither baseline_suite nor after_suite.",
+    "write_paths": "The base-to-head git diff adds only gallery.png, gallery.svg, receipt.json and samples.npz under the granted root-cause/flux-maps directory; the external ranked report is also at its granted path. The reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "The two local commits, 36171-byte samples archive, receipt with source digests and figure hashes, ranked report and run logs preserve the scientific observation. The image-generation recipe exists in the run stream rather than a committed module, and the two oversized generated assets must be replaced to satisfy the delivery contract. No baseline/after suite arms were armed because the change is data and report only.",
+    "evidence": "Independent review opened the PNG and recomputed difference=converged-analytic exactly from samples.npz. All 121 wall differences are negative (-20.611682 to -4.501678 Wb), contact is -4.501678291 Wb at the same coordinate as analytic zero, RMS is 12.634922722 Wb versus 3.702828461 Wb earlier, and the compensator matches its closed form at all 772 coordinates with 0.0 Wb error. Original source state hashes and topology axes match the gallery receipt, and figure/archive hashes match the committed bytes. Evidence deduction: nearest axis sample is 126 mm from the claimed converged axis, so the array cannot verify the exact 22 mm displacement.",
+    "fit": "The renderer used nova.media poloidal contour, wall and null painters, shared -10..50 Wb levels for the four physical-flux panels, diverging difference contours and axes off. The report gives per-panel residual and converged status. The generated SVG's trailing whitespace and overlarge exports reduce fit to the repository's delivery rules.",
+    "goal_fidelity": "The image visually answers the lead's question: the converged physical flux contours are much more contracted than the analytic and earlier contours, the limited wall contact is marked, and the compensator's line shape is uniform-field-like. The report ranks three observations and names fixture, forward-map and constraint paths without inventing a painter defect. The exact axis magnitude is inherited from a receipt rather than resolved by this gallery.",
+    "scope_discipline": "All four committed paths are inside the granted directory and the separate report is inside its grant; no product code, tests, plan or shared index was changed. The explicit data-file placement rule is missed: gallery.png is 613400 bytes and gallery.svg is 769215 bytes, each above 300000 bytes in the repository."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 11985735c020a39df74f76c75cbe6354e0e67d36\nREVIEWED_HEAD_SHA: d64a5b27b0d4ed9fd126e1d0843b789447537336\nVERDICT: fail until both committed figure files meet the 300000-byte data-file bound while remaining at the required docs figure paths.\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 13\nSCORE durability: 15\nSCORE fit: 17\nFINDING blocking: gallery.png 613400 bytes; gallery.svg 769215 bytes, both above the dispatch cap.\nFINDING follow-on: exact 22.197 mm axis shift is receipt-derived; archived samples are too coarse to resolve it.\nCHECK: opened PNG, verified all six panels and independently recomputed wall/RMS/compensator measurements and source hashes.",
+  "review_base_sha": "dadc9461110e15ea3212afbc7309ce6760cca9d0",
+  "review_run_id": "r-20261002T204631767757-review-of-cco-root-cause-flux-map-gallery",
+  "reviewed_base_sha": "11985735c020a39df74f76c75cbe6354e0e67d36",
+  "reviewed_commit": "d64a5b27b0d4ed9fd126e1d0843b789447537336",
+  "reviewed_head_sha": "d64a5b27b0d4ed9fd126e1d0843b789447537336",
+  "reviewed_revision": "d64a5b27b0d4ed9fd126e1d0843b789447537336",
+  "reviewed_run_id": "r-20261002T202608289672-cco-root-cause-flux-map-gallery",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-root-cause-flux-map-gallery",
+  "reviewer_node": "review-of-cco-root-cause-flux-map-gallery",
+  "reviewer_run_id": "r-20261002T204631767757-review-of-cco-root-cause-flux-map-gallery",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 13
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T20:56:10.223968+00:00",
+  "total": 79,
+  "verdict": "fail"
+}

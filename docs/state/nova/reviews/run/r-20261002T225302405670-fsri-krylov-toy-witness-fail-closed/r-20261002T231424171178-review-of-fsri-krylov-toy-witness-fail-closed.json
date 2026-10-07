@@ -1,0 +1,74 @@
+{
+  "added_failure_count": null,
+  "added_failure_derivation": "Unmeasurable from the reviewed run's own required suite arms: the reviewed manifest records baseline_suite='none: this node runs no pytest suite; its gate drives the witnesses' own comparison functions' and after_suite as the same none value, and classification.json parses those fields identically. The node runs no pytest suite, so there is no base/head suite-arm pair and no added-failure delta to derive. Its own gate (gate_bitwise_witnesses.log, 16/16 PASS, EXIT=0) is a witness-driven comparison gate, not a test-failure arm.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/forward-solver-route-integrity/single-site-krylov/{toy_identity,toy_self_identity,rule_toy_identity,exit_toy_identity}.py: each defines first_bit_difference/report_bit_difference and an if __name__ guard, so the comparison is importable; base compared with np.array_equal(equal_nan=True), head compares raw bit patterns and exits nonzero",
+    "rule_toy_identity_run.log: TOY_BASE bit_identical=6/8, TOY_BASE_FENCED bit_identical=8/8, TOY_DENSE_EXIT=1",
+    "independent reproduction at base 19a76002e: dense arm exits 0; at head 22469374d: dense arm exits 1",
+    "independent gate reproduction: 16/16 comparisons across 4 modules, fails=0; old_equal_nan accepts {identical=True, 1p0_vs_2p0=False, poszero_vs_negzero=True, nan_payloads=True}",
+    "ruff findings over the four files: base 22, head 20"
+  ],
+  "commits_read": [
+    "19a76002e866e4c514f108ff8155aa52704c406a",
+    "22469374d37230d703527ba4a2e32015862412c1"
+  ],
+  "completed_at": "2026-10-02T23:29:17.343Z",
+  "dispatched_at": "2026-10-02T23:14:43Z",
+  "evidence_inputs": "Section 3's gate is the exact certificate, never a tolerance; a toy identity witness that prints a mismatch count but exits 0 is fail-open and cannot serve as that gate. Base 19a76002e had three of four witnesses with no nonzero-exit path at all; head 22469374d makes all four compare raw bit patterns and exit nonzero on any difference, with the dense arm independently reproduced exiting 0 at base and 1 at head. The reviewed node changed no product source and no test file.",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed/manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "baseline_suite and after_suite are none, so added_failure_count cannot be derived from a suite-arm pair. For a figure-script node that runs no pytest suite this is appropriate, but a future review of a node whose deliverable includes test files will need completed baseline_suite/after_suite arms."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-krylov-toy-witness-fail-closed/docs/figures/forward-solver-route-integrity/single-site-krylov/toy_identity.py",
+      "line": "27",
+      "severity": "follow-on",
+      "text": "_bit_patterns views an array whose itemsize is not 1/2/4/8 as uint8 and reshapes, which requires C-contiguity and would raise on a non-contiguous or complex field; every current field is float64 so the path is latent, but a future complex-valued field would break the comparison."
+    }
+  ],
+  "gate_arms_note": "No readable reviewed-run baseline_suite/after_suite pair exists (both none: no pytest suite run). Reviewed gate log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed/logs/gate_bitwise_witnesses.log: header revision 19a76002e866e4c514f108ff8155aa52704c406a, GATE_BITWISE_WITNESSES PASS failures=0, EXIT=0.",
+  "item_verdicts": {
+    "call_sites": "not applicable: the witnesses are standalone figure scripts, not a production callable interface.",
+    "diff": "met: 495 insertions / 123 deletions confined to the four witnesses and the fragment; comparison blocks are semantically identical across the four (differ only in a print-format string).",
+    "done_when": "met: the four certificate-relevant toy witnesses now fail closed, which is the gating property section 3 requires (exact certificate, never a tolerance).",
+    "goal": "met: all four witnesses compare raw bit patterns and exit nonzero on any difference; independently reproduced base exit 0 vs head exit 1 on the dense arm.",
+    "manifest": "partially met: status complete, commits and paths explicit, gate log readable and negative control recorded, but baseline_suite/after_suite are none (no pytest suite run).",
+    "write_paths": "met: five changed paths, all within the declared grant of four figure scripts plus the landing fragment."
+  },
+  "justifications": {
+    "durability": "The comparison is importable, each witness has an if __name__ guard, and main() returns 0 if all_equal else 1, so the script fails closed rather than merely printing a difference. Latent robustness gap (informational): _bit_patterns falls back to array.view(np.uint8).reshape(...) for any field dtype whose itemsize is not 1/2/4/8 (e.g. complex128), and views whose itemsize changes require C-contiguity; every current field is float64, so this path is not exercised.",
+    "evidence": "Strong and independently reproduced. The reviewed gate log records its own comparison function driven over four pairs per witness (identical, 1.0-vs-2.0, +0.0-vs--0.0, two-NaN-different-payloads), 16/16 PASS, EXIT=0, and prints old_equal_nan_accepts=True for the signed-zero and NaN-payload pairs as the negative control. This review re-imported all four modules and reproduced 16/16 with fails=0, reproduced the old np.array_equal(equal_nan=True) accepting the +0.0/-0.0 and NaN-payload differences, and reproduced the base 0 / head 1 dense-arm exit delta. Capped below 20 only because the reviewed manifest records baseline_suite and after_suite as none (the node is a figure-script node that runs no pytest suite), so no suite-arm failure delta is derivable.",
+    "fit": "first_bit_difference and report_bit_difference name the mechanism, not a plan stage or ticket; no version numbers appear. The landing fragment states the defect, the reproduction, and the negative control in mechanism terms.",
+    "goal_fidelity": "Met exactly. The four single-site Krylov toy witnesses each define first_bit_difference/report_bit_difference, compare every field by raw bit pattern (an unsigned view of the same width after shape and dtype checks), and return nonzero on any difference. Independent reproduction: the base revision 19a76002e dense arm of toy_identity.py prints TOY_BASE bit_identical=6/8 and exits 0 (fail-open); the head revision 22469374d prints the same 6/8 and exits 1.",
+    "scope_discipline": "The complete diff 19a76002..22469374d changes only the four granted single-site-krylov witness scripts and the granted landing fragment; git status is clean and no nova product source or test file occurs in git diff --name-status. Ruff findings over the four files fall 22 at base to 20 at head (no added findings), independently confirmed."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass: 95/100 at reviewed head 22469374d (base 19a76002e). SCORE goal_fidelity: 20. SCORE evidence: 18. SCORE scope_discipline: 20. SCORE durability: 18. SCORE fit: 19. The four toy identity witnesses now compare every field by raw bit pattern and exit nonzero on any difference; the previously fail-open dense arm exits 0 at base and 1 at head, independently reproduced. No added failures measurable because the node runs no pytest suite. FOLLOW-ON: record baseline_suite/after_suite arms when a node's deliverable includes test files. FOLLOW-ON: _bit_patterns fallback assumes C-contiguous non-1/2/4/8-byte fields.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261002T231424171178-review-of-fsri-krylov-toy-witness-fail-closed",
+  "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "reviewed_head_sha": "22469374d37230d703527ba4a2e32015862412c1",
+  "reviewed_revision": "22469374d37230d703527ba4a2e32015862412c1",
+  "reviewed_run_id": "r-20261002T225302405670-fsri-krylov-toy-witness-fail-closed",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-krylov-toy-witness-fail-closed",
+  "reviewer_node": "review-of-fsri-krylov-toy-witness-fail-closed",
+  "reviewer_run_id": "r-20261002T231424171178-review-of-fsri-krylov-toy-witness-fail-closed",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T23:30:00Z",
+  "total": 95,
+  "verdict": "pass"
+}

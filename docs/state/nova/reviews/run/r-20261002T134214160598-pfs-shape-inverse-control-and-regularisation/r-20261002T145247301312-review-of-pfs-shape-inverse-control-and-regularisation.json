@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest leaves baseline_suite and after_suite empty rather than recording completed suite arms. Their readable failure-id sets are therefore both empty, giving added_failure_ids=[] and added_failure_count=0 by set difference; this records no observed added failures and does not claim that a paired suite ran.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.json: two controlled arms converged=true, two reversed controls converged=false, sixteen regularisation rows, any_weight_admitted=false",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/fc356223a71-before.log: pre-repair aggregate accepted both unsettled controls, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/fc356223a71-after.log: repaired aggregate refused both unsettled controls, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/fc356223a71-revert.log: reverse-applied repair accepted invalid controls and harness failed, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/pfs-shape-inverse-control-and-regularisation.md: stale discriminating-control claim conflicts with head refusal"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "f58e3baa92e7c62561a4e43c5c04824093d84fcf",
+    "b3cc1728e5973acd34397859c9dc5da78002dcb5",
+    "53f72498936ae7eb565e23f579812a499c6e4a2f"
+  ],
+  "completed_at": "2026-10-02T15:01:58Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T14:53:19Z",
+  "evidence_inputs": "Reviewed b12cb22cc21946e85211979b626c3f7009ae629a..53f72498936ae7eb565e23f579812a499c6e4a2f. The answering commit is a sound guard repair: newly measured unsettled controls abort before serialization, aggregate comparison requires both controlled and control equilibria to converge, and the reverse-applied mutation fails. The actual control deliverable remains absent because the only persisted reversed arms are unconverged; the regularisation sweep remains complete and no weight meets both 80% closure and 20 kA. The report and committed evidence surfaces were not regenerated or retracted after the repair.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/pfs-shape-inverse-control-and-regularisation.md",
+      "line": "3",
+      "severity": "blocking",
+      "text": "The answering commit correctly makes the code refuse both stored reversed-update arms because converged=false, but the durable report still says the node recorded a discriminating control, line 25 cites only qualified axes and zero exits, and the fragment/archive/figure captions repeat the causal claim. The stored receipt itself still carries the invalid comparison. Replace both control arms with converged equilibria and regenerate every derived surface, or retract the discriminating-control claim everywhere while retaining the regularisation result; the manifest alone does not repair contradictory committed evidence."
+    },
+    {
+      "file": "benchmarks/playable_shape_inverse_receipt.py",
+      "line": "1333",
+      "severity": "follow-on",
+      "text": "The regularisation finalizer still requires only eight rows per command. It does not assert that the weights equal DELTA_REGULARISATION_WEIGHTS in order or that closure fractions and maximum currents are finite, so a duplicated, substituted or non-finite eight-row sweep could still be finalized and captioned as the declared grid."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "The tests field remains prose rather than literal replayable commands, and the measurement log headers abbreviate PYTHONPATH and inline programs with angle-bracket placeholders. baseline_suite and after_suite are empty, so this review can derive no paired failure delta."
+    },
+    {
+      "file": "benchmarks/playable_shape_inverse_receipt.py",
+      "line": "1416",
+      "severity": "follow-on",
+      "text": "The persisted regularisation figure still places both low purple endpoint labels partly below their axes, and its study colours remain hard-coded in the benchmark rather than named by the repository style module."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "The target worktree is clean at 53f724989 and contains all three candidate commits, but 53f724989 is not an ancestor of review base 94e04a7d. Coordinator integration must carry f58e3baa9, b3cc1728e and 53f724989 together; landing only the repair would reference evidence that is absent."
+    }
+  ],
+  "gate_arms_note": "No readable baseline_suite or after_suite was recorded. The target's focused evidence is nevertheless falsifiable: fc356223a71-before.log shows the pre-repair aggregate accepting both unconverged controls; fc356223a71-after.log shows the repaired head refusing both; fc356223a71-revert.log reverse-applies the answering commit and ends EXIT=1 because the invalid controls are accepted. Independent jq reads at 53f724989 confirmed controlled arms converged=true, reversed arms converged=false at 7 and 4 trips, and stale positive comparison deltas of 0.021250713962050655 m and 0.03293832330683255 m. git diff --check exited 0.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none; the changed executable remains a benchmark and evidence generator, not a production runtime path.",
+    "diff": "Read all three commits against b12cb22cc. The answering commit adds convergence refusal at measurement and aggregate-finalization boundaries, while leaving the non-converged receipt, figures, archive splice, fragment and external report unchanged.",
+    "done_when": "The sixteen sweep rows remain complete, while the stored control arms are explicitly non-converged. At head the generator refuses both the stored aggregate and any newly measured unconverged reversed arm, so the original done-when cannot be considered satisfied until converged controls replace or qualify the committed artifacts.",
+    "goal": "The complete regularisation sweep is persisted, and the answering repair correctly refuses unsettled direction-reversal states, but no converged discriminating negative control has been persisted; the run therefore protects the claim without completing its stated control deliverable.",
+    "manifest": "The final manifest accurately records all three commits and names the corrective refusal and required remeasurement, but its tests field is prose rather than literal commands, its measurement headers retain angle-bracket placeholders, and both suite arms remain empty.",
+    "write_paths": "All ten repository paths in b12cb22cc..53f724989 and the external report remain inside the declared grants; the answering commit changes only the granted benchmark driver."
+  },
+  "justifications": {
+    "durability": "The head has two complementary convergence guards\u2014before arm serialization and before aggregate comparison\u2014and the reverse-applied mutation proves the aggregate guard can fail. Durability is reduced because no test file or paired suite arm records the behavior, the persisted artifacts predate the guard, and the sweep finalizer still checks only row count rather than exact weights and finite metrics.",
+    "evidence": "The defect reproduces quantitatively in fc356223a71-before.log, the corrected aggregate check refuses both stored controls in fc356223a71-after.log, and reverse-applying the repair makes the contract harness fail EXIT=1 in fc356223a71-revert.log. The regularisation sweep remains readable, but the durable report and evidence HTML still omit the two false convergence flags and present the invalid comparisons as completed evidence.",
+    "fit": "The refusal message names every unsettled arm and the benchmark change is compact and idiomatic. The final evidence surface is not internally coherent, however: the manifest says remeasurement is required while the report, fragment, archive and plots continue to advertise a discriminating control, and the low purple endpoint labels in the regularisation figure remain partly clipped.",
+    "goal_fidelity": "Commit 53f724989 prevents invalid evidence from being produced or accepted, which is the right repair to the review finding, but docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.json still contains two control arms with converged=false and no replacement run has completed; the node goal asks for a persisted discriminating control, not only a guard that refuses the current one.",
+    "scope_discipline": "git diff --stat b12cb22cc..53f724989 lists only the granted benchmark, figure/receipt directory, cumulative archive and fragment paths; the external report is also granted, and the cumulative evidence splice remains append-only."
+  },
+  "plan": "nova:playable-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the regularisation sweep is complete and 53f724989 correctly refuses unsettled direction-reversal states, but no converged discriminating control is persisted, so the run protects the claim without completing its stated control deliverable.\nVERDICT done_when: both stored reversed controls record converged=false; the head generator refuses them at serialization and aggregate comparison, so the control half remains unmet while the sixteen-row sweep remains valid.\nVERDICT write_paths: every repository path in b12cb22cc..53f724989 and the external report is inside the declared grant; the answering commit changes only the granted benchmark.\nVERDICT manifest: the manifest names all three commits and accurately requires remeasurement, but its tests are prose, log headers contain placeholders, and both suite arms are empty.\nVERDICT diff: f58e3baa9 adds the measurements, b3cc1728e persists the evidence, and 53f724989 adds convergence refusal without updating the invalid stored artifacts or their claims.\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: a guard that rejects the invalid control is necessary, but the node asked to persist a valid discriminating control and the only stored controls remain unconverged.\nSCORE evidence: 15\nJUSTIFICATION evidence: before, after and reverse-applied logs prove the guard behavior, while the durable report and HTML still present the invalid control as completed evidence.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all changed paths are granted and the cumulative archive edit is append-only.\nSCORE durability: 14\nJUSTIFICATION durability: two convergence guards and a reverse-applied mutation protect future measurements, but there is no test or paired suite arm, the persisted artifacts predate the guard, and the sweep guard does not pin the exact finite grid.\nSCORE fit: 15\nJUSTIFICATION fit: the code repair is compact and explicit, but the manifest and committed evidence now disagree and the regularisation endpoint labels remain clipped.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/pfs-shape-inverse-control-and-regularisation.md:3 blocking: the code refuses both stored controls as unconverged while the report, fragment, archive, receipt and figures still advertise them as discriminating; converge and regenerate them, or retract the claim everywhere.\nFINDING benchmarks/playable_shape_inverse_receipt.py:1333 follow-on: the sweep guard checks only row count, not the exact ordered weight grid or finite metrics.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md:10 follow-on: tests are prose, log headers contain placeholders, and no paired suite arms are readable.\nFINDING benchmarks/playable_shape_inverse_receipt.py:1416 follow-on: both low purple endpoint labels remain partly clipped and study colours are hard-coded.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md:5 follow-on: all three candidate commits must integrate together because target head 53f724989 is not an ancestor of review base 94e04a7d.",
+  "review_base_sha": "94e04a7d9642b620b3da5e896b9872f373f87f41",
+  "review_run_id": "r-20261002T145247301312-review-of-pfs-shape-inverse-control-and-regularisation",
+  "reviewed_base_sha": "b12cb22cc21946e85211979b626c3f7009ae629a",
+  "reviewed_commit": "53f72498936ae7eb565e23f579812a499c6e4a2f",
+  "reviewed_head_sha": "53f72498936ae7eb565e23f579812a499c6e4a2f",
+  "reviewed_revision": "53f72498936ae7eb565e23f579812a499c6e4a2f",
+  "reviewed_run_id": "r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-shape-inverse-control-and-regularisation",
+  "reviewer_node": "review-of-pfs-shape-inverse-control-and-regularisation",
+  "reviewer_run_id": "r-20261002T145247301312-review-of-pfs-shape-inverse-control-and-regularisation",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "scope_discipline": 20
+  },
+  "section": "\u00a78",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T14:58:20Z",
+  "total": 76,
+  "verdict": "fail"
+}

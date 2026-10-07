@@ -1,0 +1,128 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_source": "Derived from the reviewed run's readable gate logs. baseline-suite.log (revision 2acc1ff9) ends GATE_SUMMARY completed=true failure_count=2; after-suite.log (revision f80a679b) ends GATE_SUMMARY completed=true failure_count=2. The failure id sets are identical: tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture and tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux. Their set difference is empty, so the reviewed change adds zero failures. The reviewed head 8072b505 changes only the clip-mode None rejection and its tests, which the run's resumed none-validation-tests.log covers at GATE_SUMMARY completed=true failure_count=0.",
+  "completed_at": "2026-10-03T09:42:44.425Z",
+  "deletion_otherwise_unchanged": {
+    "evidence": "git diff f80a679b..8072b505 --stat lists exactly four paths (nova/equilibrium/forward_operator.py, nova/equilibrium/solve_request.py, tests/test_forward_solve_clip_mode_bridge.py, tests/test_forward_support_clip_mode.py), 33 insertions and 1 deletion, all None-rejection guards and their tests. git grep over nova/ at 8072b505 for _SUPPORT_CLIP_MODE, set_support_clip_mode and def support_clip_mode returns nothing, so the retired process-global API remains deleted. The commit body states only the None rejection.",
+    "verified": true
+  },
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T09:36:19Z",
+  "findings": [],
+  "follow_ons": [
+    "The reviewed run's after-suite.log is pinned at f80a679b, not the reviewed head 8072b505; a whole-suite run at the merged head is the separately dispatched test node's job and would settle the full-suite delta at the exact head.",
+    "Pre-existing out of scope: tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture fails because _LinearTarget lacks null; tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux times out compiling after 300 seconds. Both reproduce unchanged at the dispatch base."
+  ],
+  "independent_checks": [
+    {
+      "check": "head focused rejection tests",
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=<reviewed-tree> /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_forward_support_clip_mode.py::test_operator_rejects_none_clip_mode_at_each_entry tests/test_forward_solve_clip_mode_bridge.py::test_request_and_resolved_defaults_reject_none_clip_mode tests/test_clip_mode_has_no_process_global.py",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T093559978170-review-2-of-fsapi-clip-mode-global-deletion/head-focused-tests.log",
+      "result": "3 passed in 21.52s; EXIT=0",
+      "revision": "8072b50563b3ade024e1f39a8f8f39c00f05f87d",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-global-deletion"
+    },
+    {
+      "check": "base-arm falsification of the added None tests (same head test files, pre-fix f80a679b source)",
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/tmp/fsapi-review2.QWdEJ4 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_forward_support_clip_mode.py::test_operator_rejects_none_clip_mode_at_each_entry tests/test_forward_solve_clip_mode_bridge.py::test_request_and_resolved_defaults_reject_none_clip_mode",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T093559978170-review-2-of-fsapi-clip-mode-global-deletion/base-arm-none-tests.log",
+      "result": "2 failed in 7.33s; EXIT=1; 'DID NOT RAISE ValueError' at the None sites, proving both added tests discriminate the fix",
+      "revision_source": "f80a679b91abfc32670cfeb8dbff1d6fb91e5718",
+      "revision_tests": "8072b50563b3ade024e1f39a8f8f39c00f05f87d",
+      "tree": "/tmp/fsapi-review2.QWdEJ4"
+    }
+  ],
+  "item_verdicts": {
+    "deletion_unchanged": "PASS. The f80a679b-to-8072b505 diff is confined to the None rejection and its tests; no retired process-global name exists under nova/ at the reviewed head.",
+    "durability": "PASS. Commit 8072b505 has a conventional subject and non-empty body, is an ancestor of the reviewed tree HEAD, and is accompanied by readable gate logs (none-validation-tests.log GATE_SUMMARY completed=true failure_count=0) and the run manifest.",
+    "goal": "PASS. The dispatch goal of the reviewed run -- remove the process-global support clip API and reject explicit None clip modes at every retained boundary -- is fully met at 8072b505. The global deletion landed at f80a679b and the None rejection at 8072b505; both hold at the reviewed head.",
+    "prior_follow_on_closed": "PASS by file and line. None is rejected at nova/equilibrium/forward_operator.py line 2354 (__post_init__) and line 2706 (with_clip_mode), and at nova/equilibrium/solve_request.py line 506 (ForwardSolveRequest) and line 564 (ResolvedForwardSolveDefaults.from_policy). Tests assert each rejection and pass at head; the same tests fail 'DID NOT RAISE' against the pre-fix source.",
+    "scope": "PASS. base 2acc1ff9 to head 8072b505 changes eight paths, exactly the reviewed manifest's changed_paths: forward_operator.py, solve_request.py, five scoped tests, and the assigned evidence fragment. No plan HTML, shared index, or ungranted production path is touched.",
+    "suite_delta": "PASS. Readable baseline (2acc1ff9) and after (f80a679b) gate logs both end GATE_SUMMARY completed=true failure_count=2 with identical ids, giving added_failure_count 0. The two retained failures are pre-existing and out of scope: _LinearTarget lacks null (bit-identity test) and a 300-second raster compile timeout."
+  },
+  "justifications": {
+    "durability": "The reviewed commits, evidence fragment, manifest and cited logs are durable and readable; the reviewed commit carries a bodied conventional message and is reachable from the reviewed tree HEAD.",
+    "evidence": "The record rests on the run's readable gate logs (base and after both completed, added_failure_count 0), a head-arm run of the three focused tests (3 passed), and a base-arm falsification in which the same head test files fail against the pre-fix source. The single point not independently reproduced here is the full-suite post-head arm: after-suite.log is pinned at f80a679b, not 8072b505, so the whole-suite delta is inferred from the logs plus the commit's four-file, test-only-and-guard change.",
+    "fit": "Validation at the typed request and resolved-defaults boundaries matches the established immutable-operator and typed-request pattern, and the three-mode literal set is now the single closed vocabulary at every entry.",
+    "goal_fidelity": "The reviewed run's goal is complete: the process-global clip selection is deleted and every retained construction boundary rejects an undeclared clip mode, including the explicit None the prior review flagged. The finite accepted set {chord, exact, chord_cells} is now enforced at operator construction, operator mode update, request construction, and resolved-defaults construction, so no non-chord branch can be selected without a declared mode.",
+    "scope_discipline": "Every changed path is inside the reviewed manifest's declared write scope; the reviewed change edits no unrelated default, production route, plan file, or shared index."
+  },
+  "node": "review-2-of-fsapi-clip-mode-global-deletion",
+  "plan": "nova:forward-solve-api",
+  "prior_review_finding_closed": {
+    "closed": true,
+    "prior_finding": "ForwardFluxOperator later permitted clip_mode=None; reject None so the accepted clip mode set is total.",
+    "prior_review_file": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261003T082403871267-fsapi-clip-mode-global-deletion.json",
+    "prior_review_run_id": "r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion",
+    "sites": [
+      {
+        "evidence": "if self.clip_mode not in {\"chord\", \"exact\", \"chord_cells\"}: raise ValueError(f\"unknown support clip mode {self.clip_mode!r}\") -- None is no longer in the accepted set (was {None, \"chord\", \"exact\", \"chord_cells\"} at f80a679b).",
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 2354,
+        "site": "ForwardFluxOperator.__post_init__"
+      },
+      {
+        "evidence": "if clip_mode not in {\"chord\", \"exact\", \"chord_cells\"}: raise ValueError(...) before cloning, so an explicit None update is refused at the entry point.",
+        "file": "nova/equilibrium/forward_operator.py",
+        "line": 2706,
+        "site": "ForwardFluxOperator.with_clip_mode"
+      },
+      {
+        "evidence": "if self.clip_mode not in {\"chord\", \"exact\", \"chord_cells\"}: raise ValueError(...) on the frozen request dataclass.",
+        "file": "nova/equilibrium/solve_request.py",
+        "line": 506,
+        "site": "ForwardSolveRequest.__post_init__"
+      },
+      {
+        "evidence": "if clip_mode not in {\"chord\", \"exact\", \"chord_cells\"}: raise ValueError(...) on the constructed from_policy default (the two added lines of this commit).",
+        "file": "nova/equilibrium/solve_request.py",
+        "line": 564,
+        "site": "ResolvedForwardSolveDefaults.from_policy"
+      }
+    ],
+    "tests_asserting_rejection": [
+      {
+        "asserts": "ForwardFluxOperator.__post_init__ and with_clip_mode each raise ValueError matching 'unknown support clip mode None'.",
+        "file": "tests/test_forward_support_clip_mode.py",
+        "test": "test_operator_rejects_none_clip_mode_at_each_entry"
+      },
+      {
+        "asserts": "ForwardSolveRequest(clip_mode=None) and ResolvedForwardSolveDefaults.from_policy(policy, clip_mode=None) each raise ValueError matching 'unknown support clip mode None'.",
+        "file": "tests/test_forward_solve_clip_mode_bridge.py",
+        "test": "test_request_and_resolved_defaults_reject_none_clip_mode"
+      }
+    ]
+  },
+  "project": "nova",
+  "raw_text": "VERDICT pass (94/100). The reviewed run at head 8072b505 (base 2acc1ff9) removes the process-global support clip API and closes the prior review's only follow-on: clip_mode=None is now rejected at ForwardFluxOperator.__post_init__ (forward_operator.py:2354), ForwardFluxOperator.with_clip_mode (forward_operator.py:2706), ForwardSolveRequest.__post_init__ (solve_request.py:506), and ResolvedForwardSolveDefaults.from_policy (solve_request.py:564), with tests asserting each rejection. Those tests pass at head (3/3) and fail 'DID NOT RAISE' against the pre-fix source, so they discriminate. The f80a679b deletion is otherwise unchanged: f80a679b..8072b505 touches only the None guards and their tests, and no retired name exists under nova/ at head. Readable baseline and after gate logs both complete with failure_count 2 and identical ids, so added_failure_count is 0.",
+  "review_run_id": "r-20261003T093559978170-review-2-of-fsapi-clip-mode-global-deletion",
+  "reviewed_base_sha": "2acc1ff9151326b7ab2891948e2b46b34fe377dc",
+  "reviewed_commit": "8072b50563b3ade024e1f39a8f8f39c00f05f87d",
+  "reviewed_head_sha": "8072b50563b3ade024e1f39a8f8f39c00f05f87d",
+  "reviewed_run_id": "r-20261003T082403871267-fsapi-clip-mode-global-deletion",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-global-deletion",
+  "reviewer_node": "review-2-of-fsapi-clip-mode-global-deletion",
+  "reviewer_run_id": "r-20261003T093559978170-review-2-of-fsapi-clip-mode-global-deletion",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "supersedes_review_head_sha": "f80a679b91abfc32670cfeb8dbff1d6fb91e5718",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T09:52:00.000000+00:00",
+  "total": 94,
+  "verdict": "pass"
+}

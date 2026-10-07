@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T17:35:45.949Z",
+  "dispatched_at": "2026-10-05T17:31:44Z",
+  "findings": [
+    {
+      "anchor": "nova/biot/null.py:1",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must bind `nova/biot/null.py` to a destination (retire the mesh-flux quadratic null finder, or state it becomes the field representation `topology.read` evaluates) or the omission leaves a second null authority in place and the \u00a76 retirement test cannot pass.",
+      "text": "the design's 17-file null inventory binds `_FixedDesignNull2D` (forward_operator.py), `critical_point_candidates_batch` (stencil_nulls.py) and the rest to `topology.read`, but never names `nova/biot/null.py` (`Null1D`/`Null2D`) or `nova/biot/fieldnull.py`, the field-null position/value kernels that the files it is replacing actually import (`topology.py:14` `from nova.biot.null import Null1D, Null2D`; `forward_operator.py:42` `from nova.biot.null import Null2D, inside_or_near_source_cell`). A retirement that cannot name the owner it retires leaves the old null authority importable, and \u00a76's acceptance already requires `test_retired_routes_are_unreachable` to prove only `solve.fixed_point` survives \u2014 so the inventory has an unbound owner.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "d42984d0e7b8bb7ab94d2dca774c966d419c1f66efca4804577b524ddb211da0",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 22,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T17:36:53.500467+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T173131309640-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "15ec06b5aaa3103b0347efff52f100bf24ecc194",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each of the four proposed signatures hides a large body behind a smaller result. `topology.read` hides the contour-tree authority plus sub-cell axis-connected membership behind one `TopologyRead`; `solve.fixed_point` hides the verified ~590-line GMRES kernel and the line search behind one `SolveResult`. Verified in `nova/equilibrium/fixed_point.py`: `_active_set_newton_krylov` is 24 parameters over 591 lines and `newton_krylov` 30 parameters \u2014 the sprawl the plan collapses is real, and the plan replaces it with four functions rather than a fan of shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 the null-role retirement inventory that binds the 17 `nova/equilibrium` files omits the field-null owner `nova/biot/null.py` (`Null1D`/`Null2D`) and `nova/biot/fieldnull.py`, which `topology.py` and `forward_operator.py` import today and which \u00a72's `topology.read` is positioned to supersede.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 (read 2026-10-05T17:31:31Z). No section adds interface surface without naming what it retires in its own text: \u00a72 names `Topology.read` and `read_with_connectivity`, \u00a73 names `clipped_support_current_moments` and the `forward_operator.py` support partition, \u00a74 names the `ForwardFluxOperator` map, \u00a75 names `newton_krylov`/`picard`/`operator_request_body`, and \u00a76 names the promotion/recovery, frozen/live, active-set, Anderson, reduced-Newton and chord paths as deleted \u2014 and the two new operand types (`TopologyPolicy`, `SolvePolicy`) are stated as carried by the existing `ForwardSolvePolicy` in `solve_request.py`, \"extended rather than duplicated\".",
+    "reuse_search": "pass \u2014 the plan's design document carries a full source inventory binding 17 null-role files and 23 region-role files to a retirement destination each (design doc \"Source inventory and retirement destinations\"), and the plan's recorded reuse ruling (comment `c-20261005T171941782407`) names the existing single-site GMRES kernel in `nova/equilibrium/fixed_point.py` (`_single_site_krylov`, `_krylov_machine`, `_serve_krylov_stream`, `_krylov_outputs`, the Gram-Schmidt/least-squares helpers, ~590 lines, verified) and the Armijo `_steepest_descent_promotion` as reuse candidates for \u00a75, so the plan cites the machinery it searched and what it keeps.",
+    "thin_wrapper": "pass \u2014 the plan states each module as a replacement in place, not a layer over the old one: \"`gs.apply` replaces the map `ForwardFluxOperator` performs today rather than wrapping it\" and \"`topology.py` is replaced in place\". The one thin adapter \u2014 `forward.py` shrinking to \"the request and receipt adapter\" \u2014 is justified in the design as the existing `ForwardSolveRequest \u2192 ForwardProfile.solve \u2192 ForwardSolveReceipt` host seam, which is the honest reason a thin layer survives here."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T17:36:52.903358+00:00"
+}

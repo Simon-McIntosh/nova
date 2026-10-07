@@ -1,0 +1,120 @@
+{
+  "absent": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest's baseline_suite and after_suite are both null, and its own logs are a render script plus an H200 solve rather than paired suite arms. No reviewed-run failure-id set difference therefore exists: added_failure_count is null and added_failure_ids is empty by the unmeasured rule, not because a paired suite passed.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "two null-set markers drawn: grey reference triangle (half-width 6.5) and red solved triangle (half-width 3.25), nearly coincident",
+      "path": "docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence/terminal-flux-panel.svg"
+    },
+    {
+      "headline": "picard_axis [1.01381252, 1.6392e-07]; newton_axis [1.01381254, -3.837e-15]; both xpoint arrays NaN",
+      "path": "docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence/route-settle-data.npz"
+    },
+    {
+      "headline": "caption names both null sets, their coordinates and the 1.6e-07 Z coincidence",
+      "path": "docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-evidence.html"
+    }
+  ],
+  "commits_read": [
+    "f64973a5f",
+    "142d608e89bfc86ea539eef7051217ebf05fb505",
+    "87c4954d97103f1b184e419adb08616e6ac44817"
+  ],
+  "completed_at": "2026-10-02T18:35:13.394Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T18:14:26Z",
+  "evidence_inputs": {
+    "base_defect_confirmed": "142d608e8's terminal-flux-panel.svg carries one axis-marker group, the red solved triangle, and no grey reference marker, reproducing the prior review's blocking finding at the base.",
+    "job_1280457": "route-figures-h200.log records source revision 3a4faa65c, job 1280457, route-settle-data.npz creation, figure creation, EXIT_STATUS=0.",
+    "range": "3a4faa65c247e908edc68305bf252b8a3180b1b1..87c4954d97103f1b184e419adb08616e6ac44817 is exactly the eight paths declared by the reviewed manifest.",
+    "repair_commit": "87c4954d9 makes two draw_nulls calls (picard_axis with a grey doubled-size style, newton_axis with the default style) and rewrites the terminal-flux caption; the regenerated svg/png carry the added grey reference marker."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence/route-residual-before-after.svg",
+      "line": "41-690",
+      "severity": "follow-on",
+      "text": "The repair commit rewrote route-residual-before-after.svg with zero content change: after normalising matplotlib clip/marker ids and the dc:date, the base and head copies are byte-identical (0 changed lines), so the re-emitted residual figure is pure redraw churn. Harmless, but a later reader diffing the commit sees a 182-line SVG change that carries no information."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/check_both_null_sets.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The negative control is a static AST scan asserting that picard_axis and newton_axis appear as magnetic_axis subscripts on draw_nulls calls. It catches the exact omission it guards, but it is structural: it would pass a panel that supplied the right names with the wrong fields, and it verifies nothing about the rendered output. A behavioural check that the painter receives two axis points, or a committed regression test, would be stronger."
+    }
+  ],
+  "follow_ons": [
+    "Promote the both-null-set check from the run directory into a committed renderer guard or a focused regression test so the omission cannot recur silently.",
+    "Drop the cosmetic re-emission of route-residual-before-after.svg from future repair commits; only the terminal-flux panel changed."
+  ],
+  "gate_arms_note": "The reviewed node's readable arm is the AST null-set check, reproduced first-hand (head exit 0, reverted base exit 1). The H200 job 1280457 receipt is the solve arm (EXIT_STATUS=0); the cited source-gate arms belong to the prior residual-gate run and are receipts for the fragment rather than this node's own baseline/after suite.",
+  "item_verdicts": {
+    "done_when": "Met at 87c4954d9. The rendered terminal-flux-panel.svg carries two axis-marker groups: a grey (#999999) triangle of half-width 6.5 at pixel (268.790995, 266.399897) and a red (#cc0000) triangle of half-width 3.25 at (268.791006, 266.4); the base 142d608e8 SVG carries only the red marker, so the added grey reference null is real and not cosmetic.",
+    "figures": "The panel obeys the plot contract: axis off, both flux fields as line contours on one shared levels array, the first wall drawn, and both magnetic-axis null sets as filled triangles distinguished by colour and size. Neither route qualifies an X-point on this wall-limited branch, so both xpoint arrays are NaN and no saddle marker is expected or drawn.",
+    "goal": "Met. The binding terminal-flux panel now draws both null sets in distinguishable styles: panel_figure makes two draw_nulls calls, the Picard reference axis as a doubled grey triangle beside the solved Newton-Krylov red triangle, and the fragment caption names both axes with their distinct coordinates and their 1.6e-07 Z coincidence.",
+    "manifest": "Readable and terminal: status complete, negative_control_log is a bare path, tests names the check script and its arms. Its baseline_suite and after_suite are both null, so added_failure_count is unmeasured rather than a paired-suite zero.",
+    "numbers": "Every fragment number reconciles to the committed receipts: summary picard residual 2.1256680256235924e-08 over 480 points and newton 1.2828487222983532e-11 with converged=true; npz picard/newton axis coordinates exact to the printed precision; the caption's R/Z and 1.6e-07 Z-difference match the npz; compile/execute seconds are honestly reported unmeasured.",
+    "write_paths": "git diff --name-only 3a4faa65c..87c4954d changes exactly eight paths: benchmarks/frozen_route_settle_figures.py, the fragment HTML, and six files under the declared figure directory. All eight lie inside the reviewed manifest grants; no solver, test, or plan file changed."
+  },
+  "justifications": {
+    "durability": "All artifacts, the renderer and the fragment are committed at the reviewed head; commit hygiene is clean (subject and body on all three commits, no attribution trailer). The redraw is deterministic from the persisted npz. The residual risk is that the negative-control guard lives in the run directory rather than as a committed renderer guard, so the omission could recur silently in a future edit.",
+    "evidence": "The H200 solve log records job 1280457 at revision 3a4faa65c with EXIT_STATUS=0; the committed npz and summary reproduce every displayed residual, counter and coordinate; and the negative control reproduces first-hand (head arm [] -> exit 0 with both axis subscripts present; reverted base arm [] -> exit 1). Evidence is scored below full only because the run's compile/execute split is genuinely unmeasured and one leg of evidence (the AST guard) is structural rather than behavioural.",
+    "fit": "The panel follows house plotting rules -- no axes or gridlines, unfilled line contours on shared physical levels, first wall drawn, both null sets in distinguishable styles -- and the fragment cites project-absolute figure src with a caption that names both the reference and the solved route.",
+    "goal_fidelity": "Both blocking findings of the prior review at 142d608e8 are repaired: the panel supplies the Picard reference null set and the solved Newton null set to draw_nulls, and the caption names both and states their coincidence. The rendered SVG independently confirms both markers, so the goal deliverable is complete rather than claimed only in source.",
+    "scope_discipline": "The reviewed range changes exactly the eight declared paths and nothing else; no solver, test, or plan source was touched, and the plan edited is the plan being landed against."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass (89/100; goal_fidelity 18, evidence 17, scope_discipline 20, durability 17, fit 18). The reviewed resume at 87c4954d9 repairs both blocking findings the prior review raised at 142d608e8. panel_figure now draws both null sets -- the Picard reference axis as a doubled grey triangle beside the solved Newton-Krylov red triangle -- and the fragment caption names both, their distinct coordinates and their 1.6e-07 Z coincidence. Independent inspection of the committed terminal-flux-panel.svg confirms two marker groups at the persisted axis coordinates; the base 142d608e8 carried only the red solved marker, so the added reference null is real. The negative control reproduces first-hand (head exit 0, reverted base exit 1). Scope is exactly the eight declared figure/evidence paths and commit hygiene is clean. added_failure_count is null because the reviewed node recorded no completed baseline/after suite arms.",
+  "review_base_sha": "5ad2f3555804ed87ee28ce5e439837dcda46447b",
+  "review_run_id": "r-20261002T181406749930-review-of-fsri-frozen-route-settle-evidence",
+  "reviewed_base_sha": "3a4faa65c247e908edc68305bf252b8a3180b1b1",
+  "reviewed_commit": "87c4954d97103f1b184e419adb08616e6ac44817",
+  "reviewed_head_sha": "87c4954d97103f1b184e419adb08616e6ac44817",
+  "reviewed_revision": "87c4954d97103f1b184e419adb08616e6ac44817",
+  "reviewed_run_id": "r-20261002T165600155764-fsri-frozen-route-settle-evidence",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-evidence",
+  "reviewer_node": "review-of-fsri-frozen-route-settle-evidence",
+  "reviewer_run_id": "r-20261002T181406749930-review-of-fsri-frozen-route-settle-evidence",
+  "reviewing_run_id": "r-20261002T181406749930-review-of-fsri-frozen-route-settle-evidence",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/negative-control-both-null-sets.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/route-figures-h200.log"
+  ],
+  "tests": [
+    {
+      "command": "python3 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/check_both_null_sets.py <head benchmark>",
+      "result": "draw_nulls magnetic_axis arguments: ['newton_axis', 'picard_axis']; EXIT_HEAD=0"
+    },
+    {
+      "command": "python3 .../check_both_null_sets.py <benchmark from 142d608e8>",
+      "result": "draw_nulls magnetic_axis arguments: []; EXIT_BASE=1"
+    },
+    {
+      "command": "git show 87c4954d9:.../terminal-flux-panel.svg inspection",
+      "result": "two axis-marker groups: grey #999999 half-width 6.5 at (268.790995,266.399897); red #cc0000 half-width 3.25 at (268.791006,266.4); base carried only the red marker"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:25:00Z",
+  "total": 89,
+  "verdict": "pass"
+}

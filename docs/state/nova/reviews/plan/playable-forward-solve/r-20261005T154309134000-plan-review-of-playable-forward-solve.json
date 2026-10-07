@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:57:22.571Z",
+  "dispatched_at": "2026-10-05T15:43:45Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/playable-forward-solve.html#s6",
+      "id": "duplicate_owner-1",
+      "reason": "naming the launcher/scheduler owner up front makes the serving job reuse `nova_lane`'s rung and log contract instead of accreting a parallel launcher and a second `squeue` read.",
+      "text": "\u00a76 deliverable A (\"an sbatch script and a small status command\") duplicates two existing owners: `scripts/nova_lane/run.sh` (the repository's general compute-lane launcher, which already selects a rung, records the job id/node/revision in the log, and refuses a `--test-only` estimate) and `imas_codex/remote/tunnel.py::discover_compute_node` / `discover_compute_node_local` (which already resolve a service job's node with `squeue -n <service_job_name> --format=%N`). The landed `scripts/playable_server/run.sh`, `status.sh` and `payload.sh` now carry a third node/port-discovery path; `status.sh` runs its own `squeue -n nova-playable`. The design should name the mechanism it extends (or state why the general launcher cannot be) so the serving launch does not fork from both owners",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/playable-forward-solve.html#s2",
+      "id": "duplicate_owner-2",
+      "reason": "naming the single owner of the forward shape step (constraint rows vs the `shape_inverse` least-squares step) would settle which path the keyboard controls drive and stop a third implementation.",
+      "text": "\u00a72 assigns the shape-control vocabulary to `nova/equilibrium/inverse.py` + `ControlPoints` and defers the row transfer to `constraint-augmented-newton-krylov` \u00a74, but the code now carries two forward shape-control paths for the same goal: the constraint-row route (`nova/equilibrium/constraint.py`, whose `constraint_response_matrix`, `CircuitCurrentUnknown`, `CompensatorRule` and `CurrentCentroidConstraint` are the row vocabulary) and the inverse-least-squares route already landed in `nova/equilibrium/shape_inverse.py` (\"poses the same step on the forward operator's prescribed-current carrier\"). \u00a72 names neither `shape_inverse.py` nor `constraint.py`, so the playable solve can fork a third shape path rather than extend the one that exists",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/playable-forward-solve.html#s6",
+      "id": "thin_wrapper-1",
+      "reason": "the section should either justify a nova-owned status read distinct from the tunnel's node discovery or delete it and let the serving job report through the launcher/tunnel it already depends on.",
+      "text": "the design's status read is a thin layer over the scheduler query (`squeue` for job/node/start) and over the allocation record the payload writes, yet \u00a76 gives no reason the tunnel's `discover_compute_node` (which \u00a76 itself relies on for the tunnel's remote end) cannot supply node/port, nor why the general lane launcher cannot host the log/status contract. A wrapper with no such justification is the parallel path the duplicate_owner finding names",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/playable-forward-solve.html#s6",
+      "id": "interface_budget-1",
+      "reason": "with every family's budget at zero the design must account for the interface surface it adds in its own text (name a retirement, a merge, or the reason there is none) before the surface lands.",
+      "text": "\u00a76 adds a status command (a CLI), \u00a77 adds the `--decoder`/`--machine` launch options and a `view` request argument, and \u00a75/\u00a77 add the `FrameDecoder`/`DecodedFrame` public definitions and the `SteeringFrame` session schema; none of these sections names what it retires or merges, or why nothing can be, against the week's budgets of public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. \u00a76 even asserts \"Three existing pieces compose it, none new\" while delivering a new command",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "9d603032158c8252977cc4acdd00162cb6f7671fb40092adca7bf0de9ba4fba0",
+  "plan_slug": "playable-forward-solve",
+  "plan_version": 354,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T154309134000-plan-review-of-playable-forward-solve",
+  "reviewed_blob_sha": "76eda453d584c8ade5562ea0eac2ce6a0f952f2d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the \u00a77 `FrameDecoder` is a one-method protocol (`decode(frame) -> DecodedFrame`) that hides the whole checkpoint/VQ/corpus decoder behind the seam, and \u00a75's session schema is one typed record the corpus, the decoder and the page all read; the design hides substantial behaviour behind small interfaces.",
+    "duplicate_owner": "a finding \u2014 \u00a76 adds a bespoke sbatch launcher and scheduler status read beside `scripts/nova_lane/run.sh` and imas-codex's `discover_compute_node`, and \u00a72's control vocabulary now sits across three row owners without naming which it extends.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the design's design sections add a status command, the `--decoder`/`--machine` launch options, the `view` request argument, and the `FrameDecoder`/`DecodedFrame` public definitions, and no section names what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 each design section names the mechanism it extends rather than proposes fresh: \u00a72 `nova/equilibrium/inverse.py` + `ControlPoints` (`nova/geometry/plasmapoints.py`) and the `constraint-augmented-newton-krylov` row transfer; \u00a73 the `millisecond-converged-solve` reduced route; \u00a74 `apps/pulsedesign/`; \u00a76 `reckon serve` + the imas-codex tunnel; \u00a77 imas-ambix's decoder + `equilibrium_labels.py`; \u00a78 the \u00a75 `SteeringFrame` and the constrained row set. The plan searched the repos it names; the two forks below are named owners, not missing searches.",
+    "thin_wrapper": "a finding \u2014 \u00a76 deliverable A's status command adds a fresh scheduler query over `squeue` rather than saying why the tunnel's existing node discovery cannot serve it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:39.801861+00:00"
+}

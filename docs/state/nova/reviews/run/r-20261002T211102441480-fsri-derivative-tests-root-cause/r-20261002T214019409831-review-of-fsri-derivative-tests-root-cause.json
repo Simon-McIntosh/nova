@@ -1,0 +1,75 @@
+{
+  "absent": [
+    "No committed probe records the residual-shadow mask at the plus and minus conductor perturbations, or the resulting map difference. The five H200 arms prove that the failures predate both candidate merges, but they do not directly demonstrate that a discrete shadow-selection crossing produces the reported reverse/finite-difference disagreement.",
+    "The reviewed manifest declares baseline_suite: null and after_suite: null. This diagnosis node changed no product source or test file, so there is no reviewable suite delta; added_failure_count is therefore 0 rather than an unobserved comparison.",
+    "Each durable log invokes /work/projects/imas_gpu/sophelio/scratch/fsri-derivative-tests-root-cause/measure_derivatives.py. That measurement helper is not among the six committed changed paths, so the exact five-arm command cannot be reconstructed solely from the reviewed revision."
+  ],
+  "absent_items": [
+    {
+      "item": "shadow-selection perturbation trace",
+      "why": "The proposed Picard seam is plausible from the source, but no log records the selected shadow mask or a Hamming difference between the perturbation arms."
+    },
+    {
+      "item": "baseline and after suite arms",
+      "why": "The reviewed manifest explicitly declares both fields null, consistent with a diagnosis-only node that changes no source or tests."
+    },
+    {
+      "item": "committed measurement helper",
+      "why": "The durable log commands name a scratch /work helper outside the committed reviewed paths."
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "010bdb2106139c9d53fa2062f57ff9c9e1ad6b03",
+    "70e2c563b27b5fc38ffab936629c7c4630f9cdcb",
+    "6482210f5a457eb45aac7724a1f0e7be053209fe"
+  ],
+  "completed_at": "2026-10-02T21:47:47Z",
+  "dispatched_at": "2026-10-02T21:41:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solver-route-integrity/fsri-derivative-tests-root-cause.html",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: The fragment calls the Picard residual-shadow seam the pre-existing derivative mechanism, but the recorded H200 arms only establish identical failures before and after the two candidate merges. The source shows fixed_point.picard carries and refreshes previous_shadow, and ForwardFluxOperator._exclude_shadow_residual selects jnp.where(shadow, psi, mapped), yet no measurement records a shadow-mask change across either conductor perturbation or ties one to the reported 63.47875093 and 11.31396922 relative errors. Add that perturbation trace before treating the discrete-selection explanation as established root cause."
+    },
+    {
+      "file": "docs/figures/forward-solver-route-integrity/derivative-tests-root-cause/main.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: The durable measurement header identifies a scratch-only measure_derivatives.py command under /work/projects/imas_gpu/sophelio/scratch. The five committed logs preserve their results and imported-module provenance, but not the measurement implementation; commit the reusable probe or record its full source digest for a self-contained rerun."
+    }
+  ],
+  "gate_arms_note": "The reviewed manifest declares baseline_suite and after_suite null. Its five completed H200 diagnosis arms each ran the same three explicitly named tests and each ended with three failures and EXIT_STATUS=1. Since the reviewed commits add only evidence logs and a fragment, no test failure is newly introduced; added_failure_count is 0 and added_failure_ids is empty.",
+  "justifications": {
+    "durability": "The evidence fragment and all five raw H200 logs are committed in the reviewed head 6482210f5a457eb45aac7724a1f0e7be053209fe, so the reproduced failure values, revisions, test identifiers, complete summaries, and module provenance survive the run. The exact measurement helper is only named as a scratch /work path rather than committed or digested, reducing replayability of the custom measurement lines.",
+    "evidence": "All five committed logs have a measurement header naming revision, tree, literal command, imported forward.py, and resolved working directory. Each reports the three measurements, names the same three pytest failures, includes a complete pytest summary, and ends PYTEST_EXIT=1 and EXIT_STATUS=1. Parent/merge pairing and the numerical table agree with the raw logs. The direct source review supports the described control flow: fixed_point.py:2919-2924 carries previous_shadow through Picard and forward_operator.py:3997-4005 uses jnp.where(shadow, psi, mapped). However, no log observes a perturbation-induced shadow change, so the causal claim is not yet falsifiable from the record.",
+    "fit": "The node uses a compact evidence fragment and a table for a five-revision comparison, which is the appropriate medium for this non-spatial result. It preserves raw logs separately, avoids tolerance changes, makes no unsupported product edit, and directs the next work to a bounded mechanism measurement rather than hiding the failures.",
+    "goal_fidelity": "The run fulfilled the requested first decision: five H200 arms cover db580bec8^1=f863867a8, db580bec8, af7403bc0^1=3ecff38e, af7403bc0, and main e53e1141d. Every arm reports the same three failed tests, analytic maximum about 0.7598863825 below 1.0, flux-current relative error about 63.47875093, and plasma-current relative error about 11.31396922. The source-test blob is reported identical at all five revisions. It therefore supports that neither current merge caused the failures. The proposed Picard shadow-selection mechanism is a source-grounded hypothesis, not a directly measured root cause: the node itself leaves quantifying a shadow-selection crossing as a follow-on.",
+    "scope_discipline": "git diff --stat e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9..6482210f5a457eb45aac7724a1f0e7be053209fe reports exactly six files: five declared .log artifacts and the declared evidence fragment. The three commits add no product source or test file and the reviewed worktree is clean."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: Five H200 arms cover both parent/merge pairs and main, and all reproduce the same three failures with the recorded measurements. This establishes the required exclusion of today's two merges. The named Picard shadow-selection mechanism is not directly measured: no perturbation arm records a changed shadow mask, so it remains a strong hypothesis rather than a completed root-cause proof.\nSCORE evidence: 18\nJUSTIFICATION evidence: Every committed arm supplies revision/tree/command/imported-module/cwd headers, the three measurements, the same three failure ids, a completed pytest summary, and EXIT_STATUS=1. Parent/merge pairs and the table agree. Source review supports the stated control flow, but not the unobserved discrete-selection event.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The reviewed base-to-head diff contains exactly the five declared logs and one declared fragment; it changes no source or tests.\nSCORE durability: 18\nJUSTIFICATION durability: The five raw H200 logs and the fragment are committed and readable at the reviewed head. The custom measurement helper appears only as a scratch /work command and is neither committed nor source-digested.\nSCORE fit: 20\nJUSTIFICATION fit: A table plus raw per-revision logs precisely fits a five-arm numerical attribution. The node made no tolerance or product change and retains the failures as visible evidence.\nFINDING docs/evidence/fragments/forward-solver-route-integrity/fsri-derivative-tests-root-cause.html:12 follow-on: Add a perturbation trace of residual-shadow masks and map differences before treating the Picard shadow-selection explanation as established root cause.\nFINDING docs/figures/forward-solver-route-integrity/derivative-tests-root-cause/main.log:1 follow-on: Commit or source-digest the custom scratch measurement helper so its numerical probe is rerunnable from the record.\n\nMethod: independently reviewed run r-20261002T211102441480-fsri-derivative-tests-root-cause from base e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9 through head 6482210f5a457eb45aac7724a1f0e7be053209fe. Reviewed the run manifest, all three commit messages, the exact base-to-head stat, the evidence fragment, and all five committed H200 logs. The logs report f863867a8, db580bec8, 3ecff38e3, af7403bc0, and e53e1141d respectively; each has three failures, PYTEST_EXIT=1, and EXIT_STATUS=1. The reviewed manifest provides no baseline_suite or after_suite, so no candidate failure delta exists and added_failure_count is 0. Direct source review found fixed_point.picard carrying previous_shadow at fixed_point.py:2919-2924 and _exclude_shadow_residual selecting jnp.where(shadow, psi, mapped) at forward_operator.py:3997-4005.",
+  "review_run_id": "r-20261002T214019409831-review-of-fsri-derivative-tests-root-cause",
+  "reviewed_base_sha": "e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9",
+  "reviewed_head_sha": "6482210f5a457eb45aac7724a1f0e7be053209fe",
+  "reviewed_revision": "6482210f5a457eb45aac7724a1f0e7be053209fe",
+  "reviewed_run_id": "r-20261002T211102441480-fsri-derivative-tests-root-cause",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-derivative-tests-root-cause",
+  "reviewer_node": "review-of-fsri-derivative-tests-root-cause",
+  "reviewer_run_id": "r-20261002T214019409831-review-of-fsri-derivative-tests-root-cause",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T21:47:00+00:00",
+  "total": 93,
+  "verdict": "pass"
+}

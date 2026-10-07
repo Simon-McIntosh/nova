@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-06T09:40:53Z",
+  "findings": [
+    {
+      "anchor": "nova/imas/machine_artifact.py:18",
+      "id": "reuse_search-1",
+      "reason": "the re-home should cite `imas_data_dictionaries` as the reused primitive, exactly as `machine_artifact.py:18` already imports it.",
+      "text": "\u00a73 re-homes the DDv4 floor (`latest_publication_dd_version` / `publication_dd_version`, machine_artifact.py:115-139, a thin wrapper returning `max`/major-check over `dd_xml_versions()` and `parse_dd_version`) but the plan never names that the enumeration primitive is the already-installed `imas_data_dictionaries` package, so a re-home risks re-implementing DD-version enumeration in ambix rather than importing the shared provider",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas-ambix imas_ambix/data/description_identity.py:1",
+      "id": "reuse_search-2",
+      "reason": "f-mdr-001 should name `description_identity.py` as the producer mechanism whose output it compares against the registry, turning the gate into a comparison rather than a build.",
+      "text": "\u00a72 says \"the producer's replacement asserts determinism, partition consistency and visible change instead\", but the plan does not cite the module that already implements exactly that assertion (`imas_ambix/data/description_identity.py`, \"Observable identity for machine descriptions whose geometry can move\"), so the equivalence gate f-mdr-001 is written as new work rather than as a demonstration over existing machinery",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/media/sources/mast_efit.py:29",
+      "id": "reuse_search-3",
+      "reason": "the decision's accepted cost is \"any consumer missed by the \u00a73 inventory breaks at deletion\", and these seven sites are exactly that class, so the inventory must carry them before the clean-deletion step.",
+      "text": "missed-consumer census. \u00a73's in-repo consumer row names `nova/imas/mast_flux_loop_adjudication.py`, `nova/calibrate/sweep.py`, `nova/catalog/__init__.py` and \"seven `mast_*` scripts\", and its cross-repo row names only `tests/gs/test_machine_identity.py` and `tests/gs/test_artifact_resolution.py`. The full census of importers of the retired names shows additional sites the inventory does not list: `nova/media/sources/mast_efit.py:29` (`shaped_section_vertices` from `nova.catalog.mast_geometry`), `scripts/mast_reference_evidence/contours.py:110` (`MachineGeometryRegistry`), `nova/imas/mast_solve_inputs.py:74-75` and `nova/io/sourcemap.py:44` (which import `machine_drive` / `machine_evidence`, the two modules `machine_artifact.py:20-21` depends on and which \u00a73 does not inventory), `imas_ambix/gs/machine_identity.py:152` (`nova.catalog.mast_geometry.MachineGeometryRegistry`), `imas_ambix/gs/artifact_geometry.py:767` (`nova.imas.machine_artifact.resolve_machine_*`), and `imas_ambix/gs/artifact_resolution.py:315-316` (`MachineArtifactError`, `nova.imas.mast_geometry.publish_refined_artifact`)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "<plan>#s4",
+      "id": "thin_wrapper-1",
+      "reason": "the plan must name the module in ambix that will own the publication path and say why the existing `imas_ambix/data/` package cannot host it, or the re-home becomes a parallel mechanism.",
+      "text": "the plan re-homes the owner-directed publication capability and DDv4 floor into the producer but names no target module, function boundary, or interface in ambix to land them on, and ambix has no OCI/oras publication mechanism today (no `oras`, `ghcr.io`, `oci_artifact` or `image-spec` reference anywhere under `imas_ambix/` or `scripts/`), so the re-home is additive surface with no existing mechanism it extends",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_ambix/gs/machine_identity.py:150",
+      "id": "duplicate_owner-1",
+      "reason": "the \u00a74 done-when \"the ambix geometry source and identity tests migrated in coordination\" must name `imas_ambix/gs/machine_identity.py` (and `artifact_resolution.py`) as the owners that absorb registry identity, or the deletion leaves ambix's identity path with no registry to read.",
+      "text": "the plan deletes `nova/catalog/mast_geometry.py`'s `MachineGeometryRegistry` and `nova/imas/mast_geometry.py`'s `publish_refined_artifact`, but the runtime owner that currently delegates to them is `default_registry()` at `imas_ambix/gs/machine_identity.py:150-153`, which loads the registry and reads `registry.registry_digest` / `registry.dd_version` at lines 164-168, and `publish_refined_artifact` is imported at `imas_ambix/gs/artifact_resolution.py:316`; the plan's cross-repo row names the identity *tests* but not `machine_identity.py` as the module to extend",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "df1b777961d8795deda3d979af632f5f4ff77ac52dee4f44b5483f676d8512a0",
+  "plan_slug": "machine-description-retirement",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T094029653591-plan-review-of-machine-description-retirement",
+  "reviewed_blob_sha": "3daecece843f7fcc870867ee978c85f3bf5e9900",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no module to nova; it consolidates four surfaces into one producer, which reduces surface rather than spreading complexity across wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan deletes the registry and `publish_refined_artifact` while the runtime owner that delegates to them is ambix's `imas_ambix/gs/machine_identity.py`, which the plan names only as a test file and not as the module to extend.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan is net removal (it deletes a schema, a cache, a builder and a CLI script) and \u00a73 names the surface each removal retires, so no section adds to a family without accounting for it.",
+    "reuse_search": "a finding \u2014 the plan proposes re-homing the DDv4 publication floor and the machine-generic publication capability into the ambix producer without citing the primitives and identity machinery that already exist, and it does not cite ambix's existing `data/description_identity.py` mechanism that already delivers the property \u00a72 says the producer \"asserts\".",
+    "thin_wrapper": "a finding \u2014 the \u00a73 disposition re-homes the publication capability and the DDv4 floor \"in the producer\" as new machinery, and ambix carries no OCI/oras or publication mechanism today, so this adds surface with no named owner module or interface to extend."
+  },
+  "section_digests": {
+    "_document": "23f356db5402f93b10a327ce301ba4ad792baef75bb687ebf42c7cbb9e0952c8",
+    "s1": "cff5efbc8357dbaddfd36c70143784dff4ac65003b0c03149e902291c06869a2",
+    "s2": "9a5109dba8d2acbab10879fd1a119f7aa731d0dba05a944a115c6ef75f19dec8",
+    "s3": "85bb9e1aaca21050b2ac375298ea4ef0338555f884a9342dd5de4de5443680dd",
+    "s4": "316d4c7cb97706ab917ad61efcfb16a105a261e74d07f2c94d091a85889625b1"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.427640+00:00"
+}

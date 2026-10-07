@@ -1,0 +1,116 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "artifacts": {
+    "compile-memory.svg": {
+      "blob": "a37d5b5df3cd981d98baf73f17f66d792d1757b1",
+      "blob_equals_tip": true,
+      "bytes": 63150,
+      "tip": "a799465ff"
+    },
+    "largest_committed_file_bytes": 30387706,
+    "size_ceiling_bytes": 52428800,
+    "size_gate_pass": true,
+    "solve-profile-1000.json.gz": {
+      "bytes": 15119388,
+      "decompressed_sha256": "45ab6988",
+      "equal": true,
+      "tip_blob_sha256": "45ab6988"
+    },
+    "solve-profile-1000.svg": {
+      "blob": "c8fd7fe9421692642207ac63c6b1788abf4a5d48",
+      "blob_equals_tip": true,
+      "bytes": 41964,
+      "tip": "7d3c7e757"
+    },
+    "solve-profile-300.json.gz": {
+      "bytes": 14772265,
+      "decompressed_sha256": "ed24f962",
+      "equal": true,
+      "tip_blob_sha256": "ed24f962"
+    },
+    "solve-profile-300.svg": {
+      "blob": "203b2bc229dd6062f8c5ed56fe831b31aea59755",
+      "blob_equals_tip": true,
+      "bytes": 71607,
+      "tip": "7d3c7e757"
+    },
+    "solve-profile.json.gz": {
+      "bytes": 30387706,
+      "decompressed_sha256": "4141747c",
+      "equal": true,
+      "tip_blob_sha256": "4141747c"
+    }
+  },
+  "blockers": "none",
+  "commits_of_reviewed": [
+    "5751c065c156afc41a3ec55ae517777a05ac6440",
+    "0fa83088d3170a349fe6b0142bc5815511ea1baf"
+  ],
+  "completed_at": "2026-10-03T16:19:02.629Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T16:09:36Z",
+  "evidence_inputs": "Independent review of run r-20261003T160921208577-fsa-restore-msc-figure-artifacts-compressed at base e1428d907, head 0fa83088d, over commits 5751c065c and 0fa83088d. All six restored artifacts verified: three SVGs blob-identical to their s19 tips; three .json.gz decompressing to sha256 equal to their tip-blob sha256; largest committed file 30387706 B < 50 MB; no raw .json in the tree; report.md repoint is the exact two-line diff. Guard reproduced red-before (EXIT=1) and green-after (EXIT=0). added_failure_count=0, added_failure_ids=[].",
+  "follow_ons": [
+    "Wire the two check_report_figures.py scripts into a lane (or a single shared checker) so the figure-reference guard runs automatically rather than only by hand.",
+    "The *.gz .gitignore rule means every future restore of compressed receipts needs git add -f; consider a positive .gitignore un-ignore for docs/figures/**/*.json.gz."
+  ],
+  "gate_arms_note": "The reviewed run declared no baseline_suite and no after_suite (both null in its manifest), so added_failure_count is derived from the only gate arms it recorded: the per-directory check_report_figures.py arms. Baseline (artifacts absent): logs/compile-memory-before.log MISSING 1 of 1 EXIT=1, logs/solve-profile-before.log MISSING 5 of 5 EXIT=1 - three failing/unresolved checks. After (artifacts restored): logs/compile-memory-after.log RESOLVED 1 of 1 EXIT=0, logs/solve-profile-after.log RESOLVED 5 of 5 EXIT=0 - zero failing ids. added_failure_ids=[] and added_failure_count=0 by derivation from those two arms. Independently reproduced by the review at the reviewed head: both scripts run green EXIT=0 from the worktree, and both run red EXIT=1 (MISSING 1 of 1 / MISSING 5 of 5) in a scratch copy holding report.md and the script but no artifacts.",
+  "justifications": {
+    "durability": "The artifacts are committed, not left in the worktree, and the fragment records blob and content hashes so a later reader can re-verify without the tips. The two weak points: the check_report_figures.py scripts are duplicated verbatim across the two directories and are not registered in any lane, so a future regression of these references would not surface in CI; and the *.gz ignore means every future restore of this shape must remember git add -f, a step the fragment notes but which remains a footgun. The receipts themselves are durable - decompressing to the exact tip bytes means the compressed commit is a faithful, re-expandable copy.",
+    "evidence": "The evidence is strong and I reproduced its load-bearing parts. Blob identity: git rev-parse of HEAD:<svg> equals the tip blob for all three. Content identity of the receipts: streaming gzip -dc | sha256sum over each committed .json.gz yields 4141747c/ed24f962/45ab6988, each equal to the sha256 of the corresponding s19 tip blob (independently recomputed). Size gate: the largest committed file at the reviewed head is solve-profile.json.gz at 30387706 B (29.0 MB) < 50 MB, matching the fragment. Raw JSON absence: git ls-tree HEAD over the solve-profile dir lists no *.json path. Red-before/green-after: I ran both check scripts from the worktree (EXIT=0, RESOLVED 1 of 1 and 5 of 5) and reproduced the refusal in a scratch copy with the artifacts removed (EXIT=1, MISSING 1 of 1 and MISSING 5 of 5) - the guard demonstrably fires. Deductions. (a) The before logs' header line reads 'revision e1428d907' while the check script itself is added only in 5751c065c, so the header records the worktree HEAD of the moment rather than a revision at which the script existed; the run is coherent (script untracked at that instant) but the header is a weak revision stamp. (b) The guard is a standalone script wired into no pytest lane (the run's own follow_ons say so), so nothing runs it automatically - a guard that never runs on its own.",
+    "fit": "The node does exactly the record-repair class of work \u00a75 concerns: it restores referenced artifacts that main lacked and adds an existence-and-parse guard, with red/green evidence and a landing fragment under docs/evidence/fragments/figure-and-solver-audit/. It matches the plan's figure-and-solver-audit intent and its node name (fsa-restore-msc-figure-artifacts-compressed). Deferring the merged-tree verification to a separate test node is correct division, and the follow_ons name the unwired guard and the -f requirement honestly.",
+    "goal_fidelity": "The goal - bring onto main the six millisecond-solve figure artifacts the two reports name, byte-exact, with the three oversized receipts committed compressed - is met and independently reproduced. I verified the pre-state: at base e1428d907 compile-memory/report.md referenced compile-memory.svg and solve-profile/report.md referenced solve-profile.json, -300.json, -1000.json, -300.svg and -1000.svg, and none of the six was in the tree (git ls-tree at base shows only report.md and run_measurement.sbatch in those dirs), so every reference 404'd - the defect is real. At the reviewed head all six are present. The three SVGs are byte-identical to their s19 tips: committed blobs a37d5b5df3cd981d98baf73f17f66d792d1757b1, 203b2bc229dd6062f8c5ed56fe831b31aea59755, c8fd7fe9421692642207ac63c6b1788abf4a5d48 all equal the refs/s19-tips blobs (a799465ff, 7d3c7e757). Each .json.gz decompresses to a sha256 equal to its tip blob's sha256 (4141747c=2e33f631, ed24f962=2543ab3c, 45ab6988=ce75bfea), so compression is lossless and no receipt byte is lost. report.md is repointed to the .json.gz names with exactly the two-line diff claimed and no raw .json reference remains. Not full marks: the receipts are committed at .json.gz rather than the .json path the earlier frozen done-when and plan followup text name, so a reader following that historical literal path still 404s - disclosed and node-name-sanctioned, but a residual reader-facing mismatch.",
+    "scope_discipline": "The change is confined to the two millisecond-converged-solve directories, the two additive check_report_figures.py files, the two-line report.md repoint and the single evidence fragment. git diff between base and head touches exactly those paths; no unrelated file, no plan/sprint edit, no index mutation. The three .gz were force-added (-f) because .gitignore line 5 ignores *.gz, which is correct and disclosed; the SVGs are tracked under the un-ignored docs/figures/**/*.svg rule. Nothing outside the granted write scope was written."
+  },
+  "node": "review-of-fsa-restore-msc-figure-artifacts-compressed",
+  "project": "nova",
+  "review_base_sha": "18c30b9a60ee63b9c75a46272ec8fa345ce062d9",
+  "review_findings": [
+    {
+      "dimension": "evidence",
+      "id": "finding-1",
+      "repair_owner": "nova figure-and-solver-audit",
+      "severity": "low",
+      "statement": "The check scripts are wirefree: not registered in any pytest lane or CI hook, so nothing runs them automatically and a future missing-reference regression would not surface. The run's own follow_ons disclose this."
+    },
+    {
+      "dimension": "fit",
+      "id": "finding-2",
+      "repair_owner": "nova figure-and-solver-audit record",
+      "severity": "low",
+      "statement": "The receipts are committed at .json.gz, not the .json path named by the earlier frozen done-when (run r-20261003T154255400457) and the plan followup text; a reader following that historical literal path still 404s. Compression was the sanctioned node goal, so this is a record-accuracy residual rather than a measurement error."
+    }
+  ],
+  "review_run_id": "legacy-19de298e734d",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "e1428d907123eafabf46f42bf3c6c3326f9cd657",
+  "reviewed_commit": "0fa83088d3170a349fe6b0142bc5815511ea1baf",
+  "reviewed_commits": [
+    "5751c065c156afc41a3ec55ae517777a05ac6440",
+    "0fa83088d3170a349fe6b0142bc5815511ea1baf"
+  ],
+  "reviewed_head_sha": "0fa83088d3170a349fe6b0142bc5815511ea1baf",
+  "reviewed_run_id": "r-20261003T160921208577-fsa-restore-msc-figure-artifacts-compressed",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-restore-msc-figure-artifacts-compressed",
+  "reviewer_node": "review-of-fsa-restore-msc-figure-artifacts-compressed",
+  "reviewing_run_id": "r-20261003T161918355337-review-of-fsa-restore-msc-figure-artifacts-compressed",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T16:28:00Z",
+  "total": 91,
+  "verdict": "pass"
+}

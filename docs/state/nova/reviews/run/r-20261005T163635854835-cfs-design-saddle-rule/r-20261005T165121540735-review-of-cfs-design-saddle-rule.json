@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Unmeasured: reviewed manifest baseline_suite and after_suite are both empty; the single audit-doc log is a head-only structural check, not a base/head test pair.",
+  "blocking_finding_count": 1,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-05T17:02:50Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "exempted",
+      "reason": "prose documentation node: the durability dimension scores regression tests, which a design-document edit does not carry; the same exemption was recorded for the two earlier design repair runs",
+      "recorded_at": "2026-10-05T17:01:37.569591+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-05T16:51:42Z",
+  "findings": [
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "104",
+      "severity": "blocking",
+      "text": "blocking: The new sentence says the probe fixes smooth-boundary budgets and lines 227, 232 and 234 require them, but lines 85-100 retain only the weak p=2 budget and a diverted p=0.5 before arm; no diverted smooth-boundary acceptance coefficient exists, so the diverted non-saddle gate has no numeric bound."
+    },
+    {
+      "file": "docs/research/converged-forward-solve-design.html",
+      "line": "49",
+      "severity": "follow-on",
+      "text": "follow-on: The read still says it enumerates within-cell stationary points from recovered polynomial coefficients, while line 57 says no mesh-flux derivative is taken anywhere in the read; the implementation needs an explicit distinction between topology candidate enumeration and kernel-derived admitted null evaluation to avoid two readings."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163635854835-cfs-design-saddle-rule/manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are empty, so the canonical review cannot measure added_failure_count from a base/head gate pair; attach complete gate arms if a measured zero is required."
+    }
+  ],
+  "follow_on_finding_count": 2,
+  "gate_logs": {
+    "head": {
+      "completed": true,
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163635854835-cfs-design-saddle-rule/audit-doc.log",
+      "revision": "6ea685c39dd6791563328c35878d07cb933aee24"
+    }
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Commit 6ea685c39 adds the two locked rules, marks the diverted half-order values as a before arm, adds a p=2 saddle acceptance row and test description, and adds the GPFS receipt rule; it also references a diverted smooth-boundary acceptance budget that its table does not define.",
+    "done_when": "The reviewed audit-doc.log declares OK and EXIT=0 at 6ea685c39, and review-probe.log confirms the requested markers are present at head and absent at base; the audit is structural and the numerical normal-form coefficient remains to be measured.",
+    "goal": "The reviewed prompt's goal is to align the design with locked saddle, derivative and receipt rules; docs/research/converged-forward-solve-design.html:47-57,80-104,121 and 227-250 adds those rules at the reviewed head.",
+    "manifest": "The reviewed manifest names commit 6ea685c39, the edited document and audit-doc.log, but baseline_suite and after_suite are blank, so added failures are unmeasured from the run's canonical gate pair.",
+    "write_paths": "The reviewed prompt grants the design document, one evidence fragment and one figure directory; git diff 7c4a76c..6ea685c changes only docs/research/converged-forward-solve-design.html."
+  },
+  "justifications": {
+    "durability": "docs/research/converged-forward-solve-design.html:228 names a future order test, but the commit adds no executable assertion that would fail if the saddle rule or GPFS wording regressed; audit-doc.log only checks document structure.",
+    "evidence": "audit-doc.log reports zero structural errors and review-probe.log detects each added marker against the base, while neither log measures a normal-form saddle order or a diverted smooth-boundary coefficient.",
+    "fit": "docs/research/converged-forward-solve-design.html:47-57 extends the existing topology and booking sections and uses the document's existing typed tables, but line 104 names an acceptance budget missing from its table.",
+    "goal_fidelity": "docs/research/converged-forward-solve-design.html:47-57 and 80-104 states the requested geometry and derivative rules, but line 104's smooth-boundary budget claim has no diverted acceptance coefficient in lines 85-100.",
+    "reuse": "git diff 7c4a76c..6ea685c adds no production definition or module, and the existing design document remains the sole owner of these descriptions.",
+    "scope_discipline": "git diff 7c4a76c..6ea685c changes only the declared docs/research/converged-forward-solve-design.html path."
+  },
+  "limitations": [
+    "No realised-cell normal-form saddle measurement or numeric p=2 coefficient was part of this documentation node.",
+    "The reviewed manifest has no complete base/head suite fields, so added failures cannot be stated as zero."
+  ],
+  "node": "review-of-cfs-design-saddle-rule",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 7c4a76cafa41f4f5a4da06af19a0f0aac3271560\nreviewed_head_sha: 6ea685c39dd6791563328c35878d07cb933aee24\nVERDICT goal: The reviewed prompt's goal is to align the design with locked saddle, derivative and receipt rules; docs/research/converged-forward-solve-design.html:47-57,80-104,121 and 227-250 adds those rules at the reviewed head.\nVERDICT done_when: The reviewed audit-doc.log declares OK and EXIT=0 at 6ea685c39, and review-probe.log confirms the requested markers are present at head and absent at base; the audit is structural and the numerical normal-form coefficient remains to be measured.\nVERDICT write_paths: The reviewed prompt grants the design document, one evidence fragment and one figure directory; git diff 7c4a76c..6ea685c changes only docs/research/converged-forward-solve-design.html.\nVERDICT manifest: The reviewed manifest names commit 6ea685c39, the edited document and audit-doc.log, but baseline_suite and after_suite are blank, so added failures are unmeasured from the run's canonical gate pair.\nVERDICT diff: Commit 6ea685c39 adds the two locked rules, marks the diverted half-order values as a before arm, adds a p=2 saddle acceptance row and test description, and adds the GPFS receipt rule; it also references a diverted smooth-boundary acceptance budget that its table does not define.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/research/converged-forward-solve-design.html:47-57 and 80-104 states the requested geometry and derivative rules, but line 104's smooth-boundary budget claim has no diverted acceptance coefficient in lines 85-100.\nSCORE evidence: 14\nJUSTIFICATION evidence: audit-doc.log reports zero structural errors and review-probe.log detects each added marker against the base, while neither log measures a normal-form saddle order or a diverted smooth-boundary coefficient.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 7c4a76c..6ea685c changes only the declared docs/research/converged-forward-solve-design.html path.\nSCORE durability: 8\nJUSTIFICATION durability: docs/research/converged-forward-solve-design.html:228 names a future order test, but the commit adds no executable assertion that would fail if the saddle rule or GPFS wording regressed; audit-doc.log only checks document structure.\nSCORE fit: 17\nJUSTIFICATION fit: docs/research/converged-forward-solve-design.html:47-57 extends the existing topology and booking sections and uses the document's existing typed tables, but line 104 names an acceptance budget missing from its table.\nSCORE reuse: 20\nJUSTIFICATION reuse: git diff 7c4a76c..6ea685c adds no production definition or module, and the existing design document remains the sole owner of these descriptions.\nFINDING docs/research/converged-forward-solve-design.html:104 blocking: The new sentence says the probe fixes smooth-boundary budgets and lines 227, 232 and 234 require them, but lines 85-100 retain only the weak p=2 budget and a diverted p=0.5 before arm; no diverted smooth-boundary acceptance coefficient exists, so the diverted non-saddle gate has no numeric bound.\nFINDING docs/research/converged-forward-solve-design.html:49 follow-on: The read still says it enumerates within-cell stationary points from recovered polynomial coefficients, while line 57 says no mesh-flux derivative is taken anywhere in the read; the implementation needs an explicit distinction between topology candidate enumeration and kernel-derived admitted null evaluation to avoid two readings.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T163635854835-cfs-design-saddle-rule/manifest.md:22 follow-on: baseline_suite and after_suite are empty, so the canonical review cannot measure added_failure_count from a base/head gate pair; attach complete gate arms if a measured zero is required.\n",
+  "review_run_id": "r-20261005T165121540735-review-of-cfs-design-saddle-rule",
+  "review_scope": "Committed documentation delta against the live topology-read decision and the reviewed node done-when; no production test or merged-head claim.",
+  "reviewed_base_sha": "7c4a76cafa41f4f5a4da06af19a0f0aac3271560",
+  "reviewed_commits": [
+    "6ea685c39dd6791563328c35878d07cb933aee24"
+  ],
+  "reviewed_head_sha": "6ea685c39dd6791563328c35878d07cb933aee24",
+  "reviewed_run_id": "r-20261005T163635854835-cfs-design-saddle-rule",
+  "reviewer": "review-of-cfs-design-saddle-rule",
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:59:38.631564+00:00",
+  "total": 96,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T165121540735-review-of-cfs-design-saddle-rule/review-probe.log"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:25:49.539Z",
+  "dispatched_at": "2026-10-06T01:18:52Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/null-identification-authority.html#s3 (sections \u00a73, \u00a74, \u00a75)",
+      "id": "duplicate_owner-1",
+      "reason": "the three sections are still declared `implementable` with standalone done-whens, and repairing a read that a sibling plan is deleting is thrown-away work; the bodies must consume the contour tree or be explicitly deferred, not just the decision record at `#decisions`.",
+      "text": "\u00a73 roots-cause the legacy boundary predicate's wall-extremum choice in `connectivity_boundary.py`, \u00a74 roots-causes the two-pass admission and candidate-table capacity in `forward_operator.py::_fixed_design_read`, and \u00a75 hardens the polish Hessian gate and dedupe radius \u2014 all of it machinery that `contour-tree-topology-authority` \u00a75 retires: it moves the class read in `connectivity_boundary.py`, the axis/X-point/wall-anchor reads in `topology.py` and the typed-saddle read in `forward_operator.py` onto the contour tree, and deletes the raster hex partition, the sightline test and every normalised-flux classification quantity. The owning file is `docs/plans/contour-tree-topology-authority.html` (its read authority), with this plan's own read owners as the files to extend rather than fork.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:3171",
+      "id": "duplicate_owner-2",
+      "reason": "a collapse scoped to three sites leaves the other eight carrying their own reads, so the \"one shared read per residual\" done-when and its bit-identity test are sized for roughly a third of the real surface; the plan must restate the count before the node is dispatched.",
+      "text": "\u00a75 sizes its deepening at \"`_fixed_design_read` runs three times per residual from three call sites\", but the function is called at eleven sites across nine methods (3066, 3123, 3154, 3166, 3308, 3588, 3697\u00d72, 3762\u00d72); the plan's count understates the duplicate-read surface its collapse must cover.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ab914925358d274a5a5380ef6168f20f410e9fbb19140c8b91dbed93cc1329b0",
+  "plan_slug": "null-identification-authority",
+  "plan_version": 245,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:38.980686+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Section 5 is deferred to converged-forward-solve section 2; the census of _fixed_design_read call sites in forward_operator.py belongs to that plan's section 6 retirement, not to this plan.",
+      "when": "2026-10-06T01:47:39.482489+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T011837253021-plan-review-of-null-identification-authority",
+  "reviewed_blob_sha": "405aded67575828e3079ce9c9443a8efc16e6f61",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan adds no new module; it extends existing owners (\u00a72 landed behind `TopologyRead` in `nova/equilibrium/topology.py:2521`), and its `_fixed_design_read` collapse (\u00a75) deepens rather than spreads the read.",
+    "duplicate_owner": "a finding \u2014 \u00a73, \u00a74 and \u00a75 root-cause and repair the sign-change/raster read that `contour-tree-topology-authority` \u00a75 already owns and is retiring.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds to a family without naming a merge or retirement (\u00a75 collapses the three reads to one; \u00a74 makes the residual and topology gates joint; \u00a73 replaces the local-support polish), and no CLI option or MCP view is proposed.",
+    "reuse_search": "pass \u2014 the design cites and extends the machinery it needs rather than authoring a parallel read: the three producers now import the shared `banked_read_summary`/`banked_failed_read_summary` contract (`benchmarks/diiid_forward_gs_match.py:709`, `:768`), and \u00a73/\u00a74/\u00a75 name the existing read owners (`nova/equilibrium/topology.py`, `nova/equilibrium/connectivity_boundary.py`, `nova/equilibrium/forward_operator.py::_fixed_design_read`) they repair.",
+    "thin_wrapper": "pass \u2014 no thin forwarding layer is proposed over existing machinery; the shared banking helpers consolidate three producers onto one contract, and \u00a73's polish moves existing code onto the one spline (`polish_stationary_points`/`traced_spline_contour`) rather than wrapping it."
+  },
+  "section_digests": {
+    "_document": "f550eb735777b3f0e9bf906edcc59df11704c69a1584913b82191f44ef484964",
+    "s1": "1c608d4a653e364dddb073059b52717bd37444d915db2bf06c30e1794a27e3f4",
+    "s2": "fe1b4e1ec5ccd4eeed5c51e5d20a863c6090c99cbc4d66c8900016c4f8ef0d4d",
+    "s3": "e8e664c548283d2de51b94b81458440a694cc6ab7da7fa527248a4d2309b7e70",
+    "s4": "5bcdf70f6c8cc19c8be92dd038ddad6398cec2ce0dcb41bade2d4f5ff792fe54",
+    "s5": "f273e5c285e9438b5adff038dd29d7a842d736052eeea5977f8aaf69eef1e9dd"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:26:39.242331+00:00"
+}

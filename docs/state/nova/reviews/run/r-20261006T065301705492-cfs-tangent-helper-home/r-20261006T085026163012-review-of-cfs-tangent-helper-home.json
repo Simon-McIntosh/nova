@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "5562b520709767221cd9a42c949b1df17ffb06a6",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T08:59:44.467Z",
+  "dispatched_at": "2026-10-06T08:50:44Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the plan-commits meta names only 4554bb6f4,58a811d7d,ccb46cfab while the run carries five commits, so 5562b5207 and baa697669 are absent -- the fragment's own commit list omits the two evidence commits that wrote its suite-delta prose, including baa697669, the reviewed head. Carried from the prior review and unchanged by this delta."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html",
+      "line": "71",
+      "severity": "follow-on",
+      "text": "follow-on: this prose and the reviewed manifest's baseline_suite/after_suite 'command' both describe a sequential per-module pass, but the executed driver (/tmp/cfs-suite2/driver.py) launched all ten module processes concurrently; the pass wall 08:37:02Z-08:40:34Z (212 s) is shorter than the 328 s sum of the base arm's five module durations and every module logs its DD parse in the same second, so the recorded command string is template-composed rather than the literal command that ran, which the manifest contract asks the 'command' field to be. Outcome is unaffected because each module is its own process with its own --basetemp and a disabled compilation cache."
+    }
+  ],
+  "head_log_revision": "baa697669cc43e57c08f9ccf33b454f06177df50",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "delta": "the reviewed delta is the single commit 5562b5207..baa697669cc43e57c08f9ccf33b454f06177df50, docs(evidence): record the suite delta from one driver pass; it touches only docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html (3 insertions, 2 deletions) and carries no code, test or nova/ change, so it cannot alter any test outcome.",
+    "done_when": "the fragment's new suite prose claims one driver pass (2026-10-06T08:37:02Z-08:40:34Z) writing each module log and its exit status together, ten module processes all exiting 0, 29 rows deselected per arm (9 elliptic, 13 range, 7 vertex-edge), 80 passed per arm (19+40+15+5+1), and 4 skipped + 1 xfailed in both arms; each is read from logs/suite2-base.log, logs/suite2-head.log and logs/suite2-<arm>-<module>.log and all reconcile, and the caption's log-path reference is corrected from the superseded logs/suite-<arm>-<module>.log to logs/suite2-<arm>-<module>.log.",
+    "manifest": "read; status complete, five commits, and a tests/biot suite delta whose baseline_suite (revision fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb) and after_suite (revision 5562b520709767221cd9a42c949b1df17ffb06a6) each carry exit_status 0, failure_count 0 and empty failure_ids over logs/suite2-base.log and logs/suite2-head.log; because the new head baa697669 is docs-only the suite outcome is unchanged at it.",
+    "suite_counts": "verified against the per-module logs: elliptic 19 passed/9 deselected, range 40 passed/13 deselected, vertex-edge 15 passed/7 deselected, kernel-compile 5 passed/4 skipped/1 xfailed (skip reasons 'requires a GPU'/'uses GPU'), traced_section 1 passed; deselected 9+13+7=29 and passed 19+40+15+5+1=80 as stated. Reproduced independently: pytest -m 'not slow' --collect-only on tests/biot/test_range_tangent_recurrences.py reports 40/53 collected (13 deselected), matching the single slow-marked parametrized compile row.",
+    "write_paths": "the delta touches exactly the single declared path docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html; no file outside the deliverable is changed and no other path is touched."
+  },
+  "justifications": {
+    "durability": "unchanged at 19: the corrected evidence is committed in the fragment and the gate logs it cites are on disk under the run directory, and the delta's claim is reproducible from logs/suite2-status.json plus the driver's per-module logs.",
+    "evidence": "score rises 18 -> 19 from the prior review: the suite caption previously named logs/suite-<arm>-<module>.log, the superseded first attempt whose module logs carry EXIT=2/1/0 failures, and now names logs/suite2-<arm>-<module>.log, the pass the manifest's gate logs actually cite; the new deselection paragraph states 29 rows and their reason, which I reconciled to the per-module logs and to the slow-marked compile rows (13 deselected reproduced directly), and the timestamps 08:37:02Z-08:40:34Z are the driver header's own.",
+    "fit": "unchanged at 19: the added prose is mechanical evidence text with no plan, stage or ticket label and no author attribution; the fragment's HTML stays well-formed with the added <p> and edited text.",
+    "goal_fidelity": "the goal of this review is to cover only the commits the run gained since it was reviewed, and the delta does exactly that: it records the suite delta from one driver pass and corrects the caption's log-path reference to the logs that exist, so the fragment's suite-delta evidence now describes the record that produced it; the underlying homing goal is unchanged and was scored by the prior review.",
+    "reuse": "unchanged at 19: the delta removes a duplicate-fact hazard -- the caption had pointed at the superseded attempt's logs -- rather than adding machinery; no new file or duplicated receipt is introduced.",
+    "scope_discipline": "unchanged at 17: the delta itself is a clean docs-only change to its one declared path, but the run's declared fence still omits nova/biot/elliptic.py which the homing commit 4554bb6f4 compels, as the prior review recorded; the delta neither widens nor repairs that under-declaration."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT delta: the reviewed delta is the single commit 5562b5207..baa697669cc43e57c08f9ccf33b454f06177df50, docs(evidence): record the suite delta from one driver pass; it touches only docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html (3 insertions, 2 deletions) and carries no code, test or nova/ change, so it cannot alter any test outcome.\nVERDICT done_when: the fragment's new suite prose claims one driver pass (2026-10-06T08:37:02Z-08:40:34Z) writing each module log and its exit status together, ten module processes all exiting 0, 29 rows deselected per arm (9 elliptic, 13 range, 7 vertex-edge), 80 passed per arm (19+40+15+5+1), and 4 skipped + 1 xfailed in both arms; each is read from logs/suite2-base.log, logs/suite2-head.log and logs/suite2-<arm>-<module>.log and all reconcile, and the caption's log-path reference is corrected from the superseded logs/suite-<arm>-<module>.log to logs/suite2-<arm>-<module>.log.\nVERDICT suite_counts: verified against the per-module logs: elliptic 19 passed/9 deselected, range 40 passed/13 deselected, vertex-edge 15 passed/7 deselected, kernel-compile 5 passed/4 skipped/1 xfailed (skip reasons 'requires a GPU'/'uses GPU'), traced_section 1 passed; deselected 9+13+7=29 and passed 19+40+15+5+1=80 as stated. Reproduced independently: pytest -m 'not slow' --collect-only on tests/biot/test_range_tangent_recurrences.py reports 40/53 collected (13 deselected), matching the single slow-marked parametrized compile row.\nVERDICT write_paths: the delta touches exactly the single declared path docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html; no file outside the deliverable is changed and no other path is touched.\nVERDICT manifest: read; status complete, five commits, and a tests/biot suite delta whose baseline_suite (revision fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb) and after_suite (revision 5562b520709767221cd9a42c949b1df17ffb06a6) each carry exit_status 0, failure_count 0 and empty failure_ids over logs/suite2-base.log and logs/suite2-head.log; because the new head baa697669 is docs-only the suite outcome is unchanged at it.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the goal of this review is to cover only the commits the run gained since it was reviewed, and the delta does exactly that: it records the suite delta from one driver pass and corrects the caption's log-path reference to the logs that exist, so the fragment's suite-delta evidence now describes the record that produced it; the underlying homing goal is unchanged and was scored by the prior review.\nSCORE evidence: 19\nJUSTIFICATION evidence: score rises 18 -> 19 from the prior review: the suite caption previously named logs/suite-<arm>-<module>.log, the superseded first attempt whose module logs carry EXIT=2/1/0 failures, and now names logs/suite2-<arm>-<module>.log, the pass the manifest's gate logs actually cite; the new deselection paragraph states 29 rows and their reason, which I reconciled to the per-module logs and to the slow-marked compile rows (13 deselected reproduced directly), and the timestamps 08:37:02Z-08:40:34Z are the driver header's own.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: unchanged at 17: the delta itself is a clean docs-only change to its one declared path, but the run's declared fence still omits nova/biot/elliptic.py which the homing commit 4554bb6f4 compels, as the prior review recorded; the delta neither widens nor repairs that under-declaration.\nSCORE durability: 19\nJUSTIFICATION durability: unchanged at 19: the corrected evidence is committed in the fragment and the gate logs it cites are on disk under the run directory, and the delta's claim is reproducible from logs/suite2-status.json plus the driver's per-module logs.\nSCORE fit: 19\nJUSTIFICATION fit: unchanged at 19: the added prose is mechanical evidence text with no plan, stage or ticket label and no author attribution; the fragment's HTML stays well-formed with the added <p> and edited text.\nSCORE reuse: 19\nJUSTIFICATION reuse: unchanged at 19: the delta removes a duplicate-fact hazard -- the caption had pointed at the superseded attempt's logs -- rather than adding machinery; no new file or duplicated receipt is introduced.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html:11 follow-on: the plan-commits meta names only 4554bb6f4,58a811d7d,ccb46cfab while the run carries five commits, so 5562b5207 and baa697669 are absent -- the fragment's own commit list omits the two evidence commits that wrote its suite-delta prose, including baa697669, the reviewed head. Carried from the prior review and unchanged by this delta.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-tangent-helper-home.html:71 follow-on: this prose and the reviewed manifest's baseline_suite/after_suite 'command' both describe a sequential per-module pass, but the executed driver (/tmp/cfs-suite2/driver.py) launched all ten module processes concurrently; the pass wall 08:37:02Z-08:40:34Z (212 s) is shorter than the 328 s sum of the base arm's five module durations and every module logs its DD parse in the same second, so the recorded command string is template-composed rather than the literal command that ran, which the manifest contract asks the 'command' field to be. Outcome is unaffected because each module is its own process with its own --basetemp and a disabled compilation cache.",
+  "review_run_id": "r-20261006T085026163012-review-of-cfs-tangent-helper-home",
+  "reviewed_base_sha": "5562b520709767221cd9a42c949b1df17ffb06a6",
+  "reviewed_head_sha": "baa697669cc43e57c08f9ccf33b454f06177df50",
+  "reviewed_run_id": "r-20261006T065301705492-cfs-tangent-helper-home",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T08:56:16.681116+00:00",
+  "total": 112
+}

@@ -1,0 +1,49 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T03:36:08.883239+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+      "line": "1226",
+      "text": "the evidence record says the equivalence receipt shows the explicit default tracer differing from the explicit implicit one, so the parameter is live rather than inert, but that receipt reports \"implicit_differs_from_default\": false with vertex_count_sum 1584, area_sum 12.566335557375638 and support_vertices_sha256 99674cf594df2e543c2e93c0fe4b6e17270c1e03db3d9d3d04bb061659b3efda identical across all three arms, so an ignored arc_tracer would print the same report and this receipt cannot support the liveness claim; the same sentence is repeated at docs/plans/cut-cell-current-attribution.html:595 and in the reviewed manifest's artifacts line."
+    },
+    {
+      "file": "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+      "line": "1248",
+      "text": "the same record attributes test 13's F to the unsigned-110/300 fixture defect, but the test at tests/test_exact_clip_memory.py:495 drives the signed -300 weak row, which the node's own probe reports as cached and identical in both trees, and the observed F is consistent instead with the per-arm subprocess timeout at tests/test_exact_clip_memory.py:137 (3500 s) against a solve the probe measured above 2700 s; no base run of the module exists, so its zero-added-failures claim is inference."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter/manifest.md",
+      "line": "9",
+      "text": "the mutation that demonstrates the guard refusing an ignored arc_tracer (failed with assert 0 > 0, 26.19 s on the login node) has no log under the manifest's own test_logs, so the one receipt that would show the parameter is live on the real route is a claim; the guard is nevertheless sound, since it counts tracer invocations at trace time."
+    }
+  ],
+  "justifications": {
+    "durability": "the guard at tests/test_equilibrium_separatrix_clip.py:465 fails on an ignored arc_tracer (assert calls > 0 at :505) and on a substituted tracer that changes the clipped area (:508, assert at :522), so the parameter cannot silently rot, and the module is green at the pinned revision in an independent re-run.",
+    "evidence": "the done-when's weak-110 terminal-moment bit-identity was not measured (the node reports the environment cannot solve that row), the module gate is seven of eight with the eighth's failure attributed by inference rather than a base run, and the receipt cited for liveness reports \"implicit_differs_from_default\": false, so it cannot carry that claim; what does carry liveness is the guard's trace-time call counter at tests/test_equilibrium_separatrix_clip.py:505, and I re-ran the module at 935589ac independently (23 passed in 61.91s, EXIT=0).",
+    "fit": "the parameter is appended after the existing keywords on both entry points with the Callable | None annotation the module already imports, resolved in the same call-time idiom as curve_evaluator, and no plan label or superseded-name suffix appears in the diff.",
+    "goal_fidelity": "the seam the goal names is landed at nova/equilibrium/separatrix_clip.py:867 and :1758 with the tracer bound at call time on both entry points, but the globals clone the goal's purpose rests on is untouched because it lives at nova/equilibrium/forward_operator.py:647 outside this fence, and the goal's terminal-moment preservation is argued from the diff rather than measured.",
+    "scope_discipline": "git diff ef5504ea..935589ac touches exactly the two declared source and test paths, and 1647f506 touches only the two declared docs paths, with no other file under nova/ changed."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: the seam the goal names is landed at nova/equilibrium/separatrix_clip.py:867 and :1758 with the tracer bound at call time on both entry points, but the globals clone the goal's purpose rests on is untouched because it lives at nova/equilibrium/forward_operator.py:647 outside this fence, and the goal's terminal-moment preservation is argued from the diff rather than measured.\nSCORE evidence: 11\nJUSTIFICATION evidence: the done-when's weak-110 terminal-moment bit-identity was not measured (the node reports the environment cannot solve that row), the module gate is seven of eight with the eighth's failure attributed by inference rather than a base run, and the receipt cited for liveness reports \"implicit_differs_from_default\": false, so it cannot carry that claim; what does carry liveness is the guard's trace-time call counter at tests/test_equilibrium_separatrix_clip.py:505, and I re-ran the module at 935589ac independently (23 passed in 61.91s, EXIT=0).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff ef5504ea..935589ac touches exactly the two declared source and test paths, and 1647f506 touches only the two declared docs paths, with no other file under nova/ changed.\nSCORE durability: 18\nJUSTIFICATION durability: the guard at tests/test_equilibrium_separatrix_clip.py:465 fails on an ignored arc_tracer (assert calls > 0 at :505) and on a substituted tracer that changes the clipped area (:508, assert at :522), so the parameter cannot silently rot, and the module is green at the pinned revision in an independent re-run.\nSCORE fit: 19\nJUSTIFICATION fit: the parameter is appended after the existing keywords on both entry points with the Callable | None annotation the module already imports, resolved in the same call-time idiom as curve_evaluator, and no plan label or superseded-name suffix appears in the diff.\nFINDING docs/evidence/archive/cut-cell-current-attribution-landed.html:1226 the evidence record says the equivalence receipt shows the explicit default tracer differing from the explicit implicit one, so the parameter is live rather than inert, but that receipt reports \"implicit_differs_from_default\": false with vertex_count_sum 1584, area_sum 12.566335557375638 and support_vertices_sha256 99674cf594df2e543c2e93c0fe4b6e17270c1e03db3d9d3d04bb061659b3efda identical across all three arms, so an ignored arc_tracer would print the same report and this receipt cannot support the liveness claim; the same sentence is repeated at docs/plans/cut-cell-current-attribution.html:595 and in the reviewed manifest's artifacts line.\nFINDING docs/evidence/archive/cut-cell-current-attribution-landed.html:1248 the same record attributes test 13's F to the unsigned-110/300 fixture defect, but the test at tests/test_exact_clip_memory.py:495 drives the signed -300 weak row, which the node's own probe reports as cached and identical in both trees, and the observed F is consistent instead with the per-arm subprocess timeout at tests/test_exact_clip_memory.py:137 (3500 s) against a solve the probe measured above 2700 s; no base run of the module exists, so its zero-added-failures claim is inference.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter/manifest.md:9 the mutation that demonstrates the guard refusing an ignored arc_tracer (failed with assert 0 > 0, 26.19 s on the login node) has no log under the manifest's own test_logs, so the one receipt that would show the parameter is live on the real route is a claim; the guard is nevertheless sound, since it counts tracer invocations at trace time.",
+  "review_run_id": "r-20260917T033608883239-review-of-cca-implicit-arc-tracer-by-parameter",
+  "reviewed_run_id": "r-20260916T205800570103-cca-implicit-arc-tracer-by-parameter",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260917T033608883239-review-of-cca-implicit-arc-tracer-by-parameter",
+  "scores": {
+    "durability": 18,
+    "evidence": 11,
+    "fit": 19,
+    "goal_fidelity": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T04:16:44.310162+00:00",
+  "total": 82
+}

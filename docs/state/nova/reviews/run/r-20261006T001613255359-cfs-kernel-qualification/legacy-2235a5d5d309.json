@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T01:18:16Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "a measurement stop record that wrote no machinery; its reuse dimension scores instruments it ran rather than code it authored, and the compile instruments it used are the lane cache guard and the read's own growth test",
+      "recorded_at": "2026-10-06T01:28:25.242653+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-06T00:16:36Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2519",
+      "severity": "follow-on",
+      "text": "follow-on: the new measurement records cold_compile_wall_seconds and executable_bytes but asserts neither <=60 seconds nor <=50 MB; if compilation later completes in 100 seconds with a valid read, removing the strict expected-failure marker would leave a green test for a failed qualification clause."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2462",
+      "severity": "follow-on",
+      "text": "follow-on: observe_hit duplicates the persistent-cache lookup wrapper owned by scripts/h200_test_lane/cache_guard.py:150-183 rather than using its ledger, leaving two cache instruments to keep consistent."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/warm/compile-growth-132-warmup.log",
+      "line": "8",
+      "severity": "follow-on",
+      "text": "follow-on: the warmup timed out before a warmed topology executable existed, so the added assert-not-hits guard has no completed negative-control refusal; the explicit stop ruling permits this record but future cold certification still needs that control."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite is empty while after_suite reports three failed ids, so an added-failure count cannot be derived and must remain unmeasured rather than zero."
+    }
+  ],
+  "gate_arms_note": "The reviewed manifest has no baseline_suite. Its completed after_suite names h200-topology-cold.log, exit 1, and three failed ids at launch revision 92e95f4e942bb0df31d54604edc6846e3067e8cb. The 550 child header names 354831de03d1517e88ba2d6b63f8b34279fcd9b3 after a documentation-only intermediate commit; the test blob is unchanged. No base log exists to distinguish added failures, so the delta is unmeasured.",
+  "head_log_revision": "92e95f4e942bb0df31d54604edc6846e3067e8cb",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "seven commits culminate at 9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78 with 159 changed lines in tests/equilibrium/test_topology_read.py and a 50-line evidence fragment; the test adds isolated cold compilation, nested graph attribution and cache-hit observation, while no production source changes.",
+    "done_when": "prompt.txt:103 requires the 132, 300 and 550 H200 cold ladder with a 900 second row limit; h200-topology-cold.log:320-323 records three KernelCompileBarrier failures in 2735.07 seconds, each child log reaches the lowered checkpoint and ends EXIT=-15, while the resumed stop ruling explicitly withholds the larger rows and records the warm-cache refusal as not run.",
+    "goal": "prompt.txt:29 asks for cold topology compile qualification or a stop report with the dominant construct; the landed fragment at docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html:20 records the latter and tests/equilibrium/test_topology_read.py:34 uses a mechanism-only strict expected-failure reason.",
+    "manifest": "the reviewed manifest.md records seven commits, status complete, failed job 1281162, no baseline_suite, one completed after_suite with three failure ids, and a negative_control_note saying the topology cache-hit refusal never ran; its 550 equation count reconciles with cold/compile-growth-550.json.",
+    "write_paths": "prompt.txt:75-78 grants the topology test, the qualification fragment and its figure directory; git diff 7313cdd335bf493ccba3c51700c31bd8e89a76f8..9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78 changes only the granted test and fragment."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_topology_read.py:2434 raises on a 900 second child timeout and line 2529 would reject a persistent cache hit, but the warm probe never reached that assertion and lines 2519-2535 record rather than assert the 60 second and 50 MB limits.",
+    "evidence": "cold/compile-growth-132-cold.log, compile-growth-300-cold.log and compile-growth-550-cold.log show lowering followed by 900 second terminations, while docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html:33-43 explicitly marks executable sizes, compile peaks and topology cache refusal unavailable.",
+    "fit": "tests/equilibrium/test_topology_read.py:2363-2535 extends the existing topology test module with fixed row bounds and a strict expected failure, and the fragment follows the repository's typed evidence HTML form.",
+    "goal_fidelity": "docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html:35-48 documents the conditional stop branch and withholds 1074, 2616 and tangent qualification after the 550 row fails.",
+    "reuse": "tests/equilibrium/test_topology_read.py:2462-2471 installs a second JAX persistent-cache lookup wrapper instead of extending scripts/h200_test_lane/cache_guard.py:150-183, the existing cache-hit and miss ledger.",
+    "scope_discipline": "git diff 7313cdd335bf493ccba3c51700c31bd8e89a76f8..9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78 names only tests/equilibrium/test_topology_read.py and docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html, both declared in prompt.txt:75-78."
+  },
+  "node": "review-of-cfs-kernel-qualification",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 7313cdd335bf493ccba3c51700c31bd8e89a76f8\nreviewed_head_sha: 9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78\nVERDICT goal: prompt.txt:29 asks for cold topology compile qualification or a stop report with the dominant construct; the landed fragment at docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html:20 records the latter and tests/equilibrium/test_topology_read.py:34 uses a mechanism-only strict expected-failure reason.\nVERDICT done_when: prompt.txt:103 requires the 132, 300 and 550 H200 cold ladder with a 900 second row limit; h200-topology-cold.log:320-323 records three KernelCompileBarrier failures in 2735.07 seconds, each child log reaches the lowered checkpoint and ends EXIT=-15, while the resumed stop ruling explicitly withholds the larger rows and records the warm-cache refusal as not run.\nVERDICT write_paths: prompt.txt:75-78 grants the topology test, the qualification fragment and its figure directory; git diff 7313cdd335bf493ccba3c51700c31bd8e89a76f8..9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78 changes only the granted test and fragment.\nVERDICT manifest: the reviewed manifest.md records seven commits, status complete, failed job 1281162, no baseline_suite, one completed after_suite with three failure ids, and a negative_control_note saying the topology cache-hit refusal never ran; its 550 equation count reconciles with cold/compile-growth-550.json.\nVERDICT diff: seven commits culminate at 9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78 with 159 changed lines in tests/equilibrium/test_topology_read.py and a 50-line evidence fragment; the test adds isolated cold compilation, nested graph attribution and cache-hit observation, while no production source changes.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html:35-48 documents the conditional stop branch and withholds 1074, 2616 and tangent qualification after the 550 row fails.\nSCORE evidence: 15\nJUSTIFICATION evidence: cold/compile-growth-132-cold.log, compile-growth-300-cold.log and compile-growth-550-cold.log show lowering followed by 900 second terminations, while docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html:33-43 explicitly marks executable sizes, compile peaks and topology cache refusal unavailable.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 7313cdd335bf493ccba3c51700c31bd8e89a76f8..9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78 names only tests/equilibrium/test_topology_read.py and docs/evidence/fragments/converged-forward-solve/cfs-kernel-qualification.html, both declared in prompt.txt:75-78.\nSCORE durability: 11\nJUSTIFICATION durability: tests/equilibrium/test_topology_read.py:2434 raises on a 900 second child timeout and line 2529 would reject a persistent cache hit, but the warm probe never reached that assertion and lines 2519-2535 record rather than assert the 60 second and 50 MB limits.\nSCORE fit: 17\nJUSTIFICATION fit: tests/equilibrium/test_topology_read.py:2363-2535 extends the existing topology test module with fixed row bounds and a strict expected failure, and the fragment follows the repository's typed evidence HTML form.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/equilibrium/test_topology_read.py:2462-2471 installs a second JAX persistent-cache lookup wrapper instead of extending scripts/h200_test_lane/cache_guard.py:150-183, the existing cache-hit and miss ledger.\nFINDING tests/equilibrium/test_topology_read.py:2519 follow-on: the new measurement records cold_compile_wall_seconds and executable_bytes but asserts neither <=60 seconds nor <=50 MB; if compilation later completes in 100 seconds with a valid read, removing the strict expected-failure marker would leave a green test for a failed qualification clause.\nFINDING tests/equilibrium/test_topology_read.py:2462 follow-on: observe_hit duplicates the persistent-cache lookup wrapper owned by scripts/h200_test_lane/cache_guard.py:150-183 rather than using its ledger, leaving two cache instruments to keep consistent.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/warm/compile-growth-132-warmup.log:8 follow-on: the warmup timed out before a warmed topology executable existed, so the added assert-not-hits guard has no completed negative-control refusal; the explicit stop ruling permits this record but future cold certification still needs that control.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T001613255359-cfs-kernel-qualification/manifest.md:21 follow-on: baseline_suite is empty while after_suite reports three failed ids, so an added-failure count cannot be derived and must remain unmeasured rather than zero.\n",
+  "review_base_sha": "1fcca499cb29c0c00b36fbe394a66f24545d8f9b",
+  "review_run_id": "legacy-2235a5d5d309",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "7313cdd335bf493ccba3c51700c31bd8e89a76f8",
+  "reviewed_commit": "9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78",
+  "reviewed_head_sha": "9d2e1eb47a8fe0af15f028ab607a5eb9c9829e78",
+  "reviewed_run_id": "r-20261006T001613255359-cfs-kernel-qualification",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-kernel-qualification",
+  "scores": {
+    "durability": 11,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:27:00.536218+00:00",
+  "total": 85
+}

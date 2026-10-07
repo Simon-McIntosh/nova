@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T11:47:22Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T10:55:25Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "nova/equilibrium/clip_quadrature.py",
+      "line": "883",
+      "severity": "follow-on",
+      "text": "The repaired analytic-state radial centroid JVP is 1.6228792479 m/T against the six-step central plateau 1.6292239557..1.6292261572 m/T, leaving 0.0063460139 m/T (0.39%). The new seam recovers 99.2% of the earlier gap; investigate the residual geometry derivative only if the merged certificate needs tighter agreement."
+    },
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-clip-quadrature-vertex-tangent.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The scoped fragment links a JSON receipt but offers no visual comparison of the six central slopes and repaired JVP. A small direct-labelled plot would make the remaining gap and six-step plateau readable in the research record."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105502854414-cco-clip-quadrature-vertex-tangent/manifest.md",
+      "line": "commits",
+      "severity": "follow-on",
+      "text": "The four reviewed commits are local and not ancestors of review base d39db6746ac17896d8b054be17ea793fc34d250e. The coordinator must integrate them and run the separately assigned merged-head gate, then verify the vertex_jacobian contraction remains in the landed source."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's baseline_suite and after_suite are complete and readable. Baseline cf55840842c727455af49fb4f9e505a6886b789c has 16 passed, EXIT=0 in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105502854414-cco-clip-quadrature-vertex-tangent/baseline-suite-confirmed.log; after-suite 8564af7fda08c65966b159f4926cb393233860e4 has 17 passed, EXIT=0 in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105502854414-cco-clip-quadrature-vertex-tangent/head-suite.log. Both failure-id lists are empty, so added_failure_count=0. The after-suite precedes only the committed receipt and evidence-link changes. The focused declared mutation fails the new moving-boundary test with JVP 0 against central -0.4 and EXIT=1.",
+  "justifications": {
+    "durability": "The behavior is pinned by a test whose explicit old-contraction mutation fails. Baseline, head, mutation, sweep, benchmark, and extended forward-test logs are durable in the run directory; the six-step receipt and scoped evidence link are committed. All four commits have conventional subjects and explanatory bodies without attribution. Coordinator integration and merged-head verification remain outstanding.",
+    "evidence": "The parent failure and head mutation both show the specific omitted-vertex-tangent signature, JVP 0 versus central -0.4, while the head focused test passes. Complete baseline and head suite receipts show 16 and 17 passing tests with zero added failures. The committed six-step receipt preserves the analytic-state digest and base centroid and shows the radial slope plateau. The downstream moment-map benchmark has a smooth scalar positive control at 9.91e-11 and shrinking support-stage error, while the extended forward finite-difference test passes. The residual 0.39% analytic centroid gap prevents claiming exact derivative closure.",
+    "fit": "The change extends the existing local Jacobian method to its missing input, retaining the same primal clipping and live-root handling. The regression test isolates boundary motion with a constant-current closure and a finite central slope. The measurement driver explicitly requests exact clipping and records its revision. A small residual geometry derivative discrepancy remains a separate investigation.",
+    "goal_fidelity": "The exact seam is repaired: the custom JVP contracts local Jacobians for both polynomial coefficients and outer polygon vertices. The primal function and one_cell value expression are unchanged; jacfwd(..., has_aux=True) returns that same value. The existing live-root selection remains inside _quadratic_support, before local Jacobian transposition. The new current test fails on the parent mechanism and passes on the repaired head. The analytic radial centroid JVP rises from 0.836870 to 1.622879 m/T against a six-step central plateau near 1.629225 m/T. The remaining 0.006346 m/T gap is disclosed, not claimed solved.",
+    "scope_discipline": "Four reviewed commits change only the granted solver source, focused test, existing measurement driver, repaired sweep JSON, and scoped evidence fragment. The target worktree is clean, and git diff --check is clean. No solver threshold, default, plan state, or unrelated source was changed."
+  },
+  "node": "review-of-cco-clip-quadrature-vertex-tangent",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 19\nTOTAL: 94\nVERDICT: pass-with-follow-ons\nCHECKS: source diff confirms unchanged primal and live-root ordering; parent and mutation fail the moving-boundary test at JVP 0 versus central -0.4; head focused test passes; complete suite arms show 16/16 and 17/17, zero added failures; six-step analytic receipt records repaired JVP 1.6228792479 m/T versus 1.629224..1.629226 m/T central; downstream benchmark EXIT=0 and extended forward test 1 passed; target worktree and diff clean.\nFOLLOW-ONS: residual 0.006346 m/T centroid derivative gap; add a compact comparison figure to the evidence fragment; integrate local commits and verify merged head.",
+  "review_base_sha": "d39db6746ac17896d8b054be17ea793fc34d250e",
+  "review_run_id": "legacy-c07ec5dd550d",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "cf55840842c727455af49fb4f9e505a6886b789c",
+  "reviewed_commit": "fd692c7af21e6e2e0e1727479fd0c3b8174b63d2",
+  "reviewed_head_sha": "fd692c7af21e6e2e0e1727479fd0c3b8174b63d2",
+  "reviewed_run_id": "r-20261003T105502854414-cco-clip-quadrature-vertex-tangent",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-clip-quadrature-vertex-tangent",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T11:52:05Z",
+  "total": 94
+}

@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:47:22.746Z",
+  "dispatched_at": "2026-10-05T15:36:21Z",
+  "findings": [
+    {
+      "anchor": "tests/test_certificate_pin.py:29",
+      "id": "thin_wrapper-1",
+      "reason": "\u00a73's done-when (\"the pinning tests are green in the default lane\") is unsatisfiable under this instrument, so \u00a73 must either retire the pin in favour of the live gate or restate its done-when, rather than \"update the pin\" after the census rerun.",
+      "text": "\u00a73's \"focused regression lane\" is realised as a receipt reader that asserts stored field values and PNG hashes rather than exercising the solve; its own refusal test (line 106) asserts `not unqualified` against 15 unqualified rows and is red by design, so the lane adds no protection the live gate does not already provide and cannot be green while the census is unqualified",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_certificate_gate_live.py:1",
+      "id": "duplicate_owner-1",
+      "reason": "extending the live-gate owner (adding the rerun assertion there) is the honest change; a parallel receipt pin drifts from the census \u2014 the receipt's `verdict.qualified_rows` is 1 while \u00a73's prose reports 3 qualified, the same split already recorded in followups f-gsag-two-censuses-one-receipt-name and f-gsag-title-contradicts-caption-on-qualification.",
+      "text": "a certificate regression lane that both re-runs the production route and refuses unqualified/stale rows already exists, owned by plan `plasma-cell-read-fidelity` (also `benchmarks/solve_program_size_gate.py`, `tests/test_certificate_baseline_revision.py`), and \u00a73's census-pin is a second, weaker lane over the same receipt",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "958c6c93b964d74c0b5d8a1354cb71c142b2eef431358d30a912bde856064f9a",
+  "plan_slug": "gs-absolute-accuracy-gates",
+  "plan_version": 56,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153546761261-plan-review-of-gs-absolute-accuracy-gates",
+  "reviewed_blob_sha": "a8df6cc3661381622a754c517423cab11243a547",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the certificate harness (`benchmarks/solovev_certificate.py`) is one module hiding case construction, the production solve, the receipt and the render behind one builder; \u00a73's artifact document adds no new subsystem.",
+    "duplicate_owner": "a finding \u2014 \u00a73 proposes a certificate regression lane parallel to the one `plasma-cell-read-fidelity` already owns in `tests/test_certificate_gate_live.py` and `benchmarks/solve_program_size_gate.py`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds an evidence document and a default-lane test only, and neither names a new public definition, CLI option, MCP view or refusal family, so nothing needed retirement.",
+    "reuse_search": "pass \u2014 the plan extends the existing analytic-oracle and `ForwardProfile` production-seam paths (`docs/research/forward-accuracy-reuse-map.html` is cited, `analytic_operator_ladder.py` as aggregation skeleton, `ForwardProfile.solve` route), and \u00a71/\u00a72 reuse the shipped recovery gates rather than rebuilding them.",
+    "thin_wrapper": "a finding \u2014 \u00a73's pinned regression lane is `tests/test_certificate_pin.py`, which is a thin reader over the stored receipt JSON and adds no behaviour the existing live gate lacks."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.407157+00:00"
+}

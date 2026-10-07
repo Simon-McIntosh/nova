@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:55:19.553Z",
+  "dispatched_at": "2026-10-05T15:41:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/null-identification-authority.html#s3",
+      "id": "reuse_search-1",
+      "reason": "\u00a73 must be restated to test the already-landed spline-restricted minimum and its residual, or collapsed, instead of designing a move against a deleted function.",
+      "text": "\u00a73 names `connectivity_boundary.py _refine_wall_minimum_position` as the local-sub-panel limiter refinement to move onto the spline, but that symbol does not exist: 9165374a8 (\"unify reachable wall spline authority\", 2026-09-04) deleted it and minimises signed normalised flux on knot-split reachable-wall segments off the one tensor spline (nova/equilibrium/connectivity_boundary.py:42, :1037 \"Polish a wall candidate on the tensor spline over reachable wall pieces\"). The section proposes a move that is already the state of the code.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/null-identification-authority.html#s4",
+      "id": "reuse_search-2",
+      "reason": "read-repair work must be aimed at the contour-tree owner that now exists, or explicitly recorded as retired by it, or the plan designs against code it intends to replace.",
+      "text": "\u00a73/\u00a74 (limiter capture, no_qualified_axis on the hex oracle) escape their read repairs to nova/equilibrium/topology.py, yet the plan's own lead decision of 2026-10-01 says the remaining read waits on plan contour-tree-topology-authority \u2014 and that authority already exists in the tree as nova/equilibrium/contour_tree.py (raw-flux, hex-carrier, no raster, matches nothing-rasterised decision) with nova/equilibrium/contour_tree_mesh.py. The sections are written against the superseded owner.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/null-identification-authority.html#s1",
+      "id": "duplicate_owner-1",
+      "reason": "three producers re-deriving fields the read already owns forks the bank from the null identification authority the plan is named for; the plan should extend the receipt owner and have the producers serialise it.",
+      "text": "\u00a71 extends three separate producers (efit_topology_corroboration.py, efit_reproduction_gate.py with diiid_forward_gs_match.py, solovev_certificate.py) so each records Nova's axis and X-point positions, flux, admitted-candidate count and second-best margin. Those nulls are already produced by the single read: ForwardTopologyState carries axis, axis_flux, x_point and x_point_flux (nova/equilibrium/forward_operator.py:722\u2013730), and the candidate count/margin come off the census receipt (nova/equilibrium/flux_surface_connectivity.py:1031 census_stationary_receipt, which already emits multiplicity and value evidence).",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/null-identification-authority.html#s1",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added interface surface in its own text before it is implemented; a banked field added three times is added surface with no retirement named.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the \u00a71 done-when regenerates three receipts \"with the new fields\", adding axis, saddle, candidate count, second-best margin and read-status/exception fields to three public receipt shapes, and no section names what it retires or merges, or states why nothing can be.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "abd4cc45b5591aa7f662a4798339947975fdddf59afd56f73c94156e00b29399",
+  "plan_slug": "null-identification-authority",
+  "plan_version": 244,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T154054421839-plan-review-of-null-identification-authority",
+  "reviewed_blob_sha": "c03b34ba612a45ac5f46c81d942751d8c8361b8d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the substantive new surface is the containment-aware read behind Topology.read_qualification (nova/equilibrium/topology.py:1125), which hides census, containment, class read and polish behind one TopologyQualification rather than spreading faces.",
+    "duplicate_owner": "a finding \u2014 \u00a71 has three producers each record the nulls that nova/equilibrium/forward_operator.py:722 ForwardTopologyState already carries; the owner to extend is named instead of the read re-emitted three ways.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 adds axis/saddle/candidate fields across three producer receipts and names nothing it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a73/\u00a74 design read repairs against nova/equilibrium/topology.py while the successor authority the plan itself defers to, nova/equilibrium/contour_tree.py, already exists in the tree (added e403c009f).",
+    "thin_wrapper": "pass \u2014 no section proposes a wrapper over existing machinery without justification; \u00a75 merges three reads into one shared read rather than layering a fourth."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:38.578949+00:00"
+}

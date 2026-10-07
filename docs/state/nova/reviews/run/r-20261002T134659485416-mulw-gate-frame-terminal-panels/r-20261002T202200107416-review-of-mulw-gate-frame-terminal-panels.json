@@ -1,0 +1,142 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Canonical annotate_review_of_run read the source manifest: baseline_suite and after_suite name no gate logs. Both arms and their revisions are unmeasured; null is intentional. The prior review recorded 0 with a caveat, which this revision-bound review corrects without altering the prior revision record.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/repair-final-validation.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/provenance-baseline.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/provenance-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/provenance-reverted.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/single-job-negative.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/control-negative.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/control-record-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/panel-check.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/terminal-hash-negative-control.log"
+  ],
+  "assertion_audit": {
+    "allocation": "check_completed_run.py requires job 1280450, five children, zero reused receipts and five identities; parent run.json from 00f8b6ba9 fails same_job/five_children/zero_reused_receipts despite containing five frames (single-job-negative.log).",
+    "historical_control": "The parent artifact at 16d59153d lacks the historical control and fails historical_control_present in control-negative.log; the head artifact includes the receipt and matching NPZ. Documentation marker checks only prove disclosure, not numerical correctness.",
+    "panel": "check_panel.py and the final artifact check validate the actual renderer results and persisted SVG labels, nonempty contour segments, widths and no canvas caption. These assertions fail if the renderer removes contours, labels or restores its old widths. Visual inspection of frame 44 agrees with the receipt.",
+    "provenance": "Reinstating the parent _persist without _validate_frame_contract accepts five independently corrupted receipts: provenance-reverted.log records positive accepted, five mutations accepted, failures=5 and EXIT=1. At the repaired source, provenance-head.log records positive accepted, each mutation refused, failures=0 and EXIT=0. Mutation changes one side while retaining the independent aggregate header.",
+    "terminal_hash": "The persisted terminal array is hashed with dtype and shape and compared to the separately measured solver terminal hash and the receipt NPZ file hash. Replacing the recorded terminal hash with zeros is refused (terminal-hash-negative-control.log)."
+  },
+  "base_log_revision": null,
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/diiid_gate_frame_identity.py:main -> run -> _measure -> _persist",
+    "benchmarks/diiid_gate_frame_identity.py:_measure_one_frame -> _measure_frame -> _write_terminal_flux_artifact",
+    "benchmarks/diiid_gate_frame_identity.py:_render_run -> _render_frame_receipt",
+    "benchmarks/diiid_gate_frame_identity.py:main -> _compare_control"
+  ],
+  "commits_read": [
+    "60fb6c5cba45da1b7a2f1f6c32fa447d3db77a69",
+    "3e98097edfd7114a1601a37cf24c6cfff970b058",
+    "37290e840839390655fea67991509312f5d039bc",
+    "6e6c93b00a57d31ea320616651ab45a7c4fe5f72",
+    "0a36644409e2dec21a825370b1b4ee001e259f89",
+    "79c9ce89e530663dc851c40705e288d7689c35bd",
+    "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+    "16d59153d53521838ddbc6becca875379a6e1a80",
+    "471afc8bc72f94fc1f0d8a2f02293c1d481e03d4"
+  ],
+  "completed_at": "2026-10-02T20:32:11Z",
+  "dispatched_at": "2026-10-02T20:22:24Z",
+  "evidence_inputs": {
+    "historical_cache_misses": 1,
+    "historical_runtime_revision": "a66c8462dae755bfe91b307e9bf9a58d4205f7ab",
+    "job_id": 1280450,
+    "npz_count": 6,
+    "numerical_limit": "No primary or historical arm converged; residual restoration is not terminal-state bit identity. Attribution of the runtime-code change and the other four frames remains open.",
+    "png_count": 5,
+    "primary_cache_hits": 5,
+    "primary_frames": 5,
+    "source_gate_summary": "SUMMARY frames=5 same_job=1280450 npz=6 png=5 svg=5 cache_hits=5 cache_misses=0 historical_controls=1 failures=0",
+    "source_runtime_revision": "00f8b6ba969e4240177b791ab37a8c16d65a58c3",
+    "svg_count": 5
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: Both baseline_suite and after_suite are empty, so added_failure_count is null, not zero; the custom provenance logs cannot silently be substituted for completed suite arms. Record explicit paired focused-suite arms when repository regression tests are added."
+    },
+    {
+      "file": "benchmarks/diiid_gate_frame_identity.py",
+      "line": "1395",
+      "severity": "follow-on",
+      "text": "follow-on: The provenance, hash and panel falsifiers reside in check_receipt_contract.py, check_panel.py and check_completed_run.py under the source run directory, and no repository test was added for this 805-line driver delta. Preserve the corruption and parent-source cases as focused repository tests so later changes exercise them automatically; this does not invalidate the recorded refusals for this delivery."
+    },
+    {
+      "file": "benchmarks/diiid_gate_frame_identity.py",
+      "line": "1671",
+      "severity": "follow-on",
+      "text": "follow-on: _compare_control selects its success verdict from residual restoration alone, while same_input_fingerprints and same_instrument are recorded only as booleans. A future mismatched control can therefore receive the same-driver restoration verdict. Require both compatibility checks before emitting that attribution, with a mismatched-input/instrument negative case. Both booleans are true in the delivered control, so this finding does not invalidate its result."
+    }
+  ],
+  "head_log_revision": null,
+  "independent_validation": {
+    "command": "env PYTHONDONTWRITEBYTECODE=1 JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/check_completed_run.py",
+    "completed": false,
+    "exit_status": 1,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202200107416-review-of-mulw-gate-frame-terminal-panels/review-artifact-validation.log",
+    "result": "All five frame local checks and historical-control NPZ validation completed; final sacct call failed because the review sandbox cannot open a SLURM socket (Operation not permitted). No independent full-pass claim is made; original repair-final-validation.log records COMPLETED|0:0|01:12:48 and EXIT=0."
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "Read the nine-commit chain against b68eb93ff, including 79c9ce89e provenance admission and plot repairs, 00f8b6ba9 discrepancy disclosure, 16d59153d single-allocation replacement and 471afc8bc historical-control receipt and additive archive update.",
+    "done_when": "run.json and repair-final-validation.log identify five successful children, zero reused receipts and five exact cache hits in H200 job 1280450; the archive cites all five panels and expressly labels the cold-seed reference because the historical batched artifact contains no terminal arrays.",
+    "goal": "The source prompt's terminal-flux and contour-panel goal is met by six digest-checked NPZs (five primary frames and one historical control), five PNG/SVG pairs, per-frame timings and the terminal_state_element_count rename in benchmarks/diiid_gate_frame_identity.py and the committed figure directory.",
+    "manifest": "The source manifest names all nine commits, paths and literal validation commands and openly retains the numerical discrepancy, but baseline_suite and after_suite are empty at lines 20-21, so the suite failure delta is unmeasured.",
+    "write_paths": "The 26 changed repository paths in b68eb93ff..471afc8bc fall within the benchmark, figure directory, archive and fragment grants; the archive diff adds 37 lines and removes none, preserving earlier evidence."
+  },
+  "justifications": {
+    "durability": "benchmarks/diiid_gate_frame_identity.py:1395 rejects independently corrupted receipt provenance and :589 verifies file and terminal-state hashes, with positive and parent-source negative cases recorded, but those regression checks live only in the run directory instead of the repository test suite.",
+    "evidence": "repair-final-validation.log ends with six NPZs, five PNG/SVG pairs and zero artifact failures at 471afc8bc, and the historical control restores frame 44 within 3.33e-16, while the empty suite arms and review sandbox's refused SLURM accounting query limit independently established evidence.",
+    "fit": "benchmarks/diiid_gate_frame_identity.py:1245 uses the existing Nova painters, axis-free 1400-pixel panels, shared levels, both null sets, 3.0-point terminal contours and 20-point direct labels; the historical-control success verdict needs a stronger input-compatibility condition.",
+    "goal_fidelity": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/run.json binds all five frames to job 1280450 and carries arrays, per-frame timings, cache rows and five shared-level panels required by the source done-when.",
+    "scope_discipline": "All 26 paths in the reviewed diff are inside the declared grants, the cumulative archive loses no lines, and the nine commits modify no solver source or plan state."
+  },
+  "plan": "nova:multi-unit-limiter-wall",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The source prompt's terminal-flux and contour-panel goal is met by six digest-checked NPZs (five primary frames and one historical control), five PNG/SVG pairs, per-frame timings and the terminal_state_element_count rename in benchmarks/diiid_gate_frame_identity.py and the committed figure directory.\nVERDICT done_when: run.json and repair-final-validation.log identify five successful children, zero reused receipts and five exact cache hits in H200 job 1280450; the archive cites all five panels and expressly labels the cold-seed reference because the historical batched artifact contains no terminal arrays.\nVERDICT write_paths: The 26 changed repository paths in b68eb93ff..471afc8bc fall within the benchmark, figure directory, archive and fragment grants; the archive diff adds 37 lines and removes none, preserving earlier evidence.\nVERDICT manifest: The source manifest names all nine commits, paths and literal validation commands and openly retains the numerical discrepancy, but baseline_suite and after_suite are empty at lines 20-21, so the suite failure delta is unmeasured.\nVERDICT diff: Read the nine-commit chain against b68eb93ff, including 79c9ce89e provenance admission and plot repairs, 00f8b6ba9 discrepancy disclosure, 16d59153d single-allocation replacement and 471afc8bc historical-control receipt and additive archive update.\nCALL_SITES: benchmarks/diiid_gate_frame_identity.py:main -> run -> _measure -> _persist, benchmarks/diiid_gate_frame_identity.py:_measure_one_frame -> _measure_frame -> _write_terminal_flux_artifact, benchmarks/diiid_gate_frame_identity.py:_render_run -> _render_frame_receipt, benchmarks/diiid_gate_frame_identity.py:main -> _compare_control\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/run.json binds all five frames to job 1280450 and carries arrays, per-frame timings, cache rows and five shared-level panels required by the source done-when.\nSCORE evidence: 18\nJUSTIFICATION evidence: repair-final-validation.log ends with six NPZs, five PNG/SVG pairs and zero artifact failures at 471afc8bc, and the historical control restores frame 44 within 3.33e-16, while the empty suite arms and review sandbox's refused SLURM accounting query limit independently established evidence.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All 26 paths in the reviewed diff are inside the declared grants, the cumulative archive loses no lines, and the nine commits modify no solver source or plan state.\nSCORE durability: 18\nJUSTIFICATION durability: benchmarks/diiid_gate_frame_identity.py:1395 rejects independently corrupted receipt provenance and :589 verifies file and terminal-state hashes, with positive and parent-source negative cases recorded, but those regression checks live only in the run directory instead of the repository test suite.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/diiid_gate_frame_identity.py:1245 uses the existing Nova painters, axis-free 1400-pixel panels, shared levels, both null sets, 3.0-point terminal contours and 20-point direct labels; the historical-control success verdict needs a stronger input-compatibility condition.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/manifest.md:20 follow-on: Both baseline_suite and after_suite are empty, so added_failure_count is null, not zero; the custom provenance logs cannot silently be substituted for completed suite arms. Record explicit paired focused-suite arms when repository regression tests are added.\nFINDING benchmarks/diiid_gate_frame_identity.py:1395 follow-on: The provenance, hash and panel falsifiers reside in check_receipt_contract.py, check_panel.py and check_completed_run.py under the source run directory, and no repository test was added for this 805-line driver delta. Preserve the corruption and parent-source cases as focused repository tests so later changes exercise them automatically; this does not invalidate the recorded refusals for this delivery.\nFINDING benchmarks/diiid_gate_frame_identity.py:1671 follow-on: _compare_control selects its success verdict from residual restoration alone, while same_input_fingerprints and same_instrument are recorded only as booleans. A future mismatched control can therefore receive the same-driver restoration verdict. Require both compatibility checks before emitting that attribution, with a mismatched-input/instrument negative case. Both booleans are true in the delivered control, so this finding does not invalidate its result.\nREVIEWED_BASE_SHA: b68eb93ff3427e0a31cfccda56d1eaf22b01e08e\nREVIEWED_HEAD_SHA: 471afc8bc72f94fc1f0d8a2f02293c1d481e03d4\n",
+  "resolved_prior_findings": [
+    {
+      "finding": "f237f00b74d",
+      "resolution": "All five current frames were measured in job 1280450 with five children and zero reused receipts; the prior aggregate fails three single-job checks. Receipt provenance now rejects job, revision, driver digest, cache-root and identity mismatches."
+    },
+    {
+      "finding": "f3bbd556bfc",
+      "resolution": "The archive prominently records all five enlarged differences and separates paired-pass differences from historical artifact comparisons. Same-job historical frame 44 restores the artifact residual within 3.33e-16 with equal instrument and input fingerprints; the responsible runtime change and other frames remain open."
+    }
+  ],
+  "review_limitations": [
+    "Live read_plan was fenced by its attempted recovery-lock write; read canonical /home/ITER/mcintos/Code/nova/docs/plans/multi-unit-limiter-wall.html version 34 instead.",
+    "No solver suite or GPU measurement was rerun. The one repeated artifact gate reached its SLURM accounting step and was fenced there.",
+    "Source and assigned review worktrees were read only; this review writes only granted review records and its delivery logs/manifest."
+  ],
+  "review_run_id": "r-20261002T202200107416-review-of-mulw-gate-frame-terminal-panels",
+  "reviewed_base_sha": "b68eb93ff3427e0a31cfccda56d1eaf22b01e08e",
+  "reviewed_head_sha": "471afc8bc72f94fc1f0d8a2f02293c1d481e03d4",
+  "reviewed_run_id": "r-20261002T134659485416-mulw-gate-frame-terminal-panels",
+  "reviewer_node": "review-of-mulw-gate-frame-terminal-panels",
+  "reviewer_run_id": "r-20261002T202200107416-review-of-mulw-gate-frame-terminal-panels",
+  "reviewing_run_id": "r-20261002T202200107416-review-of-mulw-gate-frame-terminal-panels",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T20:29:57.386469+00:00",
+  "total": 95,
+  "verdict": "pass-with-follow-ons"
+}

@@ -1,0 +1,25 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:42:30.457Z",
+  "dispatched_at": "2026-10-05T15:29:50Z",
+  "findings": [],
+  "plan_fingerprint": "6a931ccd9c24c090b265a9bd3941a4ac97fb4d6f4298ece371379a45f8a273eb",
+  "plan_slug": "diiid-forward-onboarding",
+  "plan_version": 82,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152854475305-plan-review-of-diiid-forward-onboarding",
+  "reviewed_blob_sha": "2024fa310e87451fdec5ecbe17c42bc54aeb1ef0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the response kernels hide the \u0394* composition, sign/total-flux conversion, affine surface projection and conditioning-aware uncertainty behind four functions (`sample_chord_psi_norm`, `apply_delta_star`, `extract_flux_functions`, `vacuum_region_receipt`) in one module, and the artifact lifecycle hides manifest schema, content-addressed store and OCI reference behind one manifest type; the plan adds behaviour behind these, not a wrapper per call.",
+    "duplicate_owner": "pass \u2014 the content-addressed cache, no-clobber publication, DD-version pinning, semantic-identity pin and OCI reference helper that \u00a77 relies on are all owned by `nova/imas/machine_artifact.py` (`_canonical_cache_root`, `_verified_object_root`, `publication_dd_version`, `registry_digest`), and the two DIII-D machine-description benchmarks are thin CLIs over two distinct nova modules (`benchmarks/diiid_machine_description.py` \u2192 `nova/imas/diiid_description.py`, dataset-authoritative; `benchmarks/diiid_ids_machine_description.py` \u2192 `nova/imas/diiid_machine_ids.py`, external netCDF entry), which is the plan's dataset-primary-plus-corroboration split, not a fork of one owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan is a physics/geometry plan that adds data artifacts and library functions, names no new CLI option, MCP view or agent-facing refusal family, and its one refusal-family-shaped addition (the artifact layer's DDv4-floor refusal of a DDv3 publication) sits in `nova/imas/machine_artifact.py::publication_dd_version` as library-internal validation rather than an interface family.",
+    "reuse_search": "pass \u2014 the three design sections each name the owner they extend and the transport-seam response-kernel library the plan calls \"built for the transport seam\" exists as `nova/equilibrium/map_extraction.py` (its docstring: \"Deterministic response kernels for a labelled equilibrium flux map\"), the artifact lifecycle it generalises exists as `nova/imas/machine_artifact.py`, and the machine route it reads through exists as `nova/imas/machine.py`.",
+    "thin_wrapper": "pass \u2014 \u00a77's change is explicitly an extension of the existing owner (\"the MAST-specific artifact module becomes machine-parameterised and serves both machines through one path, rather than a second machine-specific copy beside it\"), and `machine_artifact.py` is already machine-generic (`machine_name`, `manifest_schema(machine)`, `oci_artifact_type(machine)`), so the plan extends rather than wraps."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.301656+00:00"
+}

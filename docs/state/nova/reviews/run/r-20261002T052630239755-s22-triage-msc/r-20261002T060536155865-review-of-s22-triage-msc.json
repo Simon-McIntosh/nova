@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run is a read-only investigation node, not an armed test node: its manifest carries baseline_suite null and after_suite null (confirmed in the reviewed run classification.json and manifest), and its write scope holds no test file. There is no baseline/after suite arm pair from which added failures could arise, so added_failure_count is 0 and added_failure_ids is empty. The appropriate positive check is instruction fidelity and citation reproduction, which this review performed at the reviewed revision 3ae55642292a2f86d308daf597cc7dbf7041c26a.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-msc.md: reviewed deliverable, 447 lines, 21 rows x 7 fields + grouping; verified against 3ae5564",
+    "docs/figures/millisecond-converged-solve/program-size/gate/receipt.json at 3ae5564: limits 450000000/50000000; rows[0].before.executable_bytes=461724765 (row 13 defect reproduced)",
+    "docs/state/nova/crew.json run r-20260920T153922912568 at 3ae5564: gate_check exit_status 0, log_path negative_control.log, log_digest null (row 3 reproduced)",
+    "flux-arguments/flux-functions.png and profile-args/flux-functions.png at 3ae5564: both md5 7e3dc797252272f03d4dfc21bb3d4e8a (row 14 reproduced)"
+  ],
+  "call_sites": [],
+  "commits_read": [],
+  "completed_at": "2026-10-02T06:22:43.905Z",
+  "dispatched_at": "2026-10-02T06:05:50Z",
+  "evidence_inputs": {
+    "absence_positive_control": "Row 1 (no padded-vs-unpadded receipt): grep 'padded' across docs/figures/millisecond-converged-solve/ hits 0 while grep 'receipt' hits 70 files \u2014 the scan can see content present, so the 0 is meaningful.",
+    "figure_scan": "evidence/figure-reference-scan-2026-10-02.json: scan roots docs/plans,docs/evidence,docs/research,docs/sprints,docs/audit; total_figures 68, referenced 20, unreferenced 48. Independently re-derived 68/48.",
+    "open_followup_set": "docs/plans/millisecond-converged-solve.html at 3ae5564: 22 ids data-status=open of 47 total; the 21 in scope (all but f-msc-fused-route-enforces-axis-qualification) all present as rows; the four excluded f-ecq/f-fsa ids are not on this page.",
+    "row14_md5_and_row9_dir": "flux-arguments/flux-functions.png == profile-args/flux-functions.png md5 7e3dc797252272f03d4dfc21bb3d4e8a; diverted-oracle-census/ holds only diverted-oracle-census-fine.png, no JSON.",
+    "row2_4_census": "tests/test_forward_census.py:452 ADMISSION_CENTRE_DISTANCE_IN_PITCH=0.25; :489-491: 2.51 pitches at 136 cells (136 asserted at :414; 342 at :434); 1.91 at 342.",
+    "row3_ledger": "docs/state/nova/crew.json: run_id at :215678, gate_check block at ~:215776 with exit_status 0 (:215777), log_path .../logs/negative_control.log (:215779), log_digest null (:215780). Coordinator-owned.",
+    "row5_13_receipt": "program-size/gate/receipt.json limits {300_cell_executable_bytes:450000000, 300_cell_executable_target_bytes:50000000, 300_cell_solve_instructions:210000}; rows[0].before.executable_bytes=461724765>450000000.",
+    "row6_fused": "tests/test_fused_same_state_read.py:103 partition=self._support_partition(...); :105 except NoQualifiedAxisError: :106 masks,topology=partition[0],partition[1]; :107. Substitution present.",
+    "row7_forward": "nova/equilibrium/forward.py:1980 def argument_layout; :1985 trace_bound=any(isinstance(value,jax.core.Tracer) for value in (requested_class,target_current)); :1989-1992 key=(...,argument_layout(target_current),...) built BEFORE :1998 if not trace_bound. Traced target_current would hit np.asarray in argument_layout -> TracerArrayConversionError. S21-owned file."
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-msc.md",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: row 6 (f-fsa-fused-axis-refusal) describes the test comparator as the \"_unfused_axis-refusal-adjacent comparator\", a garbled identifier \u2014 the file's helpers are _unfused_point_read/_unfused_linear_read and the substitution is the try/except NoQualifiedAxisError branch at tests/test_fused_same_state_read.py:105-107. The substantive claim (the reference arm is replaced by the fused partition's own masks/topology) is correct and reproduces; only the symbol name is loose. Also, several citations use approximate line numbers ('near line 215766', 'near line 1606') where exact anchors exist (gate_check at crew.json:215776; log_path at :215779). Recommend naming the symbol beside each approximate cite."
+    }
+  ],
+  "follow_ons": [
+    "Finding: row 6 uses a garbled comparator identifier and several rows cite approximate line numbers; the symbols are named so the record remains locatable. Cite by symbol beside each approximate line.",
+    "Rows 6, 7, 9 are correctly deferred to S21-owned forward.py/forward_operator.py/topology.py and the clip-mode change; they should be sequenced behind S21 rather than dispatched now.",
+    "Rows 9-20 all share docs/evidence/archive/millisecond-converged-solve-landed.html \u2014 must be one node or serialised, as the report's grouping states."
+  ],
+  "gate_arms_note": "Reviewed manifest baseline_suite: null. Reviewed manifest after_suite: null. The node's artifact is a written triage report, not a code change; there is no diff to gate. This review's independent arm: re-parse of docs/plans/millisecond-converged-solve.html open-followup set (22 open), field-presence check of all 21 in-scope rows, byte/marker checks on docs/figures/millisecond-converged-solve/ (md5 pair, PNG-only census dir, 68/48 figure scan, receipt limits and before.executable_bytes), and line/symbol reads of nova/equilibrium/forward.py:1975-2012, tests/test_fused_same_state_read.py:89-113, tests/test_forward_census.py:452/:481-491, docs/state/nova/crew.json:215770-215782 at 3ae5564, all matching the reviewed citations.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "read-only investigation; no production call sites changed",
+    "diff": "No commits: read-only node. The deliverable is the report file outside the repository.",
+    "done_when": "One markdown report with one row per in-scope open followup, seven fields each, plus a shared-write-path grouping section. Delivered at reports/nova/s22/s22-triage-msc.md (447 lines); all 21 in-scope ids present; grouping present.",
+    "goal": "Read-only followup triage and reuse map for the millisecond-converged-solve plan under S22 wave 2. The report triages the plan page's 21 in-scope open followups. Goal met.",
+    "manifest": "The reviewed manifest reads status complete, commits 'none: read-only investigation', changed_paths the single report path, with a checkpoint naming the 21-row table. baseline_suite and after_suite are null (investigation node, no pytest arm).",
+    "write_paths": "No repository path changed. The reviewed worktree is clean and at base 3ae5564; the sole deliverable is the out-of-repo report. Row 3's ledger path is marked coordinator-owned."
+  },
+  "justifications": {
+    "durability": "The deliverable is a durable 447-line markdown file on disk written at 2026-10-02 06:04, legible and complete, anchored to base 3ae55642292a2f86d308daf597cc7dbf7041c26a which it names in its header. Every nova citation this review checked reproduces at that revision, so a reader can re-check it. The two evidence scans (figure-reference-scan-2026-10-02.json, msc-open-followup-bodies.json) are persisted beside the run. Weakness: several citations are given as approximate line numbers ('near line 215766', 'near line 1606'), which a reader must re-locate; this does not break the record because the symbols are named.",
+    "evidence": "Every load-bearing claim this review re-derived reproduces exactly at the reviewed revision 3ae5564. Receipt docs/figures/millisecond-converged-solve/program-size/gate/receipt.json carries limits 300_cell_executable_bytes=450000000 and 300_cell_executable_target_bytes=50000000 and rows[0].before.executable_bytes=461724765 (row 5 separation and row 13 caption defect both hold). nova/equilibrium/forward.py:1985-1992 computes trace_bound then builds key=(route, static_value(requested_class), argument_layout(target_current), ...) which calls np.asarray before the `if not trace_bound:` cache branch at :1998 (row 7 holds). tests/test_fused_same_state_read.py:103-107 still substitutes partition[0]/partition[1] on NoQualifiedAxisError (row 6 holds). docs/state/nova/crew.json run r-20260920T153922912568 entry: gate_check.exit_status=0 with log_path .../logs/negative_control.log and log_digest=null (row 3 holds). The two flux-functions.png are byte-identical (both md5 7e3dc797252272f03d4dfc21bb3d4e8a) and diverted-oracle-census/ holds only the PNG, no JSON (rows 14, 9 hold). The figure scan re-derived: 68 figures, 20 referenced, 48 unreferenced. tests/test_forward_census.py:452 ADMISSION_CENTRE_DISTANCE_IN_PITCH=0.25 with :489-491 stating 2.51 pitches at 136 cells and 1.91 at 342 (rows 2/4 hold). Row-1 absence confirmed with a positive control (grep 'receipt' hits 70 files across the plan figure tree, grep 'padded' hits 0). The node also marked rows 9 and 17 as not fully verified rather than overclaiming.",
+    "fit": "The node used the right instrument for a triage: parse the plan page's open-followup attributes, read each cited code/figure/receipt, and answer per row with a currency verdict, an action class from the allowed vocabulary, write paths with S21 flags, a compute/lane-fit call and a reuse verdict. It reused the repository's own machinery in the Reuse column (nova/media poloidal draw_nulls/draw_wall, benchmark receipt writers, DIVERTED_ORACLE_PITCH_LADDER and the cross-revision receipt) rather than proposing new instruments, and it correctly flags nova/equilibrium/forward.py, forward_operator.py, topology.py as S21-owned. Two rows are honestly declared as not fully verified.",
+    "goal_fidelity": "The node was asked for one row per OPEN followup of the named plan, each row carrying the seven fields (Currency, Action class, Write paths, Compute, Lane fit, Reuse, Draft done-when) plus a closing shared-write-path grouping. It delivered exactly that: the msc plan page at 3ae5564 carries 22 data-status=open followups (independently re-parsed by this review from docs/plans/millisecond-converged-solve.html: 22 open of 47 ids), the report covers the 21 in scope after removing the one scheduled id f-msc-fused-route-enforces-axis-qualification, and every one of those 21 ids appears as a row with all seven fields. The four excluded f-ecq/f-fsa ids sit on other pages and are correctly out of scope. The grouping section names the six write-path clusters and the S21-blocked group. Nothing asked for is missing.",
+    "scope_discipline": "Read-only as instructed: the reviewed worktree s22-triage-msc is clean and its HEAD equals its base 3ae5564 (git status --porcelain empty; git rev-parse HEAD = 3ae5564), the manifest records commits 'none', and the sole deliverable is the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-msc.md, outside every repository. The two evidence JSONs sit in the run directory. Search roots named in the report (docs/plans, docs/evidence, docs/research, docs/sprints, docs/audit, nova/, tests/, benchmarks/) match the brief's named subtrees; it did not walk a repository root. Row 3 correctly marks docs/state/nova/crew.json as a coordinator-owned ledger write rather than a worker path. No source, figure or plan file was touched."
+  },
+  "plan": "nova:S22",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the report covers all 21 in-scope open followups of the msc plan with the seven requested fields and a grouping section; goal met.\nVERDICT done_when: reports/nova/s22/s22-triage-msc.md (447 lines) carries 21 rows x 7 fields plus the write-path grouping; all 21 in-scope ids present.\nVERDICT write_paths: read-only; new source/figure/plan file changed; the reviewed worktree is clean at base 3ae5564.\nVERDICT manifest: status complete; commits none (read-only); baseline_suite and after_suite null (no pytest arm).\nVERDICT diff: no commits; the deliverable is the out-of-repo report file.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: The node was asked for one row per OPEN followup of the named plan, each row carrying the seven fields (Currency, Action class, Write paths, Compute, Lane fit, Reuse, Draft done-when) plus a closing shared-write-path grouping\nSCORE evidence: 19\nJUSTIFICATION evidence: Every load-bearing claim this review re-derived reproduces exactly at the reviewed revision 3ae5564\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Read-only as instructed: the reviewed worktree s22-triage-msc is clean and its HEAD equals its base 3ae5564 (git status --porcelain empty; git rev-parse HEAD = 3ae5564), the manifest records commits 'none', and the sole deliverable is the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-msc.md, outside every repository\nSCORE durability: 18\nJUSTIFICATION durability: The deliverable is a durable 447-line markdown file on disk written at 2026-10-02 06:04, legible and complete, anchored to base 3ae55642292a2f86d308daf597cc7dbf7041c26a which it names in its header\nSCORE fit: 18\nJUSTIFICATION fit: The node used the right instrument for a triage: parse the plan page's open-followup attributes, read each cited code/figure/receipt, and answer per row with a currency verdict, an action class from the allowed vocabulary, write paths with S21 flags, a compute/lane-fit call and a reuse verdict\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/s22-triage-msc.md:61 follow-on: row 6 garbled comparator identifier ('_unfused_axis-refusal-adjacent') and approximate line numbers; substantive claims reproduce.",
+  "review_run_id": "r-20261002T060536155865-review-of-s22-triage-msc",
+  "reviewed_base_sha": "3ae55642292a2f86d308daf597cc7dbf7041c26a",
+  "reviewed_head_sha": "3ae55642292a2f86d308daf597cc7dbf7041c26a",
+  "reviewed_revision": "3ae55642292a2f86d308daf597cc7dbf7041c26a",
+  "reviewed_run_id": "r-20261002T052630239755-s22-triage-msc",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/s22-triage-msc",
+  "reviewer_node": "review-of-s22-triage-msc",
+  "reviewer_run_id": "r-20261002T060536155865-review-of-s22-triage-msc",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T08:12:00+02:00",
+  "total": 94,
+  "verdict": "pass"
+}

@@ -1,0 +1,43 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T16:55:59.112Z",
+  "dispatched_at": "2026-10-04T16:43:22Z",
+  "findings": [
+    {
+      "anchor": "scripts/analytic_oracle_fixtures/centroid_row.py:188",
+      "id": "thin_wrapper-1",
+      "reason": "the wrappers carry real fixture defaults (bound 0.25 T, per-pair scale and tolerance, the static column map) and the plan's \u00a72 done-when is interface parity in the solver, which a fixture-side builder satisfies; the honest remedy is a code simplification, not a design change.",
+      "text": "fixture_constraint_pairs wraps centroid_constraint_pair (:63) and level_constraint_pair (:141), each of which is a thin constructor of a ConstraintPair over an already-existing functional plus an already-existing unknown; the three levels add surface over the two-element tuple it returns and no stated reason is given why the generic assembly (constraint.py `constraint_response_matrix` :731 / reduced_newton.py `derive_reduced_constraint_pairs` :2569) cannot be extended instead",
+      "type": "thin_wrapper",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/equilibrium/batched_labeller.py:432",
+      "id": "duplicate_owner-1",
+      "reason": "the two builders differ in both scope and unknown (response-derived CircuitCurrentUnknown on a machine vs a bounded static exterior field on a coil-less fixture), so the fork is by design; and the column convention is consumed once by the fixture driver, which the plan does not extend \u2014 a single-source-of-truth repair worth landing, but not a change to what the plan builds.",
+      "text": "`_centroid_pair` already builds a ConstraintPair over CurrentCentroidConstraint for centroid conditioning, and the plan adds a second centroid-pair constructor at scripts/analytic_oracle_fixtures/centroid_row.py:63 rather than extending a shared constructor in the owner module nova/equilibrium/constraint.py:934; additionally `_field_direction` (centroid_row.py:41) re-encodes the column ordering declared at scripts/analytic_oracle_fixtures/measure.py:69 as literal tuples, so a change of convention in the one declared source would silently mis-map the driver's columns",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "b71f68905d93c96d9685bd531bcff6b824b39435efdceec36900b5bde1af7f62",
+  "plan_slug": "centroid-constrained-oracle-solve",
+  "plan_version": 80,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T164307678855-plan-review-of-centroid-constrained-oracle-solve",
+  "reviewed_blob_sha": "10b6daee9cbda73411b2625f6c8f9734f6921a62",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the compensating family is one protocol (CompensatingUnknown) and one functional protocol (ConstraintFunctional) hiding the bound, damped-step, refusal and dual-flux-image behaviour behind interfaces smaller than what they carry; the solver sees a tuple of ConstraintPair, and the one substantive new module is the owner (constraint.py), not a spread of parallel wrappers.",
+    "duplicate_owner": "a finding \u2014 a second centroid-pair constructor is added as fixture-side glue beside the existing one; the direction convention it encodes is also declared in a second file.",
+    "reuse_search": "pass \u2014 the plan's \u00a71 cites and \u00a72 extends the existing constraint machinery in nova/equilibrium/constraint.py (CurrentCentroidConstraint :934, ConstraintPair/ConstraintBinding, CompensatingUnknown Protocol :159) and nova/equilibrium/reduced_newton.py (derived constraints), adding only the two new implementations BoundedExteriorFieldUnknown and FluxLevelConstraint rather than a parallel subsystem.",
+    "thin_wrapper": "a finding \u2014 the fixture adds three concentric builders over the same ConstraintPair construction and a static direction map, without stating why the existing pair-assembly path cannot carry it."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.261317+00:00"
+}

@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-06T09:39:19Z",
+  "findings": [
+    {
+      "anchor": "docs/plans",
+      "id": "reuse_search-1",
+      "reason": "naming the existing cache/resolve owner would turn \u00a73 from a parallel fetch shim into an extension of a proven resolver and would rewrite the author's reuse map.",
+      "text": "\u00a73 proposes a new fetch module pulling \"named layers by digest into a local cache root, verif[ying] each blob's sha256\", but its prior-art account cites only external art (imas-efit's store and nc2hdf5) plus a future \"mast_artifact\" publication convention; it never names `nova/imas/machine_artifact.py` (`materialize_machine_artifact` L1230, `resolve_machine_artifact` L1316, `_verify_directory_files` sha256) or its consumer `nova/imas/mast_solve_input_ids.py:92` (`open_description(cache_directory, digest)` \u2192 opened IDSs + `dd_version`), which already fetch/store/verify digest-addressed artifacts locally",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine_artifact.py:1230",
+      "id": "duplicate_owner-1",
+      "reason": "the honest change is to extend the existing cache/resolve owner rather than fork it.",
+      "text": "\u00a73's fetch shim re-implements the digest-addressed local cache and per-file sha256 verification that `materialize_machine_artifact` (L1230) and `resolve_machine_artifact` (L1316) already own; a parallel cache drifts from that owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/data-manifest.json:1",
+      "id": "duplicate_owner-2",
+      "reason": "a second manifest format states the DD-version pin in two shapes that can disagree; the honest change is to extend the existing manifest owner.",
+      "text": "\u00a73's \"checked-in manifest of layer digests + DD versions + case metadata\" duplicates the existing per-case manifest owner `tests/data-manifest.json` (per-case `dd_version`/`cocos`/`machine`/`shot`/`slice_index`, consumed at `tests/test_transport_geometry_reference.py:36`) and the schema machinery `MachineArtifactManifest` in `nova/imas/machine_artifact.py`; the plan adds a second manifest format rather than extending the one nova test lanes already read",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-profile-validator-set.html#s3",
+      "id": "thin_wrapper-1",
+      "reason": "the wrapper should extend `resolve_machine_artifact`/`open_description` to accept these layer digests, or state in its own text why that owner cannot be extended.",
+      "text": "\u00a73 justifies its own shim only by contrast with imas-efit's whole-bundle CLI, which says nothing about why nova's resolver cannot carry these layers; a wrapper over the same digest/sha256 machinery with no justification against the in-repo owner",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-profile-validator-set.html#s5",
+      "id": "interface_budget-1",
+      "reason": "\u00a73/\u00a75 must account for the added public surface; extending the existing cache/manifest owners would retire most of it.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0: there is free budget, but \u00a73/\u00a75 add a new fetch module, a new checked-in manifest and a new availability gate without stating what each retires or merges, or why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5658ae611d492b567d341c1b02801783bc4e666baf81856170d51fa64f3d7ec6",
+  "plan_slug": "forward-profile-validator-set",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T093855448858-plan-review-of-forward-profile-validator-set",
+  "reviewed_blob_sha": "8bed749f1b95457855c206b55db20ae0ed465bda",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73 hides digest fetch, per-blob sha256 verification, NC\u2192HDF5 conversion and the availability gate behind one fetch-module interface, and \u00a74 keeps gates beside the receipts rather than wrapping them; the interface is smaller than the behaviour it hides.",
+    "duplicate_owner": "a finding \u2014 \u00a73's digest-addressed fetch+cache and its \"checked-in manifest of layer digests + DD versions + case metadata\" are two duplicate owners (the machine_artifact cache; tests/data-manifest.json), each named with its file and line below.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73/\u00a75 add a new fetch module, a new manifest and a new availability gate without naming what they retire or merge, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan searched imas-efit (the store and its nc2hdf5/comparator) and cites the \"norma corpus resolver\" and the `mast_artifact` convention, but never cites nova's own content-addressed OCI cache/resolver (`nova/imas/machine_artifact.py`, `nova/imas/mast_solve_input_ids.py:92 open_description`), which is the closest existing mechanism to \u00a73's fetch shim.",
+    "thin_wrapper": "a finding \u2014 \u00a73 writes a \"small fetch shim\" and justifies that choice only against imas-efit's whole-bundle CLI, never against nova's own resolver, which \u00a73 could extend instead."
+  },
+  "section_digests": {
+    "_document": "add42a95a533fdea2c80c051ebffdfe5f60bbd82e35d03a42250fa9a7525323c",
+    "s1": "6e49c515029c8bc27841b65ae395b2973bb1c3c32b13465ccf87e33de692f218",
+    "s2": "22575bebd77cacc03f777324b468c931d50b1d4c784911cbf6101bd01a6bb13e",
+    "s3": "6ccf061580286b56ef821e3ccd9da36ebd91ba54614606bb04c9415d156f4d3c",
+    "s4": "35d18a38441135e0b09cdf40356e6317493e48f293b9a9a7242b7f8b09e3bb88",
+    "s5": "958862053eb34e2a551df6a02ce8b88163427dfe22b3e49177d63e680f90b987"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.369031+00:00"
+}

@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:37:42.616Z",
+  "dispatched_at": "2026-10-04T17:24:01Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/uniform-cell-clip-and-coupling.html:94",
+      "id": "reuse_search-1",
+      "reason": "the clip deliverable would be restated as extending `_traced_clip` and its moment output rather than authoring a new packed clip, which changes the implementing worker's first step.",
+      "text": "the design says to build \"a single clip ... cell geometry entering as DATA ... fixed shapes, vertex counts and supports padded to a capacity\", but `nova/equilibrium/separatrix_clip.py::_traced_clip` already pads every support to a fixed `support_capacity`, already takes `cell_vertex_count` and `participating_cell` as data, and is already used by the hex path (`nova/equilibrium/forward_operator.py:3417`) and the rectangular path (`nova/equilibrium/flux_surface_extraction.py:2039` via `_regular_cell_mesh`, four-vertex cells), so a rebuild forks the one clip the plan exists to keep singular",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/uniform-cell-clip-and-coupling.html:94",
+      "id": "reuse_search-2",
+      "reason": "naming the moment owner keeps the unification an extension of one routine instead of a third parallel moment path beside `fixed_profile_current_moments` and `clipped_support_current_moments`.",
+      "text": "the one moment method is proposed without naming the existing moment owners `nova/equilibrium/clip_quadrature.py` (`clipped_support_current_moments`, `clipped_support_quadrature`, `saddle_wedge_current_moments`) and `nova/equilibrium/stencil_mesh.py::fixed_profile_current_moments`, even though the plan's own exact-participation followup outcome edits those very routines",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/uniform-cell-clip-and-coupling.html:98",
+      "id": "duplicate_owner-1",
+      "reason": "the named owners already carry the polygon route the plan wants for hex, so the honest change is an extension of `extraction_lattice.evaluate_forward_equilibrium` / `extract_flux_surface_geometry`, not a parallel extraction path.",
+      "text": "the extraction half (\"flux properties ... extractable from a hexagonal mesh. Current support extractable on a rectangular grid\") proposes new extraction machinery without naming `nova/equilibrium/flux_surface_extraction.py::extract_flux_surface_geometry` (the structured-flux-map flux-surface-geometry owner) or `nova/equilibrium/extraction_lattice.py` (the affine extraction-lattice owner, whose `GreenSourceRepresentation` already accepts `analytic_polygon` general polygonal sections via `polygon_analytic_flux_moments`) as the owners to extend",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/uniform-cell-clip-and-coupling.html:94",
+      "id": "duplicate_owner-2",
+      "reason": "the single-operator claim is false at the partition boundary unless the unification extends `cell_partition_geometry` as well, so the plan would add it to the clip deliverable's scope.",
+      "text": "the locked decision's \"one code path, no host-side dispatch on cell geometry\" is contradicted at the partition seam by `nova/equilibrium/cell_partition.py:123::cell_partition_geometry`, which dispatches on tiling (`_tensor_product_axes` raster adapter for tensor-product centroid lattices versus authored six-neighbour rings for the hex carrier), and the plan does not name this owner as part of the unification",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "713eb18902137a5606771d257a67437f985ffb106102fe201c782a1b84ac06b4",
+  "plan_slug": "uniform-cell-clip-and-coupling",
+  "plan_version": 25,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T172349518658-plan-review-of-uniform-cell-clip-and-coupling",
+  "reviewed_blob_sha": "041e227e2f95c3add0e43d7016b145f5565d9cbc",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one fixed-shape clip-and-moment operator hides the clip, both cell geometries and the moment quadrature behind one interface, consolidating the existing clip-and-moment surface rather than spreading it.",
+    "duplicate_owner": "a finding \u2014 the extraction half proposes hex flux-property extraction without naming the existing extraction owners to extend, and the one-code-path claim is contradicted by an existing per-tiling dispatch the plan does not name.",
+    "reuse_search": "a finding \u2014 the design re-describes as new work the capacity-padded geometry-as-data clip that already exists as `nova/equilibrium/separatrix_clip.py::_traced_clip` and is already shared by both tilings, and the existing moment owners are named only in a comment, not in the design.",
+    "thin_wrapper": "pass \u2014 the design extends the existing shared clip and coupling; the locked decision (same order, accuracy and speed, no runtime adaptation) is a stated reason not to add a per-tiling wrapper."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T15:55:39.486790+00:00"
+}

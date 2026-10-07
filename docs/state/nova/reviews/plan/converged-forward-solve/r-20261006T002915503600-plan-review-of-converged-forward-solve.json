@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T00:33:21.629Z",
+  "dispatched_at": "2026-10-06T00:29:28Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:62",
+      "id": "reuse_search-1",
+      "reason": "naming `cache_guard` as the counting owner reuses a measured instrument and removes the risk of a second, drift-prone compilation counter, which is the reuse defect this item exists to catch.",
+      "text": "\u00a74's acceptance (\"one compiled program serves two geometries of the same shape, counted as compilations\") and \u00a76's \"compiled programs per mesh shape: one\" propose a compile-count gate but name no instrument, while `scripts/h200_test_lane/cache_guard.py` already prints one row per program with its compile seconds and hit/miss outcome, so a two-geometry run with the cache disabled reports exactly the count the clause needs; the plan searched the solve machinery thoroughly but not the compile-counting surface, so a node may build a parallel counter",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/converged-forward-solve.html:143",
+      "id": "duplicate_owner-1",
+      "reason": "this is a lead-owned storage decision orthogonal to the four-signature design, and the plan's text states a location rather than re-implementing a resolver, so it tightens a convention rather than forking an owner; flagging it keeps the placement from becoming a tenth hardcoded literal if the decision is later formalised in code.",
+      "text": "the receipts-out-of-git decision routes npz/gz/json receipts above a few MB to a hardcoded `/work/projects/imas_gpu` root with \"a path pointer in the evidence fragment\", but names no owner for that placement; `nova/database/filepath.py` (`FilePath@134`) is the repository's path-resolution owner, and the GPFS literal already appears hardcoded in `nova/imas/mast_fitted_parameters.py:50`, `nova/catalog/mast_geometry.py:35`, `nova/media/sources/nova_labels.py:41` and other call sites",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "b7b57928176b30b1dba4346a31ec5d0f81e70f762cced6d1aedeeeb01a409db2",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 58,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T00:34:40.104500+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T00:34:39.502481+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T002915503600-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "280afecc1e19061149173797140bfe69e2ec6cc9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design hides the read, the booking, the map and its tangent, and the Newton solve behind four small signatures (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`), each carrying substantial behaviour (sub-cell axis-connected membership, exact-clip moments, the differentiated composed map, Newton-GMRES under a scan); the retained `forward.py` facade is a declared adapter, not a fifth behaviour.",
+    "duplicate_owner": "a finding \u2014 the receipts-out-of-git decision adds a large-artifact placement convention (hardcoded GPFS root under `/work/projects/imas_gpu` with a path pointer in the evidence fragment) without naming the path-resolution owner the codebase already uses, `nova/database/filepath.py` (`FilePath@134`); the same literal is already re-hardcoded in ~10 modules.",
+    "interface_budget": "pass \u2014 the supplied figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds no reckon interface surface, and \u00a76's request-surface ruling names what it retires from `ForwardSolvePolicy` (route, clip modes, the eight plumbing fields) and states the before/after field counts, satisfying the retire-or-justify rule for the one family it does touch.",
+    "reuse_search": "a finding \u2014 the plan searched the solver, booking, topology, moment, operand and null machinery exhaustively and cites real symbols (verified: `fixed_point.py` `_single_site_krylov`@2619, `_backtracking_scores`@1270, `_select_backtracking_candidate`@1147, `_backtracked_promotion`@1333, `picard`@2874, `newton_krylov`@5003; `polygon_moments.py`; `contour_tree.py`; `constraint.py`; `domain.py`), but it proposes a compile-cost acceptance that is counted by no cited instrument, while the counting instrument already exists at `scripts/h200_test_lane/cache_guard.py`.",
+    "thin_wrapper": "pass \u2014 the plan states in its own text that `gs.apply` replays the map `ForwardFluxOperator` performs \"rather than wrapping it\", that `topology.read` replaces `Topology.read`/`ForwardFluxOperator.read` in place, and that the retained single-site GMRES and backtracking helpers move into `solve.py` as private helpers behind one call site; each carry-or-decline ruling gives the reason, so no wrapper is added without justification."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T00:34:38.770975+00:00"
+}

@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:37:26.047Z",
+  "dispatched_at": "2026-10-04T17:23:29Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s2",
+      "id": "reuse_search-1",
+      "reason": "the plan says the \"surviving first-order\" fold localises to the contour side of the radial surface integral and leaves three rungs red, but a5d8a4da1 changed the radial-moment departure from 5.7e-4 to 8.1e-8 and the gate residual to 1.1e-4/8.7e-5/1.8e-4 at 321/641/1281, so \u00a72's open scope and its 0.5-order assertion (the test at `tests/test_equilibrium_diagnostics.py:503` still asserts `order > 0.5` and does not print) must be restated against the current rule or the section closed.",
+      "text": "the \u00a72 landed note and the \u00a72 open item are stale: `_segment_mean` midpoint sampling is absent from the tree and the rule in use is `_contour_metric`'s fourth-order tangent (`nova/equilibrium/diagnostics.py:186-192`, commit a5d8a4da1)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#followups (f-sos-diamagnetic-input)",
+      "id": "reuse_search-2",
+      "reason": "the followup must state whether the store row is sourced through that reader or a parallel one, or the ingest forks a reader the tree already owns.",
+      "text": "\u00a74's followup proposes a new store ingest for the MAST diamagnetic flux but never names the magnetics reader the tree already carries, `nova/imas/io_magnetics.py:89-96` (its `diagnostic` table enumerates `diamagnetic_internal`, `diamagnetic_external`, `diamagnetic_compensation`, `diamagnetic_differential` flux-loop channels)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/shafranov-observed-side.html#s3",
+      "id": "thin_wrapper-1",
+      "reason": "executing the \"move\" as written would author a duplicate helper beside `shafranov_vertical_field`, adding surface instead of removing the inline copy.",
+      "text": "\u00a73 asks to \"move the formula helpers ... to diagnostics\" \u2014 the correct action is to delete the inline inverse identity (constraint.py:1640) and reuse/invert the existing `shafranov_vertical_field`, since diagnostics already owns the formula",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "08f67b1761580da7ca77242a2da1d0189859d8dfc599ab2524a8a12006d3049b",
+  "plan_slug": "shafranov-observed-side",
+  "plan_version": 9,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T172315857350-plan-review-of-shafranov-observed-side",
+  "reviewed_blob_sha": "fd69e04347dbb54d3a91f25553db4564526e9f6a",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan extends existing deep modules rather than",
+    "duplicate_owner": "pass \u2014 no shared infrastructure is forked. \u00a71 names the",
+    "reuse_search": "a finding \u2014 the plan's \u00a72 \"Landed (partial)\" note describes",
+    "thin_wrapper": "a finding \u2014 \u00a73 says \"move the formula helpers out of the"
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.487518+00:00"
+}

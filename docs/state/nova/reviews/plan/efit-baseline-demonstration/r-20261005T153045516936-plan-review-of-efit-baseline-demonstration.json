@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:45:26.857Z",
+  "dispatched_at": "2026-10-05T15:31:25Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/efit-baseline-demonstration.html \u00a73",
+      "id": "reuse_search-1",
+      "reason": "the machinery was landed by the two feeder plans this endpoint dispatches, so naming the modules in \u00a73 is prose correction, not a design change.",
+      "text": "\u00a73 presents the comparator and the closed/open branch assembler as design components, but both now exist (nova/equilibrium/boundary_comparison.py:140 compare_closed_boundaries; nova/equilibrium/separatrix_branches.py:27 assemble_separatrix_branches), are already wired into both EFIT harnesses, and are cited by neither module reference in \u00a73",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/equilibrium/topology.py:107",
+      "id": "duplicate_owner-1",
+      "reason": "a fail-closed gate scores a class that still has a second, forbidden producer; the plan should pin the comparator as sole authority (or re-scope the gate read) rather than hand the retirement off while scoring through it.",
+      "text": "ForwardTopologyState.diverted is still produced (topology.py:1364) and serialized into banked receipts while classify_boundary_mode (nova/equilibrium/boundary_comparison.py:29) is the class authority \u00a73's gate declares it uses and forbids the legacy leaf \u2014 the duplicate producer sits inside this endpoint's own scored read path, and the plan defers its retirement to a foreign followup carrying no owner file",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/efit-baseline-demonstration.html \u00a73",
+      "id": "interface_budget-1",
+      "reason": "per the interface_budget rule the section must account in its own text for the public-definition and refusal-family surface it adds, or state why the per-harness comparison/refusal code cannot be retired; the current \u00a73 text does not.",
+      "text": "\u00a73 introduces a comparator (public names BoundaryMode, ClosedBoundaryComparison, classify_boundary_mode, compare_closed_boundaries) and a fail-closed gate with a new refusal family (missing_predicted_closed_boundary, missing_reference_closed_boundary, missing_achieved_topology_class, missing_predicted_saddle, missing_reference_x_points) without naming what it retires or merges; supplied counts are all 0",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ae1e09c2c42261d3786e0f732ac3f74d31089ddc2b05aecc9644a060fb63ca96",
+  "plan_slug": "efit-baseline-demonstration",
+  "plan_version": 57,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153045516936-plan-review-of-efit-baseline-demonstration",
+  "reviewed_blob_sha": "78538e0bf3b4c7abab85d9bdcf16fafce2fd35d3",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 assemble_separatrix_branches (nova/equilibrium/separatrix_branches.py:27) and compare_closed_boundaries (nova/equilibrium/boundary_comparison.py:140) each hide substantial behaviour (fixed-capacity split-at-saddle branch assembly; arc-length symmetric sup/RMS plus class classification plus unordered X-point distance) behind one function each.",
+    "duplicate_owner": "a finding \u2014 the achieved topology class has two live producers: the legacy ForwardTopologyState.diverted leaf (nova/equilibrium/topology.py:107, produced at topology.py:1364, still serialized in banked receipts) and classify_boundary_mode over class_margin (nova/equilibrium/boundary_comparison.py:29).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 commits a new comparator public interface and a new gate refusal family without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a73 names a \"shared closed-boundary comparator\" and a \"fixed-capacity closed/open branch assembler over traced_spline_contour (the one missing contract)\" without citing the modules that now own them; the \u00a72 reuse map did perform the search, but \u00a73's design text does not name what it extends or wires.",
+    "thin_wrapper": "pass \u2014 the design consolidates comparison into one shared comparator wired into both EFIT harnesses (benchmarks/diiid_forward_gs_match.py:62, benchmarks/diiid_circuit_driven_forward_validation.py:51) rather than adding a parallel path; no wrapper lacking justification."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.339727+00:00"
+}

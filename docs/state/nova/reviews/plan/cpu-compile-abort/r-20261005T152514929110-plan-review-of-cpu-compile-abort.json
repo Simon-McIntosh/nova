@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:40:09.031Z",
+  "dispatched_at": "2026-10-05T15:26:56Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/cpu-compile-abort.html \u00a73 (s3)",
+      "id": "thin_wrapper-1",
+      "reason": "it moves the recognition hook from the in-process guard to whatever runs after the payload dies, changing the section's placement and its done-when.",
+      "text": "\u00a73 asserts the lane guard \"reads its compilation cache \u2026 it is the right place to recognise this\", but scripts/h200_test_lane/cache_guard.py is loaded only as a pytest plugin (`-p cache_guard`, run.sh:26) and reports at pytest_sessionfinish, which a SIGABRT (exit 134) never reaches, so the named owner cannot observe the abort it is meant to name",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/nova_lane/run.sh:185",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owner redirects \u00a73 to extend the launcher's terminal record rather than fork a parallel classifier in the cache guard.",
+      "text": "the plan adds a second abort-recognition surface rather than extending the owner that already writes the run's terminal line (EXIT_STATUS=\u2026/NOVA_LANE_EXIT_STATUS=\u2026) and its header (run.sh:135-150) from outside the payload, which is the only thing that survives the abort",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/lane_resource_accumulation.py:104",
+      "id": "reuse_search-1",
+      "reason": "the child-surviving, fixed-interval sampler is genuinely a different measurement from the self-sampling pytest plugin, so the omission is a prior-art account gap rather than a design change.",
+      "text": "the plan proposes the \u00a71 /proc mapping sampler without citing the existing mapping recollection (totals[\"all\"][\"mapping_count\"] from /proc/self/smaps) or the compile-memory measurement in benchmarks/compile_host_memory.py, so the reuse map for the sampler is incomplete",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/cpu-compile-abort.html \u00a71/\u00a73",
+      "id": "interface_budget-1",
+      "reason": "the sections must account for the added interface surface in their own text before the first implementation node is released.",
+      "text": "with the supplied counts all zero, \u00a71 introduces the compile_abort_probe CLI and \u00a73 introduces an abort-classifier/refusal family, and neither section states what it retires or merges or why nothing can",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "cf2b5fe6f0c2268a6d9bf791026a83b980849c35d98ebb04d04d290e74d74e50",
+  "plan_slug": "cpu-compile-abort",
+  "plan_version": 24,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152514929110-plan-review-of-cpu-compile-abort",
+  "reviewed_blob_sha": "8f96e168b196721e28ee9866240ca57d8af407de",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 benchmarks/compile_abort_probe.py hides child-process /proc sampling, liveness handling and summary emission behind sample_child plus main, a small interface over substantial behaviour.",
+    "duplicate_owner": "a finding \u2014 the terminal run record the \u00a73 log line parallels is already owned by scripts/nova_lane/run.sh:185 (EXIT_STATUS=/NOVA_LANE_EXIT_STATUS), which prints the lane header and survives the process; the plan adds a parallel recognition surface in cache_guard instead of extending that owner.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 adds a probe CLI (--samples/--summary/--interval) and \u00a73 adds a classification/refusal family, and no section names what it retires or merges or states why nothing can.",
+    "reuse_search": "a finding \u2014 the plan cites the lane's cache guard and the persistent compilation cache as prior art for \u00a73 and \u00a72, but never searches the mapping/memory-measurement space it extends in \u00a71, so it does not cite benchmarks/lane_resource_accumulation.py (records process mapping_count via /proc/self/smaps) or benchmarks/compile_host_memory.py.",
+    "thin_wrapper": "a finding \u2014 \u00a73 places the compile-abort classifier in the in-process cache_guard pytest plugin, a thin extension of a cache-accounting guard that is killed by the very abort it must classify, with no statement of why the launcher's own terminal record cannot carry it."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.306833+00:00"
+}

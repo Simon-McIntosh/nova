@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:49:37.990Z",
+  "dispatched_at": "2026-10-05T15:38:57Z",
+  "findings": [
+    {
+      "anchor": "machine-description-retirement#s2",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite the producer module that will receive the publication path and the DDv4 floor, as it already cites `machine_maps/mast.json` for the map producer.",
+      "text": "\u00a71 claims the producer replaces all three bespoke things \"generically\", but \u00a74 states the dependency runs backwards (ambix imports and asserts on `nova.imas.machine_artifact`) and no producer-side publication/tag mechanism is cited, so the re-home of the 1,383-LOC live publication capability is designed against an interface never named or verified",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/media/sources/mast_efit.py:29",
+      "id": "reuse_search-2",
+      "reason": "the plan decides clean deletion partly because its inventory is complete; an enumerated-but-missing consumer must be added and rewired before the schema/digest fields leave the module.",
+      "text": "imports `nova.catalog.mast_geometry.shaped_section_vertices`, yet the \u00a73 in-repo consumer inventory lists only `mast_flux_loop_adjudication.py`, `calibrate/sweep.py`, `catalog/__init__.py` and the seven `scripts/mast_*` files",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/imas/machine_artifact.py:20",
+      "id": "duplicate_owner-1",
+      "reason": "re-homing the \"machine-generic publication capability\" without naming these owners forces the producer either to fork `DriveMap`/`EvidenceLedger` (a duplicate of a shared owner also used by `mast_geometry.py`, `mast_solve_inputs.py`, `mast_fitted_parameters.py`, `mast_seed_parameters.py`, `sourcemap.py`) or to import nova's copies, which is the reverse dependency \u00a74 says it is trying to escape.",
+      "text": "`machine_artifact.py` imports `ChannelDrive, DriveMap` from `nova/imas/machine_drive.py:87` and `EvidenceLedger`/`MachineDescriptionError` from `nova/imas/machine_evidence.py:25,417`; \u00a73's inventory names only `machine_artifact.py`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/nova/imas/machine.py:271",
+      "id": "duplicate_owner-2",
+      "reason": "without naming the seam to extend, each rewired consumer is free to grow its own reader over the producer's map, which is exactly the parallel-surface duplication this plan exists to remove.",
+      "text": "the plan rewires twelve kLOC of consumers \"to the producer route\" but never names the existing geometry-consumption seam in `nova/imas/machine.py` (`MachineGeometryReader`, `TabularGeometryReader`, `StaticMachineDescription`) that must be the reader of the produced map",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "957ff68ebaee6293d0e2ee61deafba6a576fe97022a81957ed3a7d53eadc73c4",
+  "plan_slug": "machine-description-retirement",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153750855894-plan-review-of-machine-description-retirement",
+  "reviewed_blob_sha": "3daecece843f7fcc870867ee978c85f3bf5e9900",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design adds no module; it removes the in-repo registry and builder, so a shallow-wrapper layer is not introduced and the deep-module test does not arise.",
+    "duplicate_owner": "a finding \u2014 \u00a73 names only `machine_artifact.py`, omitting the shared owners it imports (`machine_drive.py`, `machine_evidence.py`) and never naming the existing nova geometry-reader seam that the consumer rewire must extend.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every \u00a73 surface carries a delete/re-home disposition, so no section adds surface to these families without naming what leaves.",
+    "reuse_search": "a finding \u2014 \u00a71 asserts the ambix producer \"replaces all three generically\" while \u00a72/\u00a74 concede the producer carries no publication path today; the plan cites no producer-side publication mechanism it extends, and its consumer search omits `nova/media/sources/mast_efit.py`.",
+    "thin_wrapper": "pass \u2014 \u00a73 removes a thin builder (`mast_solve_input_ids.py`) rather than adding one, and names why the publication script persists only until the producer carries the path."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.439085+00:00"
+}

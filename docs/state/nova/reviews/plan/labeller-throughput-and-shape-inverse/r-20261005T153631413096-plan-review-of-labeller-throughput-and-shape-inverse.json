@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:48:47.163Z",
+  "dispatched_at": "2026-10-05T15:37:39Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/labeller-throughput-and-shape-inverse.html:56",
+      "id": "reuse_search-1",
+      "reason": "the plan should cite these two modules and state whether the work is measuring, tuning or replacing them, which is a different (and far smaller) node than \"add a compiled program\".",
+      "text": "the plan reads as greenfield for machinery that is already merged: \u00a71's \"whole slice solve inside one compiled program with a fixed trip budget and masked convergence\" is exactly `nova/equilibrium/reduced_newton.py:1519` `_compiled_slice_solver` (docstring: \"one fixed-shape program for a complete reduced solve \u2026 once a trip settles or converges, its carry is masked\") exposed as `solve_reduced_newton_compiled` at `nova/equilibrium/reduced_newton.py:3231`, and \u00a72's batch read is `nova/equilibrium/batched_labeller.py:476` `BatchedLabeller`, whose module docstring already describes \"one vmapped fixed-shape program\" over a padded batch \u2014 because the plan names no module it searched, a reader cannot tell extension from rebuild",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/reduced_newton.py:3231",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must extend this owner (trace the per-slice currents/targets as arguments, which `docs/figures/playable-forward-solve/labeller/labeller-throughput.md` names as the actual lever) rather than commission a parallel compiled route.",
+      "text": "\u00a71 proposes a new single-program slice solve, but the owner already exists: `solve_reduced_newton_compiled` and `_compiled_slice_solver` build one fixed-shape program with a fixed trip budget and masked convergence, and `benchmarks/forward_labeller_throughput.py:688` and `benchmarks/trip_quantum_width_one.py:835` already drive it against the host ladder the plan says it is replacing",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/batched_labeller.py:476",
+      "id": "duplicate_owner-2",
+      "reason": "the plan should name `batched_labeller.py` as the owner to extend and frame \u00a72 as repairing its per-element cost, which the throughput doc attributes to the write-then-read topology pass in `flux_surface_connectivity`/`connectivity_boundary`, not to the batching layer.",
+      "text": "\u00a72's \"batch of slices reads in one fixed-shape program\" is already implemented by `BatchedLabeller` (`jax.vmap` at line 725) and already consumed by `scripts/labeller_parallel/driver.py:67`, so a new batched read would fork the read every consumer depends on \u2014 the very risk \u00a72 flags",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/shape_inverse.py:1201",
+      "id": "duplicate_owner-3",
+      "reason": "the plan must say what the existing loop fails to do on the +5 % elongation command (the gain bound `RESPONSE_GAIN_BOUNDS` and the 20 kA ceiling are the plausible cause) instead of commissioning a second outer loop beside it.",
+      "text": "\u00a73 says \"Add a Newton outer loop on the achieved shape: re-linearise at the admitted state and iterate until commanded and achieved motions agree\", but `solve_shape_inverse` already implements a bounded outer Newton loop that refreshes the local current-to-turning-point tangent at the admitted state (`_secant_refreshed_tangent`, `_achieved_over_commanded`) and exits on `TURNING_POINT_RELATIVE_TOLERANCE`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/labeller_batch/shard.py:184",
+      "id": "thin_wrapper-1",
+      "reason": "the section should name `scripts/labeller_batch` as the owner and its change as \"drive it over the decoder's shot list\", which removes a duplicated corpus path and its two divergent receipt formats.",
+      "text": "\u00a76's \"one sharded job writing every shot's session as it lands with the per-slice conditioning flag and target source and a digest manifest, resumable by shot, with a completion receipt\" restates `scripts/labeller_batch/shard.py` (`write_shards`, per-shot session + manifest, resume on existing file at line 708, `policy_digest`) plus `scripts/labeller_batch/receipt.py:632` (`aggregate`, the completion receipt), so \u00a76 as written adds a second writer beside the existing one with no justification for not extending it",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/labeller-throughput-and-shape-inverse.html:77",
+      "id": "interface_budget-1",
+      "reason": "each section must account for its added surface in its own text, which here is the difference between extending `solve_shape_inverse`/`labeller_batch` and minting new entry points.",
+      "text": "with the supplied counts at zero for every family, \u00a73 (a new achieved-shape iteration surface/tolerance beside the existing `TURNING_POINT_RELATIVE_TOLERANCE`) and \u00a76 (a corpus command path) each add public definition or CLI surface without stating in the section what they retire or merge, or why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a8ed815d525cb8cd184cc0dac1e36fdfd794cbcb9317af33f4225644c993c2ec",
+  "plan_slug": "labeller-throughput-and-shape-inverse",
+  "plan_version": 4,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153631413096-plan-review-of-labeller-throughput-and-shape-inverse",
+  "reviewed_blob_sha": "c9b5578fb2571043af6061d8baf2a2aeaa55a8d5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 every section is scoped as an extension of one existing deep module in `nova/equilibrium`; \u00a75 in particular extends `wall_height_shadow_mask`, which already takes a `previous_shadow`, rather than adding a new surface, and no section proposes a spread of thin wrappers over the same machinery.",
+    "duplicate_owner": "a finding \u2014 \u00a71's single compiled slice program, \u00a72's batched topology read and \u00a73's achieved-shape Newton outer loop each already exist as named mechanisms in `nova/equilibrium`; the plan must extend them, not re-add them.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 and \u00a76 add public definition and command-line surface without naming in their own text what they retire or merge, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan proposes a compiled per-slice solve, a batched topology read, an achieved-shape Newton loop and a sharded decoder corpus without naming any of the machinery that already implements each (`reduced_newton.solve_reduced_newton_compiled`, `batched_labeller.BatchedLabeller`, `shape_inverse.solve_shape_inverse`, `scripts/labeller_batch/`); no module path appears anywhere in the plan.",
+    "thin_wrapper": "a finding \u2014 \u00a76 re-drives the sharded per-shot session writer and completion receipt that `scripts/labeller_batch` already owns without saying why that machinery cannot be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.425895+00:00"
+}

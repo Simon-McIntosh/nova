@@ -1,0 +1,99 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:30:13.939Z",
+  "dispatched_at": "2026-10-04T17:23:45Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/topology-read-containment-and-rebank.html:104",
+      "id": "reuse_search-1",
+      "reason": "an unfailable reuse search is the point of this item, and the plan's \u00a73 is the concrete place it was skipped.",
+      "text": "\u00a73 proposes a centroid-free saddle detector (every ring's local quadratic / a vertex-centred census) with no citation of the machinery that already does this, so the plan's own claim that the detector does not exist is unverified",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/stencil_nulls.py:1743",
+      "id": "reuse_search-2",
+      "reason": "\u00a73 should first show why the existing Hessian route does not admit the 110/300-cell saddle (its ring_admitted gate at forward_operator.py:1527 is the discriminated candidate), rather than build a second detector.",
+      "text": "\u00a73 proposes testing each ring's local quadratic for a saddle-type Hessian as if new, but `critical_point_candidates_batch` (stencil_nulls.py:1743, with `_refine_selected_vertices` at :1803) and `flux_surface_connectivity.py:703 _polish_stationary_points_in_bounds` already Newton-polish and Hessian-classify critical points, and the census already computes hessian_type in `_local_fit_census` (forward_operator.py:1049,1140)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/evidence/contour-tree-topology-authority/reuse-map.md:0",
+      "id": "reuse_search-3",
+      "reason": "with the reuse map in hand \u00a73 collapses into two calls to existing machinery rather than a new subsystem.",
+      "text": "the prior-art map the plan needs was already authored for the contour-tree plan and its rows 6/8 cover the fixed-slot connectivity kernels and the two jax polishes; the plan cites no search of its own",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/contour_tree.py:384",
+      "id": "deep_module-1",
+      "reason": "the plan should either extend the tree's critical-point geometry or record it as superseded, not add a parallel detector the tree plan will delete downstream.",
+      "text": "`build_contour_tree` already emits extrema, saddles and wall joins as one deep module (13 nodes / 12 edges on the single-null fixture, no overflow after repair), and the contour-tree plan \u00a73 states it \"replaces the sign-change census and the raster census as the source of critical points\"; \u00a73's proposed detector is a second, shallower source of the same critical points",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:1237",
+      "id": "deep_module-2",
+      "reason": "the plan's done-when should name the one authority the receipt reads, or the two will disagree on the same row silently.",
+      "text": "\u00a73 keeps the production census as a live second authority beside the tree, so two fixed-shape detectors must be kept in step with no stated owner for which one the receipt reports",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/topology.py:1125",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to extend the existing qualification owner and its receipt, which is where the two pre-existing axes-test failures are already attributed.",
+      "text": "\u00a75's \"joint qualification rule\" is proposed as a new layer over a residual, an admitted read and a position bound, but `Topology.read_qualification` / `TopologyQualification` (topology.py:147,1125) and the per-row census fields already exist and already carry the inputs",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:1600",
+      "id": "thin_wrapper-2",
+      "reason": "this is the mechanism behind the above finding, not a separate change; it is named so the author extends the reader rather than wrapping it.",
+      "text": "\u00a75 offers no justification for why the joint verdict cannot be emitted by the reader that already assembles per-row status (`read_census`, `candidate_table_status`)",
+      "type": "thin_wrapper",
+      "would_change": false
+    },
+    {
+      "anchor": "nova/equilibrium/topology.py:621",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a71 is already landed and its behaviour is what \u00a74 of the tree plan will replace; the plan should mark \u00a71 superseded by the tree rather than re-dispatch it, per its own followup f-trcr-rescope.",
+      "text": "the class decision \u00a71 landed on 2026-09-19 (`_axis_connected_wall_candidates` / `containment_required` inside each pass) is a second class owner beside the contour-tree plan \u00a74, which reads class and boundary off the tree (\"if the first event is the saddle, the class is diverted \u2026 if it is the wall contact, the class is limited\")",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/contour_tree.py:384",
+      "id": "duplicate_owner-2",
+      "reason": "the plan cannot be dispatched as written; its \u00a71 and \u00a73 need the revised done-when the followup demands, naming the tree section that carries the work.",
+      "text": "the plan's own followup f-trcr-rescope (written 2026-10-01) already found that \u00a71 and \u00a73 overlap the contour-tree plan's \u00a73/\u00a74, and the tree plan's build_contour_tree / contour_tree_mesh have since landed while this plan's \u00a71 and \u00a73 bodies are unchanged",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "44c60b6d76c88b6c95bf4ed675187be499a610c5684638bb0870953dae6a1aa1",
+  "plan_slug": "topology-read-containment-and-rebank",
+  "plan_version": 7,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T172333154673-plan-review-of-topology-read-containment-and-rebank",
+  "reviewed_blob_sha": "f99a303f51a0e4a78b9eea680e2bc82cde799fcf",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the substantial behaviour the plan needs (axis, X-point, wall contact and class off one signed-flux tree) is already behind the deep module `nova/equilibrium/contour_tree.py:384 build_contour_tree`; \u00a71, \u00a73 and \u00a75 propose parallel shallow logic instead of deepening or extending it.",
+    "duplicate_owner": "a finding \u2014 \u00a73 forks critical-point detection from the already-landed contour tree, and \u00a75 forks qualification from `Topology.read_qualification`.",
+    "reuse_search": "a finding \u2014 the plan proposes a new centroid-free saddle detector (\u00a73) and a joint qualification layer (\u00a75) without citing the prior-art search that already exists for exactly this capability, `docs/evidence/contour-tree-topology-authority/reuse-map.md`, whose row 8 names the two jax polishes being proposed again.",
+    "thin_wrapper": "a finding \u2014 \u00a75's joint qualification rule is a wrapper over per-row fields the census already publishes (`nova/equilibrium/forward_operator.py:1600 read_census`) and over `nova/equilibrium/topology.py:1125 read_qualification`, with no reason given why that reader cannot carry the joint verdict."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.492129+00:00"
+}

@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:49:00.408Z",
+  "dispatched_at": "2026-10-05T15:34:21Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-profile-validator-set.html#s3",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to call `efit/cli/nc2hdf5.py` or name the concrete obstacle that forbids it, instead of maintaining a second converter that will drift from the DD-version handling the store is pinned to.",
+      "text": "\u00a73 says nova \"converts NC\u2192HDF5 the way imas-efit's nc2hdf5 does\" and writes its own converter, but imas-efit already ships that conversion at `efit/cli/nc2hdf5.py:1` (per-IDS `master.h5` with external links, DD read from `data-manifest.json`); the plan justifies writing its own pull shim (imas-efit's pull is whole-bundle) but gives no such justification for the converter, and it already accepts subprocess reuse as a pattern since norma calls the `oras` CLI rather than a Python registry client",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine_artifact.py:1230",
+      "id": "duplicate_owner-1",
+      "reason": "the fetch shim should extend `machine_artifact.py` (or lift its digest/cache-root layer) rather than fork a parallel one that will drift from the verified-object layout the repo already ships.",
+      "text": "\u00a73 proposes \"a small fetch module\" that pulls layers by digest into a local cache root and \"verifies each blob's sha256\", which is a second copy of machinery nova already owns: `materialize_machine_artifact` (`nova/imas/machine_artifact.py:1230`), `resolve_machine_artifact` (`:1316`), `_canonical_cache_root` (`:844`), `_verified_object_root` (`:862`), `_verified_destination` (`:892`) and `_sha256_bytes` (`:145`) already do content-addressed materialisation, digest verification and cache-root resolution over OCI artifacts, and the plan itself endorses that convention",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/parity_tolerances.py:57",
+      "id": "duplicate_owner-2",
+      "reason": "the bands belong in the existing registry, extended for the new metrics, so the cross-code floor and the licence for each bound stay in one reviewable place instead of being buried in a test module.",
+      "text": "\u00a74 checks \"per-quantity absolute bands in physics units checked into the test module\", which is exactly the mechanism `nova/imas/parity_tolerances.py` already provides: a pre-registered tolerance registry (`MetricTolerance` at `:57`, `PARITY_TOLERANCES` at `:255`) carrying bound, direction, unit, basis and the evidence that licensed each bound; imas-efit's `tools/equilibrium_validator.py:69` `Tolerance` is the same abs/rel primitive the plan re-derives a third time",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-profile-validator-set.html#s3",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the added interface surface (retire, merge, or state why nothing can be) for the design to justify the modules it introduces.",
+      "text": "\u00a73 adds a new public fetch module and a checked-in manifest format, and \u00a74 adds a new band set, while the section text names nothing retired or merged and offers no \"nothing can be, because\u2026\" statement; the two duplicate_owner findings above show surface that could be merged rather than added",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine_artifact.py:1316",
+      "id": "duplicate_owner-3",
+      "reason": "the misattribution is why the plan missed the owner it should extend, so naming the correct owner redirects the fetch shim from a fresh module to an extension of the existing one.",
+      "text": "the plan calls the norma resolver \"nova's working OCI precedent\" in \u00a73, but norma lives at `~/Code/norma/norma/assembly/provenance/corpus.py:143` (`resolve_corpus`/`sync`) and is a sibling repo, not nova; nova's own OCI-by-digest precedent is `machine_artifact.py`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4da0cb0d5d94522753d75f892a4eaad1e49ddce6c44c0e5b4810266228f7cf6a",
+  "plan_slug": "forward-profile-validator-set",
+  "plan_version": 6,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153349341367-plan-review-of-forward-profile-validator-set",
+  "reviewed_blob_sha": "8bed749f1b95457855c206b55db20ae0ed465bda",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the central proposal is one fetch module that hides digest-pinned fetch, sha256 verification, NC\u2192HDF5 conversion and the availability gate behind one small interface, which is depth rather than a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 the fetch/verify/cache logic duplicates `nova/imas/machine_artifact.py`, and the band set duplicates `nova/imas/parity_tolerances.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds a fetch module plus a manifest reader and \u00a74 adds a band set, and neither section names anything it retires or merges, or states why nothing can be.",
+    "reuse_search": "pass \u2014 the plan cites the imas-efit OCI store and its `tests/data-manifest.json`, the norma corpus resolver, imas-efit's `nc2hdf5`/`equilibrium_validator`, and the availability-gate pattern already used by `tests/test_equilibrium_forward_reference.py:776` (`require_reference`), so it did search before proposing new machinery.",
+    "thin_wrapper": "a finding \u2014 the plan re-implements the NC\u2192HDF5 conversion imas-efit already ships at `efit/cli/nc2hdf5.py:1`, without saying why it cannot be called instead."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.374969+00:00"
+}

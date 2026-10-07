@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:47:45.180Z",
+  "dispatched_at": "2026-10-05T15:35:40Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:923",
+      "id": "reuse_search-1",
+      "reason": "\u00a73 should cite the existing machine and scope itself to the remaining whole-solve scheduling, exactly as its sub-node records already do, so the node does not duplicate it.",
+      "text": "\u00a73's design text presents the request state machine as new work, but `OperatorRequestKind` (line 923), `operator_request` (954), `operator_request_body` (972) and `run_operator_requests` (1026) are already committed and exported in `fixed_point.__all__`; a fresh node reading the section would rebuild machinery the plan's own landing record (commits 674ad986, 364f92c3) already installed",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/solve_program_size_gate.py:1",
+      "id": "duplicate_owner-1",
+      "reason": "the section should extend the owning gate (add the 1000-cell row and the 50 MB ceiling) rather than re-create the gate and the loop conversions.",
+      "text": "\u00a72's done-when (\"An executable-size gate sits beside the memory gate\"; \"trips and Newton steps run as lax.scan or while_loop\"; \"the read is evaluated once per trip\") names a gate and two mechanisms that already exist: `evaluate_gate` / `MAX_300_EXECUTABLE_BYTES` in this file (with `tests/test_solve_program_size_gate.py`), `tests/test_solve_trips_are_a_scan.py` and `tests/test_one_read_per_trip.py`; implementing \u00a72 as written duplicates committed surface",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:923",
+      "id": "interface_budget-1",
+      "reason": "the section must state in its own text what it retires or merges, or why nothing can be.",
+      "text": "\u00a73 adds five public definitions to `fixed_point.__all__` (`OperatorRequest`, `OperatorRequestKind`, `operator_request`, `operator_request_body`, `run_operator_requests`) and the section text names no retirement or merge; with public_definitions 0 supplied, the added surface is unaccounted",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "4a5fafa7726d6081d168af8a7c69e0da51e9be8303c65e3b9660fc4acd69ab41",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 112,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153508152195-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "166f9c8c3aa988ddc4049e9b5380c4127f7ca519",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the request machine hides the read authority and the per-kind payload behind one scanned body (`run_operator_requests`, `fixed_point.py:1026`), which is depth rather than a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a72's done-when re-proposes an executable-size gate and the scan/read-once mechanisms, all of which are already committed; the owning file is `benchmarks/solve_program_size_gate.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds five public definitions to `fixed_point.__all__` without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a73's design text (\"The section implements one lax state machine\") proposes a six-kind request machine without citing that it already exists and is public in `nova/equilibrium/fixed_point.py`.",
+    "thin_wrapper": "pass \u2014 \u00a74 refines `cache_guard.directory_entry_count` in place and states why the recursive file count cannot serve (XLA autotune subtree), an extension of the owner rather than a parallel counter."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.400191+00:00"
+}

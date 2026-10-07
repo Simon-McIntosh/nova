@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:49:00.334Z",
+  "dispatched_at": "2026-10-05T15:40:44Z",
+  "findings": [
+    {
+      "anchor": "plan.html:84",
+      "id": "reuse_search-1",
+      "reason": "the census missed the owner, so the node as written rebuilds `FilePath` instead of extending it, and the author needs this fact before releasing the node.",
+      "text": "\u00a75 adds a `nova.paths` resolver and a receipt-root resolver without citing `nova/database/filepath.py` (`FilePath`, `_resolve_absolute` over appdirs) or `nova/definitions.py` (`root_dir`), which already own path resolution; a new subsystem is being proposed where an existing one was never searched for",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:72",
+      "id": "deep_module-1",
+      "reason": "the node should be decomposed into extensions of the owners it names rather than shipped as one basket of parallel helpers.",
+      "text": "`replan-small-primitives` gathers a uniform-axis validator, a read-only array constructor, an atomic receipt writer, a trimmed-string check and a canonical digest into one node; these are five shallow wrappers over three unrelated machinery families (`map_extraction`/`diiid_efit`/`mast_efit`, the receipt writers, `machine_evidence`), so the node adds public surface without adding depth",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:72",
+      "id": "thin_wrapper-1",
+      "reason": "the honest change is to extend the existing mechanism, and without the justification the node forks it.",
+      "text": "the node states \"one trimmed-string check beside `require_string`\" and \"one canonical digest beside `canonical_json`\"; both `require_string` and `canonical_json` exist at `nova/imas/machine_evidence.py:33,64:` and the node gives no reason they cannot be extended (e.g. `require_string(value, context, error, strip=True)`) instead of a parallel function added beside them",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:84",
+      "id": "duplicate_owner-1",
+      "reason": "a forked resolver and a forked atomic writer drift from the owners the census already shipped an atomic-writer ancestor for, and naming the owner is exactly what this node omits.",
+      "text": "\u00a75 `replan-gpfs-data-root` proposes \"one resolver module (e.g. `nova.paths`) owns the data roots\"; the owner to extend is `nova/database/filepath.py` (`FilePath`, which already resolves roots and appdirs) with the base literal in `nova/definitions.py:6` \u2014 and \u00a74's \"one atomic receipt writer\" for `calibrate/sweep.py`, `catalog/mast_geometry.py` and `imas/mast_parity_gate.py` should extend `nova/imas/machine_artifact.py:1187`'s `_write_bytes_at` (with `_publish_directory_no_replace` at line 1197) rather than fork a second writer",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:72",
+      "id": "interface_budget-1",
+      "reason": "the section must state, in its own text, what each new public definition retires or merges, or why it cannot; as written it adds surface and accounts for none of it.",
+      "text": "\u00a74 `replan-small-primitives` adds five new public definitions (a uniform-axis validator, an array constructor, a receipt writer, a trimmed-string check and a canonical digest) while the section names what it merges only for the duplicated *implementations*, not the added public surface: the counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, and the two \"beside\" additions retire nothing",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ee948ef99d25fe20ab21d549776ce2d364c9783c78c31bdc3c5959313e7430d3",
+  "plan_slug": "nova-portfolio-replan",
+  "plan_version": 21,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153942351208-plan-review-of-nova-portfolio-replan",
+  "reviewed_blob_sha": "0ffa6788ec50722798429215a7eda49d45b494cf",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a74 `replan-small-primitives` bundles five unrelated single-function primitives into one node, adding five new surfaces over three different machinery families instead of one deep module.",
+    "duplicate_owner": "a finding \u2014 \u00a75 `replan-gpfs-data-root:84` re-implements path-root resolution rather than extending its owner `nova/database/filepath.py` (`nova/database/filepath.py:110`), and \u00a74's \"one atomic receipt writer\" duplicates `nova/imas/machine_artifact.py:1187` (`_write_bytes_at`).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 `replan-small-primitives` adds at least five new public definitions (validator, array constructor, receipt writer, trimmed-string check, digest) and names no retirement or merge in interface-family terms for the two \"beside\" additions.",
+    "reuse_search": "a finding \u2014 the plan proposes a data-root resolver (\u00a75 `replan-gpfs-data-root`), a receipt-root resolver (\u00a75 `replan-evidence-tooling-paths`) and shared primitives (\u00a74 `replan-small-primitives`) without citing `nova/database/filepath.py` (`FilePath`, `_resolve_absolute`), `nova/definitions.py:6` (`root_dir`), `nova/imas/machine_evidence.py` (`canonical_json`, `require_string`) or `nova/imas/machine_artifact.py:1187` (`_write_bytes_at`), all of which already exist.",
+    "thin_wrapper": "a finding \u2014 the two \"beside\" items in \u00a74 `replan-small-primitives` would add parallel functions next to `require_string` and `canonical_json` with no statement of why those cannot be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.455472+00:00"
+}

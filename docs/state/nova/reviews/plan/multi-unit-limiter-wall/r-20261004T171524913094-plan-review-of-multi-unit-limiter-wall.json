@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:28:45.925Z",
+  "dispatched_at": "2026-10-04T17:15:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/multi-unit-limiter-wall.html:62",
+      "id": "reuse_search-1",
+      "reason": "naming the machine-description identity owner would let \u00a74 reuse its reference model and recorded why WallReference differs, or avoid a second reference path.",
+      "text": "\u00a74 moves the wall into \"a reference to the machine description\" but cites no search of the mechanism nova.imas already owns for content-addressed machine-description references, nova/imas/machine_artifact.py and nova/imas/machine_evidence.py, so WallReference is a fresh reference subsystem beside the existing one",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/media/sources/frame.py:56",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's own contract (\"a picture and the solve cannot disagree about what is inside\") needs one predicate, so \u00a71 should extend wall_mask.py with the host-side predicate and route \u00a75 through it.",
+      "text": "inside_wall_units re-implements the occupiable region (unite closed vessel interiors, remove closed material interiors, treat an open material line as a zero-area limit) that \u00a71 declares wall_mask.py the authority for, beside the independent jax form at nova/equilibrium/connectivity_boundary.py:233 (_points_inside_wall_units) and the raster at nova/equilibrium/wall_mask.py:338 (build_wall_mask); the media and solver forms disagree at the boundary, since the media ray-cast has no explicit on-boundary test while the solver adds an explicit edge tolerance",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/steering_frames.py:499",
+      "id": "duplicate_owner-2",
+      "reason": "the digest payload (hex-float unit table) is wall-specific and no plan behaviour turns on it; a shared helper is upstream hygiene, not a design change.",
+      "text": "_wall_content_digest re-implements canonical JSON plus sha256 (json.dumps sort_keys with compact separators, hashlib.sha256) that nova/imas/machine_evidence.py:33 (canonical_json) and nova/imas/machine_artifact.py:145 (_sha256_bytes) already provide, adding a fourth machine-description digest spelling beside nova/imas/diiid_machine_ids.py:187 (_chain_sha256)",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "c3ddb8df76fdcfaaf963bbd3a91ad36d216c990a6615a09f2bebc0bb24f6e6d0",
+  "plan_slug": "multi-unit-limiter-wall",
+  "plan_version": 40,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T171524913094-plan-review-of-multi-unit-limiter-wall",
+  "reviewed_blob_sha": "16cfe73218a26ef19cb5c4867ef604c8463a96b0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 nova/equilibrium/wall_mask.py is one deep module, hiding IDS parsing, packing-with-offsets and supercover-raster behaviour behind WallUnit plus a small functional API, and \u00a71 forbids a second wall type.",
+    "duplicate_owner": "a finding \u2014 the occupiable-region predicate is authored in three places (raster in wall_mask.py, jax in connectivity_boundary.py, host-numpy in media/sources/frame.py) rather than behind the one owner \u00a71 names.",
+    "reuse_search": "a finding \u2014 the plan searched the wall representation (wall_mask.py, the s19 scout) and cites it, but \u00a74's reference subsystem is authored without considering the machine-description identity machinery nova.imas already owns.",
+    "thin_wrapper": "pass \u2014 the unit-aware consumer changes (per-unit arcs, per-unit brackets, per-unit draw_wall) add per-unit semantics rather than forwarding, and the retained legacy accessors (Wall.boundary, Wall.segments) are justified in \u00a71 and \u00a72 as compatibility for single-ring machines; no unjustified forwarding layer was found."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.450811+00:00"
+}

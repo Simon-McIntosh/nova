@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:42:31.701Z",
+  "dispatched_at": "2026-10-05T15:30:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/dual-branch-selection.html#s6",
+      "id": "reuse_search-1",
+      "reason": "the stale decision record is already marked SUPERSEDED, so the remaining \u00a76/f-dbs-001 measurement node re-derives a settled answer and should be struck or replaced by the wiring the plan actually needs.",
+      "text": "\u00a76 and followup f-dbs-001 keep \"measure the fork-arming economics on catalog frames\" as executable work, but the plan's own \u00a7coreachability result (commit a9ea090c) already answered it \u2014 no frame admits qualified roots of two classes, so the fork is moot and the route is one pinned solve plus post-hoc connectivity classification \u2014 and that route already exists as `select_achieved_forward_branch` (nova/equilibrium/branch_selection.py:638), used in production at nova/transport/coupled_window.py:1655",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/branch_selection.py:617",
+      "id": "thin_wrapper-1",
+      "reason": "\u00a75's \"What remains\" lists the seed and bootstrap islands but omits the one step that makes the seam live \u2014 threading `p_diverted` from `traced_smooth_boundary_read` into the host selector \u2014 so the plan should either name that wiring or extend the existing host selector instead of leaving a placeholder-fed wrapper.",
+      "text": "the seam's smooth weight is unreachable from production: both host entry points `select_forward_branch` (line 624) and `select_achieved_forward_branch` (line 670) build `TracedSelectionInput` with `p_diverted=jnp.asarray(0.5)` and `class_margin=jnp.asarray(jnp.nan)`, and a repository-wide search finds `forward_branch_selection_input`/`scan_forward_branch_selection` consumed only by tests/test_branch_selection.py and the benchmark, so the \"continuous selection\" exists only on the traced path no caller wires.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/traced_selection_seam.py:51",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's design should name nova/equilibrium/branch_selection.py as the single owner of the seam and retire or explicitly demote the benchmark copy, otherwise the artefact the plan cites for continuity is a parallel implementation of the function the plan just promoted.",
+      "text": "a second `traced_select_forward_branch` is defined beside the production one at nova/equilibrium/branch_selection.py:507, with the same name and a divergent blend (`0.5 * (p_weight + margin_weight)` against the production `p_diverted`-only weight), and the plan lists this benchmark among its artifacts; its own docstring still asserts \"The production selector is deliberately unchanged\", which the c64440e8 landing falsified.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/dual-branch-selection.html#s5",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the public names it introduces \u2014 the supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 \u2014 by naming what folds into the existing host selector or why the surface cannot be smaller.",
+      "text": "\u00a75 adds a public traced selection surface (the `nova/equilibrium/branch_selection.py` exports \u2014 `TracedSelectionInput`, `traced_select_forward_branch`, `scan_forward_branch_selection`, `forward_branch_selection_input`, `select_achieved_forward_branch` and the receipt/policy/history types) without naming any definition it retires or merges, and without stating why nothing can be.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "6f840d971589ac2271e834540474f486dd83d500e0bbc67a5f163c8918944eb9",
+  "plan_slug": "dual-branch-selection",
+  "plan_version": 15,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152957375245-plan-review-of-dual-branch-selection",
+  "reviewed_blob_sha": "e25446cc4702a55311231df29d5043993ac2aebd",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the seam at nova/equilibrium/branch_selection.py hides the host history machine, the traced transition and the flux blend behind `select_forward_branch`/`traced_select_forward_branch`, and the host selector delegates its transition semantics to the array core rather than reimplementing them.",
+    "duplicate_owner": "a finding \u2014 `benchmarks/traced_selection_seam.py:51` defines a second `traced_select_forward_branch` duplicating the production owner at nova/equilibrium/branch_selection.py:507 with a different blend, and the plan still names it as an artifact.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a75 promotes \"one public, traced, batched seam\" without naming what it retires or merges, or stating why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan re-runs fork-arming economics in \u00a76 and f-dbs-001 although its own class-coreachability node (a9ea090c) concluded a single pinned solve with post-hoc classification, whose mechanism already ships as `select_achieved_forward_branch` (nova/equilibrium/branch_selection.py:638, consumed at nova/transport/coupled_window.py:1655), and the plan never cites it.",
+    "thin_wrapper": "a finding \u2014 the continuous seam is a thin layer over `p_diverted`, which `traced_smooth_boundary_read` already emits (nova/equilibrium/connectivity_boundary.py:2424), and no production caller supplies it: both host entry points hardcode `p_diverted=0.5`, `class_margin=NaN`."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.331709+00:00"
+}

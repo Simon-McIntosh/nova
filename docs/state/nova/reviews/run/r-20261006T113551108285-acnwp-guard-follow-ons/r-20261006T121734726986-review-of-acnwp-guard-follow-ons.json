@@ -1,0 +1,101 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "1c023858f308f13adbf7290c318434afbb5e0b31",
+  "blocking_finding_count": 1,
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/production_solve_host_profile.py:416",
+    "benchmarks/program_scope_census.py:1093",
+    "nova/database/scripts.py:56 (the `filepath relativize --check` mode",
+    "invoked by scripts/git-hooks/pre-commit)"
+  ],
+  "completed_at": "2026-10-06T12:26:48.163Z",
+  "dispatched_at": "2026-10-06T12:17:51Z",
+  "findings": [
+    {
+      "file": "nova/database/scripts.py",
+      "line": "58",
+      "severity": "blocking",
+      "text": "blocking: the --check mode enumerates candidates from the index (worktree_path_candidates(root, cached=True) runs `git grep --cached`) but decides from working-tree content (_worktree_path_text reads root/path), so a file staged with a worktree path whose working-tree copy no longer carries it passes the hook while the index blob still names the root; reproduced in a scratch repo where `git grep --cached` returns staged.txt but worktree_path_offenders(candidates, worktree_reader) returns [], and the retired _staged_text read the index via `git show :path`, so this is a regression in the commit guard."
+    },
+    {
+      "file": "nova/database/filepath.py",
+      "line": "167",
+      "severity": "follow-on",
+      "text": "follow-on: _worktree_path_text is named module-private by its leading underscore yet imported across module boundaries (nova/database/scripts.py:9, tests/test_artifacts_carry_no_worktree_paths.py:17); if it is shared API it should not carry the private marker, and if it is private it should not be imported elsewhere."
+    }
+  ],
+  "follow_on_finding_count": 1,
+  "gate_logs": {
+    "base": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T113551108285-acnwp-guard-follow-ons/logs/baseline_suite.log",
+      "revision": "1c023858f308f13adbf7290c318434afbb5e0b31"
+    },
+    "head": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T113551108285-acnwp-guard-follow-ons/logs/after_suite.log",
+      "revision": "dc944c4156b562d0ce384080dc95894192970c1e"
+    }
+  },
+  "head_log_revision": "dc944c415",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against base 1c023858f \u2014 469233f2a carries the filepath.py, scripts.py, benchmarks and test changes, dc944c415 the evidence fragment and the archive sentence; every changed path is inside the declared scope.",
+    "done_when": "the done_when asks for a guard test that fails on a scratch tracked binary, a hook that refuses the same file staged, a second control on the candidate search, a pstats with no worktree path, neither benchmark default naming one, a consistent record, and a guard test under ten seconds; the manifest and its logs record all of these (negctl_b1.log, negctl_b2.log, negctl_b3.log, gate_c.log, guard_alone.log).",
+    "goal": "the \u00a76 node goal is to close four guard blind spots; the diff does all four \u2014 worktree_path_candidates and relativize_cprofile_dump are added to nova/database/filepath.py:136,178, both producers call the dump helper (benchmarks/production_solve_host_profile.py:416, benchmarks/program_scope_census.py:1093), both benchmark defaults become required arguments (benchmarks/backend_divergence_forensics.py:913, benchmarks/pure_arm_comparison_figure.py:411), and the record clause is reworded (docs/evidence/archive/figure-and-solver-audit-landed.html:996).",
+    "manifest": "read; it names the two commits (469233f2a, dc944c415), states the gate command and its 0-failure result, names the three negative-control logs, and records the hook-root follow-on it was fenced out of.",
+    "write_paths": "read the manifest's declared paths; every path changed by the diff (benchmarks/*, docs/evidence/archive/figure-and-solver-audit-landed.html, docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html, docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats, nova/database/filepath.py, nova/database/scripts.py, tests/test_artifacts_carry_no_worktree_paths.py, tests/test_filepath.py) is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_filepath.py:277,288,293 add reader and candidate-search guards, but no test exercises the hook's --cached enumeration against a mismatched working tree, so the defect at nova/database/scripts.py:58 is unguarded.",
+    "evidence": "the added-failure count is 0, read from the reviewed run's own baseline_suite.log and after_suite.log, and gate_c.log records 0 of 630 pstats paths naming the root, but negctl_b1.log bodies a symbol name (worktree_path_text) that the landed revision does not carry.",
+    "fit": "the additions follow nova/database/filepath.py's helper idiom, but the module-private _worktree_path_text (nova/database/filepath.py:167) is imported as cross-module API by nova/database/scripts.py:9 and tests/test_artifacts_carry_no_worktree_paths.py:17.",
+    "goal_fidelity": "all four \u00a76 deliverables land (nova/database/filepath.py:136,178), but the commit-check call at nova/database/scripts.py:58 reads working-tree content from an index enumeration, leaving one blind spot partly open.",
+    "reuse": "worktree_path_candidates (nova/database/filepath.py:136) consolidates the retired _staged_files/_staged_text and the guard's _tracked_files into one enumeration, and no pre-existing owner rewrites cProfile dumps for relativize_cprofile_dump.",
+    "scope_discipline": "every path in the diff (git diff --stat 1c023858f dc944c415) is inside the manifest's declared write paths."
+  },
+  "limitations": [
+    "The reviewed run's three-file pytest arms (about 11 min base, about 11 min head) were not re-run; the added-failure count is read from the reviewed run's own baseline_suite.log and after_suite.log, both EXIT=0 with zero failures.",
+    "The pstats repair is confirmed by re-loading the committed dump with marshal and counting recorded paths naming the root (0 of 630); the rewrite helper itself was read, not re-run over a fresh dump.",
+    "The hook defect was reproduced against the landed predicate and reader symbols imported from the reviewed worktree, not by invoking scripts/git-hooks/pre-commit end to end."
+  ],
+  "node": "review-of-acnwp-guard-follow-ons",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the \u00a76 node goal is to close four guard blind spots; the diff does all four \u2014 worktree_path_candidates and relativize_cprofile_dump are added to nova/database/filepath.py:136,178, both producers call the dump helper (benchmarks/production_solve_host_profile.py:416, benchmarks/program_scope_census.py:1093), both benchmark defaults become required arguments (benchmarks/backend_divergence_forensics.py:913, benchmarks/pure_arm_comparison_figure.py:411), and the record clause is reworded (docs/evidence/archive/figure-and-solver-audit-landed.html:996).\nVERDICT done_when: the done_when asks for a guard test that fails on a scratch tracked binary, a hook that refuses the same file staged, a second control on the candidate search, a pstats with no worktree path, neither benchmark default naming one, a consistent record, and a guard test under ten seconds; the manifest and its logs record all of these (negctl_b1.log, negctl_b2.log, negctl_b3.log, gate_c.log, guard_alone.log).\nVERDICT write_paths: read the manifest's declared paths; every path changed by the diff (benchmarks/*, docs/evidence/archive/figure-and-solver-audit-landed.html, docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html, docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats, nova/database/filepath.py, nova/database/scripts.py, tests/test_artifacts_carry_no_worktree_paths.py, tests/test_filepath.py) is inside them.\nVERDICT manifest: read; it names the two commits (469233f2a, dc944c415), states the gate command and its 0-failure result, names the three negative-control logs, and records the hook-root follow-on it was fenced out of.\nVERDICT diff: read commit by commit against base 1c023858f \u2014 469233f2a carries the filepath.py, scripts.py, benchmarks and test changes, dc944c415 the evidence fragment and the archive sentence; every changed path is inside the declared scope.\nCALL_SITES: benchmarks/production_solve_host_profile.py:416, benchmarks/program_scope_census.py:1093, nova/database/scripts.py:56 (the `filepath relativize --check` mode, invoked by scripts/git-hooks/pre-commit)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: all four \u00a76 deliverables land (nova/database/filepath.py:136,178), but the commit-check call at nova/database/scripts.py:58 reads working-tree content from an index enumeration, leaving one blind spot partly open.\nSCORE evidence: 17\nJUSTIFICATION evidence: the added-failure count is 0, read from the reviewed run's own baseline_suite.log and after_suite.log, and gate_c.log records 0 of 630 pstats paths naming the root, but negctl_b1.log bodies a symbol name (worktree_path_text) that the landed revision does not carry.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (git diff --stat 1c023858f dc944c415) is inside the manifest's declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_filepath.py:277,288,293 add reader and candidate-search guards, but no test exercises the hook's --cached enumeration against a mismatched working tree, so the defect at nova/database/scripts.py:58 is unguarded.\nSCORE fit: 16\nJUSTIFICATION fit: the additions follow nova/database/filepath.py's helper idiom, but the module-private _worktree_path_text (nova/database/filepath.py:167) is imported as cross-module API by nova/database/scripts.py:9 and tests/test_artifacts_carry_no_worktree_paths.py:17.\nSCORE reuse: 20\nJUSTIFICATION reuse: worktree_path_candidates (nova/database/filepath.py:136) consolidates the retired _staged_files/_staged_text and the guard's _tracked_files into one enumeration, and no pre-existing owner rewrites cProfile dumps for relativize_cprofile_dump.\nFINDING nova/database/scripts.py:58 blocking: the --check mode enumerates candidates from the index (worktree_path_candidates(root, cached=True) runs `git grep --cached`) but decides from working-tree content (_worktree_path_text reads root/path), so a file staged with a worktree path whose working-tree copy no longer carries it passes the hook while the index blob still names the root; reproduced in a scratch repo where `git grep --cached` returns staged.txt but worktree_path_offenders(candidates, worktree_reader) returns [], and the retired _staged_text read the index via `git show :path`, so this is a regression in the commit guard.\nFINDING nova/database/filepath.py:167 follow-on: _worktree_path_text is named module-private by its leading underscore yet imported across module boundaries (nova/database/scripts.py:9, tests/test_artifacts_carry_no_worktree_paths.py:17); if it is shared API it should not carry the private marker, and if it is private it should not be imported elsewhere.\nreviewed_base_sha: 1c023858f308f13adbf7290c318434afbb5e0b31\nreviewed_head_sha: dc944c4156b562d0ce384080dc95894192970c1e",
+  "review_run_id": "r-20261006T121734726986-review-of-acnwp-guard-follow-ons",
+  "review_scope": "Independent review of the \u00a76 guard follow-ons node: the binary cProfile dump and its two producers, the two benchmark roots made required arguments, the contradictory record sentence, and the shared candidate search replacing the full-tree scan in the guard test and the commit hook. Read-only, outside the reviewed worktree: the diff was read from the shared object store, the pstats claim re-derived, and the hook's index/worktree behaviour reproduced in a scratch repo.",
+  "reviewed_base_sha": "1c023858f308f13adbf7290c318434afbb5e0b31",
+  "reviewed_commits": [
+    "469233f2a",
+    "dc944c4156b562d0ce384080dc95894192970c1e"
+  ],
+  "reviewed_head_sha": "dc944c4156b562d0ce384080dc95894192970c1e",
+  "reviewed_run_id": "r-20261006T113551108285-acnwp-guard-follow-ons",
+  "reviewer": "review-of-acnwp-guard-follow-ons",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T12:25:49.133905+00:00",
+  "total": 103,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T121734726986-review-of-acnwp-guard-follow-ons/review-hook-index-vs-worktree.log"
+  ]
+}

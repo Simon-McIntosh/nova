@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:24:21.216Z",
+  "dispatched_at": "2026-10-06T01:20:01Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html:60",
+      "id": "reuse_search-1",
+      "reason": "\u00a71's text must cite converged-forward-solve \u00a75 and state whether it is retired, or the section will be dispatched to re-implement a rebuilt mechanism.",
+      "text": "\u00a71 proposes the `live-warmup-frozen-newton` route repair without naming the plan that supersedes it, so a dispatch of \u00a71 would rebuild a route converged-forward-solve \u00a75 is replacing; a plan that adds a subsystem without citing the owner is the reuse failure this item exists to catch",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/converged-forward-solve.html",
+      "id": "duplicate_owner-1",
+      "reason": "the author should collapse or re-point \u00a71-\u00a73 to converged-forward-solve, so no node is dispatched to build a duplicate of the live owner.",
+      "text": "three of this plan's four sections (\u00a71 Newton-Krylov route, \u00a72 program size, \u00a73 traced evaluator) duplicate the scope of converged-forward-solve \u00a74 (map and derivative), \u00a75 (fixed-point solve) and \u00a76 (acceptance and retirement), whose decision `retire-not-patch` retires exactly these ladders and the frozen/live split; the sections still carry `implementable` declarations and open followups that recommend `/reckon-build forward-solver-route-integrity \u00a7N`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/recovery_ladder_telemetry.py",
+      "id": "duplicate_owner-2",
+      "reason": "the followup should extend `recovery_ladder_telemetry.py` (or name why its receipt cannot serve) instead of repairing it as a second counter.",
+      "text": "two instruments measure the same recovery-ladder activity: `recovery_ladder_census.py` re-instruments the module globals at trace time and reads zero (f-fsri-ladder-census-runtime-counts-are-live), while `recovery_ladder_telemetry.py` already reads the persisted promotion/recovery arrays the solver emits; the plan's followup would patch the inert census rather than extend the instrument that sees the calls",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2adf1b39db91bce4822c5285567ae645b1c5df3bfd1a9cb696b175db5a61c4f0",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 116,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:33.517934+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:34.653355+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:31.928809+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T011947598255-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "853b2e5d2057a870315a9717df363b5120a1b7e6",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the mechanism \u00a73 proposes is already a deep interface: `OperatorRequestKind` / `OperatorRequest` / `operator_request_body` / `run_operator_requests` (nova/equilibrium/fixed_point.py:923-1041) hide residual, merit, acceptance, recovery, reconciliation and Jacobian-vector evaluation behind one typed request and one scan, and the plan extends it rather than adding wrappers.",
+    "duplicate_owner": "a finding \u2014 the \u00a71 route, the \u00a72 program-size budget and the \u00a73 state machine are three subsystems that docs/plans/converged-forward-solve.html \u00a74/\u00a75/\u00a76 (lines 59, 64, 69) already own and are rebuilding, yet this plan's sections remain declared `implementable` (plan-section-declarations, snapshot line 23).",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan's 2026-10-06 notes bind its remaining surface to existing owners (the size gate extends `benchmarks/solve_program_size_gate.py`, snapshot line 744; the cache guard reuses `scripts/h200_test_lane/cache_reuse_summary.py` with \"no second counter and no fresh row set\", snapshot line 750).",
+    "reuse_search": "a finding \u2014 the \u00a71 body (snapshot line 60) proposes restoring the Newton-Krylov route with the `live-warmup-frozen-newton` design and never cites docs/plans/converged-forward-solve.html, which retires that route and rebuilds the solve at its \u00a75 (converged-forward-solve.html:64); only a followup pointer (snapshot line 568) records the supersession, not the section.",
+    "thin_wrapper": "pass \u2014 \u00a74's `scripts/h200_test_lane/run.sh` (48 lines) is a thin caller over `scripts/nova_lane/run.sh` (402 lines), which is the consolidation the plan chose over hand-written per-brief recipes; the wrapper's reason is stated and it does not fork the launch logic."
+  },
+  "section_digests": {
+    "_document": "b432b26d125dff375750d161945c46529b985507287c66d3f3a3b0897837c61e",
+    "s-contract": "83d8d14d75c0216f84acbbb9ef71204975cc6134348d26b5158c593c9abfc624",
+    "s0": "80f310e76317b26c373d1244865223433df267fb8337045d575fe833c75b5858",
+    "s1": "80571c0e208f8095726792cc9d0029962c3966fed6f04e6dcb2ed1a5f352581b",
+    "s2": "f632de7fadccd34387c95c830a73120eb5234de722730bee800322a62a31db41",
+    "s3": "2912ba532e01c1f8a0dd30b1773900e600828c6bbb1cd315c7976868d2a940e5",
+    "s4": "da5c69a471b7ca2d81f157f637c5eda274244e01477238d60f1488532a220978"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:29:49.036724+00:00"
+}

@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest names both gate logs. 0 failures in each are support the count: baseline_suite (base-gate.log) records '9 passed, 5 warnings' EXIT=0 and after_suite (after-gate.log) records '12 passed' EXIT=0, so the head log reports no FAILED or ERROR node id and the set difference is empty. added_failure_count=0 and added_failure_ids=[] mean the run added no failing test.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "benchmarks/{solovev_certificate,fieldnull_production_route,plasma_cell_production_ladder,exact_placement_discriminator,carrier_step_attribution}.py: stamp_source_revision seam added (11 to 20 added lines each)",
+    "tests/test_production_solver_receipt_trip_alignment.py: 3 revision assertions added; 12 passed EXIT=0 vs base 9 passed EXIT=0, added failures 0",
+    "docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json: source_revision = 8977ecd3b76367e334bf24b33d5b9e3a27640c32 added by hand at line 127",
+    "negative control: 2 failed, 10 passed, EXIT=1 (negative-control.log:60)"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "3547676b870f278ebd290c49ad3e1460671c079c",
+    "9408475d9fb244c94683a5b471406bdbaeb453c3"
+  ],
+  "completed_at": "2026-10-02T14:59:46.149Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T14:39:33Z",
+  "evidence_inputs": "Reviewed b12cb22cc21946e85211979b626c3f7009ae629a..9408475d9fb244c94683a5b471406bdbaeb453c3 (two commits, 188 insertions, 5 deletions, git diff --check clean). The done-when's parenthetical fixes the scope to five drivers; the diff stamps exactly those five. The committed receipt.json was outside the declared write fence and was hand-edited rather than regenerated because its writer measure.py is out of scope and the done-when forbids regenerating the receipt; the value added equals the 'revision' already recorded there (8977ecd3b). The node's own manifest already flags both the out-of-fence edit and the missing measure.py stamp under follow_ons. The literal 'each benchmark that writes a production-route receipt' is only as wide as the five named drivers; other benchmarks that reference production-route artifact filenames (e.g. benchmarks/exact_clip_seed_amplitude.py, benchmarks/null_census_assertion.py) write no such receipt themselves and were not checked.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_production_solver_receipt_trip_alignment.py",
+      "line": "155",
+      "severity": "follow-on",
+      "text": "test_every_production_route_receipt_writer_stamps_source_revision calls writer.stamp_source_revision({}) rather than each writer's receipt payload builder, so it pins that the helper stamps a dict, not that the builders route through it. Removing the stamp call from, say, plasma_cell_production_ladder.assemble() would leave the suite green while that receipt lost its field. The done-when asks for the field 'on each writer's receipt payload builder', which only the solovev_certificate builder assertion actually exercises."
+    },
+    {
+      "file": "docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json",
+      "line": "127",
+      "severity": "follow-on",
+      "text": "source_revision was hand-added to a committed artifact outside the declared write fence, and its writer docs/figures/gs-absolute-accuracy/production-solver-receipt/measure.py does not emit the key (the node's own manifest records this at follow_ons), so regenerating that receipt drops the field the gate now asserts. The value matches the receipt's own 'revision' key, so the provenance is honest, but the field has no writer-side guard."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134346884424-fsa-production-route-receipt-revision/manifest.md",
+      "line": "9",
+      "severity": "follow-on",
+      "text": "The tests line quotes '12 passed in 13.59s' while the cited after-gate.log line 3 records '12 passed in 13.84s', so the record does not reconcile with the log it cites; the report repeats 13.59s at line 49."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-production-route-receipt-revision.md",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "The base revision is cited as b12cb22cc21946e85211979b626c3f7009ae6290a, which does not resolve in the repository (git rev-parse fails 'unknown revision'); the reviewed base is b12cb22cc21946e85211979b626c3f7009ae629a, so an unresolvable sha stands where the base belongs."
+    }
+  ],
+  "gate_arms_note": "Independently reproduced at reviewed head 9408475d9 from the reviewed worktree with PYTHONDONTWRITEBYTECODE=1 and -p no:cacheprovider: '12 passed in 12.70s' EXIT=0. Negative control reproduced independently without touching the peer worktree by rebinding certificate.stamp_source_revision to an identity function: both _assert_source_revision calls raise 'a production-route receipt must name the source revision it was produced at'. The reviewed base b12cb22cc is an ancestor of the head; the worktree is clean.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read both commits against b12cb22cc: 3547676b8 adds the stamp_source_revision seam to five benchmark writers and one test file, 9408475d9 adds the fragment and the single receipt field; no writer logic changes beyond replacing the returned literal with a stamped variable.",
+    "done_when": "The done-when names tests/test_production_solver_receipt_trip_alignment.py run in place as the delta gate; the test asserts the field on the committed receipt and on each writer, but for four of five writers only through writer.stamp_source_revision({}) rather than each writer's receipt payload builder, so the done-when's 'on each writer's receipt payload builder' is only satisfied where a builder is exercised (solovev_certificate).",
+    "goal": "The node goal is to stamp every production-route receipt writer with source_revision and pin it with a test; the five named writers each gained a stamp_source_revision seam and their payload builders route through it (benchmarks/solovev_certificate.py:897, benchmarks/fieldnull_production_route.py:563, benchmarks/plasma_cell_production_ladder.py:523, benchmarks/exact_placement_discriminator.py:136, benchmarks/carrier_step_attribution.py:535).",
+    "manifest": "Read; it names both commits, the base and after arms (9 vs 12 passed, EXIT=0), the red negative control (2 failed, EXIT=1) and the three logs, but its tests line quotes '12 passed in 13.59s' where the cited after-gate.log records 13.84s.",
+    "write_paths": "git diff --name-only b12cb22cc..9408475d9 lists eight repository paths: the five granted benchmarks and the granted test file inside the fence, the granted fragment, and docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json, which is outside the declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/test_production_solver_receipt_trip_alignment.py:155 calls each writer's stamp_source_revision({}), so removing the stamp call from a builder such as plasma_cell_production_ladder.assemble() would not fail any test, and the committed receipt's field has no writer-side guard.",
+    "evidence": "The gate is recorded and I reproduced it (12 passed, EXIT=0) and the negative control reddens on removal (2 failed, EXIT=1), but the manifest quotes 13.59s where after-gate.log:3 records 13.84s and the base arm runs the old 9-test file rather than the new tests against base source.",
+    "fit": "The seam mirrors benchmarks/sol_ledger_current_census.py:88 and benchmarks/centroid_constrained_fixture_receipt.py:167, names carry no plan identifier, but the fragment lacks a trailing newline and the same docstring is copied verbatim across five modules.",
+    "goal_fidelity": "All five named writers now stamp source_revision (benchmarks/solovev_certificate.py:897, benchmarks/plasma_cell_production_ladder.py:523) and the committed receipt carries it, but the pin exercises only the stamp seam for four writers, not their receipt builders.",
+    "scope_discipline": "docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json is written outside the declared write paths, acknowledged at manifest.md:23, while the other seven changed paths stay inside the fence."
+  },
+  "plan": "nova:figure-and-solver-audit",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to stamp every production-route receipt writer with source_revision and pin it with a test; the five named writers each gained a stamp_source_revision seam and their payload builders route through it (benchmarks/solovev_certificate.py:897, benchmarks/fieldnull_production_route.py:563).\nVERDICT done_when: the done-when names tests/test_production_solver_receipt_trip_alignment.py run in place as the delta gate; the test asserts the field on the committed receipt and on the writers, but only via writer.stamp_source_revision({}) rather than each writer's receipt payload builder.\nVERDICT write_paths: git diff --name-only b12cb22cc..9408475d9 lists the five granted benchmarks, the granted test file and fragment inside the fence, plus docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json outside it.\nVERDICT manifest: read; it records both commits, the base and after arms (9 vs 12 passed), the red negative control (2 failed, EXIT=1) and the three logs, but its tests line quotes 13.59s where after-gate.log records 13.84s.\nVERDICT diff: read both commits against b12cb22cc; 3547676b8 adds the stamp seam to five benchmark writers and one test file, 9408475d9 adds the fragment and the one-line receipt field, with no writer logic changed beyond the stamp call.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: all five named writers stamp source_revision (benchmarks/solovev_certificate.py:897, plasma_cell_production_ladder.py:523), but the pin exercises only the stamp seam for four of them, not their receipt builders.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate is recorded and I reproduced it (12 passed EXIT=0) and the negative control reddens on removal (2 failed EXIT=1), but the manifest quotes 13.59s against after-gate.log:3's 13.84s and the base arm runs the old 9-test file rather than the new tests against base source.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json is written outside the declared write paths, acknowledged at manifest.md:23, while the other seven changed paths stay inside the fence.\nSCORE durability: 13\nJUSTIFICATION durability: tests/test_production_solver_receipt_trip_alignment.py:155 calls each writer's stamp_source_revision({}), so removing the stamp call from plasma_cell_production_ladder.assemble() would not fail any test, and the committed receipt's field has no writer-side guard.\nSCORE fit: 17\nJUSTIFICATION fit: the seam mirrors benchmarks/sol_ledger_current_census.py:88 and centroid_constrained_fixture_receipt._revision, names carry no plan identifier, but the fragment lacks a trailing newline and the same docstring is copied verbatim across five modules.\nFINDING tests/test_production_solver_receipt_trip_alignment.py:155 follow-on: test_every_production_route_receipt_writer_stamps_source_revision calls writer.stamp_source_revision({}) rather than each writer's receipt payload builder, so removing the stamp call from a builder leaves the suite green while that receipt loses the field the done-when asks for.\nFINDING docs/figures/gs-absolute-accuracy/production-solver-receipt/receipt.json:127 follow-on: source_revision was hand-added to a committed artifact outside the declared write fence and its writer measure.py does not emit it, so a regeneration would drop the field the gate now asserts.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134346884424-fsa-production-route-receipt-revision/manifest.md:9 follow-on: the tests line quotes 13.59s while the cited after-gate.log:3 records 13.84s, so the record does not reconcile with the log it cites.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-production-route-receipt-revision.md:4 follow-on: the base revision cited as b12cb22cc21946e85211979b626c3f7009ae6290a does not resolve; the reviewed base is b12cb22cc21946e85211979b626c3f7009ae629a.\nREVIEWED_BASE_SHA: b12cb22cc21946e85211979b626c3f7009ae629a\nREVIEWED_HEAD_SHA: 9408475d9fb244c94683a5b471406bdbaeb453c3",
+  "review_base_sha": "5179ab0fb37ca58b9863a956be0d4c91e63fc46e",
+  "review_run_id": "r-20261002T143916365762-review-of-fsa-production-route-receipt-revision",
+  "reviewed_base_sha": "b12cb22cc21946e85211979b626c3f7009ae629a",
+  "reviewed_commit": "9408475d9fb244c94683a5b471406bdbaeb453c3",
+  "reviewed_head_sha": "9408475d9fb244c94683a5b471406bdbaeb453c3",
+  "reviewed_revision": "9408475d9fb244c94683a5b471406bdbaeb453c3",
+  "reviewed_run_id": "r-20261002T134346884424-fsa-production-route-receipt-revision",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-production-route-receipt-revision",
+  "reviewer_node": "review-of-fsa-production-route-receipt-revision",
+  "reviewer_run_id": "r-20261002T143916365762-review-of-fsa-production-route-receipt-revision",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "scope_discipline": 13
+  },
+  "section": "\u00a75",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T14:55:12Z",
+  "total": 73,
+  "verdict": "pass-with-follow-ons"
+}

@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_source": "unmeasured: the reviewed run's manifest names no baseline_suite or after_suite gate logs (both fields empty and confirmed empty in classification.json), so no base/head suite pair was compared; recorded as unmeasured rather than zero.",
+  "completed_at": "2026-10-03T10:15:17Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "fsapi-outboard-census-repin",
+      "recorded_at": "2026-10-03T10:26:38.560839+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-03T06:34:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html",
+      "line": "34",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment states the outboard gate (tests/test_outboard_hole_census_gate.py) remains red with its present exact expectation pinned at 14,013,835.437176 A (BOOKED_TOTALS_A exact = 14_013_835.43717596 at line 121 of the gate) while the measured booking is 15,491,539.124767 A, and asks for a re-pin in a separately scoped verification node. This is correctly declared and is outside the reviewed run's write grant; recorded for the coordinator and the verification node rather than repaired here."
+    },
+    {
+      "file": "benchmarks/outboard_census_exact_total.py",
+      "line": "446",
+      "severity": "follow-on",
+      "text": "follow-on: the round's central change (a recommendation derived from paired receipts rather than a preset constant) is exercised only by the ad-hoc run-dir command whose output is final-receipt-consistency-final.log; no committed test imports benchmarks/outboard_census_exact_total.py, so nothing in the repository would redden if _reference_comparison or _recommendation regressed or if the receipt and the fragment desynchronize again -- the exact failure this round repaired. A committed consistency test over the paired receipt and the fragment would close it."
+    },
+    {
+      "file": "benchmarks/outboard_census_exact_total.py",
+      "line": "481",
+      "severity": "follow-on",
+      "text": "follow-on: the run's declared negative control (receipt-negative-control.log) reverses commit 558cdffd3 and its positive arm cites line 480 as '\"recommendation\": RECOMMENDATION', a module constant this round removed. The control therefore describes a code state that no longer exists at head and does not falsify this round's own change; the derived disposition has positive evidence (the paired receipt) but no reversion control. The manifest's negative_control fields should be regenerated against 60baa8ee7 for the run's record to describe its head."
+    }
+  ],
+  "item_aggregate": null,
+  "item_verdicts": {},
+  "justifications": {
+    "durability": "No committed test imports benchmarks/outboard_census_exact_total.py, so _reference_comparison, _recommendation, _refinement_error_bound and the receipt assembly are exercised only by run-dir invocations. The fragment-to-receipt agreement that this round established is asserted only by an uncommitted ad-hoc command (final-receipt-consistency-final.log); either file could drift again with the repository staying green. This is the same coverage gap the prior review recorded, and it is the reason the disposition is not held by any executable check.",
+    "evidence": "Every claim the round makes about its receipt is independently reproducible from paired-final-head.json. The fragment's selected-booking sum 1,477,703.687597 A equals the receipt's current_comparison.booking_a (1477703.6875970114); the independent sum 1,477,703.686365 A equals reference_a (1477703.686364573); the 0.001232 A / 8.34e-10 relative difference equals absolute_difference_a and relative_difference exactly; the stated 0.006251 A tolerance equals tolerance_a and equals the sum of the ten per-cell quadrature_error_bound_a values in quadrature_cells; the pinned sum 0.000000001 A equals pinned booking_a 7.82e-10 and is correctly outside tolerance; and the 'main'/'set_support_clip_mode' clip-selection column matches each revision's mode_strategy. The booked-totals table (247e5aa4a = 14,013,835.437170 A, 38b441dad = 15,491,539.124767 A, increase 1,477,703.687597 A) matches the receipt's exact_booked_a per revision. generating_commit is recorded as 314e8aaa inside the payload. It loses points because the run's declared negative control still reverses the prior commit rather than this round's, so the round's own change has no reversion control, and because no committed test reproduces the reconciliation.",
+    "fit": "The new symbols describe mechanisms (_reference_comparison, _recommendation, _refinement_error_bound, TRIANGLE_CONVERGENCE_RELATIVE_TOLERANCE, generating_commit, resolved_revision), no plan, sprint, ticket or version label appears in any path, symbol or comment, and the follow-on is declared in the prose rather than repaired out of grant. _recommendation returns 're-pin'/'repair'/'undetermined' from the two measured comparisons and the recommendation_basis string now names the two fields it reads, so the receipt reflects the run it belongs to -- closing the unmeasured-value pattern the prior review flagged. The only reservation is that 'undetermined' is returned both when both arms agree and when neither does, so a run where the pinned booking also matched would read the same as a doubly-failing one.",
+    "goal_fidelity": "The round's goal was to close the prior review's actionable findings: the receipt's preset verdict and its literal zero bound, with the fragment's prose then contradicting the committed artefacts. Both are now genuinely closed and independently verified. 60baa8ee7 removes the RECOMMENDATION constant and derives the disposition in _recommendation from current_comparison.within_tolerance and pinned_comparison.within_tolerance, and derives the previously-literal quadrature bound in _refinement_error_bound; the regenerated paired receipt carries recommendation 're-pin' (current within, pinned outside) and a measured 0.006251 A bound, and the fragment reconciles with it to display precision. The two resolution commits (88597fb7b, a732e262e) additionally fix a real lookup defect where rows were keyed by the unresolved revision argument while current/pinned were looked up by resolved sha. It loses the last points only because the third state ('undetermined' when both arms agree) and the third prior finding (the red gate pin) remain, the latter correctly declared follow-on.",
+    "scope_discipline": "The five commits gained since the prior reviewed head touch only the two declared write paths: benchmarks/outboard_census_exact_total.py (60baa8ee7, 88597fb7b, a732e262e) and docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html (9d8c870cf, 314e8aaaa), confirmed by git diff --stat over the range. Nothing under nova/, no plan state, no sprint or index file. Every commit carries a conventional subject and a body. No plan, sprint, ticket or version label appears in a path, symbol or comment; the branch-neutral change of 314e8aaaa removes an abbreviated branch tip rather than adding a label."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261003T063401667067-fsapi-outboard-census-exact-total, node fsapi-outboard-census-exact-total, covering ONLY the five commits gained since the prior review (prior reviewed head a57f6c203; base of this review a57f6c203, head 314e8aaa): 60baa8ee7 fix(benchmark): derive census disposition from receipts, 88597fb7b fix(benchmark): resolve reference measurement revisions, a732e262e fix(benchmark): normalize archive revision identities, 9d8c870cf docs(evidence): reconcile paired census receipt, 314e8aaaa docs(evidence): keep current census row branch-neutral. Read from the reviewed worktree at 314e8aaaad3fae301dbc30f087650a25066f878d, which is clean and detached.\n\nCHECK 1 -- prior finding 2 (preset recommendation) is closed. The prior review flagged RECOMMENDATION as a module constant at line 31 with an unconditional basis. 60baa8ee7 removes it entirely; _recommendation (line 481) now returns re-pin/repair/undetermined from current_comparison.within_tolerance and pinned_comparison.within_tolerance over the same selected support cells, and recommendation_basis names those two fields. The regenerated receipt records recommendation 're-pin' with current_matches_reference true and pinned_matches_reference false.\n\nCHECK 2 -- prior finding 1 (literal zero bound / commitment not regenerated) is closed. The prior review observed that no receipt postdated the fix and that triangle-reference.json still carried \"quadrature_error_bound_a\": 0.0 while the prose said the zero was removed. This round derives the bound: _refinement_error_bound takes the absolute difference of the last two refinement levels per cell, _measure sums them, and the paired receipt records quadrature_error_bound_a = 0.006251123806578107, which I confirmed equals the sum of the ten per-cell bounds in quadrature_cells. The cited receipt is paired-final-head.json, generating_commit 314e8aaa, which postdates the code change, and the fragment now reconciles with it (see CHECK 3).\n\nCHECK 3 -- the fragment reconciles with the receipt. I cross-read the fragment's two tables and the prose paragraph against paired-final-head.json. The selected-booking sum 1,477,703.687597 A = booking_a 1477703.6875970114; the independent sum 1,477,703.686365 A = reference_a 1477703.686364573; the 0.001232 A and 8.34e-10 relative difference match absolute_difference_a and relative_difference; the stated 0.006251 A tolerance = tolerance_a; the pinned sum 0.000000001 A = pinned booking_a 7.8205088e-10 and is outside tolerance (relative 0.9999999999999996); the booked-totals table entries (14,013,835.437170 A at 247e5aa4a; 15,491,539.124767 A at 38b441dad and main; increase 1,477,703.687597 A) match exact_booked_a per revision; and the clip-selection column matches each revision's mode_strategy (set_support_clip_mode for 247e5aa4a/a28a3e880/38b441dad, with_clip_mode for main). The per-cell Final Delta column matches the ten quadrature_error_bound_a values. All reconciled to display precision.\n\nCHECK 4 -- the two resolution commits fix a real defect. Before a732e262e, rows were keyed by the unresolved revision argument (by_revision = {row['revision']: ...}) while current and pinned were looked up by resolved sha, and reference_revisions held raw arguments, so a branch-arg such as 'main' both failed the reference-selection test and was unfindable as head. 88597fb7b resolves reference revisions and a732e262e resolves every requested revision and keys rows by the resolved sha. The paired receipt shows the corrected behaviour: current = the a6fe0d05 main row, pinned = the 247e5aa4a row, both carrying a quadrature reference.\n\nCHECK 5 -- scope. The five commits touch only benchmarks/outboard_census_exact_total.py and the evidence fragment, confirmed by git diff --stat over the range; every commit carries a conventional subject and a body; no plan, sprint, ticket or version label appears in a path, symbol or comment.\n\nFINDING docs/evidence/fragments/forward-solve-api/fsri-outboard-census-exact-total.html:34 follow-on: the outboard gate remains red with its exact expectation pinned at 14,013,835.437176 A (BOOKED_TOTALS_A in tests/test_outboard_hole_census_gate.py line 121) against a measured booking of 15,491,539.124767 A; correctly declared follow-on and outside this node's write grant.\nFINDING benchmarks/outboard_census_exact_total.py:446 follow-on: no committed test imports the benchmark; the fragment-to-receipt agreement is asserted only by the uncommitted final-receipt-consistency-final.log, so the contradiction this round repaired could recur with the repository green.\nFINDING benchmarks/outboard_census_exact_total.py:481 follow-on: the run's declared negative control reverses the prior commit 558cdffd3 and its positive arm cites a RECOMMENDATION constant this round removed, so it no longer describes the head and does not falsify this round's change.\n\nSCORE goal_fidelity: 18\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 9\nSCORE fit: 18\n",
+  "review_run_id": "legacy-6af782be4d96",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a57f6c2033e6eabf1872270031b97d494c307f5b",
+  "reviewed_head_sha": "314e8aaaad3fae301dbc30f087650a25066f878d",
+  "reviewed_run_id": "r-20261003T063401667067-fsapi-outboard-census-exact-total",
+  "reviewer": "r-20261003T101621271048-review-of-fsapi-outboard-census-exact-total",
+  "scores": {
+    "durability": 9,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T10:24:15.811883+00:00",
+  "total": 82
+}

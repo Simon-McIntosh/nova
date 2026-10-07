@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed baseline_suite is completed true at ae2179181b with failure_ids [] (the capacity reproducer, 1 passed) and the reviewed after_suite is completed true at 388bdea2f with failure_ids [] (23 passed). No failing identifier in the after arm that the base arm does not carry, so added_failure_count is 0 and added_failure_ids is empty. This review additionally re-ran the contour-tree tests at the reviewed head: the three fast files 23 passed EXIT=0, and tests/test_contour_tree_brute_force.py 7 passed in 803.55s EXIT=0.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134218554194-review-of-ctta-tree-capacity-on-critical-nodes/review-head-fast-suite.log: 23 passed in 16.11s, EXIT=0 at reviewed head 388bdea2f",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134218554194-review-of-ctta-tree-capacity-on-critical-nodes/review-head-brute-force.log: 7 passed in 803.55s, EXIT=0 at reviewed head 388bdea2f",
+    "/tmp/edge_node_check.py output: node_count vs max edge endpoint per fixture; 340-cell nodes=13 max_edge=353, MAST 27079 nodes=66 max_edge=645",
+    "docs/evidence/fragments/contour-tree-topology-authority/ctta-tree-capacity-on-critical-nodes.html (reviewed run): MAST 66/65 and 69/68 nodes/edges, zero mismatches; certificate rungs node-minus-edge=1, overflow=false, execute 3.322/11.848/75.771 s",
+    "docs/figures/contour-tree-topology-authority/capacity-on-critical-nodes/ (reviewed run): five data-ink component-count figures (two MAST, three certificate rungs)"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "18c543541",
+    "a6e31a6dc",
+    "84d7b0602",
+    "9ee95900c",
+    "455e59349",
+    "8828a880c",
+    "514d0e8f4",
+    "388bdea2f"
+  ],
+  "completed_at": "2026-10-02T14:26:01.822Z",
+  "dispatched_at": "2026-10-02T13:42:36Z",
+  "evidence_inputs": "Reviewed base/head pair ae2179181bee2ca9bb7693f874c2d108826ee8c8 -> 388bdea2fb213a14c678f1b0774378a146755083; run commits 18c543541..388bdea2f (eight). Reviewed baseline_suite ae2179181b, 1 passed; after_suite 388bdea2f, 23 passed. The 464-cell MAST carrier realises 644 live vertices, 1737 carrier edges, two masked slots; certificate rungs 353/1004, 558/1611, 1089/3186 live-vertex/carrier-edge counts. The reviewed head's relevant files are byte-identical to the local HEAD b12cb22cc (git diff empty), so the local worktree serves as the reviewed head for the independent re-run. The blocking defect is that receipt edges remain carrier-vertex indices after compaction; node_count is 13/13/15/66/69 against max edge endpoints 353/558/1089/645/645. The 2616-cell rung does not exist in the persisted parts directory. The CPU timing growth from 3.3 s to 75.8 s is O(V*E^2) from the per-vertex sweep rebuilding E x E pairwise masks and rescanning all edges, an implementation choice, not inherent.",
+  "findings": [
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "413",
+      "severity": "blocking",
+      "text": "blocking: the new node-row compaction emits node_valid/node_vertex compacted to node_count rows (lines 411, 405) but leaves edges as carrier-vertex indices (line 413, edges=merged_edges[edge_source]), so edges no longer index the node rows. On the 340-cell certificate rung node_count is 13 while the maximum edge endpoint is 353; on MAST 27079 row 16 node_count is 66 while the maximum edge endpoint is 645. This violates the ContourTreeArrays contract at line 55 ('Edges refer to vertex slots, which are also the node slots') and the DD edge.node_index semantics (ContourTreeEdge is 'One pair of indices into ContourTreeResult.node', validated 0<=start<len(node) at line 481), so the receipt is not yet DD-mappable. Reproduction: build_contour_tree on the 340-cell rung yields nodes=13, max edge endpoint=353, all edge endpoints < node_count = False."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes/manifest.md",
+      "line": "after_suite",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest after_suite.command names relative test paths (tests/test_contour_tree_merge.py ...) rather than the absolute paths the manifest contract requires; and certificate-rung-timings.log cites command=/tmp/certificate-timing/measure.py while mast-capacity-measurement.log cites a prose command ('python capacity measurement and renderer'), neither of which is committed, so the compile/execute and vertex/edge figures are not reproducible from the record."
+    },
+    {
+      "file": "benchmarks/contour_tree_brute_force.py",
+      "line": "36",
+      "severity": "follow-on",
+      "text": "follow-on: CERTIFICATE_RUNG_PATHS exercises only the diverted-single-null certificate at the 340/550/1074 rungs; the other three persisted certificates (jump-bearing 342/551/1076, moderate-rotation 341/548/1070, strong-rotation 341/551/1069, weak-rotation 341/555/1072) are run only at the reduced rung, so three of the four Solov'ev production carriers are not exercised at the 340+ rung control."
+    }
+  ],
+  "gate_arms_note": "Reviewed baseline arm: ae2179181b, 1 passed, EXIT=0. Reviewed after arm: 388bdea2f, 23 passed, EXIT=0. Independent head re-run (worktree code byte-identical to the reviewed head on every relevant path, git diff empty): fast files 23 passed EXIT=0; tests/test_contour_tree_brute_force.py 7 passed in 803.55s EXIT=0. Independent negative control: the reviewed scratch mutation restores overflow = vertex_count > node_capacity and refuses both the 464-cell MAST carrier and the 340-cell certificate with overflow=True, EXIT=1. Independent 2616 check: docs/figures/gs-absolute-accuracy/solovev/production-route-parts holds no 2616-cell input; the three production files realise 340/550/1074 cells and the reduced files 132-136, so the 'No persisted terminal input was found' row is correct rather than a skip.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site consumes the receipt yet, so the edges/node-index break is latent.",
+    "diff": "Production change to the capacity judgement and receipt compaction, with matching tests, benchmark and figures; no out-of-scope file touched.",
+    "done_when": "Rung/MAST component counts agree at every sampled level, node-minus-edge is one, overflow is false, vmap identity holds, the over-capacity guard is visible under jit, and the negative control refuses both carriers (all reproduced). The 2616-cell rung is genuinely absent: the persisted parts directory holds only 300/500/1000-cell files (max realised 1076), so naming it absent is correct rather than a skip.",
+    "goal": "The node goal, that build_contour_tree accept production-resolution hex carriers by judging overflow on the stored receipt against the mesh-sized working arrays, is met and the run's positive controls pass.",
+    "manifest": "Both arms completed and readable at the declared base and head; the after arm's command carries relative paths rather than absolute ones.",
+    "write_paths": "All ten changed paths lie inside the reviewed manifest's grant."
+  },
+  "justifications": {
+    "durability": "The compaction introduced at nova/equilibrium/contour_tree.py:403-415 leaves the receipt's edges in carrier-vertex index space while node rows become compact; on the 340-cell rung node_count is 13 but an edge endpoint is 353, so edges no longer index the node rows as the module contract ('edges refer to node slots') and the DD edge.node_index require. No test asserts edges index node rows, and no guard reddens, so the regression is uncovered.",
+    "evidence": "The run's own gates pass and the negative control reproduces (scratch-vertex-capacity-negative-control.log: both MAST and the 340-cell certificate report overflow=True, EXIT=1; timings 340/550/1074 = 3.322/11.848/75.771 s execute). But after_suite.command uses relative test paths where the manifest contract requires the literal absolute paths, and the compile/execute figures are recorded against two throwaway commands (/tmp/certificate-timing/measure.py and 'python capacity measurement and renderer') whose scripts are not committed, so the timing table is not reproducible from the record.",
+    "fit": "The sweep keeps the fixed-shape jax.lax.fori_loop / union-find idiom and the vmap-identical receipt, with no raising inside the traced read, matching the module and plan conventions.",
+    "goal_fidelity": "nova/equilibrium/contour_tree.py:403 now judges overflow on stored node_count/edge_count against the 256/255 receipt capacities, and build_contour_tree sizes the sweep working arrays by mesh_node_capacity=vertex_psi.size and mesh_edge_capacity=edges.shape[0] (lines 328-329, 338-349); the run's rung and MAST tests pass with overflow=false, so production carriers are admitted.",
+    "scope_discipline": "git diff --name-status ae2179181b..388bdea2f lists ten paths, each inside the reviewed manifest's declared grant: one production module, two tests, one benchmark, the evidence fragment and five figures."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "VERDICT goal: build_contour_tree accepts production carriers by judging overflow on the stored receipt with mesh-sized working arrays; met, positive controls pass.\nVERDICT done_when: rung/MAST counts agree, node-minus-edge one, overflow false, vmap identity, visible over-capacity guard under jit, negative control refuses both carriers (reproduced); the 2616 rung is genuinely absent, not skipped (parts directory holds no 2616-cell input).\nVERDICT write_paths: all ten changed paths inside the reviewed grant.\nVERDICT manifest: both arms completed at base and after; after_suite command uses relative paths.\nVERDICT diff: production capacity judgement and receipt compaction plus tests, benchmark, fragment, figures; no out-of-scope path.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: overflow is judged on node_count/edge_count against the 256/255 receipt capacities and the sweep arrays are mesh-sized; the run's gates pass with overflow false.\nSCORE evidence: 15\nJUSTIFICATION evidence: gates pass and the negative control reproduces, but the after-arm command carries relative paths and the timing/measurement figures cite uncommitted throwaway scripts, so those figures are not reproducible from the record.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status ae2179181b..388bdea2f lists ten paths, each inside the grant.\nSCORE durability: 9\nJUSTIFICATION durability: the compaction leaves edges in carrier-vertex index space while node rows compact, so edges no longer index the node rows (node_count 13 vs max edge 353); no guard covers it.\nSCORE fit: 18\nJUSTIFICATION fit: the rung/MAST comparison and vmap identity match the module idiom with no forbidden names.\nFINDING nova/equilibrium/contour_tree.py:413 blocking: edges remain carrier-vertex indices after node-row compaction; node_count 13 vs edge endpoint 353 on the 340-cell rung; violates the ContourTreeArrays contract and DD edge.node_index.\nFINDING manifest follow-on: after_suite command uses relative paths (contract requires absolute).\nFINDING manifest follow-on: timing/measurement logs cite uncommitted throwaway commands, so compile/execute and vertex/edge figures are not reproducible.\nFINDING benchmarks/contour_tree_brute_force.py:36 follow-on: only diverted-single-null is exercised at the 340/550/1074 rungs; the other three production certificates are covered only at the reduced rung.",
+  "review_run_id": "r-20261002T134218554194-review-of-ctta-tree-capacity-on-critical-nodes",
+  "reviewed_base_sha": "ae2179181bee2ca9bb7693f874c2d108826ee8c8",
+  "reviewed_head_sha": "388bdea2fb213a14c678f1b0774378a146755083",
+  "reviewed_revision": "388bdea2fb213a14c678f1b0774378a146755083",
+  "reviewed_run_id": "r-20261002T124430828085-ctta-tree-capacity-on-critical-nodes",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-tree-capacity-on-critical-nodes",
+  "reviewer_node": "review-of-ctta-tree-capacity-on-critical-nodes",
+  "reviewer_run_id": "r-20261002T134218554194-review-of-ctta-tree-capacity-on-critical-nodes",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T14:21:00Z",
+  "timing_analysis": "CPU execute grows 3.322 s (340 cells) -> 11.848 s (550) -> 75.771 s (1074) while live vertices go 353/558/1089 and carrier edges 1004/1611/3186. In _sweep_tree the visit body runs once per mesh vertex (jax.lax.fori_loop over vertex_count, line 289) and each visit rebuilds full-mesh pairwise structures: _roots pointer-jumps over all vertices (line 216), the repeated-root collision mask builds an edge_count x edge_count boolean comparison (lines 225-234), and _append_edges rescans all edges for duplicates on each of its edge_count appends (lines 97-105). The per-visit cost is therefore O(V + E^2), so the sweep is O(V*E^2): between 340 and 1074 V grows 3.1x and E 3.17x for a predicted ~30x against a measured 22.8x (550->1074: predicted 7.25x, measured 6.4x). This growth is NOT inherent to contour trees, which admit near-linear O(V alpha(V)) algorithms; it is an implementation choice driven by fixed-shape jit/vmap traceability (dense repeated rescans instead of a per-vertex incident-edge gather and a single-pass union-find). A later node should move the pairwise root-collision test to the incident edges of the swept vertex and the duplicate scan to a run-local structure.",
+  "total": 79,
+  "verdict": "fail"
+}

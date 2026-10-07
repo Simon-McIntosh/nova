@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T15:22:46.732Z",
+  "delta_note": "First review of this run; the run made no commits (reviewed_base_sha == reviewed_head_sha == 4ca2045cf) and its worktree is clean. It is a read-only investigate node whose sole deliverable is the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-s19-tips-inventory.md, so there is no delta range and no gate-arm pair to difference.",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:48:50Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-s19-tips-inventory.md",
+      "line": 93,
+      "severity": "follow-on",
+      "text": "Evidence-details bullet cites the per-tip change-set files as /tmp/s19inv/refs/<tip>.txt, which is node-local session scratch and gone after the run; the durable copies the run also made live at evidence/refs/<tip>.txt under the run directory. The pointer should name the durable path so a later reader can open it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-s19-tips-inventory.md",
+      "line": 108,
+      "severity": "follow-on",
+      "text": "The addendum corrects the recommendation for eight refs (#6,#13,#17,#19,#21,#26,#28,#32) from land/extract to retire, but the table's rec column still shows the pre-correction value; a reader who stops at the table takes the superseded recommendation. The run declares the append-not-rewrite choice, so this is a legibility follow-on, not an error."
+    }
+  ],
+  "gate_arms_note": "added_failure_count is 0 and added_failure_ids is [] because the reviewed run's own manifest carries no baseline_suite and no after_suite block: this node ran no test suite (its gate is a read-only git inventory, exit 0, recorded in its manifest tests: field). With no after_suite failure_ids to subtract from, the derived added set is empty by construction, not by absence of a parsed arm. There is therefore no failure_attribution.",
+  "justifications": {
+    "durability": "Deducted to 17 from the report's two non-durable surfaces, both follow-ons rather than defects. (1) The Evidence-details bullet cites /tmp/s19inv/refs/<tip>.txt as the retained per-tip change sets; /tmp is node-local and session-scoped, so a later reader following the report cannot open them, even though durable copies exist at evidence/refs/*.txt in the run directory. (2) The table's rec column and the appended addendum disagree for eight refs (#6,#13,#17,#19,#21,#26,#28,#32): the table says land/extract-driver-only while the addendum corrects to retire after the driver-lineage check. The report declares the append-not-rewrite choice explicitly, so it is legible, but a reader who stops at the table takes the pre-correction recommendation. The report itself and its evidence directory live on durable storage outside git, and the run made no commits to lose.",
+    "evidence": "Independently reproduced first-hand in this review, deducting one point for a non-durable pointer and for the retained-artifact gap around the disclosed instrument error. (1) ref count: git for-each-ref refs/s19-tips = 33, and the ref->tip map matches the table exactly. (2) git cherry plus/minus spot-checked for six tips (#5,#10,#14,#15,#22,#23) and matches the (+/-) column, including #23's lone minus. (3) The central 'still differs' instrument was recomputed for ALL 33 tips from scratch (per tip: git merge-base, git diff --name-only, blob hash at tip vs main via one batched git cat-file --batch-check) and every D/M cell matches the table exactly, e.g. #2 9/7, #4 19/8, #28 1/0, #32 13/0, #33 1/5. (4) All seven named drivers are absent from main 4ca2045cf (git cat-file -e on each), and five tip:driver carries were confirmed present on the tips. (5) The stranding set recomputed from driver membership is exactly the 14 tips the report names, no more and no fewer. (6) #29's broken reference at compile-memory/report.md:73 to compile-memory.svg and #33's five solve-profile artifacts were both confirmed absent from main. (7) The path-scope claim is exact: 0 of all tip-changed paths fall outside benchmarks/, docs/, nova/equilibrium/, tests/. (8) The addendum's driver-lineage dates verify (global_spline_read_on_hex 2e38dc877 2026-09-22; oracle_start_newton_probe fa0082982 2026-10-03; wholecell_rows_reposed_fixture eb3388585 2026-10-03). Deduction: the report's Evidence section points at session scratch /tmp/s19inv/refs/<tip>.txt (node-local, session-scoped) rather than the durable copies it also copied to evidence/refs/*.txt under the run dir; and the disclosed first-pass parser error ('31 of 33 read as no-difference') is narrated in prose but the erroneous first-pass artifacts were not retained beside the corrected ones.",
+    "fit": "High. One markdown report, no new machinery, no code, no gate harness; the introduction defines its own column vocabulary, and the caveats section states the boundary explicitly (\"land\" means the tip carries content main does not have, not that the content is verified good), and the instrument-error disclosure is honest. The analysis approach (for-each-ref + cherry + merge-base diff + blob-identity comparison) is the minimal set that answers the question. The table/addendum split keeps the report readable at 153 lines rather than forcing an unreadable re-render.",
+    "goal_fidelity": "Full. The dispatch asked for one row per ref under refs/s19-tips (33 at dispatch), each giving the tip head, commits beyond main with git cherry plus/minus, the files changed beyond main, any banked figure/receipt on main the tip produced, the superseding commit where one exists, and a recommendation of land/extract-driver-only/retire with a one-line reason, naming every tip that strands a banked figure starting with cca-gate-b-frozen-current-flux-image. The report delivers 33/33 rows with every column, a dedicated stranding section that names #10 first and enumerates exactly 14 tips, plus an addendum of refined recommendations and a broken-reference list. Every element of the spec is present and independently verified (see evidence).",
+    "scope_discipline": "Full. The node is read-only by dispatch and stayed so: every git command was a read verb (for-each-ref, merge-base, cherry, rev-list, diff --name-status, ls-tree, cat-file), no checkout/merge/cherry-pick/stash/ref-deletion. It wrote only its one granted path, reports/nova/s22/fsa-s19-tips-inventory.md; the reviewed worktree is clean at 4ca2045cf (git status --porcelain empty). No product source, plan, index or concurrent path was touched."
+  },
+  "node": "review-of-fsa-s19-tips-inventory",
+  "previous_review_record": null,
+  "prior_findings_answered": [],
+  "project": "nova",
+  "reproduction": {
+    "broken_refs": "compile-memory/report.md:73 refs compile-memory.svg (absent on main); solve-profile/report.md:7-10 refs solve-profile{,-300,-1000}.json and -300/-1000.svg (all absent on main).",
+    "cherry_spotcheck": "git -C /home/ITER/mcintos/Code/nova cherry 4ca2045cf <tip> for #5,#10,#14,#15,#22,#23 -> plus/minus match the report column (e.g. 214f88caa=1+0-, 9a31a9155=2+/1-).",
+    "drivers_absent_on_main": "git cat-file -e 4ca2045cf:benchmarks/{frozen_current_flux_image_gate,profile_support_amplitude_gate,rung_a_certificate_resolve,gate_c_certificate_resolve,cold_seed_amplitude_gate,first_order_coupling_discriminator,read_representation_discriminator}.py -> all absent.",
+    "path_scope": "0 of all tip-changed paths fall outside benchmarks/, docs/, nova/equilibrium/, tests/.",
+    "ref_count": "git -C /home/ITER/mcintos/Code/nova for-each-ref refs/s19-tips --format='%(refname:short) %(objectname:short)' -> 33 refs, ref->tip map matches the report table",
+    "reviewed_head_clean": "git -C <reviewed worktree fsa-s19-tips-inventory> status --porcelain is empty; HEAD == 4ca2045cf.",
+    "still_differs_all_33": "recomputed per tip as (merge-base; diff --name-only; blob at tip vs blob at main 4ca2045cf via batched git cat-file --batch-check; D=differs, M=absent-on-main) -> every D/M cell matches the table across all 33 tips.",
+    "stranding_set": "recomputed tips carrying any of the six stranding drivers -> exactly the 14 named tips."
+  },
+  "review_base_sha": "181ceafd0fab0654daaaac92bfa10c8d4b549f53",
+  "review_run_id": "legacy-b2ab72a55bd0",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "4ca2045cf9b1b03ca13c8bd71b78a4ba83459513",
+  "reviewed_commit": null,
+  "reviewed_commits": [],
+  "reviewed_head_sha": "4ca2045cf9b1b03ca13c8bd71b78a4ba83459513",
+  "reviewed_run_id": "r-20261003T144829404370-fsa-s19-tips-inventory",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-s19-tips-inventory",
+  "run_base_sha": "4ca2045cf9b1b03ca13c8bd71b78a4ba83459513",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:41:00Z",
+  "total": 95,
+  "verdict": "pass"
+}

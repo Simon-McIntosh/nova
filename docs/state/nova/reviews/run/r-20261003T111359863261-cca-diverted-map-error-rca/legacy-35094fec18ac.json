@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T12:31:07Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T11:14:34Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/diverted_map_error_decomposition.py",
+      "line": "457",
+      "severity": "follow-on",
+      "text": "[units mislabel in delivered evidence, corrected after the reviewed head] At head 4c6feb76d, write_fragment() renders row['support_current_centroid_offset_mm']['dR']/['dZ'] under table headers 'dR [m]' and 'dZ [m]'. The values are current-centroid offsets in millimetres, so the committed fragment misreports them by a factor of 1000 and under the wrong quantity name: the 132-exact row shows -2.0939/-11.0855, which under a metre header reads as a ~2 m and ~11 m offset. The preceding fragile table had used the X-point offset in metres, so the header reuse silently substituted a different quantity as well as a different unit. This was repaired on the live run after the reviewed head by b7d84d916 (fix(evidence): label map offsets in millimetres) and cf78659f4 (docs(evidence): distinguish map offset quantities), which rename the columns 'current-centroid dR [mm]' and add separate labelled X-point and axis offset columns. A reader of the reviewed head alone would be misled."
+    },
+    {
+      "file": "benchmarks/diverted_map_error_decomposition.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "[provenance label inaccuracy, non-blocking] The analytic_saddle_wedge() arm returns \"source\": \"nova/equilibrium/forward_operator.py:_profile_support\", but the arm does not call _profile_support: it derives masks via operator._support_partition() and builds the clipped support directly through _traced_clip(...).qualify(participation). The stated seam does not match the code path the arm actually exercises, which weakens the traceability that the source field exists to provide. The contour-tree arm's source label (operator._fixed_design_read) is accurate."
+    }
+  ],
+  "gate_arms_note": "The reviewed run is a measurement node and is not suite-armed: its committed manifest carries baseline_suite=null and after_suite=null (confirmed in classification.json manifest.data) and no *suite* log exists in the run directory. Its gate logs are the two H200 measurement lanes map-fidelity-h200-stable.log (job 1280601, source_revision 372c604914acda4cf25bfca797a1d95e6afae8ee, 10 PAIR_DONE rows, EXIT_STATUS=0) and diverted-map-decomposition-h200-real-arms.log (job 1280610, source_revision 96a59e98ec7e4fd1a8d034dab0a8fc1ecb825612, 4 rows, EXIT_STATUS=0). Neither is a pytest arm, so there are no suite failure ids to difference; added_failure_count=0 and added_failure_ids=[] are read from the absence of any readable baseline/after suite arm rather than from two green arms.",
+  "justifications": {
+    "durability": "The delta's deliverables are committed: the two independent arms in the driver, the four refreshed per-row JSONs, report.json, and the expanded fragment; the figure PNGs, the 20-row receipt map-fidelity.json, and negative-control.log are committed in the preceding stable receipt. Both H200 lane logs are preserved under the run directory. Durability is docked because the state delivered at this head was not durable as evidence: the primary map-receipt table's units and column identities were wrong and required two further commits (b7d84d916, cf78659f4) on the live run to correct, so a reader who trusted the reviewed head's table would have been misled about offset magnitude and quantity. Commits are local and unmerged, which is expected for a worker node.",
+    "evidence": "The delta's evidence is strong in its machinery and wrong in one delivered label. Job 1280610 ran at source_revision 96a59e98e with EXIT_STATUS=0 and DIVERTED_MAP_ERROR_COMPLETE; report.json names measurement_revision=372c604914acda4cf25bfca797a1d95e6afae8ee (the receipt it reads), analysis_revision=96a59e98ec7e4fd1a8d034dab0a8fc1ecb825612, completed=true, 4 rows, and its four per-row JSONs carry executed=true. The contour-tree arm is provably recomputed rather than copied: at 132 exact it reports sup 0.18056762361783077 against production 0.18056762361844786 (differing at the 13th digit, i.e. floating-point noise from a real re-evaluation), at 132 chord 0.09508482252281729 vs 0.09508482252281530, and it carries membership_difference_count 1 (exact) and 0 (chord) - so the prior review's finding that (b) contour-tree region reproduced production verbatim is resolved. The analytic saddle wedge is genuinely distinct: 0.1799812358443686 vs production 0.18056762361844786 at 132, with production_apex_rz_m [1.5107863810710611, -1.0275005315610446] and analytic_apex_rz_m [1.5025279999999999, -1.01728]. The full ladder reconciles against the committed receipt (map-fidelity.json, 20 measured rows; e.g. 132 exact sup 0.180568 centroid_mm dR/dZ -2.0939/-11.0855) and the committed negative-control.log still shows displacement detected in both norms on all 20 rows. The defect: at this reviewed head the fragment's 'Full H200 map receipt' table headers its offset columns 'dR [m]'/'dZ [m]' while write_fragment() writes row['support_current_centroid_offset_mm']['dR']/['dZ'] - current-centroid offsets in millimetres. Under a metre header those values read 1000x too large and name a different quantity than the prior table's X-point offset column; the same -2.09 mm centroid value would read as -2.09 m. Fixed after this head at b7d84d916 (label in millimetres) and cf78659f4 (separate current-centroid, X-point and axis columns).",
+    "fit": "The delta extends machinery the node already depends on, adding two arms inside benchmarks/diverted_map_error_decomposition.py and regenerating its evidence fragment from the same receipt; it changes no product code and no tests. The independent contour-tree read is routed through production's own _fixed_design_read rather than a reimplemented approximation, which is the right seam for an oracle comparison, and the fragment's reconciliation of the stale saddle-consumer premise is verified against source: forward_operator.py:3424 passes saddle_vertex=topology.x_point, and d90a522fe is an ancestor of HEAD. The arms are measurement-first and honest about their nulls.",
+    "goal_fidelity": "The delta does exactly what the prior review's follow-ons asked and completes the node's step 0. Commit 96a59e98e replaces the two placeholder substitution blocks with two genuinely independent arms: contour_tree_region() invokes operator._fixed_design_read (a different entry point from production's operator._support_partition) and reports a membership-difference count, and analytic_saddle_wedge() rebuilds exact support from the analytic apex via _traced_clip. Commit 4c6feb76d expands the fragment's map table from 4 rows to the full 20-row certificate ladder by rendering receipt['rows'] filtered on status=='measured', adds contour-tree membership and production/analytic apex columns, and records that the 2026-09-21 saddle-consumer followup premise is obsolete. The node's underlying question is still not closed by this delta - no tested substitution brings diverted exact below 1e-2 (best is analytic membership 0.0712 at 132, and the analytic-apex wedge only moves 0.180568 to 0.179981) - but that is a reproduced measurement, not a shortfall of the delta, which is scoped to the follow-on repair.",
+    "scope_discipline": "Both commits change only the granted paths. 96a59e98e touches only benchmarks/diverted_map_error_decomposition.py (196 insertions, 31 deletions); 4c6feb76d touches only the evidence fragment and the five decomposition JSONs. The full base..head name list is exactly the seven paths in the node's brief, with no nova/ product source and no tests edited, matching the measurement-node intent. Subjects are conventional, both bodies are present and explanatory, and a scan finds no AI attribution and no plan, sprint or ticket identifier. The reviewed worktree is clean at the reviewed head (git status empty)."
+  },
+  "node": "review-of-cca-diverted-map-error-rca",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 17\nSCORE evidence: 15\nSCORE scope_discipline: 18\nSCORE durability: 16\nSCORE fit: 17\nTOTAL: 83\nVERDICT: pass-with-follow-ons\nSCOPE: delta review of r-20261003T111359863261-cca-diverted-map-error-rca covering only the commits gained since the prior review at 1aa4b84e104d3a4b393bc87cd75e9cc7587802a0 - namely 96a59e98e and 4c6feb76d. reviewed_base_sha=1aa4b84e104d3a4b393bc87cd75e9cc7587802a0, reviewed_head_sha=4c6feb76d9fa343f806ffc079e9866be39682d9e.\nCHECKS: H200 job 1280610 (real arms) ran benchmarks/diverted_map_error_decomposition.py at source_revision 96a59e98e with EXIT_STATUS=0; H200 job 1280601 (stable receipt) at source_revision 372c60491 with EXIT_STATUS=0. report.json completed=true, measurement_revision=372c60491, analysis_revision=96a59e98e. contour-tree arm recomputed not copied (sup differs from production at the 13th significant digit; membership_difference_count 1 exact / 0 chord); analytic saddle wedge genuinely distinct (0.179981 vs 0.180568 at 132). Full 20-row map ladder present and reconciling with map-fidelity.json; negative control detects displacement in both norms on all 20 rows; fragment claim forward_operator.py:3424 saddle_vertex=topology.x_point verified, d90a522fe is an ancestor of HEAD. Both commits change only the seven granted paths, bodies present, no attribution, no plan identifiers, worktree clean.\nFINDINGS: (1) at the reviewed head the 'Full H200 map receipt' table labels millimetre current-centroid offsets as [m] under reused X-point-offset headers - a 1000x units error and a wrong quantity name, fixed after the head by b7d84d916 and cf78659f4; (2) analytic_saddle_wedge() states source _profile_support but exercises _support_partition + _traced_clip, an inaccurate provenance label. Prior review's follow-ons 1, 2 and 4 are resolved by this delta.",
+  "review_base_sha": "971ac1a7d7a6efe2f70c39ed24d01f97ebecafe1",
+  "review_run_id": "legacy-35094fec18ac",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "1aa4b84e104d3a4b393bc87cd75e9cc7587802a0",
+  "reviewed_commit": "4c6feb76d9fa343f806ffc079e9866be39682d9e",
+  "reviewed_head_sha": "4c6feb76d9fa343f806ffc079e9866be39682d9e",
+  "reviewed_run_id": "r-20261003T111359863261-cca-diverted-map-error-rca",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-diverted-map-error-rca",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T12:44:00Z",
+  "total": 83
+}

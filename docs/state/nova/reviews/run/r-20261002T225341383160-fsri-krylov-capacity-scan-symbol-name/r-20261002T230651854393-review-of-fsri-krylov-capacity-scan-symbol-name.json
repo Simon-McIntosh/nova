@@ -1,0 +1,72 @@
+{
+  "added_failure_count": null,
+  "added_failure_derivation": "Unmeasurable: reviewed classification parses baseline_suite=null and after_suite=null. The gate.log is one static head-oriented check, not a readable base/head suite-arm pair.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "diverted_trace.py: SLICE1_SOURCE 3 -> 0; CAPACITY_SCAN_SOURCE 0 -> 3; source path unchanged",
+    "gate.log: static checks green but driver fail-open"
+  ],
+  "commits_read": [
+    "19a76002e866e4c514f108ff8155aa52704c406a",
+    "3236cac961a4bd546f54ab76e16be611f3607cb3",
+    "c6604c8d6684b00c2820d82e1299f3ad5e19fbeb"
+  ],
+  "completed_at": "2026-10-02T23:12:19Z",
+  "dispatched_at": "2026-10-02T23:07:20Z",
+  "evidence_inputs": "Source-symbol rename is valid and exact; failure delta is absent from the reviewed record.",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/gate.sh",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "Make the driver fail nonzero when any checked command fails; its final EXIT=0 is currently unconditional."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "Add completed base/head suite arms and failure IDs so added failures are measurable."
+    }
+  ],
+  "gate_arms_note": "Reviewed gate log is at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name/gate.log (revision 19a76002, final EXIT=0); independent py_compile and git diff --check pass at c6604c8d.",
+  "item_verdicts": {
+    "call_sites": "not applicable: module-level source binding.",
+    "diff": "met: five source insertions and five deletions plus the landing fragment.",
+    "done_when": "partially met: static rename evidence is green; suite-delta evidence is unavailable.",
+    "goal": "met: all three executable symbol sites use CAPACITY_SCAN_SOURCE with the source-path binding unchanged.",
+    "manifest": "partially met: complete status and readable gate log, but null baseline_suite/after_suite/failure_attribution.",
+    "write_paths": "met: two changed paths, both granted."
+  },
+  "justifications": {
+    "durability": "The gate driver prints statuses but unconditionally prints EXIT=0; it does not fail closed.",
+    "evidence": "Gate log and independent py_compile/diff checks are green, but reviewed baseline_suite and after_suite are null, preventing a measured base/head failure delta.",
+    "fit": "The accepted name describes the source-selection mechanism and leaves arm data labels untouched.",
+    "goal_fidelity": "Base has SLICE1_SOURCE at diverted_trace.py lines 25, 34, and 54; head has CAPACITY_SCAN_SOURCE at those three sites with fixed_point_e62c8110e.py unchanged.",
+    "scope_discipline": "The complete diff changes only the two declared paths."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-on: 84/100 at c6604c8d. Scores 20/12/20/13/19. The rename is correct; make the gate fail closed and add suite arms.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261002T230651854393-review-of-fsri-krylov-capacity-scan-symbol-name",
+  "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "reviewed_head_sha": "c6604c8d6684b00c2820d82e1299f3ad5e19fbeb",
+  "reviewed_revision": "c6604c8d6684b00c2820d82e1299f3ad5e19fbeb",
+  "reviewed_run_id": "r-20261002T225341383160-fsri-krylov-capacity-scan-symbol-name",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-krylov-capacity-scan-symbol-name",
+  "reviewer_node": "review-of-fsri-krylov-capacity-scan-symbol-name",
+  "reviewer_run_id": "r-20261002T230651854393-review-of-fsri-krylov-capacity-scan-symbol-name",
+  "scores": {
+    "durability": 13,
+    "evidence": 12,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T23:11:40Z",
+  "total": 84,
+  "verdict": "pass-with-follow-on"
+}

@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-01T21:03:10.573Z",
+  "dispatched_at": "2026-10-01T20:40:54Z",
+  "findings": [
+    {
+      "file": "docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the evidence log the done_when and manifest name is gitignored (*.log, .gitignore:119) and was never force-added, so it is absent from commit 56ee52a8d and lives only in the worktree; after the coordinator merges, the run's named evidence is unreadable and the record cannot be read against its log."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/replan-pytest-timeout-and-xdist.html",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: the cited log href \"/nova/../docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log\" normalises to /docs/evidence/..., outside the /home/ITER/mcintos/Code/nova/docs mount served at /nova, so the link 404s in the served SPA; the project-absolute form is /nova/evidence/replan-2026-09-24/fast-lane/dependency-change.log."
+    },
+    {
+      "file": "pyproject.toml",
+      "line": "272",
+      "severity": "follow-on",
+      "text": "follow-on: timeout = 300 is a global default applied to the curated slow lane as well as the fast lane, and the plan's section 4 context names slow tests as numerical sweeps and JAX kernels that legitimately run for minutes, so a slow test can be killed for its runtime rather than its correctness; the node's own gate (uv lock --check) never exercises the bound."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read 56ee52a8d against base a71934910 commit by commit; three files changed (pyproject.toml +4, uv.lock +38, fragment html), no nova/ source touched.",
+    "done_when": "the reviewed done_when requires both plugins in the dev group, timeout = 300 under [tool.pytest.ini_options], a regenerated uv.lock, and evidence at docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log with git diff --stat and uv lock --check exit 0.",
+    "goal": "read the reviewed node's goal (nova declares pytest-timeout and pytest-xdist as development dependencies with a default per-test timeout).",
+    "manifest": "read manifest.md; it records status complete, one commit, changed_paths pyproject.toml/uv.lock/fragment html, test_logs the dependency-change.log, and both baseline_suite and after_suite null.",
+    "write_paths": "the declared write paths are pyproject.toml, uv.lock, docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log, docs/evidence/fragments/nova-portfolio-replan/replan-pytest-timeout-and-xdist.html and docs/figures/nova-portfolio-replan/replan-pytest-timeout-and-xdist; read the manifest and compared every path in commit 56ee52a8d and the on-disk evidence log against them, all inside."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion, so pyproject.toml:272 timeout = 300 is guarded by nothing and an over-short bound would surface only when a slow test trips it.",
+    "evidence": "docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log records uv lock --check LOCK_CHECK_EXIT=0, but that file is gitignored (.gitignore:119) and uncommitted, so the evidence the manifest names as test_logs does not travel with commit 56ee52a8d.",
+    "fit": "dependencies sit in [dependency-groups].dev and config in [tool.pytest.ini_options] with uv.lock regenerated, but docs/evidence/fragments/nova-portfolio-replan/replan-pytest-timeout-and-xdist.html:24 cites its log at a broken path.",
+    "goal_fidelity": "pyproject.toml:131 declares pytest-timeout>=2.4.0, pyproject.toml:132 declares pytest-xdist>=3.8.0 and pyproject.toml:272 sets timeout = 300, matching the goal in full.",
+    "scope_discipline": "git show 56ee52a8d lists only pyproject.toml, uv.lock and the fragment html, all inside the declared write paths, with no nova/ source touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the reviewed node's goal (nova declares pytest-timeout and pytest-xdist as development dependencies with a default per-test timeout).\nVERDICT done_when: the reviewed done_when requires both plugins in the dev group, timeout = 300 under [tool.pytest.ini_options], a regenerated uv.lock, and evidence at docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log with git diff --stat and uv lock --check exit 0.\nVERDICT write_paths: the declared write paths are pyproject.toml, uv.lock, docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log, docs/evidence/fragments/nova-portfolio-replan/replan-pytest-timeout-and-xdist.html and docs/figures/nova-portfolio-replan/replan-pytest-timeout-and-xdist; read the manifest and compared every path in commit 56ee52a8d and the on-disk evidence log against them, all inside.\nVERDICT manifest: read manifest.md; it records status complete, one commit, changed_paths pyproject.toml/uv.lock/fragment html, test_logs the dependency-change.log, and both baseline_suite and after_suite null.\nVERDICT diff: read 56ee52a8d against base a71934910 commit by commit; three files changed (pyproject.toml +4, uv.lock +38, fragment html), no nova/ source touched.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: pyproject.toml:131 declares pytest-timeout>=2.4.0, pyproject.toml:132 declares pytest-xdist>=3.8.0 and pyproject.toml:272 sets timeout = 300, matching the goal in full.\nSCORE evidence: 12\nJUSTIFICATION evidence: docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log records uv lock --check LOCK_CHECK_EXIT=0, but that file is gitignored (.gitignore:119) and uncommitted, so the evidence the manifest names as test_logs does not travel with commit 56ee52a8d.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show 56ee52a8d lists only pyproject.toml, uv.lock and the fragment html, all inside the declared write paths, with no nova/ source touched.\nSCORE durability: 12\nJUSTIFICATION durability: the diff adds no assertion, so pyproject.toml:272 timeout = 300 is guarded by nothing and an over-short bound would surface only when a slow test trips it.\nSCORE fit: 16\nJUSTIFICATION fit: dependencies sit in [dependency-groups].dev and config in [tool.pytest.ini_options] with uv.lock regenerated, but docs/evidence/fragments/nova-portfolio-replan/replan-pytest-timeout-and-xdist.html:24 cites its log at a broken path.\nFINDING docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log:1 blocking: the evidence log the done_when and manifest name is gitignored (*.log, .gitignore:119) and was never force-added, so it is absent from commit 56ee52a8d and lives only in the worktree; after the coordinator merges, the run's named evidence is unreadable and the record cannot be read against its log.\nFINDING docs/evidence/fragments/nova-portfolio-replan/replan-pytest-timeout-and-xdist.html:24 follow-on: the cited log href \"/nova/../docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log\" normalises to /docs/evidence/..., outside the /home/ITER/mcintos/Code/nova/docs mount served at /nova, so the link 404s in the served SPA; the project-absolute form is /nova/evidence/replan-2026-09-24/fast-lane/dependency-change.log.\nFINDING pyproject.toml:272 follow-on: timeout = 300 is a global default applied to the curated slow lane as well as the fast lane, and the plan's section 4 context names slow tests as numerical sweeps and JAX kernels that legitimately run for minutes, so a slow test can be killed for its runtime rather than its correctness; the node's own gate (uv lock --check) never exercises the bound.\n",
+  "review_run_id": "r-20261001T204040669316-review-of-replan-pytest-timeout-and-xdist",
+  "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "reviewed_head_sha": "56ee52a8de48066198ec4f6556e8a2021c0b013f",
+  "reviewed_run_id": "r-20261001T191537244113-replan-pytest-timeout-and-xdist",
+  "reviewing_run_id": "r-20261001T204040669316-review-of-replan-pytest-timeout-and-xdist",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 16,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:04:20.771580+00:00",
+  "total": 80
+}

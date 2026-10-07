@@ -1,0 +1,100 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": null,
+  "call_site_count": 18,
+  "call_sites": [
+    "benchmarks/centroid_constrained_fixture_receipt.py:1011",
+    "benchmarks/centroid_constrained_fixture_receipt.py:1014",
+    "benchmarks/centroid_constrained_fixture_receipt.py:1086",
+    "benchmarks/centroid_constrained_fixture_receipt.py:1097",
+    "benchmarks/centroid_field_response_probe.py:259",
+    "benchmarks/centroid_field_response_probe.py:262",
+    "benchmarks/exact_clip_low_state_discriminator.py:683",
+    "benchmarks/exact_clip_low_state_discriminator.py:686",
+    "benchmarks/exact_clip_low_state_discriminator.py:690",
+    "benchmarks/exact_clip_seed_amplitude.py:345",
+    "benchmarks/exact_clip_seed_amplitude.py:349",
+    "benchmarks/exact_clip_seed_amplitude.py:429",
+    "benchmarks/exact_clip_seed_amplitude.py:432",
+    "benchmarks/exact_clip_seed_amplitude.py:438",
+    "benchmarks/exact_support_floor_attribution.py:724",
+    "benchmarks/exact_support_floor_attribution.py:755",
+    "benchmarks/fixture_positional_stiffness.py:580",
+    "benchmarks/fixture_positional_stiffness.py:583"
+  ],
+  "completed_at": "2026-10-03T18:29:05.134Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T18:18:41Z",
+  "findings": [
+    {
+      "file": "logs/gate_scan.log",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "follow-on: the run's gate-log headers spell the revision as rev=<sha>, which the review reader recognises only as 'revision ...', so base_log_revision and head_log_revision are null for both declared arms even though each header does name its revision (baseline_lowstate_render.log rev=68762d36; after_lowstate_render.log rev=11541380). Separately, the auxiliary head-tree logs logs/gate_scan.log (the exit-0 head scanner gate) and logs/after_suite.log (the six-file head run) carry rev=68762d3639 (base) while their tree= fields name the head worktree; base content cannot exit 0, so those header revs are wrong. The declared arms are correctly labelled and the added-failure derivation is sound, so this is a traceability defect in the log headers, not the count."
+    },
+    {
+      "file": "tests/renderer_wall_scan.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: no committed test pins the six repaired drivers. tests/test_renderer_wall_scan.py states it asserts no total count and its expectations are control sites in other files, so removing any wall= from the six drivers would not redden the suite; I showed the scanner itself detects such a removal (site exact_support_floor_attribution.py:724 re-reported, EXIT=1), so the guard exists but is manual-only."
+    },
+    {
+      "file": "benchmarks/exact_clip_seed_amplitude.py",
+      "line": "121",
+      "severity": "follow-on",
+      "text": "follow-on: the commit carries unrelated ruff-format collapses in two touched files (_problem and _figure_title in exact_clip_seed_amplitude.py, _build_context in fixture_positional_stiffness.py) that are not part of the wall-mask change and widen the diff."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 18 production call site(s)",
+    "diff": "seven files, +119/-29; 18 one-keyword wall additions plus an evidence fragment, all in scope; includes some unrelated formatting collapses.",
+    "done_when": "the scanner gate exits 0 at head and 1 at base as required, and the focused suite arm adds no failure (3 identical pre-existing ids at base and head).",
+    "goal": "read the goal and the six-driver scanner measure; every unguarded scattered-field draw_flux_contours call in the batch is now wall-masked, reproduced 18 at base and 0 at head.",
+    "manifest": "the manifest carries a landing line, both suite arms as JSON pointing at the focused-file logs, the scanner arms, the negative control and a precise follow-on; its after_suite names the head revision correctly.",
+    "write_paths": "the commit touches only the six granted benchmark drivers and the granted fragment html; no nova/ source, test file, plan or concurrent path is touched."
+  },
+  "justifications": {
+    "durability": "The fix is real and pinned by a falsifiable source scan whose two arms I reproduced, and I showed the scanner is live by removing one wall=units from head content and watching it re-report the site (exact_support_floor_attribution.py:724, EXIT=1, review-mutation-head.log). Weakness: no committed assertion pins the six repaired drivers - tests/test_renderer_wall_scan.py states it asserts no total count and checks only control sites in other files, so removing a wall= from any repaired driver would not redden the suite; the regression guard is a manual scanner run only.",
+    "evidence": "Every headline reproduces first-hand: base arm 18 sites EXIT=1, head arm 0 sites EXIT=0; the negative control is the base arm of the same command listing exactly the 18 named sites, matching the manifest line-for-line; the focused suite arm tests/test_exact_clip_low_state_render.py fails the same 3 pre-existing ids at base and head (my worktree and reviewed worktree, EXIT=1 both), so the after-minus-base set difference is empty. Weakness: the auxiliary head-tree logs logs/gate_scan.log and logs/after_suite.log carry rev=68762d36 (base) in their header while tree= names the head worktree, so those headers do not tie to a commit.",
+    "fit": "Minimal and idiomatic: each of the 18 edits adds one wall keyword to an existing draw_flux_contours call, handed the wall the driver already loads (wall=/wall_units=/units are bound in each enclosing scope, verified), and accepts the tuple spelling through the painter's optional wall; no new helper, dependency or signature change. Minor: the commit also carries unrelated ruff-format collapses in exact_clip_seed_amplitude.py (_problem, _figure_title) and fixture_positional_stiffness.py (_build_context), widening the diff.",
+    "goal_fidelity": "Goal fully met and independently reproduced: the scanner tests/renderer_wall_scan.py over the six drivers reports 18 unguarded draw_flux_contours calls at base content (68762d36, EXIT=1) and none at the reviewed head 11541380 (EXIT=0), logs review-scan-base.log/review-scan-head.log; all 18 calls now carry a wall keyword, and nova.media.poloidal.draw_flux_contours blanks every grid point outside the wall to NaN before contouring (poloidal.py:167-173), so the mask demonstrably fires.",
+    "scope_discipline": "The commit touches exactly the six granted benchmark drivers and the granted evidence fragment docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-exact-and-centroid.html; no source under nova/, no test file, no plan file, no shared index and no concurrent-node path is edited; the single commit 11541380 carries a conventional subject and an explanatory body, no AI-attribution trailer and no plan/ticket/stage identifier in names or comments."
+  },
+  "node": "review-of-fsa-wall-mask-exact-and-centroid",
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: Goal fully met and independently reproduced: the scanner tests/renderer_wall_scan.py over the six drivers reports 18 unguarded draw_flux_contours calls at base content (68762d36, EXIT=1) and none at the reviewed head 11541380 (EXIT=0), logs review-scan-base.log/review-scan-head.log; all 18 calls now carry a wall keyword, and nova.media.poloidal.draw_flux_contours blanks every grid point outside the wall to NaN before contouring (poloidal.py:167-173), so the mask demonstrably fires.\nSCORE evidence: 17\nJUSTIFICATION evidence: Every headline reproduces first-hand: base arm 18 sites EXIT=1, head arm 0 sites EXIT=0; the negative control is the base arm of the same command listing exactly the 18 named sites, matching the manifest line-for-line; the focused suite arm tests/test_exact_clip_low_state_render.py fails the same 3 pre-existing ids at base and head (my worktree and reviewed worktree, EXIT=1 both), so the after-minus-base set difference is empty. Weakness: the auxiliary head-tree logs logs/gate_scan.log and logs/after_suite.log carry rev=68762d36 (base) in their header while tree= names the head worktree, so those headers do not tie to a commit.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: The commit touches exactly the six granted benchmark drivers and the granted evidence fragment docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-exact-and-centroid.html; no source under nova/, no test file, no plan file, no shared index and no concurrent-node path is edited; the single commit 11541380 carries a conventional subject and an explanatory body, no AI-attribution trailer and no plan/ticket/stage identifier in names or comments.\nSCORE durability: 15\nJUSTIFICATION durability: The fix is real and pinned by a falsifiable source scan whose two arms I reproduced, and I showed the scanner is live by removing one wall=units from head content and watching it re-report the site (exact_support_floor_attribution.py:724, EXIT=1, review-mutation-head.log). Weakness: no committed assertion pins the six repaired drivers - tests/test_renderer_wall_scan.py states it asserts no total count and checks only control sites in other files, so removing a wall= from any repaired driver would not redden the suite; the regression guard is a manual scanner run only.\nSCORE fit: 18\nJUSTIFICATION fit: Minimal and idiomatic: each of the 18 edits adds one wall keyword to an existing draw_flux_contours call, handed the wall the driver already loads (wall=/wall_units=/units are bound in each enclosing scope, verified), and accepts the tuple spelling through the painter's optional wall; no new helper, dependency or signature change. Minor: the commit also carries unrelated ruff-format collapses in exact_clip_seed_amplitude.py (_problem, _figure_title) and fixture_positional_stiffness.py (_build_context), widening the diff.\nVERDICT goal: read the goal and the six-driver scanner measure; every unguarded scattered-field draw_flux_contours call in the batch is now wall-masked, reproduced 18 at base and 0 at head.\nVERDICT done_when: the scanner gate exits 0 at head and 1 at base as required, and the focused suite arm adds no failure (3 identical pre-existing ids at base and head).\nVERDICT write_paths: the commit touches only the six granted benchmark drivers and the granted fragment html; no nova/ source, test file, plan or concurrent path is touched.\nVERDICT manifest: the manifest carries a landing line, both suite arms as JSON pointing at the focused-file logs, the scanner arms, the negative control and a precise follow-on; its after_suite names the head revision correctly.\nVERDICT diff: seven files, +119/-29; 18 one-keyword wall additions plus an evidence fragment, all in scope; includes some unrelated formatting collapses.\nCALL_SITES: benchmarks/centroid_constrained_fixture_receipt.py:1011, benchmarks/centroid_constrained_fixture_receipt.py:1014, benchmarks/centroid_constrained_fixture_receipt.py:1086, benchmarks/centroid_constrained_fixture_receipt.py:1097, benchmarks/centroid_field_response_probe.py:259, benchmarks/centroid_field_response_probe.py:262, benchmarks/exact_clip_low_state_discriminator.py:683, benchmarks/exact_clip_low_state_discriminator.py:686, benchmarks/exact_clip_low_state_discriminator.py:690, benchmarks/exact_clip_seed_amplitude.py:345, benchmarks/exact_clip_seed_amplitude.py:349, benchmarks/exact_clip_seed_amplitude.py:429, benchmarks/exact_clip_seed_amplitude.py:432, benchmarks/exact_clip_seed_amplitude.py:438, benchmarks/exact_support_floor_attribution.py:724, benchmarks/exact_support_floor_attribution.py:755, benchmarks/fixture_positional_stiffness.py:580, benchmarks/fixture_positional_stiffness.py:583\nFINDING logs/gate_scan.log:4 follow-on: the run's gate-log headers spell the revision as rev=<sha>, which the review reader recognises only as 'revision ...', so base_log_revision and head_log_revision are null for both declared arms even though each header does name its revision (baseline_lowstate_render.log rev=68762d36; after_lowstate_render.log rev=11541380). Separately, the auxiliary head-tree logs logs/gate_scan.log (the exit-0 head scanner gate) and logs/after_suite.log (the six-file head run) carry rev=68762d3639 (base) while their tree= fields name the head worktree; base content cannot exit 0, so those header revs are wrong. The declared arms are correctly labelled and the added-failure derivation is sound, so this is a traceability defect in the log headers, not the count.\nFINDING tests/renderer_wall_scan.py:1 follow-on: no committed test pins the six repaired drivers. tests/test_renderer_wall_scan.py states it asserts no total count and its expectations are control sites in other files, so removing any wall= from the six drivers would not redden the suite; I showed the scanner itself detects such a removal (site exact_support_floor_attribution.py:724 re-reported, EXIT=1), so the guard exists but is manual-only.\nFINDING benchmarks/exact_clip_seed_amplitude.py:121 follow-on: the commit carries unrelated ruff-format collapses in two touched files (_problem and _figure_title in exact_clip_seed_amplitude.py, _build_context in fixture_positional_stiffness.py) that are not part of the wall-mask change and widen the diff.\n",
+  "review_run_id": "r-20261003T181826570684-review-of-fsa-wall-mask-exact-and-centroid",
+  "reviewed_base_sha": "68762d3639852b0d4fc87c4beab07b6298a3b384",
+  "reviewed_commit": "11541380efc7ea9c2aeaec2ddf37dca31b03e16f",
+  "reviewed_commits": [
+    "11541380efc7ea9c2aeaec2ddf37dca31b03e16f"
+  ],
+  "reviewed_head_sha": "11541380efc7ea9c2aeaec2ddf37dca31b03e16f",
+  "reviewed_run_id": "r-20261003T170817801139-fsa-wall-mask-exact-and-centroid",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-wall-mask-exact-and-centroid",
+  "reviewer_node": "review-of-fsa-wall-mask-exact-and-centroid",
+  "reviewing_run_id": "r-20261003T181826570684-review-of-fsa-wall-mask-exact-and-centroid",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T18:28:07.649442+00:00",
+  "total": 88,
+  "verdict": "pass"
+}

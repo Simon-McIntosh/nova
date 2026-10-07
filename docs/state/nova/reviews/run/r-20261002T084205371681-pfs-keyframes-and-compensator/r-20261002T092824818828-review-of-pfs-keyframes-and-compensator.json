@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "the reviewed run's manifest (run_dir/manifest.md) names no baseline_suite and no after_suite gate log \u2014 it is a figure-rendering implement node whose only gate is logs/render-gate.log (render, EXIT=0) \u2014 so annotate_review_of_run derives an unmeasured added-failure count (None) rather than a measured zero; the run changed no test file, so it cannot have added a failing pytest node id.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/playable-forward-solve/axis-configuration/axis-configuration.png (poloidal panel, machine wall drawn, P/W bars labelled +0.02 cm, L/S/R -4.11 cm)",
+    "docs/figures/playable-forward-solve/keyframes/h200-press-stage-throughput.png (prime 0.0101, first moved 0.0036 keyframes/s on a log axis against fences 10 and 1)",
+    "docs/figures/playable-forward-solve/compensator-authority/compensator-authority.png (two segments rows 15-17 and 95-97, no line across 18-94; solenoid 9/10, p6_upper row 96)"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "734a8e578"
+  ],
+  "completed_at": "2026-10-02T09:59:31.077Z",
+  "dispatched_at": "2026-10-02T09:28:44Z",
+  "evidence_inputs": {
+    "axis_arms_verified": {
+      "L": -4.1145,
+      "P": 0.0185,
+      "R": -4.1145,
+      "S": -4.1145,
+      "W": 0.0185
+    },
+    "compensator_rows_verified": "10 receipt rows; solenoid selected on rows 11-17,95,97; p6_upper on row 96",
+    "conditioned_warm_ratios_verified": {
+      "row16": 1.36958907335577,
+      "row17": 1.5444451402343304
+    },
+    "duplicate_reproduced_at_base": "h200-press-stage-throughput.png and h200-playable-axis-continuation-throughput.png were byte-identical at 27d6cab12 (md5 0957ec23a73a7e8ef13eac7742b18133)",
+    "figures_reproduce_from_receipts": "yes - scratch re-render produced byte-identical PNGs for all three figures",
+    "keyframes_png_count": 9,
+    "machine_wall_rz_m_verified": "37 points, identical to early-frame-placement.json rows[0].geometry.wall",
+    "reviewed_revision_read": "734a8e5782714985a20676c202a2fc4a5bbcfd93 (head), 27d6cab12a3bfc065629302c1da39671e23ea81c (base)"
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084205371681-pfs-keyframes-and-compensator/manifest.md",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: the artifacts line records the throughput figure's sha256 as 760052576d2d0c1f15b71e3464bec53514ac7ba862a0b47 (46 hex chars), which is not the file's hash \u2014 the committed h200-press-stage-throughput.png hashes to 760052576d2d0c1f15b71e3464dd705df60a8b8329a64c53514ac7ba862a0b47 \u2014 so the recorded-hash evidence the negative-control rests on is corrupted in the manifest even though the landing fragment records the correct 16-char prefix."
+    },
+    {
+      "file": "docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html",
+      "line": "48",
+      "severity": "follow-on",
+      "text": "follow-on: the corrected sentence states the conditioned arm is unconverged on both rows 'but does not cross', yet early-frame-placement.json records the conditioned arm at manifest_row 17 as {'converged': False} with no enclosed_area_ratio or contour at all, so 'does not cross' is asserted for row 17 where the receipt records no ratio to support it."
+    }
+  ],
+  "follow_ons": [
+    "repair the truncated sha256 for h200-press-stage-throughput.png in the reviewed run's manifest artifacts line",
+    "add an executable assertion that each figure's drawn value equals its receipt field, since the render gate only proves the driver exits zero"
+  ],
+  "gate_arms_note": "after_suite = none named by the reviewed manifest; the recorded gate is logs/render-gate.log at revision 27d6cab12, EXIT=0, three figures written. The reviewed run declares negative_control 'none: figure and caption agreement verified by re-reading each against its named receipt field and by the recorded PNG hashes'.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit 734a8e578 against base 27d6cab12: one new render driver (245 lines), three re-rendered PNGs, one figure deleted, and caption edits to the landed archive and the anchor-and-panel fragment.",
+    "done_when": "read the quantitative done-when and its gate (logs/render-gate.log:1-8, revision 27d6cab12, EXIT=0, three figures written at 92161/80331/98506 bytes); independently re-running render_figures.py in a scratch tree reproduces all three committed PNGs byte-for-byte (axis-configuration.png 08f768f79efdcbbc5a39cdb9d40435270b79a109b69a754afd34db466f26d818, h200-press-stage-throughput.png 760052576d2d0c1f15b71e3464dd705df60a8b8329a64c53514ac7ba862a0b47, compensator-authority.png f549e19b149bbeaa4b25ac7b2572320989bb6c086366457f496275a713a76994), so the figures shadow their receipts.",
+    "goal": "read the dispatched NODE goal (make the axis-configuration, keyframes-throughput and compensator-authority figures draw their receipts and correct the conditioned_warm arm label, per followups f-fsaudit-repair-axis-configuration-poloidal-panel, f-fsaudit-repair-empty-throughput-keyframe-figures and the remainder of f-fsaudit-repair-empty-and-invalid-data-panels); the diff re-renders all three figures from committed receipts, resolves the byte-identical throughput pair to one measured figure, and corrects the arm label, so every clause of the goal lands.",
+    "manifest": "read; status complete, names render-gate.log with EXIT=0 and records the three repairs, but its artifacts line carries a truncated sha256 for h200-press-stage-throughput.png that is not the file's hash.",
+    "write_paths": "read the seven declared write paths (axis-configuration, keyframes, compensator-authority figure dirs, docs/evidence/archive/playable-forward-solve-landed.html, the two fragments, and the node figure dir); every path in the diff against 27d6cab12 lies inside them."
+  },
+  "justifications": {
+    "durability": "render_figures.py carries no assert, so nothing reddens if a receipt field drifts from the caption the driver draws from it, and the manifest declares negative_control 'none' with agreement resting on a manual re-read.",
+    "evidence": "logs/render-gate.log:1-8 names revision 27d6cab12 and EXIT=0 with the three figures written, and re-running the driver in a scratch tree reproduces each committed PNG byte-for-byte, so the figures reconcile with their receipts, but the gate records no assertion of its own and the manifest's own sha256 for the throughput PNG is malformed.",
+    "fit": "the driver reuses the repository painters at render_figures.py:24-25 (nova.media.poloidal draw_wall/draw_nulls; nova.media.ink poloidal_axes/trace_axes), names every colour as a module constant (LABELLER/PARITY/REFERENCE/REFUSED), labels series directly rather than by legends, and introduces no plan, sprint or ticket identifier.",
+    "goal_fidelity": "render_figures.py:37-243 draws all three panels from axis-configuration-receipt.json, h200-press-stage-receipt.json and compensator-authority.json, the compensator line breaks cleanly between the receipt's measured_early_rows [15,16,17] and flat_top_rows [95,96,97], and the conditioned_warm label is corrected at docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html:47, so every goal clause is delivered.",
+    "scope_discipline": "every path in the diff against 27d6cab12 (render_figures.py, axis-configuration.png and its receipt.json, the two keyframes/ throughput PNGs, compensator-authority.png, the two fragments and the landed archive) lies inside the seven declared write paths."
+  },
+  "plan": "nova:playable-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the dispatched NODE goal (make the axis-configuration, keyframes-throughput and compensator-authority figures draw their receipts and correct the conditioned_warm arm label, per followups f-fsaudit-repair-axis-configuration-poloidal-panel, f-fsaudit-repair-empty-throughput-keyframe-figures and the remainder of f-fsaudit-repair-empty-and-invalid-data-panels); the diff re-renders all three figures from committed receipts, resolves the byte-identical throughput pair to one measured figure, and corrects the arm label, so every clause of the goal lands.\nVERDICT done_when: read the quantitative done-when and its gate (logs/render-gate.log:1-8, revision 27d6cab12, EXIT=0, three figures written at 92161/80331/98506 bytes); independently re-running render_figures.py in a scratch tree reproduces all three committed PNGs byte-for-byte (axis-configuration.png 08f768f79efdcbbc5a39cdb9d40435270b79a109b69a754afd34db466f26d818, h200-press-stage-throughput.png 760052576d2d0c1f15b71e3464dd705df60a8b8329a64c53514ac7ba862a0b47, compensator-authority.png f549e19b149bbeaa4b25ac7b2572320989bb6c086366457f496275a713a76994), so the figures shadow their receipts.\nVERDICT write_paths: read the seven declared write paths (axis-configuration, keyframes, compensator-authority figure dirs, docs/evidence/archive/playable-forward-solve-landed.html, the two fragments, and the node figure dir); every path in the diff against 27d6cab12 lies inside them.\nVERDICT manifest: read; status complete, names render-gate.log with EXIT=0 and records the three repairs, but its artifacts line carries a truncated sha256 for h200-press-stage-throughput.png that is not the file's hash.\nVERDICT diff: read commit 734a8e578 against base 27d6cab12: one new render driver (245 lines), three re-rendered PNGs, one figure deleted, and caption edits to the landed archive and the anchor-and-panel fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: render_figures.py:37-243 draws all three panels from axis-configuration-receipt.json, h200-press-stage-receipt.json and compensator-authority.json, the compensator line breaks cleanly between the receipt's measured_early_rows [15,16,17] and flat_top_rows [95,96,97], and the conditioned_warm label is corrected at docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html:47, so every goal clause is delivered.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/render-gate.log:1-8 names revision 27d6cab12 and EXIT=0 with the three figures written, and re-running the driver in a scratch tree reproduces each committed PNG byte-for-byte, so the figures reconcile with their receipts, but the gate records no assertion of its own and the manifest's own sha256 for the throughput PNG is malformed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff against 27d6cab12 (render_figures.py, axis-configuration.png and its receipt.json, the two keyframes/ throughput PNGs, compensator-authority.png, the two fragments and the landed archive) lies inside the seven declared write paths.\nSCORE durability: 5\nJUSTIFICATION durability: render_figures.py carries no assert, so nothing reddens if a receipt field drifts from the caption the driver draws from it, and the manifest declares negative_control 'none' with agreement resting on a manual re-read.\nSCORE fit: 17\nJUSTIFICATION fit: the driver reuses the repository painters at render_figures.py:24-25 (nova.media.poloidal draw_wall/draw_nulls; nova.media.ink poloidal_axes/trace_axes), names every colour as a module constant (LABELLER/PARITY/REFERENCE/REFUSED), labels series directly rather than by legends, and introduces no plan, sprint or ticket identifier.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084205371681-pfs-keyframes-and-compensator/manifest.md:15 follow-on: the artifacts line records the throughput figure's sha256 as 760052576d2d0c1f15b71e3464bec53514ac7ba862a0b47 (46 hex chars), which is not the file's hash \u2014 the committed h200-press-stage-throughput.png hashes to 760052576d2d0c1f15b71e3464dd705df60a8b8329a64c53514ac7ba862a0b47 \u2014 so the recorded-hash evidence the negative-control rests on is corrupted in the manifest even though the landing fragment records the correct 16-char prefix.\nFINDING docs/evidence/fragments/playable-forward-solve/pfs-anchor-and-panel-repairs.html:48 follow-on: the corrected sentence states the conditioned arm is unconverged on both rows 'but does not cross', yet early-frame-placement.json records the conditioned arm at manifest_row 17 as {'converged': False} with no enclosed_area_ratio or contour at all, so 'does not cross' is asserted for row 17 where the receipt records no ratio to support it.\n",
+  "review_run_id": "r-20261002T092824818828-review-of-pfs-keyframes-and-compensator",
+  "reviewed_base_sha": "27d6cab12a3bfc065629302c1da39671e23ea81c",
+  "reviewed_head_sha": "734a8e5782714985a20676c202a2fc4a5bbcfd93",
+  "reviewed_revision": "734a8e5782714985a20676c202a2fc4a5bbcfd93",
+  "reviewed_run_id": "r-20261002T084205371681-pfs-keyframes-and-compensator",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-keyframes-and-compensator",
+  "reviewer_node": "review-of-pfs-keyframes-and-compensator",
+  "reviewer_run_id": "r-20261002T092824818828-review-of-pfs-keyframes-and-compensator",
+  "scores": {
+    "durability": 5,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "section": "8",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T05:04:21.008108+00:00",
+  "total": 75,
+  "verdict": "pass"
+}

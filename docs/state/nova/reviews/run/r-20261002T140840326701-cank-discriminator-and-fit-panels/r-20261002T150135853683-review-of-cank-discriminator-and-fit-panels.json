@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest leaves baseline_suite and after_suite empty rather than recording completed suite arms. Their readable failure-id sets are therefore both empty, giving added_failure_ids=[] and added_failure_count=0 by set difference; this records no observed added failures and does not claim that a paired suite ran.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/row-*-state.svg: six panels, each one #3366cc triangle + one #3366cc filled cross, wall_unit_count 1, boundary flux among twelve levels",
+    "docs/figures/constraint-augmented-newton-krylov/flux-function-fit/receipt.json: figure.title carries 'pressure_gradient: converged: false, terminal residual 5.07e-02, active_set_cycle_detected; ff_prime: ... 2.24e-01 ...'",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/gate-render.log: 14 passed in 9.86s, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/negative-control.log: 13 failed, 1 passed in 9.58s, EXIT=1",
+    "/tmp/review-gate.log and /tmp/review-negctl.log: this reviewer's independent reproduction of the gate (14 passed in 8.75s) and of the base-arm control (13 failed, 1 passed in 9.08s, EXIT=1)"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "7181d7b98db2b179a8ac1392d4254ea4631d9ff8",
+    "2e2000428bff0be8c9871e74047467cee6e29440"
+  ],
+  "completed_at": "2026-10-02T15:11:02.417Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T15:01:53Z",
+  "evidence_inputs": "Reviewed f8136784c44e3705d8a955ad04401b88dbd5fd8d..2e2000428bff0be8c9871e74047467cee6e29440. Both done-when halves are met and independently reproduced. The render path draws from the committed receipts and solves nothing; the archive was spliced on this node's own caption. Coordinator integration must carry 7181d7b98 and 2e2000428 together (the fragment is in the head commit). Left open: the reviewed manifest declares no paired suite arms, so this review derives added_failure_count=0 from two empty readable sets; and the combination strip's invisible-legend deduction from the same followup is outside this node's done-when.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T140840326701-cank-discriminator-and-fit-panels/manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "baseline_suite and after_suite are empty, so this review can derive no paired suite failure delta; the tests field is a replayable literal command but the suite arms are absent."
+    },
+    {
+      "file": "docs/figures/constraint-augmented-newton-krylov/shafranov-discriminator/shafranov-combination-discriminator.svg",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The combination strip still advertises five series including 'magnetics (a)' (circular, #3366cc down-triangle) which is invisible because the row-kernel reading equals the circular reading (residual 0.0) and the discrete square covers it; this deduction from followup f-fsa-figrepair-shafranov-discriminator lies outside this node's done-when, which names only the six row-*-state panels, so it remains for a follow-on."
+    },
+    {
+      "file": "tests/test_shafranov_discriminator_render.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "The done-when names both the .png and the .svg of row-21978-35, but the test asserts the verdict only in the .svg text and the receipt title, not in the raster; the same call produces both, so the gap is coverage rather than a live defect."
+    }
+  ],
+  "gate_arms_note": "No readable baseline_suite or after_suite was recorded by the reviewed run, so the delta is empty by construction. The target's focused evidence is nevertheless falsifiable and was reproduced independently: tests/test_shafranov_discriminator_render.py is green at 2e2000428 (14 passed in 8.75s), and the same test run against the base revision's figures (extracted read-only with git show f8136784c into a scratch tree) is red at 13 failed, 1 passed in 9.08s with EXIT=1, matching negative-control.log. Direct parses at head: one #3366cc triangle and one #3366cc 12-vertex cross per state SVG; state_panel.topology.boundary_flux_wb among levels_wb to 0.00e+00 on all six rows; both fit-arm verdicts in the receipt title and the .svg text.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none; the changed executable is a benchmark/evidence generator plus a media render path, not a production runtime path.",
+    "diff": "Read both commits against f8136784c. 7181d7b98 adds NULL_GLYPH_STYLE, state_contour_levels, the state_panel topology record and the two render-only entry points, redraws the six state panels and the fit figure, and splices one archive caption; 2e2000428 adds the evidence fragment.",
+    "done_when": "Every state panel under shafranov-discriminator/ was redrawn from its committed row receipt through the benchmark's render path (no solve), with the axis triangle, the saddle cross, the wall and the boundary-flux level; the fit .svg, .png and receipt title carry 'converged: false, terminal residual 5.07e-02, active_set_cycle_detected'; the archive was spliced so no caption calls the non-converged arms' reference flux terminal; the render test fails under the base painter.",
+    "goal": "Both done-when halves are met.  Independently parsed each committed state SVG: one #3366cc solid triangle and one #3366cc 12-vertex filled cross, and the row receipt's state_panel.topology.boundary_flux_wb is among levels_wb to 0.00e+00 on all six rows; both flux-function-fit titles carry each arm's verdict read from the receipt.",
+    "manifest": "The manifest records both commits, the gate figure and the negative control, but leaves baseline_suite and after_suite empty, so no paired suite delta is derivable, and packs both shas into a single commits string.",
+    "write_paths": "All 27 paths in f8136784c..2e2000428 lie inside the eight declared grants; the archive edit is one contiguous hunk on this node's own flux-function-fit figcaption, not a rewrite."
+  },
+  "justifications": {
+    "durability": "A committed test reads the committed artifacts and asserts the glyphs, the boundary-flux level and the fit title, and it is proven to fail under the previous painter by an independent base-arm reproduction. Durability is reduced because the test asserts the .svg title but not the .png, the manifest carries no paired suite arms, and the glyph check is coupled to the painter's vertex counts.",
+    "evidence": "Independent reproduction: the render gate gives 14 passed, and the base-arm control (base figures extracted with git show into a scratch tree, head test) gives 13 failed, 1 passed, EXIT=1, matching the run's negative-control.log exactly. The gate log's first line names revision f8136784c, the tree and the command. The evidence is weakened only by the reviewed manifest's empty suite arms, which leave no paired failure delta.",
+    "fit": "The render path is compact, follows the AGENTS.md plotting rules (unfilled line contours, no axes, unit-faithful wall, shared draw_nulls vocabulary) and solves nothing; fragment, external report and archive agree. One audit deduction from the same followup \u2014 the combination strip's invisible 'magnetics (a)' series \u2014 is outside this node's done-when and remains open as a follow-on.",
+    "goal_fidelity": "Both done-when halves are independently reproduced. The six state SVGs each carry exactly one #3366cc triangle and one #3366cc filled cross (base revision: zero #3366cc in every state SVG), the recorded boundary flux is a drawn level on all six rows, the wall unit count is 1, and both fit titles carry the verdict read from the receipt. The reconciliation to the sibling shafranov/ panel rests on the committed draw_nulls vocabulary rather than a byte comparison, since the sibling is a raster-only panel.",
+    "scope_discipline": "git diff --stat f8136784c..2e2000428 lists 27 files, every one inside the eight granted write paths; no peer path is touched. The single archive hunk edits only the figcaption of the figure this node redrew and removes no other node's record."
+  },
+  "plan": "nova:constraint-augmented-newton-krylov",
+  "project": "nova",
+  "raw_text": "VERDICT goal: both done-when halves are met \u2014 six state panels redrawn with the shared null glyphs and a boundary-flux level, and both fit titles carrying each arm's verdict.\nVERDICT done_when: independently verified \u2014 glyphs, boundary-flux level, wall, and verdict title all confirmed by direct parse; the render test fails under the base painter.\nVERDICT write_paths: all 27 changed files lie inside the eight grants; the archive edit is one contiguous hunk on this node's own caption.\nVERDICT manifest: records both commits, the gate and the negative control, but leaves baseline_suite and after_suite empty.\nVERDICT diff: 7181d7b98 adds the render path, the redrawn panels and the fit figure and splices one archive caption; 2e2000428 adds the fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: both halves reproduced; the sibling-vocabulary match rests on the committed draw_nulls style since the sibling panel is raster-only.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate and base-arm control reproduced independently; weakened only by the manifest's empty suite arms.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path is granted and the archive edit removes no other node's record.\nSCORE durability: 16\nJUSTIFICATION durability: a committed artifact-reading test is proven to fail under the previous painter, but it asserts the .svg title only and the manifest carries no paired suite arms.\nSCORE fit: 16\nJUSTIFICATION fit: the render path is compact and follows the plotting rules and solves nothing; the combination strip's invisible-legend deduction from the same followup is outside this node's done-when and remains open.\nFINDING manifest.md:10 follow-on: baseline_suite and after_suite empty, so no paired failure delta is derivable.\nFINDING shafranov-combination-discriminator.svg:1 follow-on: the invisible 'magnetics (a)' circular series is unaddressed, outside this node's done-when.\nFINDING tests/test_shafranov_discriminator_render.py:104 follow-on: the test asserts the .svg title but not the raster named in the done-when.",
+  "review_base_sha": "fbba99cc277acec3c8dd893d91cfcfade4e9b65b",
+  "review_run_id": "r-20261002T150135853683-review-of-cank-discriminator-and-fit-panels",
+  "reviewed_base_sha": "f8136784c44e3705d8a955ad04401b88dbd5fd8d",
+  "reviewed_commit": "2e2000428bff0be8c9871e74047467cee6e29440",
+  "reviewed_head_sha": "2e2000428bff0be8c9871e74047467cee6e29440",
+  "reviewed_revision": "2e2000428bff0be8c9871e74047467cee6e29440",
+  "reviewed_run_id": "r-20261002T140840326701-cank-discriminator-and-fit-panels",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-discriminator-and-fit-panels",
+  "reviewer_node": "review-of-cank-discriminator-and-fit-panels",
+  "reviewer_run_id": "r-20261002T150135853683-review-of-cank-discriminator-and-fit-panels",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T15:09:55Z",
+  "total": 88,
+  "verdict": "pass"
+}

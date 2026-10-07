@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "0a7a415a4e912301f1a4464131a644288bf71420",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward.py:788",
+    "nova/equilibrium/forward.py:941",
+    "nova/equilibrium/constraint.py:1277",
+    "nova/equilibrium/batched_labeller.py:699"
+  ],
+  "completed_at": "2026-10-06T05:58:25.429Z",
+  "dispatched_at": "2026-10-06T02:28:55Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "2604",
+      "severity": "follow-on",
+      "text": "follow-on: _field_coefficients is now unused because read calls _sampled_flux, so a dead helper is left behind; remove it or keep its single caller consistent."
+    },
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2599",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt's executable_bytes is XLA generated_code_size_in_bytes (about 14 KB), not the serialized executable (about 36 MB), so the 50 MB branch of the qualification clause at :2508 can never fire and only the 60 s wall decides the barrier."
+    }
+  ],
+  "head_log_revision": "c109547d4ac7497b380e0d5e22f36309e7465532",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read change by change; dce0926c is the perf change in topology.py, 0725e7c6 adds test_kernel_backed_read_traces_each_stage_once, c109547d rewrites test_kernel_compile_growth to read the executed receipt, and 78f7bace/f73b7b3e/fc29020e carry only the evidence fragment, so the source at c109547d equals the source at the reviewed head.",
+    "done_when": "the done-when's five parts are met and recorded: the census (probe/census-*.log, 30 to 16 traces and 1,373,538 to 748,270 expanded equations), identity (h200/identity-*.log, 38 FIELD rows per state with per-field relative, worst 4.407e-15 at diverted 300 inside the wide 1e-13 bound), the H200 suite delta (jobs 1281184/1281186), the cold compiles bounded at 900 s (job 1281179), and the fragment (audit-doc OK).",
+    "goal": "the node goal is to make the kernel-backed topology read trace the Biot kernel once per stage instead of thirty times with identical results, and to measure the cold compile that buys on the H200 against the point kernel's primal-vs-single-direction-jvp; nova/equilibrium/topology.py:1597 stationary_read now returns the jet from the polish loop, :2609 _sampled_flux fuses the fit and contour flux into one value pass, and the candidate loop folds each slot's saddle_normal_form into a stacked form so the selected form is not re-evaluated, which the census scores as 30 traces falling to 16.",
+    "manifest": "read; it records the six landed revisions, the H200 gate job ids and walls, the identity table and the failure_attribution for its superseded arms, and its changed_paths match the diff.",
+    "write_paths": "the five declared paths are nova/equilibrium/topology.py, tests/equilibrium/test_topology_read.py, docs/evidence/fragments/converged-forward-solve/cfs-read-shared-kernel.html and two docs/figures directories; git diff --name-only 0a7a415a4..fc29020eb lists only the source, the test and the fragment, all inside the declaration."
+  },
+  "justifications": {
+    "durability": "tests/equilibrium/test_topology_read.py:2134 test_kernel_backed_read_traces_each_stage_once fails on the reverted-stage mutant ((4,8) vs (4,6), EXIT=1) and passes at head (re-run this session, 1 passed EXIT=0), and :2495 _qualify_cold_compile was shown to fire on a 640.4 s receipt.",
+    "evidence": "the census, identity and cold-compile gates are all recorded against job ids in the manifest and the h200/ logs, though the executable-size half of the clause is inert (tests/equilibrium/test_topology_read.py:2599 records generated_code_size_in_bytes).",
+    "fit": "the change follows the surrounding jax.tree/lax idiom and introduces no plan or stage label, though nova/equilibrium/topology.py:2604 _field_coefficients is left unused after read switched to _sampled_flux.",
+    "goal_fidelity": "the landed change is the goal at nova/equilibrium/topology.py:2609, :1597 and the candidate loop at :2986, and the census records the trace count falling from 30 to 16.",
+    "reuse": "_sampled_flux at nova/equilibrium/topology.py:2609 composes the existing _point_values owner rather than forking a second batching path, and the read's other kernel stages are extended in place.",
+    "scope_discipline": "git diff --name-only 0a7a415a4..fc29020eb lists exactly nova/equilibrium/topology.py, tests/equilibrium/test_topology_read.py and the fragment, all inside the five declared paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the kernel-backed topology read trace the Biot kernel once per stage instead of thirty times with identical results, and to measure the cold compile that buys on the H200 against the point kernel's primal-vs-single-direction-jvp; nova/equilibrium/topology.py:1597 stationary_read now returns the jet from the polish loop, :2609 _sampled_flux fuses the fit and contour flux into one value pass, and the candidate loop folds each slot's saddle_normal_form into a stacked form so the selected form is not re-evaluated, which the census scores as 30 traces falling to 16.\nVERDICT done_when: the done-when's five parts are met and recorded: the census (probe/census-*.log, 30 to 16 traces and 1,373,538 to 748,270 expanded equations), identity (h200/identity-*.log, 38 FIELD rows per state with per-field relative, worst 4.407e-15 at diverted 300 inside the wide 1e-13 bound), the H200 suite delta (jobs 1281184/1281186), the cold compiles bounded at 900 s (job 1281179), and the fragment (audit-doc OK).\nVERDICT write_paths: the five declared paths are nova/equilibrium/topology.py, tests/equilibrium/test_topology_read.py, docs/evidence/fragments/converged-forward-solve/cfs-read-shared-kernel.html and two docs/figures directories; git diff --name-only 0a7a415a4..fc29020eb lists only the source, the test and the fragment, all inside the declaration.\nVERDICT manifest: read; it records the six landed revisions, the H200 gate job ids and walls, the identity table and the failure_attribution for its superseded arms, and its changed_paths match the diff.\nVERDICT diff: read change by change; dce0926c is the perf change in topology.py, 0725e7c6 adds test_kernel_backed_read_traces_each_stage_once, c109547d rewrites test_kernel_compile_growth to read the executed receipt, and 78f7bace/f73b7b3e/fc29020e carry only the evidence fragment, so the source at c109547d equals the source at the reviewed head.\nCALL_SITES: nova/equilibrium/forward.py:788, nova/equilibrium/forward.py:941, nova/equilibrium/constraint.py:1277, nova/equilibrium/batched_labeller.py:699\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the landed change is the goal at nova/equilibrium/topology.py:2609, :1597 and the candidate loop at :2986, and the census records the trace count falling from 30 to 16.\nSCORE evidence: 18\nJUSTIFICATION evidence: the census, identity and cold-compile gates are all recorded against job ids in the manifest and the h200/ logs, though the executable-size half of the clause is inert (tests/equilibrium/test_topology_read.py:2599 records generated_code_size_in_bytes).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 0a7a415a4..fc29020eb lists exactly nova/equilibrium/topology.py, tests/equilibrium/test_topology_read.py and the fragment, all inside the five declared paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/equilibrium/test_topology_read.py:2134 test_kernel_backed_read_traces_each_stage_once fails on the reverted-stage mutant ((4,8) vs (4,6), EXIT=1) and passes at head (re-run this session, 1 passed EXIT=0), and :2495 _qualify_cold_compile was shown to fire on a 640.4 s receipt.\nSCORE fit: 18\nJUSTIFICATION fit: the change follows the surrounding jax.tree/lax idiom and introduces no plan or stage label, though nova/equilibrium/topology.py:2604 _field_coefficients is left unused after read switched to _sampled_flux.\nSCORE reuse: 20\nJUSTIFICATION reuse: _sampled_flux at nova/equilibrium/topology.py:2609 composes the existing _point_values owner rather than forking a second batching path, and the read's other kernel stages are extended in place.\nFINDING nova/equilibrium/topology.py:2604 follow-on: _field_coefficients is now unused because read calls _sampled_flux, so a dead helper is left behind; remove it or keep its single caller consistent.\nFINDING tests/equilibrium/test_topology_read.py:2599 follow-on: the receipt's executable_bytes is XLA generated_code_size_in_bytes (about 14 KB), not the serialized executable (about 36 MB), so the 50 MB branch of the qualification clause at :2508 can never fire and only the 60 s wall decides the barrier.\n",
+  "review_run_id": "legacy-e45c2900091d",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "0a7a415a4e912301f1a4464131a644288bf71420",
+  "reviewed_head_sha": "fc29020eb0134853b9795fb0524c09dfb7f5501a",
+  "reviewed_run_id": "r-20261006T022826216952-cfs-read-shared-kernel",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T06:08:01.715482+00:00",
+  "total": 114
+}

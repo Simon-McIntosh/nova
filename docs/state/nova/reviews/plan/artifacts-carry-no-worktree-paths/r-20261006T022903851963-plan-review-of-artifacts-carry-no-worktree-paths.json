@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:34:35.337Z",
+  "dispatched_at": "2026-10-06T02:29:22Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/artifacts-carry-no-worktree-paths/r-20261006T022903851963-plan-review-of-artifacts-carry-no-worktree-paths/plan.html:198",
+      "id": "duplicate_owner-1",
+      "reason": "a node implementing \u00a74 as written faces two mutually exclusive instructions for one test, and picking the `git grep` form forks the detection the predicate exists to centralize, so the plan should state that the test enumerates tracked files and hands them to `worktree_path_offenders` with no pattern match of its own.",
+      "text": "\u00a74 tells the node that `tests/test_artifacts_carry_no_worktree_paths.py` \"runs `git grep` for the pattern ... and fails naming each offender\" and then, ten lines later, that the same test \"calls `worktree_path_offenders` over every tracked file, so the only scanning decision in the repository is that one predicate\"; a `git grep` scan is a second pattern-matching mechanism beside the predicate that owns the rule, and the plan's own invariant (one predicate) is false if the node implements the first form",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a91350d072d94ffdcb1f93e3606c4318328ae6116e679a3cdf41d8b91b498bc4",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 39,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:36:13.286743+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T022903851963-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "3fcda610f949d3a1029ad9ed070f7be3989dda69",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the new behaviour (the dual-root layout matcher, the map-to-`<rest>` rule versus left-unmapped rule, the exemption set) is hidden behind two functions in an existing module; `worktree_path_offenders(paths, read)` takes a `read` callable so the index reading of the \u00a74 hook and the tree reading of the \u00a74 test feed one predicate rather than two scanners, which is exactly the seam a deep module needs.",
+    "duplicate_owner": "a finding \u2014 \u00a74 specifies the same test two contradictory ways: once as a `git grep` scan that \"fails naming each offender\", and once as a call to `worktree_path_offenders`, which it asserts is the repository's only scanning decision.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 accounts for its additions in its own text (two public functions, two module constants, \"one subcommand on the module's existing command group, so no new command surface\") and names the one thing it retires (the receipt-directory scan of \u00a74) while stating that nothing in nova rewrites or rejects worktree paths today.",
+    "reuse_search": "pass \u2014 the plan searched both named codebases and cites the mechanisms it extends: reckon/crew/promotion.py:1875 `_rewrite_worktree_roots` (verified, with its whole-segment `re.escape(candidate)+r\"(?=$|[/\\s'\\\"])\"` match and three stated differences), reckon/crew/routing.py:455-474 `_workspace_roots` as the owner of the worktree-root layout, nova/database/filepath.py:62 `repository_relative`, the `realpath -e`+`git rev-parse --show-toplevel` launcher idiom (verified identically at scripts/nova_lane/run.sh:299-300 and scripts/playable_server/run.sh:71-72), and `nova.definitions.root_dir` explicitly rejected as import-time-fixed; the census command reproduces 1,147 files and 65 launch scripts at this tree exactly.",
+    "thin_wrapper": "pass \u2014 the CLI subcommand over `relativize_worktree_paths` and the two-line hook shim are thin, but the plan justifies each (the subcommand is \"the only way to run the function over files\"; the hook \"adds no logic of its own\") and states why the pre-commit framework is not adopted (it stashes, which the workstation policy bans), so neither is an unjustified parallel layer."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "8026ae91bd0eaa5e380290a2821f4c59969d238ad321834ab9a7ddf93d43da81",
+    "s2": "a050123a63da936e1e84713de647f39ce987e8f3475655086b8a5cec3794a766",
+    "s3": "af55126bd0713335b2716da37306ca4e7716c52a12337e9d50c6a6e28ad05475",
+    "s4": "7750fc32a7cbe1227c32649610d9d06528947b8ff938bc2db975416c88c3ad42",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:36:12.199024+00:00"
+}

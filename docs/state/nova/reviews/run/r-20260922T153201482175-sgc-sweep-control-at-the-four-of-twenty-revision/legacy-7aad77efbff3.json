@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/coil_edit_latency.py:2456",
+    "benchmarks/coil_edit_latency.py:200",
+    "benchmarks/coil_edit_latency.py:2410"
+  ],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/single-grid-solver-cutover-landed.html",
+      "line": "63",
+      "text": "the caption and alt text for titan-terminal-raster-flux.png assert line contours on stated levels with the stationary points marked, but the committed PNG is a filled pcolormesh with a colorbar, axes, ticks and no wall, so the record misdescribes its own published artifact."
+    },
+    {
+      "file": "docs/evidence/archive/single-grid-solver-cutover-landed.html",
+      "line": "55",
+      "text": "\"agreeing to the last displayed digit\" is true as displayed, but the underlying agreement is round-off level (maximum absolute difference 3.47e-16 m, 5 of 20 edits differing near 1e-15 relative) and the record states no tolerance, so a later reader can take it for bit-identity."
+    },
+    {
+      "file": "docs/evidence/archive/single-grid-solver-cutover-landed.html",
+      "line": "59",
+      "text": "the published PNG of the paired terminal-state panels clips its suptitle at both edges, so the caption's residual values are partly unreadable in the artifact."
+    },
+    {
+      "file": "docs/figures/single-grid-solver-cutover/titan-coil-edit-latency.png",
+      "line": "1",
+      "text": "label the figure by artifact path since it carries no text line of its own; its bottom-right panel title is clipped at the right edge (\"persistent hits 1896\"), so the published latency figure loses part of its own annotation."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "the landed HTML appends one section to a cumulative record and the plan gains one s4 comment; both cite receipts whose hashes and revisions were checked against the files.",
+    "done_when": "recomputed the twenty-edit comparison from the two raw receipts rather than from the published table; all twenty rows agree on converged flag, termination and trip count, and the banked unconstrained cell carries no vertical_centroid rows as claimed.",
+    "goal": "read the plan's section 4 and the run manifest; the node delivered the two things asked of it, a same-revision device control for the four-of-twenty sweep and a per-edit comparison against both the H200 and the banked receipt.",
+    "manifest": "read complete, naming commit 94e4a099, the titan job 1275968 with its device, and the four output receipts plus the three-receipt comparison.",
+    "write_paths": "commit 94e4a099 changes the nine paths its scope fence grants, adds without deleting, and leaves every intermediate receipt and the twenty-row table inside the reports fence."
+  },
+  "justifications": {
+    "durability": "the record, both same-revision receipts and all figures are committed in 94e4a099 with a bodied conventional message, and the landed HTML appends one section to a cumulative record; the caption/artifact mismatch and the unstated round-off tolerance are what will not survive a later stricter read.",
+    "evidence": "every table cell recomputes from the raw receipts, but the caption at line 63 describes the raster artifact as line contours with unfilled stationary-point markers while the committed PNG is a filled pcolormesh with axes, ticks and a colorbar.",
+    "fit": "the record answers the revision-versus-device question the plan's section 4 gate needed and states what it does not establish, but leaves the ten-to-four drop unsplit between the constraint row and the response-kernel port.",
+    "goal_fidelity": "the two named deliverables are both present and complete in docs/evidence/archive/single-grid-solver-cutover-landed.html (sections titan-twenty-edit-stride-sweep, lines 17 to 68).",
+    "scope_discipline": "commit 94e4a099 touches only the nine paths granted by its scope fence, adds without deleting, and keeps all intermediate output under the reports fence; two points held because the record does not note that its evidence clause said nothing would be committed."
+  },
+  "project": "nova",
+  "raw_text": "REVISION: 94e4a0991f0da98cbf6fa7103cad3dcebc71a04b\n\nAnswers to the five fence questions, each recomputed from raw evidence:\n\n1. Titan receipt (job 1275968, revision a3f2429b) against the H200 receipt at the same revision (job 1274510): 20 of 20 edits match on the converged flag, the termination reason and the trip_count, and 20 of 20 also match on the vertical-centroid qualification. The comparison was recomputed cell by cell from the two receipt JSONs, not read from the published table. The maximum boundary displacement is 0.1513229613096163 m on titan against 0.15132296130961653 m on the H200: maximum absolute difference 3.47e-16 m, with 5 of 20 edits differing at about 1e-15 relative. That is round-off-level agreement, not bit-identity.\n2. run() sets constraint_pairs unconditionally at a3f2429b: line 2456 of benchmarks/coil_edit_latency.py is exactly constraint_pairs = (prepared[\"vertical_centroid_pair\"],) and the enclosing run() at line 2410 takes no constraint parameter. git log -S on the line resolves to c920e30d9 as the introducing commit, which is the commit that imposes the vertical current-centre on the coil-edit sweep. The record's configuration caveat is correct: the brief's \"no vertical current-centre constraint\" is unreachable from the driver's command line at that revision.\n3. The banked 10-of-20 receipt at d3849192 (job 1273580) carries no vertical_centroid rows: verified 0 of 20 rows, constraint {} in the case block, converged_edit_count 10.\n4. The measurement-host guard on titan: _require_measurement_host() admits an off-host run only when NOVA_COIL_EDIT_OFF_HOST_PROVENANCE is set AND the resolved platform is gpu, returning before any H200 check; the receipt stamps runtime.off_host_marker with the named reason, beside device Tesla P100-PCIE-16GB and node 98dci4-gpu-0002.iter.org. The adjacent node's control at the banked revision shows the unmarked run refusing (RuntimeError: one H200 is required, got cuda:0), so the guard is not inert \u2014 with the caveat that the control was recorded at d3849192, not at a3f2429b.\n5. Committing docs beyond the report-only fence: the subject's own SCOPE fence explicitly grants docs/evidence/archive/single-grid-solver-cutover-landed.html, docs/figures/single-grid-solver-cutover and docs/plans/single-grid-solver-cutover.html, and commit 94e4a099 touches only paths inside that grant, with nine additions and no deletions, so the commit is within the authority the brief conveyed. The EVIDENCE clause's \"nothing is committed\" contradicts that grant; the record does not note the conflict. Acceptable as the evidence record: yes.\n\nVERDICT goal: read the plan's section 4 and the run manifest; the node delivered the two things asked of it, a same-revision device control for the four-of-twenty sweep and a per-edit comparison against both the H200 and the banked receipt.\nVERDICT done_when: recomputed the twenty-edit comparison from the two raw receipts rather than from the published table; all twenty rows agree on converged flag, termination and trip count, and the banked unconstrained cell carries no vertical_centroid rows as claimed.\nVERDICT write_paths: commit 94e4a099 changes the nine paths its scope fence grants, adds without deleting, and leaves every intermediate receipt and the twenty-row table inside the reports fence.\nVERDICT manifest: read complete, naming commit 94e4a099, the titan job 1275968 with its device, and the four output receipts plus the three-receipt comparison.\nVERDICT diff: the landed HTML appends one section to a cumulative record and the plan gains one s4 comment; both cite receipts whose hashes and revisions were checked against the files.\nVERDICT call_sites: verified the record's two production citations against the tree, the unconditional constraint line inside run() and the off-host admission branch of the guard.\n\nCALL_SITES: benchmarks/coil_edit_latency.py:2456, benchmarks/coil_edit_latency.py:200, benchmarks/coil_edit_latency.py:2410\n\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 18\nSCORE durability: 14\nSCORE fit: 14\n\nJUSTIFICATION goal_fidelity: the two named deliverables are both present and complete in docs/evidence/archive/single-grid-solver-cutover-landed.html (sections titan-twenty-edit-stride-sweep, lines 17 to 68).\nJUSTIFICATION evidence: every table cell recomputes from the raw receipts, but the caption at line 63 describes the raster artifact as line contours with unfilled stationary-point markers while the committed PNG is a filled pcolormesh with axes, ticks and a colorbar.\nJUSTIFICATION scope_discipline: commit 94e4a099 touches only the nine paths granted by its scope fence, adds without deleting, and keeps all intermediate output under the reports fence; two points held because the record does not note that its evidence clause said nothing would be committed.\nJUSTIFICATION durability: the record, both same-revision receipts and all figures are committed in 94e4a099 with a bodied conventional message, and the landed HTML appends one section to a cumulative record; the caption/artifact mismatch and the unstated round-off tolerance are what will not survive a later stricter read.\nJUSTIFICATION fit: the record answers the revision-versus-device question the plan's section 4 gate needed and states what it does not establish, but leaves the ten-to-four drop unsplit between the constraint row and the response-kernel port.\n\nFINDING docs/evidence/archive/single-grid-solver-cutover-landed.html:63 the caption and alt text for titan-terminal-raster-flux.png assert line contours on stated levels with the stationary points marked, but the committed PNG is a filled pcolormesh with a colorbar, axes, ticks and no wall, so the record misdescribes its own published artifact.\nFINDING docs/evidence/archive/single-grid-solver-cutover-landed.html:55 \"agreeing to the last displayed digit\" is true as displayed, but the underlying agreement is round-off level (maximum absolute difference 3.47e-16 m, 5 of 20 edits differing near 1e-15 relative) and the record states no tolerance, so a later reader can take it for bit-identity.\nFINDING docs/evidence/archive/single-grid-solver-cutover-landed.html:59 the published PNG of the paired terminal-state panels clips its suptitle at both edges, so the caption's residual values are partly unreadable in the artifact.\nFINDING docs/figures/single-grid-solver-cutover/titan-coil-edit-latency.png:1 label the figure by artifact path since it carries no text line of its own; its bottom-right panel title is clipped at the right edge (\"persistent hits 1896\"), so the published latency figure loses part of its own annotation.",
+  "review_run_id": "legacy-7aad77efbff3",
+  "review_run_id_source": "derived",
+  "reviewed_revision": "94e4a0991f0da98cbf6fa7103cad3dcebc71a04b",
+  "reviewed_run_id": "r-20260922T153201482175-sgc-sweep-control-at-the-four-of-twenty-revision",
+  "reviewer_node": "review-of-sgc-sweep-control-at-the-four-of-twenty-revision",
+  "reviewing_run_id": "r-20260922T171937739298-review-of-sgc-sweep-control-at-the-four-of-twenty-revision",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 14,
+    "goal_fidelity": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-22T17:48:26.070664+00:00",
+  "total": 80
+}

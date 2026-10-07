@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's classification.json records baseline_suite null and after_suite null, so no base/head gate-log arm exists and the added-failure count was not taken (additional to the read-path recomputation, which derives the same state from the reviewed manifest.md).",
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/h200_test_lane/run.sh:26"
+  ],
+  "commits_read": [
+    "48a40fab18be098a17ea5df6d631c1b153a027f2",
+    "737dfc022af55eceef5b8bc57e78e03a048e2283"
+  ],
+  "completed_at": "2026-10-01T22:40:56.843Z",
+  "dispatched_at": "2026-10-01T22:15:59Z",
+  "findings": [
+    {
+      "file": "scripts/h200_test_lane/run.sh",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "the thin caller carries only the cache_guard emit_header prelude, so it drops two things the reserved-H200 lane contract in AGENTS.md documents (AGENTS.md:396): the cache_guard.sample_gpu_utilisation samples taken at 10, 30 and 60 s with the allocation device inventory (scripts/h200_test_lane/cache_guard.py:242), and the PINNED_REVISION mismatch diagnostic the base caller printed when the served pin was compiled for another revision; the lane still enforces NOVA_CACHE_MISS_BUDGET through the loaded plugin, so only the GPU/device evidence and the pin-revision warning are lost."
+    },
+    {
+      "file": "scripts/nova_lane/run.sh",
+      "line": "334",
+      "severity": "follow-on",
+      "text": "the admission_refused rung fallback is the one done-when element with no measuring log \u2014 only the dry-run prints the sbatch line, so a real submission PENDING on a Resources or Configuration reason falling through to the next rung is implemented but unexercised; the reviewed manifest itself records this under follow_ons, and it is an environment limit here (sbatch/srun are reckon host shims on the worker's node; the reviewed run ran in-place."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read the single commit against base 48a40fab1: it adds scripts/nova_lane/run.sh (341 lines), reduces scripts/h200_test_lane/run.sh to a 34-line thin caller, adds tests/test_nova_lane_launcher.py (70 lines), the evidence fragment and five logs.",
+    "done_when": "the done-when's evidence items are met and logged: bash -n OK (docs/figures/forward-solver-route-integrity/lane-launcher/shell-syntax.log), dry-run one sbatch line per rung plus the --mem=0 refusal at EXIT=2 (dry-run-mem-refusal.log), an in-place CPU-rung run whose header names rung, job id and revision with EXIT_STATUS=0 (cpu-rung-run.log), and 2 passed with a red negative control (pytest-lane-launcher.log, negative-control.log). The real-submission rung fallback is implemented but no log exercises it.",
+    "goal": "the reviewed node's goal is one launcher placing a script or pytest target on the H200, titan or CPU rung under the repository's SLURM rules; scripts/nova_lane/run.sh:61 rung_sbatch_flags encodes each rung and scripts/nova_lane/run.sh:26 names the shared interpreter, so the goal is delivered.",
+    "manifest": "read the reviewed manifest.md; status complete, one commit 737dfc022, launcher tests 2 passed, follow_ons name the unexercised submit path and absent shellcheck; classification.json records baseline_suite null and after_suite null.",
+    "write_paths": "the run's declared paths are scripts/nova_lane, scripts/h200_test_lane/run.sh, tests/test_nova_lane_launcher.py and the two docs paths; git diff --name-status 48a40fab1..737dfc022 lists exactly those nine files, all inside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/test_nova_lane_launcher.py:60 reddens when the scripts/nova_lane/run.sh:235 refusal is neutralised (docs/figures/forward-solver-route-integrity/lane-launcher/negative-control.log, EXIT=1), but only the dry-run lines and the --mem refusal of a longer launcher carry guards.",
+    "evidence": "docs/figures/forward-solver-route-integrity/lane-launcher/dry-run-mem-refusal.log records the per-rung sbatch line and the EXIT=2 refusal and cpu-rung-run.log records the header, but no log exercises a real sbatch submission or the scripts/nova_lane/run.sh:334 rung fallback the done-when names.",
+    "fit": "scripts/nova_lane/run.sh follows the bash idiom of the base scripts/h200_test_lane/run.sh it generalises and introduces no forbidden name.",
+    "goal_fidelity": "scripts/nova_lane/run.sh:53 rung_platforms and scripts/nova_lane/run.sh:61 rung_sbatch_flags supply the rung table the goal names, and scripts/h200_test_lane/run.sh:26 keeps the H200 lane working as a caller.",
+    "scope_discipline": "git diff --name-status base..737dfc022 touches only the declared paths, but scripts/h200_test_lane/run.sh:26 also drops documented lane evidence the goal did not ask to write away."
+  },
+  "limits": [
+    "Read-only review; the reviewed run changes shell launchers, tests and docs only, so no suite and no SLURM job were run.",
+    "The submit path and rung fallback were read, not exercised: the reviewed worker ran inside allocation 1277272 where sbatch/srun are reckon host shims, so no arm of that behaviour exists anywhere on this host.",
+    "The dropped h200-lane evidence was confirmed by reading the base scripts/h200_test_lane/run.sh, the new thin caller, cache_guard.py:242 (sample_gpu_utilisation) and AGENTS.md:396, not by running the lane."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is one launcher placing a script or pytest target on the H200, titan or CPU rung under the repository's SLURM rules; scripts/nova_lane/run.sh:61 rung_sbatch_flags encodes each rung and scripts/nova_lane/run.sh:26 names the shared interpreter, so the goal is delivered.\nVERDICT done_when: the done-when's evidence items are met and logged: bash -n OK (docs/figures/forward-solver-route-integrity/lane-launcher/shell-syntax.log), dry-run one sbatch line per rung plus the --mem=0 refusal at EXIT=2 (dry-run-mem-refusal.log), an in-place CPU-rung run whose header names rung, job id and revision with EXIT_STATUS=0 (cpu-rung-run.log), and 2 passed with a red negative control (pytest-lane-launcher.log, negative-control.log). The real-submission rung fallback is implemented but no log exercises it.\nVERDICT write_paths: the run's declared paths are scripts/nova_lane, scripts/h200_test_lane/run.sh, tests/test_nova_lane_launcher.py and the two docs paths; git diff --name-status 48a40fab1..737dfc022 lists exactly those nine files, all inside the declared scope.\nVERDICT manifest: read the reviewed manifest.md; status complete, one commit 737dfc022, the launcher tests at 2 passed, and its own follow_ons name the unexercised submit path and the absent shellcheck; classification.json records baseline_suite null and after_suite null.\nVERDICT diff: read the single commit against base 48a40fab1: it adds scripts/nova_lane/run.sh (341 lines), reduces scripts/h200_test_lane/run.sh to a 34-line thin caller, adds tests/test_nova_lane_launcher.py (70 lines), the evidence fragment and five logs.\nCALL_SITES: scripts/h200_test_lane/run.sh:26\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scripts/nova_lane/run.sh:53 rung_platforms and scripts/nova_lane/run.sh:61 rung_sbatch_flags supply the rung table the goal names, and scripts/h200_test_lane/run.sh:26 keeps the H200 lane working as a caller.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/figures/forward-solver-route-integrity/lane-launcher/dry-run-mem-refusal.log records the per-rung sbatch line and the EXIT=2 refusal and cpu-rung-run.log records the header, but no log exercises a real sbatch submission or the scripts/nova_lane/run.sh:334 rung fallback the done-when names.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --name-status base..737dfc022 touches only the declared paths, but scripts/h200_test_lane/run.sh:26 also drops documented lane evidence the goal did not ask to remove.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_nova_lane_launcher.py:60 reddens when the scripts/nova_lane/run.sh:235 refusal is neutralised (docs/figures/forward-solver-route-integrity/lane-launcher/negative-control.log, EXIT=1), but only the dry-run lines and the --mem refusal of a longer launcher carry guards.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/nova_lane/run.sh follows the bash idiom of the base scripts/h200_test_lane/run.sh it generalises, reuses the shared interpreter at scripts/nova_lane/run.sh:26, and introduces no forbidden name in scripts, tests or the evidence fragment.\nFINDING scripts/h200_test_lane/run.sh:26 follow-on: the thin caller carries only the cache_guard emit_header prelude, so it drops two things the reserved-H200 lane contract in AGENTS.md documents (AGENTS.md:396): the cache_guard.sample_gpu_utilisation samples taken at 10, 30 and 60 s with the allocation device inventory (scripts/h200_test_lane/cache_guard.py:242), and the PINNED_REVISION mismatch diagnostic the base caller printed when the served pin was compiled for another revision; the lane still enforces NOVA_CACHE_MISS_BUDGET through the loaded plugin, so only the GPU/device evidence and the pin-revision warning are lost.\nFINDING scripts/nova_lane/run.sh:334 follow-on: the admission_refused rung fallback is the one done-when element with no measuring log \u2014 only the dry-run prints the sbatch line, so a real submission PENDING on a Resources or Configuration reason falling through to the next rung is implemented but unexercised; the reviewed manifest itself records this under follow_ons, and it is an environment limit here (sbatch/srun are reckon host shims on the worker's node; the reviewed run ran in-place).",
+  "recommendation": "accept the launcher: scripts/nova_lane/run.sh delivers the goal's rung table, explicit-memory refusal, TMPDIR and env rules and the rung/job/revision header, and the required evidence logs and tests (with a red negative control) are present at 737dfc022. Record two follow-ons rather than repairs: the reserved-H200 thin caller should keep the GPU-utilisation samples and pin-revision warning AGENTS.md documents, and a separately dispatched node should exercise one real sbatch submission and the rung fallback.",
+  "review_run_id": "r-20261001T221541046754-review-of-fsri-one-nova-lane-launcher",
+  "reviewed_base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+  "reviewed_head_sha": "737dfc022af55eceef5b8bc57e78e03a048e2283",
+  "reviewed_run_id": "r-20261001T211450582325-fsri-one-nova-lane-launcher",
+  "reviewing_run_id": "r-20261001T221541046754-review-of-fsri-one-nova-lane-launcher",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-01T22:35:43.133071+00:00",
+  "total": 87
+}

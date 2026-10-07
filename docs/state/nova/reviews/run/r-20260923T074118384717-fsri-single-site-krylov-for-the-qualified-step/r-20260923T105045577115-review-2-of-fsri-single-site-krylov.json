@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/equilibrium/fixed_point.py:2833",
+    "nova/equilibrium/fixed_point.py:2875",
+    "nova/equilibrium/fixed_point.py:3455",
+    "nova/equilibrium/fixed_point.py:4781",
+    "nova/equilibrium/fixed_point.py:4875"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T10:50:45.577115+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png",
+      "line": "1",
+      "text": "the reviewed worktree leaves this figure and its .svg modified and uncommitted outside the declared fence, so a reader cannot tell whether the change intends them."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read af995f0c..044ac480 against 52bfefc0; the source change replaces the separate gmres and Arnoldi sites with one scan body, the review-fix pass then removes the nine private jax._src imports at fixed_point.py:51 and rebuilds the",
+    "done_when": "the section gate is four certificate terminal states bit-identical and a stream instruction count at or below the interim's 203,078 / 204,531; the census measures 284,792 / 287,117, above both ceilings, and the real-operator",
+    "goal": "read the node goal (one operator call site for _qualified_krylov_step served from a lax.scan request stream) against nova/equilibrium/fixed_point.py:2148 (_single_site_krylov) and the census receipt; the landed change serves every",
+    "manifest": "read; it carries the 15 shas, every changed path, the census and suite receipts, the negative control (per_site.install rebinding the base body, its log repeating the mutation on line 1 and refusing at 11 == 1), and the",
+    "write_paths": "read the reviewed manifest's fence and the diff 52bfefc0..044ac480 commit by commit; the commits touch nova/equilibrium/fixed_point.py, tests/test_single_site_krylov.py (the coordinator-requested scope extension) and"
+  },
+  "justifications": {
+    "durability": "tests/test_single_site_krylov.py:62 counts the operator's contraction in the traced jaxpr and asserts exactly one site, and rebinding the base per-site body reddens it (single-site-test-mutated.log, assert 11 == 1), so",
+    "evidence": "qualified-step.json carries a same-job per-site control (302,550 vs the recorded base 302,553) and single-site-test-mutated.log repeats the declared mutation and refuses at 11 == 1, but the section gate the done_when names",
+    "fit": "the helpers at nova/equilibrium/fixed_point.py:2063 mirror jax.scipy.sparse.linalg's operation order on public jax APIs, and the change carries no name the repository naming rules forbid.",
+    "goal_fidelity": "nova/equilibrium/fixed_point.py:2148 serves every operator application of the qualified step from one scan slot and qualified-step.json records the live-map sites falling 3 to 1.",
+    "scope_discipline": "the committed diff 52bfefc0..044ac480 stays inside the declared fence and the coordinator-requested test path, but two figures under docs/figures/gs-absolute-accuracy are left modified and uncommitted outside it."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the node goal (one operator call site for _qualified_krylov_step served from a lax.scan request stream) against nova/equilibrium/fixed_point.py:2148 (_single_site_krylov) and the census receipt; the landed change serves every\noperator application of the qualified step from one scan slot and qualified-step.json records the qualified step's live-map sites falling 3 (13,165 instructions) to 1 (2,696), so the goal is delivered.\nVERDICT done_when: the section gate is four certificate terminal states bit-identical and a stream instruction count at or below the interim's 203,078 / 204,531; the census measures 284,792 / 287,117, above both ceilings, and the real-operator\nterminal moves 55,355 ulps, so the gate the worker reports does not meet the done_when; the worker disclosed both rather than claiming closure, and the lead accepted a per-slice re-base (main b1940ff25).\nVERDICT write_paths: read the reviewed manifest's fence and the diff 52bfefc0..044ac480 commit by commit; the commits touch nova/equilibrium/fixed_point.py, tests/test_single_site_krylov.py (the coordinator-requested scope extension) and\ndocs/plans, docs/evidence/archive and docs/figures/forward-solver-route-integrity, but docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png and its .svg are left modified and uncommitted in the reviewed\nworktree, outside the fence.\nVERDICT manifest: read; it carries the 15 shas, every changed path, the census and suite receipts, the negative control (per_site.install rebinding the base body, its log repeating the mutation on line 1 and refusing at 11 == 1), and the\nreduced-Newton four-failure result stated as no failure added.\nVERDICT diff: read af995f0c..044ac480 against 52bfefc0; the source change replaces the separate gmres and Arnoldi sites with one scan body, the review-fix pass then removes the nine private jax._src imports at fixed_point.py:51 and rebuilds the\nhelpers on public jax APIs, adds tests/test_single_site_krylov.py, and corrects the evidence record; the site-count test fails at 11 != 1 under the rebound base body.\nCALL_SITES: nova/equilibrium/fixed_point.py:2833, nova/equilibrium/fixed_point.py:2875, nova/equilibrium/fixed_point.py:3455, nova/equilibrium/fixed_point.py:4781, nova/equilibrium/fixed_point.py:4875\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/fixed_point.py:2148 serves every operator application of the qualified step from one scan slot and qualified-step.json records the live-map sites falling 3 to 1.\nSCORE evidence: 16\nJUSTIFICATION evidence: qualified-step.json carries a same-job per-site control (302,550 vs the recorded base 302,553) and single-site-test-mutated.log repeats the declared mutation and refuses at 11 == 1, but the section gate the done_when names\nis not met (284,792 above 203,078) and was disclosed rather than claimed.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: the committed diff 52bfefc0..044ac480 stays inside the declared fence and the coordinator-requested test path, but two figures under docs/figures/gs-absolute-accuracy are left modified and uncommitted outside it.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_single_site_krylov.py:62 counts the operator's contraction in the traced jaxpr and asserts exactly one site, and rebinding the base per-site body reddens it (single-site-test-mutated.log, assert 11 == 1), so\nthe guard fails on the regression it names.\nSCORE fit: 17\nJUSTIFICATION fit: the helpers at nova/equilibrium/fixed_point.py:2063 mirror jax.scipy.sparse.linalg's operation order on public jax APIs, and the change carries no name the repository naming rules forbid.\nFINDING docs/figures/gs-absolute-accuracy/solovev/diverted-single-null-production-route-cells-300.png:1 the reviewed worktree leaves this figure and its .svg modified and uncommitted outside the declared fence, so a reader cannot tell whether the change intends them.\nreviewed_base_sha: 52bfefc0a0f02412d8910aaccb632bfbd9fd43b5\nreviewed_head_sha: 044ac4805208bc1907ece68d9786337668228f88\n",
+  "review_run_id": "r-20260923T105045577115-review-2-of-fsri-single-site-krylov",
+  "reviewed_base_sha": "52bfefc0a0f02412d8910aaccb632bfbd9fd43b5",
+  "reviewed_head_sha": "044ac4805208bc1907ece68d9786337668228f88",
+  "reviewed_run_id": "r-20260923T074118384717-fsri-single-site-krylov-for-the-qualified-step",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260923T105045577115-review-2-of-fsri-single-site-krylov",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T11:01:02.072493+00:00",
+  "total": 83
+}

@@ -1,0 +1,118 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:23:15.374Z",
+  "dispatched_at": "2026-10-06T01:18:33Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/constraint.py:1281",
+      "id": "reuse_search-1",
+      "reason": "the node's stated scope is materially larger than the work that remains, and the brief should cite `_flux_jacobian_image` and the `ConstraintFunctional` Protocol as the mechanism it extends rather than propose to introduce one.",
+      "text": "\u00a74 `replan-constraint-algebra` says \"five identical `dual_flux_image` methods \u2026 share one tested implementation\", but all five already do: `FluxLevelConstraint` (constraint.py:1067), `IsofluxConstraint` (:1360), `XPointConstraint` (:1408), `FieldComponentConstraint` (:1484) and `WallGapConstraint` (:1546) each `return _flux_jacobian_image(self, profile, context, payload)`. The residual/dual interface is likewise already declared by the `ConstraintFunctional` Protocol (constraint.py:128). The plan cites neither, so it reads as if the dual side is greenfield when most of it is done; only the `CurrentCentroidConstraint` (:980) and `ExternalShafranovConstraint` (:1656) inline-`jax.jacrev` duals and the seven `residual` bodies remain.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/machine_evidence.py:64",
+      "id": "thin_wrapper-1",
+      "reason": "a sibling helper per call-site group forks the owner and adds interface surface; the honest change is usually to extend `require_string`/`canonical_json`, and the plan must say why it cannot.",
+      "text": "\u00a74 `replan-small-primitives` proposes \"one trimmed-string check beside `require_string`\" and \"one canonical digest beside `canonical_json`\". Both owners live in `nova/imas/machine_evidence.py` (`require_string` :64, `canonical_json` :33) and the plan places the new functions beside them without stating why the owners cannot be extended (a trim policy argument on `require_string`; a digest-algorithm parameter on `canonical_json`).",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py:209",
+      "id": "duplicate_owner-1",
+      "reason": "a forked resolver drifts from the owner; the node should extend `nova/database/filepath.py` and the done-when should grep for literals against that module.",
+      "text": "\u00a75 `replan-gpfs-data-root` proposes \"one data-root resolver replaces them\", but `nova/database/filepath.py` already owns path resolution: `FilePath.__post_init__`/`_resolve_absolute` (:209)/`_resolve_relative` (:231) and the module-level `repository_relative` (:62) resolve data roots and repo-relative forms. The plan names no owner, so the resolver risk is a second, parallel one.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py:62",
+      "id": "duplicate_owner-2",
+      "reason": "same owner as the data-root node; extending `repository_relative` once serves both `replan-gpfs-data-root` and this node, and naming it stops the two nodes from growing two resolvers.",
+      "text": "\u00a75 `replan-evidence-tooling-paths` proposes \"one resolver with repo-relative receipt paths\" for `benchmarks/` and `scripts/`, but `repository_relative` (filepath.py:62) already produces repo-relative paths. The plan does not name it as the owner to extend (e.g. a crew/receipt-root sibling of it).",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/db_entry.py:15",
+      "id": "duplicate_owner-3",
+      "reason": "the node should route the 15 call sites through the existing `nova/imas/db_entry.py` opener (or state why its policy cannot be extended there), not build a parallel opener.",
+      "text": "\u00a75 `replan-dbentry-constructor` proposes \"one owned opener\" for 15 `imas.DBEntry` call sites, but an owned opener already exists: `class DBEntry(imas.DBEntry)` (nova/imas/db_entry.py:15) carries the `dd_version`/`xml_path` policy, and `nova/imas/dataset.py:729` exposes a `DBEntry` accessor. The plan names neither.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova-portfolio-replan#replan-small-primitives",
+      "id": "interface_budget-1",
+      "reason": "the section must account for its added interface surface; for `replan-small-primitives` in particular the \"beside\" phrasing points at extension of the existing owners instead.",
+      "text": "with public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 this week, `replan-small-primitives` (uniform-axis validator, read-only array constructor, atomic receipt writer, trimmed-string check, canonical digest \u2014 five new public definitions) and `replan-hot-module-contracts` (contract tests and validators) add to the public-definition family without naming, in their own text, what they retire or merge, or why nothing can be.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f32efea4e7edc8e3c2e055a6425909d1e1cbf7c4f3d4cfa23461cfe4061d48db",
+  "plan_slug": "nova-portfolio-replan",
+  "plan_version": 22,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:41.211331+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:41.882211+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:42.523790+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:43.456372+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:40.047026+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:40.685080+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T011821466993-plan-review-of-nova-portfolio-replan",
+  "reviewed_blob_sha": "662f2cfbb87a4a561416111ee8466b2b89e3ef4d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan's consolidations reduce surface (seven duplicated `residual`/five `dual_flux_image` bodies and the hard-coded path literals retire into one implementation each) rather than spreading complexity across a spread of new wrappers.",
+    "duplicate_owner": "a finding \u2014 three \u00a75 nodes propose new resolvers/openers without naming the owners to extend: `nova/database/filepath.py` (path resolution, repo-relative paths) and `nova/imas/db_entry.py` (DBEntry policy).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; `replan-small-primitives` and `replan-hot-module-contracts` add public definitions without naming what they retire or merge, or why nothing can be.",
+    "reuse_search": "a finding \u2014 \u00a74 `replan-constraint-algebra` proposes one shared implementation for five `dual_flux_image` bodies that already delegate to `_flux_jacobian_image` (nova/equilibrium/constraint.py:1281), and the residual/dual interface is already fixed by the `ConstraintFunctional` Protocol (constraint.py:128), neither of which the plan cites.",
+    "thin_wrapper": "a finding \u2014 \u00a74 `replan-small-primitives` adds a trimmed-string check \"beside\" `require_string` and a canonical digest \"beside\" `canonical_json` without saying why those owners cannot be extended to carry the new behaviour."
+  },
+  "section_digests": {
+    "_document": "66b6a2c452b286f325830c1fe68e3648c5518b6e2725714a7c6086b682b87376",
+    "s1": "58ad1730dc7612f2dc456bf4599af55a71ceb55e5ed306ccf2229dd7bc011ac6",
+    "s2": "7b91ed2a58ab9aaae272d528c052c40f54ca4422ec97d9111051a88840cdbc66",
+    "s3": "69f113368c428a995aa7d308edeff811c658d2946119c0ee44e68f1e414847d0",
+    "s4": "75080dbfa702a52b0169e07a361b59918d20f29acda6010388acd446feab60bb",
+    "s5": "83aa1bd165a42794b25be0c81a0b6937d8e88d520e05f58b537fcfb2a0fd4956"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:23:59.999872+00:00"
+}

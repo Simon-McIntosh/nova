@@ -1,0 +1,120 @@
+{
+  "absent": [
+    "Complete inventory in the report of callers whose centroid values change"
+  ],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest's baseline_suite completed at 3c026a1562263e24be178eb34e1e56d76929d4e6 with failure_ids=[] and its after_suite completed at aa60b1f4999c6529dff20fcc947b89bc2740eed9 with failure_ids=[]. Set difference after minus baseline is [], count 0. The baseline ran only test_forward_constraints.py; the after arm also ran the new test file, so this is the recorded gate delta rather than a full-suite claim.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-first-moment-centroid-row.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/baseline-scratch.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/after-caller-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/negative-control-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T120047647655-review-of-cco-first-moment-centroid-row/review-check.log"
+  ],
+  "call_site_count": 13,
+  "call_sites": [
+    "nova/equilibrium/constraint.py:1623",
+    "nova/equilibrium/forward.py:1285",
+    "nova/equilibrium/forward.py:1352",
+    "scripts/labeller_batch/shard.py:607",
+    "benchmarks/batched_labeller_receipt.py:340",
+    "benchmarks/centroid_radius_attribution.py:183",
+    "benchmarks/playable_keyframe_receipt.py:378",
+    "benchmarks/reversed_current_guard_diagnosis.py:465",
+    "benchmarks/shafranov_combination_discriminator.py:560",
+    "tests/test_observation_kernels.py:207",
+    "tests/test_labeller_parallel.py:34",
+    "tests/test_batched_labeller.py:116",
+    "tests/test_steering_frames.py:1040"
+  ],
+  "commits_read": [
+    "327cb34cb018608fd9b562073f6a39753b0a646a",
+    "e7355c0ba90fd500491f6806c4c778f9088dd801",
+    "220e6d51b8f1df7ac5d6c3693dfc91f16bbe143d",
+    "aa60b1f4999c6529dff20fcc947b89bc2740eed9"
+  ],
+  "completed_at": "2026-10-03T12:12:34Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T12:01:08Z",
+  "evidence_inputs": "Reviewed 3c026a1562263e24be178eb34e1e56d76929d4e6..aa60b1f4999c6529dff20fcc947b89bc2740eed9. Library and benchmark first-moment formulas match exactly on an independent two-cell control; confined centroid gradient is [1.0,0.0], review-check EXIT=0. Worker gate: baseline 2 passed, head 5 passed, added failures 0; cell-centre mutation 1 failed as intended. Analytic 135-cell radial offset changes from -6.169608 mm to -0.077375 mm. Verdict fail because report line 17 omits active changed-value callers, including ExternalShafranovConstraint and labeller batch export. Amend that report before promotion; no solver rerun was part of this review.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-first-moment-centroid-row.md",
+      "line": "17",
+      "severity": "blocking",
+      "text": "The caller-impact paragraph presents a direct-caller list but omits active consumers of changed centroid_r/centroid_z. In particular, nova/equilibrium/constraint.py:1623 samples the Shafranov external field at that centroid, scripts/labeller_batch/shard.py:607 exports both coordinates, and benchmarks/batched_labeller_receipt.py:340 reads the free centroid. Also omitted are centroid_radius_attribution.py, playable_keyframe_receipt.py, reversed_current_guard_diagnosis.py, shafranov_combination_discriminator.py and active observation/labeller/steering tests. Enumerate these and the forward.current_moment_map/typed-pin paths, distinguishing readers of plasma_current alone or stub observations whose values stay fixed. The exact caller-impact criterion is unmet until the report is amended."
+    },
+    {
+      "file": "scripts/analytic_oracle_fixtures/centroid_row.py",
+      "line": "112",
+      "severity": "follow-on",
+      "text": "The new builder accepts requested_class and passes it into ConstraintContext, but CurrentCentroidConstraint.observed currently forwards only target_current to current_moment_observation. Thus requested_class does not affect the analytic observation or the runtime row. The reviewed 135-cell case still passes; document or repair this interface separately if a classed state must be admitted by this row."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "The declared 3c026a15..aa60b1f4 diff changes five files and passes git diff --check. The reviewed worktree is clean at aa60b1f4. The review worktree is read-only at 8b149152.",
+    "done_when": "At the 135-cell exact-clip analytic state the worker records a 6.169608 mm cell-centre offset and a 0.077375 mm first-moment offset, recovering 98.75%; the final focused gate passed 5 tests. The report's impact list omits the Shafranov row, labeller batch writer, and several benchmark and test readers, so one explicit criterion remains unmet.",
+    "goal": "The library and certificate pair implement the first-moment row and analytic-state tolerance, but the required caller-impact report omits several active readers of the changed centroid.",
+    "manifest": "The reviewed run's complete manifest names four commits, all five source/test paths and its report, completed baseline and after suite arms, the failing mutation log, and a constrained-solve follow-on.",
+    "source": "The library recovery multiplies coupled moments by the same [radial, vertical, cross] second-moment matrix as benchmarks/plasma_cell_map_fidelity.py; ForwardProfile applies both moments and masks them with confined support. JAX differentiates the resulting masked centroid.",
+    "write_paths": "Five repository paths changed within the implementation scope; the external report is in its granted path. The review writes only its two granted JSON records."
+  },
+  "justifications": {
+    "durability": "All implementation paths are committed, the report and run manifest are durable, and the gate logs carry revisions, commands, summaries and exit codes. The impact map in the report is incomplete and needs a scoped amendment.",
+    "evidence": "The reviewed baseline log completed with 2 passed, the final head log with 5 passed, and the cell-centre mutation failed the analytic tolerance test by 0.006169608068965715 m. An independent control at the reviewed head found exact equality with the benchmark recovery for two cells and JAX gradient [1.0, 0.0] through the confined centroid. This confirms the moved formula and a nonzero tangent without asserting a rerun of the full exact-clip fixture.",
+    "fit": "The selected first-moment definition and analytic residual tolerance follow the live plan's \u00a72 decision. The incomplete impact map hides changes to another production constraint row and to exported labeller centroids, so the deliverable does not yet meet the plan's communication requirement.",
+    "goal_fidelity": "The observed current centroid includes within-cell terms and the active certificate builder binds the analytic residual as its tolerance. The report omits active readers despite the node's explicit requirement to list every affected caller.",
+    "scope_discipline": "The declared implementation commits touch only observation.py, forward.py, centroid_row.py, the certificate benchmark, and the focused test; the report is at its granted path. The review did not alter the read-only worktree."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 3c026a1562263e24be178eb34e1e56d76929d4e6\nREVIEWED_HEAD_SHA: aa60b1f4999c6529dff20fcc947b89bc2740eed9\nVERDICT: fail; caller-impact report omits active changed-value readers.\nSCORE goal_fidelity: 16\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 15\nADDED_FAILURES: 0, from completed baseline [] and after [] suite arms.",
+  "review_base_sha": "8b149152abd28de233465cc189c9f2ae0fc5defb",
+  "review_run_id": "r-20261003T120047647655-review-of-cco-first-moment-centroid-row",
+  "reviewed_after_suite": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/after-caller-head.log",
+    "revision": "aa60b1f4999c6529dff20fcc947b89bc2740eed9"
+  },
+  "reviewed_base_sha": "3c026a1562263e24be178eb34e1e56d76929d4e6",
+  "reviewed_baseline_suite": {
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T105738891003-cco-first-moment-centroid-row/baseline-scratch.log",
+    "revision": "3c026a1562263e24be178eb34e1e56d76929d4e6"
+  },
+  "reviewed_commit": "aa60b1f4999c6529dff20fcc947b89bc2740eed9",
+  "reviewed_head_sha": "aa60b1f4999c6529dff20fcc947b89bc2740eed9",
+  "reviewed_revision": "aa60b1f4999c6529dff20fcc947b89bc2740eed9",
+  "reviewed_run_id": "r-20261003T105738891003-cco-first-moment-centroid-row",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-first-moment-centroid-row",
+  "reviewer_node": "review-of-cco-first-moment-centroid-row",
+  "reviewer_run_id": "r-20261003T120047647655-review-of-cco-first-moment-centroid-row",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T12:08:08Z",
+  "total": 87,
+  "verdict": "fail"
+}

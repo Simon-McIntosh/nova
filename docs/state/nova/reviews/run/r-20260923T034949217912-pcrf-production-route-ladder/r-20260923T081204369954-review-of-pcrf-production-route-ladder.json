@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:ForwardOperator.support_current_moments",
+    "nova/equilibrium/forward_operator.py:_cell_banked_current_moments",
+    "nova/equilibrium/fixed_point.py:_active_set_newton_krylov",
+    "nova/media/ink.py:poloidal_axes"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T08:12:04.369954+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/plasma_cell_production_ladder.py",
+      "line": "622",
+      "text": "the transition selection takes the first pair in REVISIONS order, which lists the ladder oldest to newest, so a ladder carrying two or more transitions would report the oldest one, and the plan asks for the first rung reached scanning from main backwards, which is the newest such pair; the attribution fixture control holds a single transition and this receipt holds none, so neither exercises the direction and the field's one job \u2014 naming the transition rung \u2014 is untested in the direction the goal uses it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit by commit against e2edd8775bff; 17 commits add the 1170-line driver, 20 per-rung receipts, two execution receipts, the assembled ladder JSON, the PNG with its SVG, one plan div and one landed-record section, and no file outside benchmarks/ is source, so the certificate route is measured rather than substituted.",
+    "done_when": "the done-when has three clauses; the chord negative control is recorded and unconverged at docs/figures/exact-mode-production-ladder/f5af729a9-diverted-single-null-chord.json (residual 0.49574731595435056) and its reactor companion (0.05245103919634117), and every unbuilt arm carries its exception text (ten not-built rows), while the first clause is met by neither branch \u2014 the receipt names no rung and does not state the ladder is one way.",
+    "goal": "the node's goal is to name the operator landing at which the certificate production route in exact clip mode stopped converging at the reduced rung, and benchmarks/plasma_cell_production_ladder.py:585 implements the transition scan while docs/figures/exact-mode-production-ladder/production-route-ladder.json records \"not-attributed: decisive older arms are unavailable to this driver\", so the harness is delivered and the named landing is absent, on an explicitly authorized partial closure rather than a self-granted one.",
+    "manifest": "read; it records the 22-arm accounting, 46 trip-health samples, the two validator results and the scratch cleanup, and I reproduced both validator exits and cross-checked all 20 per-rung receipt files against the assembled rows, with zero mismatches in terminal residual, trip count, convergence flag and raw status.",
+    "write_paths": "the manifest declares six write paths and all 36 files in e2edd8775bff..f4d0e532a lie inside them, and the diff is insertions only, so docs/plans/plasma-cell-read-fidelity.html and docs/evidence/archive/plasma-cell-read-fidelity-landed.html were appended rather than rewritten."
+  },
+  "justifications": {
+    "durability": "two in-code guards redden on regression \u2014 the non-finite counter's positive control at benchmarks/plasma_cell_production_ladder.py:147 and the trip-observation marker assertion at benchmarks/plasma_cell_production_ladder.py:116 \u2014 while the validator predicates carry no committed test and are exercised only by inline control scripts whose logs live under the run report directory.",
+    "evidence": "benchmarks/plasma_cell_production_ladder.py:1151 shows the pass the manifest records is validate --partial, a completeness predicate over the 22-arm census, while the same receipt refuses the full-ladder validator, so the recorded result is a weaker measure than the done-when and both exits reproduce.",
+    "fit": "the module follows the repository benchmark idiom (argparse subcommands at benchmarks/plasma_cell_production_ladder.py:1124, atomic write_json at :58, ruff check and format clean) and names no plan or ticket label, with failure_stage at :904 describing the receipt that failed rather than where it came from.",
+    "goal_fidelity": "the driver at benchmarks/plasma_cell_production_ladder.py:585 computes the transition scan and its receipt records no attribution, which is the honest reading of an unreachable older ladder but is not the named landing the dispatch GOAL line states.",
+    "scope_discipline": "every path in e2edd8775bff..f4d0e532a is inside the six declared write paths (git diff --shortstat reads 36 files, 28360 insertions, 0 deletions) and the plan append states and honours that it changes no section or followup status."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to name the operator landing at which the certificate production route in exact clip mode stopped converging at the reduced rung, and benchmarks/plasma_cell_production_ladder.py:585 implements the transition scan while docs/figures/exact-mode-production-ladder/production-route-ladder.json records \"not-attributed: decisive older arms are unavailable to this driver\", so the harness is delivered and the named landing is absent, on an explicitly authorized partial closure rather than a self-granted one.\nVERDICT done_when: the done-when has three clauses; the chord negative control is recorded and unconverged at docs/figures/exact-mode-production-ladder/f5af729a9-diverted-single-null-chord.json (residual 0.49574731595435056) and its reactor companion (0.05245103919634117), and every unbuilt arm carries its exception text (ten not-built rows), while the first clause is met by neither branch \u2014 the receipt names no rung and does not state the ladder is one way.\nVERDICT write_paths: the manifest declares six write paths and all 36 files in e2edd8775bff..f4d0e532a lie inside them, and the diff is insertions only, so docs/plans/plasma-cell-read-fidelity.html and docs/evidence/archive/plasma-cell-read-fidelity-landed.html were appended rather than rewritten.\nVERDICT manifest: read; it records the 22-arm accounting, 46 trip-health samples, the two validator results and the scratch cleanup, and I reproduced both validator exits and cross-checked all 20 per-rung receipt files against the assembled rows, with zero mismatches in terminal residual, trip count, convergence flag and raw status.\nVERDICT diff: read commit by commit against e2edd8775bff; 17 commits add the 1170-line driver, 20 per-rung receipts, two execution receipts, the assembled ladder JSON, the PNG with its SVG, one plan div and one landed-record section, and no file outside benchmarks/ is source, so the certificate route is measured rather than substituted.\nCALL_SITES: nova/equilibrium/forward_operator.py:ForwardOperator.support_current_moments, nova/equilibrium/forward_operator.py:_cell_banked_current_moments, nova/equilibrium/fixed_point.py:_active_set_newton_krylov, nova/media/ink.py:poloidal_axes\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: the driver at benchmarks/plasma_cell_production_ladder.py:585 computes the transition scan and its receipt records no attribution, which is the honest reading of an unreachable older ladder but is not the named landing the dispatch GOAL line states.\nSCORE evidence: 15\nJUSTIFICATION evidence: benchmarks/plasma_cell_production_ladder.py:1151 shows the pass the manifest records is validate --partial, a completeness predicate over the 22-arm census, while the same receipt refuses the full-ladder validator, so the recorded result is a weaker measure than the done-when and both exits reproduce.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in e2edd8775bff..f4d0e532a is inside the six declared write paths (git diff --shortstat reads 36 files, 28360 insertions, 0 deletions) and the plan append states and honours that it changes no section or followup status.\nSCORE durability: 14\nJUSTIFICATION durability: two in-code guards redden on regression \u2014 the non-finite counter's positive control at benchmarks/plasma_cell_production_ladder.py:147 and the trip-observation marker assertion at benchmarks/plasma_cell_production_ladder.py:116 \u2014 while the validator predicates carry no committed test and are exercised only by inline control scripts whose logs live under the run report directory.\nSCORE fit: 18\nJUSTIFICATION fit: the module follows the repository benchmark idiom (argparse subcommands at benchmarks/plasma_cell_production_ladder.py:1124, atomic write_json at :58, ruff check and format clean) and names no plan or ticket label, with failure_stage at :904 describing the receipt that failed rather than where it came from.\nFINDING benchmarks/plasma_cell_production_ladder.py:622 the transition selection takes the first pair in REVISIONS order, which lists the ladder oldest to newest, so a ladder carrying two or more transitions would report the oldest one, and the plan asks for the first rung reached scanning from main backwards, which is the newest such pair; the attribution fixture control holds a single transition and this receipt holds none, so neither exercises the direction and the field's one job \u2014 naming the transition rung \u2014 is untested in the direction the goal uses it.",
+  "review_run_id": "r-20260923T081204369954-review-of-pcrf-production-route-ladder",
+  "reviewed_base_sha": "e2edd8775bff1f89d6ed2d9cd76153d39f440ec2",
+  "reviewed_head_sha": "f4d0e532a5f3c82852bd7c0b093f89d37e55fe77",
+  "reviewed_run_id": "r-20260923T034949217912-pcrf-production-route-ladder",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260923T081204369954-review-of-pcrf-production-route-ladder",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T09:35:14.553985+00:00",
+  "total": 79
+}

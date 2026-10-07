@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T22:52:27.334Z",
+  "dispatched_at": "2026-10-05T22:48:54Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/observation.py:295",
+      "id": "duplicate_owner-1",
+      "reason": "the author must add one ruling stating whether current.book subsumes observe_current_moments or why both remain (and name observation.py as retained or retired), otherwise the \u00a76 import census has no rule to test the moment authority against and a duplicated moment path survives the retirement.",
+      "text": "\u00a74's moment-map-derivative ruling names forward.py:1239-1302 as the owner moved into gs.apply, but observe_current_moments (observation.py:295) independently produces the same net-current and centroid from cell_current, and MomentIntegralSupport (observation.py:81) selects its core support; the design doc's destination for that row reads \"current.book supplies the same moments and support receipt; retain observation formulae\", which leaves two live producers of one set of current moments and no single named authority in the \u00a73/\u00a74/\u00a76 text",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e0fa31b9c96e7fcf5656dcb1664b4eddb9edebd0f927d53fbd0c4b88d059600c",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 43,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T22:54:25.843647+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T224841940350-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "b2d142a572c17f527ebabaab38dfb33ac78450e1",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design puts one substantial function per module behind an interface far smaller than what it hides: topology.read collapses ~40 null/region authorities and an existing thin wrapper (Topology.read at topology.py:1396 already delegates to read_with_connectivity) into one module; solve.fixed_point hides Newton-GMRES, the line search and the per-step history behind one lax.scan call site; gs.apply hides the composed read-book-map and its three derivatives. This is consolidation of a 54,102-line sprawl into four deep modules, not a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a74 declares gs.apply the single owner of the current-moment map and moves the derivative off forward.py, but nova/equilibrium/observation.py:295 (observe_current_moments) is a second producer of the same net+centroid moments, and the plan's \u00a73/\u00a74 prose never names its fate; the design doc's inventory binds it only loosely (\"current.book supplies the same moments ... retain observation formulae\").",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the sections that add surface account for it in the plan's own text \u2014 \u00a76's Retirement paragraph and the request-surface ruling name SolveRoute collapsing from six literal members (nova/equilibrium/solve_request.py:27-34) to the one solve, SupportClipMode collapsing from three (\"chord\", \"exact\", \"chord_cells\") to the exact clip, the eight plumbing fields (active_set_steps, settled_exit, stagnation_stop, best_iterate_retention, continuation, own_mask_acceptance, warmup, step_cap) leaving ForwardSolvePolicy, and ~11 modules deleted; the two added policy operands (TopologyPolicy, SolvePolicy) are stated as carried by the existing ForwardSolvePolicy \"extended rather than duplicated\", so the three new modules and three functions net against a larger retirement rather than adding unaccounted surface.",
+    "reuse_search": "pass \u2014 the plan runs an unfailable reuse map rather than asserting one: \u00a71's design inventory binds 17 null-finding and 23 region-finding implementations to a destination each, and the plan carries eight cite-or-justify rulings that name exact symbols in exact files (topology.Topology.read/read_with_connectivity at nova/equilibrium/topology.py:1396/1376; ForwardFluxOperator.read/read_census/read_with_current_moments at nova/equilibrium/forward_operator.py:3166/1600/3191; the single-site GMRES kernel at fixed_point.py:2216/2371/2394/2619 and the backtracking helpers at fixed_point.py:1147/1270/1333; contour_tree.build_contour_tree at nova/equilibrium/contour_tree.py:384 and contour_tree_mesh.build_contour_mesh at contour_tree_mesh.py:193; polygon_moments.polygon_monomial_moments at nova/equilibrium/polygon_moments.py:141; the reduced-Newton step helpers at reduced_newton.py:970/976/990/767 and linearized_constraint_response_matrix at reduced_newton.py:2513; the clip helpers at clip_quadrature.py:415/714; the moment-map derivative at forward.py:1239/1276/1292). I opened each and confirmed the symbol exists at the cited module; the ruling that withdraws nova/biot/null.py as a null candidate (mesh-flux stitchers, not kernel derivatives) is correct on the file.",
+    "thin_wrapper": "pass \u2014 the new modules replace rather than wrap: \u00a76 states gs.apply \"replaces the map ForwardFluxOperator performs today rather than wrapping it\", topology.read replaces Topology.read in place, and the regrown forward.py is justified in its own text as the consumer-facing request/receipt seam over ForwardProfile.operator, with the moment-map derivative moved out (\"keeps no copy\"). No proposed layer lacks its extend-vs-replace justification."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T22:54:25.098720+00:00"
+}

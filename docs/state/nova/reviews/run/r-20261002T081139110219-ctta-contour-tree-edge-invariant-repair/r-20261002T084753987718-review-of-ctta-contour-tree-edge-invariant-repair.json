@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Completed baseline 878018cd has the certificate comparator failure; completed after arm 86fe582f has no failures, so added_failure_count is zero. The reviewed head has unchanged source/tests and independently passes 25 tests.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084753987718-review-of-ctta-contour-tree-edge-invariant-repair/reviewed-head-four-tests-xdist.log: 25 passed, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084753987718-review-of-ctta-contour-tree-edge-invariant-repair/reviewed-head-diverted-comparator.log: 13 nodes, 12 edges, 140 levels, zero mismatches, EXIT=0"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "86fe582f3185b861150c5fc63d64e155a2085161",
+    "a4d82e3c2c0b3a2af469225b37dda43718925f5b",
+    "7f8f9770811cfcbfa81750083e80c38f3050825f"
+  ],
+  "completed_at": "2026-10-02T09:05:28Z",
+  "dispatched_at": "2026-10-02T08:48:12Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "312",
+      "severity": "follow-on",
+      "text": "follow-on: synthetic padded virtual slot is emitted as a minimum despite documentation that the virtual outside node is not emitted as a DD critical point; add downstream/DD mapping coverage."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/edge-invariant-repair/baseline-brute-force.log",
+      "line": "15",
+      "severity": "follow-on",
+      "text": "follow-on: git diff --check reports trailing whitespace at lines 15, 21, 22, and 31."
+    },
+    {
+      "file": "docs/evidence/fragments/contour-tree-topology-authority/ctta-contour-tree-edge-invariant-repair.html",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: persistence and primary selection must quantify absorption of the extra piecewise-linear extrema."
+    }
+  ],
+  "gate_arms_note": "Baseline 878018cd: 1 failed, EXIT=1. After 86fe582f: 25 passed, EXIT=0. Independent reviewed head 7f8f9770: 25 passed in 106.41s, EXIT=0.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call site is added.",
+    "diff": "The source repair is concentrated in contour_tree.py with a focused regression test and evidence receipts.",
+    "done_when": "The named gate and independent comparator succeeded at the reviewed source.",
+    "goal": "The recorded defect is repaired.",
+    "manifest": "Both reviewed suite arms are completed and readable.",
+    "write_paths": "All changed paths are granted."
+  },
+  "justifications": {
+    "durability": "The baseline failure is real and the new triangular-cycle guard is exercised. Follow-ons cover the synthetic padded virtual-node representation, committed-log whitespace, and absent quantitative persistence evidence.",
+    "evidence": "The reviewed completed arms are a red baseline at 878018cd and a green after arm at 86fe582f. The reviewed head changes no source or test after that arm. An independent archive-source repeat at 7f8f9770 records 25 passed in 106.41s, EXIT=0; comparator sources are unchanged.",
+    "fit": "The implementation retains the fixed-shape JAX contour-tree architecture, simulation-of-simplicity ordering, visible capacity refusal, and combinatorial edge subdivision.",
+    "goal_fidelity": "The repair resolves the reproduced padded-edge union-find corruption. At the reviewed head, the independent comparator has zero mismatches at all 140 diverted-fixture levels, with 13 nodes, 12 edges, and no overflow. The surplus critical points are consistent with the piecewise-linear carrier and require persistence/primary selection rather than showing a component-count defect.",
+    "scope_discipline": "All 11 changed paths lie in the reviewed grant, and neither comparator source was edited."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "VERDICT pass: independent reviewed-head gate records 25 passed and the comparator records zero diverted-fixture mismatches. SCORE goal_fidelity: 18. SCORE evidence: 18. SCORE scope_discipline: 20. SCORE durability: 15. SCORE fit: 18. FINDING follow-on: cover synthetic padded virtual-node DD treatment and quantitative persistence selection.",
+  "review_run_id": "r-20261002T084753987718-review-of-ctta-contour-tree-edge-invariant-repair",
+  "reviewed_base_sha": "878018cd28c009792cc51307219c9d4dc94ef9f6",
+  "reviewed_head_sha": "7f8f9770811cfcbfa81750083e80c38f3050825f",
+  "reviewed_revision": "7f8f9770811cfcbfa81750083e80c38f3050825f",
+  "reviewed_run_id": "r-20261002T081139110219-ctta-contour-tree-edge-invariant-repair",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-contour-tree-edge-invariant-repair",
+  "reviewer_node": "review-of-ctta-contour-tree-edge-invariant-repair",
+  "reviewer_run_id": "r-20261002T084753987718-review-of-ctta-contour-tree-edge-invariant-repair",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T11:02:00+02:00",
+  "total": 89,
+  "verdict": "pass"
+}

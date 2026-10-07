@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:45:33.829Z",
+  "dispatched_at": "2026-10-05T23:41:00Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:923",
+      "id": "reuse_search-1",
+      "reason": "the section already had four attempts churning request plumbing; naming the owning mechanism in the design text is what stops a fifth parallel implementation.",
+      "text": "\u00a73's design text proposes \"one lax state machine whose sole operator body serves residual, merit, acceptance, recovery, reconciliation and Jacobian-vector requests\" without naming that this machine already exists at fixed_point.py:923-1055, so a node dispatched to \u00a73 can build a parallel request enum and body instead of extending the committed one",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/h200_test_lane/cache_guard.py:213",
+      "id": "duplicate_owner-1",
+      "reason": "the section should name cache_reuse_summary.py as the key enumerator and have the guard reuse or extend its convention, rather than defining program-key membership a second time.",
+      "text": "\u00a74 asks the guard's `served_entries` to count program-key cache entries, but the cache-key enumeration and its on-disk filename convention are already owned by `scripts/h200_test_lane/cache_reuse_summary.py` (`pin_programs`, `prewarm_programs`, `served_keys`), so a second, differently-defined key count in cache_guard drifts from that owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7efdcd8aae33687b346c73855da44ebc29c9aec3f4333013776c39db25c6b051",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 115,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:46:40.854826+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T23:46:40.135663+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T234046484863-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "fc9fcaa8ee65626373b6d087c3057bcaa23ea092",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the machinery the plan extends is one deep module (a request kind plus payload reaching a single shared operator body); \u00a72 adds gates and \u00a74 edits two guard functions, neither of which spreads complexity across new shallow wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a74 introduces a second \"program-key entry\" count inside `cache_guard.py` when `cache_reuse_summary.py` already owns the cache-key enumeration and its filename convention.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds to any family, so nothing needs naming as retired or merged.",
+    "reuse_search": "a finding \u2014 \u00a73's design subsection describes building \"one lax state machine\" as if new, and never cites `nova/equilibrium/fixed_point.py:923-1055` (`OperatorRequestKind`/`operator_request_body/`run_operator_requests`), which already is that machine.",
+    "thin_wrapper": "pass \u2014 the plan edits the existing owner in place (`cache_guard.py` `served_entries`, the fixed_point request bodies) rather than putting a new thin layer over machinery it leaves untouched."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:46:39.433691+00:00"
+}

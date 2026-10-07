@@ -1,0 +1,39 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T11:33:41.549374+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/cut-cell-current-attribution-landed.html",
+      "line": "2565",
+      "text": "the manifest and section record 'manifest written before each wait with wait_condition/wait_probe/wait_terminal/resume_brief' from the done_when, and the run's own resume-1/resume-2-advice.txt and auto_resume trigger show the wait mechanism actually fired and was picked back up correctly across the two SLURM allocations, but no intermediate manifest snapshot survives on disk to show those fields were populated on the pre-wait writes rather than reconstructed after the fact; this is a process claim I could not independently confirm from artifacts, though the final numeric content is unaffected."
+    }
+  ],
+  "justifications": {
+    "durability": "the receipts (cpu/exact-110.json, titan/exact-110.json, titan/exact-300.log, titan/exact-1000.log, cpu/class-census-overlap-retry.log) persist every number quoted in the report and evidence doc, doccheck passes at both the pre-landing and post-landing revisions with only a pre-existing warning, and the section is merged into the shared landed record (75588c276) rather than left in a private worktree.",
+    "evidence": "I independently re-read the raw JSON/log receipts and every figure quoted in report.md, the plan section and the evidence section against them: exact-110 CPU 234,130,996 bytes/395.488862 s, exact-110 titan 48,079,034 bytes/631.973051 s compile/435.136704 s execute/277,725,696 peak device bytes/digest c0dce019..., both exact-300 and exact-1000 titan logs reproduce the identical 'a(0)=nan, a(1)=0.89683512' ValueError before lowering, and the class-census retry JSON gives cut=49/inside=103/outside=190 with 0 confined/open flips and 49 moving areas plus both positive controls passing \u2014 every figure matches exactly, with no rounding or selective quoting found.",
+    "fit": "no source file under nova/ is touched (landing-gate.log: production_changes=0, worktree_status_lines=0); the new report scripts and shell drivers live entirely under the reports fence, sbatch invocations match the done_when's exact partition/cpu/mem/time/env spec verbatim (cpu: all_debug --cpus-per-task=8 --mem=128G --time=00:59:00 TMPDIR=/tmp JAX_PLATFORMS=cpu; titan: --partition=titan --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=02:00:00 JAX_PLATFORMS unset), and no plan/stage/sprint label or version suffix appears in any changed filename or symbol.",
+    "goal_fidelity": "the goal (measure the exact-mode certificate executable at HEAD, its compile wall/peak allocation at three cell counts, and whether the clip is live at the stalled state) is met as far as the code permits: 110 cells is fully measured on both CPU and titan, 300/1000 correctly report 'unavailable' rather than fabricating a number because exact-mode seed construction raises before lowering on both requested rows, and the class census at the 342-cell stalled terminal directly answers the liveness question (49 cut cells all move, 0 whole-cell flips); the report states plainly which of the two named reductions the program census points at first, exactly as required.",
+    "scope_discipline": "the two commits (f2379a5f1 figures, eeffe5df2 evidence/plan) touch only docs/figures/cut-cell-current-attribution/exact-mode-executable-census/*, docs/evidence/archive/cut-cell-current-attribution-landed.html and docs/plans/cut-cell-current-attribution.html \u2014 nothing under nova/, matching both the manifest's own changed_paths and the landing-gate's production_changes=0 verification."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the goal (measure the exact-mode certificate executable at HEAD, its compile wall/peak allocation at three cell counts, and whether the clip is live at the stalled state) is met as far as the code permits: 110 cells is fully measured on both CPU and titan, 300/1000 correctly report 'unavailable' rather than fabricating a number because exact-mode seed construction raises before lowering on both requested rows, and the class census at the 342-cell stalled terminal directly answers the liveness question (49 cut cells all move, 0 whole-cell flips); the report states plainly which of the two named reductions the program census points at first, exactly as required.\nSCORE evidence: 19\nJUSTIFICATION evidence: I independently re-read the raw JSON/log receipts and every figure quoted in report.md, the plan section and the evidence section against them: exact-110 CPU 234,130,996 bytes/395.488862 s, exact-110 titan 48,079,034 bytes/631.973051 s compile/435.136704 s execute/277,725,696 peak device bytes/digest c0dce019..., both exact-300 and exact-1000 titan logs reproduce the identical 'a(0)=nan, a(1)=0.89683512' ValueError before lowering, and the class-census retry JSON gives cut=49/inside=103/outside=190 with 0 confined/open flips and 49 moving areas plus both positive controls passing \u2014 every figure matches exactly, with no rounding or selective quoting found.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits (f2379a5f1 figures, eeffe5df2 evidence/plan) touch only docs/figures/cut-cell-current-attribution/exact-mode-executable-census/*, docs/evidence/archive/cut-cell-current-attribution-landed.html and docs/plans/cut-cell-current-attribution.html \u2014 nothing under nova/, matching both the manifest's own changed_paths and the landing-gate's production_changes=0 verification.\nSCORE durability: 18\nJUSTIFICATION durability: the receipts (cpu/exact-110.json, titan/exact-110.json, titan/exact-300.log, titan/exact-1000.log, cpu/class-census-overlap-retry.log) persist every number quoted in the report and evidence doc, doccheck passes at both the pre-landing and post-landing revisions with only a pre-existing warning, and the section is merged into the shared landed record (75588c276) rather than left in a private worktree.\nSCORE fit: 19\nJUSTIFICATION fit: no source file under nova/ is touched (landing-gate.log: production_changes=0, worktree_status_lines=0); the new report scripts and shell drivers live entirely under the reports fence, sbatch invocations match the done_when's exact partition/cpu/mem/time/env spec verbatim (cpu: all_debug --cpus-per-task=8 --mem=128G --time=00:59:00 TMPDIR=/tmp JAX_PLATFORMS=cpu; titan: --partition=titan --gres=gpu:1 --cpus-per-task=4 --mem=64G --time=02:00:00 JAX_PLATFORMS unset), and no plan/stage/sprint label or version suffix appears in any changed filename or symbol.\nFINDING docs/evidence/archive/cut-cell-current-attribution-landed.html:2565 the manifest and section record 'manifest written before each wait with wait_condition/wait_probe/wait_terminal/resume_brief' from the done_when, and the run's own resume-1/resume-2-advice.txt and auto_resume trigger show the wait mechanism actually fired and was picked back up correctly across the two SLURM allocations, but no intermediate manifest snapshot survives on disk to show those fields were populated on the pre-wait writes rather than reconstructed after the fact; this is a process claim I could not independently confirm from artifacts, though the final numeric content is unaffected.",
+  "review_run_id": "r-20260922T113341549374-review-of-cca-measure-the-exact-mode-executable-at-head",
+  "reviewed_run_id": "r-20260922T090712671761-cca-measure-the-exact-mode-executable-at-head",
+  "reviewer": {
+    "backend": "claude",
+    "model": "claude-sonnet-5"
+  },
+  "reviewer_run_id": "r-20260922T113341549374-review-of-cca-measure-the-exact-mode-executable-at-head",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T13:35:00+00:00",
+  "total": 95
+}

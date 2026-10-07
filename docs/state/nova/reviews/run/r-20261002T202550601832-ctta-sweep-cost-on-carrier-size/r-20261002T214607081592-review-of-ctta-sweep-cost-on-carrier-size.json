@@ -1,0 +1,94 @@
+{
+  "absent": [
+    "No committed test or receipt pins the base/head field identity; the identity is demonstrated only by the run's scratch comparator (deleted) and by this review's independent differential.",
+    "No batched (vmap) H200 wall is recorded, so the H200 arm does not demonstrate the throughput regime in which the card is expected to beat CPU."
+  ],
+  "absent_items": [
+    {
+      "item": "committed all-field receipt comparator",
+      "why": "the comparator establishing field-by-field base/head identity ran from /tmp and was not committed; only its {nodes, edges, overflow} summary survives in the repository."
+    },
+    {
+      "item": "durable perf regression bound in the committed gate",
+      "why": "the only wall-clock assertion lives in a scratch negative-control test; the committed 33-test gate carries no performance bound."
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "b973adbc17db13658dc0bfdc0d5ab865595da128",
+    "cae331a085faea1433405ddd9d5c335f85b8c8d1",
+    "3ab1adef4903973ece6c3df64a51ab29e9b611b2",
+    "73d557eb6cce724c4eea8db292383b69357fd405"
+  ],
+  "completed_at": "2026-10-02T22:12:31.804Z",
+  "dispatched_at": "2026-10-02T21:46:28Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202550601832-ctta-sweep-cost-on-carrier-size/manifest.md",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "follow-on: check 1 holds and was strengthened independently: the run claims the base/head receipt comparison covers every field on all 18 fixtures, but the committed comparator logs (docs/figures/contour-tree-topology-authority/sweep-cost/base-head-receipt-comparison.log) print only {nodes, edges, overflow} per fixture and the comparator itself (/tmp/ctta_receipt_compare_chunk.py) is uncommitted and gone, so 'every field' is not verifiable from the committed artifact. I rebuilt both trees (base 11985735c via git archive, head 73d557eb6 from the reviewed worktree) and compared every ContourTreeArrays field (node_vertex, node_psi, node_valid, critical_type, edges, edge_valid, overflow) on 13 certificate fixtures plus 35 synthetic graphs (grids, a degree-11 star, and 40 random graphs carrying self-loops, duplicate edges, invalid vertices and wall masks): 48 cases, 336 fields, 0 mismatches (run dir review-evidence/base-head-all-field-differential.log). The identity claim is therefore true, but the run's own committed evidence under-states its coverage. The 3 rung fixtures and 2 MAST fixtures in the run's 18 were not independently re-run on the base arm: the base fixture sweep exceeded a 10-minute budget (base is 200x slower on the largest rung), so those five rest on the run's own summary comparator; the all-field identity is established independently on the other 13 plus 35 synthetic graphs."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/nova/equilibrium/contour_tree.py",
+      "line": "317",
+      "severity": "follow-on",
+      "text": "follow-on: check 2: the replacement of the segmented max with a duplicate-index scatter is equivalent, by an argument the differential tests but no committed test names. parents.at[neighbour_root].set(where(root_active & usable, vertex, parents[neighbour_root])) is safe because two neighbour slots that share a root are in the same union-find component and are therefore always both active, so every duplicate write of that root carries the same value vertex; the random-graph arm above (cycles produce duplicate roots) confirms no observable difference from the base build."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/nova/equilibrium/contour_tree.py",
+      "line": "186",
+      "severity": "follow-on",
+      "text": "follow-on: check 3: complexity stated from the code. _carrier_adjacency indexes each edge once into an O(V*C) table with C = min(edge_count, 16); the per-visit repeated check is O(C^2) over the 16-wide neighbour row instead of O(E^2) over the full edge buffer, so the bounded-degree carrier sweep falls from base O(V*(V+E) + V*E^2) to about O(V + E). I reproduced BOTH arms on the 1074-cell fixture (1089 vertices, 3478 edges): base 96.995 s vs head 0.464 s, about 209x, against the run's recorded 100.381 s -> 0.490 s."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/docs/figures/contour-tree-topology-authority/sweep-cost/h200-rungs.log",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: check 4, H200 vs CPU: at 1089 vertices the H200 execute is 2.772 s against 0.490 s on CPU, so CPU is about 5.7x faster for a single field. This is the expected shape of a sequential sweep: _sweep_tree is a jax.lax.fori_loop of V visits run twice, each running a data-dependent jax.lax.while_loop, so the device is launch-latency bound and the card is under-used. The H200 lane therefore wins on throughput under batching, not single-field latency; I confirmed build_contour_tree is traceable and fixed-shape under jax.vmap (batched node_vertex (4,256), edges (4,255,2), identical per-field to a loop of jitted single calls), but no vmap-batched H200 wall was measured, so the marked H200 arm is a correctness/latency receipt rather than a demonstrated throughput win."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/tests/test_contour_tree_merge.py",
+      "line": "204",
+      "severity": "follow-on",
+      "text": "follow-on: the two capacity tests raise a JAX FutureWarning, 'scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error', from the new int64 index/scatter in _carrier_adjacency (test_carrier_neighbour_capacity_overflow_is_visible and test_critical_node_capacity_overflow_is_jittable_and_visible, head-topology-gate.log warnings summary). Pin the index dtype so a JAX upgrade does not turn the refusal tests into errors."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202550601832-ctta-sweep-cost-on-carrier-size/negative-repeated-neighbour-matrix.log",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: check 5, negative control fires: restoring the base repeated-neighbour matrix makes test_sweep_execute_bound fail at 101.056 s against its 2.0 s bound, EXIT=1, single failing id test_sweep_execute_bound (line 20). The guard the change adds is a wall-clock assertion in a scratch test (/tmp/sweep_negative_control.py, now gone), so it is non-deterministic by construction; the committed 33-test gate does not carry a perf bound, and the sought proof of the perf change is the measured scaling rather than a durable test."
+    }
+  ],
+  "justifications": {
+    "durability": "The change, its overflow regression test, the figure and the H200 log are committed to the reviewed branch and the worktree is clean, but two load-bearing instruments are uncommitted scratch: the field comparator that supports the identity claim and the negative-control perf test, so neither is reproducible from the repository after the run's /tmp scratch is reaped.",
+    "evidence": "The measurements are strong and independently reproduced (CPU 0.464 s; 48-case all-field differential 336 fields 0 mismatches; negative control EXIT=1), but the run's own committed evidence for its central identity claim is a 3-scalar-per-fixture summary whose comparator is uncommitted and deleted, and the perf guard is a non-deterministic scratch timing test.",
+    "fit": "The new symbols _carrier_adjacency and _neighbour_roots are mechanism-named and their docstrings explain the bounded-degree carrier table and the visible capacity refusal; no plan, sprint or ticket identifier appears in symbols, comments, filenames or the commit subjects and each commit carries a body.",
+    "goal_fidelity": "The indexed sweep lands the intended cost reduction and the run's numbers reproduce: the committed CPU rungs fall 6.105 -> 0.084 s, 19.320 -> 0.198 s and 100.381 -> 0.490 s at 353/558/1089 vertices, I re-measured 0.464 s at 1089 vertices, the 33-test topology gate passes (after-topology-suite.log 33 passed), the H200 arm completed with CudaDevice(id=0) and EXIT_STATUS=0, and the receipt identity holds. The H200 single-field arm is slower than CPU (2.772 vs 0.490 s), which is a property of the sequential sweep rather than a goal miss.",
+    "scope_discipline": "The four commits b973adbc1, cae331a08, 3ab1adef4 and 73d557eb6 union to eight files, all inside the declared write paths (nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py, docs/figures/contour-tree-topology-authority/sweep-cost/*, docs/evidence/fragments/contour-tree-topology-authority/ctta-sweep-cost-on-carrier-size.html), and the reviewed worktree is clean."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "SCORE durability: 16\nJUSTIFICATION durability: The change, its overflow regression test, the figure and the H200 log are committed to the reviewed branch and the worktree is clean, but two load-bearing instruments are uncommitted scratch: the field comparator that supports the identity claim and the negative-control perf test, so neither is reproducible from the repository after the run's /tmp scratch is reaped.\nSCORE evidence: 15\nJUSTIFICATION evidence: The measurements are strong and independently reproduced (CPU 0.464 s; 48-case all-field differential 336 fields 0 mismatches; negative control EXIT=1), but the run's own committed evidence for its central identity claim is a 3-scalar-per-fixture summary whose comparator is uncommitted and deleted, and the perf guard is a non-deterministic scratch timing test.\nSCORE fit: 20\nJUSTIFICATION fit: The new symbols _carrier_adjacency and _neighbour_roots are mechanism-named and their docstrings explain the bounded-degree carrier table and the visible capacity refusal; no plan, sprint or ticket identifier appears in symbols, comments, filenames or the commit subjects and each commit carries a body.\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The indexed sweep lands the intended cost reduction and the run's numbers reproduce: the committed CPU rungs fall 6.105 -> 0.084 s, 19.320 -> 0.198 s and 100.381 -> 0.490 s at 353/558/1089 vertices, I re-measured 0.464 s at 1089 vertices, the 33-test topology gate passes (after-topology-suite.log 33 passed), the H200 arm completed with CudaDevice(id=0) and EXIT_STATUS=0, and the receipt identity holds. The H200 single-field arm is slower than CPU (2.772 vs 0.490 s), which is a property of the sequential sweep rather than a goal miss.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The four commits b973adbc1, cae331a08, 3ab1adef4 and 73d557eb6 union to eight files, all inside the declared write paths (nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py, docs/figures/contour-tree-topology-authority/sweep-cost/*, docs/evidence/fragments/contour-tree-topology-authority/ctta-sweep-cost-on-carrier-size.html), and the reviewed worktree is clean.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202550601832-ctta-sweep-cost-on-carrier-size/manifest.md:24 follow-on: check 1 holds and was strengthened independently: the run claims the base/head receipt comparison covers every field on all 18 fixtures, but the committed comparator logs (docs/figures/contour-tree-topology-authority/sweep-cost/base-head-receipt-comparison.log) print only {nodes, edges, overflow} per fixture and the comparator itself (/tmp/ctta_receipt_compare_chunk.py) is uncommitted and gone, so 'every field' is not verifiable from the committed artifact. I rebuilt both trees (base 11985735c via git archive, head 73d557eb6 from the reviewed worktree) and compared every ContourTreeArrays field (node_vertex, node_psi, node_valid, critical_type, edges, edge_valid, overflow) on 13 certificate fixtures plus 35 synthetic graphs (grids, a degree-11 star, and 40 random graphs carrying self-loops, duplicate edges, invalid vertices and wall masks): 48 cases, 336 fields, 0 mismatches (run dir review-evidence/base-head-all-field-differential.log). The identity claim is therefore true, but the run's own committed evidence under-states its coverage. The 3 rung fixtures and 2 MAST fixtures in the run's 18 were not independently re-run on the base arm: the base fixture sweep exceeded a 10-minute budget (base is 200x slower on the largest rung), so those five rest on the run's own summary comparator; the all-field identity is established independently on the other 13 plus 35 synthetic graphs.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/nova/equilibrium/contour_tree.py:317 follow-on: check 2: the replacement of the segmented max with a duplicate-index scatter is equivalent, by an argument the differential tests but no committed test names. parents.at[neighbour_root].set(where(root_active & usable, vertex, parents[neighbour_root])) is safe because two neighbour slots that share a root are in the same union-find component and are therefore always both active, so every duplicate write of that root carries the same value vertex; the random-graph arm above (cycles produce duplicate roots) confirms no observable difference from the base build.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/nova/equilibrium/contour_tree.py:186 follow-on: check 3: complexity stated from the code. _carrier_adjacency indexes each edge once into an O(V*C) table with C = min(edge_count, 16); the per-visit repeated check is O(C^2) over the 16-wide neighbour row instead of O(E^2) over the full edge buffer, so the bounded-degree carrier sweep falls from base O(V*(V+E) + V*E^2) to about O(V + E). I reproduced BOTH arms on the 1074-cell fixture (1089 vertices, 3478 edges): base 96.995 s vs head 0.464 s, about 209x, against the run's recorded 100.381 s -> 0.490 s.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/docs/figures/contour-tree-topology-authority/sweep-cost/h200-rungs.log:14 follow-on: check 4, H200 vs CPU: at 1089 vertices the H200 execute is 2.772 s against 0.490 s on CPU, so CPU is about 5.7x faster for a single field. This is the expected shape of a sequential sweep: _sweep_tree is a jax.lax.fori_loop of V visits run twice, each running a data-dependent jax.lax.while_loop, so the device is launch-latency bound and the card is under-used. The H200 lane therefore wins on throughput under batching, not single-field latency; I confirmed build_contour_tree is traceable and fixed-shape under jax.vmap (batched node_vertex (4,256), edges (4,255,2), identical per-field to a loop of jitted single calls), but no vmap-batched H200 wall was measured, so the marked H200 arm is a correctness/latency receipt rather than a demonstrated throughput win.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size/tests/test_contour_tree_merge.py:204 follow-on: the two capacity tests raise a JAX FutureWarning, 'scatter inputs have incompatible types: cannot safely cast value from dtype=int64 to dtype=int32 with jax_numpy_dtype_promotion=standard. In future JAX releases this will result in an error', from the new int64 index/scatter in _carrier_adjacency (test_carrier_neighbour_capacity_overflow_is_visible and test_critical_node_capacity_overflow_is_jittable_and_visible, head-topology-gate.log warnings summary). Pin the index dtype so a JAX upgrade does not turn the refusal tests into errors.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T202550601832-ctta-sweep-cost-on-carrier-size/negative-repeated-neighbour-matrix.log:20 follow-on: check 5, negative control fires: restoring the base repeated-neighbour matrix makes test_sweep_execute_bound fail at 101.056 s against its 2.0 s bound, EXIT=1, single failing id test_sweep_execute_bound (line 20). The guard the change adds is a wall-clock assertion in a scratch test (/tmp/sweep_negative_control.py, now gone), so it is non-deterministic by construction; the committed 33-test gate does not carry a perf bound, and the sought proof of the perf change is the measured scaling rather than a durable test.\n",
+  "review_run_id": "r-20261002T214607081592-review-of-ctta-sweep-cost-on-carrier-size",
+  "reviewed_base_sha": "11985735c020a39df74f76c75cbe6354e0e67d36",
+  "reviewed_head_sha": "73d557eb6cce724c4eea8db292383b69357fd405",
+  "reviewed_revision": "73d557eb6cce724c4eea8db292383b69357fd405",
+  "reviewed_run_id": "r-20261002T202550601832-ctta-sweep-cost-on-carrier-size",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-cost-on-carrier-size",
+  "reviewer_node": "review-of-ctta-sweep-cost-on-carrier-size",
+  "reviewer_run_id": "r-20261002T214607081592-review-of-ctta-sweep-cost-on-carrier-size",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T22:07:24.329104+00:00",
+  "total": 89,
+  "verdict": "pass"
+}

@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest declares no baseline_suite and no after_suite arm, and the reviewed run ran no pytest suite: its three 'pytest' stream hits are reads of scripts/nova_lane/run.sh and a grep of benchmarks/tests, not a suite execution. The reviewed commit 4b55fc0a changes only benchmarks/contour_tree_sweep_placement.py and two docs paths, adding no test file, so there is no suite pair from which an added failure could be derived. Its two gate logs, receipt-cpu-vmap-host-input.log and receipt-cpu-parallel-host-input.log, each report zero mismatches on all seven fields with EXIT_STATUS=0. Derived added_failure_count is therefore 0 with no ids.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T031538138757-review-of-ctta-sweep-device-placement/independent-verification.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T022349310426-ctta-sweep-device-placement/measurements/combined-host-input.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T022349310426-ctta-sweep-device-placement/receipt-cpu-vmap-host-input.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T022349310426-ctta-sweep-device-placement/receipt-cpu-parallel-host-input.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T022349310426-ctta-sweep-device-placement/receipt-cpu-vmap.log"
+  ],
+  "blockers": [],
+  "changed_paths": [
+    "benchmarks/contour_tree_sweep_placement.py",
+    "docs/evidence/fragments/contour-tree-topology-authority/ctta-sweep-device-placement.html",
+    "docs/figures/contour-tree-topology-authority/ctta-sweep-device-placement/execute-wall-by-carrier.png"
+  ],
+  "commits_read": [
+    "4b55fc0a057be6d08a15e0d3c4a07855da48e589"
+  ],
+  "completed_at": "2026-10-03T03:35:16.698Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T03:16:04Z",
+  "evidence_inputs": {
+    "figure": "execute-wall-by-carrier.png is a valid 1360x440 RGBA PNG committed at head; fragment src /nova/figures/contour-tree-topology-authority/ctta-sweep-device-placement/execute-wall-by-carrier.png resolves to the committed docs path.",
+    "fragment_table_reproduced": "Combined-host-input rows give means cpu 0.225/1.793/14.484, vmap 1.675/1.748/1.894, parallel 0.369/0.407/0.461 at batches 1/8/64 over 14 carriers, matching the committed fragment (parallel batch-1 rounds 0.369 to 0.370).",
+    "h200_job": "1280539 completed on 98dci4-gpu-0003; 1280537 also EXIT_STATUS=0.",
+    "identity_reproduced": "Fresh CPU arm at head 4b55fc0a (42 receipt keys) vs recorded device arms: 0 mismatches on all seven fields, EXIT=0.",
+    "negative_control": "mutated node_valid bool -> 'node_valid: 1 mismatches', EXIT=1; reviewed run's uncontrolled comparison -> 'node_psi: 15 mismatches', EXIT_STATUS=1."
+  },
+  "failure_attribution": {},
+  "findings": [],
+  "follow_ons": [
+    "The reviewed manifest leaves negative_control_log empty although the run holds a genuine red control at receipt-cpu-vmap.log (node_psi 15 mismatches, EXIT_STATUS=1); recording it would make the reviewed record self-describing.",
+    "Caveat to carry into any production routing decision: the batched device arms replicate ONE carrier across the batch (_arguments docstring, 'Repeat one physical carrier into a same-shaped batch'), so the batch-64 census speedup models 64 same-shaped fields; distinct census carriers of differing shape would not vectorise the same way.",
+    "The H200 parallel union-find path is benchmark-only; promote it into nova/ under its own review before any production batch or census routes to it, and do not select the existing device vmap for any measured use.",
+    "Warm execute is a single post-compile sample per fixture and compile is a cold-minus-warm proxy; averaging over repeats would tighten the walls if a production threshold is later set from them."
+  ],
+  "gate_arms_note": "No pytest suite arms were declared or run by the reviewed run. Its gate logs are the two receipt comparators, both EXIT_STATUS=0 on all seven fields. added_failure_count 0 and added_failure_ids [] follow from the absence of a baseline/after suite pair together with the absence of any test-file change in the reviewed commit.",
+  "item_verdicts": {
+    "negative_control": "pass: the reviewed run's own receipt-cpu-vmap.log records the uncontrolled comparison at 15 node_psi mismatches with EXIT_STATUS=1, and this review's own mutation of one node_valid boolean makes the comparator report node_valid 1 mismatch and exit 1.",
+    "receipt_identity": "pass: receipt-cpu-vmap-host-input.log and receipt-cpu-parallel-host-input.log each print 0 mismatches for all seven fields with EXIT_STATUS=0; independently reproduced at head 4b55fc0a from a fresh CPU arm against both recorded device arms.",
+    "recommendation": "pass: single solve -> host CPU 0.225 s vs prototype 0.370 s; batch 8 -> parallel 0.407 s vs serial 1.793 s; batch 64 -> parallel 0.461 s vs serial 14.484 s; vmap rejected at every measured batch.",
+    "suite_arms": "not run: the reviewed node is a measurement node that declares no baseline_suite/after_suite and changes no test file.",
+    "three_placements_measured": "pass: benchmark/contour_tree_sweep_placement.py:412-469 measures cpu (serial host calls), vmap (jax.vmap of build_contour_tree) and parallel (build_parallel_union_find) across BATCH_SIZES (1,8,64) on 14 fixtures."
+  },
+  "justifications": {
+    "durability": "The benchmark is committed and re-runnable against the committed fixture factories, the fragment carries the decision and the figure, and the arm logs and per-fixture measurements are durable under the run directory. The recommendation is not yet wired into any executable routing default, which is correct for a measure-then-recommend node but means the decision is not yet load-bearing.",
+    "evidence": "The fragment table was recomputed from combined-host-input.json and matches exactly; the committed comparator reports 0 mismatches on all seven fields for the recorded receipts; an independent CPU arm at head 4b55fc0a with the persisted carrier inputs reproduces the identity against both recorded device arms end-to-end; and a mutated receipt makes the comparator name the altered field and exit 1. Weakness: each fixture's warm execute is a single post-compile sample rather than an average over repeats, and compile is a cold-minus-warm proxy, both disclosed in the fragment.",
+    "fit": "The work answers plan section f-ctta-sweep-device-placement and keeps the production route untouched. Minor fit cost: the fragment's 'Placement:' paragraph reads as a usable routing recommendation while the parallel union-find path is benchmark-only, so a reader who stops at that paragraph could read the prototype as production-ready; the manifest and fragment intro do state it is a prototype.",
+    "goal_fidelity": "Every element the followup asked for is present: three placements (host serial single field, device vmap of the existing sweep, device parallel union-find prototype), batch sizes 1, 8 and 64, all 12 certificate rungs plus the 2 MAST carriers, compile and warm execute walls reported per placement, a per-use recommendation (single solve -> host CPU; labeller batch 8 and census 64 -> H200 parallel prototype), and receipt identity checked with the committed --compare mode.",
+    "scope_discipline": "Commit 4b55fc0a touches exactly the three node-owned paths (benchmark, evidence fragment, figure) and modifies no production code; the benchmark imports private sweep helpers but changes none of them."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "prior_review_findings_closed": [],
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-ons: the followup's three placements, three batch sizes, all 14 carriers, compile/execute walls, per-use recommendation and committed --compare receipt identity are all present; the fragment table recomputes exactly from the recorded measurements; an independent CPU arm at head 4b55fc0a reproduces zero mismatches on all seven receipt fields against both recorded device arms; and a mutated receipt makes the comparator name the altered field and refuse. Added failures 0. Non-blocking follow-ons: manifest negative_control field left empty though a red control exists, the batched arms replicate one carrier (same-shape caveat), the parallel path is benchmark-only, and warm execute is a single sample.\nSCORE goal_fidelity: 20\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 19\nSCORE fit: 18\n",
+  "review_run_id": "r-20261003T031538138757-review-of-ctta-sweep-device-placement",
+  "reviewed_base_sha": "83f2de99eebcdfb9565e89b176ab694d3d521e11",
+  "reviewed_commit": "4b55fc0a057be6d08a15e0d3c4a07855da48e589",
+  "reviewed_head_sha": "4b55fc0a057be6d08a15e0d3c4a07855da48e589",
+  "reviewed_revision": "4b55fc0a057be6d08a15e0d3c4a07855da48e589",
+  "reviewed_run_id": "r-20261003T022349310426-ctta-sweep-device-placement",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-device-placement",
+  "reviewer_node": "review-of-ctta-sweep-device-placement",
+  "reviewer_run_id": "r-20261003T031538138757-review-of-ctta-sweep-device-placement",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "Followups / f-ctta-sweep-device-placement",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T03:30:00Z",
+  "total": 96,
+  "verdict": "pass-with-follow-ons"
+}

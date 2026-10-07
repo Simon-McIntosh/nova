@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T13:08:50.172Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T12:01:07Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html",
+      "line": "97",
+      "severity": "follow-on",
+      "text": "follow-on: the safety argument ends \"The 300 s ini default governs only direct pytest runs outside the launcher\" but omits the two mechanisms that actually protect a non-lane run -- conftest.py _SLOW_FILES excludes tests/test_equilibrium_forward_solve.py from the default -m \"not slow\" lane, and scripts/nova_lane/standing_suite.sh lists it in GPU_FILES so the standing suite routes it to the 3600 s lane -- so the line leaves a bare CPU pytest run reading as exposed to the 300 s bound when the repository already excludes and routes the file."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T120048839648-fsri-forward-solve-tests-fit-their-bound/manifest.md",
+      "line": "9",
+      "severity": "follow-on",
+      "text": "follow-on: the manifest states \"Confirm H200 lane job 1280612 ran ... --timeout 3600 (launcher-injected default)\", but confirm-lane-forced-3600.log's own header names SOURCE_REVISION=4a441e717, the commit carrying @pytest.mark.timeout(660), and pytest-timeout's marker overrides the command-line --timeout, so the 660 mark and not the launcher's 3600 governed the tested node and the shipped head 3ec60184d was never run under the lane's own bound."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/nova-forward-solve-timeouts/measure.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the measurement ran on a compilation-cache miss (PINNED_REVISION_MISMATCH pinned=eb565ed4 serving=8b149152a) with no cache-guard receipt because the guard plugin never loaded, so the 312.57 s accelerator-route wall is compile-inclusive and an upper bound rather than a warm-lane wall; this strengthens rather than weakens the no-mark conclusion, but the manifest's \"measured wall\" is not a warm-cache measurement."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/nova-forward-solve-timeouts/negative.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: no negative-control arm completed -- negative.log's job 1280623 was CANCELLED at 2026-10-03T15:06:12 with no test result and the coordinator cancelled the earlier negative job 1280617 by id -- so the manifest carries a negative_control_waiver rather than a red log; the waiver is sound for a measurement-only node that lands no check, but four cancelled negative logs remain in /home/ITER/mcintos/.cache/nova-forward-solve-timeouts/ with no result."
+    }
+  ],
+  "gate_arms_note": "The reviewed run is measurement-only and its manifest names no baseline_suite or after_suite field, so the count is derived from the two gate logs it does declare in its test_logs line. Arm A: ~/.cache/nova-forward-solve-timeouts/measure.log (job 1280609, SOURCE_REVISION=8b149152abd28de233465cc189c9f2ae0fc5defb, command pytest -p no:cacheprovider tests/test_equilibrium_forward_solve.py --timeout=0 --durations=0 -m 'slow or not slow') 29 passed, EXIT_STATUS=0, completed=true, failure_ids=[]. Arm B: ~/.cache/nova-forward-solve-timeouts/confirm-lane-forced-3600.log (job 1280612, SOURCE_REVISION=4a441e7179c4f641aea9a5327d12c0597568691e) 1 passed, EXIT_STATUS=0, completed=true, failure_ids=[]. Both declared arms are green. Independently, git diff 8b149152abd28de233465cc189c9f2ae0fc5defb..3ec60184d0a330d00a1d3cf57c06f1406c7a20cd -- tests/ is empty, so the head test surface is byte-identical to the base and no test can be newly failing: added_failure_count=0, added_failure_ids=[]. Caveat a reader must carry: the two arms measure different revisions (base 8b149152a and the marked intermediate 4a441e717), and the shipped head 3ec60184d carries no test change, so this zero bounds no changed test surface -- it is a zero over an unchanged file, which is the correct reading for a node that lands no test change.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "the three commits are 4a441e717 (add the mark, +3 lines), d5ec45fd7 (remove it, -3 lines) and 3ec60184d (the 101-line fragment); the net base..head diff is the fragment alone and touches no product source and no test.",
+    "done_when": "the done-when's measure (one H200 lane job over the whole file with --timeout=0 --durations=0) ran as job 1280609 and measure.log records \"29 passed, 1 warning in 665.51s\" with the slowest item test_the_accelerator_routes_agree_on_the_fixed_point at 312.57 s, EXIT_STATUS=0; the \"second job over only the marked node ids\" ran as job 1280612 (confirm-lane-forced-3600.log, 1 passed in 378.95 s, EXIT_STATUS=0) but at revision 4a441e717, the commit that carried the @pytest.mark.timeout(660) mark, so it measured the marked tree rather than the shipped head 3ec60184d.",
+    "goal": "read the node goal (\"Give every forward-solve test that runs past 200 s on the H200 a per-test timeout taken from its measured wall\") against the landed head 3ec60184d; the landed change adds no per-test timeout at all, because scripts/nova_lane/run.sh:274 injects --timeout \"${NOVA_LANE_TEST_TIMEOUT:-3600}\" into every lane pytest run, and the coordinator scope correction in the run directory's resume-3-advice.txt redirected the node to a measurement-only completion.",
+    "manifest": "the reviewed manifest.md records status complete, commits 4a441e717/d5ec45fd7/3ec60184d, the fragment as its only changed path, test_logs measure.log and confirm-lane-forced-3600.log, a landing line citing job 1280609 (29 passed in 665.51 s, slowest 312.57 s), a negative_control_waiver in place of a negative_control_log, and a follow_ons entry for the cache guard; the durations it quotes reconcile with /home/ITER/mcintos/.cache/nova-forward-solve-timeouts/measure.log.",
+    "write_paths": "git diff 8b149152a..3ec60184d --name-status is a single added path, docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html, inside the three granted write paths; git diff 8b149152a HEAD -- tests/ prints nothing, so tests/test_equilibrium_forward_solve.py is byte-identical to base."
+  },
+  "justifications": {
+    "durability": "the node lands no code and no assertion, so nothing can regress and no guard is owed, and the durable artifact is the committed fragment whose per-test table reproduces from measure.log; the cache-guard non-load it records as a follow-on is a real defect left for its owning node rather than a missing guard in this one.",
+    "evidence": "/home/ITER/mcintos/.cache/nova-forward-solve-timeouts/measure.log (job 1280609) records 29 passed in 665.51 s with the 312.57 s accelerator-route item and its durations table reconciles with the fragment, but the confirm arm ran at 4a441e717 with the 660 mark governing rather than at the shipped head, and on a compilation-cache miss (PINNED_REVISION_MISMATCH pinned=eb565ed4 serving=8b149152a), so the recorded walls are compile-inclusive and the bound is confirmed only by reading the launcher source.",
+    "fit": "the landed artifact is one evidence fragment under docs/evidence/fragments/forward-solver-route-integrity/ named by its capability and matching the plan's fragment idiom, with a table rather than a figure for data that is naturally tabular and no name the repository naming rules forbid.",
+    "goal_fidelity": "the shipped head gives no test a @pytest.mark.timeout, the goal's named artifact, because scripts/nova_lane/run.sh:274 already injects --timeout 3600 on every lane pytest run and resume-3-advice.txt redirected the node to measurement-only, so the goal's purpose (no legitimate long forward-solve test is killed by pytest-timeout) is fully met while its literal deliverable is absent from docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html.",
+    "scope_discipline": "git diff 8b149152a..3ec60184d --name-status is the single granted fragment path with tests/ byte-identical to base, the reviewed worktree is clean, and all three commit subjects are conventional with bodies and no AI attribution and no plan or sprint identifier."
+  },
+  "node": "review-of-fsri-forward-solve-tests-fit-their-bound",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 8b149152abd28de233465cc189c9f2ae0fc5defb\nreviewed_head_sha: 3ec60184d0a330d00a1d3cf57c06f1406c7a20cd\nVERDICT goal: read the node goal (\"Give every forward-solve test that runs past 200 s on the H200 a per-test timeout taken from its measured wall\") against the landed head 3ec60184d; the landed change adds no per-test timeout at all, because scripts/nova_lane/run.sh:274 injects --timeout \"${NOVA_LANE_TEST_TIMEOUT:-3600}\" into every lane pytest run, and the coordinator scope correction in the run directory's resume-3-advice.txt redirected the node to a measurement-only completion.\nVERDICT done_when: the done-when's measure (one H200 lane job over the whole file with --timeout=0 --durations=0) ran as job 1280609 and measure.log records \"29 passed, 1 warning in 665.51s\" with the slowest item test_the_accelerator_routes_agree_on_the_fixed_point at 312.57 s, EXIT_STATUS=0; the \"second job over only the marked node ids\" ran as job 1280612 (confirm-lane-forced-3600.log, 1 passed in 378.95 s, EXIT_STATUS=0) but at revision 4a441e717, the commit that carried the @pytest.mark.timeout(660) mark, so it measured the marked tree rather than the shipped head 3ec60184d.\nVERDICT write_paths: git diff 8b149152a..3ec60184d --name-status is a single added path, docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html, inside the three granted write paths; git diff 8b149152a HEAD -- tests/ prints nothing, so tests/test_equilibrium_forward_solve.py is byte-identical to base.\nVERDICT manifest: the reviewed manifest.md records status complete, commits 4a441e717/d5ec45fd7/3ec60184d, the fragment as its only changed path, test_logs measure.log and confirm-lane-forced-3600.log, a landing line citing job 1280609 (29 passed in 665.51 s, slowest 312.57 s), a negative_control_waiver in place of a negative_control_log, and a follow_ons entry for the cache guard; the durations it quotes reconcile with /home/ITER/mcintos/.cache/nova-forward-solve-timeouts/measure.log.\nVERDICT diff: the three commits are 4a441e717 (add the mark, +3 lines), d5ec45fd7 (remove it, -3 lines) and 3ec60184d (the 101-line fragment); the net base..head diff is the fragment alone and touches no product source and no test.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: the shipped head gives no test a @pytest.mark.timeout, the goal's named artifact, because scripts/nova_lane/run.sh:274 already injects --timeout 3600 on every lane pytest run and resume-3-advice.txt redirected the node to measurement-only, so the goal's purpose (no legitimate long forward-solve test is killed by pytest-timeout) is fully met while its literal deliverable is absent from docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html.\nSCORE evidence: 14\nJUSTIFICATION evidence: /home/ITER/mcintos/.cache/nova-forward-solve-timeouts/measure.log (job 1280609) records 29 passed in 665.51 s with the 312.57 s accelerator-route item and its durations table reconciles with the fragment, but the confirm arm ran at 4a441e717 with the 660 mark governing rather than at the shipped head, and on a compilation-cache miss (PINNED_REVISION_MISMATCH pinned=eb565ed4 serving=8b149152a), so the recorded walls are compile-inclusive and the bound is confirmed only by reading the launcher source.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 8b149152a..3ec60184d --name-status is the single granted fragment path with tests/ byte-identical to base, the reviewed worktree is clean, and all three commit subjects are conventional with bodies and no AI attribution and no plan or sprint identifier.\nSCORE durability: 16\nJUSTIFICATION durability: the node lands no code and no assertion, so nothing can regress and no guard is owed, and the durable artifact is the committed fragment whose per-test table reproduces from measure.log; the cache-guard non-load it records as a follow-on is a real defect left for its owning node rather than a missing guard in this one.\nSCORE fit: 17\nJUSTIFICATION fit: the landed artifact is one evidence fragment under docs/evidence/fragments/forward-solver-route-integrity/ named by its capability and matching the plan's fragment idiom, with a table rather than a figure for data that is naturally tabular and no name the repository naming rules forbid.\nFINDING docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-tests-fit-their-bound.html:97 follow-on: the safety argument ends \"The 300 s ini default governs only direct pytest runs outside the launcher\" but omits the two mechanisms that actually protect a non-lane run -- conftest.py _SLOW_FILES excludes tests/test_equilibrium_forward_solve.py from the default -m \"not slow\" lane, and scripts/nova_lane/standing_suite.sh lists it in GPU_FILES so the standing suite routes it to the 3600 s lane -- so the line leaves a bare CPU pytest run reading as exposed to the 300 s bound when the repository already excludes and routes the file.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T120048839648-fsri-forward-solve-tests-fit-their-bound/manifest.md:9 follow-on: the manifest states \"Confirm H200 lane job 1280612 ran ... --timeout 3600 (launcher-injected default)\", but confirm-lane-forced-3600.log's own header names SOURCE_REVISION=4a441e717, the commit carrying @pytest.mark.timeout(660), and pytest-timeout's marker overrides the command-line --timeout, so the 660 mark and not the launcher's 3600 governed the tested node and the shipped head 3ec60184d was never run under the lane's own bound.\nFINDING /home/ITER/mcintos/.cache/nova-forward-solve-timeouts/measure.log:1 follow-on: the measurement ran on a compilation-cache miss (PINNED_REVISION_MISMATCH pinned=eb565ed4 serving=8b149152a) with no cache-guard receipt because the guard plugin never loaded, so the 312.57 s accelerator-route wall is compile-inclusive and an upper bound rather than a warm-lane wall; this strengthens rather than weakens the no-mark conclusion, but the manifest's \"measured wall\" is not a warm-cache measurement.\nFINDING /home/ITER/mcintos/.cache/nova-forward-solve-timeouts/negative.log:1 follow-on: no negative-control arm completed -- negative.log's job 1280623 was CANCELLED at 2026-10-03T15:06:12 with no test result and the coordinator cancelled the earlier negative job 1280617 by id -- so the manifest carries a negative_control_waiver rather than a red log; the waiver is sound for a measurement-only node that lands no check, but four cancelled negative logs remain in /home/ITER/mcintos/.cache/nova-forward-solve-timeouts/ with no result.",
+  "review_base_sha": "16856d5f3713c47df08d4cc4df42f5dc04a22aa4",
+  "review_run_id": "legacy-00952f3d66a7",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "8b149152abd28de233465cc189c9f2ae0fc5defb",
+  "reviewed_commit": "3ec60184d0a330d00a1d3cf57c06f1406c7a20cd",
+  "reviewed_head_sha": "3ec60184d0a330d00a1d3cf57c06f1406c7a20cd",
+  "reviewed_run_id": "r-20261003T120048839648-fsri-forward-solve-tests-fit-their-bound",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-tests-fit-their-bound",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T13:18:00Z",
+  "total": 81
+}

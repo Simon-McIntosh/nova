@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:37:58.773Z",
+  "dispatched_at": "2026-10-06T01:33:55Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/artifacts-carry-no-worktree-paths.html:160",
+      "id": "duplicate_owner-1",
+      "reason": "the hook must obtain pattern and exemptions from the single owner (e.g. delegate to a tiny Python entry point importing the constant) or be added to the exemption set, otherwise the plan ships a guard that fails on the mechanism it lands.",
+      "text": "\u00a74 declares one exemption set and says \"the tests and the script included, imports the constant rather than spelling the pattern, so it needs no exemption\", but the commit-time hook `scripts/git-hooks/pre-commit` is a shell script that cannot import a Python constant: to reject a staged file containing the pattern it must contain the pattern literal, and `scripts/git-hooks/pre-commit` sits outside the exemption set (docs/state, docs/plans, docs/research, filepath.py), so the new guard test's `git grep` would return the hook as an offender and the plan's own done-when (\"the test passes on the merged head\") is unreachable",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/artifacts-carry-no-worktree-paths.html:122",
+      "id": "duplicate_owner-2",
+      "reason": "a shell launch script must be self-contained, `git rev-parse --show-toplevel` is the canonical mechanism rather than a nova duplicate, and one line per script is legitimate; noting the Python owner is advisory.",
+      "text": "\u00a73 gives every launch script its own inline `ROOT=\"$(git -C ... rev-parse --show-toplevel)\"` (and the Python equivalent), spreading repository-root resolution across the 65 census scripts rather than extending the existing root-resolution owners `benchmarks/measurement_provenance.py:35` `resolve_checkout` and `nova/definitions.py:6` `root_dir`; only the 7 `.py` launch scripts could reuse the Python owner, and the 58 shell scripts have no shared owner today",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/artifacts-carry-no-worktree-paths.html:65",
+      "id": "interface_budget-1",
+      "reason": "the interface-budget rule requires each adding section to name in its own text what it retires or merges, or why nothing can be, and \u00a72 and \u00a74 currently leave the constant, the CLI script and the hook unaccounted for.",
+      "text": "with this week's four figures all at zero, \u00a72 introduces a new public function and a new public constant in `nova/database/filepath.py` and a new command surface `scripts/relativize_worktree_paths.py`, and \u00a74 introduces a new commit-time hook, yet the sections account for only the function (which \u00a72 says cannot be folded into `repository_relative`) and a test deletion not in any budget family; the constant and the hook are added surface with no stated retirement, merge, or reason none is possible",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "76d1057287d3190c0f9f4af6e7f1e81a2166c9219419137970702b00d27cd844",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 14,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:40:03.798024+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:40:05.222593+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:40:06.674505+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T013338384767-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "ce85628359412349b5543ea98d0eee1a2622c85b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one public function, `relativize_worktree_paths(text) -> (text, unmapped)`, hides the whole matcher (both worktree roots, `~` forms, escaped and line-wrapped spellings, idempotence) and returns the unmapped spans; the plan states it is the only public surface the function family adds.",
+    "duplicate_owner": "a finding \u2014 \u00a74's shell hook cannot import the Python constant, so it re-spells the pattern (and the exemption set) that `nova/database/filepath.py` is declared to own, and the guard test would then flag the hook itself.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a public function plus a public constant plus a standalone CLI script and \u00a74 adds a commit-time hook, but no section names what those retire or merge, or why nothing can be \u2014 the only retirement named is a test's directory-limited scan, which is not in any budget family.",
+    "reuse_search": "pass \u2014 the plan names the existing owner it extends (`nova/database/filepath.py:62` `repository_relative`, extended by delegation) and the existing scan it supersedes (`tests/test_render_receipt_paths.py:73` `test_no_receipt_directory_json_records_a_worktree_path`), so the search is evidenced rather than asserted.",
+    "thin_wrapper": "pass \u2014 the applier CLI and the commit-time hook are each justified: the script is an in-place bulk applier distinct from the write-time helper, and the hook exists because the `pre-commit` framework is declared but uninstalled and is banned by workstation policy for stashing (verified: no `.pre-commit-config.yaml`, no `core.hooksPath`, `pyproject.toml:121` declares the dependency only)."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "12f7221fb9667808b3669af3eb8c8362417c8f82654faeea51b215c7cb15ced5",
+    "s2": "6f40682d5aa8b5f1ede06771b91b4efa40fad0ba09084070ddfa016eed760ae8",
+    "s3": "9346273061b28050e678b7ed729ab10a255274b1f0606ca49efb4501f0faf82e",
+    "s4": "8c6ea5cc32d33d569507ed2302480e0ae82966d74fa911da0d08069726411c62",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:40:02.228188+00:00"
+}

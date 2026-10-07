@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T05:17:19.308Z",
+  "dispatched_at": "2026-10-03T03:15:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub-gate.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's \"11 tests each\" reads the census pass count, while the same logs report \"11 passed, 2 skipped\"; the two skipped tests are pytest.mark.slow cases and the fragment does not say so, so a reader cannot tell the skipped set from the passed set."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate/comparison.json",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "follow-on: the census block stores \"tests\": 11 as the count of parsed slowest-duration lines (len(durations)), not the passed-test count; the two agree here but the field name is not the quantity it holds."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "The run's own diff c090222b..ef9174d1e is the single evidence fragment; the code change the gate certifies is the merged branch a28856c8..c090222b (benchmarks/solovev_certificate.py, scripts/analytic_oracle_fixtures/measure.py), which is what comparison.json's base_sha/head_sha name.",
+    "done_when": "I confirmed from comparison.json and the six per-arm receipts that base-default and head-chord are bit-identical in all 9 hashed arrays for both cases, that each head-exact arm's solving operator reported exact and its arrays differ from head-chord in 4 of 9, and that tests/test_forward_census.py ran to completion in both extracted trees with the reported durations.",
+    "goal": "The node's goal - show the certificate hub keeps a chord row bit-identical and carries an explicit exact mode to the solving operator - is delivered by two cases at the smallest rung in three arms each, and I re-derived every claim from the run's own receipts.",
+    "manifest": "The manifest reads complete with matching artifacts, changed_paths, commits and test_logs; the H200 lane log lane-hub-gate6.log carries EXIT_STATUS=0 and SCRATCH_REMOVED=True, reconciled with comparison.json.",
+    "write_paths": "The run wrote only docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub-gate.html; commits 0a2106004 and ef9174d1e each touch that one file, and the gate driver, per-arm helper and fragment builder live in the run directory, not the tracked tree."
+  },
+  "justifications": {
+    "durability": "The fragment is committed and the per-arm receipts and comparison.json persist under the run directory, but the gate driver certificate_hub_gate.py and helper certificate_row_arm.py are not in the tracked tree, so re-running the gate needs the run directory.",
+    "evidence": "The SHA-256 bit-identity is over each row's float64 bytes computed by certificate_row_arm.py's _hash_arrays, the operator mode is captured by wrapping the real _certificate_solve_request rather than echoed from a receipt, and the exact-vs-chord 4-of-9 difference is a positive control that the instrument is sensitive to a real change; the gate driver nonetheless exits 0 unconditionally, so the identity verdict lives in comparison.json a reader must interpret.",
+    "fit": "The fragment follows the forward-solve-api evidence idiom - section id, h2 headings, tables of arm/requested clip/receipt clip/solving operator/residual/converged - and cites project-relative paths.",
+    "goal_fidelity": "Both questions the fragment poses are answered by artefacts the reviewer re-derived - 9/9 array hashes identical between base a28856c81 and head c090222b2 chord arms in both cases, and OPERATOR_ACTIVE=exact with DEFAULTS_CLIP=exact printed by each head-exact arm log.",
+    "scope_discipline": "git show --stat on 0a2106004 and ef9174d1e returns exactly one path each, the fragment, and the worktree carried no other tracked change."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node's goal - show the certificate hub keeps a chord row bit-identical and carries an explicit exact mode to the solving operator - is delivered by two cases at the smallest rung in three arms each, and I re-derived every claim from the run's own receipts.\nVERDICT done_when: I confirmed from comparison.json and the six per-arm receipts that base-default and head-chord are bit-identical in all 9 hashed arrays for both cases, that each head-exact arm's solving operator reported exact and its arrays differ from head-chord in 4 of 9, and that tests/test_forward_census.py ran to completion in both extracted trees with the reported durations.\nVERDICT write_paths: The run wrote only docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub-gate.html; commits 0a2106004 and ef9174d1e each touch that one file, and the gate driver, per-arm helper and fragment builder live in the run directory, not the tracked tree.\nVERDICT manifest: The manifest reads complete with matching artifacts, changed_paths, commits and test_logs; the H200 lane log lane-hub-gate6.log carries EXIT_STATUS=0 and SCRATCH_REMOVED=True, reconciled with comparison.json.\nVERDICT diff: The run's own diff c090222b..ef9174d1e is the single evidence fragment; the code change the gate certifies is the merged branch a28856c8..c090222b (benchmarks/solovev_certificate.py, scripts/analytic_oracle_fixtures/measure.py), which is what comparison.json's base_sha/head_sha name.\nVERDICT call_sites: none\nSCORE goal_fidelity: 19\nSCORE evidence: 17\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 18\nJUSTIFICATION goal_fidelity: Both questions the fragment poses are answered by artefacts the reviewer re-derived - 9/9 array hashes identical between base a28856c81 and head c090222b2 chord arms in both cases, and OPERATOR_ACTIVE=exact with DEFAULTS_CLIP=exact printed by each head-exact arm log.\nJUSTIFICATION evidence: The SHA-256 bit-identity is over each row's float64 bytes computed by certificate_row_arm.py's _hash_arrays, the operator mode is captured by wrapping the real _certificate_solve_request rather than echoed from a receipt, and the exact-vs-chord 4-of-9 difference is a positive control that the instrument is sensitive to a real change; the gate driver nonetheless exits 0 unconditionally, so the identity verdict lives in comparison.json a reader must interpret.\nJUSTIFICATION scope_discipline: git show --stat on 0a2106004 and ef9174d1e returns exactly one path each, the fragment, and the worktree carried no other tracked change.\nJUSTIFICATION durability: The fragment is committed and the per-arm receipts and comparison.json persist under the run directory, but the gate driver certificate_hub_gate.py and helper certificate_row_arm.py are not in the tracked tree, so re-running the gate needs the run directory.\nJUSTIFICATION fit: The fragment follows the forward-solve-api evidence idiom - section id, h2 headings, tables of arm/requested clip/receipt clip/solving operator/residual/converged - and cites project-relative paths.\nFINDING docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub-gate.html:20 follow-on: the fragment's \"11 tests each\" reads the census pass count, while the same logs report \"11 passed, 2 skipped\"; the two skipped tests are pytest.mark.slow cases and the fragment does not say so, so a reader cannot tell the skipped set from the passed set.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate/comparison.json:96 follow-on: the census block stores \"tests\": 11 as the count of parsed slowest-duration lines (len(durations)), not the passed-test count; the two agree here but the field name is not the quantity it holds.\n",
+  "review_run_id": "legacy-c3106c1bec17",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "c090222b2fe41addc3f0da24bc451460f592e55e",
+  "reviewed_head_sha": "ef9174d1ef65f503caae6315c16fae62dc9deecb",
+  "reviewed_run_id": "r-20261003T031455079972-fsapi-clip-mode-certificate-hub-gate",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261003T052626870977-review-of-fsapi-clip-mode-certificate-hub-gate"
+  },
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T05:32:54.845820+00:00",
+  "total": 90
+}

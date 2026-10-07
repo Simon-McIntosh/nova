@@ -1,0 +1,64 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base or head suite gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-02T15:15:14.812Z",
+  "dispatched_at": "2026-10-02T13:41:45Z",
+  "findings": [
+    {
+      "file": "docs/figures/millisecond-converged-solve/trip-quantum/per-trip-kernels/per_trip_kernel_breakdown.py",
+      "line": "62",
+      "severity": "follow-on",
+      "text": "follow-on: the comment marking the retired default cites the commit sha 6d99b59ba (repeated at :64), introduced by the same change; the repository naming rule keeps transient commit references out of comments, and the mechanism (the PNG is retired, the component breakdown is carried by per-trip-components.csv) reads the same without the sha."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134117794154-msc-figure-cohort-cite-or-retire/logs/deleted-ref-head-scan.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the head gate log's first line names REVISION=6d99b59ba (the pre-repair parent) while it measured the repaired working tree committed as 986b1a138, so a reader tying the 3-total/0-in-scope count to a revision is pointed at the wrong commit; the content reproduces at 986b1a138, so the count stands, but the recorded revision does not name the revision measured."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit 986b1a138 against 6d99b59ba and the node's whole landing b12cb22cc..986b1a138; 14 files change, 43 retired path keys drop from 11 receipts, two generator defaults are touched, four sentences of the landed record are reworded, and no numeric value changes.",
+    "done_when": "the done_when names a src/href scan at the node head reporting zero uncited files plus the deletions listed in the report; the manifest records its sha/gate logs and I reproduced the scan at 986b1a138 (logs/head-src-scan-review.log): FIGURES=26 CITED=26 UNCITED=0.",
+    "goal": "the node goal is to give every millisecond-converged-solve figure a receipt-backed citation or retire it, and commit 986b1a138 completes that by removing the last committed references to the 41 figures retired at 6d99b59ba.",
+    "manifest": "read; it reports the repair landed in 986b1a138, the deleted-reference scan contracting from 44 in-scope hits at base 6d99b59ba to 0 at head, and names its logs.",
+    "write_paths": "read the manifest's declared paths (docs/figures/millisecond-converged-solve, docs/evidence/archive/millisecond-converged-solve-landed.html, benchmarks/trip_quantum_width_one.py, the report and the fragment); every path in commit 986b1a138 is inside them."
+  },
+  "justifications": {
+    "durability": "no test guards the receipt-path discipline \u2014 the deleted-reference scan lives in the run directory (figure-deleted-reference-scan.py), so nothing in the repository suite reddens if a receipt later regains a retired path.",
+    "evidence": "I reproduced both gates at 986b1a138 \u2014 the src/href scan reads FIGURES=26 CITED=26 UNCITED=0 and the retired-reference scan reads 3 total / 0 in-scope against 47 total / 44 in-scope at 6d99b59ba \u2014 but the head gate logs carry REVISION=6d99b59ba (the pre-repair parent) in their header rather than the measured head.",
+    "fit": "the receipt pruning and the generator repoint match the surrounding docs/figures idiom, but per_trip_kernel_breakdown.py:62,64 adds a comment citing the commit sha 6d99b59ba, a transient provenance reference the repository naming rules keep out of source.",
+    "goal_fidelity": "986b1a138 answers all three prior findings \u2014 condition_discriminator_trace.py:51 now defaults to the renamed discriminator PNG, the receipts no longer name the deleted panels, and landed.html:834/:962/:972/:1093 no longer name a retired SVG twin.",
+    "scope_discipline": "every path in 986b1a138 sits under docs/figures/millisecond-converged-solve or docs/evidence/archive/millisecond-converged-solve-landed.html, both inside the declared write paths."
+  },
+  "node": "review-of-msc-figure-cohort-cite-or-retire",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to give every millisecond-converged-solve figure a receipt-backed citation or retire it, and commit 986b1a138 completes that by removing the last committed references to the 41 figures retired at 6d99b59ba.\nVERDICT done_when: the done_when names a src/href scan at the node head reporting zero uncited files plus the deletions listed in the report; the manifest records its sha/gate logs and I reproduced the scan at 986b1a138 (logs/head-src-scan-review.log): FIGURES=26 CITED=26 UNCITED=0.\nVERDICT write_paths: read the manifest's declared paths (docs/figures/millisecond-converged-solve, docs/evidence/archive/millisecond-converged-solve-landed.html, benchmarks/trip_quantum_width_one.py, the report and the fragment); every path in commit 986b1a138 is inside them.\nVERDICT manifest: read; it reports the repair landed in 986b1a138, the deleted-reference scan contracting from 44 in-scope hits at base 6d99b59ba to 0 at head, and names its logs.\nVERDICT diff: read commit 986b1a138 against 6d99b59ba and the node's whole landing b12cb22cc..986b1a138; 14 files change, 43 retired path keys drop from 11 receipts, two generator defaults are touched, four sentences of the landed record are reworded, and no numeric value changes.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: 986b1a138 answers all three prior findings \u2014 condition_discriminator_trace.py:51 now defaults to the renamed discriminator PNG, the receipts no longer name the deleted panels, and landed.html:834/:962/:972/:1093 no longer name a retired SVG twin.\nSCORE evidence: 16\nJUSTIFICATION evidence: I reproduced both gates at 986b1a138 \u2014 the src/href scan reads FIGURES=26 CITED=26 UNCITED=0 and the retired-reference scan reads 3 total / 0 in-scope against 47 total / 44 in-scope at 6d99b59ba \u2014 but the head gate logs carry REVISION=6d99b59ba (the pre-repair parent) in their header rather than the measured head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in 986b1a138 sits under docs/figures/millisecond-converged-solve or docs/evidence/archive/millisecond-converged-solve-landed.html, both inside the declared write paths.\nSCORE durability: 13\nJUSTIFICATION durability: no test guards the receipt-path discipline \u2014 the deleted-reference scan lives in the run directory (figure-deleted-reference-scan.py), so nothing in the repository suite reddens if a receipt later regains a retired path.\nSCORE fit: 16\nJUSTIFICATION fit: the receipt pruning and the generator repoint match the surrounding docs/figures idiom, but per_trip_kernel_breakdown.py:62,64 adds a comment citing the commit sha 6d99b59ba, a transient provenance reference the repository naming rules keep out of source.\nFINDING docs/figures/millisecond-converged-solve/trip-quantum/per-trip-kernels/per_trip_kernel_breakdown.py:62 follow-on: the comment marking the retired default cites the commit sha 6d99b59ba (repeated at :64), introduced by the same change; the repository naming rule keeps transient commit references out of comments, and the mechanism (the PNG is retired, the component breakdown is carried by per-trip-components.csv) reads the same without the sha.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134117794154-msc-figure-cohort-cite-or-retire/logs/deleted-ref-head-scan.log:1 follow-on: the head gate log's first line names REVISION=6d99b59ba (the pre-repair parent) while it measured the repaired working tree committed as 986b1a138, so a reader tying the 3-total/0-in-scope count to a revision is pointed at the wrong commit; the content reproduces at 986b1a138, so the count stands, but the recorded revision does not name the revision measured.\n",
+  "review_run_id": "legacy-26a62b6dcce2",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "b12cb22cc21946e85211979b626c3f7009ae629a",
+  "reviewed_commit": "986b1a138842adda759d6c4876c4d6b621b0057d",
+  "reviewed_head_sha": "986b1a138842adda759d6c4876c4d6b621b0057d",
+  "reviewed_run_id": "r-20261002T134117794154-msc-figure-cohort-cite-or-retire",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-figure-cohort-cite-or-retire",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T16:57:09.926399+00:00",
+  "total": 82
+}

@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:01:44.028Z",
+  "dispatched_at": "2026-10-05T22:59:10Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/gs-absolute-accuracy-gates.html:54",
+      "id": "deep_module-1",
+      "reason": "\u00a73 should name the one pinning module that owns the census so the six-way surface is folded into a single deep pin rather than added to.",
+      "text": "\u00a73's done-when names a single \"focused regression lane\" but the certified numbers are pinned by tests/test_certificate_pin.py (121 lines), tests/test_certificate_baseline_revision.py (693 lines), tests/test_certificate_gate_live.py (270 lines), tests/test_solovev_certificate_builder.py (61 lines), tests/test_solovev_certificate_render.py and tests/test_solovev_certificate_panel_titles.py \u2014 six modules, none cited by the plan, so a reader cannot tell which one is the pin and drift can fire against only a subset",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_certificate_pin.py:16",
+      "id": "thin_wrapper-1",
+      "reason": "the plan should extend the builder's receipt accessor (or a shared certificate-receipt module) rather than have each test re-open the artifact, so a schema change touches one accessor and not five.",
+      "text": "the pinning test opens its own handle on the production-route receipt (`_receipt()` doing `json.loads(RECEIPT.read_text())`), while tests/test_certificate_baseline_revision.py:285 and :681, tests/test_certificate_gate_live.py:266 and tests/test_solovev_certificate_render.py:40 each load the same artifact through their own path constant and loader, duplicating receipt access that benchmarks/solovev_certificate.py already owns as the builder/validator of that receipt",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 must designate the one census that file holds (or split the name) and restamp the citing document, because a reader cannot resolve which census a named receipt carries.",
+      "text": "the plan's own open followup f-gsag-two-censuses-one-receipt-name records that this single file name is cited as the certificate source by docs/evidence/gs-absolute-accuracy-certificate.html (3 of 16, diverted-single-null) and docs/evidence/archive/gs-absolute-accuracy-gates-landed.html (2 of 16, diverted-jump-bearing) from two different part-receipt families in the same solovev/production-route-parts/ directory, so two documents publish different censuses under one receipt identity and \u00a73 names no owning reader",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "745f3b325941b5a1a5345a3b2f22ab3d4475b9ba9b4b4075823c0d6fa0697a4d",
+  "plan_slug": "gs-absolute-accuracy-gates",
+  "plan_version": 56,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T225856752674-plan-review-of-gs-absolute-accuracy-gates",
+  "reviewed_blob_sha": "a8df6cc3661381622a754c517423cab11243a547",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a73 commits the certificate to \"a focused regression lane\" (docs/plans/gs-absolute-accuracy-gates.html:54) but the certified census is in fact pinned across six separate test modules, none of them named, so the plan's own text permits a spread of shallow pins over one receipt instead of one deep pinning surface.",
+    "duplicate_owner": "a finding \u2014 two part-receipt families publish mutually inconsistent censuses under the single name docs/figures/gs-absolute-accuracy/solovev-certificate-production-route.json, and \u00a73 neither names one census owner nor retires the other.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds one evidence document and one focused test lane, and adds no public definition, CLI option, MCP view or refusal family, so there is nothing for it to retire or merge.",
+    "reuse_search": "pass \u2014 the plan's artifact list and comment thread cite docs/research/forward-accuracy-reuse-map.html (a 45-row inventory across nova, imas-ambix and reckon), and the implementation honours it rather than re-deriving: benchmarks/efit_reproduction_gate.py:30 imports benchmarks/diiid_forward_gs_match for the DIII-D frame selection and comparator the map names as \"fits whole\", and \u00a71 extends the existing reduced-oracle recovery path (tests/test_solovev_recovery_gates.py, scripts/analytic_oracle_fixtures/measure.py) rather than a parallel oracle.",
+    "thin_wrapper": "a finding \u2014 each certificate test re-implements receipt access rather than extending the builder that writes and validates it, so the same JSON is loaded by five private loaders over one artifact."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:02:28.191610+00:00"
+}

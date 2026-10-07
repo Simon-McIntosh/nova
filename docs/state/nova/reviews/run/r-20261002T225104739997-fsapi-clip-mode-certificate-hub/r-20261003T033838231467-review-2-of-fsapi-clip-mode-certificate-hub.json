@@ -1,0 +1,141 @@
+{
+  "absent": [
+    "The node's own terminal certificate-row measurement (archived-default-chord versus committed-explicit-chord smallest-row bit identity, and the exact-mode row capture) remains unmet. This review treats it as neither a defect nor a scope failure: the node's fence records it as a separately dispatched measurement (run r-20261003T031455079972 at c090222b2), and the head commit does not change the certificate solve path."
+  ],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Both arms are readable and completed (all 26 per-module logs per arm emit a pytest summary or a terminal EXIT line). Derived independently at head 4d355d3d5 from the per-module gate logs under base-tests/ and head-tests/: base failure ids (16) from test_equilibrium_analytic_oracle::test_the_closed_form_boundary_is_the_production_boundary_read, test_exact_clip_moments::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from, test_figure_panel_pin::test_an_unchanged_panel_re_render_satisfies_the_content_pin, test_null_generator_admission::{test_raster_label_parity_over_both_analytic_fields, test_reachable_benchmark_consumers_keep_own_node_samples[resolution_ladder]}, test_oracle_axis_admission::test_coarse_diverted_exact_field_admits_axis_and_saddle, the eight test_production_solver_receipt_trip_alignment ids, test_solovev_recovery_gates::test_the_reduced_oracle_is_a_seconds_class_roundoff_fixed_point, and test_solve_path_census_inputs::test_solve_path_prefix_slices_do_not_feed_the_null_census; head failure ids (6) are exactly the subset of those excluding the nine source_revision/archive ids. The manifest's baseline_suite.failure_ids (16) and after_suite.failure_ids (6) match this derivation entry for entry. head-minus-base is empty, so added_failure_count is 0 and added_failure_ids is empty. Timeouts (EXIT=124: base test_forward_receipt_raster, test_reduced_newton, test_two_class_recovery; head additionally test_forward_census) are outside the FAILED/ERROR id sets in both arms and are flagged separately under findings.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "head 4d355d3d584d6866b7f7928e4d4fdcb7808d1be3: benchmarks/solovev_certificate.py, scripts/analytic_oracle_fixtures/measure.py, docs/... /fsapi-clip-mode-certificate-hub.html",
+    "range 19a76002e..4d355d3d5: 3 files changed, 217 insertions(+), 154 deletions(-)",
+    "head commit 4d355d3d5: benchmarks/solovev_certificate.py -4, fragment +39",
+    "paired arms: base 16 failure ids / head 6 failure ids; added 0"
+  ],
+  "commits_read": [
+    "19a76002e866e4c514f108ff8155aa52704c406a",
+    "2e0061a7c4424cff1d1255ef1d59e901c15f6bbc",
+    "4d355d3d584d6866b7f7928e4d4fdcb7808d1be3"
+  ],
+  "completed_at": "2026-10-03T03:48:33.126Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T03:39:11Z",
+  "evidence_inputs": {
+    "added_failure_count": 0,
+    "out_of_scope_delegations": [
+      "row bit-identity and census timing: r-20261003T031455079972 at c090222b2",
+      "deleting the _SUPPORT_CLIP_MODE global in nova/equilibrium/forward_operator.py: wider f-fsapi-clip-mode-is-a-request-field deliverable, outside this node's write scope"
+    ],
+    "prior_findings_closed": [
+      "inert _closed_form_current_target clip_mode keyword removed at 4d355d3d5",
+      "evidence fragment populated (47 lines, migration table + arms + row-gate)",
+      "manifest command placeholder removed and failure_count aligned with failure_ids (16/6)"
+    ]
+  },
+  "evidence_record": "The review record is stored once at both granted paths for run r-20261002T225104739997-fsapi-clip-mode-certificate-hub, at reviewed head 4d355d3d5.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-failure-ids.txt",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The run's base-failure-ids.txt and head-failure-ids.txt are not failure-id lists: each is a 124-line grep usage dump (it opens with '--auto-hybrid-regex' and 'Usage:' and contains zero '::' lines), so a reader who opens the named artefact gets grep's help text. The manifest's own failure_ids lists are correct - this review re-derived 16 base / 6 head test ids directly from the per-module logs under base-tests/ and head-tests/ and reproduced them - so the defect is confined to the two auxiliary files, which should be regenerated from the logs or removed."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/test_forward_census.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "At head test_forward_census.py timed out (13 collected, then '......s....EXIT=124') where the base arm passed (11 passed, 2 skipped, EXIT=0 in 220 s). Neither arm's failure_ids records it and the manifest does not mention it, so the paired-arm delta reads more favourably than it was. Re-run at head under a bounded timeout, or record it as a known head-only non-pass."
+    },
+    {
+      "file": "benchmarks/solovev_certificate.py",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The base arm ran against /tmp/fsapi-clip-mode-certificate-hub-base, an extracted archive with no .git, so benchmarks/solovev_certificate.py _source_revision() raises CalledProcessError exit 128 and manufactures 9 base failures (test_exact_clip_moments::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from and the eight test_production_solver_receipt_trip_alignment source_revision tests) unrelated to clip mode. They pass at head and inflate the base-only set; a base arm from a real checkout would remove the artefact."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/manifest.md",
+      "line": "after_suite",
+      "severity": "follow-on",
+      "text": "The after_suite arm revision is 2e0061a7c while the reviewed head is 4d355d3d5. The intervening commit (removing an unread keyword and populating a docs fragment) cannot change a test outcome, so the derived added-failure count of 0 stands; but a reader comparing the arm revision to the reviewed head should find the reason recorded rather than inferred."
+    }
+  ],
+  "follow_ons": [
+    "Regenerate or remove the run's base-failure-ids.txt/head-failure-ids.txt, which are grep usage dumps rather than ids; the manifest's failure_ids lists are already correct.",
+    "Re-run tests/test_forward_census.py at head under a stated base and a bounded timeout, or record the head-only EXIT=124 timeout as a known non-pass.",
+    "Re-run the base arm from a real git checkout or worktree so _source_revision() does not manufacture nine spurious base failures.",
+    "Deleting the module global _SUPPORT_CLIP_MODE and its setter in nova/equilibrium/forward_operator.py is the wider report-level deliverable and remains outside this node's declared write scope.",
+    "The two terminal certificate measurements (archived-default-chord vs committed-explicit-chord bit identity, and the exact-mode row capture) belong to run r-20261003T031455079972 at c090222b2, per the node's fence."
+  ],
+  "gate_arms_note": "Both arms completed and are readable. base arm: revision 19a76002e, tree /tmp/fsapi-clip-mode-certificate-hub-base (an extracted archive with no .git), 26 modules, exit_status 1, completed true. head arm: revision 2e0061a7c, tree the run worktree, 26 modules, exit_status 1, completed true. The reviewed head is 4d355d3d5, one inert-keyword commit after the head arm's revision.",
+  "item_verdicts": {
+    "gate": "UNCHANGED. The paired arms ran at base 19a76002e (explicit chord) and head 2e0061a7c; the reviewed head 4d355d3d5 postdates the head arm. The intervening commit removes an unread keyword and populates a docs fragment, so no solve-path behaviour changes, but the head arm does not literally cover the reviewed head.",
+    "prior_finding_empty_fragment": "CLOSED. docs/evidence/fragments/forward-solve-api/fsapi-clip-mode-certificate-hub.html is 47 lines at head (from a 10-line '<body></body>' skeleton) and now carries a titled <main> with a former-global-sites table naming each migrated site and its explicit destination, a paired-arms section, and a row-gate section recording the resolved live-read blocker 8130fed42 and the merged measurement handoff c090222b2 (both commits verified to exist).",
+    "prior_finding_inert_keyword": "CLOSED. At head 4d355d3d5, _closed_form_current_target(case_name, source_case, operator, exact_physical) carries no clip_mode keyword (benchmarks/solovev_certificate.py:618-624 in the head tree) and its two former keyword call sites (previously lines 2298 and 3774) now pass positionally; a head-tree grep for clip_mode returns only the live request/operator threading (case/op helpers and the three certificate drivers at lines 2277,2287,3196,3757,3763,3923,4188,4371,4409,4416,4437) and no reference to the removed helper keyword. All four call sites (1126, 2294, 3330, 3769) pass four positional arguments.",
+    "prior_finding_record_defects": "CLOSED in the manifest. baseline_suite/after_suite command strings no longer carry the '<importing-module>' placeholder (each now reads 'Literal per-module CPU pytest commands are the first line of each of the 26 logs in log_path.'), and failure_count now equals len(failure_ids) in both arms (16 base, 6 head). Residual instrument artefacts remain and are recorded under findings.",
+    "receipt": "Populated and committed.",
+    "scope": "Met. Range 19a76002e..4d355d3d5 is exactly three paths (benchmarks/solovev_certificate.py, scripts/analytic_oracle_fixtures/measure.py, the evidence fragment), 217 insertions / 154 deletions; the head commit 4d355d3d5 touches only solovev_certificate.py (-4 lines) and the fragment (+39), no test file, no schema, no solver semantics."
+  },
+  "justifications": {
+    "durability": "Product change and the now-populated evidence fragment are committed at 4d355d3d5 under a conventional subject with a body; the gate logs and the global-clip reproduction log persist under the run directory. Four points are reserved because the head arm predates the reviewed head, the base arm is not reproducible from a stated checkout (an archive dereferenced under /tmp), and the failure-id artefacts are unrunnable.",
+    "evidence": "A readable, completed paired-arm record exists (26 per-module logs per arm) and this review independently re-derived the failure sets from those logs: 16 base failure ids, 6 head ids, head-minus-base empty, so added_failure_count 0. Four points are reserved for instrument artefacts that survive the repair: the run's base-failure-ids.txt and head-failure-ids.txt are files that hold grep usage text rather than ids (both 124 lines, identical), the head arm's test_forward_census.py timed out (EXIT=124) where base passed (11 passed, 2 skipped, EXIT=0 in 220 s), the base arm is archive-contaminated (9 source_revision failures from a missing .git), and the arm revision 2e0061a7c predates the reviewed head.",
+    "fit": "The approach is correct for a provenance/state-threading migration: explicit mode as operator and request state rather than a process global, with a None default preserving the sites that relied on the global. No figure is warranted and none is claimed. Two points reserved for the residual record/instrument artefacts rather than the design.",
+    "goal_fidelity": "The scoped migration goal is met: no process-global clip mutation remains in the two owned files, every operator/request on the certificate path receives an explicit mode (or a None default that preserves prior behaviour), and the prior review's inert keyword is gone. Three points are reserved because the node's own terminal gate (a serialised certificate row proving the receipt records the solving mode) is still unmet, delegated per the fence to r-20261003T031455079972 at c090222b2.",
+    "scope_discipline": "The diff is exactly the two scoped source files and the evidence fragment; no unrelated edits, no test-file writes, no solver semantics. One point reserved only for the auxiliary failure-id artefacts left in the run directory."
+  },
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT pass (85/100; goal_fidelity 17, evidence 15, scope_discipline 19, durability 16, fit 18). This re-review is attached to run r-20261002T225104739997-fsapi-clip-mode-certificate-hub at head 4d355d3d5 (base 19a76002e). The prior review's three required findings are closed: (1) the inert clip_mode keyword on _closed_form_current_target is removed at 4d355d3d5, its signature carries no such parameter and all four call sites pass positionally; (2) the evidence fragment is populated to 47 lines with the former-global-sites table, the paired-arms counts and the row-gate blocker, citing existing commits 8130fed42 and c090222b2; (3) the manifest command strings no longer carry the '<importing-module>' placeholder and failure_count now equals len(failure_ids) (16 base, 6 head). The node's scoped migration is complete: no process-global clip mutation remains in the two owned files. This review independently re-derived the failure sets from the per-module gate logs (base 16 ids, head 6, head-minus-base empty), so added_failure_count is 0 and added_failure_ids is empty. The node's own terminal certificate-row measurement remains unmet but is delegated by the node's fence to r-20261003T031455079972 at c090222b2 and is not counted against it. Residual instrument artefacts remain and are recorded as follow-ons: the run's base/head-failure-ids.txt are grep usage dumps, the head arm's test_forward_census timed out (EXIT=124) where base passed, the base arm is archive-contaminated, and the arm revision predates the reviewed head.",
+  "review_base_sha": "2ad434ae7ef58a887142eb4c4a0c91aec093d2f6",
+  "review_run_id": "r-20261003T033838231467-review-2-of-fsapi-clip-mode-certificate-hub",
+  "reviewed_base_sha": "19a76002e866e4c514f108ff8155aa52704c406a",
+  "reviewed_commit": "4d355d3d584d6866b7f7928e4d4fdcb7808d1be3",
+  "reviewed_head_sha": "4d355d3d584d6866b7f7928e4d4fdcb7808d1be3",
+  "reviewed_revision": "4d355d3d584d6866b7f7928e4d4fdcb7808d1be3",
+  "reviewed_run_id": "r-20261002T225104739997-fsapi-clip-mode-certificate-hub",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-certificate-hub",
+  "reviewer_node": "review-2-of-fsapi-clip-mode-certificate-hub",
+  "reviewer_run_id": "r-20261003T033838231467-review-2-of-fsapi-clip-mode-certificate-hub",
+  "reviewing_run_id": "r-20261003T033838231467-review-2-of-fsapi-clip-mode-certificate-hub",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 19
+  },
+  "section": "f-fsapi-clip-mode-is-a-request-field",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-suite-summary.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-suite-summary.txt",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-tests/",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-tests/test_forward_census.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/test_forward_census.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-tests/test_exact_clip_moments.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/test_exact_clip_moments.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/base-tests/test_production_solver_receipt_trip_alignment.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T225104739997-fsapi-clip-mode-certificate-hub/head-tests/test_production_solver_receipt_trip_alignment.log"
+  ],
+  "tests": [
+    {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/tmp/fsapi-clip-mode-certificate-hub-base /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'not slow' /tmp/fsapi-clip-mode-certificate-hub-base/tests/<per-module>.py (base arm, 26 modules)",
+      "result": "base_failures=11 modules; 16 test ids FAILED/ERROR"
+    },
+    {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=<run-worktree> /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -m 'not slow' <run-worktree>/tests/<per-module>.py (head arm, 26 modules)",
+      "result": "head_failures=9 modules; 6 test ids FAILED/ERROR; head ids a subset of base ids, added 0"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T03:52:00+00:00",
+  "total": 85,
+  "verdict": "pass"
+}

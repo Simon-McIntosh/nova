@@ -1,0 +1,50 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T16:58:32.669Z",
+  "dispatched_at": "2026-10-04T16:44:17Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/converged-forward-solve/r-20261004T164404793073-plan-review-of-converged-forward-solve/plan.html#s4",
+      "id": "thin_wrapper-1",
+      "reason": "the design's own delivery already reduces `forward_operator.py` to helpers or removes it, so the new-module-versus-extend choice is a naming detail rather than a behavioural gap.",
+      "text": "\u00a74 introduces `gs.apply` as a module whose body is the composition `ForwardFluxOperator` already performs (\"Map a trial poloidal flux to the flux its plasma current generates\", `nova/equilibrium/forward_operator.py:2323`), and the plan does not state why that map cannot be extended in place",
+      "type": "thin_wrapper",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/plan-review/converged-forward-solve/r-20261004T164404793073-plan-review-of-converged-forward-solve/plan.html#s6",
+      "id": "duplicate_owner-1",
+      "reason": "an unnamed owner at retirement is exactly the fork the design's own delivery forbids, and naming one file per function is a one-line plan change that removes the ambiguity before \u00a76 lands.",
+      "text": "\u00a76 says \"`fixed_point.py`, `forward.py` and `forward_operator.py` shrink to the four functions and their receipts\", while the landed design places `current.book`, `gs.apply` and `solve.fixed_point` in new modules `current.py`, `gs.py`, `solve.py` (design \u00a7Four signatures: \"`topology.py` is replaced in place; `current.py`, `gs.py` and `solve.py` absorb their respective responsibilities\"); the two readings disagree on which file owns each function",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "fc419c0c3fd3438a4cb856c2f7e8f498950764837c3038fc4ec268da0a04ec85",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 12,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T01:52:10.897195+00:00"
+    }
+  },
+  "review_run_id": "r-20261004T164404793073-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "c7bffe6c0d3e5c8bddc4a56ee01f68577b57c3e7",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `topology.read` hides a contour tree, branch selection and sub-cell fragmentation behind one signature, and `current.book` hides fragmentation plus exact-clip quadrature behind one signature; the design explicitly forbids a second public booking or solver, so the complexity sits behind the interface rather than spread across wrappers. The existing `Topology.read`/`read_with_connectivity` methods (`nova/equilibrium/topology.py:1396`,`:1376`) already return domain labels and the axis/separatrix state, and the design replaces `topology.py` in place \u2014 an extension of the owner.",
+    "duplicate_owner": "a finding \u2014 the plan names no single file owner for the map and solve functions, so it stays open whether new modules fork the existing `forward_operator.py` and `fixed_point.py`.",
+    "reuse_search": "pass \u2014 \u00a71's landed design (`docs/research/converged-forward-solve-design.html`) carries a revision-bound inventory of 17 null-role and 23 region-role source files, each with a real source marker and an absorb/delete destination, and \u00a74 names the implicit Picard, moment-map and boundary-flux envelope derivative contracts it carries over, so the plan cites the existing mechanism it extends rather than adding a subsystem blind.",
+    "thin_wrapper": "a finding \u2014 \u00a74's `gs.apply(\u03c8) = \u03c8_ext + G @ book(\u03c8, read(\u03c8))` is a four-line composition over a map the codebase already has."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:50:44.743228+00:00"
+}

@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T09:37:07.911Z",
+  "dispatched_at": "2026-10-06T09:21:10Z",
+  "findings": [
+    {
+      "anchor": "nova/transport/window_batch.py",
+      "id": "reuse_search-1",
+      "reason": "the brief's reuse map is the point of the item, and naming the existing boundary would have the author extend it so every new batching path reuses member_ids/for_member instead of re-deriving them.",
+      "text": "\u00a72 adds a second identified-member batching boundary beside the one already owned by nova/transport/ensemble.py (EnsembleForwardTransport, EnsembleTransportState.from_members, EnsembleMemberReceipt; commits cc542659c/c792f7d2c, 2026-08-20, three days before window_batch.py at 5c448153a, 2026-08-23), and neither the plan text nor its survey cites that owner",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/transport/window_batch.py:38",
+      "id": "duplicate_owner-1",
+      "reason": "the owner to extend is nova/transport/ensemble.py; a second member-axis boundary drifts from the first and the plan should name which one future batching consumers use.",
+      "text": "the member-identity machinery is a census: `_member_ids`/`member_ids`/`member(member_id)`/per-member receipt restated at nova/transport/ensemble.py:55,152,156 and again at nova/transport/window_batch.py:38,57,209",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/observation.py:200",
+      "id": "duplicate_owner-2",
+      "reason": "the plan must name the owner (nova/equilibrium/constraint.py) and either fold the pins into the ConstraintFunctional/ConstraintPair protocol or state why the pin interval semantics cannot be a ConstraintFunctional, so a later reader does not maintain two residual implementations.",
+      "text": "IsofluxPin (:200) / MomentPin (:223) / ConstraintPinSet (:242), and ForwardProfile.constraint_residual/jacobian (nova/equilibrium/forward.py:1310,1365), duplicate the flux/centroid residual surface owned by nova/equilibrium/constraint.py \u2014 IsofluxConstraint (:1295) with `observed`/`residual`/`dual_flux_image`, and CurrentCentroidConstraint (:934) \u2014 leaving ForwardProfile with two parallel constraint entry points (the older `constraint_pairs: tuple[ConstraintPair, ...]` compensator path at forward.py:1937,2142 and the pin path)",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c46332745a899a03e970a3109e75e544f20d9a57a816257eb3ed92e5b728d6aa",
+  "plan_slug": "ensemble-forward-seam",
+  "plan_version": 12,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T092046883086-plan-review-of-ensemble-forward-seam",
+  "reviewed_blob_sha": "52782816a8e285c77055e33dafb6f0909641d1f5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 ForwardProfile.thomson_observation_map/jacobian (nova/equilibrium/forward.py:1187,1215) composes synthesize_thomson (nova/equilibrium/observation_kernels.py:146), which hides profile-coordinate interpolation, COCOS pinning, support envelopes and typed receipts behind one function, so \u00a73+\u00a74 add depth rather than surface.",
+    "duplicate_owner": "a finding \u2014 two shared-owner mechanisms are duplicated, not extended: the identified-member batch boundary (owner nova/transport/ensemble.py) and the flux/isofont constraint-residual surface (owner nova/equilibrium/constraint.py).",
+    "interface_budget": "pass \u2014 the supplied current-week figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the reviewed revision (v12, a currency-audit revision) adds nothing to any of the four families, so no section triggers the retire-or-justify rule. The public names enumerated in the landed \u00a72\u2013\u00a75 summaries (solve_window_batch, MemberArrayBatch, BatchedCouplingState, ThomsonSignals, synthesize_thomson, ConstraintPinSet, \u2026) belong to the prior landing revision and are not this week's additions.",
+    "reuse_search": "a finding \u2014 the plan cites its cross-repo ambix survey (scripts/assimilation_seam_survey/report.md) but its in-repo reuse map omits the member-batch boundary that already existed in nova/transport/ensemble.py three days before the \u00a72 batching module was authored; the later diagnostics/thomson reuse of synthesize_thomson is correctly layered and is a pass, but one missed owner makes the item a finding.",
+    "thin_wrapper": "pass \u2014 solve_window_batch wraps solve_window but \u00a72 states in its own landed summary why the facade exists (member identity, one operator invocation per exchange, typed fail-closed refusals) and honestly publishes it 21% slower, which is the justification the item requires."
+  },
+  "section_digests": {
+    "_document": "1fdfda565ac608a04636a557f29f540598afa2ffb871dcf58c45da3438cd2b8f",
+    "s1": "0c65e168dde569dcf56e954a612c41d691e2af16829e2d316a06b6c92afb2d87",
+    "s2": "6ce656a5036bf9867ce8f80e5d03c0e39aae77e14323a96d228fcfeec3e35cb8",
+    "s3": "b73e8079585c95c1faa649f5fa7188a71d0a536e75f6eba7fc9ec83f93b3b29a",
+    "s4": "b46b865c43a1afec75c43adf4cb0c486063645fb075759790b403a5b7f7eeb83",
+    "s5": "72aec3633df2cd20b33692c9eaca749430043e6093f37d4beefa54694aeb5dfe"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T09:38:27.850372+00:00"
+}

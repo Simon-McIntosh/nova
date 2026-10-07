@@ -1,0 +1,34 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:27:40.915Z",
+  "dispatched_at": "2026-10-06T02:22:45Z",
+  "findings": [],
+  "plan_fingerprint": "0760f568fee8ed96ab725778012aa54002d3ff62532ff32ca019a73a05c77ff1",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 69,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T022227211495-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "8f6e14ba4a2da34531635111e8daadc783b90486",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the four functions are not wrappers: \u00a71's landed inventory binds 17 null-finding and 23 region-finding implementations to a single read (\u00a76 deletion list, `c-20261005T191534392997`), and each new module replaces a distinct multi-thousand-line mechanism (`fixed_point.py` 5,641 lines, `topology.py` 3,104, `forward_operator.py` 4,133) behind one signature. Surface shrinks (forward.py \"shrinks to the request and receipt adapter\"; `fixed_point.py`, `reduced_newton.py` and the operator's solver/booking authority are deleted), so the split adds depth rather than distributed wrappers.",
+    "duplicate_owner": "pass \u2014 the plan names the mechanism to extend at each point where duplication would otherwise appear: `ForwardSolvePolicy`/`TopologyPolicy` \"extended rather than duplicated\" (\u00a72, \u00a75); row scale owned by `ConstraintPair`/`ConstraintRecord` in `constraint.py` with \"no second declaration of a row scale exists in `solve.py`\" (`c-20261005T183924356464`); moments owned by `polygon_moments.py` (`c-20261005T195327296038`); the current-moment-map derivative owned by `gs.apply` and removed from `forward.py` (`c-20261005T204350711042`); GPFS receipt root resolved through `FilePath`, never a repeated literal (`c-20261006T003421698821`); program counting via `cache_guard.py`, \"no node builds a second compilation counter\" (`c-20261006T003421698760`); exterior flux owned by the `ExteriorField` operand, not a second path (`c-20261006T021141702213`). The \u00a76 census-as-gate enumerates importers and attribute users across `nova`, `apps`, `benchmarks`, `scripts`, `tests` before deletion, and names the retained exceptions (`moment.py`'s inverse estimator, `contour_tree.py`, `nova/biot/null.py`/`fieldnull.py`) so the check is not weakened to pass.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 (2026-10-06T02:22:27.985986Z). No section adds an option, view or refusal family, and each new public function names what it retires in its own section and \u00a76: \u00a72 retires the old `Topology` read + region authorities, \u00a73 the clip and support partition, \u00a74 the `ForwardFluxOperator` map, \u00a75 the `newton_krylov`/`picard`/`reduced_newton` routes; \u00a76's request-surface ruling (`c-20261005T213541950241`) records the `ForwardSolvePolicy` field count before and after as the interface-budget accounting the claim rests on.",
+    "reuse_search": "pass \u2014 the plan carries an explicit reuse map (recorded as cite-or-justify rulings on the run record) that names the existing owner for every mechanism it adds: `contour_tree.build_contour_tree`/`contour_tree_mesh.build_contour_mesh` for the tree (comment `c-20261005T185928859669`), `polygon_moments.polygon_monomial_moments` for moments (`c-20261005T195327296038`), `_single_site_krylov`/`_krylov_machine`/`_serve_krylov_stream`/`_krylov_outputs` and `_backtracking_scores`/`_select_backtracking_candidate`/`_backtracked_promotion` in `fixed_point.py` for the solve, `_flatten_*`/`_SourceLayout`/`_OperatorPytreeAux` in `forward_operator.py` for the operand layouts, the `clip_quadrature.py` exact-clip helpers for the booking, `ForwardSolvePolicy` in `solve_request.py` and `ConstraintPair`/`ConstraintRecord` in `constraint.py` for policy and row scale, and `FilePath` in `nova/database/filepath.py` plus `scripts/h200_test_lane/cache_guard.py` for path resolution and program counting. I opened each named owner and confirmed it exists at the cited symbol.",
+    "thin_wrapper": "pass \u2014 every new module is stated as a replacement, not a layer over the old: \u00a76 \"gs.apply replaces the map ForwardFluxOperator performs today rather than wrapping it\"; \u00a75 replaces `newton_krylov`, `picard` and `operator_request_body`; \u00a72 replaces `Topology.read`/`read_with_connectivity` and the `ForwardFluxOperator.read*` authorities; \u00a73 replaces `clipped_support_current_moments` and the support partition. The retained `forward.py` adapter is the existing request/receipt seam re-pointed, not a new pass-through, and it carries the request validation and receipt assembly itself."
+  },
+  "section_digests": {
+    "_document": "0782d95966fa181a1038db8afc8730a2b32bc1a2925501ad45d114d4818afcb1",
+    "s0": "66bed59341ceddd2b2d61465f1233d35c4d59c22234d867f09b1e4a337b0b482",
+    "s1": "e3926ed31983268b83ff4f7fe6feb947700172eb86a0d601549966b9cd8f4e20",
+    "s2": "254b21ab4574a4654af4914ed85cd161db29a25975ca66c1cadc0169b816d17d",
+    "s3": "bfa74835b32e89f1d009029df7d262e2ff3a2ec8c1b385240ffd1944e826f14c",
+    "s4": "7d23b7b52a53c7baf79319043739e7f1a16c13c17507bb66d13c97607c5eed19",
+    "s5": "7d065f3d2a0cd7837dbcc5e5df468c3df2a608776346c22c209ab7a7595cc0ce",
+    "s6": "7d71ea2158135f26f4d2ad95e6f32e582e3479791b56228cae60d5cb4b3fad9d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:32:58.906466+00:00"
+}

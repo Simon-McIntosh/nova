@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "From the reviewed run's own gate logs. The reviewed manifest declares no suite arms: baseline_suite and after_suite are both empty (classification.json manifest.data), and the reviewed change adds no product source or test, so there is no base/head pytest log to difference. The production derivation added_failures_from_gate_logs(None, None) returns unmeasured (count null, ids []), and the count is stored as unmeasured rather than as a measured zero.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py: 432-line instrument; enabled arm 418 count observations, disabled arm 0; verdict executable_scoped_not_process_cumulative, growth 0, transient peak 2, after-drop 0, disabled max 0",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json: 55 KB, revision 82f26d0a, analysis_revision a9c29fa7",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/alive-graph-count.png: 1400x700 direct-labelled line figure",
+    "docs/evidence/fragments/millisecond-converged-solve/mcs-alive-graph-count-series.html: 44-line landing fragment",
+    "report: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "6b9fa435011793b757ec0506d7784be50ff1a005",
+    "82f26d0ac6984782693e7e48d06926a16664144f",
+    "217b698411ac47506df01d45d359be4a4950de58",
+    "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+    "37daba9a5d3f2594d182c27312967dd7556ae725"
+  ],
+  "completed_at": "2026-10-02T18:05:19.127Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T17:27:59Z",
+  "evidence_inputs": "Reviewed 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567..37daba9a5d3f2594d182c27312967dd7556ae725 (five commits, 3087 insertions, git diff --check clean, reviewed worktree clean). The enabled raw log command_buffers_enabled.log shows the alive-graph counter oscillating 0..2 (instantiate->alive, destroy->remaining 0) throughout the ladder, so the count is transient rather than a stable retained count. The stored receipt.json summary came from --analyze-existing at revision a9c29fa7 and its after_cache_clear reading (release_events[0], :158) reverses the verdict the Titan job itself recorded (no_growth_observed, after-drop 2, released -1). The reviewed manifest's own baseline_suite and after_suite are empty.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py",
+      "line": "158",
+      "severity": "blocking",
+      "text": "The post-release count is release_events[0][\"count\"], the FIRST destruction event between the before_drop and after_drop markers, not a settled re-read after the drop. In the recorded enabled log that window (command_buffers_enabled.log:3689-3852) holds the same per-execution instantiate/destroy churn seen throughout the ladder (:27->:36, :47->:56, ...), and the running `remaining alive executable graphs` reaches 0 many times between programs, and the after_drop marker itself read 2 (:3852->:3856). So the reported 'dropping 10 handles plus cache clear returned it to 0' (graphs_released_after_drop 1, receipt.json:2584) attributes to the drop a return to zero the measurement also exhibits without any drop; there is no drop-absent control. The landed verdict executable_scoped_not_process_cumulative therefore rests on a reading of the churn, not on a measured release.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "The stored receipt labels itself revision 82f26d0a (:4, the Titan job revision) while its summary was produced by --analyze-existing at analysis_revision a9c29fa7 (:5); the two revisions disagree about the verdict -- the job's own receipt (titan-job-1280456.log:7) recorded {verdict: no_growth_observed, alive_executable_graphs_after_drop: 2, graphs_released_after_drop: -1} whereas the stored summary records executable_scoped_not_process_cumulative with after-drop 0 and released 1 (:2577, :2584) -- so a reader comparing the receipt to the locked revision 82f26d0a is reading a verdict that revision did not produce.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "The report states 'Measurement revision: 82f26d0a' (:8) and then quotes the post-hoc re-analysis verdict block (:19 executable_scoped_not_process_cumulative, :25 graphs released at the drop boundary 1) as the measurement, without disclosing that the job at that revision itself returned no_growth_observed with released -1 (titan-job-1280456.log:7); the manifest's landing line carries the same unqualified claim, so the reversal is not visible to a reader of the record.",
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "gate_arms_note": "Read the reviewed run's own logs rather than re-running. The enabled arm emitted 418 count observations and the disabled arm 0 (receipt.json arms), so the disabled zero is a genuine control result. The first Titan job 1280453 failed the enabled arm's positive control guard (no count) and produced no verdict.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call sites; the change adds a standalone measurement script and docs artefacts and reaches no runtime production code.",
+    "diff": "Read all five commits against 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567: instrument 3087 insertions across five files (instrument 432, receipt.json 2587, sbatch launcher, the 44-line fragment and the PNG); nothing outside the declared scope.",
+    "done_when": "The done-when names one Titan job with a disabled-command-buffer control arm and a drop-and-re-read step; the job ran (titan-job-1280456.log:7, enabled 418 count observations vs disabled 0, exit 0, Tesla P100), but its release clause is read from a post-hoc re-parse (analysis_revision a9c29fa7) that reverses the job's own receipt.",
+    "goal": "The goal is to measure whether the alive CUDA graph count accumulates per compiled executable or for the process; the enabled arm's twenty-program ladder (64x64..368x368) held the count at 1 at every completed-program marker with transient peak 2 (docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json summary), so it does not accumulate per distinct compiled executable.",
+    "manifest": "Read; names all five commits, both Titan jobs, the analysis log and the five test_logs; status complete, blockers none, negative control declared as the disabled-1280456 arm (write paths reach no test file, so no red log is required).",
+    "write_paths": "The manifest declares four write paths; git diff --numstat 8cbd46f3..37daba9a5 changes five repository files, all under docs/figures/millisecond-converged-solve/cuda-graph-count/ and the declared docs/evidence/fragments/millisecond-converged-solve/mcs-alive-graph-count-series.html, plus the declared out-of-repo report path."
+  },
+  "justifications": {
+    "durability": "No test pins the parse and the same raw log yields opposite verdicts across the parser revisions 82f26d0a and a9c29fa7 (titan-job-1280456.log:7 vs receipt.json:2577), so the recorded result is not reproducible from the input it cites.",
+    "evidence": "The job ran with a real positive control (enabled 418 count observations vs disabled 0), but the stored receipt's summary was produced by --analyze-existing at analysis_revision a9c29fa7 (receipt.json:5) and records a verdict the job's own receipt contradicts (titan-job-1280456.log:7 no_growth_observed, after-drop 2, released -1).",
+    "fit": "The figure obeys the data-ink rules (direct labels, despined, no grid) and the instrument guards are mechanism-worded, though the figure draws a flat-line-then-drop the raw churn does not cleanly show.",
+    "goal_fidelity": "The ladder answers the posed alternative (growth_across_program_ladder 0 over twenty distinct programs, receipt.json), but the landing's release clause -- 'dropping 10 handles plus cache clear returned it to 0' -- is not measured independently of the per-execution churn the same log shows (command_buffers_enabled.log:27-36, 3689-3852).",
+    "scope_discipline": "Every one of the five changed files is inside the out-of-repo declared paths (git diff --numstat 8cbd46f3..37daba9a5); receipt.json is 55 KB, below the 300 KB bound for a repository data file."
+  },
+  "plan": "nova:millisecond-converged-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567\nREVIEWED_HEAD_SHA: 37daba9a5d3f2594d182c27312967dd7556ae725\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: The ladder answers the posed alternative (growth_across_program_ladder 0 over twenty distinct programs, receipt.json), but the landing's release clause -- 'dropping 10 handles plus cache clear returned it to 0' -- is not measured independently of the per-execution churn the same log shows (command_buffers_enabled.log:27-36, 3689-3852).\nSCORE evidence: 11\nJUSTIFICATION evidence: The job ran with a real positive control (enabled 418 count observations vs disabled 0), but the stored receipt's summary was produced by --analyze-existing at analysis_revision a9c29fa7 (receipt.json:5) and records a verdict the job's own receipt contradicts (titan-job-1280456.log:7 no_growth_observed, after-drop 2, released -1).\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: Every one of the five changed files is inside the out-of-repo declared paths (git diff --numstat 8cbd46f3..37daba9a5); receipt.json is 55 KB, below the 300 KB bound for a repository data file.\nSCORE durability: 10\nJUSTIFICATION durability: No test pins the parse and the same raw log yields opposite verdicts across the parser revisions 82f26d0a and a9c29fa7 (titan-job-1280456.log:7 vs receipt.json:2577), so the recorded result is not reproducible from the input it cites.\nSCORE fit: 15\nJUSTIFICATION fit: The figure obeys the data-ink rules (direct labels, despined, no grid) and the instrument guards are mechanism-worded, though the figure draws a flat-line-then-drop the raw churn does not cleanly show.\nVERDICT goal: The goal is to measure whether the alive CUDA graph count accumulates per compiled executable or for the process; the enabled arm's twenty-program ladder (64x64..368x368) held the count at 1 at every completed-program marker with transient peak 2 (docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json summary), so it does not accumulate per distinct compiled executable.\nVERDICT done_when: The done-when names one Titan job with a disabled-command-buffer control arm and a drop-and-re-read step; the job ran (titan-job-1280456.log:7, enabled 418 count observations vs disabled 0, exit 0, Tesla P100), but its release clause is read from a post-hoc re-parse (analysis_revision a9c29fa7) that reverses the job's own receipt.\nVERDICT write_paths: The manifest declares four write paths; git diff --numstat 8cbd46f3..37daba9a5 changes five repository files, all under docs/figures/millisecond-converged-solve/cuda-graph-count/ and the declared docs/evidence/fragments/millisecond-converged-solve/mcs-alive-graph-count-series.html, plus the declared out-of-repo report path.\nVERDICT manifest: Read; names all five commits, both Titan jobs, the analysis log and the five test_logs; status complete, blockers none, negative control declared as the disabled-1280456 arm (write paths reach no test file, so no red log is required).\nVERDICT diff: Read all five commits against 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567: instrument 3087 insertions across five files (instrument 432, receipt.json 2587, sbatch launcher, the 44-line fragment and the PNG); nothing outside the declared scope.\nCALL_SITES: none\nFINDING docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py:158 blocking: The post-release count is release_events[0][\"count\"], the FIRST destruction event between the before_drop and after_drop markers, not a settled re-read after the drop. In the recorded enabled log that window (command_buffers_enabled.log:3689-3852) holds the same per-execution instantiate/destroy churn seen throughout the ladder (:27->:36, :47->:56, ...), and the running `remaining alive executable graphs` reaches 0 many times between programs, and the after_drop marker itself read 2 (:3852->:3856). So the reported 'dropping 10 handles plus cache clear returned it to 0' (graphs_released_after_drop 1, receipt.json:2584) attributes to the drop a return to zero the measurement also exhibits without any drop; there is no drop-absent control. The landed verdict executable_scoped_not_process_cumulative therefore rests on a reading of the churn, not on a measured release.\nFINDING docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json:5 follow-on: The stored receipt labels itself revision 82f26d0a (:4, the Titan job revision) while its summary was produced by --analyze-existing at analysis_revision a9c29fa7 (:5); the two revisions disagree about the verdict -- the job's own receipt (titan-job-1280456.log:7) recorded {verdict: no_growth_observed, alive_executable_graphs_after_drop: 2, graphs_released_after_drop: -1} whereas the stored summary records executable_scoped_not_process_cumulative with after-drop 0 and released 1 (:2577, :2584) -- so a reader comparing the receipt to the locked revision 82f26d0a is reading a verdict that revision did not produce.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md:19 follow-on: The report states 'Measurement revision: 82f26d0a' (:8) and then quotes the post-hoc re-analysis verdict block (:19 executable_scoped_not_process_cumulative, :25 graphs released at the drop boundary 1) as the measurement, without disclosing that the job at that revision itself returned no_growth_observed with released -1 (titan-job-1280456.log:7); the manifest's landing line carries the same unqualified claim, so the reversal is not visible to a reader of the record.\n",
+  "review_base_sha": "bf8122ae28f481e1ac7eb9194bdfcf21f6f567e5",
+  "review_run_id": "r-20261002T172738437395-review-of-mcs-alive-graph-count-series",
+  "reviewed_base_sha": "8cbd46f3fdee9a61fbd48fb919cd7c0728d51567",
+  "reviewed_commit": "37daba9a5d3f2594d182c27312967dd7556ae725",
+  "reviewed_head_sha": "37daba9a5d3f2594d182c27312967dd7556ae725",
+  "reviewed_revision": "37daba9a5d3f2594d182c27312967dd7556ae725",
+  "reviewed_run_id": "r-20261002T170249718910-mcs-alive-graph-count-series",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series",
+  "reviewer_node": "review-of-mcs-alive-graph-count-series",
+  "reviewer_run_id": "r-20261002T172738437395-review-of-mcs-alive-graph-count-series",
+  "scores": {
+    "durability": 10,
+    "evidence": 11,
+    "fit": 15,
+    "goal_fidelity": 12,
+    "scope_discipline": 18
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T17:52:00Z",
+  "total": 66,
+  "verdict": "pass-with-follow-ons"
+}

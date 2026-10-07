@@ -1,0 +1,102 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest leaves baseline_suite and after_suite empty, so neither suite arm is readable and both observable failure-id sets are empty. Their set difference is added_failure_ids=[] and added_failure_count=0; this records no added failure in readable paired arms and does not claim that a paired suite ran.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.json: control refused, no comparison, two eight-row finite ordered sweeps, any_weight_admitted=false",
+    "docs/figures/playable-forward-solve/shape-inverse/direction-reversal-negative-control.json: both controls converged=false, comparison_admissible=false, diagnostic errors retained only as diagnostics",
+    "docs/figures/playable-forward-solve/shape-inverse/shape-regularisation-curve.png: 1400x600 receipt-driven curve; no weight combines 80 percent closure with 20 kA",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/convergence-upper.log: CONTROL-REFUSED trips=7 budget=64 terminal_residual=0.00093867, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/convergence-elongation.log: CONTROL-REFUSED trips=4 budget=64 terminal_residual=0.00137849, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/finalizer-and-retraction-gate.log: receipt refusal plus three sweep mutations refused, EXIT=0"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "f58e3baa92e7c62561a4e43c5c04824093d84fcf",
+    "b3cc1728e5973acd34397859c9dc5da78002dcb5",
+    "53f72498936ae7eb565e23f579812a499c6e4a2f",
+    "3106d03c6bbc3c85bb159d12a981e3c0b3fa51c5"
+  ],
+  "completed_at": "2026-10-02T17:38:03Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T17:20:19Z",
+  "evidence_inputs": "Reviewed b12cb22cc21946e85211979b626c3f7009ae629a..3106d03c6bbc3c85bb159d12a981e3c0b3fa51c5 and the external report. The larger-budget attempts did not converge: upper stopped after 7 of 64 trips at residual 9.386702e-4 and elongation after 4 of 64 at 1.378488e-3. The head therefore removes the causal comparison and figure, sets final control errors to null while retaining diagnostic terminal errors, and states the refusal consistently in the receipt, report, fragment and cumulative archive. The regularisation sweep is complete and guarded: at weight 100, upper closes 3.6364 percent at 4.8504 kA and elongation closes 29.4643 percent at 11.2130 kA; no weight meets both the 80 percent floor and 20 kA ceiling.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "Land this as a measured negative repair, not as completion of the original physical claim. The persisted regularisation result is valid, but both reversed-update controls remain non-converged and the control figure is correctly absent; the underlying need for a converged discriminating shape-inverse control therefore remains open."
+    },
+    {
+      "file": "benchmarks/playable_shape_inverse_receipt.py",
+      "line": "1503",
+      "severity": "follow-on",
+      "text": "The generated 1400 by 600 regularisation figure clips the sentence-length left y-axis label at the top of the canvas. Shorten it to a quantity-and-unit label such as 'closure fraction' and leave the 80 percent criterion to the directly labelled threshold and caption."
+    },
+    {
+      "file": "benchmarks/playable_shape_inverse_receipt.py",
+      "line": "1439",
+      "severity": "follow-on",
+      "text": "The upper and elongation colours remain literal hex values in this benchmark. The plotting policy requires component colours to be named once in the repository style module and reused consistently; move these roles there and retain a palette-validation receipt when the mapping is established."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "Reviewed head 3106d03c6 is not an ancestor of review base bf8122ae2. Coordinator integration must land the complete four-commit chain ending at 3106d03c6; the final retraction commit depends on the receipts and generator changes in its three ancestors."
+    }
+  ],
+  "gate_arms_note": "No readable baseline_suite or after_suite was recorded. Independent receipt inspection at reviewed head 3106d03c6 confirms verdict=refused_non_convergence, comparison_admissible=false, no comparison field, null final errors on both controls, diagnostic errors 0.04023821824440655 m and 0.11262202629459438 m, terminal residuals 9.386702041675805e-4 and 1.3784876256828574e-3, exact weights [0,1e-4,1e-3,1e-2,1e-1,1,10,100], eight rows per command and any_weight_admitted=false. The target's finalizer gate passed the head receipt and refused reordered, NaN and infinite sweep mutations. git diff --check exited 0.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none; the executable change remains a benchmark and receipt generator, not a production runtime path.",
+    "diff": "Read all four commits against b12cb22cc. The first two add and persist the attempted control and sweep; 53f724989 adds convergence refusal; 3106d03c6 reruns the controls with a 64-trip budget, retracts the inadmissible comparison and figure, adds ordered-finite sweep validation, regenerates the curve, and reconciles every durable evidence surface.",
+    "done_when": "The original control-and-figure clause is not physically achieved, but the prescribed repair state is complete: both controls are refused, no comparison or control figure remains, all sixteen regularisation points are retained, and the generated curve states that no weight admits under the 80 percent closure floor and 20 kA ceiling.",
+    "goal": "The resumed run follows the independent review's authorised fallback exactly: after a bounded larger-budget attempt left both reversed-update equilibria non-converged, it retracts the causal-control claim everywhere and retains the complete regularisation result. This passes as an honest negative result; it does not establish the originally sought discriminating control.",
+    "manifest": "The final manifest records all four candidate commits, explicit changed paths, literal replayable commands, measurement paths and the retraction outcome. Its baseline_suite and after_suite arms remain empty, so no paired failure delta was measured.",
+    "write_paths": "All nine repository paths in b12cb22cc..3106d03c6 and the external report are inside the declared grants. The cumulative evidence change is a bounded append-only section, and the invalid control PNG is removed inside the granted figure directory."
+  },
+  "justifications": {
+    "durability": "The generator refuses non-converged controls before comparison, the retraction finalizer requires finite refusal receipts, and the sweep finalizer pins the exact ordered weight tuple plus finite closure and current metrics. A head-arm gate checks the persisted refusal and three deliberately corrupted sweeps; reverse-reading 53f724989 fails the repaired verdict contract with EXIT=1. Two points are withheld because these checks are inline gates rather than a committed test file and no paired suite arms were recorded.",
+    "evidence": "convergence-upper.log and convergence-elongation.log name revision 4bf3047cf, the exact module and cwd, and record residuals 9.386702e-4 and 1.378488e-3 with explicit CONTROL-REFUSED receipts. The measurement implementation at 4bf3047cf is byte-equivalent to reviewed head 3106d03c6 for the control path; the final head adds only retraction handling around it. The aggregate receipt, arm receipts, report, fragment and archive reconcile, and the finalizer gate proves three malformed sweep mutations are refused.",
+    "fit": "The retraction is compact, explicit and consistent with the receipt vocabulary; the replacement PNG is 1400 by 600, despined, directly labelled and generated from the receipt. The left vertical axis label is visibly clipped because its sentence-length text exceeds the canvas height, and the two component colours remain hard-coded in the benchmark rather than named once in the repository style module.",
+    "goal_fidelity": "The repair obeys the re-review's ordered instruction: try both controls for at most twenty minutes, then retract if either remains non-converged. Both attempts terminated at the previously observed 7 and 4 trips despite a 64-trip budget, so the head truthfully records refused_non_convergence and preserves the independently valid sweep. Three points are withheld because the original goal still lacks a converged discriminating control.",
+    "scope_discipline": "git diff --name-status b12cb22cc..3106d03c6 lists only the granted benchmark, figure/receipt directory, cumulative archive and fragment. The external report is at its granted absolute path, and the target worktree is clean."
+  },
+  "plan": "nova:playable-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the resumed run follows the authorised fallback after both enlarged-budget controls remain non-converged; it retracts the causal claim everywhere and retains the valid sweep, so the repair passes while the original discriminating-control need remains open.\nVERDICT done_when: no inadmissible comparison or control figure remains; the receipt carries explicit refusal plus sixteen ordered finite sweep points, and the regularisation caption states that no weight admits.\nVERDICT write_paths: every repository path in b12cb22cc..3106d03c6 and the external report is inside the declared grant; the archive edit is a bounded append-only section.\nVERDICT manifest: all four commits, paths and literal commands are recorded; baseline_suite and after_suite are empty, so no paired suite delta was measured.\nVERDICT diff: f58e3baa9 and b3cc1728e add the attempted control and evidence, 53f724989 refuses unsettled comparisons, and 3106d03c6 performs the bounded rerun, retraction, exact finite sweep guard and evidence reconciliation.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: the ordered fallback is satisfied and the negative result is honest, but no converged discriminating control exists.\nSCORE evidence: 19\nJUSTIFICATION evidence: two fully headed solve logs, reconciled receipts and evidence surfaces, a reverse-parent failure and three mutation refusals make the conclusion falsifiable and reproducible.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all changed paths are granted and the target tree is clean.\nSCORE durability: 18\nJUSTIFICATION durability: convergence, verdict, exact-weight and finite-metric guards all fire under mutation, though they remain inline gates rather than a committed test and no paired suite ran.\nSCORE fit: 16\nJUSTIFICATION fit: the code and evidence vocabulary are clear and the direct labels now sit inside the axes, but the long left axis label is clipped and the study colours remain hard-coded outside the style module.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md:5 follow-on: land this as a measured negative; the original converged-control need remains open.\nFINDING benchmarks/playable_shape_inverse_receipt.py:1503 follow-on: shorten the clipped sentence-length closure-axis label and leave the criterion to the threshold and caption.\nFINDING benchmarks/playable_shape_inverse_receipt.py:1439 follow-on: move the hard-coded study colours to named repository style roles and preserve palette validation.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md:5 follow-on: integrate the complete four-commit chain ending at 3106d03c6 because it is not yet in review base bf8122ae2.",
+  "review_base_sha": "bf8122ae28f481e1ac7eb9194bdfcf21f6f567e5",
+  "review_run_id": "r-20261002T171954107443-review-of-pfs-shape-inverse-control-and-regularisation",
+  "reviewed_base_sha": "b12cb22cc21946e85211979b626c3f7009ae629a",
+  "reviewed_commit": "3106d03c6bbc3c85bb159d12a981e3c0b3fa51c5",
+  "reviewed_head_sha": "3106d03c6bbc3c85bb159d12a981e3c0b3fa51c5",
+  "reviewed_revision": "3106d03c6bbc3c85bb159d12a981e3c0b3fa51c5",
+  "reviewed_run_id": "r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-shape-inverse-control-and-regularisation",
+  "reviewer_node": "review-of-pfs-shape-inverse-control-and-regularisation",
+  "reviewer_run_id": "r-20261002T171954107443-review-of-pfs-shape-inverse-control-and-regularisation",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "section": "\u00a78",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T17:28:25Z",
+  "total": 90,
+  "verdict": "pass"
+}

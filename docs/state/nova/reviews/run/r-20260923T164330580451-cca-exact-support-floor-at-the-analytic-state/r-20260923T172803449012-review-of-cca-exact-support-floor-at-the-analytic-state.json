@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "assertion_review": {
+    "archived_state_controls": "Coordinate/state and physical/coupling-moment comparisons fail on different fixtures, support paths, basis conversion or archived fractions; the archive supplies the comparison values.",
+    "census": "The required census is not independent: both expected and observed sets change together when the receipt declarations and rows are shortened; the empty-census counterexample passed.",
+    "closure": "The algebraic four-term identity and cell/class sums check accounting consistency; closure alone cannot prove the independently integrated geometry is correct.",
+    "geometry_controls": "Known concave area/moments, hole subtraction and signed-versus-geometric bow-tie values fail if orientation, holes or winding semantics regress.",
+    "paired_control": "The live chord condition refuses absolute archived-target deficit ratios at or above 0.1; the saved audit deliberately refuses a false verdict. The hard-coded two-percent toy assertion is arithmetic, not an additional exercise of the live condition.",
+    "panels": "PNG signatures fail for absent or non-PNG artifacts; scientific visual content was checked separately by opening both panels.",
+    "refinement_controls": "Boundary relative L1 and quadrature-order-doubling bounds fail when the two independent resolutions/orders disagree above their thresholds."
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "docs/figures/cut-cell-current-attribution/exact-support-floor/run.sh:17"
+  ],
+  "completed_at": "",
+  "counterexample_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T172803449012-review-of-cca-exact-support-floor-at-the-analytic-state/audit-counterexample.log",
+  "dispatched_at": "2026-09-23T17:28:03.449012+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/cut-cell-current-attribution/exact-support-floor/audit.py",
+      "line": "15",
+      "text": "[P2] Pin the required case/rung census independently of the receipt: expected is currently formed from report['cases'] and report['rungs'], so shortening those declarations together with rows preserves the equality and skips omitted cases; validate accepted completed=true with cases=[], rungs=[], rows=[] and the two existing PNG panels. A control declaring one expected row but supplying none was refused, proving the validator executed. Fix by asserting the authored two cases and five rungs against independent constants and add a coherent omission/empty-census refusal, rather than only removing a row while retaining its declaration."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "Reviewed the nine commit records and final benchmark, audit, receipt tables, logs, both figures and append-only HTML delta against 66b5c51cc99bb80d5084987cfbc5860f1d648b9a; docs/figures/cut-cell-current-attribution/exact-support-floor/audit.py:15 contains a reproducible completeness-guard defect, while the delivered numerical evidence supports the reported attribution.",
+    "done_when": "Read the source prompt and resume-1-advice.txt together; docs/figures/cut-cell-current-attribution/exact-support-floor/job.log records all ten case/rung pairs in both modes, fraction 0.954177219088 and centroid -35.0621334 mm on diverted 110, while report.md retains the revised chord/exact deficit criterion and both inspected 300-cell panels.",
+    "goal": "Satisfied for an attribution-only node: benchmarks/exact_support_floor_attribution.py:455 separates same-polygon integration from geometry and preserves an additional non-simple booked-minus-formula remainder; docs/figures/cut-cell-current-attribution/exact-support-floor/report.md:190 states the resulting mechanism limit rather than claiming a production repair.",
+    "manifest": "Read the complete source manifest, nine declared commits, numerical and rendering logs and scheduler receipt; its four-term caveat and retained open followup agree with docs/evidence/archive/cut-cell-current-attribution-landed.html:2969, and the numerical run at 150a1398c478e2b11d7a25de5195e280838dd856 differs from the reviewed head only in later rendering/provenance behavior and added evidence.",
+    "write_paths": "All 49 paths in the base-to-head diff lie within the source node's five declared write roots, including the benchmark, receipt directory, cumulative evidence and owning plan; no path under nova/ changes."
+  },
+  "justifications": {
+    "durability": "The geometric controls and archived-state comparisons in benchmarks/exact_support_floor_attribution.py:98 and :330 can expose numerical regressions, but audit.py:15 derives its expected census from the same receipt and accepted a zero-row completed receipt in the independent counterexample, bypassing every row assertion.",
+    "evidence": "docs/figures/cut-cell-current-attribution/exact-support-floor/job.log:1 pins the complete 20-evaluation run to its source and tree, and audit.log records passing sums plus two refusals, but audit.py:15 does not independently enforce the required two-case/five-rung census.",
+    "fit": "benchmarks/exact_support_floor_attribution.py uses the existing certificate, fixture, moment and nova.media APIs, names mechanisms rather than plan stages, retains x64 and device checks, and publishes both figures through project-absolute links in the evidence HTML.",
+    "goal_fidelity": "benchmarks/exact_support_floor_attribution.py:255 evaluates the archived analytic state without solving and records the required per-cell and class attribution, non-simple source polygons and paired chord measurements, with the unavoidable fourth term stated explicitly in report.md:192.",
+    "scope_discipline": "The 49-file diff stays inside the source manifest's declared roots, and docs/plans/cut-cell-current-attribution.html adds evidence within section 6 without changing plan-version, plan-modified, the driving followup or production source."
+  },
+  "limitations": [
+    "Scheduler launch of a full receipt recheck was refused by sandbox socket permissions before allocation; the original passing audit.log and completed H200 job.log were inspected instead.",
+    "The independent counterexample is a small unit check, completed in 2.804578321054578 seconds; no candidate source or receipt was changed.",
+    "The fourth non-simple integration term is retained honestly; the attribution does not isolate secondary confinement, density evaluation and quadrature within the moment path."
+  ],
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 66b5c51cc99bb80d5084987cfbc5860f1d648b9a\nreviewed_head_sha: c3fc3b7e0dd1c2df94c1a55bd069d835c34dcb95\nVERDICT goal: Satisfied for an attribution-only node: benchmarks/exact_support_floor_attribution.py:455 separates same-polygon integration from geometry and preserves an additional non-simple booked-minus-formula remainder; docs/figures/cut-cell-current-attribution/exact-support-floor/report.md:190 states the resulting mechanism limit rather than claiming a production repair.\nVERDICT done_when: Read the source prompt and resume-1-advice.txt together; docs/figures/cut-cell-current-attribution/exact-support-floor/job.log records all ten case/rung pairs in both modes, fraction 0.954177219088 and centroid -35.0621334 mm on diverted 110, while report.md retains the revised chord/exact deficit criterion and both inspected 300-cell panels.\nVERDICT write_paths: All 49 paths in the base-to-head diff lie within the source node's five declared write roots, including the benchmark, receipt directory, cumulative evidence and owning plan; no path under nova/ changes.\nVERDICT manifest: Read the complete source manifest, nine declared commits, numerical and rendering logs and scheduler receipt; its four-term caveat and retained open followup agree with docs/evidence/archive/cut-cell-current-attribution-landed.html:2969, and the numerical run at 150a1398c478e2b11d7a25de5195e280838dd856 differs from the reviewed head only in later rendering/provenance behavior and added evidence.\nVERDICT diff: Reviewed the nine commit records and final benchmark, audit, receipt tables, logs, both figures and append-only HTML delta against 66b5c51cc99bb80d5084987cfbc5860f1d648b9a; docs/figures/cut-cell-current-attribution/exact-support-floor/audit.py:15 contains a reproducible completeness-guard defect, while the delivered numerical evidence supports the reported attribution.\nCALL_SITES: docs/figures/cut-cell-current-attribution/exact-support-floor/run.sh:17\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: benchmarks/exact_support_floor_attribution.py:255 evaluates the archived analytic state without solving and records the required per-cell and class attribution, non-simple source polygons and paired chord measurements, with the unavoidable fourth term stated explicitly in report.md:192.\nSCORE evidence: 19\nJUSTIFICATION evidence: docs/figures/cut-cell-current-attribution/exact-support-floor/job.log:1 pins the complete 20-evaluation run to its source and tree, and audit.log records passing sums plus two refusals, but audit.py:15 does not independently enforce the required two-case/five-rung census.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 49-file diff stays inside the source manifest's declared roots, and docs/plans/cut-cell-current-attribution.html adds evidence within section 6 without changing plan-version, plan-modified, the driving followup or production source.\nSCORE durability: 14\nJUSTIFICATION durability: The geometric controls and archived-state comparisons in benchmarks/exact_support_floor_attribution.py:98 and :330 can expose numerical regressions, but audit.py:15 derives its expected census from the same receipt and accepted a zero-row completed receipt in the independent counterexample, bypassing every row assertion.\nSCORE fit: 20\nJUSTIFICATION fit: benchmarks/exact_support_floor_attribution.py uses the existing certificate, fixture, moment and nova.media APIs, names mechanisms rather than plan stages, retains x64 and device checks, and publishes both figures through project-absolute links in the evidence HTML.\nFINDING docs/figures/cut-cell-current-attribution/exact-support-floor/audit.py:15 [P2] Pin the required case/rung census independently of the receipt: expected is currently formed from report['cases'] and report['rungs'], so shortening those declarations together with rows preserves the equality and skips omitted cases; validate accepted completed=true with cases=[], rungs=[], rows=[] and the two existing PNG panels. A control declaring one expected row but supplying none was refused, proving the validator executed. Fix by asserting the authored two cases and five rungs against independent constants and add a coherent omission/empty-census refusal, rather than only removing a row while retaining its declaration.\n",
+  "review_method": "Read-only source, commit, artifact and call-site inspection; no numerical rerun; one in-memory completeness counterexample.",
+  "review_run_id": "r-20260923T172803449012-review-of-cca-exact-support-floor-at-the-analytic-state",
+  "reviewed_base_sha": "66b5c51cc99bb80d5084987cfbc5860f1d648b9a",
+  "reviewed_head_sha": "c3fc3b7e0dd1c2df94c1a55bd069d835c34dcb95",
+  "reviewed_run_id": "r-20260923T164330580451-cca-exact-support-floor-at-the-analytic-state",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-exact-support-floor-at-the-analytic-state",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-24T04:56:32.125044+00:00",
+  "total": 93
+}

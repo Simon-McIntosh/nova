@@ -1,0 +1,102 @@
+{
+  "absent": [
+    "no test guards this node's product: the added-failure delta is a one-shot measurement with no assertion that re-derives it",
+    "no usable timing evidence: both arms carry PINNED_REVISION_MISMATCH, so the two walls cannot support the \u00a73 per-member cost figure",
+    "no repository commit: the reviewed node's only output is the report and the two lane logs, both outside the repository"
+  ],
+  "absent_items": [
+    {
+      "disposition": "not reproduced by this review: the review rubric forbids re-running the suite, and the two arms already ran the same file byte-identically at both revisions; the failure sets are therefore taken from the reviewed run's recorded logs, which is the evidence the done_when names.",
+      "item": "an independent re-run of the reference file to confirm the eight failures are stable"
+    },
+    {
+      "disposition": "follow-on: this node answers only the added-failure delta of the fused-route change; the \u00a73 millisecond figure needs a cache-warm, correctly-pinned H200 run and is not produced here (both arms ran against pin eb565ed4, mismatched to their revisions).",
+      "item": "wall-clock evidence for the millisecond per-member cost that plan \u00a73 asks for"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": {
+    "note": "This node is a measurement role: it adds no product assertion, so there is no added assertion to weigh against an independent source. Its publication is the added-failure delta, and that delta is falsifiable by the two logs it cites \u2014 I reproduced it from the logs directly, not from the manifest's summary. The change under test (571f4e8cc) does add a guard (require_qualified_axis(admitted) at nova/equilibrium/forward_operator.py:3327) plus a test edit in tests/test_fused_same_state_read.py, but that guard and test belong to the fused-route node, not to this test-role node, and are outside this review's diff."
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:3600 cell_current_moments",
+    "nova/equilibrium/forward_operator.py:3663 current_moments_and_observation",
+    "nova/equilibrium/forward_operator.py:3673 normalised_current_moments_and_observation"
+  ],
+  "commits_read": [
+    "d786948c468d01c1ffb87718758ed60483ea4910",
+    "0e5e34157bf39041cd1b2d53539602fda659e995"
+  ],
+  "completed_at": "2026-10-02T10:22:04.394Z",
+  "dispatched_at": "2026-10-02T10:05:12Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T090417250576-msc-reference-lane-full-run/manifest.md",
+      "line": "after_suite",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded after_suite.command is the launcher argv ('.../scripts/h200_test_lane/run.sh --log <run>/head-reference-full.log --time 02:00:00 -- tests/test_equilibrium_forward_reference.py'), but the command that actually ran is the one the head log header prints at its COMMAND line: '.../python -m pytest -p no:cacheprovider tests/test_equilibrium_forward_reference.py --timeout 3600'. The manifest's baseline_suite.command carries an explicit '--timeout 3600' because the base revision's launcher predates the per-test bound, so the two recorded commands differ in whether the bound appears even though both logs' pytest headers read 'timeout: 3600.0s'. The measure is unaffected (test outcomes only), but a reader comparing the two stored command fields can read them as running under different timeouts when they did not."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/msc-reference-lane-full-run.md",
+      "line": "Confounds",
+      "severity": "follow-on",
+      "text": "follow-on: both arms ran against a prewarm pin compiled for another revision (each log carries PINNED_REVISION_MISMATCH pinned=eb565ed4...), so the two wall times (976.26s, 967.42s) are compile-affected and are not a comparable timing measurement; the report and manifest record this correctly and exclude timing from the measure, but the numeric walls appear in the report's arms table and could be lifted from it into a millisecond-cost claim they cannot support. This run produces a test-outcome delta only; no wall-clock evidence for the \u00a73 figure is present in these two logs."
+    }
+  ],
+  "gate_arms_note": "Both arms are present and readable in the reviewed run's own manifest. baseline_suite (revision d786948c4) and after_suite (revision 0e5e34157) each declare completed true, exit_status 1, failure_count 8 and an eight-element failure_ids list. I derived the delta twice and both derivations agree: from the manifest's stored ids (set(after) - set(baseline) is empty) and independently from the reviewed run's own gate logs, whose FAILED lines I parsed directly (head-reference-full.log: 8 FAILED lines; base-reference-full.log: 8 FAILED lines; the sorted sets are identical), so added_failure_ids is empty by a measured absence rather than an omitted comparison. Positive control for that absence: the same parser sees eight FAILED ids and the terminal summary line '8 failed, 21 passed' in each log, so it demonstrably reads a non-empty failure set present in the input; the reviewed-run manifest's baseline_suite/after_suite ids are byte-equal to the log-derived ids (set equality true for both arms). A timed-out test would appear as a 'Timeout' section, of which there are zero in both logs; ERROR counts are zero in both.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "The reviewed node's artifact is a report, so no production code reaches it; the production call sites of the change it measured were examined and are the _support_partition consumers in nova/equilibrium/forward_operator.py.",
+    "diff": "The reviewed node landed no repository change (git status --porcelain on its worktree is empty and its HEAD is 0e5e34157); the diff this review reads is the change under test, 571f4e8cc, which adds require_qualified_axis(admitted) at nova/equilibrium/forward_operator.py:3327 and edits tests/test_fused_same_state_read.py.",
+    "done_when": "Read prompt.txt:84: the file must run once at merged main (head, containing 571f4e8cc) and once from a detached checkout of d786948c4 (base), both submitted before either is awaited with TMPDIR=/tmp exported, and the report must tabulate passed/failed/error/timeout per arm.",
+    "goal": "The source goal (prompt.txt:30) is to run the forward-reference test file to completion on the H200 lane at merged main and at the fused-route base and report the added-failure delta of the fused-route axis enforcement; the report does exactly that, tabulating passed/failed/error/timeout per arm and stating the delta is zero.",
+    "manifest": "Read the reviewed run's manifest; it records both SLURM job ids (1280066 head, 1280067 base), the two pytest summaries, the eight failure ids per arm, empty failure_attribution, and the pin-mismatch confound; its account matches both logs field-for-field.",
+    "write_paths": "The reviewed node's only declared write path is /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/msc-reference-lane-full-run.md; the report was written there, and the run-directory logs and base checkout are named as authorised by the done_when."
+  },
+  "justifications": {
+    "durability": "The node adds no test and no guard, and its product is a one-shot measurement reproducible only from the recorded logs: nothing re-runs or asserts the delta, and both arms carry PINNED_REVISION_MISMATCH (pin eb565ed4 against each arm revision) so the wall times are compile-affected and no timing evidence for the millisecond claim survives this run.",
+    "evidence": "The gate is the reference file itself, run through scripts/h200_test_lane/run.sh at each revision; both logs carry a terminal pytest summary ('8 failed, 21 passed in 976.26s' head, '8 failed, 21 passed in 967.42s' base) and I independently reproduced the eight FAILED ids from head-reference-full.log and base-reference-full.log and confirmed the two sets are identical and equal to the manifest's baseline_suite/after_suite failure_ids; held at 18 because the manifest's after_suite.command stores the launcher argv rather than the executed pytest argv the head log records (head-reference-full.log COMMAND line carries '--timeout 3600'), so the recorded command is not byte-identical to the command that ran.",
+    "fit": "The report follows the run-record idiom, is named with hyphens (msc-reference-lane-full-run.md) at the dispatch-assigned report path outside the repository, carries no version or plan label in its own filename, and its body tables are plain markdown; the source it names, nova/equilibrium/forward_operator.py, is referenced by path only and no symbol is introduced.",
+    "goal_fidelity": "The goal is to run tests/test_equilibrium_forward_reference.py to completion on the H200 lane at merged main and at the fused-route base and report the added-failure delta; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/msc-reference-lane-full-run.md tabulates both arms (head 0e5e34157: 8 failed/21 passed; base d786948c4: 8 failed/21 passed) and states the added-failure delta is zero, which is the deliverable the goal names.",
+    "scope_discipline": "The reviewed node changed no repository file (its worktree at 0e5e34157 is clean) and wrote only the report at its single declared path plus the lane logs and the base checkout inside its own run directory, both of which the done_when explicitly authorises ('with its recorded log under the run directory ... a detached checkout of d786948c4 made inside the run directory'); no path outside the declared delivery scope was written."
+  },
+  "limitations": [
+    "The eight pre-existing failures in tests/test_equilibrium_forward_reference.py are present at both revisions and are outside this node's measure; the fixed-point residual 0.0144 against tolerance 1e-06 at head is a live solver defect reported by the reviewed manifest as a follow-on, not repaired here.",
+    "This review reads the recorded logs and the manifest; it did not re-execute the H200 lane, consistent with a review's reading bound."
+  ],
+  "notes": "The reviewed node is a test role: run tests/test_equilibrium_forward_reference.py to completion on the H200 lane at merged main (0e5e34157) and at the fused-route base (d786948c4) and report the added-failure delta of the axis-enforcement change 571f4e8cc. Both arms ran to their pytest summary line (8 failed, 21 passed each; 0 error, 0 timeout, 29/29 to a verdict) and the failure sets are identical id-for-id, so the added-failure count is zero, derived both from the manifest's stored ids and independently from the two logs. The change under test is source-side (the test file is byte-identical across revisions) and the guarded-call count 2->3 is confirmed. Scores: goal_fidelity 20 (both arms ran and the zero-delta is reported), evidence 18 (logs carry terminal summaries and I reproduced the identical failure sets; held for the after_suite.command shape), scope_discipline 20 (repo untouched; only the declared report plus run-dir artifacts the done_when authorises), durability 14 (measurement with no guard and no usable timing off a mismatched pin), fit 17 (report is a clean markdown record at the assigned path). Total 89, verdict pass; the two findings are follow-ons and do not hold the node.",
+  "plan": "nova:millisecond-converged-solve",
+  "project": "nova",
+  "review_run_id": "r-20261002T100450241440-review-of-msc-reference-lane-full-run",
+  "reviewed_base_sha": "d786948c468d01c1ffb87718758ed60483ea4910",
+  "reviewed_head_sha": "0e5e34157bf39041cd1b2d53539602fda659e995",
+  "reviewed_revision": "0e5e34157bf39041cd1b2d53539602fda659e995",
+  "reviewed_run_id": "r-20261002T090417250576-msc-reference-lane-full-run",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/msc-reference-lane-full-run",
+  "reviewer_node": "review-of-msc-reference-lane-full-run",
+  "reviewer_run_id": "r-20261002T100450241440-review-of-msc-reference-lane-full-run",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T10:15:41Z",
+  "total": 89,
+  "verdict": "pass",
+  "verified_independently": [
+    "The reviewed worktree HEAD is 0e5e34157bf39041cd1b2d53539602fda659e995 and git status --porcelain shows no changes, so the node landed no repository file.",
+    "571f4e8cc7e7916423e4baace06c33acd4245834 is an ancestor of head 0e5e34157 and is not an ancestor of base d786948c4, so the two arms differ by exactly the fused-route axis-enforcement change and base d786948c4 is an ancestor of head.",
+    "tests/test_equilibrium_forward_reference.py is byte-identical at both revisions (blob 9acd642007ca74cd8a02dc50a88629591cd8ae72 at HEAD:... and at d786948c4:...), confirming the report's claim that the delta between arms is source-side, not test-side.",
+    "The head log's terminal summary is '8 failed, 21 passed in 976.26s (0:16:16)' and the base log's is '8 failed, 21 passed in 967.42s (0:16:07)'; each log reports 'collected 29 items', 0 ERROR lines and 0 'Timeout' sections, so all 29 tests reached a verdict in each arm.",
+    "The eight FAILED... FAILED ids are identical between head-reference-full.log and base-reference-full.log (sorted diff is empty), and equal to the manifest's baseline_suite and after_suite failure_ids; the manifest's stored sets equal the log-derived sets exactly (set equality true for both arms, 8 ids each).",
+    "The remaining failure reproduces with the identical residual at both arms: 'assert 0.01437940905543304 < 1e-06' in test_the_solve_reaches_its_fixed_point (head-reference-full.log line 239, base-reference-full.log line 238), so the eight failures are pre-existing at the base and none is attributable to 571f4e8cc.",
+    "The guarded-call count in the measured change is confirmed: require_qualified_axis occurs 4 times in HEAD:nova/equilibrium/forward_operator.py (import at line 91 plus call sites 3174, 3185, 3327) against 3 at d786948c4 (import plus 3174, 3185), matching the reviewed manifest's '2 at base -> 3 at head'.",
+    "Both arm logs carry exactly one PINNED_REVISION_MISMATCH line and neither carries a WALL-CLOCK-UNRELIABLE line, matching the report's confound statement."
+  ]
+}

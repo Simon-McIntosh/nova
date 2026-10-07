@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T19:21:41.985Z",
+  "dispatched_at": "2026-10-05T19:18:42Z",
+  "findings": [
+    {
+      "anchor": "benchmarks/solovev_certificate.py:280",
+      "id": "duplicate_owner-1",
+      "reason": "the plan asserts a consolidation it did not perform; naming the owner turns the shipped row into the shared helper it claims and stops the sixth copy.",
+      "text": "`stamp_source_revision` is defined verbatim in five benchmarks (plasma_cell_production_ladder.py:74, solovev_certificate.py:280, fieldnull_production_route.py:110, carrier_step_attribution.py:68, exact_placement_discriminator.py:59), each with the same docstring and each calling its own private revision helper; the plan's f-fsa-production-route-receipt-revision lands and reports \"one shared helper\", which does not exist \u2014 the record is false and the five copies drift. Owner to extend: the one module that should carry it (it already owns revision provenance via `compute_provenance`), `nova/database/filepath.py`, so each writer imports rather than re-declares.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/shafranov_pair_receipt.py:70",
+      "id": "duplicate_owner-2",
+      "reason": "the plan already carries the open node f-fsa-one-project-relative-helper (r-20261005T190533725591) naming exactly this owner, so a finding adds nothing the plan does not already act on.",
+      "text": "`repository_relative` is copied verbatim into four drivers (shafranov_pair_receipt.py:70, shafranov_combination_discriminator.py:93, sol_ledger_current_census.py:49, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:31) and `relative_carrier_evidence` into two; owner to extend is `nova/database/filepath.py`, which already owns path resolution and holds no such function.",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/figures/millisecond-converged-solve/solve-profile/check_report_figures.py",
+      "id": "duplicate_owner-3",
+      "reason": "this duplicate is unaccounted-for by any section or followup, so naming an owner is the only mechanism that removes the second copy.",
+      "text": "the report-figure existence checker is duplicated verbatim across the compile-memory and solve-profile directories and is wired into no pytest lane (its review recorded it as an existence-only guard), and no followup owns it; owner to extend is the shared check mechanism, not a second hand-copied script.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/media/poloidal.py:223",
+      "id": "interface_budget-1",
+      "reason": "the section must account for its added public surface in its own text, and stating the merge makes the painter's role as the single guarded route explicit.",
+      "text": "\u00a73 adds public definitions (`draw_scattered_contours`, `triangles_outside_wall`, `tests/renderer_wall_scan.py`, and the proposed filepath `repository_relative`) against all four supplied counts at 0, and no section text names what it retires, merges or why nothing can be; the call-site consolidation is in fact a merge but is never stated as one.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "704f3294407659f3a117f65bf7376193b7d161bc83561b5d9b97bf71b85fd816",
+  "plan_slug": "figure-and-solver-audit",
+  "plan_version": 105,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T191829889696-plan-review-of-figure-and-solver-audit",
+  "reviewed_blob_sha": "49a0f803b308122afd3bf017b157c3056166c78e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `tests/renderer_wall_scan.py` (488 lines of AST producer-tracking and call-tracing) hides behind one `scan_paths()`/`scan_paths` entry, and each painter hides the wall-mask geometry behind a small signature; the complexity is behind the interface, not spread across wrappers.",
+    "duplicate_owner": "a finding \u2014 `stamp_source_revision` is defined five times (once per benchmark) and ~94 benchmark modules each carry their own `_source_revision`/`_revision`/`_source_commit`, while the plan's \u00a73 records these as stamping \"through one shared helper\"; and the report-figure checker is duplicated verbatim across two directories with no owner.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds public definitions (`nova.media.poloidal.draw_scattered_contours`, `triangles_outside_wall`, `tests/renderer_wall_scan.py`, and the proposed `nova.database.filepath.repository_relative`) without any section naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the plan extends the existing `nova.media.poloidal` painter family (`draw_flux_contours` gains `wall=`, `draw_scattered_contours` reuses `triangles_outside_wall`/`inside_wall_units`) and the pre-existing AST-source-guard idiom, rather than inventing a subsystem; the repair batches routed ~78 call sites through the shared painter instead of forking one.",
+    "thin_wrapper": "pass \u2014 the two painter routes are genuinely distinct (raster blanking vs. node triangulation masking) and are not wrappers over one another; `draw_flux_contours(wall=)` is an extension of the existing function, which the rubric prefers to a parallel one."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:23:10.842934+00:00"
+}

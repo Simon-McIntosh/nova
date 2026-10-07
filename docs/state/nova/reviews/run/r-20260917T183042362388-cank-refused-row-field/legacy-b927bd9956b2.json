@@ -1,0 +1,36 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "benchmarks/shafranov_pair_receipt.py",
+      "line": "530",
+      "text": "the row-set mismatch refusal precedes the write loop in regenerate and wrote nothing in the control run, but only an uncommitted control log under the reports fence exercises it, so a later change to regenerate could drop the guard without failing any committed test."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_shafranov_pair_receipt.py:48 pins the field null on a refused emission whose target was seeded, :77 is the positive control in which an imposed row keeps the combination its emission carries, and :104 asserts the receipt holds six rows before requiring null on each, but no committed test calls regenerate and the row-set refusal at benchmarks/shafranov_pair_receipt.py:530 is demonstrated only by a control log under the reports fence.",
+    "evidence": "I measured the receipt diff 38b7014e..d86fca7c at 24 changed lines, twelve replacements (six inside receipt.json and one per row file), every one terminal_profile_combination with all other bytes identical, re-ran tests/test_shafranov_pair_receipt.py at head (3 passed in 12.67 s), matched the six SHAFRANOV-STAMP lines of the node's replay.log to the committed receipts field for field, and confirmed from sacct that no job ran beyond the all_debug gate 1273239, while the base/head comparison ran the base test file against head library code and is sound only because the diff touches no nova/ file.",
+    "fit": "the new test imports private helpers from benchmarks/ the way the existing tests/test_raster_flux_receipt.py does, ROW_FIELDS and the docstrings follow the driver's own register, and no added name or comment carries a plan label.",
+    "goal_fidelity": "benchmarks/shafranov_pair_receipt.py:103 routes both the measurement and the --emissions replay through one _terminal_combination rule that returns null on a refused row, all six receipts under docs/figures/constraint-augmented-newton-krylov/shafranov/ now state null beside status refused, and docs/evidence/archive/constraint-augmented-newton-krylov-landed.html names all three superseded attempts 1272932, 1272936 and 1272972 with their causes.",
+    "scope_discipline": "git diff 38b7014e..d86fca7c lists only benchmarks/shafranov_pair_receipt.py, tests/test_shafranov_pair_receipt.py, docs/figures/constraint-augmented-newton-krylov/shafranov, docs/evidence/archive/constraint-augmented-newton-krylov-landed.html and docs/plans/constraint-augmented-newton-krylov.html, every one inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/shafranov_pair_receipt.py:103 routes both the measurement and the --emissions replay through one _terminal_combination rule that returns null on a refused row, all six receipts under docs/figures/constraint-augmented-newton-krylov/shafranov/ now state null beside status refused, and docs/evidence/archive/constraint-augmented-newton-krylov-landed.html names all three superseded attempts 1272932, 1272936 and 1272972 with their causes.\nSCORE evidence: 18\nJUSTIFICATION evidence: I measured the receipt diff 38b7014e..d86fca7c at 24 changed lines, twelve replacements (six inside receipt.json and one per row file), every one terminal_profile_combination with all other bytes identical, re-ran tests/test_shafranov_pair_receipt.py at head (3 passed in 12.67 s), matched the six SHAFRANOV-STAMP lines of the node's replay.log to the committed receipts field for field, and confirmed from sacct that no job ran beyond the all_debug gate 1273239, while the base/head comparison ran the base test file against head library code and is sound only because the diff touches no nova/ file.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 38b7014e..d86fca7c lists only benchmarks/shafranov_pair_receipt.py, tests/test_shafranov_pair_receipt.py, docs/figures/constraint-augmented-newton-krylov/shafranov, docs/evidence/archive/constraint-augmented-newton-krylov-landed.html and docs/plans/constraint-augmented-newton-krylov.html, every one inside the declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_shafranov_pair_receipt.py:48 pins the field null on a refused emission whose target was seeded, :77 is the positive control in which an imposed row keeps the combination its emission carries, and :104 asserts the receipt holds six rows before requiring null on each, but no committed test calls regenerate and the row-set refusal at benchmarks/shafranov_pair_receipt.py:530 is demonstrated only by a control log under the reports fence.\nSCORE fit: 18\nJUSTIFICATION fit: the new test imports private helpers from benchmarks/ the way the existing tests/test_raster_flux_receipt.py does, ROW_FIELDS and the docstrings follow the driver's own register, and no added name or comment carries a plan label.\nFINDING benchmarks/shafranov_pair_receipt.py:530 the row-set mismatch refusal precedes the write loop in regenerate and wrote nothing in the control run, but only an uncommitted control log under the reports fence exercises it, so a later change to regenerate could drop the guard without failing any committed test.",
+  "review_run_id": "legacy-b927bd9956b2",
+  "review_run_id_source": "derived",
+  "reviewed_run_id": "r-20260917T183042362388-cank-refused-row-field",
+  "reviewing_run_id": "r-20260917T201331252469-review-of-cank-refused-row-field",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-17T20:40:48.546331+00:00",
+  "total": 91
+}

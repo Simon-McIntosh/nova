@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "e74d8fce12601e372d91572aba1b5602f2d7df55",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-06T05:00:48.573Z",
+  "dispatched_at": "2026-10-06T04:45:43Z",
+  "findings": [
+    {
+      "file": "nova/biot/rangefunction.py",
+      "line": "548",
+      "severity": "follow-on",
+      "text": "follow-on: _tangent_sum, _product_tangent (line 568) and _scale_tangent (line 576) are re-declared here while nova/biot/completeelliptic.py:340/351/374 already carry _tangent_sum, _product_tangent and _scale_tangent with the same bodies, so the tangent-helper vocabulary now lives in two sibling modules and can drift; the import direction (completeelliptic imports _array_program from rangefunction) makes rangefunction the natural owner, so completing the reuse means refactoring completeelliptic, which is outside this node's write scope."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-range-tangent-recurrences.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's \"calls in jet\" column (harmonic_multiply 443, harmonic_add 245, harmonic_scale 76, range_function 40, product 101, total 49, scaled 61, across_the_range 107, sine_squared_times 15, deflate 46, contract 184, rising_integral 0) is the census that justifies which operations need a tangent, but no committed gate log in the run reproduces the jaxpr census \u2014 a search of the run's logs and downloads finds those counts only in supervisor artifacts, so the column is asserted rather than reproducible."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline suite_arm ran in a git-archive tree that lacks the root conftest.py, so the named-path policy that clears the default -m 'not slow' never applied there; the base elliptic arm reports 19 passed and 9 deselected against the head arm's 28 passed, so the two arms are not selection-matched and the 9 slow elliptic rows were exercised only at head \u2014 a slow-row regression in an untouched module would appear as an added failure with no base counterpart, though both arms are in fact green."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T041805209709-cfs-range-tangent-recurrences/identity.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: identity.log names revision a86bc1900 and compile.log and suite_after name a8a1a2362, two and one commits behind the reviewed head 21e7cdc07, so no single gate log names the reviewed head; the intervening commit is docs-only (the fragment), so the code evidence is bound to the reviewed code, but a reader checking the logged revision reproduces a tree without the fragment."
+    }
+  ],
+  "head_log_revision": "a8a1a2362e53d6f5f9b401e808079ea9a1280f52",
+  "item_aggregate": 108,
+  "item_verdicts": {
+    "call_sites": "no production call site: the tangents are private, unwrapped and referenced by no source outside the test module; the custom_jvp wrapping of the point jet is deferred to a later node.",
+    "diff": "read commit by commit: a86bc1900 adds the 13 tangent functions and their helper vocabulary in nova/biot/rangefunction.py, a8a1a2362 the identity/truncation/compile/primal test module, 21e7cdc07 the evidence fragment; the three commits touch exactly the three declared paths.",
+    "done_when": "the done_when asks for the identity against jax.jvp of the base, a truncation control, a cold compile within three times the primal, primal bit-identity, the test module and the fragment; the manifest records every one, in identity.log, compile.log, negative_control.log and suite_after, and I reproduced 53 passed at the reviewed head and the negative control's 13 failed, EXIT=1.",
+    "goal_fidelity": "the node goal is a private tangent for each range-function operation the point jet reaches, matching jax.jvp of the base without calling autodiff; the diff adds one tangent per operation in nova/biot/rangefunction.py:548 and no new source calls jax.jvp, jax.grad or jax.jacfwd on a primal it differentiates.",
+    "manifest": "read; it records status complete, three commits, per-row identity, truncation, compile and primal numbers with their logs, and a suite delta from zero base failures (the range module absent at base) to zero head failures.",
+    "write_paths": "the manifest declares four source and doc paths; git diff e74d8fce..21e7cdc07 touches exactly nova/biot/rangefunction.py, tests/biot/test_range_tangent_recurrences.py and the fragment, every one inside the declared scope and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_range_tangent_recurrences.py:335 compares each tangent against jax.jvp of the base-revision function loaded from git (an independent source, not a value the test passed in), negative_control.log and my independent reproduction show the one-term truncation reddening all thirteen identity rows (13 failed, EXIT=1), and the primal half is asserted bit-identical leaf by leaf.",
+    "evidence": "identity.log, compile.log, negative_control.log and the two suite arms record the identity, truncation, compile, primal and delta rows the done_when asserts, and I reproduced 53 passed at the reviewed head; but the fragment's calls-in-jet census has no committed log, the fragment's \"declared mutation max\" column repeats the \"truncated max\" column rather than an independent measurement, and the base suite arm ran without the root conftest so its selection does not match the head arm's.",
+    "fit": "the tangent helpers follow the module's private-helper idiom under _array_program and carry no plan or stage label, matching the surrounding style of nova/biot/rangefunction.py.",
+    "goal_fidelity": "nova/biot/rangefunction.py:548 gives every operation the jet reaches a recurrence and the primal is bit-identical, with the caveat that rising_integral is not reached by the jet (fragment calls in jet 0) yet carried anyway \u2014 a superset of the goal, not a miss; the compile bound is met at a worst ratio of 2.60 against the required 3.0.",
+    "reuse": "the change duplicates _tangent_sum, _product_tangent and _scale_tangent already declared at nova/biot/completeelliptic.py:340/351/374; the import direction favours rangefunction as the owner, so the reuse is defensible layering-wise but incomplete until completeelliptic is refactored to import them, and the test module likewise re-authors the elliptic identity/truncation/compile structure rather than sharing a harness.",
+    "scope_discipline": "git diff e74d8fce..21e7cdc07 touches only the three declared paths, all inside the manifest write scope, with nothing outside the goal and a clean reviewed worktree (git status empty)."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a private tangent for each range-function operation the point jet reaches, matching jax.jvp of the base without calling autodiff; the diff adds one tangent per operation in nova/biot/rangefunction.py:548 and no new source calls jax.jvp, jax.grad or jax.jacfwd on a primal it differentiates.\nVERDICT done_when: the done_when asks for the identity against jax.jvp of the base, a truncation control, a cold compile within three times the primal, primal bit-identity, the test module and the fragment; the manifest records every one, in identity.log, compile.log, negative_control.log and suite_after, and I reproduced 53 passed at the reviewed head and the negative control's 13 failed, EXIT=1.\nVERDICT write_paths: the manifest declares four source and doc paths; git diff e74d8fce..21e7cdc07 touches exactly nova/biot/rangefunction.py, tests/biot/test_range_tangent_recurrences.py and the fragment, every one inside the declared scope and nothing else.\nVERDICT manifest: read; it records status complete, three commits, per-row identity, truncation, compile and primal numbers with their logs, and a suite delta from zero base failures (the range module absent at base) to zero head failures.\nVERDICT diff: read commit by commit: a86bc1900 adds the 13 tangent functions and their helper vocabulary in nova/biot/rangefunction.py, a8a1a2362 the identity/truncation/compile/primal test module, 21e7cdc07 the evidence fragment; the three commits touch exactly the three declared paths.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/biot/rangefunction.py:548 gives every operation the jet reaches a recurrence and the primal is bit-identical, with the caveat that rising_integral is not reached by the jet (fragment calls in jet 0) yet carried anyway \u2014 a superset of the goal, not a miss; the compile bound is met at a worst ratio of 2.60 against the required 3.0.\nSCORE evidence: 16\nJUSTIFICATION evidence: identity.log, compile.log, negative_control.log and the two suite arms record the identity, truncation, compile, primal and delta rows the done_when asserts, and I reproduced 53 passed at the reviewed head; but the fragment's calls-in-jet census has no committed log, the fragment's \"declared mutation max\" column repeats the \"truncated max\" column rather than an independent measurement, and the base suite arm ran without the root conftest so its selection does not match the head arm's.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff e74d8fce..21e7cdc07 touches only the three declared paths, all inside the manifest write scope, with nothing outside the goal and a clean reviewed worktree (git status empty).\nSCORE durability: 19\nJUSTIFICATION durability: tests/biot/test_range_tangent_recurrences.py:335 compares each tangent against jax.jvp of the base-revision function loaded from git (an independent source, not a value the test passed in), negative_control.log and my independent reproduction show the one-term truncation reddening all thirteen identity rows (13 failed, EXIT=1), and the primal half is asserted bit-identical leaf by leaf.\nSCORE fit: 19\nJUSTIFICATION fit: the tangent helpers follow the module's private-helper idiom under _array_program and carry no plan or stage label, matching the surrounding style of nova/biot/rangefunction.py.\nSCORE reuse: 15\nJUSTIFICATION reuse: the change duplicates _tangent_sum, _product_tangent and _scale_tangent already declared at nova/biot/completeelliptic.py:340/351/374; the import direction favours rangefunction as the owner, so the reuse is defensible layering-wise but incomplete until completeelliptic is refactored to import them, and the test module likewise re-authors the elliptic identity/truncation/compile structure rather than sharing a harness.\nFINDING nova/biot/rangefunction.py:548 follow-on.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-range-tangent-recurrences.html:1 follow-on: the calls-in-jet census is asserted with no committed log.\nFINDING baseline arm ran without the root conftest, so base and head selections differ.\nFINDING identity.log:1 names a86bc1900 against head 21e7cdc07.",
+  "review_run_id": "r-20261006T044523606978-review-of-cfs-range-tangent-recurrences",
+  "reviewed_base_sha": "e74d8fce12601e372d91572aba1b5602f2d7df55",
+  "reviewed_head_sha": "21e7cdc07da57e5902b0689cfd644d75f6513bb9",
+  "reviewed_run_id": "r-20261006T041805209709-cfs-range-tangent-recurrences",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T05:02:00+00:00",
+  "total": 108
+}

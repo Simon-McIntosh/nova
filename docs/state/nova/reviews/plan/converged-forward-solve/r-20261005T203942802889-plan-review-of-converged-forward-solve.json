@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T20:42:44.924Z",
+  "dispatched_at": "2026-10-05T20:39:55Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/forward.py:1292",
+      "id": "duplicate_owner-1",
+      "reason": "it would add a seventh cite-or-justify ruling naming forward.py:1292 and resolve whether forward.py's moment-map methods are carried, re-pointed or deleted, the same decision the plan already makes explicitly for every sibling helper.",
+      "text": "\u00a74 directs `gs.apply` to carry \"the moment-map derivative\" into the new module, but forward.py already owns that machinery: `current_moment_jacobian` (forward.py:1292) differentiates the support-declared current-moment map, with `current_moment_map` (1276) and `current_moment_observation` (1239) beside it, and forward.py is itself retained as the request/receipt adapter; unlike the GMRES kernel, the field-null kernels, the geometry operands, the quadrature helpers and the contour tree \u2014 each given an explicit cite-or-justify ruling \u2014 this carried derivative has no owner named, so an implementer may fork it into gs.py while forward.py's copy survives, which the plan's own import census would not catch for a derivative rather than a module",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "01c9b080b684b84aa655c445b140052dad7878e9f598faf36b25899a0f39c816",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 35,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T20:44:10.167390+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T203942802889-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "1c56a02ee8525ccede8e831a47d8390b98071ca0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `topology.read`, `current.book`, `gs.apply` and `solve.fixed_point` each collapse a multi-file subsystem (17 null authorities and 23 region authorities for the read; contour tree, clip quadrature, coupling matrix and Newton-GMRES for the rest) behind one call each, so complexity is concentrated rather than spread.",
+    "duplicate_owner": "a finding \u2014 `gs.apply` is to carry the moment-map derivative but the plan names no owner for it, while forward.py already differentiates the support-declared current-moment map over flux.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 names Topology.read/read_with_connectivity, \u00a73 names clipped_support_current_moments and the forward_operator support partition, \u00a74 names the ForwardFluxOperator map, \u00a75 names newton_krylov/picard/operator_request_body, and \u00a76 names the ladder, frozen/live split, live-read and active-set routes as retirements.",
+    "reuse_search": "pass \u2014 the plan cites prior art for the GMRES kernel (`_single_site_krylov` et al. in fixed_point.py), the field-null kernels (nova/biot/null.py, fieldnull.py), the contour tree (contour_tree.py / contour_tree_mesh.py), the moment owner (polygon_moments.py), the geometry-operand flatteners (forward_operator.py) and the quadrature helpers (clip_quadrature.py), and every named symbol was verified present in the code.",
+    "thin_wrapper": "pass \u2014 the plan states `gs.apply` \"replaces the map ForwardFluxOperator performs today rather than wrapping it\", `topology.read` replaces the old read in place, and the retained `ForwardProfile.operator` seam is justified as forward.py's request/receipt adapter for duck-typed consumers being re-pointed off the deleted class."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T20:44:09.523575+00:00"
+}

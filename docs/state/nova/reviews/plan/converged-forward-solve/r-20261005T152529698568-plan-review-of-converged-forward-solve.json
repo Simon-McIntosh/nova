@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:39:02.817Z",
+  "dispatched_at": "2026-10-05T15:27:06Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/solve_request.py:233",
+      "id": "duplicate_owner-1",
+      "reason": "name ForwardSolvePolicy as the owner the new policy must extend or fold into, or the two policy notions drift and the seam's single-route guarantee is undermined.",
+      "text": "the design's solve.fixed_point and topology.read take new policy operands (SolvePolicy, TopologyPolicy), while ForwardSolvePolicy already owns forward-solve policy, defaults and version pinning (solve_request.py:233, with declared_forward_solve_policy:356 and resolve_forward_solve_policy:369) and is a public export of nova/equilibrium/__init__.py:260; a second policy vocabulary for the same solve forks the owner the design says it keeps as the host adapter (solve_request.py:471 ForwardSolveRequest and :631 ForwardSolveReceipt)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/converged-forward-solve.html#s2",
+      "id": "interface_budget-1",
+      "reason": "\u00a76 is the single owner of retirement by design and it names every deletion and its ordering, so deferring the retire/merge statement to \u00a76 is a deliberate structure rather than unaccounted surface.",
+      "text": "\u00a72 to \u00a75 each introduce a new public module-qualified API (topology.read, current.book, gs.apply, solve.fixed_point) but the only statement of what each replaces is the collective retirement list in \u00a76, so \u00a72 does not name, in its own text, that topology.read replaces Topology.read in topology.py and \u00a74 does not name that gs.apply replaces ForwardFluxOperator's map",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "aefca2fdb5d21794652eae02a4c77de02b5a7358f663ee24649175517ed39e76",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 18,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152529698568-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "394189f1df207a062c4388294bd8b9d03a101ead",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four module-qualified functions (topology.read, current.book, gs.apply, solve.fixed_point) each hide the work that today spreads across the roughly forty files the inventory retires, and \u00a76 removes the promotion/recovery rungs, frozen/live split, active-set, Anderson, reduced-Newton and separate chord routes rather than stacking new wrappers over them.",
+    "duplicate_owner": "a finding \u2014 the design introduces new policy types (TopologyPolicy, SolvePolicy) beside the existing policy owner ForwardSolvePolicy in nova/equilibrium/solve_request.py:233 without naming it as the owner to extend or merge.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; each of \u00a72 to \u00a75 adds a new public module-qualified API (topology.read, current.book, gs.apply, solve.fixed_point) but names what it retires only collectively in \u00a76, not in its own section text.",
+    "reuse_search": "pass \u2014 the design's \u00a7inventory binds 17 null-role and 23 region-role source files at revision 6598321, each with a marker and a destination, and I opened the code to confirm those markers resolve: build_contour_tree (contour_tree.py:384), flux_field_polynomial (stencil_mesh.py:78), critical_point_candidates_batch (stencil_nulls.py:40), _FixedDesignNull2D (forward_operator.py:830), polish_stationary_points (flux_surface_connectivity.py:96), clipped_support_current_moments (clip_quadrature.py:714), read_qualification (topology.py:1125), traced_boundary_read (connectivity_boundary.py:357) and _active_set_newton_krylov (fixed_point.py:4410) all exist; retained oracles (the contour-tree kernel, the stencil-mesh field polynomial, the solve_request seam) are cited as extend/reuse, not rebuilt.",
+    "thin_wrapper": "pass \u2014 the plan states gs.apply \"replaces the map ForwardFluxOperator performs today rather than wrapping it\" and forward.py \"shrinks to the request and receipt adapter\"; no proposed module forwards to existing machinery behind a thin interface, and the extended seam is the pre-existing solve_request one."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:50:44.738358+00:00"
+}

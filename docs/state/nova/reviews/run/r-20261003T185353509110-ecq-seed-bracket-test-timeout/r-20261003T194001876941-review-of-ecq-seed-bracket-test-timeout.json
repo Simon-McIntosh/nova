@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [
+    "a durable record at the marker of why 600 s was chosen (the rationale is in the commit body and plan only)",
+    "a test or check that a slow-lane run in fact completes within the per-test bound on a loaded node"
+  ],
+  "absent_observations": [
+    "the reviewed run did not re-run any broader suite; the fast-lane deselect is shown by --collect-only (EXIT 5), not by a fast-lane run of the whole tree",
+    "the reviewed run declared no negative_control string for a red log's first line because no such string was declared on its node; it nonetheless applied a marker-removal mutation, recorded in its negative_control_log and negative_control_note, and that log is the baseline_suite arm above",
+    "no guard exists against the 342-cell carrier's wall later crossing 600 s, and no instrument records the sizing rationale beside the marker"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "1ce7e15357780b7a6bd54a4d270731625f23a124",
+    "7c19c9b24c3e0665c06b469fba87706f255d3a4c"
+  ],
+  "completed_at": "2026-10-03T19:50:10.939Z",
+  "dispatched_at": "2026-10-03T19:40:21Z",
+  "findings": [
+    {
+      "file": "r-20261003T185353509110-ecq-seed-bracket-test-timeout/manifest.md",
+      "line": "landing: '...sized to 1.8x its measured 333.8 s wall...' and artifacts",
+      "severity": "follow-on",
+      "text": "follow-on: the 600 s bound is justified in the manifest as '1.8x its measured 333.8 s wall', but no gate log cited by the run carries a 333.8 s wall. The four logs on disk read 325.43 s (marker arm), 339.43 s (base arm, --timeout 1000) and 324.29 s (negative control) wall, with call times 316.60 s and 311.08 s; my independent head-arm re-run read 344.62 s wall / 317.57 s call. The 333.8 s figure therefore traces to the plan-recording commit 1ce7e1535 rather than to any arm this run produced, so the '1.8x' ratio is stated against an uncited number. Cosmetic: the chosen 600 s is still a sound headroom over every measured wall (600/344.62 = 1.74x worst observed), so no functional impact; recorded because the manifest presents the figure as this run's own measurement."
+    },
+    {
+      "file": "tests/test_exact_clip_seed_bracket.py",
+      "line": "14 (@pytest.mark.timeout(600))",
+      "severity": "follow-on",
+      "text": "follow-on: the per-test bound is a fixed 600 s with no recorded rationale at the point of use and no guard against the carrier's wall later crossing it. If the 342-cell build slows (shared-node load, larger mesh, a heavier analytic reference) the test will again time out on the slow lane, and the marker will read as an arbitrary constant. Not a defect in this change; the sizing rationale belongs in the commit body (where it is, correctly) and the plan, and the bound should be revisited if the wall drifts."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "timeout 900 env JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-seed-bracket-test-timeout /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --durations=0 -v -m slow tests/test_exact_clip_seed_bracket.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T185353509110-ecq-seed-bracket-test-timeout/logs/seed-bracket-marker-arm.log",
+      "revision": "1ce7e15357780b7a6bd54a4d270731625f23a124"
+    },
+    "baseline_suite": {
+      "command": "timeout 400 env JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-seed-bracket-test-timeout:/tmp/reckon-crew-scratch/r-20261003T185353509110-ecq-seed-bracket-test-timeout/ecq-negctl.24UMO1 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 300 -v /tmp/reckon-crew-scratch/r-20261003T185353509110-ecq-seed-bracket-test-timeout/ecq-negctl.24UMO1/test_exact_clip_seed_bracket_negctl.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T185353509110-ecq-seed-bracket-test-timeout/logs/seed-bracket-negative-control.log",
+      "revision": "1ce7e15357780b7a6bd54a4d270731625f23a124"
+    }
+  },
+  "gate_arms_note": "Derived from the reviewed run's own baseline_suite and after_suite manifest keys and the gate logs they name. after_suite (log logs/seed-bracket-marker-arm.log, revision 1ce7e1535 tree carrying the uncommitted marker): completed true, exit_status 0, failure_count 0, failure_ids []. baseline_suite (log logs/seed-bracket-negative-control.log, revision 1ce7e1535, marker removed in scratch, --timeout 300): completed true, exit_status 1, failure_count 1, failure_ids ['test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier']. added_failure_ids = failure_ids(after) minus failure_ids(baseline) = [] and added_failure_count = 0: the change adds no failing test id; it removes one. The baseline arm here is the run's defect-reproduction arm (marker removed), and the after arm is the repaired state; both header their revision as the base sha 1ce7e1535 because the run measured before committing the marker, which the reviewed manifest states explicitly. This review re-ran the after arm independently at the head revision (see justifications.evidence) and did not re-fire the marker-removed arm.",
+  "justifications": {
+    "durability": "The fix is durable and lives in source: a per-test pytest-timeout marker read by the timeout plugin on every slow-lane run, not a flag a caller must pass and not an environment variable. It removes the failure class (any -m slow run timing this test out at 300 s) rather than one occurrence. Held below full because the bound is a fixed number with no guard against the carrier's wall silently crossing 600 s later, and because nothing in the repository records why 600 was chosen when the marker is read alone (the rationale lives only in the commit body and the plan). The timeout marker itself is not registered in pyproject's markers list, but pytest-timeout registers it, so it resolves without an unknown-mark warning - noted, not a defect.",
+    "evidence": "The substance is independently reproducible and I reproduced the load-bearing half. The head arm re-run by this review at 7c19c9b24 reads 1 passed in 344.62 s, call 317.57 s, EXIT 0 (log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T194001876941-review-of-ecq-seed-bracket-test-timeout/logs/reviewer-head-arm.log); the session header prints 'timeout: 300.0s' while the call exceeds 300 s and still passes, which is direct proof the per-test marker took effect. The reviewed run supplies the other direction: the marker-removed arm under --timeout 300 (its baseline_suite) fails with pytest-timeout at 324.29 s, 'FAILED ... test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier' plus 'Timeout (>300.0s)', EXIT 1; and a marker-removed arm under --timeout 1000 passes at 339.43 s EXIT 0, proving the test is not a genuine product failure and only the bound is at issue. The default-lane collect log shows the fast lane deselects it ('no tests collected (1 deselected)', EXIT 5). Held below full for one provenance gap (finding 1): the manifest sizes the 600 s bound as '1.8x its measured 333.8 s wall', but no cited log carries 333.8 s - the four logs on disk show 325.43, 339.43 and 324.29 s walls (calls 316.60 and 311.08 s), so the single number behind the '1.8x' claim is uncited and traces to the earlier plan-record commit rather than to a gate arm this run produced.",
+    "fit": "The change matches the file's existing idiom (it sits directly beside the slow marker that already governed this test), respects the repository's lane policy (slow tests excluded from the fast lane; suite default unchanged; per-command -m preserved), and ships as a conventional test(...) commit whose body states what changed and why. Independently grepped: the commit message carries no AI attribution, no plan/sprint/ticket identifier, and no phase/stage label; the single added source line is a standard pytest marker with no naming or attribution residue. The one change is the smallest that addresses the failure.",
+    "goal_fidelity": "The change discharges the recorded defect in full. Head 7c19c9b24 adds exactly one line, @pytest.mark.timeout(600), beside the existing @pytest.mark.slow on test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier. The test's measured call time (311.08-317.57 s across three arms I can see) exceeds the suite-wide 300 s default in pyproject [tool.pytest.ini_options] timeout=300, so the slow-lane gate reported it red regardless of the change under test; the per-test marker raises the bound only for this test while leaving the suite default at 300 and leaving the fast lane (-m 'not slow') to deselect it. I independently reproduced the head arm at the exact head revision: 1 passed, call 317.57 s, EXIT 0, under a session that still prints 'timeout: 300.0s' - so the marker, not the session default, is what let a >300 s test pass. Held 1 rather than 20 because 600 s is only about 1.8-1.9x the observed wall on a shared node where the CI figure is not guaranteed, and the bound will age if the carrier slows; the minimal per-test fix is nonetheless the right instrument over raising the suite-wide default.",
+    "scope_discipline": "The landed range is one file, one line, entirely inside the node's declared write path tests/test_exact_clip_seed_bracket.py. git diff --stat base..head is '1 file changed, 1 insertion(+)', pure addition; the reviewed worktree is clean at head (git status --porcelain empty) and its HEAD is 7c19c9b24 whose parent is reviewed_base_sha 1ce7e1535. No fragment and no figure were written, which the done-when did not require. No module and no other test is touched."
+  },
+  "notes": "The reviewed node is a single-line test-bound repair. It adds @pytest.mark.timeout(600) to the 342-cell seed-bracket test so a slow-lane run is not killed at the suite-wide 300 s default, while the fast lane continues to deselect it. I reproduced the load-bearing half independently at the head revision: the test's call is 317.57 s under a session that still prints 'timeout: 300.0s' and it passes, which cannot happen unless the per-test marker raised the bound; the run's marker-removed arms fail at --timeout 300 (324.29 s) and pass at --timeout 1000 (339.43 s), isolating the defect to the bound. added_failure_count is 0 and added_failure_ids is empty: the change adds no failing test id, it removes one. Two follow-ons and no blocking defect keep the total at 92: (1) the manifest justifies the bound as '1.8x a measured 333.8 s wall' but no cited log carries 333.8 s, the figure tracing to the earlier plan-record commit rather than a gate arm this run ran; (2) the 600 s bound is a fixed constant with its rationale only in the commit body, with no guard against the carrier later crossing it. Neither touches correctness, scope, or durability of the fix. Scores: goal_fidelity 19, evidence 17, scope_discipline 20, durability 17, fit 19; total 92.",
+  "plan": "nova:exact-clip-moment-quadrature",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "At head 7c19c9b24 the single added line @pytest.mark.timeout(600) raises the bound for this test only. The reviewed run's slow-lane arm passes at 325.43 s EXIT 0. I independently re-ran the head arm at 7c19c9b24: 1 passed in 344.62 s, call 317.57 s, EXIT 0, under a session that still prints 'timeout: 300.0s' - a >300 s call passing proves the per-test marker, not the session default, governs the bound. The default fast lane still deselects the test (collect-only: 'no tests collected (1 deselected)', EXIT 5).",
+    "before": "At base 1ce7e1535 the test carries only @pytest.mark.slow; pyproject sets timeout = 300. The reviewed run's marker-removed arm under --timeout 300 (logs/seed-bracket-negative-control.log) fails: 'FAILED ...test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier' with the pytest-timeout '[Timeout]' stack, session '1 failed in 324.29s', EXIT 1. A marker-removed arm under --timeout 1000 (logs/seed-bracket-base-arm.log) passes at 339.43 s EXIT 0, isolating the failure to the bound rather than the test body.",
+    "finding_id": "recorded defect: the 342-cell seed-bracket test's wall (about 334 s) exceeds the suite-wide 300 s per-test timeout, so a full-suite gate reports it red regardless of the change under test"
+  },
+  "review_run_id": "r-20261003T194001876941-review-of-ecq-seed-bracket-test-timeout",
+  "reviewed_base_sha": "1ce7e15357780b7a6bd54a4d270731625f23a124",
+  "reviewed_head_sha": "7c19c9b24c3e0665c06b469fba87706f255d3a4c",
+  "reviewed_revision": "7c19c9b24c3e0665c06b469fba87706f255d3a4c",
+  "reviewed_run_id": "r-20261003T185353509110-ecq-seed-bracket-test-timeout",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-seed-bracket-test-timeout",
+  "reviewer_node": "review-of-ecq-seed-bracket-test-timeout",
+  "reviewer_run_id": "r-20261003T194001876941-review-of-ecq-seed-bracket-test-timeout",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T19:53:00+00:00",
+  "total": 92,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha 7c19c9b24c3e0665c06b469fba87706f255d3a4c has parent reviewed_base_sha 1ce7e15357780b7a6bd54a4d270731625f23a124 (git rev-parse 7c19c9b24^)",
+    "git diff --stat 1ce7e1535..7c19c9b24 is '1 file changed, 1 insertion(+)' and the sole hunk adds '@pytest.mark.timeout(600)' above test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier in tests/test_exact_clip_seed_bracket.py",
+    "the reviewed worktree is clean at head (git status --porcelain empty) and its HEAD is 7c19c9b24c3e0665c06b469fba87706f255d3a4c",
+    "pyproject [tool.pytest.ini_options] sets timeout = 300 and addopts includes -m 'not slow'; pytest-timeout>=2.4.0 is a declared dependency, so the timeout marker resolves without an unknown-mark warning",
+    "independently re-ran the head arm at 7c19c9b24: 1 passed in 344.62 s, call 317.57 s, EXIT 0 (log logs/reviewer-head-arm.log); the session prints 'timeout: 300.0s' yet a 317.57 s call passes, proving the per-test marker is load-bearing",
+    "read the reviewed run's after_suite log (marker arm): 1 passed in 325.43 s, call 316.60 s, EXIT 0, session timeout 300.0s",
+    "read the reviewed run's baseline_suite log (negative control, marker removed, --timeout 300): 1 failed in 324.29 s, '[Timeout]' on the 342-cell test, EXIT 1",
+    "read the reviewed run's base-arm log (marker removed, --timeout 1000): 1 passed in 339.43 s, call 311.08 s, EXIT 0",
+    "read the reviewed run's default-lane collect log: 'no tests collected (1 deselected)', EXIT 5 - the fast lane still excludes the test",
+    "the reviewed commit message carries a conventional subject and a body and no AI attribution, plan/sprint/ticket identifier or phase/stage label (independently grepped)"
+  ]
+}

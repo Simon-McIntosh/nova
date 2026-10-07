@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "assertion_analysis": [
+    {
+      "fails_if": "The declared three trips are dropped, reordered, assigned another residual or mask difference, or unavailable damping is exposed as true; restoring the old function crashes on its scalar indexing.",
+      "path": "tests/test_production_solver_receipt_trip_alignment.py:40-58"
+    },
+    {
+      "fails_if": "The receipt invents inner decisions or promotion records from the unavailable scalar defaults; these are output-empty contracts, with production trace availability independently confirmed by the populated per-trip history.",
+      "path": "tests/test_production_solver_receipt_trip_alignment.py:59-60"
+    },
+    {
+      "fails_if": "The executed prefix includes padding or mispairs any residual/mask/damping value; restoring bool(-1) gives [false,true,true] instead of [false,true,null], which is recorded in the negative control.",
+      "path": "tests/test_production_solver_receipt_trip_alignment.py:73-75"
+    },
+    {
+      "fails_if": "Any short array, non-sentinel scalar damping, or two-dimensional mask is accepted or raises an exception without the alignment marker and offending field; the parameter matrix supplies five distinct invalid histories.",
+      "path": "tests/test_production_solver_receipt_trip_alignment.py:89-92"
+    },
+    {
+      "fails_if": "Zero executed trips fabricate a trip or a nonzero count; the original implementation also passes this boundary case and the negative log preserves that one pass.",
+      "path": "tests/test_production_solver_receipt_trip_alignment.py:103-104"
+    },
+    {
+      "fails_if": "A negative trip count silently constructs an empty history rather than issuing the named refusal; the original function does exactly that and the negative log reports DID NOT RAISE.",
+      "path": "tests/test_production_solver_receipt_trip_alignment.py:108-112"
+    }
+  ],
+  "blocking_findings": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "benchmarks/solovev_certificate.py:2297 _production_solver_receipt after profile.solve",
+    "nova/equilibrium/forward.py:2231 ForwardProfile._solve_reduced_newton history producer",
+    "nova/equilibrium/fixed_point.py:445 FixedPointResult per-trip defaults"
+  ],
+  "commits_read": [
+    "8977ecd3b76367e334bf24b33d5b9e3a27640c32",
+    "a3a7c58ce5792eed6d57adae6e54c48b08a86410"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T23:19:13.468967+00:00",
+  "findings": [],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read commits 8977ecd3b76367e334bf24b33d5b9e3a27640c32 and a3a7c58ce5792eed6d57adae6e54c48b08a86410 separately against the source base; the first adds the alignment helper, contract tests and red/green evidence, while the second adds the successful numerical receipt, scheduler evidence, contour SVG and append-only landing text.",
+    "done_when": "Read the exact source prompt gate; production-solver-receipt/reproduction.log records the requested chord row failing with the scalar IndexError, focused.log records 9 passed, negative-control.log records 8 failed and 1 passed under the declared source reversion, and repaired-row.log plus receipt.json record the same 342-cell row successfully emitting its receipt.",
+    "goal": "Read the source prompt and live docs/plans/gs-absolute-accuracy-gates.html followup f-gsag-production-solver-receipt-desyncs-on-reduced-newton; benchmarks/solovev_certificate.py:710 validates the same executed prefix for all three trip fields and preserves the reduced-Newton unavailable damping sentinel as null.",
+    "manifest": "Read the source run manifest.md and opened its named committed logs; its two commit identities, nine passing tests, eight negative-control failures, 342 realised cells, null damping, and unchanged nonconverged residual 0.05474333838145354 agree with those artifacts.",
+    "write_paths": "Compared the six source-prompt write roots with all 14 changed paths in f8c24a819fc821e6549b791892295da30323d2f9..a3a7c58ce5792eed6d57adae6e54c48b08a86410; every path is allowed, and both HTML changes append evidence without closing the driving followup or altering plan version metadata."
+  },
+  "justifications": {
+    "durability": "tests/test_production_solver_receipt_trip_alignment.py:38-112 fixes independent expected trip values and null semantics and requires named refusals, with negative-control.log proving that restoring the original receipt function causes eight failures rather than a green-but-unexercised guard.",
+    "evidence": "docs/figures/gs-absolute-accuracy/production-solver-receipt/reproduction.log, negative-control.log, scheduler.log and receipt.json substantiate every requested gate, although focused.log:1 identifies the base revision with a working-tree repair rather than an immutable tested-source digest.",
+    "fit": "benchmarks/solovev_certificate.py:706-766 follows the surrounding NumPy host-receipt idiom, introduces mechanism-based names, and documents the sentinel meaning without changing solver execution or inventing unavailable telemetry.",
+    "goal_fidelity": "benchmarks/solovev_certificate.py:710-766 handles the actual scalar -1 damping default, indexes residuals and mask differences with the same executed trip index, and refuses malformed prefixes with ProductionSolverReceiptAlignmentError.",
+    "scope_discipline": "The 14 paths in the base-to-head diff all fall under the six declared roots, and docs/evidence/archive/gs-absolute-accuracy-gates-landed.html:233 appends the new evidence without removing the cumulative record."
+  },
+  "limitations": [
+    "Independent artifact and code review; numerical solve and test suite were not rerun by this review node.",
+    "Focused tests ran against uncommitted repair content at the stated base; the archive explicitly discloses this and the repaired numerical row is pinned to 8977ecd3b76367e334bf24b33d5b9e3a27640c32.",
+    "The numerical row remains nonconverged; merged-head verification and driving-followup adjudication belong to the coordinator and separately dispatched test node."
+  ],
+  "plan_read": {
+    "access": "canonical working-tree HTML; local docs HTTP endpoint unavailable",
+    "followup": "f-gsag-production-solver-receipt-desyncs-on-reduced-newton",
+    "path": "/home/ITER/mcintos/Code/nova/docs/plans/gs-absolute-accuracy-gates.html",
+    "section": "s1",
+    "version": 51
+  },
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: f8c24a819fc821e6549b791892295da30323d2f9\nREVIEWED_HEAD_SHA: a3a7c58ce5792eed6d57adae6e54c48b08a86410\nVERDICT goal: Read the source prompt and live docs/plans/gs-absolute-accuracy-gates.html followup f-gsag-production-solver-receipt-desyncs-on-reduced-newton; benchmarks/solovev_certificate.py:710 validates the same executed prefix for all three trip fields and preserves the reduced-Newton unavailable damping sentinel as null.\nVERDICT done_when: Read the exact source prompt gate; production-solver-receipt/reproduction.log records the requested chord row failing with the scalar IndexError, focused.log records 9 passed, negative-control.log records 8 failed and 1 passed under the declared source reversion, and repaired-row.log plus receipt.json record the same 342-cell row successfully emitting its receipt.\nVERDICT write_paths: Compared the six source-prompt write roots with all 14 changed paths in f8c24a819fc821e6549b791892295da30323d2f9..a3a7c58ce5792eed6d57adae6e54c48b08a86410; every path is allowed, and both HTML changes append evidence without closing the driving followup or altering plan version metadata.\nVERDICT manifest: Read the source run manifest.md and opened its named committed logs; its two commit identities, nine passing tests, eight negative-control failures, 342 realised cells, null damping, and unchanged nonconverged residual 0.05474333838145354 agree with those artifacts.\nVERDICT diff: Read commits 8977ecd3b76367e334bf24b33d5b9e3a27640c32 and a3a7c58ce5792eed6d57adae6e54c48b08a86410 separately against the source base; the first adds the alignment helper, contract tests and red/green evidence, while the second adds the successful numerical receipt, scheduler evidence, contour SVG and append-only landing text.\nCALL_SITES: benchmarks/solovev_certificate.py:2297 _production_solver_receipt after profile.solve, nova/equilibrium/forward.py:2231 ForwardProfile._solve_reduced_newton history producer, nova/equilibrium/fixed_point.py:445 FixedPointResult per-trip defaults\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: benchmarks/solovev_certificate.py:710-766 handles the actual scalar -1 damping default, indexes residuals and mask differences with the same executed trip index, and refuses malformed prefixes with ProductionSolverReceiptAlignmentError.\nSCORE evidence: 19\nJUSTIFICATION evidence: docs/figures/gs-absolute-accuracy/production-solver-receipt/reproduction.log, negative-control.log, scheduler.log and receipt.json substantiate every requested gate, although focused.log:1 identifies the base revision with a working-tree repair rather than an immutable tested-source digest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The 14 paths in the base-to-head diff all fall under the six declared roots, and docs/evidence/archive/gs-absolute-accuracy-gates-landed.html:233 appends the new evidence without removing the cumulative record.\nSCORE durability: 20\nJUSTIFICATION durability: tests/test_production_solver_receipt_trip_alignment.py:38-112 fixes independent expected trip values and null semantics and requires named refusals, with negative-control.log proving that restoring the original receipt function causes eight failures rather than a green-but-unexercised guard.\nSCORE fit: 20\nJUSTIFICATION fit: benchmarks/solovev_certificate.py:706-766 follows the surrounding NumPy host-receipt idiom, introduces mechanism-based names, and documents the sentinel meaning without changing solver execution or inventing unavailable telemetry.\n",
+  "recommendation": "accept",
+  "review_run_id": "r-20260923T231913468967-review-of-gsag-production-solver-receipt-trip-alignment",
+  "reviewed_base_sha": "f8c24a819fc821e6549b791892295da30323d2f9",
+  "reviewed_commit": "a3a7c58ce5792eed6d57adae6e54c48b08a86410",
+  "reviewed_head_sha": "a3a7c58ce5792eed6d57adae6e54c48b08a86410",
+  "reviewed_run_id": "r-20260923T205045006945-gsag-production-solver-receipt-trip-alignment",
+  "scores": {
+    "durability": 20,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "self_referential_assertions": [],
+  "source_evidence": {
+    "contract_job": "1277029",
+    "converged": false,
+    "cycle_damping_activated": null,
+    "negative_control": "revert the receipt repair",
+    "negative_control_failed_tests": 8,
+    "negative_control_passed_tests": 1,
+    "partition": "all_debug",
+    "passed_tests": 9,
+    "realised_cells": 342,
+    "repaired_row_job": "1277030",
+    "reproduction_error": "IndexError: too many indices for array: array is 0-dimensional, but 1 were indexed",
+    "reproduction_job": "1277027",
+    "residual_before_and_after": 0.05474333838145354,
+    "trip_count": 1
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-24T00:28:52.765177+00:00",
+  "total": 99
+}

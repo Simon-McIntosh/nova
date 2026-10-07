@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-18T08:00:38.273594+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json",
+      "line": "56",
+      "text": "flux_max_abs_difference is recorded as 0.0 while the receipt's own reading one line below (line 57) and an independent recomputation of the persisted arrays both give 0.482, so the file as written claims the twelve arms' flux is bit-identical when flux is the one array that differs \u2014 and it is exactly the array the one-program conclusion must exclude from the bit-identity claim."
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json",
+      "line": "75",
+      "text": "cache_inventory pairs bytes 20044389103 with gib 18.662, but those bytes are 18.668 GiB, and the census receipt's pair (20038219057 / 18.662, re-measured in this review) is self-consistent, so the bank file's gib was carried across from another capture and the cache size a pre-warm budget would be read from is ambiguous."
+    },
+    {
+      "file": "docs/research/compile-cost-evidence.html",
+      "line": "113",
+      "text": "the paragraph asserts the twelve bank identities need twelve entries today and one under a capacity-keyed identity, contradicting the same section's own bank paragraph (line 87, they compile to one program) and bank-shape-identity.json:97 (\"one entry today\"); the twelve belongs to the runtime-version directories, a recompile count, so the sentence overstates the bank's cache cost and misdescribes what the design changes there."
+    },
+    {
+      "file": "docs/plans/millisecond-converged-solve.html",
+      "line": "400",
+      "text": "the node's landing record was never appended to the plan although the dispatch contract required it and the file was inside the declared write paths, so the plan names neither the census nor its revision and a reader following the plan cannot reach this node's outcome."
+    },
+    {
+      "file": "docs/evidence/archive/millisecond-converged-solve-landed.html",
+      "line": "733",
+      "text": "the cumulative evidence record still ends at the marker-census node's block with no anchor for this node, so the evidence chain a reader is meant to follow is broken at exactly the node whose receipts the compile-cost decision's first lever rests on."
+    },
+    {
+      "file": "docs/research/compile-cost-evidence.html",
+      "line": "85",
+      "text": "the section presents the certificate rows as read from the route's own problem builder without disclosing that the census patches observation._UNIT_NODE for the duration of the call \u2014 a compatibility shim recorded only inside program-shape-census.json under framework_compat_shims \u2014 so a reader cannot tell that the builder resolves a module attribute it does not define, or that the underlying framework defect is still open."
+    },
+    {
+      "file": "docs/research/compile-cost-evidence.html",
+      "line": "110",
+      "text": "the goal names member width among the axes to bucket, but this bullet is the only place the design addresses it and it rests on the assertion that the axis is already constant across the bank; no axis in program-shape-census.json measures member width, so the one axis the design calls free is the one axis nothing measured."
+    }
+  ],
+  "justifications": {
+    "durability": "no test names benchmarks/program_shape_census.py or the program-shapes receipt directory (a grep over tests/ finds no reference to either), so nothing fails if the census or its numbers regress.",
+    "evidence": "benchmarks/program_shape_census.py can only be reading rather than compiling \u2014 it imports no jax, and a full re-run of every certificate case left the shared compilation cache at exactly its pre-run 3958 entries / 20038219057 bytes \u2014 and every material census figure re-derived identically on a separate node, but the curated bank receipt contradicts itself in two numeric fields (findings below).",
+    "fit": "the instrument follows the benchmarks/ idiom (argparse, main(argv) returning int, raise SystemExit(main()), a receipt JSON written beside its own figure) and all seven changed paths pass the repository naming checks with no plan label, version suffix or attribution.",
+    "goal_fidelity": "the census delivers the measured shape count for the twelve bank arms (one program today) and for the four certificate rows (four capacity vectors collapsing to one bucket), and an independent re-run on all_debug reproduced every one of those numbers, but the goal's member-width axis is carried by an assertion with no receipt row (docs/research/compile-cost-evidence.html:110) and the landing record the dispatch contract required was never appended.",
+    "scope_discipline": "git diff 299e4b64..2e848df7 names exactly seven paths \u2014 benchmarks/program_shape_census.py, the five files under docs/figures/millisecond-converged-solve/program-shapes/, and docs/research/compile-cost-evidence.html \u2014 every one inside the declared write paths and nothing carried that the goal does not imply."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: the census delivers the measured shape count for the twelve bank arms (one program today) and for the four certificate rows (four capacity vectors collapsing to one bucket), and an independent re-run on all_debug reproduced every one of those numbers, but the goal's member-width axis is carried by an assertion with no receipt row (docs/research/compile-cost-evidence.html:110) and the landing record the dispatch contract required was never appended.\nSCORE evidence: 16\nJUSTIFICATION evidence: benchmarks/program_shape_census.py can only be reading rather than compiling \u2014 it imports no jax, and a full re-run of every certificate case left the shared compilation cache at exactly its pre-run 3958 entries / 20038219057 bytes \u2014 and every material census figure re-derived identically on a separate node, but the curated bank receipt contradicts itself in two numeric fields (findings below).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 299e4b64..2e848df7 names exactly seven paths \u2014 benchmarks/program_shape_census.py, the five files under docs/figures/millisecond-converged-solve/program-shapes/, and docs/research/compile-cost-evidence.html \u2014 every one inside the declared write paths and nothing carried that the goal does not imply.\nSCORE durability: 8\nJUSTIFICATION durability: no test names benchmarks/program_shape_census.py or the program-shapes receipt directory (a grep over tests/ finds no reference to either), so nothing fails if the census or its numbers regress.\nSCORE fit: 19\nJUSTIFICATION fit: the instrument follows the benchmarks/ idiom (argparse, main(argv) returning int, raise SystemExit(main()), a receipt JSON written beside its own figure) and all seven changed paths pass the repository naming checks with no plan label, version suffix or attribution.\nFINDING docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json:56 flux_max_abs_difference is recorded as 0.0 while the receipt's own reading one line below (line 57) and an independent recomputation of the persisted arrays both give 0.482, so the file as written claims the twelve arms' flux is bit-identical when flux is the one array that differs \u2014 and it is exactly the array the one-program conclusion must exclude from the bit-identity claim.\nFINDING docs/figures/millisecond-converged-solve/program-shapes/bank-shape-identity.json:75 cache_inventory pairs bytes 20044389103 with gib 18.662, but those bytes are 18.668 GiB, and the census receipt's pair (20038219057 / 18.662, re-measured in this review) is self-consistent, so the bank file's gib was carried across from another capture and the cache size a pre-warm budget would be read from is ambiguous.\nFINDING docs/research/compile-cost-evidence.html:113 the paragraph asserts the twelve bank identities need twelve entries today and one under a capacity-keyed identity, contradicting the same section's own bank paragraph (line 87, they compile to one program) and bank-shape-identity.json:97 (\"one entry today\"); the twelve belongs to the runtime-version directories, a recompile count, so the sentence overstates the bank's cache cost and misdescribes what the design changes there.\nFINDING docs/plans/millisecond-converged-solve.html:400 the node's landing record was never appended to the plan although the dispatch contract required it and the file was inside the declared write paths, so the plan names neither the census nor its revision and a reader following the plan cannot reach this node's outcome.\nFINDING docs/evidence/archive/millisecond-converged-solve-landed.html:733 the cumulative evidence record still ends at the marker-census node's block with no anchor for this node, so the evidence chain a reader is meant to follow is broken at exactly the node whose receipts the compile-cost decision's first lever rests on.\nFINDING docs/research/compile-cost-evidence.html:85 the section presents the certificate rows as read from the route's own problem builder without disclosing that the census patches observation._UNIT_NODE for the duration of the call \u2014 a compatibility shim recorded only inside program-shape-census.json under framework_compat_shims \u2014 so a reader cannot tell that the builder resolves a module attribute it does not define, or that the underlying framework defect is still open.\nFINDING docs/research/compile-cost-evidence.html:110 the goal names member width among the axes to bucket, but this bullet is the only place the design addresses it and it rests on the assertion that the axis is already constant across the bank; no axis in program-shape-census.json measures member width, so the one axis the design calls free is the one axis nothing measured.",
+  "review_run_id": "r-20260918T080038273594-review-of-msc-canonical-program-shapes-census",
+  "reviewed_run_id": "r-20260917T204844553132-msc-canonical-program-shapes-census",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260918T080038273594-review-of-msc-canonical-program-shapes-census",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-18T08:51:57.087602+00:00",
+  "total": 79
+}

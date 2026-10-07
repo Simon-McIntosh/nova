@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "artifacts": "docs/figures/playable-forward-solve/parallel-components-read/solovev-certificate/solve-panels/chord/{weak-rotation-reactor-static,moderate-rotation-conventional-static,strong-rotation-compact-static}-production-route-cells-1000.png and diverted-single-null-production-route-cells-500.png \u2014 all four regenerated and independently re-read here: title==drawn==receipt for each.\n- weak-rotation-reactor-static: title reads 'read qualified_axis (axis admission; not an accuracy verdict); psi relative_rms=0.1178 relative_sup=0.2098; residual=1.388e-15; converged=yes'\n- moderate-rotation-conventional-static: relative_rms=0.1176 relative_sup=0.2093 residual=5.875e-16 converged=yes\n- strong-rotation-compact-static: relative_rms=0.1155 relative_sup=0.2038 residual=2.913e-16 converged=yes\n- diverted-single-null: relative_rms=4.6e-15 relative_sup=1.428e-14 residual=2.423e-17 converged=yes",
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+    "4720f395b",
+    "df0687b01",
+    "c7d47126d",
+    "4d3363b58",
+    "c50391acd"
+  ],
+  "completed_at": "2026-10-03T15:47:16.033Z",
+  "delta_note": "First review of this run. The diff range is 0dfce2a0d (the node's orientation base and the pre-repair artifact revision) to c50391acd (its landed head, the revision this review is keyed on). Five commits: 4720f395b, df0687b01, c7d47126d, 4d3363b58, c50391acd. I reproduced the guard first-hand rather than reading the worker's account: for all four chord arms the on-disk panel's embedded PNG Title equals figure.panel_title and the recorded sha256 matches the panel bytes.",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T15:39:52Z",
+  "evidence_inputs": "Receipt keys each title re-derives from: analytic_flux_regions.all_carrier_cells.relative_rms / .relative_sup; banked_read.read_status; solver.terminal_fixed_point_residual; solver.converged; case and requested_cells via certificate._slug. The bare qualification gone from all four arms is solver.qualification == 'qualified'. Gate: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_solovev_certificate_panel_titles.py -> 20 passed (EXIT=0) at c50391acd. Negative controls: nc-revert-A.log (7 failed / 13 passed, EXIT=1), nc-with-B-old-title.log (1 failed / 19 passed, EXIT=1), nc-pre-B-old-title.log (12 passed) showing the drawn-title guard is what reddens.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_solovev_certificate_panel_titles.py",
+      "line": "70",
+      "severity": "follow-on",
+      "text": "test_panel_title_re_derives_from_receipt_keys asserts recorded == solovev_panel_title(row) where the recorded value was written by that same function, so the two sides move together and a formatting regression inside solovev_panel_title would leave it green; the independent guards at lines 79 (raw receipt keys), 88 (drawn PNG title) and 99 (digest) cover the gap, so it does not hold the node."
+    }
+  ],
+  "follow_ons": "Outside this node's write scope and echoed from the reviewed manifest: (1) the chord error panels draw only absolute levels, so the four arms cannot be compared as drawn; (2) the contour level strings sit over the wall polyline. Both are a re-render inside benchmarks/solovev_certificate._draw_error_contours, not a title defect, and neither holds this node.",
+  "gate_arms_note": "added_failure_count is 0 and added_failure_ids is [] derived from the reviewed run's own gate logs, not asserted: baseline-preprerepair.log reports 16 failed / 4 passed (EXIT=1) and gate-final.log reports 20 passed (EXIT=0 at c50391acd), and reckon.crew.review.added_failures_from_gate_logs over those two texts returns (0, []), so the head added no failing test the base did not already fail. With an empty added set there is no failure_attribution.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commit by commit against base 0dfce2a0d: 4720f395b adds solovev_panel_title and embeds it, df0687b01 adds the file's trailing newline, c7d47126d regenerates every chord arm and writes the drawn title into each PNG, 4d3363b58 adds the drawn-title test, c50391acd corrects the fragment's arm-revision labels; 11 files changed, all inside the declared scope.",
+    "done_when": "The done_when names tests/test_solovev_certificate_panel_titles.py and requires regenerated titles read from the receipt plus a red negative control; the manifest records the gate at c50391acd and I read both gate logs and the negative-control logs.",
+    "goal": "The node goal was to stop three certificate chord panels being titled qualified over an 11 to 12 percent relative flux error; the landed change re-renders every chord arm with a title that names the axis-admission read status and prints the relative flux error, terminal residual and converged flag, and the four on-disk titles now read qualified_axis beside relative_rms 0.1178/0.1176/0.1155 (1000-cell arms) and 4.6e-15 (diverted) rather than the bare word.",
+    "manifest": "Read; status complete, commits c50391acd (and four predecessors) named, the gate command and its 20-passed/exit-0 result recorded, and baseline_suite (16 failing ids) plus after_suite (0) blocks present.",
+    "write_paths": "The manifest declares benchmarks/parallel_components_read.py, tests/test_solovev_certificate_panel_titles.py, the pfs-solovev-certificate-panel-titles fragment and the solovev-certificate figure trees; git diff --name-only 0dfce2a0d..c50391acd lists only paths inside those grants."
+  },
+  "justifications": {
+    "durability": "tests/test_solovev_certificate_panel_titles.py:99 fails if a panel is re-rendered with the old bare title and only its digest refreshed, which is exactly the regression nc-with-B-old-title.log shows red (1 failed / 19 passed, exit 1), so the guard is shown to fire rather than assumed.",
+    "evidence": "tests/test_solovev_certificate_panel_titles.py:88 asserts the drawn PNG title equals the receipt's recorded title, and I independently reproduced title==drawn and sha256-match for all four arms from the on-disk receipts; the gate log gate-final.log records 20 passed / exit 0 at c50391acd.",
+    "fit": "benchmarks/parallel_components_read.py:422 composes the title through the committed certificate painter and its _slug helper, matching the module's existing receipt-driven render idiom, and adds no name the repository naming rules forbid.",
+    "goal_fidelity": "benchmarks/parallel_components_read.py:422 turns the panel title into the axis-admission read plus the receipt's relative_rms/relative_sup, terminal residual and converged flag, and the four committed panel receipts now carry that title instead of the bare qualification.",
+    "scope_discipline": "git diff --name-only 0dfce2a0d..c50391acd lists only benchmarks/parallel_components_read.py, tests/test_solovev_certificate_panel_titles.py, the fragment and the two solovev-certificate figure trees, all inside the manifest's declared write paths; the regenerated diverted control arm stays inside that same directory scope."
+  },
+  "node": "review-of-pfs-solovev-certificate-panel-titles",
+  "plan": "nova:playable-forward-solve",
+  "previous_review_record": null,
+  "prior_findings_answered": [],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal was to stop three certificate chord panels being titled qualified over an 11 to 12 percent relative flux error, and benchmarks/parallel_components_read.py:422 now titles each arm by its axis-admission read status with the relative flux error printed beside it.\nVERDICT done_when: the done_when names tests/test_solovev_certificate_panel_titles.py; the manifest records that run at c50391acd and I read both its gate arms.\nVERDICT write_paths: read the manifest's declared paths; git diff --name-only 0dfce2a0d..c50391acd lists every changed path inside them.\nVERDICT manifest: read; it states the gate passed 20/20 at c50391acd and names its log, baseline_suite and after_suite blocks.\nVERDICT diff: read commit by commit against the base; five commits, eleven files changed, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: benchmarks/parallel_components_read.py:422 turns the panel title into the axis-admission read plus the receipt's relative_rms/relative_sup, terminal residual and converged flag.\nSCORE evidence: 19\nJUSTIFICATION evidence: tests/test_solovev_certificate_panel_titles.py:88 asserts the drawn PNG title equals the receipt's recorded title, and I reproduced title==drawn and the sha256 match for all four arms from the on-disk receipts.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only 0dfce2a0d..c50391acd lists only paths inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_solovev_certificate_panel_titles.py:99 fails on a re-rendered panel carrying the old title with a refreshed digest, the exact regression nc-with-B-old-title.log records red.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/parallel_components_read.py:422 composes the title through the committed certificate painter, matching the module's existing receipt-driven render idiom.\nFINDING tests/test_solovev_certificate_panel_titles.py:70 follow-on: test_panel_title_re_derives_from_receipt_keys compares a stored title against the same function that wrote it, so it moves with solovev_panel_title and would stay green on a formatting regression; the independent raw-key, drawn-title and digest assertions cover it.\n",
+  "review_base_sha": "63a12e2516bf19604caec9fb9293593a9395a3d0",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261003T153931698808-review-of-pfs-solovev-certificate-panel-titles",
+  "reviewed_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "reviewed_commit": "c50391acdf7a6c6b841b444f9e7084ff65b55e4b",
+  "reviewed_head_sha": "c50391acdf7a6c6b841b444f9e7084ff65b55e4b",
+  "reviewed_run_id": "r-20261003T143720361037-pfs-solovev-certificate-panel-titles",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-solovev-certificate-panel-titles",
+  "reviewer_node": "review-of-pfs-solovev-certificate-panel-titles",
+  "reviewer_run_id": "r-20261003T153931698808-review-of-pfs-solovev-certificate-panel-titles",
+  "reviewing_run_id": "r-20261003T153931698808-review-of-pfs-solovev-certificate-panel-titles",
+  "run_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 19
+  },
+  "section": "\u00a78",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:47:00Z",
+  "total": 95,
+  "verdict": "pass"
+}

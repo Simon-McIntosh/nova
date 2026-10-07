@@ -1,0 +1,115 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest leaves baseline_suite and after_suite empty, so there are no completed suite-arm logs from which to compute a failure-id set difference. added_failure_count=0 and added_failure_ids=[] mean no added failures were observed in readable suite arms; they do not claim that a paired suite ran. The H200 measurement logs and render/hash checks are custom artifact gates, not suite arms.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/run.json: five frame rows, five panel records, exact jit_solve misses on five receipts, top-level job 1280417 with three selected frames and two resumed receipts",
+    "five frame JSON+NPZ+PNG+SVG sets: each terminal NPZ has 1173 scalar elements and passed independent digest validation/rendering",
+    "docs/evidence/archive/multi-unit-limiter-wall-landed.html#diiid-gate-frame-terminal-panels: five project-absolute figure citations, but no disclosure of the newly enlarged artifact differences",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T163432368419-review-of-mulw-gate-frame-terminal-panels/independent-render-validation.log: RENDERED_PANELS=5, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T163432368419-review-of-mulw-gate-frame-terminal-panels/independent-negative-control.log: positive load and mutated-hash refusal, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T163432368419-review-of-mulw-gate-frame-terminal-panels/independent-ruff.log: All checks passed, EXIT=0"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "60fb6c5cba45da1b7a2f1f6c32fa447d3db77a69",
+    "3e98097edfd7114a1601a37cf24c6cfff970b058",
+    "37290e840839390655fea67991509312f5d039bc",
+    "6e6c93b00a57d31ea320616651ab45a7c4fe5f72",
+    "0a36644409e2dec21a825370b1b4ee001e259f89"
+  ],
+  "completed_at": "2026-10-02T16:44:44Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T16:35:01Z",
+  "evidence_inputs": "Reviewed b68eb93ff3427e0a31cfccda56d1eaf22b01e08e..0a36644409e2dec21a825370b1b4ee001e259f89 (five commits, 24 repository paths). The renamed count is absent under its old identity_row_count spelling and present as terminal_state_element_count in all five receipts and run.json. Independent scratch extraction of the exact head reproduced digest validation, the negative refusal, and all five render outputs. Per-frame provenance was read from the receipts, not inferred: jobs 1280398/1280398/1280417/1280417/1280417 and source revisions 3e98097ed/3e98097ed/6e6c93b00/6e6c93b00/6e6c93b00. The candidate worktree is clean; none of the five candidate commits is an ancestor of review base fbba99cc2, so coordinator integration must land the complete five-commit chain.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/run.json",
+      "line": "212",
+      "severity": "blocking",
+      "text": "The done-when requires all five frames in ONE H200 job, but this receipt records child_process_count=3, resumed_from_independent_frame_receipts=2, and selected_frame_indices=[2,3,4] for job 1280417. Frames 179 and 44 instead carry job 1280398/device_sha 3e98097ed; the other three carry job 1280417/device_sha 6e6c93b00. The aggregate is useful recovery evidence, but it is not the specified gate. Either run all five in one allocation or obtain an explicit change to the one-job requirement; when composing receipts, preserve and validate per-frame job/revision provenance instead of letting one top-level header stand for the set."
+    },
+    {
+      "file": "docs/evidence/archive/multi-unit-limiter-wall-landed.html",
+      "line": "60",
+      "severity": "blocking",
+      "text": "The new measurement overturns the adjacent identity account without saying so. Against the committed head artifact, frames 44, 144, 146 and 137 moved from residual differences 2.78e-16, 1.20e-13, 1.11e-16 and 1.39e-16 to 0.216, 9.145, 6.019 and 2.244e-4; frame 179 moved from 0.0994 to 0.2637. run.json lines 824-829 records all five differences, but the new archive section reports timings, terminal residuals and panels only, and manifest follow_ons says none. Section 3's DIII-D regression conclusion cannot remain unqualified until this changed result is attributed or prominently recorded as the new open discrepancy."
+    },
+    {
+      "file": "benchmarks/diiid_gate_frame_identity.py",
+      "line": "1368",
+      "severity": "follow-on",
+      "text": "The resumed aggregate accepts every pre-existing schema-2 frame receipt after checking only its NPZ hashes. It never requires receipt.header.job_id, device_sha, driver_sha256, cache root, artifact digest, frame identity/index, or measurement configuration to match the aggregate contract. This is how two revisions are intentionally combined here, but it would also accept an unrelated stale receipt and still emit frame_failures=[] under the current job header. Add explicit compatible-provenance checks and retain each frame's provenance in run.json."
+    },
+    {
+      "file": "benchmarks/diiid_gate_frame_identity.py",
+      "line": "1222",
+      "severity": "follow-on",
+      "text": "The two contour calls omit linewidth, so the committed SVGs use the shared 0.35 pt contour default; the wall renders at 1.2 pt. The binding plot style calls for 3.0 pt on the headline series and 2.6 pt on the comparison series, with every coloured series directly labelled or in a frameless legend at 20 pt. These panels instead identify blue and ochre in a 15 pt sentence embedded below the axes, duplicating the HTML figcaption. Pass compliant widths and direct labels (or a frameless legend), and leave the explanatory sentence in the page caption."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/manifest.md",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "The tests field is a prose outcome list rather than the literal commands that ran, and baseline_suite/after_suite are empty at lines 20-21. Therefore no suite failure delta can be derived from reviewed-run gate logs. This review records added_failure_count=0 only as no observed added failures in readable suite arms, not as evidence that a paired suite ran; a focused test should pin receipt provenance, digest refusal, and render output shape."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/final.txt",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "final.txt still says the node is blocked with two frames and three commits, while manifest.md says complete with five frames and five commits. The run was resumed successfully, but its user-facing terminal record was not refreshed, leaving two contradictory durable summaries under one run id."
+    }
+  ],
+  "gate_arms_note": "No readable baseline_suite or after_suite was recorded. Independent checks at reviewed head 0a3664440 used a scratch extraction: render-only regenerated 5 panels and exited 0; all five NPZ file/terminal hashes were accepted; mutating frame 179's recorded terminal hash was refused and exited 0; ruff on the changed benchmark passed. h200-1280417.log itself contains exactly three FRAME_OUTCOME rows, while h200-1280398.log contains the first two before scheduler cancellation.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call sites; the changed executable is a benchmark/receipt CLI.",
+    "diff": "Read all five commits against b68eb93ff. The benchmark grows by 553 lines to persist/validate arrays, record cache/timing evidence, resume selected frames, and render panels; four evidence commits land two partial frames, the resume path, three remaining frames, the aggregate, fragment, and cumulative archive splice.",
+    "done_when": "The literal one-job condition is false. run.json records child_process_count 3, resumed_from_independent_frame_receipts 2, and selected_frame_indices [2,3,4] for top-level job 1280417; frame receipts 179/44 identify job 1280398 and revision 3e98097ed, while 144/146/137 identify job 1280417 and revision 6e6c93b00.",
+    "goal": "The implementation supplies the five digest-checked terminal NPZs, five PNG+SVG panels, the terminal_state_element_count rename, and per-frame compile/solve/cache fields, but the required five-frame measurement did not run as one H200 job: the aggregate combines two frames from job 1280398 with three from job 1280417.",
+    "manifest": "The manifest names all five commits and paths and honestly says job 1280417 completed only the remaining 3/3 frames, but baseline_suite and after_suite are empty, tests is prose rather than the literal commands, follow_ons is none despite the newly enlarged DIII-D differences, and final.txt remains the stale two-frame blocked handoff.",
+    "write_paths": "All 24 repository paths in b68eb93ff..0a3664440 are inside the benchmark, figure-directory, cumulative-archive, and fragment grants; the external report is at its granted path. The reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "The NPZ file hash plus dtype/shape-aware terminal-array hash is a strong durable guard and the render-only path reproduced. The aggregate loader, though, accepts any schema-2 receipt with a matching local NPZ and does not require its job id, device SHA, driver hash, cache root, or artifact digest to match the current run before presenting a single top-level header. No test file or readable baseline/after suite protects the 553-line benchmark change, and final.txt contradicts the terminal manifest.",
+    "evidence": "Independent render-only validation at 0a3664440 regenerated five panels and revalidated every NPZ; an independent positive load plus mutated terminal hash produced the named refusal. However, the new receipts overturn the public identity account: the earlier head-arm residual differences for frames 44/144/146/137 were about 2.78e-16/1.20e-13/1.11e-16/1.39e-16, while the new run records 0.216/9.145/6.019/2.244e-4; frame 179 grows from 0.0994 to 0.2637. The archive adds the new residuals and panels without explaining that contradiction, and no paired suite arms exist.",
+    "fit": "The code reuses Nova's wall, flux-contour, null, and poloidal-axis painters and produces the mandated 1400-pixel-wide axis-free figures. It leaves contour linewidth at the shared painter's 0.35 pt default and the wall at 1.2 pt, far below the binding 2.6/3.0 pt data-series rules; blue and ochre are identified only by a 15 pt caption embedded in the canvas rather than direct 20 pt labels or a frameless legend, and the same caption is duplicated in HTML.",
+    "goal_fidelity": "The main artifacts exist and the misleading count is correctly renamed, but the dispatch fixed a one-job five-frame measurement and the delivered aggregate is explicitly a two-job, two-revision composition. The panels compare each terminal state with the production cold seed, not with terminal arrays from the committed batched artifact, which still has no arrays.",
+    "scope_discipline": "Every changed repository path falls inside the declared grants, the archive splice is additive, the report is at its exact external grant, all five commits have conventional subjects and bodies without attribution trailers, and the candidate worktree is clean."
+  },
+  "plan": "nova:multi-unit-limiter-wall",
+  "project": "nova",
+  "raw_text": "VERDICT goal: five digest-checked NPZs and PNG+SVG panels, terminal_state_element_count, per-frame solve/compile fields and cache rows are present, but the fixed one-job gate was not run; the aggregate combines two frames from job 1280398 with three from job 1280417.\nVERDICT done_when: run.json:212 records child_process_count 3 and resumed_from_independent_frame_receipts 2, while header.selected_frame_indices is [2,3,4]; the two earlier receipts are from revision 3e98097ed and the later three from 6e6c93b00.\nVERDICT write_paths: all 24 repository paths in b68eb93ff..0a3664440 are inside the declared grants and the external report uses its exact grant.\nVERDICT manifest: five commits and all paths are named, but tests is prose, baseline_suite/after_suite are empty, follow_ons says none despite changed DIII-D results, and final.txt is a stale blocked two-frame handoff.\nVERDICT diff: 60fb6c5cb adds persistence/rendering, 3e98097ed fixes the no-extra-saddle case, 37290e840 preserves two partial frames, 6e6c93b00 adds selected-frame resume/aggregation, and 0a3664440 lands the remaining three frames and evidence.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: the named artifacts exist and the field rename is correct, but the five frames were not measured in one H200 job as required and the figures use the cold seed rather than an artifact terminal-array reference.\nSCORE evidence: 10\nJUSTIFICATION evidence: independent digest, render and refusal checks pass, but four formerly machine-precision artifact residual comparisons are now 0.216, 9.145, 6.019 and 2.244e-4 and the public evidence does not disclose the changed conclusion; no paired suite arms exist.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path is within the fence, the worktree is clean, and all five commits have conventional subjects and bodies without attribution trailers.\nSCORE durability: 11\nJUSTIFICATION durability: hashes and render-only regeneration are strong, but aggregation accepts stale schema-2 receipts without compatible-provenance checks, no test file or paired suite arm protects 553 added benchmark lines, and final.txt contradicts the manifest.\nSCORE fit: 12\nJUSTIFICATION fit: shared Nova painters and 1400-pixel axis-free figures are used, but contours remain at 0.35 pt, the wall at 1.2 pt, and the series are named only in a duplicated 15 pt canvas caption rather than direct labels or a compliant legend.\nFINDING docs/figures/multi-unit-limiter-wall/diiid-gate-frame-identity/run.json:212 blocking: the receipt itself proves the exact one-job gate was not run; it combines two frames from job 1280398/revision 3e98097ed with three from job 1280417/revision 6e6c93b00.\nFINDING docs/evidence/archive/multi-unit-limiter-wall-landed.html:60 blocking: the new receipts overturn the adjacent DIII-D identity account on all five frames, including 9.145 and 6.019 residual differences, but the archive and manifest record no new discrepancy or follow-on.\nFINDING benchmarks/diiid_gate_frame_identity.py:1368 follow-on: aggregation validates schema and NPZ hashes but not compatible job/revision/driver/cache/artifact provenance, so an unrelated stale receipt can enter a complete run under the current header.\nFINDING benchmarks/diiid_gate_frame_identity.py:1222 follow-on: the persisted figures use 0.35 pt contours and 1.2 pt wall lines and identify colour only through a 15 pt embedded caption, contrary to the binding plot sizes and direct-label rule.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/manifest.md:14 follow-on: tests is not a literal command and both suite arms are empty, so added_failure_count 0 means no readable delta rather than a paired-suite pass.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134659485416-mulw-gate-frame-terminal-panels/final.txt:1 follow-on: final.txt still reports the earlier blocked two-frame state while manifest.md reports the resumed five-frame completion.\nREVIEWED_BASE_SHA: b68eb93ff3427e0a31cfccda56d1eaf22b01e08e\nREVIEWED_HEAD_SHA: 0a36644409e2dec21a825370b1b4ee001e259f89",
+  "review_base_sha": "fbba99cc277acec3c8dd893d91cfcfade4e9b65b",
+  "review_run_id": "r-20261002T163432368419-review-of-mulw-gate-frame-terminal-panels",
+  "reviewed_base_sha": "b68eb93ff3427e0a31cfccda56d1eaf22b01e08e",
+  "reviewed_commit": "0a36644409e2dec21a825370b1b4ee001e259f89",
+  "reviewed_head_sha": "0a36644409e2dec21a825370b1b4ee001e259f89",
+  "reviewed_revision": "0a36644409e2dec21a825370b1b4ee001e259f89",
+  "reviewed_run_id": "r-20261002T134659485416-mulw-gate-frame-terminal-panels",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mulw-gate-frame-terminal-panels",
+  "reviewer_node": "review-of-mulw-gate-frame-terminal-panels",
+  "reviewer_run_id": "r-20261002T163432368419-review-of-mulw-gate-frame-terminal-panels",
+  "scores": {
+    "durability": 11,
+    "evidence": 10,
+    "fit": 12,
+    "goal_fidelity": 13,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T16:41:39Z",
+  "total": 66,
+  "verdict": "fail"
+}

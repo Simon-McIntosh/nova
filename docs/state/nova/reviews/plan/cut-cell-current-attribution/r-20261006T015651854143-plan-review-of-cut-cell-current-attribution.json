@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:02:37.699Z",
+  "dispatched_at": "2026-10-06T01:57:12Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:3275",
+      "id": "duplicate_owner-1",
+      "reason": "two competing coupling designs now coexist in the plan and one is already implemented, so the first node cannot know whether to extend the frozen matrix with order-two curvature blocks (lines 825-827) or rebuild clipped-polygon blocks per trip; the author must pick one owner before dispatch.",
+      "text": "\u00a79 (\"Take the cut cells' moment conversion and kernel blocks over the clipped polygon\", plan lines 665-667 and the \u00a79 followup at 781-783) specifies that \"the kernel blocks that image the cell's zeroth, first and second moments are the polygon-analytic integrals over that clipped polygon about its own centroid\" and \"the blocks are rebuilt once per trip\", but the decision section \"The coupling geometry is frozen\" (lines 708-715) rejects exactly that: \"the held line answered it by rebuilding polygon-analytic blocks over each clipped polygon every trip \u2026 it is not the design\", choosing frozen atomic-cell blocks with the clipped current expanded to order-two moments imaged by matmul; the plan's own followups at 801 and 809 were withdrawn on the same grounds (\"there are no per-trip clipped blocks to trace\"), yet \u00a79 and a landed worktree (5854d184, line 1513) still carry the per-trip rebuilt-block path \u2014 the owner is `coupling_current_moments`/`current_moment_image` in forward_operator.py with the kernel integral `nova/biot/polygonanalytic.polygon_analytic_flux_moments`.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/separatrix_clip.py:1487",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a73 already cites the held spline-chain clip and \u00a77 names separatrix_clip.py among the implement files, so the design is extension rather than fork; it needs a one-line citation of the owning file, not a redesign.",
+      "text": "\u00a73 describes the saddle-vertex clip, branch-paired roots and four fixed-capacity wedges as the mechanism to carry, and \u00a77 then re-states the wiring (\"pass the typed census saddle as the clip's saddle vertex\"); both already exist in `separatrix_clip.py` (`_traced_clip` saddle insert near line 1008, `_ordered_saddle_wedges`, `_traced_saddle_wedges_from_edge_roots`, `SaddleCellWedges`, `branch_linear_current_moments`), and the plan's own record (line 1741) confirms the production exact mode is the spline-chain route excluded only by the `(curve_evaluator is None)` conjunct, so the delta is a wiring pass-through plus a capacity check, not a new wedge mechanism.",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "c51f005e12f2e5e6076a4ff9d66f64ad86acda8e0afe951029467cef514c355b",
+  "plan_slug": "cut-cell-current-attribution",
+  "plan_version": 236,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Section 9 is declared deferred (2026-10-06), superseded by converged-forward-solve; no node is dispatched from it, so no second coupling path is built. The coupling the new map uses is ruled in converged-forward-solve section 4, beside the locked coupling-geometry-frozen decision.",
+      "when": "2026-10-06T02:04:52.061551+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Sections 3 and 7 are declared deferred (2026-10-06), superseded by converged-forward-solve section 3, whose booking takes saddle support from the null's normal form (lead ruling 2026-10-05), not from the separatrix_clip.py wedges; no node is dispatched from them.",
+      "when": "2026-10-06T02:04:52.794735+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T015651854143-plan-review-of-cut-cell-current-attribution",
+  "reviewed_blob_sha": "116ba9fc57c7cc05656451c14813f2c756dd59e4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a74 makes \"the boundary the read returns, the region the current integrates over and the polynomial space the density is evaluated in \u2026 the same object per cell\", hiding clip plus moments plus coupling behind one discretisation rather than a scatter of wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a79 re-proposes per-trip polygon-analytic kernel blocks over the clipped polygon, a second coupling implementation beside the frozen interaction-matrix path the `coupling-geometry-frozen` decision already locked in `nova/equilibrium/forward_operator.py`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds no CLI/MCP/refusal surface (the `clip_mode` seam it uses, forward_operator.py:2341, already exists at HEAD with values chord/exact/chord_cells) and \u00a78 names the default it retires (chord, promoted away only by the \u00a75 acceptance rule).",
+    "reuse_search": "pass \u2014 the plan cites the mechanism it extends before adding: `nova/equilibrium/separatrix_clip.py` `_traced_clip`/`_ordered_saddle_wedges`/`SaddleCellWedges`, `nova/equilibrium/forward_operator.py` `_profile_support` (3351), `coupling_current_moments` (3275), `current_moment_image` (3885), `nova/equilibrium/clip_quadrature.py` `_flux_selected_current_moments` (888), the saddle-aware flood in `flux_surface_connectivity.py`, `polygon_moments`, `polygon_analytic_flux_moments`, and the two held stacks 0372d3fc / 28a49bcb.",
+    "thin_wrapper": "pass \u2014 \u00a77's saddle wiring and \u00a78's flagged exact path both extend existing seams (`separatrix_clip._traced_clip`'s `saddle_vertex` parameter, 933; the pre-existing `clip_mode` field, forward_operator.py:2341) rather than layering a parallel interface, and \u00a78 states why the flag exists."
+  },
+  "section_digests": {
+    "_document": "5eb60db4a7f651f4d3d7aeebeb75a3c735029c71213bffba125511579e4c044b",
+    "c-run-r-20260918t133650330007-figure-recovery-stranded-worktrees-h": "f2ca5bab0a56eda6ce007eba1ace03fc18b92e9791126e7f2c6df9900ea8b13b",
+    "outboard-hole-booking-gate": "ad21f16e0c08776407c9bb087590244cde781fea6337ceb97142f2f241a59081",
+    "s-contract": "4f404edd71893da3bf01f4ba21a8602ad66f1ae6a5419054e6d6620fc0bc3168",
+    "s0": "94fd54ee6ddcae60d490a45b6e9605e4610175cdd41ebe4dcb8e844779f9d30c",
+    "s1": "1ae594eeccb3e9c258a1a026b84717472c27c9e46f7154a4a95ece542ad5e04a",
+    "s10": "312f359cb02c5156d5f721da9596d0fa34188dd5d29c922edd399e7dccf5f3b6",
+    "s11": "af9b6355dd6fabee60970c6b5b7e9d664ae4291fc357dbd0ec2182a858ab3329",
+    "s2": "013ff46ef64cfe94568fa375a3a9e3795f680ef56a67f4f8b80ac97f6ee4877e",
+    "s3": "f76a7acd3cc166f1aef9188eb52312ecf47c7cd7dc95fc2a9b1470fcde33acda",
+    "s4": "8507899810be7a005e33cdd600b3b55755bb4aea60e2c7138a035bc26643fdef",
+    "s5": "1e77d2d98bb305173977f11b5a9a13f9a1ab43b9c96248c1294046980a1794d5",
+    "s6": "7d6d9a6c7db609bc914e9814c2564420415b4f1789fe509c25ca244c802e2728",
+    "s7": "00a79376ac82488453506fa812e7bba5e1711278c79043a51ccd81581f2dcf60",
+    "s8": "aad27918778dd65a47e99942dcbe002e4f71282a17728055028f4be1a215cd59",
+    "s9": "e8a6ec8dea20becc61e6911153c607cc61f1433edfa2fee0d4d62e6bfaf78645"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:03:43.028815+00:00"
+}

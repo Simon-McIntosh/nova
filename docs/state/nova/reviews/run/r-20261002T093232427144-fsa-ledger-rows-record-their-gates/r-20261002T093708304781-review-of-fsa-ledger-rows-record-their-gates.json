@@ -1,0 +1,121 @@
+{
+  "absent": [
+    "no test guards the correction: the review_scores/exit-status agreement the source followup requires has no assertion, and the ledger writer still promotes a green gate with a nonzero exit, so the repaired state can silently revert",
+    "no consumer of the added row-level 'failures' key in reckon, so the three ids are stored as data only",
+    "no commit inside nova/ or reckon/ beyond the ledger data file: the reviewed node's only change is docs/state/nova/crew.json"
+  ],
+  "absent_items": [
+    {
+      "disposition": "not independently reproduced by this review (the reckon CLI is absent from PATH in the review worktree and the ledger MCP view returned a holds summary rather than the row records); the clause is instead supported by direct json.load and by parsing both revisions, which shows the stored fields are exactly the corrected ones.",
+      "item": "an independent verification that `reckon crew ledger --view records` reads the two rows back, the last clause of the done_when"
+    },
+    {
+      "disposition": "follow-on: 8 further rows read gate 'passed' with exit_status != 0 and are outside this node's two-row measure; the writer guard belongs to reckon/ledger.py:1688 and is named as a follow-on rather than fixed here.",
+      "item": "coverage of the remaining promotion rows that share the repaired defect class"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": {
+    "note": "This node is a data correction; it adds no test assertion, so there is no added assertion to weigh against an independent source. The nearest evidence for the change is the pair of gate logs itself, and both are named in the row (log_path) and one is pinned by sha256 (row two); row one's log_digest remains null."
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "reckon/ledger.py:2639",
+    "reckon/crew/summary.py:run_rows",
+    "reckon/ledger.py:1688"
+  ],
+  "commits_read": [
+    "d598cd1931edec10fff7a069b0149bd048989503",
+    "ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93"
+  ],
+  "completed_at": "2026-10-02T09:59:15.481Z",
+  "dispatched_at": "2026-10-02T09:37:22Z",
+  "findings": [
+    {
+      "file": "docs/state/nova/crew.json",
+      "line": "201187",
+      "severity": "follow-on",
+      "text": "follow-on: row r-20260918T201949355073-nia-limited-boundary-touches-wall-2 stores the three failure ids under a new top-level 'failures' key that no reader consumes. The ledger's declared record fields (reckon/ledger.py:107-162) enumerate the row keys and 'failures' is not among them, so the ids are data only: the source followup asked that the row 'preserve the three failure IDs rather than classifying them away', but a gate reading the ledger cannot see them. The canonical home for a gate's failures is the suite observation (baseline_suite/after_suite failure_ids, reckon/ledger.py:275) rather than an undeclared row key."
+    },
+    {
+      "file": "docs/state/nova/crew.json",
+      "line": "201169",
+      "severity": "follow-on",
+      "text": "follow-on: the 'executable argv' claim in the done_when is only half met. gate_check.command is stored as a JSON list, but reckon's canonical gate-check normaliser (_normalized_gate_check, reckon/ledger.py:241) coerces any command with str(), so the same list read back through the ledger writer becomes the unexecutable Python-repr string \"['env', 'TMPDIR=/tmp', 'srun', ...]\". I verified this by running _normalized_gate_check on the stored list. The row is correct in the committed file (written textually, not through the writer), but a re-normalisation by the ledger does not round-trip the argv shape it records."
+    },
+    {
+      "file": "reckon/ledger.py",
+      "line": "1688",
+      "severity": "follow-on",
+      "text": "follow-on: the write-path guard the source followup (f-fsa-wall-ledger-gate-integrity-full) requires \u2014 a gate status that must agree with exit_status before promotion \u2014 is not added by this node, which was to correct the two rows only. As delivered, 8 rows still carry gate 'passed' with gate_check.exit_status != 0 (r-20260908T031258319849-pfs-centroid-radius-report exit 1, r-20260919T071103282439-review-of-nia-limited-boundary-touches-wall-2 exit 1, r-20260915T055602091466-cca-newton-krylov-iteration-count exit 1, and five more), and the promotion writer refuses a passing gate only when the check is missing or malformed, never when exit_status disagrees with the verdict. The defect class this node repaired in two rows remains unguarded in the writer."
+    }
+  ],
+  "gate_arms_note": "The reviewed run is a data correction whose manifest declares 'No pytest gate (data correction)' and whose diff touches only docs/state/nova/crew.json; it holds no baseline_suite or after_suite arm of its own, so there is no head-minus-base failure set to derive and the added set is empty by a measured absence rather than by an omitted comparison. Positive control for that absence: the reviewed run's own changed path is a JSON data file with no test module, and I confirmed its manifest carries no baseline_suite/after_suite keys while a normal test-bearing run's does.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production readers of the changed data: reckon/ledger.py:2639 read_records, reckon/crew/summary.py run_rows, and reckon/ledger.py:1688 the promotion gate-check guard",
+    "diff": "Read the single commit ac83a864b against base d598cd193; it changes two records in docs/state/nova/crew.json (22 insertions, 10 deletions) and no other path.",
+    "done_when": "Read prompt.txt:91-95: row one reads gate failed with exit_status 1, an executable argv list, and the three failing ids as failures rather than follow_on_paths; row two binds gate_check.log_path to after_suite.log with its sha256 and exit_status 0 and leaves negative_control.log only under the negative-control field. Every clause is satisfied and checked against the logs; git diff --stat is one file and python json.load succeeds.",
+    "goal": "The source goal (prompt.txt:30) is to make two promotion rows record the gate their logs actually show, per followups f-fsa-wall-ledger-gate-integrity-full and f-msc-audit-baseline-log-binding; both rows are corrected to match their logs, so the landed change does what the goal states.",
+    "manifest": "Read the reviewed run's manifest; it states the two corrections, quotes the log summaries ('3 failed, 30 passed' and '43 passed'), records the sha256 digest, and names the read-back check; its account matches the logs and the diff.",
+    "write_paths": "The reviewed node's only changed path is docs/state/nova/crew.json, inside its declared write scope; the base..head diff names no other file."
+  },
+  "justifications": {
+    "durability": "This is a data correction with no test and no guard: nothing asserts that gate status agrees with gate_check.exit_status, so a later ledger write can re-green the row undetected; the same class survives in the ledger as delivered (8 rows still read gate 'passed' with exit_status != 0, e.g. r-20260908T031258319849-pfs-centroid-radius-report and r-20260919T071103282439-review-of-nia-limited-boundary-touches-wall-2), and the promotion guard the source followup asks for (reckon/ledger.py:1688) refuses a passing gate only when its check is absent, never when exit_status disagrees.",
+    "evidence": "Each corrected value was checked against its primary log: the three stored failures match the FAILED lines at the tail of pytest-final.slurm.log (ending '3 failed, 30 passed in 223.55s'), the stored argv matches the srun call in the run's resume-2.jsonl token for token, and the stored sha256 243371c899ae7efdea987819ccd4d30950e799e9f2834e1cc599c9662c8ef57a equals sha256sum of after_suite.log (ending '43 passed in 9.30s'); held below 20 because the reconstructed argv is stored under gate_check.command as a JSON list while the ledger's canonical writer stringifies it (reckon/ledger.py:241), so the recorded shape is not what reckon itself produces.",
+    "fit": "The edit is a textual in-place change to docs/state/nova/crew.json as the fence requires, carries no plan or ticket identifier, and adds no symbol; but it introduces a row-level 'failures' key that is not among the ledger's declared row fields (reckon/ledger.py:107-162) so no reader consumes it, and stores gate_check.command as a list where the canonical normaliser at reckon/ledger.py:241 coerces the field to a string.",
+    "goal_fidelity": "Both named rows now read the gate their logs show: docs/state/nova/crew.json:201167 (run r-20260918T201949355073-nia-limited-boundary-touches-wall-2) reads gate 'failed' with gate_check.exit_status 1 kept, and docs/state/nova/crew.json:215791 (run r-20260920T153922912568-msc-persist-the-baseline-state-array) binds gate_check.log_path to after_suite.log, matching the goal to make each row record the gate its log shows.",
+    "scope_discipline": "The base..head diff is exactly two records in docs/state/nova/crew.json (run_ids r-20260918T201949355073-nia-limited-boundary-touches-wall-2 and r-20260920T153922912568-msc-persist-the-baseline-state-array), 22 insertions and 10 deletions, confined to those two rows' line ranges; no other run_id differs (parsed both revisions, 1824 rows each, exactly 2 changed)."
+  },
+  "limitations": [
+    "row one's gate_check.log_digest is left unchanged at null, so that row's evidence is located but not pinned by content hash the way row two's is.",
+    "the two corrected rows are promoted-history records; this review reads them in the ledger file and their logs, not by re-running the gates described."
+  ],
+  "notes": "The reviewed node is a data correction to two promotion rows. Both defects reproduce at base and are corrected at head: row r-20260918T201949355073-nia-limited-boundary-touches-wall-2 read gate 'passed' against a log ending '3 failed, 30 passed' with exit 1 (now 'failed' with the three ids under failures and an argv reconstructed from the run's stream), and row r-20260920T153922912568-msc-persist-the-baseline-state-array bound its gate_check.log_path to its negative-control log (now after_suite.log with a verified sha256). Every value was checked against the primary logs. Scores: goal_fidelity 20 (both rows corrected as the goal states), evidence 19 (values verified against the logs; held for the argv shape the ledger does not round-trip), scope_discipline 20 (diff is exactly the two rows), durability 14 (a data correction with no guard, and 8 same-class rows survive in the writer), fit 16 (textual in-place edit as required, but a non-canonical 'failures' key and a list-valued command the ledger stringifies). Total 89, verdict pass; the three findings are follow-ons, none blocks this node's landing.",
+  "plan": "nova:figure-and-solver-audit",
+  "project": "nova",
+  "reproduction_of_repaired_defect": [
+    {
+      "after": "At head ac83a864b the row reads gate 'failed' with exit_status 1 kept, gate_check.command reconstructed as an argv list (verified token-for-token against the srun call in the run's resume-2.jsonl), a row-level 'failures' array holding exactly the three ids the log marks FAILED, and follow_on_paths reduced to docs/plans/null-identification-authority.html; the referenced log's last line is '3 failed, 30 passed in 223.55s'.",
+      "before": "At base d598cd193, docs/state/nova/crew.json row r-20260918T201949355073-nia-limited-boundary-touches-wall-2 carried gate 'passed' with gate_check command 'one all_debug job over the three topology test files (30 passed, 3 failed as named under follow_ons)', exit_status 1, log_path pointing at pytest-final.slurm.log and log_digest null, and its follow_on_paths mixed the three failing test ids with the numeric fragments 0.00051738, 0.22031877 and 1.9.",
+      "finding_id": "the limited-boundary promotion row read gate passed while its own gate_check.exit_status was 1 and its log ended in three failures (followup f-fsa-wall-ledger-gate-integrity-full)."
+    },
+    {
+      "after": "At head ac83a864b gate_check.log_path is .../logs/after_suite.log and log_digest is 243371c899ae7efdea987819ccd4d30950e799e9f2834e1cc599c9662c8ef57a, which equals sha256sum of that file, whose tail is '43 passed in 9.30s'; negative_control.log appears only under the row's negative_control field.",
+      "before": "At base d598cd193 the row r-20260920T153922912568-msc-persist-the-baseline-state-array carried gate_check.log_path = .../logs/negative_control.log, a log whose own tail reads '2 failed, 12 passed in 8.50s' (the declared negative control), with log_digest null.",
+      "finding_id": "the baseline-state-array promotion row bound its gate_check.log_path to its negative-control log rather than the gate's own pass log (followup f-msc-audit-baseline-log-binding)."
+    }
+  ],
+  "review_run_id": "r-20261002T093708304781-review-of-fsa-ledger-rows-record-their-gates",
+  "reviewed_base_sha": "d598cd1931edec10fff7a069b0149bd048989503",
+  "reviewed_head_sha": "ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93",
+  "reviewed_revision": "ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93",
+  "reviewed_run_id": "r-20261002T093232427144-fsa-ledger-rows-record-their-gates",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-ledger-rows-record-their-gates",
+  "reviewer_node": "review-of-fsa-ledger-rows-record-their-gates",
+  "reviewer_run_id": "r-20261002T093708304781-review-of-fsa-ledger-rows-record-their-gates",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T09:57:51Z",
+  "total": 89,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha ac83a864b is a single commit whose parent is reviewed_base_sha d598cd193 (git rev-parse ac83a864b^ = d598cd193).",
+    "the reviewed worktree is clean at head (git status --porcelain empty) and its HEAD is ac83a864b.",
+    "the base..head diff over docs/state/nova/crew.json is exactly two changed run_ids: parsed both revisions (1824 rows each) and exactly 2 records differ, r-20260918T201949355073-nia-limited-boundary-touches-wall-2 and r-20260920T153922912568-msc-persist-the-baseline-state-array; no other field or row changed.",
+    "row one's three stored failure ids are byte-identical to the three FAILED lines in .../limited-touch/pytest-final.slurm.log, whose summary is '3 failed, 30 passed in 223.55s'.",
+    "row one's stored argv matches the /usr/bin/bash -lc \"env TMPDIR=/tmp srun --partition=all_debug --time=00:59:00 --cpus-per-task=4 --mem=64G --output=...pytest-final.slurm.log ... bash -lc '... four test files ... -vv'\" invocation found in the run's resume-2.jsonl.",
+    "row two's digest is verified relative to its log: sha256sum of .../msc-persist-the-baseline-state-array/logs/after_suite.log is 243371c899ae7efdea987819ccd4d30950e799e9f2834e1cc599c9662c8ef57a, and that file's tail is '43 passed in 9.30s'.",
+    "row two's old log_path pointed at negative_control.log, which is a distinct 589-byte file ending '2 failed, 12 passed in 8.50s', confirming the base bound the gate to the wrong log and the head correctly separates the pass log from the negative control.",
+    "independent falsification of the ledger writer's argv assertion: ledger._normalized_gate_check({'command': ['env','TMPDIR=/tmp','srun','bash','-lc','x'], 'exit_status':1, 'log_path':'/x) returns command as the string \"['env', 'TMPDIR=/tmp', 'srun', 'bash', '-lc', 'x']\", showing the canonical writer does not round-trip a list-valued command (reckon/ledger.py:241).",
+    "class scan of the head ledger: 8 rows still carry gate 'passed' with gate_check.exit_status != 0, so the repaired defect class is not eliminated, only these two rows are corrected."
+  ]
+}

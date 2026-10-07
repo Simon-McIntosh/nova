@@ -1,0 +1,90 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's manifest declares readable, completed baseline_suite at f3ce0410b179d816220384eea0dea946a870154b and after_suite at 3b4902e9e2f951afc0ebe64aa07b7f3b76ad30bb. Each receipt has exit_status 0, failure_count 0, and failure_ids []. Their after-minus-baseline failure-id set difference is therefore empty. The commands exercise different arms, so zero added failures is limited to the reviewed run's declared arms rather than a whole-suite claim.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T001249500645-review-of-fsri-picard-implicit-derivative/review-picard-implicit-derivative.log: 3 passed in 9.09s, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/picard-derivative-witness.log: H200 probe=3 at the root receipt's three absolute steps, GMRES information 0, EXIT_STATUS=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T230005440753-fsri-picard-implicit-derivative/unrolled-negative-control-test.log: archived unrolled derivative admissibility assertion fails, 1 failed, EXIT=1",
+    "docs/figures/forward-solver-route-integrity/fsri-picard-implicit-derivative/derivative-estimates.png: committed 107900-byte derivative comparison figure"
+  ],
+  "changed_paths": [
+    "benchmarks/picard_derivative_contract.py",
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-picard-implicit-derivative.html",
+    "docs/figures/forward-solver-route-integrity/fsri-picard-implicit-derivative/derivative-estimates.png",
+    "nova/equilibrium/fixed_point.py"
+  ],
+  "commits_read": [
+    "db2812cdc819af61172578acb6c00ae99d011741",
+    "f3a1f8e302b00ff0650aae021a1a236165242522",
+    "3b4902e9e2f951afc0ebe64aa07b7f3b76ad30bb",
+    "4d319ffcc0a12d1b5bf8390759bc4b1154fdfc3b"
+  ],
+  "completed_at": "2026-10-03T00:39:12Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T00:13:13Z",
+  "evidence_inputs": {
+    "head_measurement": "Probe-3 forward current -0.9410909805213235, implicit current -0.9410909805208577, and linked-flux reverse/JVP/implicit agreement are present in the completed H200 receipt. The control at probe 0 reaches 7.84e-08 current relative error at its smallest step.",
+    "mechanism": "At 4d319ffc the custom JVP uses the converged terminal state and held terminal shadow, applies a terminal-map linear operator, and delegates both primal and adjoint linear systems to GMRES via custom_linear_solve.",
+    "prior_blocker_resolution": "The original root-cause H200 receipt used probe 3 and 293.18627897744824/87.95588369323447/29.318627897744825 A. The reviewed H200 receipt now invokes exactly those values rather than its previous automatic probe-0 selection."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_picard_implicit_derivative.py",
+      "line": "25-62",
+      "severity": "follow-on",
+      "text": "The focused test validates scalar reverse/JVP/implicit agreement and the NaN refusal, but no committed test invokes the benchmark with its explicit physical probe and absolute-step arguments."
+    }
+  ],
+  "follow_ons": [
+    "Add a committed regression test that invokes the derivative-contract driver with the published probe-3 conductor index and three absolute finite-difference steps, then asserts the receipt retains the pinned values and a successful GMRES solve.",
+    "Add a physical-fixture assertion that both reverse and JVP retain the terminal topology shadow and partition, rather than proving frozen selection only through the scalar control.",
+    "The separate moment and map-tangent finite-difference ladders remain external boundary-flux and clip-quadrature defects; retain them outside this reviewed change."
+  ],
+  "gate_arms_note": "Reviewed manifest baseline_suite: revision f3ce0410b179d816220384eea0dea946a870154b, completed=true, exit_status=0, failure_ids=[]. Reviewed manifest after_suite: revision 3b4902e9e2f951afc0ebe64aa07b7f3b76ad30bb, completed=true, exit_status=0, failure_ids=[]. Independent exact-head CPU test: 3 passed in 9.09s, EXIT=0.",
+  "item_verdicts": {
+    "finite_difference_interpretation": "pass: the landing record distinguishes the valid smooth probe-0 convergence control from probe 3, whose nonsmooth central-difference spread is evidence of the primal boundary rather than a failed implicit tangent.",
+    "matrix_free_implicit_tangent": "pass: fixed_point.py lines 2999-3024 define I - dG/dpsi as a matvec, obtain its transpose with jax.vjp, and provide both GMRES solves to custom_linear_solve without forming jnp.eye or a dense Jacobian.",
+    "nonconvergence_refusal": "pass: fixed_point.py lines 2962 and 3026-3030 require finite residual at or below implicit_tolerance and return an all-NaN state tangent otherwise; the independent focused test covers this branch.",
+    "paired_witness": "pass: the head receipt runs --probe 3 --steps 293.18627897744824 87.95588369323447 29.318627897744825, exactly matching the root-cause witness that the earlier review found absent.",
+    "terminal_shadow": "pass: fixed_point.py lines 2945-2966 returns the last loop shadow, and lines 2978-2997 feed that held value into both parameter and state terminal-map derivatives with a float0 tangent."
+  },
+  "justifications": {
+    "durability": "tests/test_picard_implicit_derivative.py passes at the reviewed head and covers scalar reverse/JVP/implicit agreement plus the converged-only NaN refusal. The evidence fragment persists the probe-3 nonsmooth witness beside the probe-0 smooth control, and the figure is committed. The new command-line witness pin is exercised by the H200 receipt but is not itself a committed unit test.",
+    "evidence": "The archived unrolled control reproduces the prior fault at probe 3: current_forward -11.536878951555435 versus central difference -0.9368935998653215, relative error 11.313969220425736. The reviewed H200 receipt at the same probe and steps reports forward -0.9410909805213235, JVP-identical, and implicit -0.9410909805208577; the values match the predecessor implicit witness and its GMRES information is 0. The separate probe-0 smooth control converges to the implicit tangent at 7.84e-08 current relative error. The focused exact-head CPU gate independently passed 3 tests in 9.09 s.",
+    "fit": "The terminal shadow produced by the primal loop is held with a float0 tangent. The tangent is built from the terminal map, not by differentiating the accelerated route; custom_linear_solve uses GMRES for both forward and VJP-derived transpose actions. The nonconvergence branch deliberately returns NaNs.",
+    "goal_fidelity": "The prior review's sole blocking numerical defect was that the comparison silently changed from the root receipt's probe 3 and absolute steps 293.18627897744824, 87.95588369323447, and 29.318627897744825 to head-selected probe 0 steps. benchmarks/picard_derivative_contract.py now accepts --probe and --steps and the H200 head receipt uses exactly that root witness. fixed_point.py replaces the dense Jacobian materialisation with terminal-map VJP actions and matrix-free forward/transpose GMRES solves.",
+    "scope_discipline": "git diff --name-only c75057d5..4d319ffc contains precisely the four declared review paths: the derivative contract benchmark, landing fragment, derivative-estimates figure, and fixed_point.py. git diff --check over that range is clean."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-on: The four commits since c75057d5 resolve the earlier review's blocking provenance defect by running the head H200 witness at the same probe and absolute steps as the recorded unrolled fault. The matrix-free terminal-map implicit derivative, frozen terminal shadow, converged-only refusal, and reverse/JVP compatibility are implemented and independently tested. The published record correctly distinguishes the nonsmooth physical finite-difference direction from the smooth control. A committed explicit-witness regression test remains a nonblocking follow-on.\nSCORE goal_fidelity: 20\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 20\n",
+  "review_run_id": "r-20261003T001249500645-review-of-fsri-picard-implicit-derivative",
+  "reviewed_base_sha": "c75057d59d9a4a4baaf0fcf9e38ba2b3bf43c65b",
+  "reviewed_head_sha": "4d319ffcc0a12d1b5bf8390759bc4b1154fdfc3b",
+  "reviewed_revision": "4d319ffcc0a12d1b5bf8390759bc4b1154fdfc3b",
+  "reviewed_run_id": "r-20261002T230005440753-fsri-picard-implicit-derivative",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-picard-implicit-derivative",
+  "reviewer_node": "review-of-fsri-picard-implicit-derivative",
+  "reviewer_run_id": "r-20261003T001249500645-review-of-fsri-picard-implicit-derivative",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T00:35:03Z",
+  "total": 97,
+  "verdict": "pass-with-follow-on"
+}

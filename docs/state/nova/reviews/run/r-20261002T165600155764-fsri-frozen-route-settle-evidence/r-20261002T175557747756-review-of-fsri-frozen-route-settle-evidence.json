@@ -1,0 +1,134 @@
+{
+  "absent": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest's baseline_suite and after_suite are absent, and its own gate logs are a render script and one H200 solve rather than paired suite arms. Consequently no reviewed-run failure-id set difference exists: added_failure_count is null and added_failure_ids is empty by the unmeasured rule, not because a paired suite passed.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "H200 revision 3a4faa65c; Picard residual 2.1256680256235924e-08; Newton residual 1.2828487222983532e-11 and converged=true",
+      "path": "docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence/route-settle-summary.json"
+    },
+    {
+      "headline": "480-point Picard trace; maximum Picard-vs-Newton grid difference 6.522150519661096e-07; distinct magnetic-axis coordinates; no X-points on either field; wall shape [61,2]",
+      "path": "docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence/route-settle-data.npz"
+    },
+    {
+      "headline": "two actual contour groups (grey reference and blue solved) and one wall, but one red solved-axis marker only",
+      "path": "docs/figures/forward-solver-route-integrity/frozen-route-settle-evidence/terminal-flux-panel.svg"
+    },
+    {
+      "headline": "all route residual, arm-result, timing, and counter claims reconcile; compile and execute columns correctly say unmeasured",
+      "path": "docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-evidence.html"
+    }
+  ],
+  "commits_read": [
+    "f64973a5f",
+    "142d608e89bfc86ea539eef7051217ebf05fb505"
+  ],
+  "completed_at": "2026-10-02T18:03:33Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T17:56:23Z",
+  "evidence_inputs": {
+    "figure_contract": "Source inspection proves two contour fields on one levels array and the wall are drawn. It also proves one draw_nulls call bound to newton_axis/newton_xpoint only; Picard axis is present and numerically distinct in the persisted data, so the reference null set is omitted rather than coincident.",
+    "job_1280457": "route-figures-h200.log records source revision 3a4faa65c, job 1280457, route-settle-data.npz creation, figure creation, and EXIT_STATUS=0.",
+    "range": "3a4faa65c247e908edc68305bf252b8a3180b1b1..142d608e89bfc86ea539eef7051217ebf05fb505 is exactly the eight paths declared by the reviewed manifest.",
+    "receipt_numbers": "The before and after committed RCA receipts, persisted NPZ/summary, and six reviewed-run logs substantiate every displayed residual, route counter, job result, timing, and exit code in the evidence fragment to the precision it prints.",
+    "timing_split": "The fragment's compile and execute fields say unmeasured, exactly matching its available lane logs, which contain whole-test elapsed times but no per-program compile/execute receipt rows."
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/frozen_route_settle_figures.py",
+      "line": "120-125",
+      "severity": "blocking",
+      "text": "panel_figure calls draw_nulls exactly once, with newton_axis and newton_xpoint. It never supplies picard_axis or picard_xpoint. The repository plotting contract requires both solved and reference null sets whenever a solved flux map is shown beside a reference map, and the committed NPZ proves the two axes are distinct rather than one shared coordinate. Regenerate the panel with both null sets in distinguishable styles and state their identity/coincidence in the HTML caption."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-solver-route-integrity/fsri-frozen-route-settle-evidence.html",
+      "line": "39",
+      "severity": "blocking",
+      "text": "The terminal-panel caption says the contours coincide where the maps agree and names one magnetic axis, but it does not say that the Picard reference axis is not drawn. The caption therefore cannot satisfy the required both-null-set disclosure; it must identify both null sets after the figure is regenerated."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/manifest.md",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "The evidence node records CPU redraw and H200 solve commands but no completed baseline_suite or after_suite. added_failure_count is therefore unmeasured, not evidence of a paired-suite zero-delta; a small renderer test should assert both reference and solved null painter calls."
+    }
+  ],
+  "follow_ons": [
+    "Regenerate terminal-flux-panel PNG and SVG with both the Picard reference and solved Newton null sets passed to nova.media.draw_nulls in distinguishable styles, then revise the HTML caption to identify both sets and say whether the no-X-point sets coincide.",
+    "Add a focused renderer guard that rejects a terminal reference-panel request when either the solved or reference null set was not delivered to the painter."
+  ],
+  "gate_arms_note": "The reviewed node's readable arms are the CPU redraw script (EXIT=0) and H200 job 1280457 (EXIT_STATUS=0). The cited source-gate run supplies prior H200/CPU solver arms, but those are receipts for the fragment rather than this node's baseline/after suite arms.",
+  "item_verdicts": {
+    "done_when": "The reviewed H200 run's route-figures-h200.log records job 1280457 at source revision 3a4faa65c and EXIT_STATUS=0. The source-gate logs independently confirm the prior negative, combined, and split-fallback arms. The exact terminal-panel rule is not met: the renderer makes two contour calls on one level array and one wall call, but makes only one draw_nulls call using newton_axis/newton_xpoint.",
+    "figures": "The terminal SVG contains two QuadContourSet groups: grey Picard and blue Newton contours, both supplied the same levels object, plus the black wall. Its one draw_nulls invocation receives only newton_axis/newton_xpoint. Persisted arrays show the two axis coordinates differ (Picard [1.0138125242670817, 1.6391910425447234e-07], Newton [1.0138125413840287, -3.8369757568922906e-15]); both X-point arrays are absent [NaN, NaN]. Thus both contour sets are actually drawn, but both null sets are neither drawn nor coincident: the distinct Picard axis is omitted. The caption says the contour maps coincide where they agree and identifies only one magnetic axis; it does not disclose the omitted Picard null marker.",
+    "goal": "The committed figure directory, redraw benchmark, persisted solve arrays, summary, and evidence fragment are present. The residual history and route-cost account meet the stated evidence goal. The terminal flux panel fails the binding flux-panel goal because it draws only the solved Newton magnetic axis, not the Picard reference axis.",
+    "manifest": "The reviewed manifest is complete and names both commits, all eight changed paths, the CPU redraw and H200 job 1280457. It honestly declares compile and execute seconds unmeasured. It contains no completed baseline_suite or after_suite fields, so its own gate logs cannot yield a paired failure delta.",
+    "numbers": "Every numerical claim in the fragment reconciles with its named source to displayed precision: before receipt 2.372871479532645e-06 and ACTIVE_SET_SETTLED; after receipt 1.2827280630881833e-11, 2 frozen passes, 3 live reads, and 1 live-read step; persisted H200 arrays 480 Picard points from 1.2947724665298606 to 2.1256680256235924e-08 and terminal Newton residual 1.2828487222983532e-11; H200/CPU split fallback 749.31/4649.01 s; combined H200 768.47 s with CPU EXIT=134; base H200 412.21 s; frozen-objective parity miss 1.1976779784e-05. The fragment correctly reports the compile/execute split as unmeasured rather than estimating it.",
+    "write_paths": "git diff --name-only 3a4faa65c..142d608e lists exactly eight changed paths: the benchmark, one fragment, and six files in the declared figure directory. No solver source, test, or plan file changed; all eight are within the reviewed manifest grants."
+  },
+  "justifications": {
+    "durability": "All rendered artifacts, the NPZ, summary JSON, fragment, and source renderer are committed at the reviewed head. The redraw benchmark deterministically consumes the committed data and receipts. It lacks a render assertion that both reference and solved null inputs reach the painter, so the mandatory omission can recur silently.",
+    "evidence": "The reviewed H200 receipt confirms job 1280457, source revision 3a4faa65c, persisted NPZ creation, figure creation, and zero exit. Direct inspection of the exact committed NPZ and JSON reproduces the summary values; the prior source-gate logs provide the negative-arm and timing receipts. Evidence is scored below full because the claimed terminal comparison is visually incomplete at the null markers.",
+    "fit": "The panel is axis-free, line-contour based, uses shared physical levels, and renders the first wall with committed nova.media painters. It violates the binding forward-solve panel rule by passing only the solved field's nulls to draw_nulls; the distinct reference axis is absent even though a reference flux field is plotted.",
+    "goal_fidelity": "The repair evidence is substantively delivered and its residual, terminal-state, negative-arm, and route-cost account is backed by primary receipts. The panel is itself a mandatory deliverable and the repository rule requires both null sets when solved and reference flux coexist; a caption cannot replace an omitted reference null.",
+    "scope_discipline": "The review range 3a4faa65c..142d608e changes only the exact declared benchmark, fragment, and figure-directory outputs. The committed evidence node did not modify solver, test, or plan sources."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "VERDICT fail (80/100; goal_fidelity 16, evidence 18, scope_discipline 20, durability 17, fit 9). The fragment's numerical account is sound: its before/after residuals and counters, 480-point Picard trace, negative and passing arms, whole-test times, job 1280457 receipt, and unmeasured compile/execute split all reconcile with primary committed receipts and reviewed gate logs. The mandatory terminal flux panel is incomplete. It draws both Picard and Newton contours on shared levels and draws the wall, but source inspection shows exactly one draw_nulls call using newton_axis/newton_xpoint. The persisted NPZ has a distinct Picard magnetic axis, so it is neither drawn nor coincident. The HTML caption does not disclose that omission. The panel must be regenerated with both null sets and an explicit caption before this evidence package can pass. added_failure_count is null because this evidence node recorded no completed baseline/after suite arms.",
+  "review_base_sha": "5baef21a458b90e0b2f53c2dd96b57d15f910669",
+  "review_run_id": "r-20261002T175557747756-review-of-fsri-frozen-route-settle-evidence",
+  "reviewed_base_sha": "3a4faa65c247e908edc68305bf252b8a3180b1b1",
+  "reviewed_commit": "142d608e89bfc86ea539eef7051217ebf05fb505",
+  "reviewed_head_sha": "142d608e89bfc86ea539eef7051217ebf05fb505",
+  "reviewed_revision": "142d608e89bfc86ea539eef7051217ebf05fb505",
+  "reviewed_run_id": "r-20261002T165600155764-fsri-frozen-route-settle-evidence",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-frozen-route-settle-evidence",
+  "reviewer_node": "review-of-fsri-frozen-route-settle-evidence",
+  "reviewer_run_id": "r-20261002T175557747756-review-of-fsri-frozen-route-settle-evidence",
+  "reviewing_run_id": "r-20261002T175557747756-review-of-fsri-frozen-route-settle-evidence",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 9,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T165600155764-fsri-frozen-route-settle-evidence/route-figures-h200.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/accelerator-h200-split-fallback.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/accelerator-cpu-split-fallback.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/accelerator-h200-live-fallback.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/accelerator-cpu-live-fallback.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T084121851662-fsri-frozen-route-settle-residual-gate/rca-after-h200.log"
+  ],
+  "tests": [
+    {
+      "command": "reviewed-run route-figures-h200.log: /home/ITER/mcintos/Code/nova/.venv/bin/python benchmarks/frozen_route_settle_figures.py solve",
+      "result": "job 1280457; source revision 3a4faa65c247e908edc68305bf252b8a3180b1b1; EXIT_STATUS=0; persisted route-settle-data.npz and wrote figures"
+    },
+    {
+      "command": "review inspection of 142d608e: route-settle-data.npz and frozen_route_settle_figures.py",
+      "result": "480 Picard residual samples 1.2947724665298606 to 2.1256680256235924e-08; shared levels are passed to both contour calls; exactly one null-set painter call is made"
+    },
+    {
+      "command": "reviewed source-gate logs: accelerator-h200-split-fallback.log, accelerator-cpu-split-fallback.log, accelerator-h200-live-fallback.log, accelerator-cpu-live-fallback.log, rca-after-h200.log",
+      "result": "H200 split fallback passed in 749.31 s; CPU split fallback passed in 4649.01 s; combined H200 passed in 768.47 s and combined CPU exited 134; after RCA exited 0 with the cited counters"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:00:16Z",
+  "total": 80,
+  "verdict": "fail"
+}

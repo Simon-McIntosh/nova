@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own gate logs. Its positive logs report no failures: gate.log names revision 5666c8bcc with 2 passed, EXIT=0; repair-gate.log names revision e3ee1c90a with 5 passed, EXIT=0. Its three committed negative-control logs (negative-control-sentinel.log, negative-control-spatial-edges.log, negative-control-stale-receipt.log) each fail exactly one or two named guards under a deliberate mutation and pass the rest; those are injected refusals, not baseline failures. An independent re-run at reviewed head 4c86a9f83 also reports 5 passed, EXIT=0. The reviewed run's own readable head test set therefore contains no failures, and no base-to-head failure delta can be established because baseline_suite and after_suite are absent.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png: 1680x960; right graph axis now spans [-0.006, +0.006] Wb, outside node drawn at wall-contact level; left panel draws no lines between nodes; residual overlap of the wall maximum and outside (wall contact) labels",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json: 13 nodes, 12 edges, node_count_minus_edge_count 1, outside node raw psi_wb -1.007008e+00 drawn at drawn_psi_wb -1.631685e-03, real-node range [-6.135728e-03, +5.701056e-03] Wb",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree/negative-control-sentinel.log: 1 failed/4 passed, EXIT=1",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree/negative-control-spatial-edges.log: 1 failed/4 passed, EXIT=1",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree/docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree/negative-control-stale-receipt.log: 2 failed/3 passed, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T184827657323-review-2-of-ctta-explanatory-figure-from-computed-tree/logs/independent-head-gate.log: 5 passed, EXIT=0 at 4c86a9f83"
+  ],
+  "commits_read": [
+    "d0f91aa521b789a900fd5ff425cb712f60114edf",
+    "8980da9ef682542b412f039778f2deaa1e473d4f",
+    "f07b40302",
+    "4633d64eb",
+    "5666c8bcc",
+    "e3ee1c90a4e2f2d22321d3acaff9cb918715b9c0",
+    "4c86a9f83cc570c7dbef15eb869ff0e80dbeab03"
+  ],
+  "completed_at": "2026-10-02T19:23:54.818Z",
+  "dispatched_at": "2026-10-02T18:48:44Z",
+  "evidence_inputs": "Plan nova:contour-tree-topology-authority section 2 (v31). Prior review r-20261002T181034474235 scored head e3ee1c90a 55/100 fail with three blocking findings (fd406a1cec1, f74a527259c, f87be44c506). Corrective resume r-20261002T164824351467 attempt-3, write-scoped to tests/test_contour_tree_explanatory_figure.py and benchmarks/contour_tree_explanatory_figure.py, produced head 4c86a9f83. All three blocking findings are resolved and each repair is falsified by a committed negative control. Reviewed manifest baseline_suite and after_suite remain empty. The landing evidence fragment still describes the pre-repair figure and gate and lies outside the corrective round's write scope.",
+  "findings": [
+    {
+      "file": "benchmarks/contour_tree_explanatory_figure.py",
+      "line": "464",
+      "severity": "follow-on",
+      "text": "In the graph panel the direct labels for the private-region wall maximum and the outside node are placed at the same signed-flux level (both resolve to the wall-contact join level -1.631685e-03 Wb) on adjacent node ranks, each annotated with a fixed (6,6) point offset, so the two label boxes overlap and the word maximum is obscured in the delivered PNG. Per the data-ink rule, when direct labels collide use a frameless legend or stagger the offsets; the caption already carries the multiplicity. This is a residual readability defect the corrective round could have addressed because the benchmark is in that round's scope."
+    },
+    {
+      "file": "docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "The landing evidence fragment at head still describes the pre-repair figure and guard: line 20 says the poloidal panel overlays nodes 'with the tree's edges dashed between them', and line 25 reports the gate as '2 passed' with the pre-repair DROP_NODE negative control. The delivered figure draws no such edges and the gate now runs 5 tests with three distinct negative controls. The fragment is the plan's reader-facing landing record and now contradicts the artifact it describes. The corrective round's write scope was limited to tests/ and benchmarks/, so the fragment was outside it and this is not a scope failure, but the record must be regenerated by a separately scoped node."
+    },
+    {
+      "file": "tests/test_contour_tree_explanatory_figure.py",
+      "line": "89",
+      "severity": "follow-on",
+      "text": "test_committed_figure_files_exist verifies the committed PNG and SVG are present and larger than 1024 bytes but does not compare their content to the receipt, so a stale-but-present render alongside a current receipt would pass. The done-when's reads-the-committed-JSON-SVG-or-PNG requirement is satisfied via the JSON receipt arm; this is a strengthening suggestion, not a gap in the named measure."
+    }
+  ],
+  "gate_arms_note": "Reviewed positive arms: gate.log (revision 5666c8bcc, 2 passed in 44.05s, EXIT=0); repair-gate.log (revision e3ee1c90a, 5 passed in 77.77s, EXIT=0); independent re-run at head (revision 4c86a9f83, 5 passed in 90.59s, EXIT=0). Reviewed negative-control arms at head content: sentinel (1 failed/4 passed, EXIT=1, test_graph_omits_the_virtual_outside_sentinel), spatial-edges (1 failed/4 passed, EXIT=1, test_poloidal_panel_draws_no_lines_between_nodes), stale-receipt (2 failed/3 passed, EXIT=1, test_committed_receipt_matches_the_computed_tree and test_committed_figure_files_exist).",
+  "item_verdicts": {
+    "call_sites": "not applicable: this is an explanatory benchmark and a static evidence artifact.",
+    "diff": "met: the diff is the benchmark repair, the strengthened guard, the regenerated receipt/PNG/SVG and the three committed negative controls.",
+    "done_when": "met: each prior blocking finding is answered and each answer is falsified by a committed negative control.",
+    "goal": "met: a reader can now read the computed tree off the figure and its receipt.",
+    "manifest": "partially met: the reviewed manifest names each finding by id (acted <id>: 4c86a9f83 for all three) and its tests field reads 5 passed EXIT=0, but baseline_suite and after_suite remain empty and its test_logs still point at repair-gate.log whose header names e3ee1c90a rather than reviewed head 4c86a9f83.",
+    "write_paths": "met: corrective changes stay within the two granted source paths plus the figure outputs they regenerate."
+  },
+  "justifications": {
+    "durability": "The figure guard now reads a committed artifact: test_committed_receipt_matches_the_computed_tree opens contour-tree-computed.json and compares it to independently rebuilt state, and test_committed_figure_files_exist checks the committed PNG and SVG. A stale receipt fails both (negative control). Gap: the PNG/SVG guard verifies presence and minimum size only, so a stale-but-present PNG alongside a current JSON would pass; and test_figure_draws_exactly_the_receipts_valid_nodes still compares in-memory state rather than an artifact (that path is covered by the committed-file existence test).",
+    "evidence": "Three committed negative controls at head falsify each repaired guard (sentinel 1 failed/4 passed EXIT=1; spatial-edges 1 failed/4 passed EXIT=1; stale-receipt 2 failed/3 passed EXIT=1), which proves each guard actually fires rather than merely passing. An independent re-run at reviewed head 4c86a9f83 confirms 5 passed, EXIT=0. Short of full marks because the reviewed run's own positive gate logs still name a prior revision (gate.log 5666c8bcc, 2 passed; repair-gate.log e3ee1c90a, 5 passed) and no single positive head log names 4c86a9f83; the landing evidence fragment also carries a stale gate description.",
+    "fit": "Edges are now arcs in the graph panel rather than straight dotted spatial lines, and the sentinel no longer distorts the graph scale, so the figure respects the data-ink rules far better than at e3. Residual: in the graph the direct labels 'wall maximum' and 'outside (wall contact)' occupy the same signed-flux level on adjacent node ranks and overlap, obscuring the word maximum; the data-ink rule says to use a frameless legend or stagger offsets when direct labels collide.",
+    "goal_fidelity": "The figure at head 4c86a9f83 renders the computed contour tree honestly: the signed-flux graph axis now spans the physical node levels, the virtual outside sentinel (-1.007 Wb) no longer enters it, and the outside node is drawn and labelled at its wall-contact join level (-1.631685e-03 Wb); the poloidal panel draws no inter-node lines and carries the outside attachment as an explicit diamond at the wall contact. The tree is readable at the real-node scale, so the attachment requirement is met. Residual: two direct labels collide (see finding).",
+    "scope_discipline": "The corrective round was granted exactly two paths (tests/test_contour_tree_explanatory_figure.py, benchmarks/contour_tree_explanatory_figure.py). Commit 4c86a9f83 changes those two plus the regenerated figure outputs (PNG, SVG, JSON receipt) and the committed negative-control logs, all within the run's original grant; it adds no unrelated edits."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "prior_blocking_findings_confirmed_resolved": [
+    {
+      "answered_by": "4c86a9f83cc570c7dbef15eb869ff0e80dbeab03",
+      "id": "fd406a1cec1",
+      "resolution": "resolved",
+      "verification": "Receipt node row 12 (kind 'outside (virtual)') stores psi_wb = -1.007008e+00 but drawn_psi_wb = -1.631685e-03 with join_level_wb = -1.631685e-03, so the sentinel no longer sets the axis. test_graph_omits_the_virtual_outside_sentinel asserts abs(outside.drawn_psi_wb) < 0.02 and graph ylim low > -0.05; the committed negative control CONTOUR_TREE_FIGURE_SENTINEL=1 restores the sentinel and the test fails (assert -1.1082784774243604 > -0.05). The attachment is explicit: the poloidal panel draws the outside node as an open diamond at its wall-contact carrier position, and the graph annotates it 'outside (wall contact)'."
+    },
+    {
+      "answered_by": "4c86a9f83cc570c7dbef15eb869ff0e80dbeab03",
+      "id": "f74a527259c",
+      "resolution": "resolved",
+      "verification": "_draw_poloidal draws no line between nodes; inter-node segments exist only behind the CONTOUR_TREE_FIGURE_POLOIDAL_EDGES hook. test_poloidal_panel_draws_no_lines_between_nodes asserts no dashed artist is present on the panel; the committed negative control CONTOUR_TREE_FIGURE_POLOIDAL_EDGES=1 restores 12 spatial lines and the test fails. Visual inspection of contour-tree-computed.png confirms no lines connect nodes on the left panel."
+    },
+    {
+      "answered_by": "4c86a9f83cc570c7dbef15eb869ff0e80dbeab03",
+      "id": "f87be44c506",
+      "resolution": "resolved",
+      "verification": "test_committed_receipt_matches_the_computed_tree opens the committed contour-tree-computed.json and compares fixture, node_count, edge_count, node-minus-edge invariant and drawn_carrier_vertices to independently rebuilt state; test_committed_figure_files_exist opens the committed PNG and SVG. The committed negative control pointing CONTOUR_TREE_FIGURE_DIR at a directory with a stale receipt (node_count 99) and no PNG makes both tests fail (2 failed/3 passed, EXIT=1)."
+    }
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT pass: 76/100 at reviewed head 4c86a9f83 (base d0f91aa52). The three blocking findings of the prior review are resolved and each repair is falsified by a committed negative control.\nSCORE goal_fidelity: 16\nSCORE evidence: 14\nSCORE scope_discipline: 20\nSCORE durability: 13\nSCORE fit: 13\nRESOLVED fd406a1cec1: virtual outside sentinel omitted from the signed-flux axis and drawn at its wall-contact join level; attachment shown explicitly as an open diamond at wall contact with graph label outside (wall contact).\nRESOLVED f74a527259c: poloidal panel draws no lines between nodes; test_poloidal_panel_draws_no_lines_between_nodes, falsified by CONTOUR_TREE_FIGURE_POLOIDAL_EDGES=1.\nRESOLVED f87be44c506: guard now reads the committed contour-tree-computed.json and the committed PNG/SVG; stale-receipt control fails 2 tests.\nFINDING follow-on: graph direct labels wall maximum and outside (wall contact) overlap in contour-tree-computed.png.\nFOLLOW-ON: the landing evidence fragment still describes the pre-repair figure and the pre-repair 2-test gate; regenerate in a separately scoped node.\nFOLLOW-ON: PNG/SVG guard checks presence and size only, not content.",
+  "review_kind": "re-review after corrective resume",
+  "review_run_id": "r-20261002T184827657323-review-2-of-ctta-explanatory-figure-from-computed-tree",
+  "reviewed_base_sha": "d0f91aa521b789a900fd5ff425cb712f60114edf",
+  "reviewed_head_sha": "4c86a9f83cc570c7dbef15eb869ff0e80dbeab03",
+  "reviewed_revision": "4c86a9f83cc570c7dbef15eb869ff0e80dbeab03",
+  "reviewed_run_id": "r-20261002T164824351467-ctta-explanatory-figure-from-computed-tree",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-from-computed-tree",
+  "reviewer_node": "review-2-of-ctta-explanatory-figure-from-computed-tree",
+  "reviewer_run_id": "r-20261002T184827657323-review-2-of-ctta-explanatory-figure-from-computed-tree",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 13,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "supersedes_review": "r-20261002T181034474235-review-of-ctta-explanatory-figure-from-computed-tree",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T19:18:04Z",
+  "total": 76,
+  "verdict": "pass"
+}

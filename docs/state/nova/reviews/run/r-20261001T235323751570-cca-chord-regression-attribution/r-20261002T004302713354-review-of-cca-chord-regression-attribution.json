@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run is an evaluation/attribution node, not an armed test node: its manifest carries no baseline_suite and no after_suite (both absent/null, confirmed in classification.json), and its write scope holds no test file. There is therefore no test-suite arm pair from which added failures could arise, so added_failure_count is 0 and added_failure_ids is empty. The equivalent positive check for this node is not a pytest arm but the benchmark's own negative control, which fired on every one of the twelve rows (vertical-shift displaced map, sup_relative 0.36 to 1.62 against the ~1e-4 good-row mismatch), and this review's independent reproduction of four rows (weak and diverted chord, fc13e55fb and b0a0676df) that matched the reviewed receipts to full float precision.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T004302713354-review-of-cca-chord-regression-attribution/review-fc13e55fb-weak.log: weak chord sup_relative 9.540289289933222e-05, EXIT=0 (independent reproduction, revision fc13e55fb)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T004302713354-review-of-cca-chord-regression-attribution/review-b0a0676df-weak.log: weak chord sup_relative 1.8606337522878692e-02, EXIT=0 (independent reproduction, revision b0a0676df)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T004302713354-review-of-cca-chord-regression-attribution/review-fc13e55fb-diverted.log: diverted chord sup_relative 0.12519040648301358, EXIT=0 (independent reproduction, revision fc13e55fb)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T004302713354-review-of-cca-chord-regression-attribution/review-b0a0676df-diverted.log: diverted chord sup_relative 0.2779570937674722, EXIT=0 (independent reproduction, revision b0a0676df)",
+    "docs/figures/cut-cell-current-attribution/chord-regression-attribution/attribution.md: weak chord sup 9.54029e-05 (de29a1a30, 6c519684e, 427f05e10, fc13e55fb) -> 1.86063e-02 (b0a0676df, 92613fd3d); diverted chord 0.125190 -> 0.277957",
+    "docs/evidence/fragments/cut-cell-current-attribution/cca-chord-regression-attribution.html: \u00a76 fragment, base 20da3b290"
+  ],
+  "call_sites": [],
+  "commits_read": [
+    "8ba46fa50069d4cf99946a0b1b2cde0dc3bc227c",
+    "6cd83e2e7cdc857b70f238ba320b3811b1d45edb",
+    "6297324c6f9b053d25b6c3fba667162c849ba04b"
+  ],
+  "completed_at": "2026-10-02T01:03:38.011Z",
+  "dispatched_at": "2026-10-02T00:43:16Z",
+  "evidence_inputs": {
+    "culprit_commit": "a59529f206cd71d024734c05d27e49eb5555d294 fix(equilibrium): use connected separatrix membership (nova/equilibrium/clip_quadrature.py, +88/-3; conditions the chord density samples on the axis-connected shared spline region). Confirmed by ancestry: it is the only functional commit in the delta fc13e55fb..92613fd3d.",
+    "lineage": "merge-base(fc13e55fb,b0a0676df)=a71934910; 92613fd3d parents are fc13e55fb and cd8454dc8; commits reachable from 92613fd3d not fc13e55fb are {3ba7f6b00 test, a59529f20 fix, c8260b44c docs, b0a0676df merge, 9acda6b6d applied-flag, cd8454dc8 test, 92613fd3d merge}.",
+    "mainline_first_bad": "92613fd3d (the merge that carries a59529f20 into main); fc13e55fb is its first parent and the mainline last-good. b0a0676df is a chord-branch merge, an ancestor of 92613fd3d, not of fc13e55fb.",
+    "measured_rows": "weak chord sup 9.54029e-05 at de29a1a30/6c519684e/427f05e10/fc13e55fb and 1.86063e-02 at b0a0676df/92613fd3d; diverted chord 0.125190 -> 0.277957; weak centroid dR -0.06982 -> -0.64553 mm.",
+    "reproduction": "This review reproduced weak and diverted chord rows at fc13e55fb and b0a0676df from git-archive extractions, all four matching the reviewed receipts to full float precision."
+  },
+  "findings": [
+    {
+      "file": "docs/figures/cut-cell-current-attribution/chord-regression-attribution/attribution.md",
+      "line": "51",
+      "severity": "follow-on",
+      "text": "follow-on: the artifact calls b0a0676df the 'first bad revision' and fc13e55fb '92613fd3d^1' the last good, presenting them as adjacent in history, but b0a0676df is a chord-repair-branch merge (parents c8260b44c and a71934910), not the mainline first-bad, which is 92613fd3d (also measured bad). b0a0676df is an ancestor of 92613fd3d and is not a descendant of fc13e55fb; its commit date (2026-10-01 21:06) precedes fc13e55fb (2026-10-02 00:56), so the 'last good then first bad' ordering does not hold for the measured pair. The headline conclusion is unaffected, and indeed the chosen pair is a clean A/B (they share merge-base a71934910, so b0a0676df differs from fc13e55fb only by the chord lineage); a reader should read the mainline first-bad as 92613fd3d."
+    },
+    {
+      "file": "docs/figures/cut-cell-current-attribution/chord-regression-attribution/logs/fc13e55fb/run.log",
+      "line": "8",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest asserts 'all 12 rows EXIT=0', but only one of the eight committed run logs (92613fd3d/run-weak-probe.log) contains an 'EXIT=' line; the other seven end at the final ROW line, so the exit status of ten of the twelve declared rows is not legible from the committed logs. The twelve JSON receipts do corroborate that each row completed (a receipt is written only after the row runs), and this review's own reproductions of four of the rows all exited 0, so the work is sound; the gap is in what the committed log shows, not in what happened."
+    },
+    {
+      "file": "docs/evidence/fragments/cut-cell-current-attribution/cca-chord-regression-attribution.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on (cosmetic): all three commit subjects use the 'test(equilibrium):' conventional type while the commits change only docs/figures and docs/evidence; 'docs(...)' would match the content. The commit bodies are present and state what changed and why."
+    }
+  ],
+  "follow_ons": [
+    "Finding 1: state the mainline first-bad as 92613fd3d (not the branch merge b0a0676df) in the artifact, or say explicitly that the measured b0a0676df/fc13e55fb pair is a branch-side A/B sharing merge-base a71934910.",
+    "Finding 2: the reviewed manifest's 'all 12 rows EXIT=0' is not legible from seven of the eight committed run logs; either print an EXIT line per run or soften the claim.",
+    "Next step for the plan (owned by the driving followup, not this review: the merged-result verification belongs to a separately dispatched test node)."
+  ],
+  "gate_arms_note": "Reviewed manifest baseline_suite: absent. Reviewed manifest after_suite: absent. The node's gate is the benchmark row measurement, not a pytest suite; the reviewed manifest's tests field records the row commands, and the twelve committed receipts are the arm. This review's independent arm: four git-archive extractions (fc13e55fb and b0a0676df) each run on the CPU witness under JAX_PLATFORMS=cpu, weak and diverted chord rows at 135 realised cells, all four reproducing the reviewed sup_relative to full precision (EXIT=0).",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites changed (attribution-only node)",
+    "diff": "Three commits: 8ba46fa50 lands the attribution.md, the twelve receipts, the run logs and the evidence fragment; 6cd83e2e and 6297324c correct the imported clip_quadrature provenance line in the row log headers.",
+    "done_when": "The deliverable is the attribution artifact plus the twelve row receipts under docs/figures/cut-cell-current-attribution/chord-regression-attribution/ and the \u00a76 evidence fragment; all present, committed and reproduced.",
+    "goal": "The dispatched goal was to attribute the chord map-fidelity regression to a revision/commit; the artifact names a59529f20 as the functional change and supports it with a clean six-revision A/B, and this review independently confirmed the culprit by git ancestry.",
+    "manifest": "The reviewed manifest reports status complete with commits, changed_paths, test_logs and evidence_inputs; baseline_suite and after_suite are absent (this was an evaluation node, not an armed test node), so there are no gate-suite arms.",
+    "write_paths": "All 22 changed files lie inside the two declared write roots."
+  },
+  "justifications": {
+    "durability": "The attribution artifact (docs/figures/.../chord-regression-attribution/attribution.md), the twelve row receipts and eight run logs, and the evidence fragment are all committed (8ba46fa50) with the later provenance corrections (6cd83e2e, 6297324c); the reviewed head 6297324c is the worktree tip. The archived receipts are the durable record and reproduce. The reviewed head is not yet an ancestor of origin/main (expected for a worker that commits locally); the reviewed manifest's own 'all 12 EXIT=0' over-claim weakens the receipt's self-audit slightly.",
+    "evidence": "Four of the twelve declared rows were independently reproduced by this review, each to full float precision: weak-rotation chord sup_relative 9.540289289933222e-05 at fc13e55fb and 1.8606337522878692e-02 at b0a0676df; diverted chord 0.12519040648301358 at fc13e55fb and 0.2779570937674722 at b0a0676df. Each reproduced run printed mode=chord, and the weak fc13e55fb receipt's centroid dR -0.06981943764028387 matched to the last digit. The committed log headers name the revision, the extraction path and (via two follow-up provenance corrections, 6cd83e2e and 6297324c) the imported benchmark path, so each receipt is legibly bound to the tree that produced it. Every row receipt carries the benchmark's own displaced-plasma negative control (vertical_shift_m), and that control fired (sup_relative 0.36 to 1.62 against the ~1e-4 good-row mismatch) on every row, so the benchmark was demonstrably able to detect a displaced map. The manifest's 'all 12 rows EXIT=0' is not evidenced by the committed logs (see finding 2).",
+    "fit": "The node used the repo's own benchmark (benchmarks/plasma_cell_map_fidelity.py) and its analytic-state CPU preflight path, extracted each revision with git archive under the run scratch and imported it by PYTHONPATH, and reported each row's mismatch sup beside the reviewed receipt in both the artifact and the fragment \u2014 exactly the shape the driving followup asks for. No new production machinery was added, which is right for an attribution-only node.",
+    "goal_fidelity": "The node did what the driving followup (f-cca-chord-membership-finish-option-one, gate item 4) needs as a prerequisite: it localised the chord map-fidelity regression in benchmarks/plasma_cell_map_fidelity.py to the chord-membership change. It measured both chord rows (weak-rotation-reactor-static and diverted-single-null) at requested -110 cells (135 realised) at six revisions by git-archive extraction and named a59529f20 (fix(equilibrium): use connected separatrix membership, nova/equilibrium/clip_quadrature.py) as the functional culprit. Verified independently: merge-base(fc13e55fb,b0a0676df)=a71934910, fc13e55fb is 92613fd3d^1, and the delta fc13e55fb..92613fd3d is exactly {3ba7f6b00, a59529f20, c8260b44c, b0a0676df, 9acda6b6d, cd8454dc8, 92613fd3d}, so the only functional change between the mainline last-good and first-bad is a59529f20. One framing imprecision: the artifact calls b0a0676df the first bad revision, but it is a chord-branch merge, not the mainline first-bad (92613fd3d); see finding 1.",
+    "scope_discipline": "The run's three commits touch exactly 22 paths, all under the two declared grant roots (docs/figures/cut-cell-current-attribution/chord-regression-attribution/ and docs/evidence/fragments/cut-cell-current-attribution/cca-chord-regression-attribution.html); no file under nova/ or tests/ changed, matching the manifest's 'No product source or tests were written by this node'. git status --short on the reviewed worktree is clean."
+  },
+  "plan": "nova:cut-cell-current-attribution",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node attributed the chord map-fidelity regression to a59529f20 (connected separatrix membership in clip_quadrature.py), verified by git ancestry.\nVERDICT done_when: the attribution artifact, twelve row receipts and the \u00a76 evidence fragment are present, committed and reproduced.\nVERDICT write_paths: all 22 changed files are inside the two declared write roots.\nVERDICT manifest: status complete; baseline_suite and after_suite absent (evaluation node, no pytest arm).\nVERDICT diff: three commits land the artifact/receipts/logs/fragment and correct the imported-module provenance lines.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: correct and independently confirmed culprit; the 'first bad revision' framing names a branch merge rather than the mainline first-bad.\nSCORE evidence: 18\nJUSTIFICATION evidence: four of twelve rows reproduced to full precision; per-row negative control fired; log headers bind each receipt to its tree; 'all 12 EXIT=0' is not legible from the committed logs.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git shows only the declared figure and fragment paths; no nova/ or tests/ change.\nSCORE durability: 18\nJUSTIFICATION durability: artifact, receipts and logs committed; head is not yet on origin/main (expected for a worker).\nSCORE fit: 18\nJUSTIFICATION fit: uses the repo's own benchmark CPU-preflight path and reports each row beside the reviewed receipt; no new machinery.\nFINDING attribution.md:51 follow-on: b0a0676df framed as first bad but is a branch merge; mainline first-bad is 92613fd3d.\nFINDING logs/fc13e55fb/run.log:8 follow-on: only one of eight logs carries EXIT=, so 'all 12 EXIT=0' is not legible.\nFINDING cca-chord-regression-attribution.html:1 follow-on: commit subjects use test(...) while changing only docs paths.\n",
+  "review_run_id": "r-20261002T004302713354-review-of-cca-chord-regression-attribution",
+  "reviewed_base_sha": "20da3b290955d0479d94be9601c77ef819ca5189",
+  "reviewed_head_sha": "6297324c6f9b053d25b6c3fba667162c849ba04b",
+  "reviewed_revision": "6297324c6f9b053d25b6c3fba667162c849ba04b",
+  "reviewed_run_id": "r-20261001T235323751570-cca-chord-regression-attribution",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cca-chord-regression-attribution",
+  "reviewer_node": "review-of-cca-chord-regression-attribution",
+  "reviewer_run_id": "r-20261002T004302713354-review-of-cca-chord-regression-attribution",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a76",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T03:01:53+02:00",
+  "total": 92,
+  "verdict": "pass"
+}

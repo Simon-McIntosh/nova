@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "236bb74c6afa6f2f1242c551b5abec8e5f6bcc00",
+    "082b193ad8104a7ef86999b2228253bc22a0da7f"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T11:15:11.418494+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T093450129138-cca-why-the-ring-read-misses-and-the-twin-loop/manifest.md.asdelivered",
+      "line": "5",
+      "text": "the delivered manifest's status in-progress is outside the complete|blocked|failed vocabulary, so the completed run classified as unreadable until the coordinator rewrote it, and the asdelivered copy is what shows it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-ring-read-misses-and-the-twin-loop/measure.py",
+      "line": "36",
+      "text": "the census instrument resolves its root from the minting worktree's absolute path, so the measurements cannot be regenerated once that worktree is cleaned, although the receipts preserve the recorded values."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits; 236bb74c6 adds the four figure files only and 082b193ad adds the evidence section and a three-line plan comment under section s7, with no production or test source touched.",
+    "done_when": "the fence asks for a reports-fence report holding the diagnosis, the twin census and polish, one titan job at 340/550/1074/2616-scale rungs against production with warm compile excluded, one CPU witness, one boundary-distance figure and one 340-cell panel under the plotting rules; report.md:16-60 carries the four tables and docs/evidence/archive/cut-cell-current-attribution-landed.html:2502-2570 carries both figures with project-absolute src.",
+    "goal": "the goal asks why the production saddle read misses at 132 and 340 cells, whether the twin-loop census with global-spline polish admits every rung, and its vmapped GPU cost; report.md:8-10 answers all three with per-rung numbers and no production change.",
+    "manifest": "read; as delivered it carried status in-progress and the coordinator comment at manifest.md:6 rewrote it to complete with manifest.md.asdelivered preserving the delivered line.",
+    "write_paths": "the four declared scopes are the reports fence directory, the landed evidence file, the figures directory and the plan; git diff --stat da3def20e95b..082b193ad lists exactly six files, all inside them."
+  },
+  "justifications": {
+    "durability": "the deliverables are receipts and figures rather than a runtime change so no test can regress with them, the numbers on the fence are guarded only by the receipts beside them, and the record shows the delivered status defect at manifest.md.asdelivered:5.",
+    "evidence": "accuracy-receipt.json holds the nine-rung admission and error table with a true analytic nonuniformity control, timing-gpu-receipt.json and timing-cpu-receipt.json hold the cost tables of report.md:50-60, and report.md:62 reconciles the timing log header da3def20e against the receipt's figure-only revision 236bb74c6.",
+    "fit": "the figures are drawn through the committed painters measure.py:612-651 imports (draw_flux_contours, draw_wall, draw_nulls, poloidal axes) under the hyphenated figure convention, and neither the landed paths nor the two commit messages carry a banned name or attribution.",
+    "goal_fidelity": "report.md:8-10 states both miss mechanisms, the 9-of-9 union admission and the titan cost ratio the goal sentence asks for.",
+    "scope_discipline": "every path of git diff --stat da3def20e95b..082b193ad is inside the four declared write paths, the plan append adds three lines only, and no nova/ file changed as the done-when requires."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal asks why the production saddle read misses at 132 and 340 cells, whether the twin-loop census with global-spline polish admits every rung, and its vmapped GPU cost; report.md:8-10 answers all three with per-rung numbers and no production change.\nVERDICT done_when: the fence asks for a reports-fence report holding the diagnosis, the twin census and polish, one titan job at 340/550/1074/2616-scale rungs against production with warm compile excluded, one CPU witness, one boundary-distance figure and one 340-cell panel under the plotting rules; report.md:16-60 carries the four tables and docs/evidence/archive/cut-cell-current-attribution-landed.html:2502-2570 carries both figures with project-absolute src.\nVERDICT write_paths: the four declared scopes are the reports fence directory, the landed evidence file, the figures directory and the plan; git diff --stat da3def20e95b..082b193ad lists exactly six files, all inside them.\nVERDICT manifest: read; as delivered it carried status in-progress and the coordinator comment at manifest.md:6 rewrote it to complete with manifest.md.asdelivered preserving the delivered line.\nVERDICT diff: read both commits; 236bb74c6 adds the four figure files only and 082b193ad adds the evidence section and a three-line plan comment under section s7, with no production or test source touched.\nCALL_SITES: none\nREVIEWED_REVISION: 082b193ad8104a7ef86999b2228253bc22a0da7f\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: report.md:8-10 states both miss mechanisms, the 9-of-9 union admission and the titan cost ratio the goal sentence asks for.\nSCORE evidence: 18\nJUSTIFICATION evidence: accuracy-receipt.json holds the nine-rung admission and error table with a true analytic nonuniformity control, timing-gpu-receipt.json and timing-cpu-receipt.json hold the cost tables of report.md:50-60, and report.md:62 reconciles the timing log header da3def20e against the receipt's figure-only revision 236bb74c6.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path of git diff --stat da3def20e95b..082b193ad is inside the four declared write paths, the plan append adds three lines only, and no nova/ file changed as the done-when requires.\nSCORE durability: 15\nJUSTIFICATION durability: the deliverables are receipts and figures rather than a runtime change so no test can regress with them, the numbers on the fence are guarded only by the receipts beside them, and the record shows the delivered status defect at manifest.md.asdelivered:5.\nSCORE fit: 19\nJUSTIFICATION fit: the figures are drawn through the committed painters measure.py:612-651 imports (draw_flux_contours, draw_wall, draw_nulls, poloidal axes) under the hyphenated figure convention, and neither the landed paths nor the two commit messages carry a banned name or attribution.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T093450129138-cca-why-the-ring-read-misses-and-the-twin-loop/manifest.md.asdelivered:5 the delivered manifest's status in-progress is outside the complete|blocked|failed vocabulary, so the completed run classified as unreadable until the coordinator rewrote it, and the asdelivered copy is what shows it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex-20260916/cca-why-the-ring-read-misses-and-the-twin-loop/measure.py:36 the census instrument resolves its root from the minting worktree's absolute path, so the measurements cannot be regenerated once that worktree is cleaned, although the receipts preserve the recorded values.\n",
+  "review_run_id": "r-20260922T111511418494-review-of-cca-why-the-ring-read-misses-and-the-twin-loop",
+  "reviewed_base_sha": "da3def20e95b7aa5b2b3c8d18715820c18009698",
+  "reviewed_revision": "082b193ad8104a7ef86999b2228253bc22a0da7f",
+  "reviewed_run_id": "r-20260922T093450129138-cca-why-the-ring-read-misses-and-the-twin-loop",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/cca-why-the-ring-read-misses-and-the-twin-loop",
+  "reviewer_run_id": "r-20260922T111511418494-review-of-cca-why-the-ring-read-misses-and-the-twin-loop",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T12:30:13.201932+00:00",
+  "total": 90
+}

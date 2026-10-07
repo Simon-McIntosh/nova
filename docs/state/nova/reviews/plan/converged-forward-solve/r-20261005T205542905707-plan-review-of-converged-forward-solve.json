@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T21:01:00.820Z",
+  "dispatched_at": "2026-10-05T20:55:55Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:1672",
+      "id": "reuse_search-1",
+      "reason": "the ruling must name only the Armijo acceptance arithmetic (`required`/`sufficient` with `_SUFFICIENT_DECREASE_SLOPE`) as reusable, leaving the search direction to be supplied by the Newton caller, or a node obeying the ruling wholesale substitutes steepest descent for the Newton step \u00a75 exists to implement.",
+      "text": "the \u00a75 reuse ruling (plan comment `c-20261005T171941782407`, 2026-10-05) names `_steepest_descent_promotion` as \"the Armijo backtracking search\" to carry into `solve.fixed_point` \"stripped of the ladder\", but the function computes its own steepest-descent direction (`direction = jnp.where(..., -gradient / jnp.maximum(gradient_norm, 1.0e-300), ...)`, fixed_point.py:1691-1693) and scores it on a fixed scale ladder `_STEEPEST_DESCENT_SCALES = (1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8)` (fixed_point.py:93), whereas the design (\u00a7 `solve`, line 118) requires a line search on \u03c6=\u00bd\u2016F\u2016\u00b2 along the GMRES/Newton direction with initial factor 1 and shrink factor \u00bd; carrying this helper as the ruling directs would import a steepest-descent direction and a factor schedule whose largest step is 1e-4, so the \u00a75 node would be built on the wrong direction",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "926ed295ef976fc04218412139d1060a15df3092830243ba97a4b49c38d6bc78",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 36,
+  "project": "nova",
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T21:02:25.964542+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T205542905707-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "863d9b08498387fa190161b07bebb2e41fb23346",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one owning module each hides substantial behaviour behind a single logical signature: topology.read (contour tree, null census, normal-form saddle support, axis-connected membership), current.book (exact clip integration), gs.apply (composed map plus its JVP), solve.fixed_point (Newton-GMRES at one scan call site), with forward.py reduced to the request/receipt facade.",
+    "duplicate_owner": "pass \u2014 each retained authority is named as the owner to extend (`ConstraintPair`/`ConstraintRecord` for the row scale; polygon_moments.py for exact polygon moments; contour_tree.py/contour_tree_mesh.py for the tree; biot/null.py + biot/fieldnull.py for field-null kernels; forward.py for the moment-map derivative), and the \u00a76 inventory folds deleted modules into these owners rather than forking them.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72\u2013\u00a75 each name the mechanism they retire or merge in their own text (Topology.read; clipped_support_current_moments and the support partition; the ForwardFluxOperator map; newton_krylov/picard/operator_request_body) and \u00a76 names the ladders, the frozen/live split and the alternate routes it deletes, so no section adds surface without accounting for what it removes.",
+    "reuse_search": "a finding \u2014 the design cites a real owner for every mechanism it proposes (contour_tree.py, biot/null.py, polygon_moments.py, constraint.py, forward_operator.py operand layouts, clip_quadrature.py, forward.py's moment-map derivative), but the \u00a75 reuse candidate `_steepest_descent_promotion` does not do the thing its reuse ruling says it does.",
+    "thin_wrapper": "pass \u2014 each new module replaces rather than wraps (topology.read replaces `Topology.read`/`read_with_connectivity`; gs.apply replaces the map `ForwardFluxOperator` performs; solve.fixed_point replaces `newton_krylov`, `picard` and `operator_request_body`), and the cite-or-justify rulings require each carried helper to justify itself against the fixed-shape contract rather than be wrapped."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T21:02:25.464057+00:00"
+}

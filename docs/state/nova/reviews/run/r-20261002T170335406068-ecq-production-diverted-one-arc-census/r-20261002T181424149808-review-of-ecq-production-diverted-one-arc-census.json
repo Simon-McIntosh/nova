@@ -1,0 +1,129 @@
+{
+  "absent": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Unmeasured from the reviewed run's own records. This is a measurement node: its manifest declares no test path and its baseline_suite and after_suite fields are empty, so there is no paired gate arm to difference. Its gate is the aggregate read one_arc_census.py --aggregate-production (EXIT=0), which reads committed per-row partials rather than running a suite. added_failure_count is null and added_failure_ids is [] rather than a fabricated zero.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "row_count 11, any_row_refuses_a_cell false, smallest_saddle_wedge_margin 5; independently reproduced",
+      "path": "docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/production/production-one-arc-census-receipt.json"
+    },
+    {
+      "headline": "MAST 21978/35 reproduced (capacity 136, max 132, refused 0); capacity forced to 100 refuses 117 cells, confirming the instrument fires",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census/review-probe-one-arc-production.log"
+    },
+    {
+      "headline": "DIII-D frame 179 reproduced (capacity 136, max 132, wedge 131, refused 0)",
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census/review-probe-diiid-row.log"
+    }
+  ],
+  "commits_read": [
+    "1024be47a91cf1c466c3e1c643dc0b2f5717351c",
+    "80d20b80ce841928eb9dc163086ea9d1f8eb787c",
+    "06a15267be81085122695599b44b20001ecaeae7",
+    "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f"
+  ],
+  "completed_at": "2026-10-02T19:00:25.636Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T18:14:46Z",
+  "evidence_inputs": {
+    "distinctness": "Eleven distinct member identities with distinct axes/X-points and saddle-cell counts 0-2; the receipt rows equal the committed per-row files as a set.",
+    "independent_reproduction": "MAST 21978/35 and DIII-D frame 179 both recomputed to capacity 136, realised max live 132, refused 0; DIII-D saddle_wedge_maximum 131 giving the reported 136-131 = 5.",
+    "measured_capacity": "one_arc_capacity is traced_polygon_vertex_capacity(straight=8) = 128*1 + 8 = 136 on every row; the support refusal predicate is live_vertex_count > support_capacity (separatrix_clip:1343), folded with saddle-chain overflow at line 1406.",
+    "positive_control": "Forcing traced_polygon_vertex_capacity to 100 made the production refusal predicate name 117 refused cells at MAST 21978/35, so the zero-refused result is a measured absence, not a vacuous check.",
+    "reviewed_range": "f863867a8e6151993e851f55ea54d85ac8ec4064..d7e48acc0a8a8bdcaff42615b4e56a4294bc960f; 14 paths, 1111 insertions, 3 deletions; git diff --check clean; worktree clean"
+  },
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/one_arc_census.py",
+      "line": "282-302",
+      "severity": "follow-on",
+      "text": "_production_refused_cells short-circuits to [] whenever base.refused_cells() is zero, so the raised-capacity differencing arm its own docstring describes never runs for any of these eleven rows. The refusal predicate itself is sound and the review forced it to fire (capacity 100 yields 117 refused cells at MAST within the same instrument), but the census would be stronger with a committed forced-bound positive-control row so the absence is demonstrated in-node rather than only by a reviewer.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/production/production-one-arc-census-receipt.json",
+      "line": "rows[*].saddle_wedge_margin",
+      "severity": "follow-on",
+      "text": "The headline smallest_saddle_wedge_margin of 5 is capacity minus the largest spline saddle wedge (136-131). The binding headroom against the one_arc_capacity the census tests is the support margin, 136-132 = 4. Both are consistent and neither refuses a cell, but the receipt could report the support margin beside the wedge margin so a reader does not read 5 as the support headroom.",
+      "verdict": "CONFIRMED"
+    },
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/capacity/one-arc-census/production/production-one-arc-census-receipt.json",
+      "line": "row_selection",
+      "severity": "follow-on",
+      "text": "The verdict covers single-null and limited production layouts only; no double-null diverted row exists in the evaluated banks, as the sibling analytic census already records for its own bank. A double-null row added to a bank later would be unmeasured by this census and would need its own two-run check.",
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "follow_ons": [
+    "Add a committed forced-bound control row to the production census so the production refusal predicate is shown to fire inside the node, not only under a reviewer's patch.",
+    "Report the support margin (capacity minus realised live maximum = 4) beside the saddle-wedge margin in the aggregate receipt, since the support count is the quantity the one-arc bound actually bounds.",
+    "If a double-null diverted production row is ever added to a bank, measure it separately; the evaluated banks carry no double-null diverted row."
+  ],
+  "gate_arms_note": "No baseline/after suite arms exist on the reviewed run to pair. The independent review reproduced the MAST 21978/35 and DIII-D frame 179 rows and added a forced-capacity positive control; see tests and test_logs.",
+  "item_verdicts": {
+    "call_sites": "one_arc_census.production_case builds the row, reads support.refused_cells() against capacity traced_polygon_vertex_capacity(straight=8)=136, and measures the spline saddle wedges via traced_saddle_wedges. The refusal predicate is separatrix_clip:1343 overflow = live_arc_vertex_count > support_capacity, folded with saddle-chain overflow at line 1406.",
+    "diff": "1024be47a adds the production census route and per-row partials; 80d20b80c adapts the production seed support census; 06a15267b exposes the DIII-D machine cache as an explicit input; d7e48acc0 is docs-only and lands the eleven row receipts, the aggregate receipt and the evidence fragment. 14 paths, 1111 insertions, 3 deletions.",
+    "done_when": "The committed aggregate receipt reports row_count 11, any_row_refuses_a_cell false and smallest_saddle_wedge_margin 5, and its rows match the eleven committed per-row receipts as a set. The gate command one_arc_census.py --aggregate-production exits 0. The independent review reproduced the MAST 21978/35 row (capacity 136, max live 132, refused 0) and the DIII-D frame 179 row (capacity 136, max live 132, wedge 131, refused 0) exactly.",
+    "goal": "The node measures the question \u00a75 leaves open: whether any production diverted row refuses the one-arc traced bound, the criterion for landing the held two-run wiring 61b291089. It measures eleven rows (six unique MAST production moment-seed slices and five DIII-D forward-gate frames) at their production 1089-cell layout, reports zero refused cells on every row, and concludes the two-run wiring does not land. That is the correct decision input.",
+    "manifest": "The reviewed manifest is terminal (complete) and names all four commits and all changed paths. Its tests line carries the literal aggregate command and EXIT=0. It declares no test path, so its baseline_suite and after_suite arms are empty by construction, and no paired failure delta exists to derive.",
+    "write_paths": "git diff --name-status BASE..HEAD lists exactly the granted census script, the eleven granted production receipts plus the aggregate receipt, and the granted landing fragment. The reviewed worktree is clean; git diff --check is clean. No plan, index or foreign source path changed."
+  },
+  "justifications": {
+    "durability": "The receipts, the aggregate and the census script are committed and reproducible, and the census writes per-row partials so a lost process loses one row rather than the run. Two residual fragilities: the DIII-D rows require the governed machine cache to be passed explicitly because the script default remains the node-local tmpfs path, and the row logs span two revisions (MAST at 80d20b80c, DIII-D at 06a15267b) that a later reader reconciles against the docs-only HEAD commit carrying them.",
+    "evidence": "Per-row provenance headers carry revision, tree, module, cwd and the literal command, and every accepted row ends EXIT=0. The eleven rows have eleven distinct identities with distinct axes and X-points and saddle-cell counts 0-2, so the uniform maximum of 132 is a layout fact rather than a replayed row. The independent probe reproduced two of the eleven rows exactly and, by forcing the one-arc capacity to 100, made the same production refusal predicate name 117 refused cells, so the reported zero is a measured absence. The node ships no in-node positive control, and its _production_refused_cells raised-bound differencing branch is dead behind an early return for every row, so the second instrument is untested.",
+    "fit": "The census extends the established per-cell-count census seam to production banks and reports nullable refusal indices per row, so a later reader sees a positive finding as data rather than as an opaque verdict string.",
+    "goal_fidelity": "\u00a75 asks for a measurement of production diverted rows against the one-arc bound before declaring two runs. The node delivers the measurement on both production banks and returns the decision input with the correct one-run default bound.",
+    "scope_discipline": "The diff is confined to the granted census directory and the granted landing fragment; the worktree is clean and no plan or index file changed."
+  },
+  "plan": "nova:exact-clip-moment-quadrature",
+  "project": "nova",
+  "raw_text": "VERDICT pass (91/100; goal_fidelity 19, evidence 17, scope_discipline 20, durability 16, fit 19). The production one-arc census answers the \u00a75 question: eleven production diverted rows (six MAST slices, five DIII-D frames) each refuse zero cells at capacity 136 with a realised maximum of 132 live vertices, so the held two-run wiring 61b291089 does not land. The independent review reproduced the MAST 21978/35 and DIII-D frame 179 rows exactly and forced the one-arc capacity to 100, which made the same refusal predicate name 117 cells, confirming the reported zero is measured rather than vacuous. Findings are non-blocking: the differencing arm of _production_refused_cells is dead behind an early return, the headline margin is the wedge margin (5) rather than the support margin (4), and the banks carry no double-null diverted row. Accept.",
+  "review_base_sha": "5ad2f3555804ed87ee28ce5e439837dcda46447b",
+  "review_run_id": "r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census",
+  "reviewed_base_sha": "f863867a8e6151993e851f55ea54d85ac8ec4064",
+  "reviewed_commit": "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f",
+  "reviewed_head_sha": "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f",
+  "reviewed_revision": "d7e48acc0a8a8bdcaff42615b4e56a4294bc960f",
+  "reviewed_run_id": "r-20261002T170335406068-ecq-production-diverted-one-arc-census",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-production-diverted-one-arc-census",
+  "reviewer_node": "review-of-ecq-production-diverted-one-arc-census",
+  "reviewer_run_id": "r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census",
+  "reviewing_run_id": "r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a75",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census/review-probe-one-arc-production.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T181424149808-review-of-ecq-production-diverted-one-arc-census/review-probe-diiid-row.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170335406068-ecq-production-diverted-one-arc-census/aggregate-production.log"
+  ],
+  "tests": [
+    {
+      "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python $TMPDIR/probe_one_arc_production.py (reviewed census module imported from the reviewed worktree)",
+      "result": "REPRO_MAST1 capacity 136, max_live 132, refused 0, identity 21978/35; FORCED_BOUND_100 refused 117, instrument_can_fire true; EXIT=0"
+    },
+    {
+      "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python $TMPDIR/probe_diiid_row.py (reviewed census module, governed DIII-D machine cache)",
+      "result": "REPRO_DIIID1 d3d_shot_00000c4a7b.parquet frame 179, capacity 136, max_live 132, wedge 131, margin 5, refused 0, saddle 2; EXIT=0"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:55:25Z",
+  "total": 91,
+  "verdict": "pass"
+}

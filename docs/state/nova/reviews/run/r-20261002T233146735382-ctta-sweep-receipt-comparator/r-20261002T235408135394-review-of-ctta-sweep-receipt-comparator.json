@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own armed gate logs. baseline_suite: revision f7f823c667f9b65740a04d5de40d991e60a2cd4e, completed true, exit_status 0, failure_count 0, failure_ids [] (log baseline-brute-force-suite.log: 8 passed). after_suite: revision c01f5f4c359de3f9e09cbefe6c8a0cc027637b23, completed true, exit_status 0, failure_count 0, failure_ids [] (log after-brute-force-suite.log: 8 passed). Both arms completed to their summary line, so added_failure_count is a measured zero (after_failure_ids minus baseline_failure_ids = []).",
+  "added_failure_ids": [],
+  "artifacts": [
+    "benchmarks/contour_tree_brute_force.py",
+    "tests/test_contour_tree_receipt_comparator.py",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T235408135394-review-of-ctta-sweep-receipt-comparator/review-gate-verify.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T235408135394-review-of-ctta-sweep-receipt-comparator/review-negative-control-verify.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T235408135394-review-of-ctta-sweep-receipt-comparator/review-e2e-verify.log"
+  ],
+  "commits_read": [
+    "c01f5f4c359de3f9e09cbefe6c8a0cc027637b23"
+  ],
+  "completed_at": "2026-10-03T00:10:33.538Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T23:54:28Z",
+  "evidence_inputs": "Reviewed f7f823c667f9b65740a04d5de40d991e60a2cd4e..c01f5f4c359de3f9e09cbefe6c8a0cc027637b23, one commit, two files, both inside the granted paths. Reproduced in a git-archive scratch tree at c01f5f4c3: gate 15 passed EXIT=0; declared negative control CONTOUR_TREE_RECEIPT_SKIP=edge_valid 1 failed 14 passed EXIT=1 (test_single_field_difference_names_that_field[edge_valid]); both reviewed suite arms completed EXIT=0 with no failures (8 passed each). Independent end-to-end on real certificate fixtures: --write produced 4 fixtures x 7 fields; identical receipts print 0 mismatches for all seven fields (exit 0); a one-entry edge_valid change prints edge_valid: 1 with all other fields 0 (exit 1). Dropped fixture and missing field each count as a mismatch as documented. Three follow-ons; no blocking finding.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_receipt_comparator.py",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "The suite builds every receipt from a SimpleNamespace with hand-named attributes, so it never exercises the real path the deliverable exists for: receipt_from_tree on a ContourTreeArrays, write_receipts/--write, or the --compare CLI exit codes on real receipt files. Add one test that builds a tree via build_contour_tree over a small fixture and round-trips it through write_receipt_file/load_receipts/compare_receipts; a renamed tree attribute would then fail the suite instead of only failing at sweep time. This review verified the real path independently (4 certificate fixtures, 7 fields, identical -> exit 0, one-field mutation -> edge_valid: 1, exit 1) but that is not a committed guard."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T233146735382-ctta-sweep-receipt-comparator/manifest.md",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "evidence_inputs states 'item (1) of f-ctta-sweep-durability-and-placement is met'. Item (1) covers two deliverables: the base-versus-head receipt comparator and the performance negative control, both previously run from /tmp and uncommitted. This node commits only the comparator. Coordinator writeback should record item (1) as partially met (comparator landed; performance negative control still uncommitted) rather than resolved."
+    },
+    {
+      "file": "benchmarks/contour_tree_brute_force.py",
+      "line": "423",
+      "severity": "follow-on",
+      "text": "_compared_fields reads CONTOUR_TREE_RECEIPT_SKIP from the environment and applies the skip inside the production comparison, so any stray value of that variable silently omits a field from a real base/head comparison and turns a real mismatch into a clean pass. Prefer injecting the skip set as a parameter used only by the test (or reading it only under a pytest marker), so the negative control cannot weaken a production run."
+    }
+  ],
+  "gate_arms_note": "Both suite arms are present, completed and readable, unlike an unarmed node; the added-failure count is therefore measured rather than encoded as an unmeasured zero.",
+  "item_verdicts": {
+    "diff": "git diff f7f823c..c01f5f4c3 touches two files (+255/-5). The diff includes three unrelated whitespace reformats in measure_cpu_rungs that are collateral to the change but harmless. git diff --check is clean. The reviewed commit is not an ancestor of the review worktree HEAD (1c48ad34e), so all reviewed artifacts were read through git show and reproduced from a git-archive scratch tree at c01f5f4c3.",
+    "done_when": "The new tests/test_contour_tree_receipt_comparator.py passes 15/15 in a scratch tree at the reviewed head (reproduced, EXIT=0) and fails under the declared negative control CONTOUR_TREE_RECEIPT_SKIP=edge_valid with 1 failed, 14 passed, EXIT=1, the failing id being test_single_field_difference_names_that_field[edge_valid]. tests/test_contour_tree_brute_force.py adds no failure: baseline 8 passed EXIT=0 at f7f823c, after 8 passed EXIT=0 at c01f5f4c3, both arms completed to their summary line.",
+    "goal": "A --compare BASE HEAD mode was added to benchmarks/contour_tree_brute_force.py that loads two receipt files written by the benchmark and reports one mismatch line per receipt field, exiting nonzero on any mismatch; a receipt writer (receipt_from_tree, write_receipt_file/write_receipts, --write DIR) supplies the files. RECEIPT_FIELDS holds exactly the seven fields the followup enumerates (node vertices, node values, node masks, critical types, compact edges, edge masks, overflow).",
+    "manifest": "The reviewed manifest is complete: status complete, commit c01f5f4c3, both changed paths listed, the green gate, the declared negative control with its exact failing id, and both suite arms as armed JSON with revision, literal command, exit status, log path, completed and failure ids.",
+    "write_paths": "One commit c01f5f4c3 (+255 / -5) changes only benchmarks/contour_tree_brute_force.py and the new tests/test_contour_tree_receipt_comparator.py, both inside the two granted repository paths. The granted evidence-fragment and figure paths were not used because the done-when names no artifact."
+  },
+  "justifications": {
+    "durability": "The comparator and its tests are committed with a bodied conventional commit; the gate, negative-control and both suite-arm logs are on disk under the run directory with revisions and literal commands. Durability is marked down because the committed tests exercise only synthetic SimpleNamespace receipts and never call receipt_from_tree/receipt_of/write_receipts/--write or the CLI --compare, so a regression in the real serialization path (a renamed tree attribute) would pass the committed suite even though the comparison logic stays guarded. The review's own end-to-end run closes that gap for this read but is not a committed guard.",
+    "evidence": "Every load-bearing claim was reproduced independently in a scratch tree extracted at c01f5f4c3 (module __file__ /tmp/ctta-rc-verify/benchmarks/contour_tree_brute_force.py, cwd /tmp/ctta-rc-verify). Gate: 15 passed EXIT=0. Negative control: 1 failed, 14 passed EXIT=1, failing id test_single_field_difference_names_that_field[edge_valid]. Independent end-to-end check the committed suite does not carry: --write --fixtures certificate produced a real 98467-byte receipts.json over four certificate fixtures, each carrying all seven fields; comparing it to itself printed '0 mismatches' for all seven fields with exit 0, and toggling a single edge_valid entry in one fixture printed 'edge_valid: 1 mismatches' (all other fields 0) with exit 1. The docstring claims that a dropped fixture, or a field missing from one file, counts as a mismatch were also checked directly: a fixture present in only one file counts 1 mismatch in every field, and a field absent from one file counts 1 mismatch in exactly that field.",
+    "fit": "The comparator is delivered as a benchmark mode (--write/--compare) matching the followup's 'benchmark mode' phrasing and reuses the existing Fixture/build_contour_tree machinery rather than a parallel implementation. It is a smaller, well-targeted addition. Minor fit note: the negative-control toggle is read from the environment inside the production comparison path rather than injected in the test, so a stray CONTOUR_TREE_RECEIPT_SKIP in the environment would silently omit a field from a real base/head comparison.",
+    "goal_fidelity": "Every element of the requested deliverable is present and reproduces: seven-field comparison, one printed line per field with its mismatch count, and a nonzero exit on any mismatch. The reviewed manifest's evidence_inputs overstates the scope of the followup it resolves, claiming item (1) of f-ctta-sweep-durability-and-placement 'is met' when only the comparator half of item (1) is delivered; the performance negative control half of the same item is not committed here. That is a writeback-accuracy issue, not a missing deliverable, so it lowers goal_fidelity by two rather than failing the node.",
+    "scope_discipline": "Changes are confined to the two granted repository paths, the diff is 255 lines, and no plan, sprint, index or out-of-scope file was touched. Work was read-only over the reviewed commit; nothing was written into the repo (the review's writes are the two review-record paths only)."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: f7f823c667f9b65740a04d5de40d991e60a2cd4e\nREVIEWED_HEAD_SHA: c01f5f4c359de3f9e09cbefe6c8a0cc027637b23\nVERDICT: pass-with-follow-ons; seven-field receipt comparator delivered and reproduced.\nSCORE goal_fidelity: 18\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 18\nTOTAL: 91\nADDED_FAILURES: measured 0 (both suite arms completed, 8 passed each, no failing ids).",
+  "review_base_sha": "1c48ad34ef1d38807c6bb9ef0e5f9a33d33deeb6",
+  "review_run_id": "r-20261002T235408135394-review-of-ctta-sweep-receipt-comparator",
+  "reviewed_base_sha": "f7f823c667f9b65740a04d5de40d991e60a2cd4e",
+  "reviewed_commit": "c01f5f4c3",
+  "reviewed_head_sha": "c01f5f4c359de3f9e09cbefe6c8a0cc027637b23",
+  "reviewed_revision": "c01f5f4c359de3f9e09cbefe6c8a0cc027637b23",
+  "reviewed_run_id": "r-20261002T233146735382-ctta-sweep-receipt-comparator",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-sweep-receipt-comparator",
+  "reviewer_node": "review-of-ctta-sweep-receipt-comparator",
+  "reviewer_run_id": "r-20261002T235408135394-review-of-ctta-sweep-receipt-comparator",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "s2",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T00:07:00Z",
+  "total": 91,
+  "verdict": "pass-with-follow-ons"
+}

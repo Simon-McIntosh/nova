@@ -1,0 +1,71 @@
+{
+  "absent": [
+    "a completed 17-file baseline at f9ac69f68c9cae7dd66b936c819becbdd7de89ef using the same command as job 1275947"
+  ],
+  "absent_items": [
+    {
+      "disposition": "required to validate the claimed 165-pass, 2-failure base and the base-to-after delta; the cited log ran at 2e38dc87, not f9ac69f68",
+      "item": "same-revision 17-file baseline"
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "4a3837c08ac00adc56f9a88eadce8ce1d25b03ff",
+    "a9fe994a5f4a949f2fc36ba831e8d64c7cd1b1e2",
+    "3a9a99baa9af0c2f75fd204599ad9f2b558b38c7"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T15:52:37.762794+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T140423155727-pta-attribute-stale-contracts/manifest.md",
+      "line": "17",
+      "severity": "high",
+      "text": "baseline_suite declares revision f9ac69f68, completed=true, 165 passed and two failures, but log_path opens with revision=2e38dc87 and reports 163 passed, four failures and three skips. The derivation says f9ac differs only by the secondary-saddle seam and coil-null repin, while git diff 2e38dc87..f9ac69f68 spans 119 paths, including nova/equilibrium/clip_quadrature.py and many files outside those two changes. The fresh two-test f9ac baseline proves the two owned failures, and job 1275947 proves the after head is green, but there is no completed same-command 17-file baseline at f9ac; the armed baseline receipt and the stated 165-to-167 delta are therefore invalid."
+    },
+    {
+      "file": "tests/test_plasma_cell_topology_read.py",
+      "line": "129",
+      "severity": "medium",
+      "text": "the repaired boundary-coordinate oracle now calls the production Topology.wall_anchor_data method with the same tensor surface used by the production read. This correctly updates the operand order and the historical pair independently supports the pin-stale verdict, but exact coordinate equality at this seam is now self-agreement: a future defect inside the surface-aware wall selector can move both actual and expected together. Preserve the historical attribution, but restore an independent selector reconstruction or a banked expected coordinate if this assertion is intended to remain an independent oracle."
+    }
+  ],
+  "item_aggregate": 8,
+  "item_verdicts": {
+    "diff": "read commits 4a3837c0, a9fe994a and 3a9a99ba and the full f9ac69f68..3a9a99ba range; four files changed, all inside the declared scope, and all three commit messages have conventional subjects plus explanatory bodies.",
+    "done_when": "PARTIAL: both owned tests pass, the negative control fails both, the after lane is 167 passed and 3 skipped, and both historical attributions are supported. The required focused-lane delta is not valid because its armed baseline names f9ac69f68 while citing a run at 2e38dc87 across a 119-path intervening range.",
+    "manifest": "FAIL on evidence identity only: commit and changed-path fields are complete, the negative_control_log is a bare openable path, and after_suite matches its log; baseline_suite is marked completed at a revision the cited log did not run.",
+    "mast_saddle_attribution": "PASS: 3d381ef8 passes and 68cfe15c first fails after refreshing the persisted operands. Direct blob inspection confirms the old selected point was a separately polished upper saddle near the old upper candidate, while the refreshed selected point equals the typed-census upper candidate; the upper branch is retained rather than replaced by the lower saddle.",
+    "negative_control": "PASS: negative-control.log begins with the declared mutation restoring both stale inputs, collects exactly the two owned tests, reproduces the 4.82899244e-15 m coordinate discrepancy and the old MAST coordinates, and exits 1.",
+    "raster_attribution": "PASS with an independence caveat: 09f5cc50 passes and merge 9f0692fb first fails; the production diff introduces surface evaluation at wall nodes before the quadratic contact selector. The repair adds no tolerance and restores exact equality by matching that operation order, but it shares the production wall_anchor_data method.",
+    "repinned_assertions": "PASS: both assertions name the responsible commit and mechanism in their failure text; the raster uses no widened tolerance and the saddle retains the pre-existing 5e-9 absolute tolerance while pinning the refreshed typed-census position.",
+    "write_paths": "PASS: the source commit changes only the two authorized tests and the two documentation commits change only the authorized plan and landed-evidence files; the target worktree is clean."
+  },
+  "justifications": {
+    "durability": "the three commits, historical pair logs, landing matrix, owned baseline/after logs, negative-control log and terminal after-suite log preserve the important evidence. Durability is reduced because the manifest presents a derived old-revision result as a completed f9ac baseline and the plan/evidence repeat the false claim that the 119-path range contains only two relevant changes.",
+    "evidence": "the last-pass/first-fail matrices are real revision-specific executions; the MAST bank blobs independently show the same upper branch moving from separately polished to typed-census coordinates; the negative control reproduces both defects; and job 1275947 has a complete headed 167-pass log. The missing same-command f9ac baseline prevents the claimed focused-lane delta from being accepted.",
+    "fit": "the repins are narrow, preserve enabled tests, name commits and mechanisms, avoid widening the raster tolerance, and correctly distinguish the same upper MAST branch from a candidate switch. Fit is reduced because the raster expected-coordinate path now calls the same production selector it is meant to check.",
+    "goal_fidelity": "both stale contracts are attributed to the correct first persisted changes with pin-stale verdicts, concrete coordinates and mechanisms; the owned gates and negative control behave exactly as required. Only the aggregate delta portion of the done-when remains unsupported.",
+    "scope_discipline": "all three commits stay inside the declared two-test and two-document scope, production code was read only, and unrelated coil-null or owning-plan work was not modified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: both contracts are correctly attributed pin-stale \u2014 raster first fails at 9f0692fb when tensor-spline wall samples precede the quadratic contact selector, and MAST first fails at 68cfe15c when the refreshed bank publishes the same upper branch at its typed-census position.\nVERDICT done_when: the two owned tests pass, the declared negative control fails both, and the after lane reports 167 passed and 3 skipped; the 17-file delta is not valid because no same-command baseline ran at f9ac69f68.\nVERDICT write_paths: all four changed files are authorized and the target worktree is clean.\nVERDICT manifest: commits, paths, negative-control path and after receipt are complete; baseline_suite is incorrectly armed as completed at f9ac while its log ran at 2e38dc87.\nVERDICT diff: read 4a3837c0, a9fe994a and 3a9a99ba; all have conventional subjects and explanatory bodies.\nCALL_SITES: none\nREVIEWED_REVISION: 3a9a99baa9af0c2f75fd204599ad9f2b558b38c7\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the commit-specific pin-stale verdicts, mechanisms, coordinates, owned gates and negative control satisfy the central goal; only the aggregate delta gate remains unsupported.\nSCORE evidence: 13\nJUSTIFICATION evidence: historical pairs, bank blobs, negative control and the green after lane are strong, but the declared f9ac baseline is an older 2e38 run projected across 119 changed paths.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the node changed exactly the two tests and two plan/evidence files it owned.\nSCORE durability: 15\nJUSTIFICATION durability: receipts and commits are extensive, but the manifest and durable documents misstate the identity and completeness of the baseline run.\nSCORE fit: 18\nJUSTIFICATION fit: narrow mechanism-named repins preserve exact raster equality and the same upper MAST branch; the raster coordinate check now shares the production wall selector and is no longer independent at that seam.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T140423155727-pta-attribute-stale-contracts/manifest.md:17 baseline_suite names f9ac69f68 and completed=true while its log names 2e38dc87; git diff between them spans 119 paths, so 165 passed and the stated delta are derived, not executed evidence.\nFINDING tests/test_plasma_cell_topology_read.py:129 the expected boundary coordinate now comes from the same production wall_anchor_data(surface=surface) method as the actual read, so exact coordinate equality is self-agreement at the selector seam even though the historical attribution itself is sound.",
+  "review_run_id": "r-20260922T155237762794-review-of-pta-attribute-stale-contracts",
+  "reviewed_base_sha": "f9ac69f68c9cae7dd66b936c819becbdd7de89ef",
+  "reviewed_revision": "3a9a99baa9af0c2f75fd204599ad9f2b558b38c7",
+  "reviewed_run_id": "r-20260922T140423155727-pta-attribute-stale-contracts",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s18-fable-20260922/pta-attribute-stale-contracts",
+  "reviewer_run_id": "r-20260922T155237762794-review-of-pta-attribute-stale-contracts",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T16:03:05.544903+00:00",
+  "total": 84
+}

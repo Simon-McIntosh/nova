@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T23:47:53.202Z",
+  "dispatched_at": "2026-10-05T23:43:13Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/constraint.py:489",
+      "id": "duplicate_owner-1",
+      "reason": "the section should extend the one owner (or factor the shared normalized-to-flux wedge) rather than ship a second implementation, which is the fork the item exists to prevent.",
+      "text": "BoundedExteriorFieldUnknown repeats CircuitCurrentUnknown's exact contract (physical_value = scale*normalized; flux_delta = prescribed_current_field.flux_delta(direction @ physical_value)): constraint.py:330-381 against constraint.py:563-625, with the bound ladder the only added behaviour, and \u00a72 never states why CircuitCurrentUnknown (constraint.py:330) or a shared base could not carry the bound",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/centroid-constrained-oracle-solve.html \u00a72",
+      "id": "interface_budget-1",
+      "reason": "against public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 the section must account in its own text for the surface it adds or fold the level term, which is also what the open followup f-cco-account-for-constraint-surface asks.",
+      "text": "\u00a72 introduces CurrentCentroidConstraint, BoundedExteriorFieldUnknown (constraint.py:489) and FluxLevelConstraint (constraint.py:993) as public definitions and adds the recorded exterior-field bound-refusal family, and its text names nothing retired or merged and gives no reason a third conforming CompensatingUnknown and a new refusal family cannot be avoided",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b71c7318df16d63665c95de35ebe4a721f876db5345d4648f4398378442ce02b",
+  "plan_slug": "centroid-constrained-oracle-solve",
+  "plan_version": 85,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T234300690244-plan-review-of-centroid-constrained-oracle-solve",
+  "reviewed_blob_sha": "7dd8666aee957d1b501462df4eebf3403615fc41",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one ConstraintPair (constraint.py:237) plus BoundedExteriorFieldUnknown (constraint.py:489) hide the direction selection, the bounded damped-step refusal ladder and the exterior response mapping behind physical_value/flux_delta, and the fixture's three-column family is reachable through a single pair value rather than a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 BoundedExteriorFieldUnknown (nova/equilibrium/constraint.py:489) re-implements the compensated-unknown wedge that CircuitCurrentUnknown (nova/equilibrium/constraint.py:330) already owns, and the plan does not say why the existing owner cannot be extended with the bound.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds public definitions and a refusal family without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 \u00a72 cites and the landed code extends the existing owners \u2014 the CompensatingUnknown/ConstraintPair interface in nova/equilibrium/constraint.py:159,237 and profile.current_moment_observation at nova/equilibrium/forward.py:1239, which already recovers within-cell first moments through recover_physical_first_moments at nova/equilibrium/observation.py:280 \u2014 so neither the centroid read nor the moment is rebuilt, and CurrentCentroidConstraint is a pre-existing functional already consumed by the labeller (nova/equilibrium/batched_labeller.py:443).",
+    "thin_wrapper": "pass \u2014 the fixture builders at scripts/analytic_oracle_fixtures/centroid_row.py:63,141,188 add the direction map, the analytic-state-derived tolerance and the seeded initial unknown, so they assemble rather than forward thinly to ConstraintPair; they extend the existing interface instead of wrapping it."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:49:34.505838+00:00"
+}

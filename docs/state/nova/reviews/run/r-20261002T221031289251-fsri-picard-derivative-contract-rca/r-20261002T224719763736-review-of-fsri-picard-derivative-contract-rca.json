@@ -1,0 +1,49 @@
+{
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest's baseline_suite and after_suite fields are empty, so no completed gate-log failure-id set difference exists; null is recorded rather than zero.",
+  "added_failure_ids": [],
+  "completed_at": "2026-10-02T22:55:34Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T22:47:46Z",
+  "evidence_inputs": {
+    "control": "The no-selection scalar control reports maximum disagreement 1.222666412557698e-12.",
+    "measurement_result": "Reverse and JVP agree at about -0.04295874785; the largest-step plasma-current finite-loop error is 11.313969220425736 and terminal-tangent error is 0.004480103884121076, with GMRES information 0 and residual 7.30565917006834e-19.",
+    "provenance_caveat": "The H200 receipt reports source revision e6aaf182..., but that revision lacks the invoked benchmark path; a committed-head rerun with a source digest is needed.",
+    "suite_delta": "Unmeasured, not zero: the reviewed run declares no completed baseline_suite or after_suite arm."
+  },
+  "failure_attribution": {},
+  "follow_ons": [
+    "Re-run H200 at the committed revision with a benchmark digest in the receipt.",
+    "Re-render uncropped labels and reconcile the untracked H200 raster.",
+    "Investigate the separate static moment/support derivative mismatch under a dedicated scope."
+  ],
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "Pass 86/100. The finite 80-step Picard diagnosis is supported on the measured conductor fixture, with a validated no-selection control and exact source-change scope. H200 receipt provenance is incomplete because its recorded base lacks the invoked committed driver; paired suite-delta arms are absent and the committed figure has cropped vertical labels.",
+  "review_run_id": "r-20261002T224719763736-review-of-fsri-picard-derivative-contract-rca",
+  "reviewed_base_sha": "e6aaf182eea7587a1ec71678bc830d899f701971",
+  "reviewed_head_sha": "2799b22a685daf18d96fdea06a4447f55de7cda9",
+  "reviewed_revision": "2799b22a685daf18d96fdea06a4447f55de7cda9",
+  "reviewed_run_id": "r-20261002T221031289251-fsri-picard-derivative-contract-rca",
+  "reviewer_node": "review-of-fsri-picard-derivative-contract-rca",
+  "reviewer_run_id": "r-20261002T224719763736-review-of-fsri-picard-derivative-contract-rca",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T22:50:46+00:00",
+  "total": 86,
+  "verdict": "pass"
+}

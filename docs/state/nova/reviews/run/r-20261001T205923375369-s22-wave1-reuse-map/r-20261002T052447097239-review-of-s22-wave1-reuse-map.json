@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run is a read-only investigation node, not an armed test node: its manifest carries no baseline_suite and no after_suite (both empty, confirmed in the reviewed run's classification.json status 'complete' and the manifest fields), and its write scope holds no test file. There is therefore no baseline/after suite arm pair from which added failures could arise, so added_failure_count is 0 and added_failure_ids is empty. The appropriate positive check for this node is instruction fidelity, not a pytest arm: this review reproduced the three nodes' named symbols and line numbers at the reviewed revision 252e9632 (see evidence justification) and reproduced the node 2 cited log's failure count, failure ids and absence of an EXIT= line.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/wave1-reuse-map.md: the reviewed deliverable (215 lines); three node sections, cross-cutting facts; verified against 252e9632",
+    "docs/state/nova/crew.json runs[1508] confirmed: gate 'passed' (line 202553) with gate_check.exit_status 1 (line 202556), the reviewed defect reproduced",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-codex/limited-touch/pytest-final.slurm.log: 3 ^FAILED lines, 0 ^EXIT= lines, ends '3 failed, 30 passed in 223.55s (0:03:43)'"
+  ],
+  "call_sites": [],
+  "commits_read": [],
+  "completed_at": "2026-10-02T05:40:39.253Z",
+  "dispatched_at": "2026-10-02T05:24:59Z",
+  "evidence_inputs": {
+    "node1_symbols": "nova/equilibrium/separatrix... nova/equilibrium/separatrix_clip.py at 252e9632: _SPLINE_BOUNDARY_SEGMENTS=128 at :54, def traced_polygon_vertex_capacity at :61, one-arc return at :78, multi-run capacity at :1325, overflow at :1326, receipt fields :242/:243/:245/:249; tests at tests/test_equilibrium_separatrix_clip.py:693/:699. Report's 'near line 1185' correctly identified as candidate assembly, not the capacity function.",
+    "node2_row": "docs/state/nova/crew.json (308005 lines): runs[1508] run_id r-20260918T201949355073-nia-limited-boundary-touches-wall-2; sha 8fdc71ef5f358399ec434827821192d34e402802 at :202544; gate 'passed' :202553; gate_check.exit_status 1 :202556; log_path :202557; follow_on_paths holds the three failing ids. The cited log exists and ends '3 failed, 30 passed' with 0 EXIT= lines. Reckon half: _require_gate_log_agrees (reckon/crew/promotion.py:1094, sole caller :5016) refuses only empty log / contradicting EXIT=<n> / command-never-ran, never verdict-vs-exit-status; no reckon verb amends a committed ledger row (claims.py amends write claims only).",
+    "node3_symbols": "nova/equilibrium/forward_operator.py at 252e9632: current_moments_and_observation at :3662 -> _support_partition :3664; _support_partition at :3319 discards _admitted at :3324, no require_qualified_axis; read at :3177 calls require_qualified_axis at :3185, topology_margin at :3174 likewise; require_qualified_axis at nova/equilibrium/topology.py:216 with tracer no-op; divergence test tests/test_fused_same_state_read.py:93-113 carries the documented try/except workaround. Edit site forward_operator.py is S21-owned.",
+    "reckon_citation_defect": "Cross-repo line numbers in the report are stale/unanchored (finding 1): reckoned at HEAD c47424bd the symbols sit at promotion.py:1094/:5016/:4421, cli.py:5213/:5503/:5659. Function and verb names in the report are correct."
+  },
+  "findings": [
+    {
+      "file": "docs/reports/nova/s22/wave1-reuse-map.md",
+      "line": "94",
+      "severity": "follow-on",
+      "text": "follow-on: the report cites the node 2 write path only in the reckon repository by bare line number with no reckon revision named, and those numbers do not resolve against reckon HEAD c47424bd this review read. The report gives promotion.py:1084 for _require_gate_log_agrees (actual :1094), its caller at :4855 (actual :5016) and _require_gate_check_precondition at :4275 (actual :4421); cli.py:5201/5491/5647 for crew complete/verify-gate/ledger (actual :5213/:5503/:5659); and claims.py:5/:54. The offsets are non-uniform across the three symbols, so a single stale revision cannot explain them and the citations cannot be reconstructed. The function and verb NAMES are correct and the qualitative claim (the guard refuses only an empty log, a contradicting EXIT=<n>, or a command-never-ran shape and never compares verdict to asserted exit status) is confirmed by reading _require_gate_log_agrees at promotion.py:1094-1163, so the guard is still locatable by name; a reader loses only the pointer. Recommend citing the reckon revision beside cross-repo line numbers, or dropping line numbers and keeping the symbol names."
+    }
+  ],
+  "follow_ons": [
+    "Finding 1: anchor the node 2 reckon citations to a named reckon revision, or drop the cross-repo line numbers and keep the symbol/verb names.",
+    "The reuse map's nova citations are exact at 252e9632 and can be consumed by the three nodes as delivered."
+  ],
+  "gate_arms_note": "Reviewed manifest baseline_suite: empty. Reviewed manifest after_suite: empty. The node's artifact is a written reuse map, not a code change; there is no diff to gate. This review's independent arm: structural parse of docs/state/nova/crew.json (runs[1507]/[1508] keys and lines) and line/symbol greps over nova/equilibrium/separatrix_clip.py, nova/equilibrium/forward_operator.py, nova/equilibrium/topology.py, nova/equilibrium/forward.py, benchmarks/solovev_certificate.py, tests/test_equilibrium_separatrix_clip.py and tests/test_fused... tests/test_fused_same_state_read.py at 252e9632, all matching the reviewed citations exactly, against reckon's promotion.py/cli.py/claims.py which did not.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "read-only investigation; no production call sites changed",
+    "diff": "No commits: read-only node. The deliverable is the report file outside the repository.",
+    "done_when": "The brief's what-to-report list (symbol file/line at HEAD, reuse candidates with fitness verdicts, exact write files with S21 flags, covering tests, node 2 nova/reckon split) is present for all three nodes in docs/reports/nova/s22/wave1-reuse-map.md.",
+    "goal": "The dispatched goal was a read-only prior-art reuse map serving three S22 wave 1 nodes; the report maps each of the three followups' symbols, reuse candidates, write files and tests, and splits node 2 by repository. Goal met.",
+    "manifest": "The reviewed manifest reads status complete, commits 'none: read-only investigate node', changed_paths the single report path, with a checkpoint noting a degraded first write rewritten from the brief; baseline_suite and after_suite are empty (this was an investigation node, not an armed test node), so there are no gate-suite arms.",
+    "write_paths": "No repository path changed; the sole deliverable is the out-of-repo report. The reviewed worktree is clean and at base."
+  },
+  "justifications": {
+    "durability": "The deliverable is a durable file on disk written at 2026-10-02 07:22, legible and complete (215 lines, three node sections plus cross-cutting facts). Its nova citations are anchored to the reviewed revision 252e9632, which it names, and every one this review checked reproduces exactly at that revision, so a reader can re-check them. The weakness is cross-repository: the reckon citations are cited by bare line number with no reckon revision named, and those numbers no longer resolve (finding 1), so the node 2 write path and CLI verbs cannot be checked from the report alone without grepping by function name. The report itself correctly names the plan citations it found stale.",
+    "evidence": "This review independently re-derived the load-bearing claims at the reviewed revision 252e9632 and they hold exactly. Node 1: _SPLINE_BOUNDARY_SEGMENTS=128 (separatrix_clip.py:54), def traced_polygon_vertex_capacity at :61, return _SPLINE_BOUNDARY_SEGMENTS + int(straight_vertex_capacity) at :78, the multi-run capacity traced_polygon_vertex_capacity(chord_capacity) at :1325 with overflow at :1326, _pack_traced_vertices called at :1207, receipt fields vertex_capacity :242 / refused_cell_count :243 / refused_cells :245 / assert_no_refusal :249, and the two named tests at tests/test_equilibrium_separatrix_clip.py:693 and :699 ('capacity == 128 + 30', two-run refusal) all present. Node 2: docs/state/nova/crew.json is 308005 lines, runs[1508] is run_id r-20260918T201949355073-nia-limited-boundary-touches-wall-2, the sha 8fdc71ef... is at :202544, gate 'passed' at :202553, gate_check.command prose at :202555, exit_status 1 at :202556, log_path at :202557, and follow_on_paths structurally holds the three failing ids; the cited log exists (10721 B), carries exactly 3 ^FAILED lines matching the named ids and 0 ^EXIT= lines, and ends '3 failed, 30 passed in 223.55s (0:03:43)'. Node 3: current_moments_and_loop... current_moments_and_observation at forward_operator.py:3662 calling _support_partition at :3664, _support_partition at :3319 discarding _admitted at :3324, read at :3177 calling require_qualified_axis at :3185 (and :3174 in topology_margin), require_qualified_axis at topology.py:216 with the tracer no-op, and the divergence test docstring at tests/test_fused_same_state_read.py:96-113 all verified. One evidence defect: the cross-repository reckon line numbers do not reproduce (see finding 1).",
+    "fit": "The node used the right investigative shape for a reuse map: read the committed followup bodies, grep/read the named subtrees, and answer per node with file:line, reuse candidates and one-line fitness, write files, S21 flags and tests. It reused the repo's own artifacts (the existing TracedCapacityRefusalError / refused_cell_count machinery, require_qualified_axis, the crew.json row and its cited log) rather than proposing new machinery, and it flagged the S21-owned modules (forward_operator.py, topology.py, forward.py) exactly where the brief asks. The node 2 nova/reckon split is drawn with the correct evidence (the row lives in nova's crew.json; the guard that failed to refuse is reckon's promotion.py _require_gate_log_agrees).",
+    "goal_fidelity": "The node did what the brief asks of a read-only reuse map: it read the three named followups in committed plan HTML (f-ecq-per-layout-vertex-capacity in docs/plans/exact-clip-moment-quadrature.html, f-fsa-wall-ledger-gate-integrity-full in docs/plans/figure-and-solver-audit.html, f-msc-fused-route-enforces-axis-qualification in docs/plans/millisecond-converged-solve.html) and for each returned the file and line of every named symbol at HEAD, capability-shaped reuse candidates with one-line fitness verdicts, exact write files with S21 conflicts flagged, covering tests, and the nova/reckon split for node 2. It also flagged the two stale plan citations (crew.json:201511 and followup-1 'near line 1185') rather than reproducing them. All three sections answer the brief; no section is missing.",
+    "scope_discipline": "The node is read-only: the reviewed worktree is clean and its HEAD equals base (git status --short empty; dot '__file__'/'git status' root empty), and the manifest states no repository file was written (commits: none). The sole deliverable is the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/wave1-reuse-map.md, outside every repository, and the search bounds named in the report (nova/, tests/, benchmarks/, scripts/, docs/, reckon/) match the brief's named subtrees. No path outside the declared write scope was touched."
+  },
+  "plan": "nova:S22",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node read the three named followups and mapped each one's symbols, reuse candidates, write files, S21 flags and tests; goal met.\nVERDICT done_when: the report docs/reports/nova/s22/wave1-reuse-map.md answers every item in the what-to-report list for all three nodes.\nVERDICT write_paths: no repository path changed; the reviewed worktree is clean and at base 252e9632.\nVERDICT manifest: status complete; commits none (read-only); baseline_suite and after_suite empty (no pytest arm).\nVERDICT diff: no commits; the deliverable is the out-of-repo report file.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all three node sections answer the brief; the two stale plan citations are flagged rather than repeated.\nSCORE evidence: 17\nJUSTIFICATION evidence: every nova symbol/line and the node 2 row+log reproduced exactly at 252e9632; the reviewed defect (gate passed, exit_status 1) re-derived from the row and the cited log (3 FAILED, 0 EXIT=); cross-repo reckon line numbers do not resolve.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: read-only, clean worktree at base, searches bounded to the named subtrees, sole deliverable outside every repository.\nSCORE durability: 17\nJUSTIFICATION durability: durable report; nova citations anchored to 252e9632 and reproduce; reckoned citations are unanchored and stale.\nSCORE fit: 18\nJUSTIFICATION fit: reuses existing nova machinery and the repo's own log/row evidence; no new machinery; S21 flags placed as the brief asks.\nFINDING docs/reports/nova/s22/wave1-reuse-map.md:94 follow-on: cross-repo reckon line numbers stale/unanchored (promotion.py:1084->:1094 and caller :4855->:5016; cli.py:5201->:5213); names correct so the guard is still locatable.\n",
+  "review_run_id": "r-20261002T052447097239-review-of-s22-wave1-reuse-map",
+  "reviewed_base_sha": "252e9632e8f64a79a9214fcf89f135e1c7a8db0b",
+  "reviewed_head_sha": "252e9632e8f64a79a9214fcf89f135e1c7a8db0b",
+  "reviewed_revision": "252e9632e8f64a79a9214fcf89f135e1c7a8db0b",
+  "reviewed_run_id": "r-20261001T205923375369-s22-wave1-reuse-map",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/s22-wave1-reuse-map",
+  "reviewer_node": "review-of-s22-wave1-reuse-map",
+  "reviewer_run_id": "r-20261002T052447097239-review-of-s22-wave1-reuse-map",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T07:40:00+02:00",
+  "total": 91,
+  "verdict": "pass"
+}

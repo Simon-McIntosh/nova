@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-03T11:58:41.817Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T11:17:37Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_recovery_ladder_census.py",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: test_module_under_test_is_the_imported_copy asserts only truthiness of fixed_point.__file__, which holds for any successful import and cannot fail on a regression; it adds no guard despite counting among the five passing cases."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111711852375-fsri-ladder-census-counts-every-entry/census-row.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the raw census run header names rev 419152362 while the committed report.json records census_commit 5721de656 and worktree_head 5721de656, so the committed per-solve report cannot be tied to the logged run that produced it."
+    },
+    {
+      "file": "docs/figures/forward-solver-route-integrity/fsri-ladder-census-counts-every-entry/report.md",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: all five per-solve execution counts are 0 while the solver telemetry records a promotion attempt, so the runtime instrument may undercount; already recorded by the worker under follow_ons."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's manifest.md records no baseline_suite and no after_suite field; its declared gate is the focused test tests/test_recovery_ladder_census.py. The base revision 8f475ae23620206e833b7f92347dccf64a7e46d3 does not contain that test file (git ls-tree returns nothing), so the base arm contributes no failing id; the head arm is green: head-test.log '5 passed in 4.63s' EXIT=0 and the reviewer's independent re-run review-after-arm.log '5 passed in 8.55s' EXIT=0. The set difference of failing ids is empty, so added_failure_count=0. Note the parser's read-time derivation from the reviewed manifest will report this count as unmeasured because that manifest names no gate-log fields.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 8f475ae23; four commits change the census, the new test, the evidence fragment and the one-row report, all inside scope, with no nova/ source edit.",
+    "done_when": "the done-when names tests/test_recovery_ladder_census.py passing under JAX_PLATFORMS=cpu and failing under the tree-copy negative control; the manifest records both, and the reviewer re-ran the focused test at the reviewed head (review-after-arm.log, 5 passed).",
+    "goal": "the reviewed node's goal is to make benchmarks/recovery_ladder_census.py count every promotion and recovery entry and fail on a renamed rung; the landed change enumerates {_backtracking_scores,_backtracked_promotion,_complete_newton_promotion,_rebuilt_model_promotion,_steepest_descent_promotion} by the predicate `_backtrack*` / `*_promotion` and refuses any disagreement with LADDER_ENTRIES.",
+    "manifest": "read; it states tests/test_recovery_ladder_census.py 5 passed (head-test.log) and the rename negative control 3 failed (negative-control.log), and records the runtime-count zero as follow_ons.",
+    "write_paths": "the declared paths are benchmarks/recovery_ladder_census.py, benchmarks/recovery_ladder_telemetry.py, tests/test_recovery_ladder_census.py and the two docs/ evidence and figure paths; every changed path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_recovery_ladder_census.py:30 deletes _rebuilt_model_promotion and requires counted_entries to raise naming it, a mutation the negative control confirms reddens three cases.",
+    "evidence": "the reviewed gate logs head-test.log and negative-control.log are recorded, but the committed report.json names census_commit 5721de656 while census-row.log ran at rev 419152362, so the report is not covered by a logged run.",
+    "fit": "benchmarks/recovery_ladder_census.py:48 names functions by what they do (enumerated_entries, counted_entries, wrapped_paths) with no version or plan identifiers.",
+    "goal_fidelity": "benchmarks/recovery_ladder_census.py:61 counted_entries refuses a module whose scan disagrees with LADDER_ENTRIES in either direction, and nova/equilibrium/fixed_point.py defines exactly the five enumerated rungs.",
+    "scope_discipline": "every path in the reviewed diff is inside the declared write paths and no nova/ source file is touched."
+  },
+  "node": "review-of-fsri-ladder-census-counts-every-entry",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to make benchmarks/recovery_ladder_census.py count every promotion and recovery entry and fail on a renamed rung; the landed change enumerates {_backtracking_scores,_backtracked_promotion,_complete_newton_promotion,_rebuilt_model_promotion,_steepest_descent_promotion} by the predicate `_backtrack*` / `*_promotion` and refuses any disagreement with LADDER_ENTRIES.\nVERDICT done_when: the done-when names tests/test_recovery_ladder_census.py passing under JAX_PLATFORMS=cpu and failing under the tree-copy negative control; the manifest records both, and the reviewer re-ran the focused test at the reviewed head (review-after-arm.log, 5 passed).\nVERDICT write_paths: the declared paths are benchmarks/recovery_ladder_census.py, benchmarks/recovery_ladder_telemetry.py, tests/test_recovery_ladder_census.py and the two docs/ evidence and figure paths; every changed path in the diff is inside them.\nVERDICT manifest: read; it states tests/test_recovery_ladder_census.py 5 passed (head-test.log) and the rename negative control 3 failed (negative-control.log), and records the runtime-count zero as follow_ons.\nVERDICT diff: read commit by commit against base 8f475ae23; four commits change the census, the new test, the evidence fragment and the one-row report, all inside scope, with no nova/ source edit.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/recovery_ladder_census.py:61 counted_entries refuses a module whose scan disagrees with LADDER_ENTRIES in either direction, and nova/equilibrium/fixed_point.py defines exactly the five enumerated rungs.\nSCORE evidence: 17\nJUSTIFICATION evidence: the reviewed gate logs head-test.log and negative-control.log are recorded, but the committed report.json names census_commit 5721de656 while census-row.log ran at rev 419152362, so the report is not covered by a logged run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the reviewed diff is inside the declared write paths and no nova/ source file is touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_recovery_ladder_census.py:30 deletes _rebuilt_model_promotion and requires counted_entries to raise naming it, a mutation the negative control confirms reddens three cases.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/recovery_ladder_census.py:48 names functions by what they do (enumerated_entries, counted_entries, wrapped_paths) with no version or plan identifiers.\nFINDING tests/test_recovery_ladder_census.py:14 follow-on: test_module_under_test_is_the_imported_copy asserts only truthiness of fixed_point.__file__, which holds for any successful import and cannot fail on a regression; it adds no guard despite counting among the five passing cases.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T111711852375-fsri-ladder-census-counts-every-entry/census-row.log:1 follow-on: the raw census run header names rev 419152362 while the committed report.json records census_commit 5721de656 and worktree_head 5721de656, so the committed per-solve report cannot be tied to the logged run that produced it.\nFINDING docs/figures/forward-solver-route-integrity/fsri-ladder-census-counts-every-entry/report.md:28 follow-on: all five per-solve execution counts are 0 while the solver telemetry records a promotion attempt, so the runtime instrument may undercount; already recorded by the worker under follow_ons.\n",
+  "review_base_sha": "a09500c32e6a1651bb7aebdcc706a9ca9322cf6c",
+  "review_run_id": "legacy-d6e6168401cf",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "8f475ae23620206e833b7f92347dccf64a7e46d3",
+  "reviewed_commit": "a90d04c14b54a55eabce135cfbbcc3cb87a13a5c",
+  "reviewed_head_sha": "a90d04c14b54a55eabce135cfbbcc3cb87a13a5c",
+  "reviewed_run_id": "r-20261003T111711852375-fsri-ladder-census-counts-every-entry",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-ladder-census-counts-every-entry",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T12:07:33Z",
+  "total": 93
+}

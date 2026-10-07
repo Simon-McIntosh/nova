@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T17:18:38.676Z",
+  "dispatched_at": "2026-10-05T17:13:43Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:2619",
+      "id": "reuse_search-1",
+      "reason": "the design's \"Implement a fixed-capacity `lax.scan` state machine\" reads as new work, so the plan's \u00a75 scope and the design's edit/return language imply building a kernel that already exists; citing it changes whether \u00a75 builds or relocates, and corrects a false prior-art statement.",
+      "text": "\u00a75 asks to \"implement\" Newton-GMRES at \"one call site served from a `lax.scan`\" that \"traces under `jax.jit` and `jax.vmap`\" with \"one line search\", but the plan's reuse map cites only `operator_request_body`'s \"single-site pattern\" and never the existing single-site GMRES kernel \u2014 `_single_site_krylov` (fixed_point.py:2619), `_krylov_machine` (:2216), `_serve_krylov_stream` (:2394), `_krylov_outputs` (:2371), and the Gram-Schmidt/lstsq helpers, ~613 lines at fixed_point.py:2088\u20132700 \u2014 nor the existing Armijo backtracking search (`_steepest_descent_promotion`, fixed_point.py:1672), which already provide exactly the \"one call site, jit/vmap, one line search\" behaviour \u00a75 specifies; and it misnames the location of the single-site pattern, which lives in the Krylov server, not in `operator_request_body` (a `jax.jit` body builder using `jax.jvp`, no `lax.scan`).",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:2619",
+      "id": "duplicate_owner-1",
+      "reason": "the plan must name `fixed_point.py`'s Krylov kernel as the mechanism to relocate into `solve.py` (or extend in place) rather than delete, which changes both \u00a75's build and \u00a76's deletion list, and prevents a duplicate kernel being written beside the one it replaces.",
+      "text": "`solve.fixed_point` would duplicate the GMRES/line-search machinery whose owner is `fixed_point.py`, while \u00a76 states \"`fixed_point.py`, `reduced_newton.py` and the solver and booking authority in `forward_operator.py` are deleted, with geometry and polynomial helpers kept as private dependencies\" \u2014 but a single-site GMRES kernel with its custom `vmap` batching rule (`_single_site_krylov`'s `stream.def_vmap`, :2619\u20132687) is solver infrastructure, not a geometry or polynomial helper, so the plan deletes the owner of machinery the new solver must still contain. `_single_site_krylov` is live on the production route (called from `_qualified_krylov_step`, fixed_point.py:2715), so the deletion clause removes used code, not dead code.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e87020c2e0dd0538e2b2a5f10ec36d64b13bfc0580b237b181901f84f966d820",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 21,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T17:20:00.007110+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T17:19:59.512698+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T171330897153-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "149269459e012ad01081ed4af36a4677d33e4e1c",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 each of the four signatures hides substantial behaviour behind one function (contour-tree read over wall-clipped hex cells, sub-cell booking, the composed map with its tangent, and a fixed-point Krylov solve), and the design's operand/result table keeps the machinery behind the interface rather than beside it.",
+    "duplicate_owner": "a finding \u2014 `solve.fixed_point` duplicates GMRES and line-search machinery whose owner is `nova/equilibrium/fixed_point.py`, and \u00a76 deletes that owner while \u00a75 still needs it.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72\u2013\u00a75 each name in their own text the mechanism they replace (`Topology.read`/`read_with_connectivity`; `clipped_support_current_moments` and the `forward_operator.py` support partition; the map `ForwardFluxOperator` performs; `newton_krylov`/`picard`/`operator_request_body`), and \u00a75 names the remaining refusal machinery it does not carry and defers its deletion to \u00a76.",
+    "reuse_search": "a finding \u2014 the design's source inventory (17 null-role + 23 region-role files, each bound to a destination) is a genuine reuse map and correctly identifies the null/region sprawl, but it omits the solver kernel, so \u00a75 proposes Newton-GMRES without citing the existing single-site GMRES implementation in `fixed_point.py`.",
+    "thin_wrapper": "pass \u2014 no proposed module is a pass-through: `current.book` absorbs the support partition out of `forward_operator.py` as well as the quadrature out of `clip_quadrature.py`, `gs.apply` replaces the map `ForwardFluxOperator` performs rather than delegating to it, and `topology.read` replaces `Topology.read`/`read_with_connectivity` in place."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T17:19:59.003469+00:00"
+}

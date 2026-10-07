@@ -1,0 +1,102 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Zero added: base suite 0677e2308 passed 84/0 (importer-base.log, EXIT=0) and head suite 4355ebce passed 86/0 (importer-after.log, EXIT=0); the two extra tests are test_filepath.py::test_repository_relative_resolves_against_its_own_root and ::test_repository_relative_prefers_the_nearest_repository_root, so the head-minus-base failing-id set is empty.",
+  "blocking_finding_count": 0,
+  "call_site_count": 12,
+  "call_sites": [
+    "nova/database/filepath.py:62:repository_relative (sole definition)",
+    "benchmarks/sol_ledger_current_census.py:479,480,496",
+    "benchmarks/shafranov_pair_receipt.py:538,1134,1151",
+    "benchmarks/shafranov_combination_discriminator.py:952,960,1066,1074",
+    "docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:426"
+  ],
+  "completed_at": "2026-10-05T19:58:28.646Z",
+  "dispatched_at": "2026-10-05T19:42:58Z",
+  "findings": [
+    {
+      "file": "benchmarks/shafranov_pair_receipt.py",
+      "line": "1134",
+      "severity": "follow-on",
+      "text": "follow-on: the projection call sites at benchmarks/shafranov_pair_receipt.py:1134 (filesystem_path) and :1151 (vector_filesystem_path) record through repository_relative, but test_render_route_records_relative_paths_shafranov_pair drives render_row_panels (row figure at :538) only, and the flux-function-fit receipt they write is under none of the four scanned directories; reverting either line to str(path) leaves every test green and the next projection render would rewrite an absolute path undetected."
+    }
+  ],
+  "follow_on_finding_count": 1,
+  "gate_logs": {
+    "base": {
+      "completed": true,
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/importer-base.log",
+      "revision": "0677e23086b739bc5c16684b5c6485cab2ba5bac"
+    },
+    "head": {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-one-project-relative-helper /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_render_receipt_paths.py tests/test_filepath.py",
+      "completed": true,
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/gate-head.log",
+      "revision": "4355ebce34d5e4a190e26c7d795be08caf0e04ff"
+    },
+    "review_rerun": {
+      "command": "JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-one-project-relative-helper /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_render_receipt_paths.py tests/test_filepath.py",
+      "completed": true,
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T194243336004-review-of-fsa-one-project-relative-helper/review-gate-head.log",
+      "revision": "45dfb49503d9175a4b940148121f0ebbfb3e6f79"
+    }
+  },
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified 12 repository_relative call sites across the four drivers plus the sole definition; base carried four verbatim copies at the spec's named lines and two relative_carrier_evidence copies.",
+    "diff": "Read commit by commit against base 0677e2308; 4355ebce carries the refactor, 45dfb495 adds only the landing fragment, nine files total.",
+    "done_when": "All three spec parts delivered and verified: single owner, render-route tests per driver into a git-marked temporary root, and the preflight rewrite with the scan exclusion removed.",
+    "goal": "Give the repository-relative path helper one owner in nova.database.filepath and prove it on the render routes; the four copies and the duplicate carrier helper are consolidated and the render routes record relative paths.",
+    "manifest": "Read; it records gate 38 passed/3 skipped EXIT=0, red negative control EXIT=1, importer arms base 84/after 86 zero added, and names gate-head.log, negative-control.log, importer-base.log, importer-after.log.",
+    "write_paths": "The manifest declares the four drivers, preflight receipt, filepath.py, the two test files and the landing fragment; every path in the nine-file diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_render_receipt_paths.py now runs each driver's solve-free render route into a git-marked temporary directory and asserts the written receipt records relative, non-absolute paths -- closing the gap the earlier sibling review raised. test_filepath.py adds two unit tests, one pinning the nearest-root preference. Residual: the pair driver's projection call sites (benchmarks/shafranov_pair_receipt.py:1134 and :1151) are relativised but exercised by neither the render-route test nor the four-directory scan.",
+    "evidence": "The named gate is logged with a receipt header at gate-head.log (38 passed, 3 skipped, EXIT=0); this review independently re-ran the exact gate at head 45dfb495 and reproduced 38 passed/3 skipped EXIT=0 in 539.40s (review-gate-head.log), leaving the reviewed tree clean. The declared negative control reddens test_render_route_records_relative_paths_sol_ledger with EXIT=1. Importer arms are base 84 passed and after 86 passed, zero added failures.",
+    "fit": "repository_relative sits in nova.database.filepath beside FilePath, takes str|os.PathLike and returns str, and its docstring states the git-root search and the absolute fallback; relative_carrier_evidence stays with the driver the sibling already imports for it, with the reason in its docstring; measure.render gained an output parameter defaulting to OUTPUT; no plan/ticket identifiers or AI attribution.",
+    "goal_fidelity": "All three spec parts delivered and independently re-derived: base 0677e2308 defines repository_relative four times and relative_carrier_evidence twice; head 45dfb495 defines each once with the drivers importing them; preflight-receipt.json changes only path-bearing string leaves and no .reckon-worktrees path remains.",
+    "reuse": "Four verbatim copies of repository_relative and two of relative_carrier_evidence collapse to a single owner each, removing four drift surfaces. The only new duplication is small: measure.render re-emits the census._strict/indent=2/allow_nan=False serialisation inline instead of sharing a destination-parameterised writer.",
+    "scope_discipline": "git diff 0677e2308..45dfb495 touches exactly nine files, every one inside the manifest's declared write paths; no plan edit, no push, no committed figure re-rendered."
+  },
+  "limitations": [
+    "The Shafranov pair driver's projection render routes (benchmarks/shafranov_pair_receipt.py:1134 and :1151) record repository_relative paths but are exercised by neither test_render_receipt_paths.py nor the four-directory scan, whose outputs (flux-function-fit) lie outside the scanned directories.",
+    "Other benchmark drivers still assign filesystem_path from str(...) (e.g. benchmarks/centroid_constrained_fixture_receipt.py:1048, benchmarks/diiid_forward_gs_match.py:4999, benchmarks/exact_clip_memory_scaling.py:318); these are pre-existing, outside the node's declared write scope, and not required by the spec."
+  ],
+  "node": "review-of-fsa-one-project-relative-helper",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node gave the repository-relative path helper one owner in nova.database.filepath and proved it on the render routes; base 0677e2308 defined repository_relative verbatim four times and relative_carrier_evidence twice, and head 45dfb495 defines each once with the drivers importing them.\nVERDICT done_when: The three spec parts are met: (1) one public helper at nova/database/filepath.py:62 imported by all four drivers, with relative_carrier_evidence owned at benchmarks/shafranov_pair_receipt.py:71; (2) tests/test_render_receipt_paths.py runs each driver's solve-free render route into a .git-marked temporary directory and asserts the written receipt's paths are relative; (3) preflight-receipt.json rewritten to repository-relative with only path-bearing leaves changed and the scan exclusion removed.\nVERDICT write_paths: The diff touches only the manifest's declared write paths; no plan edit, no committed figure re-rendered.\nVERDICT manifest: Read; gate 38 passed/3 skipped EXIT=0, negative control red EXIT=1, importer arms base 84/after 86 zero added, all named log paths present.\nVERDICT diff: Read commit by commit against base 0677e2308; 4355ebce is the refactor, 45dfb495 adds only the landing fragment, nine files total.\nCALL_SITES: nova/database/filepath.py:62 (sole repository_relative definition), benchmarks/sol_ledger_current_census.py:479,480,496, benchmarks/shafranov_pair_receipt.py:538,1134,1151, benchmarks/shafranov_combination_discriminator.py:952,960,1066,1074, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:426\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: All three spec parts are delivered and independently re-derived. Base 0677e2308 defines repository_relative verbatim four times (benchmarks/sol_ledger_current_census.py:49, benchmarks/shafranov_pair_receipt.py:70, benchmarks/shafranov_combination_discriminator.py:93, docs/figures/cut-cell-current-attribution/outboard-hole/measure.py:31) and relative_carrier_evidence twice (pair:92, discriminator:115); head 45dfb495 defines repository_relative once at nova/database/filepath.py:62, the four drivers import it, and relative_carrier_evidence has one owner at pair:71 with the discriminator importing it. preflight-receipt.json changes only path-bearing string leaves (verified key-by-key: three processes' command[1]/command[7]/log_path plus submitted_script) and no .reckon-worktrees path remains.\nSCORE evidence: 19\nJUSTIFICATION evidence: The named gate is logged with a receipt header (revision 4355ebce, tree, module, command, cwd) at gate-head.log (38 passed, 3 skipped, EXIT=0); this review independently re-ran the exact gate at head 45dfb495 and reproduced 38 passed/3 skipped EXIT=0 in 539.40s (review-gate-head.log), leaving the reviewed tree clean. The declared negative control reverts the sol-ledger png call site (repository_relative(output) -> str(output)) and reddens test_render_route_records_relative_paths_sol_ledger with EXIT=1 (negative-control.log). Importer arms are base 84 passed and after 86 passed, zero added failures, both EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 0677e2308..45dfb495 touches exactly nine files, every one inside the manifest's declared write paths (four drivers, preflight receipt, nova/database/filepath.py, tests/test_filepath.py, tests/test_render_receipt_paths.py, and the landing fragment); no plan edit, no push, no committed figure re-rendered.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_render_receipt_paths.py now actually runs each driver's solve-free render route into a git-marked temporary directory and asserts the written receipt records relative, non-absolute paths -- closing the exact gap the earlier sibling review raised. test_filepath.py adds two unit tests, one pinning the nearest-root preference. The residual: the Shafranov pair driver's projection call sites (benchmarks/shafranov_pair_receipt.py:1134 and :1151) are relativised but exercised by neither the render-route test (which drives render_row_panels, writing the row figure at :538) nor the four-directory scan, so reverting either leaves every test green.\nSCORE fit: 18\nJUSTIFICATION fit: repository_relative sits in nova.database.filepath beside FilePath, takes str|os.PathLike and returns str, and its docstring states the git-root search and the absolute fallback; relative_carrier_evidence stays with the driver the sibling already imports for it, with the reason in its docstring; measure.render gained an output parameter defaulting to OUTPUT so the committed route is unchanged; no plan/ticket identifiers or AI attribution. The one nit is measure.render inlining _write's body rather than parameterising _write's destination.\nSCORE reuse: 19\nJUSTIFICATION reuse: Four verbatim copies of repository_relative and two of relative_carrier_evidence collapse to a single owner each, a direct reduction of duplicated capability that removes four drift surfaces. The only new duplication is small: measure.render re-emits the census._strict/indent=2/allow_nan=False serialisation inline instead of sharing a destination-parameterised writer.\nFINDING benchmarks/shafranov_pair_receipt.py:1134 follow-on: the projection call sites at benchmarks/shafranov_pair_receipt.py:1134 (filesystem_path) and :1151 (vector_filesystem_path) record through repository_relative, but test_render_route_records_relative_paths_shafranov_pair drives render_row_panels (row figure at :538) only, and the flux-function-fit receipt they write is under none of the four scanned directories; reverting either line to str(path) leaves every test green and the next projection render would rewrite an absolute path undetected.\nreviewed_base_sha: 0677e23086b739bc5c16684b5c6485cab2ba5bac\nreviewed_head_sha: 45dfb49503d9175a4b940148121f0ebbfb3e6f79\n",
+  "review_run_id": "r-20261005T194243336004-review-of-fsa-one-project-relative-helper",
+  "review_scope": "Committed single-owner path-helper delta over four drivers, its render-route tests and the preflight rewrite, against the reviewed node done-when; read-only apart from an independent re-run of the named gate, no re-render of committed figures and no solve.",
+  "reviewed_base_sha": "0677e23086b739bc5c16684b5c6485cab2ba5bac",
+  "reviewed_commits": [
+    "4355ebce34d5e4a190e26c7d795be08caf0e04ff",
+    "45dfb49503d9175a4b940148121f0ebbfb3e6f79"
+  ],
+  "reviewed_head_sha": "45dfb49503d9175a4b940148121f0ebbfb3e6f79",
+  "reviewed_run_id": "r-20261005T190533725591-fsa-one-project-relative-helper",
+  "reviewer": "review-of-fsa-one-project-relative-helper",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:59:00.000000+00:00",
+  "total": 113,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/gate-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/negative-control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/importer-base.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T190533725591-fsa-one-project-relative-helper/importer-after.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T194243336004-review-of-fsa-one-project-relative-helper/review-gate-head.log"
+  ]
+}

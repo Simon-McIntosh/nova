@@ -1,0 +1,49 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T18:58:11.969283+00:00",
+  "findings": [
+    {
+      "file": "docs/plans/figure-and-solver-audit.html",
+      "line": "351",
+      "text": "the fragment the fence mandates is duplicated in the evidence file (section id at line 2754, h2 id at line 3097), so the citation reaches the cut-cell audit rather than this record at #memory-scaling-figure-regeneration, and the link text names a third record"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "8c894a3ce adds the render entry point, receipt, test and regenerated figures; 2a7f85d38 appends the plan landing record (line 351) and the evidence section (line 3850); both bodies present",
+    "done_when": "reviewer re-ran the named gate on the committed tree in a scratch copy: 7 passed; points 25.47, 51.81, 70.41 GiB equal their receipt byte counts; the control reddens exactly the point check",
+    "goal": "read the prompt, the plan section and both commits; the scaling SVG and its PNG companion now come from the driver's render entry point reading base-memory.json, with no solve executed",
+    "manifest": "reviewed run's manifest: status complete, both shas, the nine changed paths, the gate command with its 7-of-7 result, and the bare negative-control path whose first line repeats the declared mutation",
+    "write_paths": "git diff 654844b88..2a7f85d38 touches only the nine files inside the six assigned paths; no concurrent path, no plan meta line, evidence-archive change is 44 added and 0 removed"
+  },
+  "justifications": {
+    "durability": "artifacts are committed (the newly ignored PNG staged explicitly), the figures reproduced byte-for-byte from the committed receipt in a second scratch tree, and both commits carry subjects with bodies",
+    "evidence": "in a scratch copy of the committed tree: both PNGs and render-receipt.json byte-identical, both SVGs identical after normalising dc:date and the matplotlib ids, gate 7 passed, control 1 failed 6 passed",
+    "fit": "the record answers the followup it names and states it does not close the section; the one deduction is the landing citation, whose link text names a different record than its anchor reaches (finding below)",
+    "goal_fidelity": "both figures route through the media stack (nova.media.ink for the scaling figure; nova.media.poloidal... see benchmarks/solovev_certificate.py:66-67) and the render receipt names its source receipt and its sha256",
+    "scope_discipline": "the diff is exactly the nine files under the assigned paths; no concurrent node's path appears, and the evidence-archive numstat reads 44 added, 0 removed"
+  },
+  "node": "review-of-fsa-regenerate-the-memory-scaling-figure",
+  "project": "nova",
+  "raw_text": "REVIEWED_REVISION: 2a7f85d38ba5e00dd4f097a6502e7a03b112a54b\nreviewed base 654844b88b31b9b7fe3a6c1a99f1d02c24f85b41 (the diff was taken against it)\nreviewed run r-20260922T183755100803-fsa-regenerate-the-memory-scaling-figure, role implement, reviewed by r-20260922T185811969283\n\nVERDICT goal: read the prompt, the plan section and both commits; the scaling SVG and its PNG companion now come from the driver's render entry point reading base-memory.json, with no solve executed\nVERDICT done_when: reviewer re-ran the named gate on the committed tree in a scratch copy: 7 passed; points 25.47, 51.81, 70.41 GiB equal their receipt byte counts; the control reddens exactly the point check\nVERDICT write_paths: git diff 654844b88..2a7f85d38 touches only the nine files inside the six assigned paths; no concurrent path, no plan meta line, evidence-archive change is 44 added and 0 removed\nVERDICT manifest: reviewed run's manifest: status complete, both shas, the nine changed paths, the gate command with its 7-of-7 result, and the bare negative-control path whose first line repeats the declared mutation\nVERDICT diff: 8c894a3ce adds the render entry point, receipt, test and regenerated figures; 2a7f85d38 appends the plan landing record (line 351) and the evidence section (line 3850); both bodies present\nCALL_SITES: none\n\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: both figures route through the media stack (nova.media.ink for the scaling figure; nova.media.poloidal... see benchmarks/solovev_certificate.py:66-67) and the render receipt names its source receipt and its sha256\nSCORE evidence: 20\nJUSTIFICATION evidence: in a scratch copy of the committed tree: both PNGs and render-receipt.json byte-identical, both SVGs identical after normalising dc:date and the matplotlib ids, gate 7 passed, control 1 failed 6 passed\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff is exactly the nine files under the assigned paths; no concurrent node's path appears, and the evidence-archive numstat reads 44 added, 0 removed\nSCORE durability: 20\nJUSTIFICATION durability: artifacts are committed (the newly ignored PNG staged explicitly), the figures reproduced byte-for-byte from the committed receipt in a second scratch tree, and both commits carry subjects with bodies\nSCORE fit: 19\nJUSTIFICATION fit: the record answers the followup it names and states it does not close the section; the one deduction is the landing citation, whose link text names a different record than its anchor reaches (finding below)\nFINDING docs/plans/figure-and-solver-audit.html:351 the fragment the fence mandates is duplicated in the evidence file (section id at line 2754, h2 id at line 3097), so the citation reaches the cut-cell audit rather than this record at #memory-scaling-figure-regeneration, and the link text names a third record",
+  "review_run_id": "r-20260922T185811969283-review-of-fsa-regenerate-the-memory-scaling-figure",
+  "reviewed_revision": "2a7f85d38ba5e00dd4f097a6502e7a03b112a54b",
+  "reviewed_run_id": "r-20260922T183755100803-fsa-regenerate-the-memory-scaling-figure",
+  "role": "review",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T20:14:17.680007+00:00",
+  "total": 99
+}

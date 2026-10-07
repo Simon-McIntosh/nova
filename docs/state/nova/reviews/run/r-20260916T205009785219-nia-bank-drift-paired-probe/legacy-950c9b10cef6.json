@@ -1,0 +1,55 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/plans/null-identification-authority.html",
+      "line": "25",
+      "text": "the commit edits the plan-version and plan-modified meta lines the dispatch forbids every worker to touch, which manufactures exactly the promotion-time merge conflict the brief names, at a cost that is real and avoidable for a one-line gain."
+    },
+    {
+      "file": "docs/evidence/archive/null-identification-authority-landed.html",
+      "line": "711",
+      "text": "the prose gives the current tree 469 compile lines while its own table at line 704 gives 468; both are reproducible counts of different markers (Compiling lines against finished XLA compilations, the difference being the eleventh jit(solve) the allocation killed), but one quantity stated twice with two values and no marker leaves a reader unable to tell which number the reuse claim rests on."
+    },
+    {
+      "file": "benchmarks/bank_drift_paired_probe.py",
+      "line": "528",
+      "text": "no committed test covers _merge's row-count contract at line 605 or its unpaired-arm path, so a regression that let a ten-row receipt read as complete would pass the repository green, and the only controls that ever exercised them live in /tmp."
+    },
+    {
+      "file": "docs/figures/null-identification-authority/bank-drift-probe/receipt.json",
+      "line": "274",
+      "text": "the receipt records its provenance as absolute paths inside the worker worktree, so source_receipts and right.root stop resolving once the worker worktree is removed; the committed copies under the arms/ directory survive, so the record is readable, but a reader must re-derive the path rather than follow it."
+    },
+    {
+      "file": "docs/evidence/archive/null-identification-authority-landed.html",
+      "line": "715",
+      "text": "this forward-solve evidence record carries no poloidal flux contour panel of the 21978/35 pure terminal states, which the repository plotting rules require of every such record; the paragraph names the plotting gap itself, so it is declared, but the converged producer state beside the non-converged current state is precisely the comparison the rule exists to show."
+    }
+  ],
+  "justifications": {
+    "durability": "benchmarks/bank_drift_paired_probe.py:528 has no committed test covering the merge's row-count contract at line 605 or the unpaired-arm path, so the only exercises of that guard are the two control harnesses under /tmp, which are outside the repository.",
+    "evidence": "receipt.json:475 records rows_present 10 with the two missing rows declared rather than silently absent, and every headline and compile number reproduces from the committed emissions and sweep logs independently of the manifest.",
+    "fit": "the driver follows the benchmarks/ idiom of argparse subcommands and typed helpers, and its names carry no plan or version label; the empty sentinel at benchmarks/bank_drift_paired_probe.py:164 is a deliberate readable string rather than a hidden constant.",
+    "goal_fidelity": "receipt.json:331 names partition_structure as the first differing stage on all ten paired arms and the 21978/35 pure pair reproduces the bank's own 3.86e-16 at fae50f15, but the twelve-row bank the goal names is covered for ten rows because the allocation expired on 22086/43 after the superseded job 1272411 had already shown the current tree's sweep to be compile-bound.",
+    "scope_discipline": "every path in all five commits (commit 5ed1dd3b e.g.) sits inside the declared write paths with nothing under nova/, but 903d5d49 edits the plan-version and plan-modified meta lines that the node's own dispatch says no worker may touch."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20260916T205009785219-nia-bank-drift-paired-probe, node nia-bank-drift-paired-probe, landed at commits 5ed1dd3b, 37fec904, f7364e82, 1b467745, 903d5d49 against base ef5504ea, read from the merged tree at 903d5d49.\n\nCHECK 1 \u2014 the receipt reproduces the manifest's headline. docs/figures/null-identification-authority/bank-drift-probe/receipt.json carries rows_present 10 of rows_expected 12, rows_missing 2, rows_unexpected 0 with first_differing_stage_counts {\"partition_structure\": 10}; all ten paired rows carry profile_support 5683f88ca97c076e on both sides; 21978/35 pure reads 3.857344474796854e-16 converged at fae50f15 against 0.0024506488565449 not converged at the current tree, and the arm emission arms/new-21978-35-pure.json carries termination_reason active_set_cycle_detected for it; the ratios span 0.7111111111111111 (21978/35 mixed) to 6353201982755.15 (21978/35 pure), matching the manifest's 0.711 to 6.35e12.\n\nCHECK 2 \u2014 the compile-cost finding is stated with its numbers and every number reproduces from the raw logs. The evidence record states ten jit(solve) compiles at 728.5 to 774.0 seconds each, 7551.2 of 7659.2 total compile seconds on the current tree against 723.1 seconds for the producer tree's whole sweep. I recomputed from the logs on independent markers: sweep-old.log holds 1068 lines of \"Finished XLA compilation of jit(...) in N sec\" totalling 723.1 s with a 35.1 s maximum (scan); sweep-new.log holds 468 such lines totalling 7659.2 s, of which the ten finished solve compiles total 7551.2 s (98.6 percent) with a 773.99 s maximum, and an eleventh \"Compiling jit(solve)\" line has no finished record, which is the allocation's cut mid-22086/43. The wall-clock rates 42 and 4.4 arms per hour reproduce from the documented sweeps of ~17 minutes for twelve arms and ~136 minutes for ten.\n\nCHECK 3 \u2014 partition_values reading the literal string empty on the producer tree is explained, not treated as a measured digest. benchmarks/bank_drift_paired_probe.py:164 emits the literal only when the flattened numeric leaf list is empty, and the producer emissions show why it is: the operator flattens to one opaque leaf (is_pytree false, leaf_count 1, PyTreeDef(*)) at fae50f15 while the current tree partitions the same operator class into 76 leaves, which the evidence record states. No row anywhere presents empty as a hash, and the receipt's structure digests are computed from a recorded summary rather than inferred from the sentinel.\n\nCHECK 4 \u2014 the five commits touch only the declared write paths. git show --name-only gives benchmarks/bank_drift_paired_probe.py for 5ed1dd3b, 37fec904, f7364e82 and 1b467745, and docs/evidence/archive/null-identification-authority-landed.html, ten arm receipts plus receipt.json under docs/figures/null-identification-authority/bank-drift-probe/arms, and docs/plans/null-identification-authority.html for 903d5d49. Nothing under nova/ appears in any of the five, and the accepted operand cache still hashes to 2c291a84ecc1022b7e11151991dc9284c207c8b456c68d60ba27cc521f66b904 as recorded at campaign start.\n\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: receipt.json:331 names partition_structure as the first differing stage on all ten paired arms and the 21978/35 pure pair reproduces the bank's own 3.86e-16 at fae50f15, but the twelve-row bank the goal names is covered for ten rows because the allocation expired on 22086/43 after the superseded job 1272411 had already shown the current tree's sweep to be compile-bound.\nSCORE evidence: 18\nJUSTIFICATION evidence: receipt.json:475 records rows_present 10 with the two missing rows declared rather than silently absent, and every headline and compile number reproduces from the committed emissions and sweep logs independently of the manifest.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every path in all five commits (commit 5ed1dd3b e.g.) sits inside the declared write paths with nothing under nova/, but 903d5d49 edits the plan-version and plan-modified meta lines that the node's own dispatch says no worker may touch.\nJUSTIFICATION durability: benchmarks/bank_drift_paired_probe.py:528 has no committed test covering the merge's row-count contract at line 605 or the unpaired-arm path, so the only exercises of that guard are the two control harnesses under /tmp, which are outside the repository.\nSCORE durability: 8\nSCORE fit: 18\nJUSTIFICATION fit: the driver follows the benchmarks/ idiom of argparse subcommands and typed helpers, and its names carry no plan or version label; the empty sentinel at benchmarks/bank_drift_paired_probe.py:164 is a deliberate readable string rather than a hidden constant.\n\nFINDING docs/plans/null-identification-authority.html:25 the commit edits the plan-version and plan-modified meta lines the dispatch forbids every worker to touch, which manufactures exactly the promotion-time merge conflict the brief names, at a cost that is real and avoidable for a one-line gain.\nFINDING docs/evidence/archive/null-identification-authority-landed.html:711 the prose gives the current tree 469 compile lines while its own table at line 704 gives 468; both are reproducible counts of different markers (Compiling lines against finished XLA compilations, the difference being the eleventh jit(solve) the allocation killed), but one quantity stated twice with two values and no marker leaves a reader unable to tell which number the reuse claim rests on.\nFINDING benchmarks/bank_drift_paired_probe.py:528 no committed test covers _merge's row-count contract at line 605 or its unpaired-arm path, so a regression that let a ten-row receipt read as complete would pass the repository green, and the only controls that ever exercised them live in /tmp.\nFINDING docs/figures/null-identification-authority/bank-drift-probe/receipt.json:274 the receipt records its provenance as absolute paths inside the worker worktree, so source_receipts and right.root stop resolving once the worker worktree is removed; the committed copies under the arms/ directory survive, so the record is readable, but a reader must re-derive the path rather than follow it.\nFINDING docs/evidence/archive/null-identification-authority-landed.html:715 this forward-solve evidence record carries no poloidal flux contour panel of the 21978/35 pure terminal states, which the repository plotting rules require of every such record; the paragraph names the plotting gap itself, so it is declared, but the converged producer state beside the non-converged current state is precisely the comparison the rule exists to show.",
+  "review_run_id": "legacy-950c9b10cef6",
+  "review_run_id_source": "derived",
+  "reviewed_run_id": "r-20260916T205009785219-nia-bank-drift-paired-probe",
+  "scores": {
+    "durability": 8,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-17T11:00:36.273457+00:00",
+  "total": 76
+}

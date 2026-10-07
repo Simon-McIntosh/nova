@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 119,
+  "call_sites": [
+    "nova/graphics/pyplot.py",
+    "nova/geometry/volume.py",
+    "nova/graphics/polyfill.py",
+    "nova/thermalhydralic/naka/database.py",
+    "nova/utilities/geom.py",
+    "nova/dataset/access.py",
+    "nova/equilibrium/solve_request.py",
+    "nova/equilibrium/stencil_nulls.py",
+    "nova/graphics/addtext.py",
+    "nova/scripts/render_misfit_figures.py"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T11:26:44.449504+00:00",
+  "findings": [
+    {
+      "file": "docs/figures/forward-solve-api/optional-extra-imports/negative-control.log",
+      "line": "1",
+      "text": "the negative control is a hand-authored transcript with no committed harness: the commit adds no script that produces this log, so a reader cannot re-run the mutation from the repository, only read four lines of prose; I reproduced the mechanism itself by loading the census's own catches_import_error and module_level_imports over a synthetic try/except-ImportError module and got guarded=True, then False for the except-ValueError mutation, so the claim is true but is not independently re-runnable from what is conveyed as evidence"
+    },
+    {
+      "file": "docs/figures/forward-solve-api/optional-extra-imports/census.log",
+      "line": "1",
+      "text": "the gate log's header records revision=4d51fba1a, the node's base, rather than the appraised head a9d01979a, so the log alone does not identify the content the census scanned; the manifest argues the two agree because nothing under nova/ changes between them and I closed the gap by re-running the manifest's command at head a9d01979a and obtaining the same 205-row finding set, so this is a labelling weakness rather than a false result"
+    }
+  ],
+  "item_aggregate": 205,
+  "item_verdicts": {
+    "call_sites": "the census reports 205 findings across 119 distinct modules under nova/, dominated by 100 jax imports and 36 matplotlib imports",
+    "diff": "read the single commit a9d01979a against its parent 4d51fba1a; it adds benchmarks/optional_extra_import_census.py (418 lines), the optional-extra-imports report set (report.md, report.json, census.log, negative-control.log), a 3-line plan comment under data-section s1, and a 48-line evidence anchor in docs/evidence/archive/forward-solve-api-landed.html",
+    "done_when": "the evidence fence names the script, its two outputs, the extra-only criterion, the try/except ImportError exclusion, the vedo control, the committed log and the untouched nova/; all present: benchmarks/optional_extra_import_census.py is committed and reads [project.dependencies] and [project.optional-dependencies] via tomllib, report.md and report.json exist, the vedo control is reported found and the script returns 1 when the control is missing, the log is committed beside the report, and the commit touches no path under nova/",
+    "goal": "the node goal is a report listing every nova core module that imports at module level a package declared only in an optional extra of pyproject.toml; I independently recomputed the census from pyproject.toml, importlib.metadata.packages_distributions and a fresh ast walk of nova/ at the appraised head a9d01979a and obtained an identical 205-row finding set with an empty two-way set difference, identical extras attribution, the same 197-runtime / 8-annotation split and the same 13 guarded exclusions, so the report is complete and not merely self-consistent",
+    "manifest": "read; it reports status complete with one commit, the census command and its counts, the negative_control_log path with a one-line note, and the base-versus-head revision disclosure under evidence_inputs",
+    "write_paths": "the manifest declares benchmarks/optional_extra_import_census.py, docs/figures/forward-solve-api/optional-extra-imports, docs/evidence/archive/forward-solve-api-landed.html, docs/figures/forward-solve-api and docs/plans/forward-solve-api.html; the single commit a9d01979a touches exactly 7 files, all inside those fence entries, and git show --name-only a9d01979a | grep -c '^nova/' returns 0"
+  },
+  "justifications": {
+    "durability": "the script is committed, deterministic given the tree and the installed environment, and re-running the manifest's command at the appraised head reproduced the exact finding set, so the deliverable is durable; the declared negative control is not committed as a harness, so its own claim survives only as a transcript even though I reproduced the mechanism with the script's primitives",
+    "evidence": "the census reproduces exactly at the appraised head a9d01979a; the positive control nova/geometry/section.py:8 vedo is a genuine unguarded module-level import present in the source at both revisions and the script exits nonzero at line 411 when the control is missing, so the control can fail; two weaknesses remain: the gate log's header names the node base revision rather than the appraised head, and the negative control has no committed harness",
+    "fit": "the census is ast-based and follows the repository's benchmark-script shape, no symbol or filename introduces a forbidden plan or ticket label, and the report set lives under the conventional docs/figures/<topic>/ path with no figure published because the census is naturally a table",
+    "goal_fidelity": "the report lists every unguarded module-level import of a package provided by an extra and by no core dependency, with module path, line, package and extras; my independent recomputation at head produced the same 205 rows with an empty diff in both directions and the positive control reproduced",
+    "scope_discipline": "the single commit touches exactly the seven declared paths and no path under nova/; the pre-solve and post-solve deliverables both sit inside the docs/ and benchmarks/ entries of the fence"
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is a report listing every nova core module that imports at module level a package declared only in an optional extra of pyproject.toml; I independently recomputed the census from pyproject.toml, importlib.metadata.packages_distributions and a fresh ast walk of nova/ at the appraised head a9d01979a and obtained an identical 205-row finding set with an empty two-way set difference, identical extras attribution, the same 197-runtime / 8-annotation split and the same 13 guarded exclusions, so the report is complete and not merely self-consistent\nVERDICT done_when: the evidence fence names the script, its two outputs, the extra-only criterion, the try/except ImportError exclusion, the vedo control, the committed log and the untouched nova/; all present: benchmarks/optional_extra_import_census.py is committed and reads [project.dependencies] and [project.optional-dependencies] via tomllib, report.md and report.json exist, the vedo control is reported found and the script returns 1 when the control is missing, the log is committed beside the report, and the commit touches no path under nova/\nVERDICT write_paths: the manifest declares benchmarks/optional_extra_import_census.py, docs/figures/forward-solve-api/optional-extra-imports, docs/evidence/archive/forward-solve-api-landed.html, docs/figures/forward-solve-api and docs/plans/forward-solve-api.html; the single commit a9d01979a touches exactly 7 files, all inside those fence entries, and git show --name-only a9d01979a | grep -c '^nova/' returns 0\nVERDICT manifest: read; it reports status complete with one commit, the census command and its counts, the negative_control_log path with a one-line note, and the base-versus-head revision disclosure under evidence_inputs\nVERDICT diff: read the single commit a9d01979a against its parent 4d51fba1a; it adds benchmarks/optional_extra_import_census.py (418 lines), the optional-extra-imports report set (report.md, report.json, census.log, negative-control.log), a 3-line plan comment under data-section s1, and a 48-line evidence anchor in docs/evidence/archive/forward-solve-api-landed.html\nCALL_SITES: nova/graphics/pyplot.py, nova/geometry/volume.py, nova/graphics/polyfill.py, nova/thermalhydralic/naka/database.py, nova/utilities/geom.py, nova/dataset/access.py, nova/equilibrium/solve_request.py, nova/equilibrium/stencil_nulls.py, nova/graphics/addtext.py, nova/scripts/render_misfit_figures.py\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: the report lists every unguarded module-level import of a package provided by an extra and by no core dependency, with module path, line, package and extras; my independent recomputation at head produced the same 205 rows with an empty diff in both directions and the positive control reproduced\nSCORE evidence: 17\nJUSTIFICATION evidence: the census reproduces exactly at the appraised head a9d01979a; the positive control nova/geometry/section.py:8 vedo is a genuine unguarded module-level import present in the source at both revisions and the script exits nonzero at line 411 when the control is missing, so the control can fail; two weaknesses remain: the gate log's header names the node base revision rather than the appraised head, and the negative control has no committed harness\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit touches exactly the seven declared paths and no path under nova/; the pre-solve and post-solve deliverables both sit inside the docs/ and benchmarks/ entries of the fence\nSCORE durability: 18\nJUSTIFICATION durability: the script is committed, deterministic given the tree and the installed environment, and re-running the manifest's command at the appraised head reproduced the exact finding set, so the deliverable is durable; the declared negative control is not committed as a harness, so its own claim survives only as a transcript even though I reproduced the mechanism with the script's primitives\nSCORE fit: 19\nJUSTIFICATION fit: the census is ast-based and follows the repository's benchmark-script shape, no symbol or filename introduces a forbidden plan or ticket label, and the report set lives under the conventional docs/figures/<topic>/ path with no figure published because the census is naturally a table\nFINDING docs/figures/forward-solve-api/optional-extra-imports/negative-control.log:1 the negative control is a hand-authored transcript with no committed harness: the commit adds no script that produces this log, so a reader cannot re-run the mutation from the repository, only read four lines of prose; I reproduced the mechanism itself by loading the census's own catches_import_error and module_level_imports over a synthetic try/except-ImportError module and got guarded=True, then False for the except-ValueError mutation, so the claim is true but is not independently re-runnable from what is conveyed as evidence\nFINDING docs/figures/forward-solve-api/optional-extra-imports/census.log:1 the gate log's header records revision=4d51fba1a, the node's base, rather than the appraised head a9d01979a, so the log alone does not identify the content the census scanned; the manifest argues the two agree because nothing under nova/ changes between them and I closed the gap by re-running the manifest's command at head a9d01979a and obtaining the same 205-row finding set, so this is a labelling weakness rather than a false result\n",
+  "review_run_id": "r-20260923T112644449504-review-of-fsapi-extras-census-local",
+  "reviewed_base_sha": "4d51fba1af1b1030f90830e63cf0f0ff19e48cab",
+  "reviewed_head_sha": "a9d01979af240ba7a3e252d5f74af857dede5595",
+  "reviewed_revision": "a9d01979af240ba7a3e252d5f74af857dede5595",
+  "reviewed_run_id": "r-20260923T101535967736-fsapi-core-modules-importing-optional-extras-census",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260923T112644449504-review-of-fsapi-extras-census-local",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T13:43:19+02:00",
+  "total": 94
+}

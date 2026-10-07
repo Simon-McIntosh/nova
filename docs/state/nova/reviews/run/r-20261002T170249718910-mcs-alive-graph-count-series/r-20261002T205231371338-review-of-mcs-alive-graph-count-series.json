@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Derived from the reviewed run's own baseline_suite and after_suite fields in its manifest.md, which are both empty (the reviewed change adds no product source or test, so no base/head pytest arm was armed). added_failures_from_gate_logs(None, None) returns unmeasured (count None, ids []), so the count is stored as unmeasured rather than as a measured zero.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "artifacts": [
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json (valid JSON; active verdict no_growth_observed, release_established false; summary initial 1, peak 1, growth_across_program_ladder 0, programs_compiled 20, alive_executable_graphs_after_drop 2, graphs_released_after_drop -1, disabled_control_maximum 0; withdrawn_post_hoc_analysis status withdrawn)",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/alive-graph-count.png (1400x700 RGBA; enabled arm flat at 1.0 over distinct programs, disabled dashed at 0.0; STALE post-drop point at 0.0, label 'after dropping 10 handles')",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py (407 lines; _parse_arm_output raises RuntimeError when no XLA count lies between before_drop and settled_reread)",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/run_measurement.sbatch (titan submit script)",
+    "docs/evidence/fragments/millisecond-converged-solve/mcs-alive-graph-count-series.html (aligned record; 44 added lines)",
+    "report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md (23-line report, aligned)"
+  ],
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "6b9fa435011793b757ec0506d7784be50ff1a005",
+    "82f26d0ac6984782693e7e48d06926a16664144f",
+    "217b698411ac47506df01d45d359be4a4950de58",
+    "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+    "37daba9a5d3f2594d182c27312967dd7556ae725",
+    "021e72442bdf0f4e81a807f9cabbe28c146931f8",
+    "993888eb40a9e6f103db2bf473087abe6311f1ff",
+    "0aac33c2dedddbe2b89139008f0e933af0766250"
+  ],
+  "completed_at": "2026-10-02T21:13:57.166Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T20:52:53Z",
+  "evidence_inputs": "Read 8cbd46f3f..0aac33c2d (eight commits; five files; numstat fragment +44, instrument +407, receipt +2604, run_measurement.sbatch +24, alive-graph-count.png binary); reviewed worktree clean, HEAD exactly 0aac33c2d. Verified job 1280456 stdout (titan-job-1280456.log): verdict no_growth_observed, initial_alive 1, final_alive 1, after_drop 2, released -1, disabled_control_maximum 0. Verified job 1280468 traceback (titan-job-1280468.log): RuntimeError from measure_cuda_graph_count.py:133, no XLA count between before_drop and settled_reread; raw enabled log lines 3683-3685 show before_drop then settled_reread (programs_executed_after_drop 0) with the next count at teardown, so no settled reading exists. Report/fragment/receipt now agree on the withdrawal, but the committed PNG was generated at 19:22 (commit 37daba9a) before the 0aac33c2d alignment and still plots the withdrawn 0 post-drop value. The reviewed manifest's baseline_suite and after_suite are both empty, so the added-failure count is unmeasured. Scope: the range touches only the declared cuda-graph-count directory and the declared fragment, plus the declared out-of-repo report.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/millisecond-converged-solve/cuda-graph-count/alive-graph-count.png",
+      "line": "1",
+      "severity": "blocking",
+      "text": "The committed line figure is stale and contradicts the aligned record: it draws the enabled arm's post-drop point at 0.0 with the label 'after dropping 10 handles' (the withdrawn a9c29fa7 post-hoc reading), while the active receipt (receipt.json:7, :2590) copies job 1280456's alive_executable_graphs_after_drop 2 and release_established false, and the current measure_cuda_graph_count.py:310-317 plots summary.alive_executable_graphs_after_drop (2) under the label 'settled reread after dropping N handles'. The alignment commit 0aac33c2d updated the receipt and fragment but not the figure, so the artifact a reader opens still shows the released value the node withdrew."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md",
+      "line": "15",
+      "severity": "blocking",
+      "text": "The report records that the fresh settled reread produced no count and that release is unmeasured, but it never states which of the two the count is -- the answer the done-when does name ('the report ... states which of the two it is, with the evidence that decides it'). With the ladder's flat count and release unmeasured, the posed alternative (per-executable-and-released, vs process-cumulative) is left open, so the node's terminal artifact carries no answer to its own goal."
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json",
+      "line": "2346",
+      "severity": "follow-on",
+      "text": "The command-buffers-disabled control arm recorded zero count observations (receipt.json:2346 onwards; count_events empty), so the reported disabled_control_maximum 0 is the absence of any lifecycle count, not a measured control reading. With XLA_FLAGS=--xla_gpu_enable_command_buffer= no executable graphs are created at all, so the arm cannot demonstrate that the instrument registers graphs (no positive control); the enabled arm's maximum 2 against the motivating failure's 1669 also reads as a regime mismatch the report does not address."
+    }
+  ],
+  "follow_ons": "The node's own follow-on stands: build an on-demand XLA alive-graph count query that fires after device synchronisation without graph dispatch, then run a fresh completed two-arm titan measurement; no production repair is chosen beforehand. Additions from this review: regenerate or drop the stale figure so it agrees with the aligned receipt; use a control arm that can register a non-zero reading (a positive control) rather than a command-buffer-disabled arm whose count is necessarily absent; and close the regime gap between the flat ladder (max 1-2) and the motivating failure's 1669 alive graphs before any verdict is drawn from the instrument.",
+  "gate_arms_note": "The reviewed node armed no pytest arms. Its own gate was a jq check of receipt.json plus a reckon audit-doc call (manifest tests field), which this review read rather than re-ran: the change is docs/evidence only and touches no product source under test. The measurement is titan job 1280456, whose stdout is titan-job-1280456.log; the refusal is titan job 1280468, whose traceback is titan-job-1280468.log.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production runtime call site reaches the change; the only entry is the benchmark instrument's own CLI under docs/figures/, so CALL_SITES is none.",
+    "diff": "Commit by commit against 8cbd46f3f: 6b9fa435 initial instrument; 82f26d0a/217b6984a/37daba9a series and logging; a9c29fa7 raw-log preservation; 021e72442 settled-reread guard; 993888eb and 0aac33c2d record repairs. All inside the declared scope, git diff --check clean.",
+    "done_when": "Read item by item: titan job 1280456 compiled the ladder and ran the disabled control; the series is persisted as receipt.json; the instrument and a line figure sit beside it; but the drop-and-reread step returned only churn (after-drop 2, released -1) and the fresh settled attempt refused (job 1280468, RuntimeError), so the report states no which-of-the-two answer.",
+    "goal": "The node's goal is to state whether the alive CUDA graph count accumulates per compiled executable and is released when an executable is dropped, or accumulates for the process; it measured a flat ladder (count 1 at program 1 and 1 at program 20, growth 0 across 20 distinct programs) and a withdrawn release reading, but its record still cannot state which of the two it is.",
+    "manifest": "The reviewed manifest reads status complete, eight commits ending 0aac33c2d, landing aligned to job 1280456; its tests are a receipt jq gate and an audit-doc call; baseline_suite and after_suite are both empty, so the added-failure count is unmeasured.",
+    "write_paths": "The reviewed node declared four write paths; the range 8cbd46f3f..0aac33c2d changes exactly the five files under docs/figures/millisecond-converged-solve/cuda-graph-count/ plus the fragment, every one inside them, and the out-of-repo report is declared; the reviewed worktree is clean."
+  },
+  "justifications": {
+    "durability": "The instrument gained a fail-closed settled-reread guard in 021e72442 and it demonstrably fired (job 1280468 exited with RuntimeError 'no XLA graph count was emitted between before_drop and the settled reread marker', titan-job-1280468.log), a real refusal rather than a passing suite. But no committed test pins the guard, the active verdict is carried from one named job rather than reproducible from the committed inputs, and the figure is not regenerated by the committed instrument on record, so the record can drift from its artifact.",
+    "evidence": "The 0aac33c2d repair closes the prior review's blocking contradiction -- the report body now presents no_growth_observed as active and marks the a9c29fa7 release reading withdrawn, and the receipt carries the same active verdict copied from job 1280456 -- and every headline number reconciles with the raw titan-job-1280456.log stdout (verdict no_growth_observed, initial 1, final 1, after_drop 2, released -1, disabled_control_maximum 0). Deductions: the committed figure still plots the withdrawn post-drop value (0.0), and the disabled control arm recorded zero count observations, so neither the reader-facing figure nor the control is consistent with the active reading.",
+    "fit": "The instrument and fragment are mechanism-worded with no plan label. The figure is 1400x700 with a direct label and a 3.0 pt / 2.4 pt line pair. Deductions: the committed figure is stale relative to the current _plot, carrying a withdrawn value and the pre-021e72442 label 'after dropping 10 handles' rather than the current 'settled reread after dropping N handles'.",
+    "goal_fidelity": "The node answers only half the posed question and its record now says so honestly: job 1280456 shows no growth (count 1 at program 1 and 1 at program 20, growth_across_program_ladder 0) across twenty distinct programs, which argues against per-program accumulation, but release-on-drop is unmeasured -- the job's own after-drop reading was 2 with graphs_released_after_drop -1, the fresh settled reread refused (titan-job-1280468.log), and the report states release remains unmeasured. The done-when names the explicit answer 'which of the two it is', and neither the report nor the fragment gives it. The ladder also never reaches the regime of the motivating failure (1669 alive graphs at 17 edits), peaking at 2, so it cannot explain that observation.",
+    "scope_discipline": "git diff --numstat 8cbd46f3f..0aac33c2d changes exactly five files (fragment +44, instrument +407, receipt +2604, run_measurement.sbatch +24, alive-graph-count.png binary), every one under docs/figures/millisecond-converged-solve/cuda-graph-count/ or the declared evidence fragment; the out-of-repo report is declared; the same reviewed worktree is clean; nothing outside the declared write paths changed."
+  },
+  "plan": "nova:millisecond-converged-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 8cbd46f3fdee9a61fbd48fb919cd7c0728d51567\nREVIEWED_HEAD_SHA: 0aac33c2dedddbe2b89139008f0e933af0766250\nVERDICT goal: state whether the alive CUDA graph count is per-executable-and-released or process-cumulative; the ladder is flat (growth 0 over 20 programs) but release is unmeasured, so the which-of-the-two answer is absent.\nVERDICT done_when: ladder job 1280456, a disabled control arm and a line figure are present, but the drop-and-reread step returned only churn (after-drop 2, released -1) and the settled attempt refused (job 1280468), so the report states no which-of-the-two answer.\nVERDICT write_paths: the range 8cbd46f3f..0aac33c2d changes five files, all inside the four declared write paths plus the declared report; the reviewed worktree is clean.\nVERDICT manifest: status complete, eight commits ending 0aac33c2d, baseline_suite and after_suite empty (added-failure count unmeasured).\nVERDICT diff: 6b9fa435 instrument; 82f26d0a/217b6984a/37daba9a series and logging; a9c29fa7 raw logs; 021e72442 settled-reread guard; 993888eb/0aac33c2d record repairs; git diff --check clean.\nCALL_SITES: none\nSCORE goal_fidelity: 11\nJUSTIFICATION goal_fidelity: The node answers only half the posed question and its record now says so honestly: job 1280456 shows no growth (count 1 at program 1 and 1 at program 20, growth_across_program_ladder 0) across twenty distinct programs, which argues against per-program accumulation, but release-on-drop is unmeasured -- the job's own after-drop reading was 2 with graphs_released_after_drop -1, the fresh settled reread refused (titan-job-1280468.log), and the report states release remains unmeasured. The done-when names the explicit answer 'which of the two it is', and neither the report nor the fragment gives it. The ladder also never reaches the regime of the motivating failure (1669 alive graphs at 17 edits), peaking at 2, so it cannot explain that observation.\nSCORE evidence: 13\nJUSTIFICATION evidence: The 0aac33c2d repair closes the prior review's blocking contradiction -- the report body now presents no_growth_observed as active and marks the a9c29fa7 release reading withdrawn, and the receipt carries the same active verdict copied from job 1280456 -- and every headline number reconciles with the raw titan-job-1280456.log stdout (verdict no_growth_observed, initial 1, final 1, after_drop 2, released -1, disabled_control_maximum 0). Deductions: the committed figure still plots the withdrawn post-drop value (0.0), and the disabled control arm recorded zero count observations, so neither the reader-facing figure nor the control is consistent with the active reading.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --numstat 8cbd46f3f..0aac33c2d changes exactly five files (fragment +44, instrument +407, receipt +2604, run_measurement.sbatch +24, alive-graph-count.png binary), every one under docs/figures/millisecond-converged-solve/cuda-graph-count/ or the declared evidence fragment; the out-of-repo report is declared; the same reviewed worktree is clean; nothing outside the declared write paths changed.\nSCORE durability: 12\nJUSTIFICATION durability: The instrument gained a fail-closed settled-reread guard in 021e72442 and it demonstrably fired (job 1280468 exited with RuntimeError 'no XLA graph count was emitted between before_drop and the settled reread marker', titan-job-1280468.log), a real refusal rather than a passing suite. But no committed test pins the guard, the active verdict is carried from one named job rather than reproducible from the committed inputs, and the figure is not regenerated by the committed instrument on record, so the record can drift from its artifact.\nSCORE fit: 15\nJUSTIFICATION fit: The instrument and fragment are mechanism-worded with no plan label. The figure is 1400x700 with a direct label and a 3.0 pt / 2.4 pt line pair. Deductions: the committed figure is stale relative to the current _plot, carrying a withdrawn value and the pre-021e72442 label 'after dropping 10 handles' rather than the current 'settled reread after dropping N handles'.\nFINDING docs/figures/millisecond-converged-solve/cuda-graph-count/alive-graph-count.png:1 blocking: The committed line figure is stale and contradicts the aligned record: it draws the enabled arm's post-drop point at 0.0 with the label 'after dropping 10 handles' (the withdrawn a9c29fa7 post-hoc reading), while the active receipt (receipt.json:7, :2590) copies job 1280456's alive_executable_graphs_after_drop 2 and release_established false, and the current measure_cuda_graph_count.py:310-317 plots summary.alive_executable_graphs_after_drop (2) under the label 'settled reread after dropping N handles'. The alignment commit 0aac33c2d updated the receipt and fragment but not the figure, so the artifact a reader opens still shows the released value the node withdrew.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md:15 blocking: The report records that the fresh settled reread produced no count and that release is unmeasured, but it never states which of the two the count is -- the answer the done-when does name ('the report ... states which of the two it is, with the evidence that decides it'). With the ladder's flat count and release unmeasured, the posed alternative (per-executable-and-released, vs process-cumulative) is left open, so the node's terminal artifact carries no answer to its own goal.\nFINDING docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json:2346 follow-on: The command-buffers-disabled control arm recorded zero count observations (receipt.json:2346 onwards; count_events empty), so the reported disabled_control_maximum 0 is the absence of any lifecycle count, not a measured control reading. With XLA_FLAGS=--xla_gpu_enable_command_buffer= no executable graphs are created at all, so the arm cannot demonstrate that the instrument registers graphs (no positive control); the enabled arm's maximum 2 against the motivating failure's 1669 also reads as a regime mismatch the report does not address.\n",
+  "review_base_sha": "d8d417286ec7e0c0ade25d03ef714a4cdeb34814",
+  "review_run_id": "r-20261002T205231371338-review-of-mcs-alive-graph-count-series",
+  "reviewed_base_sha": "8cbd46f3fdee9a61fbd48fb919cd7c0728d51567",
+  "reviewed_commit": "0aac33c2dedddbe2b89139008f0e933af0766250",
+  "reviewed_head_sha": "0aac33c2dedddbe2b89139008f0e933af0766250",
+  "reviewed_revision": "0aac33c2dedddbe2b89139008f0e933af0766250",
+  "reviewed_run_id": "r-20261002T170249718910-mcs-alive-graph-count-series",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series",
+  "reviewer_node": "review-of-mcs-alive-graph-count-series",
+  "reviewer_run_id": "r-20261002T205231371338-review-of-mcs-alive-graph-count-series",
+  "scores": {
+    "durability": 12,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 11,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T21:06:00+00:00",
+  "total": 71,
+  "verdict": "fail"
+}

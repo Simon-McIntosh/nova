@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's committed gate logs show one e644d69e base failure, tests/test_forward_solve_clip_mode_request.py::test_request_clip_mode_builds_each_operator_and_records_each_receipt, and zero failures in the ebf1a979 repaired arm. No failure is added at f91d746.",
+  "added_failure_ids": [],
+  "artifacts": [
+    {
+      "headline": "Real keys differ across the three modes; only repeated chord reports a hit.",
+      "path": "tests/test_forward_solve_clip_mode_request.py"
+    },
+    {
+      "headline": "Real-key pre-repair arm fails with len(set(keys)) == 1.",
+      "path": "docs/figures/forward-solve-api/clip-mode-request-field/cache-key-baseline.log"
+    },
+    {
+      "headline": "Repaired real-key arm passes at ebf1a979.",
+      "path": "docs/figures/forward-solve-api/clip-mode-request-field/cache-key-after.log"
+    },
+    {
+      "headline": "Same-device maximum array variation is 2.9103830456733704e-11 with an identical chord metric.",
+      "path": "docs/figures/forward-solve-api/clip-mode-request-field/map-fidelity-chord-comparison.json"
+    }
+  ],
+  "commits_read": [
+    "e644d69ebadbb7e6618bd9156c25b991e0f35451",
+    "ebf1a97963bdfcd5b2ddd9a8d601380e42d755e5",
+    "f91d746b115531dd467e3b99fd36dd954611b854"
+  ],
+  "completed_at": "2026-10-02T18:31:12Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T18:22:16Z",
+  "evidence_inputs": {
+    "numeric_ruling": "The H200 difference is same-device roundoff variation, not a request-field behavior change.",
+    "prior_blockers": "Resolved: clip_mode participates in the production key and the regression tests that real key.",
+    "request_field_audit": "Checked carrier_identity, source_profile, seed_policy, policy, route, target_current, constraint_pins, constraint_pairs, current, prescribed_current, enforce, compilation_cache_hit, and clip_mode. No remaining request-selected static key omission was found."
+  },
+  "failure_attribution": {},
+  "findings": [],
+  "follow_ons": [],
+  "gate_arms_note": "Independent f91d746 replay: 1 passed, 5 read-only persistent-JAX-cache warnings, EXIT=0. The warnings are review-fence effects and do not affect the in-memory key/provenance assertions.",
+  "item_verdicts": {
+    "cache_program_audit": "Read forward.py, forward_operator.py, and solve_request.py. The key covers program identity, route, full policy, clip_mode, initial/current/target/prescribed operand shapes and dtypes, static constraint-pair signature, and enforcement. source_profile is shape/layout validated before program identity; constraint_pins are post-solve validation; carrier_identity and compilation_cache_hit are provenance. Values are traced operands. No other request field selects an omitted static request cache, memo, or program key. ForwardFluxOperator.program_identity does not separately encode clip mode, but its caller-owned request cache key now does.",
+    "h200_comparison": "Base bf8122ae and request-field head 09a0b9b both pass at chord_sup_relative=9.540289289876033e-05. The 2.9103830456733704e-11 largest computed-array difference is same-device floating-point variation, not a numerical behavior change.",
+    "prior_findings": "Resolved. ForwardProfile._request_compilation_cache_key includes request.clip_mode. The focused test calls that real key builder without patching it, asserts distinct chord, exact, and chord_cells keys, and asserts cache-hit provenance false, false, false, true over first requests plus repeated chord.",
+    "request_route": "ForwardProfile._solve_imposed_request binds request.source_profile and request.clip_mode to the active profile before calculating the key and persists clip_mode in ResolvedForwardSolveDefaults and ForwardSolveReceipt.",
+    "scope": "The corrective range e644d69e..f91d746 contains only the key repair, focused test, evidence fragment, and two durable gate logs; git diff --check is clean."
+  },
+  "justifications": {
+    "durability": "Concrete-revision base and repaired logs preserve the failed and passing arms, and the test proves first-use versus repeat cache provenance.",
+    "evidence": "The reviewed run's committed e644d69e base arm fails the real-key assertion and its committed ebf1a979 repaired arm passes; the review independently replays f91d746 to one passing test.",
+    "fit": "Request-owned clip selection now has matching request-owned compilation-cache identity.",
+    "goal_fidelity": "Both previously blocking findings are repaired at the exact reviewed head.",
+    "scope_discipline": "The correction stays within the declared implementation and evidence surface."
+  },
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT pass (100/100). The corrective resume resolved both blocking cache-key findings; the independent exact-head replay passes, the run's own committed arms establish zero added failures, no additional request-field key omission was found, and the 2.9e-11 H200 delta is same-device variation.",
+  "review_base_sha": "948fd49f8ba9587827442b1ad3540c521455ff8c",
+  "review_run_id": "r-20261002T182149958467-review-2-of-fsapi-clip-mode-request-field-core",
+  "reviewed_base_sha": "e644d69ebadbb7e6618bd9156c25b991e0f35451",
+  "reviewed_commit": "f91d746b115531dd467e3b99fd36dd954611b854",
+  "reviewed_head_sha": "f91d746b115531dd467e3b99fd36dd954611b854",
+  "reviewed_revision": "f91d746b115531dd467e3b99fd36dd954611b854",
+  "reviewed_run_id": "r-20261002T170741100631-fsapi-clip-mode-request-field-core",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core",
+  "reviewer_node": "review-2-of-fsapi-clip-mode-request-field-core",
+  "reviewer_run_id": "r-20261002T182149958467-review-2-of-fsapi-clip-mode-request-field-core",
+  "reviewing_run_id": "r-20261002T182149958467-review-2-of-fsapi-clip-mode-request-field-core",
+  "scores": {
+    "durability": 20,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a75",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T182149958467-review-2-of-fsapi-clip-mode-request-field-core/review-clip-mode-request-head.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/docs/figures/forward-solve-api/clip-mode-request-field/cache-key-baseline.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/docs/figures/forward-solve-api/clip-mode-request-field/cache-key-after.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/docs/figures/forward-solve-api/clip-mode-request-field/h200-map-fidelity-chord-comparison.log"
+  ],
+  "tests": [
+    {
+      "command": "JAX_PLATFORMS=cpu NUMBA_CACHE_DIR=/tmp/reckon-crew-scratch/r-20261002T182149958467-review-2-of-fsapi-clip-mode-request-field-core/numba PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest --timeout 0 -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-request-field-core/tests/test_forward_solve_clip_mode_request.py -q",
+      "result": "1 passed, 5 warnings in 15.26s; EXIT=0"
+    },
+    {
+      "command": "Reviewed run committed cache-key gate arms",
+      "result": "e644d69e: 1 failed, EXIT=1; ebf1a979: 1 passed, EXIT=0"
+    },
+    {
+      "command": "Reviewed run same-device H200 chord comparison",
+      "result": "both pass with chord_sup_relative=9.540289289876033e-05; largest head-base absolute difference=2.9103830456733704e-11"
+    }
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:29:00Z",
+  "total": 100,
+  "verdict": "pass"
+}

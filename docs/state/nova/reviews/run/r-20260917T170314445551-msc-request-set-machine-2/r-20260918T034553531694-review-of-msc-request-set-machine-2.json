@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-18T03:45:53.531694+00:00",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "862",
+      "text": "dispatch_read_requests and the FluxReadRequest/FluxReadAnswer types have no call site in nova/, tests/ or benchmarks/ (grep matches only the definitions at 826, 846, 862), so the tagged request router is inert weight and the head census confirms it moved nothing (120 / 74 unchanged)."
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": "1331",
+      "text": "the fused route is reached only from this branch, and neither tests/test_equilibrium_forward.py nor tests/test_equilibrium_forward_operator.py mentions use_linear_moments, so nothing in the node's declared test paths executes the changed call site; the fusion is defended only by code-level substitution reading and the same-revision certificate."
+    },
+    {
+      "file": "benchmarks/solve_program_size_gate.py",
+      "line": "1075",
+      "text": "both certificate arms are built at the head revision (baseline_program = jax.jit(baseline_solve) and candidate_program = profile._accelerated_history_program), so the certificate is a same-revision two-arm identity check and does not compare the fused route's terminal states against base c2843217."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/request-set/census-base-head.md",
+      "line": "11",
+      "text": "the head executable-bytes cell reads 590,668,120 while the head part JSON records solve.executable.serialized_bytes 590,669,120 against base 590,667,512; the receipt figure is off by 1,000 bytes, minor, and the copy counts that carry the gate are unaffected."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "826",
+      "text": "the body of commit 1f141e67 ends with the stray sentence \"Selected unverified. be careful\", an unresolved note left in the durable account of the change."
+    }
+  ],
+  "justifications": {
+    "durability": "read_with_current_moments is reached from exactly one non-linear branch, and no test in the node's declared test paths mentions use_linear_moments, so the fused route carries no behavioural test in the lane the node ran; the dispatcher has no test anywhere because it has no caller.",
+    "evidence": "All four fence items read true: certificate/certificate-identity-worktree.json shows identity_row_count 4 with every row terminal_state_bit_identical true, maximum_absolute_state_difference 0.0 and measurement_revision f7901923; census/scope-census-index.md and census-base-cold/scope-census-index.md both read 120 / 1 and 74 / 1 with identical instruction counts 668,453 / 10,155; decomposition/read-body-multiplication.md names its parser decompose_read_parents.py, its job 1273284 exit 0 and its dump census-base-cold/hlo/weak-rotation-reactor-static_300c_solve.hlo.txt; and the three commits touch only nova/equilibrium/forward_operator.py and nova/equilibrium/forward.py.",
+    "fit": "The census-base-head measurement withdrew the node's own earlier five-copy reading and produced the plan's restated per-parent gate (112 moment / 70 topology), and read-body-multiplication.md names the factors stages three to five must collapse, which is the direction the plan records.",
+    "goal_fidelity": "The request set and its tag-selected dispatcher are declared as data at nova/equilibrium/forward_operator.py:826-880 with no call site anywhere in nova/, tests/ or benchmarks/, so the stage's request-routed entry point exists but is not exercised; the same-state read fusion at nova/equilibrium/forward.py:1331 does land on the executed non-linear path.",
+    "scope_discipline": "The three commits between c2843217 and f7901923 edit only the two declared source modules, with no test, fixture, plan or figure edits and no stray files, and the node reports its own blocked status rather than widening scope."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: The request set and its tag-selected dispatcher are declared as data at nova/equilibrium/forward_operator.py:826-880 with no call site anywhere in nova/, tests/ or benchmarks/, so the stage's request-routed entry point exists but is not exercised; the same-state read fusion at nova/equilibrium/forward.py:1331 does land on the executed non-linear path.\nSCORE evidence: 16\nJUSTIFICATION evidence: All four fence items read true: certificate/certificate-identity-worktree.json shows identity_row_count 4 with every row terminal_state_bit_identical true, maximum_absolute_state_difference 0.0 and measurement_revision f7901923; census/scope-census-index.md and census-base-cold/scope-census-index.md both read 120 / 1 and 74 / 1 with identical instruction counts 668,453 / 10,155; decomposition/read-body-multiplication.md names its parser decompose_read_parents.py, its job 1273284 exit 0 and its dump census-base-cold/hlo/weak-rotation-reactor-static_300c_solve.hlo.txt; and the three commits touch only nova/equilibrium/forward_operator.py and nova/equilibrium/forward.py.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: The three commits between c2843217 and f7901923 edit only the two declared source modules, with no test, fixture, plan or figure edits and no stray files, and the node reports its own blocked status rather than widening scope.\nSCORE durability: 11\nJUSTIFICATION durability: read_with_current_moments is reached from exactly one non-linear branch, and no test in the node's declared test paths mentions use_linear_moments, so the fused route carries no behavioural test in the lane the node ran; the dispatcher has no test anywhere because it has no caller.\nSCORE fit: 17\nJUSTIFICATION fit: The census-base-head measurement withdrew the node's own earlier five-copy reading and produced the plan's restated per-parent gate (112 moment / 70 topology), and read-body-multiplication.md names the factors stages three to five must collapse, which is the direction the plan records.\nFINDING nova/equilibrium/forward_operator.py:862 dispatch_read_requests and the FluxReadRequest/FluxReadAnswer types have no call site in nova/, tests/ or benchmarks/ (grep matches only the definitions at 826, 846, 862), so the tagged request router is inert weight and the head census confirms it moved nothing (120 / 74 unchanged).\nFINDING nova/equilibrium/forward.py:1331 the fused route is reached only from this branch, and neither tests/test_equilibrium_forward.py nor tests/test_equilibrium_forward_operator.py mentions use_linear_moments, so nothing in the node's declared test paths executes the changed call site; the fusion is defended only by code-level substitution reading and the same-revision certificate.\nFINDING benchmarks/solve_program_size_gate.py:1075 both certificate arms are built at the head revision (baseline_program = jax.jit(baseline_solve) and candidate_program = profile._accelerated_history_program), so the certificate is a same-revision two-arm identity check and does not compare the fused route's terminal states against base c2843217.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/request-set/census-base-head.md:11 the head executable-bytes cell reads 590,668,120 while the head part JSON records solve.executable.serialized_bytes 590,669,120 against base 590,667,512; the receipt figure is off by 1,000 bytes, minor, and the copy counts that carry the gate are unaffected.\nFINDING nova/equilibrium/forward_operator.py:826 the body of commit 1f141e67 ends with the stray sentence \"Selected unverified. be careful\", an unresolved note left in the durable account of the change.\n",
+  "review_run_id": "r-20260918T034553531694-review-of-msc-request-set-machine-2",
+  "reviewed_revision": "f79019234a0a33b337aca865f1e6b8c492ee6732",
+  "reviewed_run_id": "r-20260917T170314445551-msc-request-set-machine-2",
+  "reviewer_node": "review-of-msc-request-set-machine-2",
+  "reviewer_run_id": "r-20260918T034553531694-review-of-msc-request-set-machine-2",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-18T08:05:32.350067+00:00",
+  "total": 75
+}

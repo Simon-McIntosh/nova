@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest leaves baseline_suite and after_suite empty, so there are no completed suite-arm logs from which a set difference can be computed. added_failure_count=0 and added_failure_ids=[] mean no added failures were observed in readable suite arms; they do not claim that a paired suite ran.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.json: two comparisons, two eight-row regularisation curves, any_weight_admitted=false",
+    "docs/figures/playable-forward-solve/shape-inverse/direction-reversal-negative-control.png: 1400x500, visually inspected",
+    "docs/figures/playable-forward-solve/shape-inverse/shape-regularisation-curve.png: 1400x600, visually inspected; purple endpoint labels cross the lower axes",
+    "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/pfs-shape-inverse-control-and-regularisation.md: omits the two false convergence flags while reporting qualified axes and EXIT=0"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "f58e3baa92e7c62561a4e43c5c04824093d84fcf",
+    "b3cc1728e5973acd34397859c9dc5da78002dcb5"
+  ],
+  "completed_at": "2026-10-02T14:43:20Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T14:26:12Z",
+  "evidence_inputs": "Reviewed b12cb22cc21946e85211979b626c3f7009ae629a..b3cc1728e5973acd34397859c9dc5da78002dcb5. Base defect reproduced from the stored receipt: upper arm/all-prescribed 18.9875/80.9988 mm; elongation arm/all-prescribed 79.6837/66.6808 mm. Head control errors are 40.2382 and 112.6220 mm against 18.9875 and 79.6837 mm, but both controls are non-converged while both controlled arms are converged. The sweep has sixteen correct persisted rows; strongest weight 100 gives upper 3.6364% at 4.8504 kA and elongation 29.4643% at 11.2130 kA, so no point meets both 80% and 20 kA. The candidate worktree is clean. Neither candidate commit is an ancestor of review base e47e3eab.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/playable_shape_inverse_receipt.py",
+      "line": "1546",
+      "severity": "blocking",
+      "text": "Both committed direction-reversal arms record converged=false (upper: 7 trips, 40.2382 mm; elongation: 4 trips, 112.6220 mm), while the controlled arms record converged=true. The finalizer rejects only when control_error <= arm_error at lines 1299-1305 and 1549-1553. A larger error from an unsettled state can be caused by incomplete fixed-point convergence rather than reversal of the active-current direction, so the report and evidence fragment cannot yet call this a causal discriminating control. Require a converged reversed-update equilibrium, or record and justify an explicit terminal residual criterion that makes the non-converged states comparable, before landing the control claim."
+    },
+    {
+      "file": "benchmarks/playable_shape_inverse_receipt.py",
+      "line": "1322",
+      "severity": "follow-on",
+      "text": "The regularisation guard checks only that each curve has eight rows; it never asserts that the row weights equal DELTA_REGULARISATION_WEIGHTS in order, nor that closure and current values are finite. The current persisted receipt is correct and was independently checked, but a duplicated or substituted eight-row sweep would still finalize and be captioned as the declared eight-weight grid."
+    },
+    {
+      "file": "benchmarks/playable_shape_inverse_receipt.py",
+      "line": "1416",
+      "severity": "follow-on",
+      "text": "The fixed negative label offset places both purple 'upper' direct labels below their low final points; in the persisted 1400-pixel regularisation figure the labels cross the bottom spine and are partly clipped below the axes. Offset low endpoint labels upward or expand the lower plotting margin so every coloured series name is wholly readable."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md",
+      "line": "10",
+      "severity": "follow-on",
+      "text": "The tests field records prose summaries rather than the literal commands that ran, and all three gate-log headers abbreviate PYTHONPATH as <tree> instead of the required absolute path; the finalization log also contains an earlier EXIT=1 followed by the successful arm. Preserve literal replayable commands and one complete run per gate log."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "The reviewed commits f58e3baa9 and b3cc1728e are reachable from the candidate head but neither is an ancestor of review base e47e3eab; coordinator integration must land both commits, not only the evidence tip."
+    }
+  ],
+  "gate_arms_note": "No readable baseline_suite or after_suite was recorded. The worker's custom controls and finalizer ended EXIT=0, but the control receipts themselves record converged=false for both arms. Independent read-only jq validation at reviewed head b3cc1728 exited 0 and confirmed source/embedded receipt identity, comparison deltas +0.021250713962050655 m and +0.03293832330683255 m, eight rows per command, and any_weight_admitted=false. git diff --check exited 0.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none; the changed executable is a benchmark/receipt CLI and no production runtime caller reaches the new helpers.",
+    "diff": "Read both commits against b12cb22cc: the benchmark adds the control, sweep extraction and renderers; the evidence commit persists their JSON/PNG outputs, adds the fragment and append-only archive section, and deletes the hand-authored SVG.",
+    "done_when": "The aggregate receipt contains two strictly positive control-minus-arm comparisons and two eight-row weight curves, but the finalizer checks only the inequalities and row counts; it does not require the control solves to converge or the eight stored weights to equal the declared grid.",
+    "goal": "The node persists a replacement direction-reversal control and the complete regularisation sweep, but both replacement control equilibria are explicitly non-converged, so the landed evidence does not yet establish a discriminating equilibrium control.",
+    "manifest": "The manifest names both commits and all changed paths, but its tests field summarizes outcomes rather than recording the literal commands, its log headers substitute PYTHONPATH=<tree>, and baseline_suite and after_suite are empty.",
+    "write_paths": "All ten repository paths in b12cb22cc..b3cc1728 lie inside the declared benchmark, shape-inverse figure, cumulative archive and fragment grants, and the external report is at its granted path."
+  },
+  "justifications": {
+    "durability": "benchmarks/playable_shape_inverse_receipt.py:1291-1347 adds self-checks for the control inequality and curve length, but no test file or suite arm was added, convergence is not asserted, and eight duplicated or incorrect weight values would still satisfy the length guard.",
+    "evidence": "The base receipt independently reproduces the original defect (66.6808 mm all-prescribed against 79.6837 mm elongation), and an independent jq check at b3cc1728 verifies embedded/source control identity, positive deltas of 21.2507 and 32.9383 mm, two eight-row curves and any_weight_admitted=false; however, the report at line 25 mentions only qualified axes and EXIT=0 while omitting converged=false for both controls.",
+    "fit": "The receipt is machine-readable and the append-only evidence splice matches repository practice, but benchmarks/playable_shape_inverse_receipt.py:1416 places the low purple direct labels below the final data points so both render partly below their axes, and the two study colours are hard-coded in the benchmark rather than named in the repository style module.",
+    "goal_fidelity": "benchmarks/playable_shape_inverse_receipt.py:1546 records convergence for each control, and both committed control receipts record false; a larger error from an unsettled fixed-point state does not yet prove that reversing the actuator direction is the discriminating cause, although the literal inequalities and all sixteen sweep points are present.",
+    "scope_discipline": "git diff --stat b12cb22cc..b3cc1728 lists only the granted benchmark, shape-inverse figure directory, cumulative archive and fragment, while the report is in its granted external path; the cumulative archive change is append-only with zero removed lines."
+  },
+  "plan": "nova:playable-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to persist a discriminating shape-inverse negative control and regularisation sweep; benchmarks/playable_shape_inverse_receipt.py:1483-1554 and the head receipt persist both, but both replacement controls are non-converged, so the equilibrium-control claim is not yet established.\nVERDICT done_when: docs/figures/playable-forward-solve/shape-inverse/shape-inverse-receipt.json carries two positive control-minus-arm comparisons and sixteen sweep rows, but benchmarks/playable_shape_inverse_receipt.py:1291-1347 checks only the inequalities and row counts, not control convergence or exact weight identity.\nVERDICT write_paths: git diff b12cb22cc..b3cc1728 changes ten repository paths, all inside the benchmark, shape-inverse figure, cumulative archive and fragment grants; the external report is at its granted path.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md names both commits and all changed paths, but line 10 gives prose outcomes rather than literal commands, the log headers use PYTHONPATH=<tree>, and both suite arms are empty.\nVERDICT diff: f58e3baa9 adds the control, sweep extraction and renderers; b3cc1728e persists the receipts and figures, adds the fragment and append-only archive section, and removes the hand-authored SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: benchmarks/playable_shape_inverse_receipt.py:1546 records convergence, and both committed controls say false, so greater error does not yet isolate direction reversal even though the literal inequalities and sweep rows are present.\nSCORE evidence: 13\nJUSTIFICATION evidence: the base defect and all head metrics reproduce from the receipts, but the report line 25 omits converged=false for both controls and substitutes qualified-axis plus EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every repository path in b12cb22cc..b3cc1728 is within the declared grant and the cumulative archive splice removes no prior lines.\nSCORE durability: 8\nJUSTIFICATION durability: benchmarks/playable_shape_inverse_receipt.py:1291-1347 has no convergence guard, checks only curve length rather than exact weights, and no test or readable paired suite arm protects the change.\nSCORE fit: 16\nJUSTIFICATION fit: the receipt and splice follow repository idioms, but benchmarks/playable_shape_inverse_receipt.py:1416 clips the purple endpoint labels below both axes and hard-codes study colours outside the style module.\nFINDING benchmarks/playable_shape_inverse_receipt.py:1546 blocking: both reversed-update receipts record converged=false while the controlled arms record true; the inequality can therefore be explained by an unsettled fixed-point state, so a converged or explicitly residual-qualified control is required before the causal discrimination claim lands.\nFINDING benchmarks/playable_shape_inverse_receipt.py:1322 follow-on: the sweep guard checks only eight rows, not that their weights equal the declared grid or that their metrics are finite.\nFINDING benchmarks/playable_shape_inverse_receipt.py:1416 follow-on: the negative endpoint offset partly clips both purple upper labels below their axes in the persisted figure.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md:10 follow-on: tests are prose rather than literal commands and gate headers contain PYTHONPATH=<tree>; the finalizer log combines an earlier failure with the successful run.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation/manifest.md:5 follow-on: neither candidate commit is an ancestor of review base e47e3eab, so both must be integrated.",
+  "review_base_sha": "e47e3eab89444ef8c5c46962f6f3f45ad5735e50",
+  "review_run_id": "r-20261002T142547902578-review-of-pfs-shape-inverse-control-and-regularisation",
+  "reviewed_base_sha": "b12cb22cc21946e85211979b626c3f7009ae629a",
+  "reviewed_commit": "b3cc1728e5973acd34397859c9dc5da78002dcb5",
+  "reviewed_head_sha": "b3cc1728e5973acd34397859c9dc5da78002dcb5",
+  "reviewed_revision": "b3cc1728e5973acd34397859c9dc5da78002dcb5",
+  "reviewed_run_id": "r-20261002T134214160598-pfs-shape-inverse-control-and-regularisation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-shape-inverse-control-and-regularisation",
+  "reviewer_node": "review-of-pfs-shape-inverse-control-and-regularisation",
+  "reviewer_run_id": "r-20261002T142547902578-review-of-pfs-shape-inverse-control-and-regularisation",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "scope_discipline": 20
+  },
+  "section": "\u00a78",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T14:36:27Z",
+  "total": 71,
+  "verdict": "fail"
+}

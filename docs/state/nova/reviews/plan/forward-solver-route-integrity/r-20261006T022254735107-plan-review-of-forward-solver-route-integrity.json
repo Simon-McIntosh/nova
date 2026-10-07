@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:27:32.481Z",
+  "dispatched_at": "2026-10-06T02:23:14Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/forward-solver-route-integrity.html#s3",
+      "id": "reuse_search-1",
+      "reason": "the section should cite OperatorRequestKind and be written as extending fixed_point.py's machine (or say why that machine cannot carry the whole-solve body), which changes both its wording and its scope.",
+      "text": "the \u00a73 design paragraph says \"the section implements one lax state machine whose sole operator body serves residual, merit, acceptance, recovery, reconciliation and Jacobian-vector requests\", but nova/equilibrium/fixed_point.py already defines exactly that: OperatorRequestKind (fixed_point.py:923) enumerates the acceptance/recovery/reconciliation/merit kinds and the request serve machine (lax.switch + lax.scan loop at fixed_point.py:995-1041, served at fixed_point.py:2403-2407) \u2014 the section reads as building a subsystem that exists, so a fresh implementer cannot tell it is extending the committed machine rather than forking a parallel one",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/h200_test_lane/cache_guard.py:209",
+      "id": "duplicate_owner-1",
+      "reason": "the section must name cache_reuse_summary.py:63 served_keys as the owner to reuse and state which of the two existing served_entries sites it retires or repairs, otherwise the guard and the summariser diverge on the same number.",
+      "text": "\u00a74 asks to \"make the guard's served_entries count program-key cache entries rather than a recursive file count\", but the program-key counting it describes already exists as served_keys() in scripts/h200_test_lane/cache_reuse_summary.py:63, which is exactly how that module reports \"served_entries\": len(disk) at cache_reuse_summary.py:115; served_entries itself is already computed at two sites (cache_guard.py:209 directory_entry_count and prewarm.sh:135 find|wc -l), so \u00a74 risks adding a third program-key counter rather than reconciling the two existing ones",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "42d0f7170715556a050f25107e8fe55da1c3a4f4fbca9ea4decf3151ecad40f3",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 119,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T02:32:58.973390+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-06T02:32:58.971947+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/plan-forward-solver-route-integrity.v119.json",
+  "review_run_id": "r-20261006T022254735107-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "066494916f17b430c705308528b83a91621c42a0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan consolidates behaviour onto one scan body (\u00a72) and one traced operator body (\u00a73) rather than adding shallow wrappers, and proposes no new module.",
+    "duplicate_owner": "a finding \u2014 \u00a74's program-key served_entries duplicates the existing program-key counting owner scripts/h200_test_lane/cache_reuse_summary.py.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; no section adds to any of these families, so nothing must be retired or merged.",
+    "reuse_search": "a finding \u2014 \u00a71/\u00a72/\u00a74 cite the machinery they extend (the four committed route files and dd7d8286; the memory gate beside the new size gate; the pre-warm pin and cache guard), but \u00a73's design paragraph proposes \"one lax state machine\" without citing nova/equilibrium/fixed_point.py, which already carries precisely that machine.",
+    "thin_wrapper": "pass \u2014 the changes are in-place extensions of existing machinery (the request machine, the size gate, the pre-warm counter), not a new layer over it."
+  },
+  "section_digests": {
+    "_document": "7739af69fcae62fccbe936bc312043bbba4c7b7451259bf94375a0cc17fd55b5",
+    "s-contract": "83d8d14d75c0216f84acbbb9ef71204975cc6134348d26b5158c593c9abfc624",
+    "s0": "80f310e76317b26c373d1244865223433df267fb8337045d575fe833c75b5858",
+    "s1": "80571c0e208f8095726792cc9d0029962c3966fed6f04e6dcb2ed1a5f352581b",
+    "s2": "f632de7fadccd34387c95c830a73120eb5234de722730bee800322a62a31db41",
+    "s3": "2912ba532e01c1f8a0dd30b1773900e600828c6bbb1cd315c7976868d2a940e5",
+    "s4": "da5c69a471b7ca2d81f157f637c5eda274244e01477238d60f1488532a220978"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:32:58.963250+00:00"
+}

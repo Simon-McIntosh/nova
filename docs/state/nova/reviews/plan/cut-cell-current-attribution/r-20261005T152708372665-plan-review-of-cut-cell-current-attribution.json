@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:41:56.606Z",
+  "dispatched_at": "2026-10-05T15:28:43Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html:63",
+      "id": "reuse_search-1",
+      "reason": "the author must name the real owning symbol or drop the claim, which changes \u00a73's account of what it extends.",
+      "text": "\u00a73 claims \"The complement-clip machinery already exists (`common_support`)\" but no symbol named `common_support` exists anywhere in `nova/`; the nearest real names are the `PlasmaDomain.COMMON_SOL` label (`nova/equilibrium/domain.py:94`) and the four fixed-capacity saddle regions in `SaddleCellWedges` (`nova/equilibrium/separatrix_clip.py:336`). A plan that cites a mechanism by a name that resolves to nothing cannot be checked for reuse, and its \"extend, don't rebuild\" claim is not demonstrable.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html:73",
+      "id": "reuse_search-2",
+      "reason": "\u00a78's scope collapses to \"verify/promote what is already merged\", which the author would not write the same way once the ancestry is known.",
+      "text": "\u00a75 says the exact-participation stack `0372d3fc` and the discriminator stack `28a49bcb` are \"held stacks ... neither merged nor discarded until \u00a72 lands\", and \u00a78 opens \"Merge the held stacks 0372d3fc and 28a49bcb\"; `git merge-base --is-ancestor` reports BOTH are already ancestors of HEAD. \u00a78 therefore proposes work that is already in the tree, and \u00a75's premise for deferring them is stale.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html:592",
+      "id": "thin_wrapper-1",
+      "reason": "either \u00a77 is verified as landed (and its done-when re-scoped to the residual gate) or the premise must be corrected \u2014 both change the section.",
+      "text": "\u00a77's premise is \"the production spline route discards it because the operator passes no saddle vertex\", but `forward_operator.py:3417 _profile_support` already calls `_traced_clip(..., saddle_vertex=topology.x_point, ...)`, and `_traced_clip` (`separatrix_clip.py:926`) already accepts and consumes `saddle_vertex` to build the wedges. A section whose whole job is to add that wiring must state why the existing wiring does not already do it, or it is a thin layer over machinery that already carries the parameter.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html:598",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a79 as written would re-introduce the per-trip rebuild the lead ruled out; the section must be rewritten to extend the frozen-blocks-plus-moments owner, not fork the image.",
+      "text": "\u00a79 re-implements the coupling: it says to \"image the cell's zeroth, first and second moments with the polygon-analytic integrals over that clipped polygon about its own centroid\" with \"the blocks ... rebuilt once per trip\". That is exactly the \"per-trip clipped-polygon kernel blocks\" option the lead REJECTED in the locked decision `coupling-geometry-frozen` (2026-09-14) and again in `production-clip-is-moment-preserving-and-coupling-frozen` (2026-09-22), which chose frozen per-mesh blocks with the clipped current expanded to moments about the atomic centroid. The owner to extend is `forward_operator.py:3885 current_moment_image` (fed by `:3275 coupling_current_moments`) \u2014 \u00a79 forks it.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html:63",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a73 and \u00a77 must be merged into one section over the committed wedge owner, which removes a section's worth of scope from the plan.",
+      "text": "\u00a73 describes, as new, the saddle-wedge mechanism that is already committed: `SaddleCellWedges` with four fixed-capacity regions (\"core, private flux, and the two common scrape-off-layer regions\", `separatrix_clip.py:336`), `AtomicCellMesh.traced_saddle_wedges` (`:2170`) and `_traced_saddle_wedges_from_edge_roots` (`:1591`), and its done-when gate (oracle at 110/300/500 cells, then one H200 job over the four diverted rows with the four limited rows bit-identical) is word-for-word the gate \u00a77 repeats at line 592. Two sections own the same mechanism and the same gate, and \u00a73's design text does not cite the committed owner it would extend.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/cut-cell-current-attribution.html:284",
+      "id": "reuse_search-3",
+      "reason": "naming the switch changes \u00a76 from \"reimplement the clip\" to \"change the default / promote the exact mode\", which is a different and smaller node.",
+      "text": "\u00a76 rung A proposes to \"Replace the all-ones clip in the profile support with the clip against the signed flux\" but `_profile_support` already exposes a mode switch whose exact branch clips against the signed flux of the iterate (`forward_operator.py:3417` calls `_traced_clip(... inside_boundary ...)` after computing `inside_boundary = self.polarity * (shared_flux - topology.boundary_flux)`), with the chord branch reproducing the all-ones c9a89e58 behaviour (`:3375`). The section does not cite this mode switch or say whether rung A is a default flip rather than a reimplementation.",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e35ec339fa3d45f52281ba6b3ca8dcfbf90d68c6f3864676d203f9746310dc9a",
+  "plan_slug": "cut-cell-current-attribution",
+  "plan_version": 234,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152708372665-plan-review-of-cut-cell-current-attribution",
+  "reviewed_blob_sha": "c557a503d2c4d3216df3bb1c1850dce3a3c3f3af",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan puts its physics in existing deep modules (`separatrix_clip.py`, `clip_quadrature.py`, `forward_operator.py`) and proposes no new wrapper family; the one shallow risk, \u00a79, is addressed under duplicate_owner.",
+    "duplicate_owner": "a finding \u2014 \u00a73 and \u00a79 each re-implement a mechanism whose owner is already committed; the findings name the owning file.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the sections add internal kernels inside existing modules and name no new public definition, CLI option, MCP view or refusal family, so nothing is owed against the budget.",
+    "reuse_search": "a finding \u2014 two prior-art claims checked by opening the code are wrong: \u00a73 cites `common_support` as existing complement-clip machinery and no such symbol exists, and \u00a75/\u00a78 treat `0372d3fc` and `28a49bcb` as unmerged held stacks when both are ancestors of HEAD.",
+    "thin_wrapper": "a finding \u2014 \u00a77's stated justification (\"the operator passes no saddle vertex\") is false in the current tree, so the section is a thin wiring over a parameter that is already wired."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.314871+00:00"
+}

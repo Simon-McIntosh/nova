@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived as zero by absence of arms, not from a green run: the reviewed run's classification.json records baseline_suite null and after_suite null, and its manifest names only head.log (a focused 8-test gate) and negative-control.log (a mutation arm), so no base/after suite pair exists from which a failure delta could be taken; the reviewer's own head-gate reproduction at df0009127 added 0 failures.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-02T10:37:14.949Z",
+  "dispatched_at": "2026-10-02T10:04:44Z",
+  "findings": [
+    {
+      "file": "tests/test_playable_figure_receipts.py",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the docstring (echoed by the landing fragment) says the drivers read their receipts under PLAYABLE_FIGURE_RECEIPTS_ROOT when set, but no driver references that variable - grep finds it only in this test, which reads it and then redirects the drivers through monkeypatched module globals (LIMITED/EARLY/CENTROID/BATCHED) and the render_figures root argument, so exporting the variable and running a driver directly has no effect."
+    },
+    {
+      "file": "head.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed gate log's first line records revision=9b1b1bb8d17dea0b42346d1f64a3c565a0e89009 (the pre-commit base) while the reviewed head is df00091274e25417964d981e8bd4595e492be1d5, so the recorded pass cannot be tied to the committed head from the log alone; the reviewer re-ran the gate at df0009127 to cover it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit df0009127 against base 9b1b1bb8; it adds tests/test_playable_figure_receipts.py (+328), the landing fragment (+33) and a five-line correction to pfs-anchor-and-panel-repairs.html, touching no driver or solver code.",
+    "done_when": "the done-when names a new tests/test_playable_figure_receipts.py covering the limited-anchor rows 11-17, the centroid class panel, the batched arms 1.06/2.34/3.18 slices/s, the early-frame placement states, the compensator rows 15-17/95-97 and the keyframes series, a red negative control, a fresh-process CPU pass with no images, and the row-17 conditioned-arm correction; eight tests exist and pass, the arms read 1.06/2.34/3.18, and the row-17 clause is corrected to converged=false with no enclosed_area_ratio.",
+    "goal": "the node's goal is a test that fails when a drawn caption or title field drifts from its receipt; tests/test_playable_figure_receipts.py re-runs the three committed drivers with Figure.savefig stubbed and asserts each drawn title/label against the receipt field it was read from, so the goal is delivered.",
+    "manifest": "read; it states status complete, names commit df0009127, records the head gate as 8 passed exit 0 and names the negative-control log; its evidence_inputs describes the driver localization accurately (module constants or a root argument redirected from the test).",
+    "write_paths": "the manifest lists tests/test_playable_figure_receipts.py, both playable-forward-solve evidence fragments and the figure directory; git diff 9b1b1bb8..df0009127 changes exactly three files, all inside them."
+  },
+  "justifications": {
+    "durability": "the new test is itself the guard and it fires (the negative control goes red); it is a fresh-process CPU test with the figure writer stubbed and no image written to the tree, and monkeypatch.setattr on the driver globals fails loudly if a driver renames LIMITED/EARLY/CENTROID/BATCHED, though the drawn-text checks match by substring and 2-decimal formatting.",
+    "evidence": "the head gate reproduces first-hand at df0009127 (8 passed, exit 0) and the declared negative control reproduces exactly (perturbing row 15 boundary_flux_wb in a temp copy draws psi_N 0.0020 against the receipt's 0.0138; 1 failed, 7 passed, exit 1); the reviewed head.log names revision 9b1b1bb8 (the pre-commit base), so the log alone does not anchor the pass to the committed head.",
+    "fit": "tests/test_playable_figure_receipts.py mirrors the tests/ layout, uses mechanism-named helpers (_expected_receipt, Drawn, _load) and carries no plan label; it sits beside the drivers rather than in production code.",
+    "goal_fidelity": "tests/test_playable_figure_receipts.py:128-329 pins eight drawn titles/labels across the three drivers to receipt fields; the limited-anchor refusal/boundary split, the 1.06/2.34/3.18 arms and the row-17 converged=false clause all match, but the module docstring overstates where the receipt-root override lives.",
+    "scope_discipline": "git diff 9b1b1bb8..df0009127 changes only tests/test_playable_figure_receipts.py and the two playable-forward-solve evidence documents, with no driver, solver or tolerance change and no AI attribution in the single commit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a test that fails when a drawn caption or title field drifts from its receipt; tests/test_playable_figure_receipts.py re-runs the three committed drivers with Figure.savefig stubbed and asserts each drawn title/label against the receipt field it was read from, so the goal is delivered.\nVERDICT done_when: the done-when names a new tests/test_playable_figure_receipts.py covering the limited-anchor rows 11-17, the centroid class panel, the batched arms 1.06/2.34/3.18 slices/s, the early-frame placement states, the compensator rows 15-17/95-97 and the keyframes series, a red negative control, a fresh-process CPU pass with no images, and the row-17 conditioned-arm correction; eight tests exist and pass, the arms read 1.06/2.34/3.18, and the row-17 clause is corrected to converged=false with no enclosed_area_ratio.\nVERDICT write_paths: the manifest lists tests/test_playable_figure_receipts.py, both playable-forward-solve evidence fragments and the figure directory; git diff 9b1b1bb8..df0009127 changes exactly three files, all inside them.\nVERDICT manifest: read; it states status complete, names commit df0009127, records the head gate as 8 passed exit 0 and names the negative-control log; its evidence_inputs describes the driver localization accurately (module constants or a root argument redirected from the test).\nVERDICT diff: read commit df0009127 against base 9b1b1bb8; it adds tests/test_playable_figure_receipts.py (+328), the landing fragment (+33) and a five-line correction to pfs-anchor-and-panel-repairs.html, touching no driver or solver code.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/test_playable_figure_receipts.py:128-329 pins eight drawn titles/labels across the three drivers to receipt fields; the limited-anchor refusal/boundary split, the 1.06/2.34/3.18 arms and the row-17 converged=false clause all match, but the module docstring overstates where the receipt-root override lives.\nSCORE evidence: 17\nJUSTIFICATION evidence: the head gate reproduces first-hand at df0009127 (8 passed, exit 0) and the declared negative control reproduces exactly (perturbing row 15 boundary_flux_wb in a temp copy draws psi_N 0.0020 against the receipt's 0.0138; 1 failed, 7 passed, exit 1); the reviewed head.log names revision 9b1b1bb8 (the pre-commit base), so the log alone does not anchor the pass to the committed head.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 9b1b1bb8..df0009127 changes only tests/test_playable_figure_receipts.py and the two playable-forward-solve evidence documents, with no driver, solver or tolerance change and no AI attribution in the single commit.\nSCORE durability: 17\nJUSTIFICATION durability: the new test is itself the guard and it fires (the negative control goes red); it is a fresh-process CPU test with the figure writer stubbed and no image written to the tree, and monkeypatch.setattr on the driver globals fails loudly if a driver renames LIMITED/EARLY/CENTROID/BATCHED, though the drawn-text checks match by substring and 2-decimal formatting.\nSCORE fit: 17\nJUSTIFICATION fit: tests/test_playable_figure_receipts.py mirrors the tests/ layout, uses mechanism-named helpers (_expected_receipt, Drawn, _load) and carries no plan label; it sits beside the drivers rather than in production code.\nFINDING tests/test_playable_figure_receipts.py:11 follow-on: the docstring (echoed by the landing fragment) says the drivers read their receipts under PLAYABLE_FIGURE_RECEIPTS_ROOT when set, but no driver references that variable - grep finds it only in this test, which reads it and then redirects the drivers through monkeypatched module globals (LIMITED/EARLY/CENTROID/BATCHED) and the render_figures root argument, so exporting the variable and running a driver directly has no effect.\nFINDING head.log:1 follow-on: the reviewed gate log's first line records revision=9b1b1bb8d17dea0b42346d1f64a3c565a0e89009 (the pre-commit base) while the reviewed head is df00091274e25417964d981e8bd4595e492be1d5, so the recorded pass cannot be tied to the committed head from the log alone; the reviewer re-ran the gate at df0009127 to cover it.\n\nCHECKS (the evidence behind the scores; no other prefixed lines follow)\ngoal/done_when: read the reviewed node's prompt at runs/r-20261002T100422625793-pfs-figure-renderers-assert-their-receipts/prompt.txt (GOAL and FENCE-EVIDENCE) and its manifest.\ndiff: git -C <worktree> diff 9b1b1bb8d17dea0b42346d1f64a3c565a0e89009..df00091274e25417964d981e8bd4595e492be1d5 --stat = 3 files, +366/-2.\nhead gate: re-ran ( cd <worktree> && PYTHONPATH=<worktree> JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_playable_figure_receipts.py -q ) = 8 passed in 5.17s, EXIT=0 at df0009127 (log review-head-gate.log).\nnegative control: copied docs/figures/playable-forward-solve to $TMPDIR, set row 15 boundary_flux_wb = axis + 0.0020*(x-axis) in the copy, ran with PLAYABLE_FIGURE_RECEIPTS_ROOT=<copy> = 1 failed, 7 passed in 7.42s, EXIT=1, the failure being the psi_N 0.0020-vs-0.0138 mismatch (log review-negative-control.log).\nreceipts: limited-anchor row 15 axis 0.3056408914, boundary 0.3044709155, x 0.2208434329 -> fraction 0.0138; expected arms 1.0597/2.3375/3.1850 round to 1.06/2.34/3.18; early-frame row 17 conditioned converged=false ratio None, row 16 conditioned ratio 0.0019.\nfragment correction: early-frame-placement.json row 17 conditioned = {converged false, enclosed_area_ratio null}, so the corrected clause is right and the prior \"does not cross\" was wrong.\ndurability probe: the covering module is the node's own deliverable and it fires under the declared mutation; no second environment was built (shared venv, PYTHONPATH only).\nadded failures: the reviewed run's classification.json records baseline_suite null and after_suite null and its manifest names no base/after suite pair, so 0 is derived by absence of arms; the reviewer's own head-gate reproduction at df0009127 added 0 failures.\n",
+  "review_run_id": "legacy-7c2033040126",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "9b1b1bb8d17dea0b42346d1f64a3c565a0e89009",
+  "reviewed_head_sha": "df00091274e25417964d981e8bd4595e492be1d5",
+  "reviewed_run_id": "r-20261002T100422625793-pfs-figure-renderers-assert-their-receipts",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T13:00:22Z",
+  "total": 87
+}

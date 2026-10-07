@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's baseline_suite is null, while after_suite is a completed 0-failure focused gate at 75495edb0. The pre-change reproduction is a dry-run with EXIT=0, not a completed baseline pytest arm, so no added-failure count or identifiers can be derived from the reviewed run's own paired gate logs without inventing evidence.",
+  "call_site_count": 1,
+  "call_sites": [
+    "scripts/h200_test_lane/run.sh:40"
+  ],
+  "commits_read": [
+    "55bca9b993d56d5f06737271e65d9fd3fa9aaca9",
+    "75495edb0afa05f41d7240b5690878da5cb170aa",
+    "2308e555e4b7fca8f6624057dc1bb36b62a9c465",
+    "e1c48a691bac4ca2cc95ea09530a5d842c51f552"
+  ],
+  "completed_at": "2026-10-02T07:53:23Z",
+  "dispatched_at": "2026-10-02T07:45:15Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "The reviewed manifest leaves baseline_suite empty. Its reproduction-before.log proves only that the old dry-run omitted a timeout and exits 0; it is not a completed pytest baseline. Preserve a paired completed baseline/after gate next time so added_failure_count and added_failure_ids are measurable."
+    },
+    {
+      "file": "tests/test_nova_lane_launcher.py",
+      "line": "82",
+      "severity": "follow-on",
+      "text": "pytest_timeout_argument handles --timeout=value and the landing fragment claims that form remains authoritative, but the committed suite exercises only the separate --timeout 45 form. This review independently dry-ran --timeout=45 with NOVA_LANE_TEST_TIMEOUT=7200 and observed only --timeout=45; keep that spelling in a focused regression test."
+    },
+    {
+      "file": "docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/reproduction-before.log",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "git diff --check reports trailing whitespace in three evidence logs. It does not alter launcher behavior, but evidence artifacts should be clean so mechanical quality checks remain useful."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified one production caller: scripts/h200_test_lane/run.sh:40 execs the general launcher, so its pytest target inherits the resolved timeout behavior.",
+    "diff": "read the complete b6d479a93..e1c48a691 delta: 55bca9b99 adds the default timeout and tests, 75495edb0 makes dry-run preview the submitted payload, 2308e555e adds reproduction/red-control/gate evidence, and e1c48a691 makes the focused-gate header machine-readable. The source behavior is complete at 75495edb0; e1c48a691 changes only the log header.",
+    "done_when": "The pre-change reproduction states that the H200 dry-run ends with '-- tests/test_nova_lane_launcher.py' and no timeout. The committed in-place log records PYTEST_TIMEOUT=3600, an executed command ending '--timeout 3600', 7 passed in 14.95s, and EXIT_STATUS=0. I independently ran TMPDIR=/tmp PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 120 /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-launcher-test-timeout/tests/test_nova_lane_launcher.py at e1c48a691 and got 7 passed in 16.82s. A dry-run with NOVA_LANE_TEST_TIMEOUT=7200 and explicit --timeout=45 printed --timeout=45, not 7200.",
+    "goal": "The reviewed node adds a bounded default to every pytest launcher invocation while retaining caller authority and allowing an environment-selected default. scripts/nova_lane/run.sh:80-117 detects either timeout spelling and builds the effective command; lines 272-275 carry the same argument list into dry-run and submission; lines 134-136 record the effective timeout. This meets the launcher timeout goal.",
+    "manifest": "read the reviewed manifest.md and classification.json: status is complete, commits and declared paths match the delta, the negative-control log is a bare path and records 2 failures with EXIT=1, and after_suite is a completed 0-failure gate. baseline_suite is null, so added-failure attribution is unmeasured rather than zero.",
+    "write_paths": "git diff --name-status b6d479a93..e1c48a691 lists scripts/nova_lane/run.sh, tests/test_nova_lane_launcher.py, the declared evidence fragment, and files under the declared lane-launcher evidence directory only. No changed path falls outside the reviewed node's grant."
+  },
+  "justifications": {
+    "durability": "The guard is implemented in both execution routes: build_command supplies a default for in-place/payload execution, while payload_target_args adds it before a dry-run or sbatch invocation. Explicit --timeout and --timeout=value are detected before injection. The default, split explicit spelling, and environment override have committed tests; the equals spelling was independently exercised in dry-run but lacks a committed regression test.",
+    "evidence": "Evidence could have failed: reproduction-before.log shows the formerly absent argument, negative-control.log removes injection and yields the two named default/override assertion failures with EXIT=1, focused-gate.log records 7 passed and EXIT=0, and in-place-launcher.log records the actual PYTEST_TIMEOUT=3600 and command. Evidence loses two points because baseline_suite is absent and the completed after-suite log is stamped 75495edb0 rather than the final documentation-only head e1c48a691.",
+    "fit": "The change fits the existing bash array-based command construction and test helper. It keeps the shared interpreter, computes a single effective timeout, previews that exact payload in dry-run, and writes the selected value into the existing launcher receipt header. No dependency, broad refactor, or unrelated behavior is added.",
+    "goal_fidelity": "The desired safety property is delivered: lane pytest processes receive a 3600-second per-test bound by default, caller values win, NOVA_LANE_TEST_TIMEOUT selects a different default, and dry-run faithfully displays the payload arguments. The live in-place receipt demonstrates the default and the independent dry-run demonstrates the equals-form caller override.",
+    "scope_discipline": "All seven files in the delta fall under the declared script, test, fragment, or evidence-directory grants. Four commits have conventional subjects and explanatory bodies. The only mechanical defect found is trailing whitespace in committed evidence logs, not an out-of-scope change."
+  },
+  "limits": [
+    "Read-only review. No real sbatch submission was made; the reviewed in-place receipt is the execution evidence, while the submit route is checked through dry-run and the same payload argument construction.",
+    "The reviewed run does not provide a completed baseline_suite gate. added_failure_count and added_failure_ids are therefore null/empty as unmeasured, not a claim of zero added failures.",
+    "The final reviewed head e1c48a691 changes only the focused-log header; its completed after-suite record is from the behavioral head 75495edb0."
+  ],
+  "project": "nova",
+  "raw_text": "VERDICT goal: scripts/nova_lane/run.sh supplies a 3600-second pytest timeout when none is given, preserves explicit --timeout and --timeout=value values, honors NOVA_LANE_TEST_TIMEOUT for the default, previews the submitted payload in dry-run, and records PYTEST_TIMEOUT in the execution header.\nVERDICT done_when: the old reproduction ends '-- tests/test_nova_lane_launcher.py' without a timeout; the committed in-place receipt records PYTEST_TIMEOUT=3600 and 7 passed EXIT_STATUS=0; independent focused pytest at e1c48a691 passed 7 in 16.82s; independent dry-run with NOVA_LANE_TEST_TIMEOUT=7200 and --timeout=45 retained --timeout=45.\nVERDICT write_paths: every path in b6d479a93..e1c48a691 is in the reviewed node's declared grant.\nVERDICT manifest: complete, with a valid bare negative-control path and completed 0-failure after suite; baseline_suite is null, so failure delta is unmeasured.\nVERDICT diff: read commits 55bca9b99, 75495edb0, 2308e555e, and e1c48a691.\nCALL_SITES: scripts/h200_test_lane/run.sh:40\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: default, caller override, environment override, dry-run preview and receipt marker are all implemented and evidenced.\nSCORE evidence: 18\nJUSTIFICATION evidence: real pre-change absence, red mutation, completed focused gate and in-place receipt are present; paired baseline/after failure delta is not.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all changes are granted; evidence logs carry trailing whitespace.\nSCORE durability: 17\nJUSTIFICATION durability: both paths build the effective timeout and the key variants are tested, but --timeout=value has no committed regression test.\nSCORE fit: 19\nJUSTIFICATION fit: focused array-based bash change and matching receipt/test conventions.\nFINDING manifest.md:baseline_suite follow-on: no paired baseline suite means no honest added-failure delta.\nFINDING tests/test_nova_lane_launcher.py:82 follow-on: add a committed --timeout=value regression.\nFINDING docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/reproduction-before.log:4 follow-on: remove trailing whitespace from evidence logs.",
+  "recommendation": "accept: the timeout guard is correctly implemented, its prior absence is reproduced, a mutation proves the focused assertions fire, and the reviewed head independently passes 7 launcher tests. Record three follow-ons: create a paired completed baseline suite for future failure attribution, commit the already-verified equals-form timeout regression, and remove evidence-log trailing whitespace.",
+  "review_run_id": "r-20261002T074458503566-review-of-fsri-lane-launcher-test-timeout",
+  "reviewed_base_sha": "b6d479a93a1c2047815b9eecb2c1018643615244",
+  "reviewed_head_sha": "e1c48a691bac4ca2cc95ea09530a5d842c51f552",
+  "reviewed_run_id": "r-20261002T072853636572-fsri-lane-launcher-test-timeout",
+  "reviewing_run_id": "r-20261002T074458503566-review-of-fsri-lane-launcher-test-timeout",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T09:50:01+02:00",
+  "total": 91
+}

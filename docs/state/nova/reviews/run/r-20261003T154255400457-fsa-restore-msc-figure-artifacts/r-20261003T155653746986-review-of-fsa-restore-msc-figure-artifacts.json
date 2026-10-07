@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "artifacts": "docs/figures/millisecond-converged-solve/compile-memory/compile-memory.svg (63150 B, blob a37d5b5d, sha256 5032106e..., restored from refs/s19-tips/msc-compile-host-memory); docs/figures/millisecond-converged-solve/solve-profile/solve-profile.json (blob 2e33f631, sha256 4141747c...), solve-profile-300.json (blob 2543ab3c, sha256 ed24f962...), solve-profile-1000.json (blob ce75bfea, sha256 45ab6988...), solve-profile-300.svg (blob 203b2bc2, sha256 836bf645...), solve-profile-1000.svg (blob c8fd7fe9, sha256 94a09c25...), all from refs/s19-tips/msc-solve-profile-kernel-count. Both checks reproduce EXIT=0 here (compile-memory: all 1 referenced artifact present; solve-profile: all 5 referenced artifacts present).",
+  "base_log_revision": null,
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "f2ea3fc1511f3deddce9328f7dff4f72771c7af5",
+    "1c469999f"
+  ],
+  "completed_at": "2026-10-03T16:08:51.943Z",
+  "delta_note": "First review of this run. Diff range f2ea3fc15 (node orientation base) to 1c469999f (landed head, the revision this review is keyed on), one commit. I reproduced the evidence first-hand rather than reading the worker's account: for every one of the six files git rev-parse at the head commit equals git rev-parse at its tip ref, and the on-disk sha256 equals the manifest's declared value; both check scripts exit 0 here and the solve-profile check reddens (missing=4 of 5, EXIT=1) when handed the base report from a scratch directory with no sibling artifacts.",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T15:57:13Z",
+  "evidence_inputs": "Reviewed node is a docs restore with no pytest suite, so its manifest names no baseline_suite/after_suite gate logs; its gate is the two committed check_report_figures.py scripts, whose before arm is red (compile-memory missing=1 of 1 EXIT=1; solve-profile missing=5 of 5 EXIT=1) and after arm green (EXIT=0). The plan follow-up row f-fsa-restore-msc-figure-artifacts (docs/plans/figure-and-solver-audit.html:281) is still data-status=\"open\" with no r-fu-outcome; resolving the row and landing the fragment is the coordinator/ship step. Follow-up f-fsa-extract-stranded-figure-drivers (line 286) remains open and independent of this node.",
+  "findings": [
+    {
+      "file": "docs/figures/millisecond-converged-solve/solve-profile/check_report_figures.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "byte-identical to the compile-memory copy and committed under docs/figures rather than tests/, so no lane runs it automatically; the guard only fires when invoked by hand."
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/solve-profile/check_report_figures.py",
+      "line": "53",
+      "severity": "follow-on",
+      "text": "the check is existence-only, so a zero-length or corrupt solve-profile.json passes it; the done-when asked only for existence."
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/solve-profile/solve-profile.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "solve-profile.json (198.8 MB) plus its two per-cell parts (82.8, 83.0 MB) add ~365 MB of JSON receipts into git; the report needs the receipt but an external or LFS store may be wanted."
+    }
+  ],
+  "follow_ons": "(1) check_report_figures.py not wired into any test lane and duplicated verbatim across two directories; (2) existence-only check; (3) ~365 MB of JSON receipts in git \u2014 the node's own manifest flags the store question. All three are outside this review's scope and none holds the node.",
+  "gate_arms_note": "added_failure_count is null and added_failure_ids is [] derived by reckon.crew.review.annotate_review_of_run from the reviewed run's own manifest: the reviewed node ran no pytest suite, so its manifest names no baseline_suite/after_suite gate logs and the framework records the count as unmeasured rather than as a measured zero. With no added set there is no failure_attribution.",
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read against base f2ea3fc15; 16502148 insertions and 0 deletions, nine new files, nothing modified.",
+    "done_when": "The reviewed fence names the six artifacts, their two tip refs, the committed check scripts and the before/after EXIT codes; the manifest records all of them.",
+    "goal": "Bring onto main exactly the six references the two reports name \u2014 compile-memory/report.md:73 and solve-profile/report.md:7-10 \u2014 and check they all exist.",
+    "manifest": "Read; status complete, commit 1c469999f named, four check logs plus a negative_control_log, and per-file blob/sha256 values that all reconcile.",
+    "write_paths": "git show --name-only 1c469999f lists only the six artifacts, the two check scripts and the fragment, all inside the declared grants."
+  },
+  "justifications": {
+    "durability": "the guard is committed and shown to fire on the real absence, but it is not wired into any test lane and is existence-only.",
+    "evidence": "git rev-parse head-blob == tip-blob and on-disk sha256 == the manifest's declared value for every file; both checks reproduce EXIT=0 and redden independently.",
+    "fit": "the restore matches the figure-folder convention, but the 63-line script is duplicated and ~365 MB of JSON receipts enter git.",
+    "goal_fidelity": "all six referenced artifacts are on the reviewed head and byte-identical to their tip blobs, so neither report 404s.",
+    "scope_discipline": "the one commit adds nine files, all inside the declared write paths; the two pre-existing report files are unchanged."
+  },
+  "node": "review-of-fsa-restore-msc-figure-artifacts",
+  "plan": "nova:figure-and-solver-audit",
+  "previous_review_record": null,
+  "project": "nova",
+  "raw_text": "VERDICT goal: bring onto main exactly the figure artifacts the two millisecond-solve reports reference but main lacked, each byte-for-byte from its s19 tip blob, and add a committed check that every referenced file then exists. Both are met: the six files are byte-identical to their tip blobs and both checks exit 0.\nVERDICT done_when: the reviewed fence names the six artifacts, the tip refs, the committed check scripts and the before/after EXIT codes; the manifest records all of them and I reproduced the green runs and an independent red first-hand.\nVERDICT write_paths: git show --name-only 1c469999f lists only the six artifacts, the two check scripts and the fragment, all inside the manifest's declared write paths; report.md and run_measurement.sbatch are unchanged.\nVERDICT manifest: read; status complete, commit 1c469999f named, four check logs, negative_control_log and per-file blob plus sha256 recorded, and every value reconciles with what I measured.\nVERDICT diff: read against base f2ea3fc15; 16502148 insertions, 0 deletions, nine new files, all inside scope.\nVERDICT call_sites: none\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: all six referenced artifacts are on the reviewed head and byte-identical to their tip blobs; compile-memory/report.md:73 and solve-profile/report.md:7-10 read them and neither report 404s.\nSCORE evidence: 19\nJUSTIFICATION evidence: for each file git rev-parse at the head commit equals git rev-parse at its tip ref and the on-disk sha256 equals both the manifest's declared value and the tip blob; both check scripts reproduce EXIT=0 and redden independently (missing=4 of 5, EXIT=1) against the base report.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the single commit adds nine files, all inside the declared write paths; no plan, index or shared state was touched and the two pre-existing report files are left as main has them.\nSCORE durability: 17\nJUSTIFICATION durability: the guard is a committed script shown to fire on the real absence, but it lives under docs/figures and no test lane or CI invokes it, so it never reddens automatically, and it tests existence only so an empty or truncated artifact would pass.\nSCORE fit: 16\nJUSTIFICATION fit: the restore matches the repo's figure-folder convention and the script naming is descriptive, but the identical 63-line script is duplicated across the two directories and ~365 MB of JSON receipts are added to git, which the node's own manifest flags as a store the repo may not want.\nFINDING docs/figures/millisecond-converged-solve/solve-profile/check_report_figures.py:1 follow-on: the script is byte-identical to the compile-memory copy and is committed under docs/figures, not tests/, so nothing in the pytest lane runs it and the guard only fires when a person invokes it by hand.\nFINDING docs/figures/millisecond-converged-solve/solve-profile/check_report_figures.py:53 follow-on: the check is existence-only, so a zero-length or corrupt solve-profile.json passes it; the done-when asked only that every referenced file exists, so this does not hold the node.\nFINDING docs/figures/millisecond-converged-solve/solve-profile/solve-profile.json:1 follow-on: solve-profile.json (198.8 MB) and its two per-cell parts (82.8, 83.0 MB) add ~365 MB of JSON receipts into its own git tree; the report needs the receipt, but an external or LFS store may be wanted.",
+  "review_base_sha": "e9849ca8cd34653de8aa37a80da38218c2f37671",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261003T155653746986-review-of-fsa-restore-msc-figure-artifacts",
+  "reviewed_base_sha": "f2ea3fc1511f3deddce9328f7dff4f72771c7af5",
+  "reviewed_commit": "1c469999f54c448f6739c26c03476367a32bb871",
+  "reviewed_head_sha": "1c469999f54c448f6739c26c03476367a32bb871",
+  "reviewed_run_id": "r-20261003T154255400457-fsa-restore-msc-figure-artifacts",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-restore-msc-figure-artifacts",
+  "reviewer_node": "review-of-fsa-restore-msc-figure-artifacts",
+  "reviewer_run_id": "r-20261003T155653746986-review-of-fsa-restore-msc-figure-artifacts",
+  "reviewing_run_id": "r-20261003T155653746986-review-of-fsa-restore-msc-figure-artifacts",
+  "run_base_sha": "f2ea3fc1511f3deddce9328f7dff4f72771c7af5",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a75",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.127489+00:00",
+  "total": 92,
+  "verdict": "pass"
+}

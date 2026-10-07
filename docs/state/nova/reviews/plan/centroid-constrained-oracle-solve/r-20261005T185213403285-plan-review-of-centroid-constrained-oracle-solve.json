@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T18:58:01.377Z",
+  "dispatched_at": "2026-10-05T18:52:34Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/constraint.py:489",
+      "id": "interface_budget-1",
+      "reason": "the section must state in its own text what it retires or merges (for example fold the level term onto the existing multiplier path, or state plainly why the level column is a distinct unbounded mechanism) before further constraint surface lands, since an unaccounted third mechanism and refusal family is exactly the surface budget item 5 exists to catch.",
+      "text": "\u00a72's done-when adds `BoundedExteriorFieldUnknown` and `FluxLevelConstraint` as new public definitions in nova's constraint module, widening the `CompensatingUnknown` protocol (`constraint.py:159`) to three conforming mechanisms beside `CircuitCurrentUnknown`, and adds a new refusal family (the recorded exterior-field bound refusal), with no text naming a retirement, a merge, or why a third conforming unknown and a new refusal family are irreducible",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "8b5775bf43deec07e59a01f5ef6b222efd9087ed9b7e5b7782794dfc4afb22ba",
+  "plan_slug": "centroid-constrained-oracle-solve",
+  "plan_version": 83,
+  "project": "nova",
+  "responses": {
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-05T19:04:25.628865+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T185213403285-plan-review-of-centroid-constrained-oracle-solve",
+  "reviewed_blob_sha": "db413e12cfb10c63f7a27b5f6b50569789367611",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `nova/equilibrium/constraint.py:489` `BoundedExteriorFieldUnknown` hides normalisation, per-component bounds, the damped backtracking ladder and the bound refusal behind `physical_value`/`damped_step`/`flux_delta`, and `CurrentCentroidConstraint` (`constraint.py:954`) delegates to `profile.current_moment_observation` rather than re-deriving the moment.",
+    "duplicate_owner": "pass \u2014 the coil-less fixture reuses the single `BoundedExteriorFieldUnknown` (`constraint.py:489`) as its compensator rather than adding a second bounded class; `benchmarks/constraint_centroid_receipt.py:99` configures the same shared functional with its own `CircuitCurrentUnknown` for the MAST machine pair, and no placement, path resolution, scheduler query or state reader is re-implemented.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds two public classes (`BoundedExteriorFieldUnknown`, `FluxLevelConstraint`) and a new fixture builder module to nova's constraint surface, and introduces a new \"bound refusal\" recorded on the constraint record, without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the plan names and extends the existing machinery: `CurrentCentroidConstraint` and the `CompensatingUnknown` protocol in `nova/equilibrium/constraint.py`, and the reduced-route pairs in `nova/equilibrium/reduced_newton.py`; `nova/` never imports the fixture script, so the \"no fixture-specific branch in the solver\" clause holds.",
+    "thin_wrapper": "pass \u2014 `scripts/analytic_oracle_fixtures/centroid_row.py` supplies configuration only (direction map, field/level scales, bounds, targets, tolerance) and instantiates the generic `CurrentCentroidConstraint`/`BoundedExteriorFieldUnknown`/`FluxLevelConstraint`; it re-implements none of them, and the machine route (`CircuitCurrentUnknown` chosen by `derive_reduced_constraint_pairs`, `reduced_newton.py:2569`) is untouched."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:01:20.284923+00:00"
+}

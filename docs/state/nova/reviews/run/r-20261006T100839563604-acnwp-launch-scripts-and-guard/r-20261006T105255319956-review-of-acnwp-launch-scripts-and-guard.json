@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "0 added. Derived from the reviewed manifest's own suite fields: baseline_suite.failure_ids = [tests/test_artifacts_carry_no_worktree_paths.py::test_no_tracked_file_names_a_worktree_path] (the guard test at the dispatch base, EXIT=1), after_suite.failure_ids = [] (47 passed, 3 skipped, EXIT=0). reckon's added_failures_from_gate_logs reads pytest FAILED/ERROR ids in the head log minus the base log: gate-head-pytest.log prints no FAILED line, so added = {} and count 0. The reviewed run added no failing test.",
+  "blocking_finding_count": 0,
+  "completed_at": "2026-10-06T11:05:57.061Z",
+  "dispatched_at": "2026-10-06T10:53:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/figure-and-solver-audit-landed.html",
+      "line": "996",
+      "severity": "follow-on",
+      "text": "The hand-repair replaced the receipt's absolute path value with the repository-relative one (now `figure: docs/figures/forward-solve-api/coil-edit-latency.png`) but left the trailing clause describing that value: '\u2014 an absolute path into a since-removed worker worktree, not the published repo-relative path.' The sentence now calls the value absolute while the value is repo-relative, so the repaired record contradicts itself. The plan asked to 'change nothing else' in the record, which is why the prose survived; rewording the clause (or leaving the value and rewording only prose) removes the contradiction."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "after_suite.revision records the dispatch base a04e8ff81, not the head fb17b44c9. The log it names (gate-head-pytest.log) repeats the same header line '# revision: a04e8ff81...' while its '# tree:' and PYTHONPATH name the head worktree. The code under test was head (PYTHONPATH pointed at the worktree at fb17b44c9), and guard-at-head.log correctly records fb17b44c9, so this is a header/field mislabel rather than a mis-run, but a reader deriving the reviewed head from after_suite.revision gets the base revision."
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/trip-quantum/host-profile/production-solve.pstats",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "A tracked 32 KB binary cProfile dump (NUL at byte 7) embedding absolute worktree paths. It is skipped by both the census command (git grep -I) and the guard test's reader (a NUL byte in the opening block reads as binary), so it is invisible to the guard and untouched by the lexical rule. This is the reviewed node's own recorded follow_on; restated here because the guard's reach, not this node's change, is what leaves it out."
+    },
+    {
+      "file": "benchmarks/backend_divergence_forensics.py",
+      "line": "24",
+      "severity": "follow-on",
+      "text": "The two benchmark importers (this file and pure_arm_comparison_figure.py) now compute DEFAULT_SHADOW_ROOT / DEFAULT_PINNED_ROOT as Path('/home/ITER/mcintos/Code') / ('.' + WORKTREE_ROOT) / 'nova-a0f1e0938fc2/s18-hexgrid/...'. The literal 'reckon-worktrees' is gone from the source, so the census and guard pass, but the resolved default root still names a specific since-removed worktree. \u00a73 explicitly instructed this import, so the node is compliant; recorded because the artifact still locates a nonexistent path, which is the \u00a71 concern the plan exists to fix, and a later node may prefer a portable default."
+    }
+  ],
+  "follow_on_finding_count": 4,
+  "gate_logs": {
+    "base": {
+      "completed": true,
+      "exit_status": 1,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/logs/negative-control-guard-at-base.log",
+      "note": "guard test at dispatch base: 1 failed, 1 passed; names 70 offenders",
+      "revision": "a04e8ff81190a1131a4b75742f220001fc533b34"
+    },
+    "head": {
+      "completed": true,
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T100839563604-acnwp-launch-scripts-and-guard/logs/gate-head-pytest.log",
+      "note": "47 passed, 3 skipped; header revision mislabels the base sha (see finding)",
+      "revision": "fb17b44c9717169806b6cd7106be4010bc68b39b"
+    }
+  },
+  "item_verdicts": {
+    "call_sites": "worktree_path_offenders consumed by tests/test_artifacts_carry_no_worktree_paths.py (both tests) and by nova/database/scripts.py relativize --check; relativize_worktree_paths still consumed by the relativize apply path; WORKTREE_ROOT imported by the two benchmarks.",
+    "diff": "Read: 62 launch scripts given a run-time root (realpath-first shell idiom / git rev-parse in Python), 5 residual data files repaired or reworded, benchmarks import WORKTREE_ROOT, nova/database/scripts.py gains relativize --check and _staged_files/_staged_text, tests/test_render_receipt_paths.py drops the superseded scan + helpers, new guard test and hook.",
+    "done_when": "Reproduced independently: census at head lists only nova/database/filepath.py (exempt); 48 .sh + 10 .sbatch pass bash -n; 9 changed .py compile; probe 62/62 lines print this worktree's toplevel; guard test 2 passed EXIT=0 at head; predicate returns 70 offenders at base and 0 at head; hook --check rejects EXIT=1 then accepts EXIT=0 in a scratch repo.",
+    "goal": "\u00a73 and \u00a74 delivered in one commit fb17b44c9: 58 shell/sbatch launch scripts + 4 Python launch scripts resolve their root at run time; the two benchmark importers take WORKTREE_ROOT; the five residual data files are repaired or reworded; tests/test_artifacts_carry_no_worktree_paths.py and scripts/git-hooks/pre-commit land; filepath relativize --check is added; the superseded receipt scan is deleted.",
+    "manifest": "Read; status complete; single commit fb17b44c9; gate logs gate-head-pytest, guard-at-head, negative-control-guard-at-base, hook-scratch-arms, probe_roots present. after_suite.revision mislabels the base sha (finding).",
+    "write_paths": "Diff a04e8ff81..fb17b44c9 touches 74 files, all inside the manifest's declared write paths; no plan file edited; no PNG/SVG; no solver or SLURM submission."
+  },
+  "justifications": {
+    "durability": "The \u00a74 guard is durable by construction: tests/test_artifacts_carry_no_worktree_paths.py scans every tracked file through the one predicate, carries a positive control that asserts the scan reaches a file in every top-level directory and that the reader returns non-empty content, and runs unmarked in the fast lane. The hook plus relativize --check is the commit-time arm. Held below full because core.hooksPath is deliberately not set (the plan defers enabling to the coordinator), so at head the commit-time guard is present but inert until enabled, and the guard's reach excludes binary files, leaving the tracked .pstats dump unguarded.",
+    "evidence": "Independently reproduced, in this worktree: (1) the guard test at head \u2014 2 passed, EXIT=0 (review-guard-at-head.log); (2) the census \u2014 base 71 files incl. exempt filepath.py (70 offenders), head only filepath.py (0 offenders); (3) worktree_path_offenders fed head's predicate over base content \u2014 base 70 offenders, head 0; (4) the hook's --check mechanism in a scratch git repo \u2014 staged offender exits 1 naming it, after relativize exits 0 (review-hook-check.log); (5) bash -n on 48 .sh and 10 .sbatch (0 failures) and compile() on 9 .py (0 failures); (6) probe_roots.log 62 OK lines. Marked down because the manifest's after_suite.revision and gate-head-pytest.log's '# revision:' header name the base sha a04e8ff81 rather than the head fb17b44c9, so the head arm's own record misidentifies the revision it tested.",
+    "fit": "The change sits at the plan's named seam: it reuses \u00a72's worktree_path_offenders and relativize_worktree_paths rather than defining a second rule, uses the realpath-first idiom the plan cites from scripts/nova_lane/run.sh, and adds --check as a mode on the existing filepath click group rather than a new command. The hook is the single commit-time check the plan designates, a two-line shim delegating to the subcommand.",
+    "goal_fidelity": "Every \u00a73 and \u00a74 deliverable is present and independently re-derived. \u00a73: the census at head lists only nova/database/filepath.py, so no launch script contains the pattern; each of the 62 scripts given a run-time root evaluates to this worktree's git toplevel (probe 62/62), and the shell idiom is the plan's realpath-first BASH_SOURCE form; the four Python scripts use git rev-parse from Path(__file__).resolve().parent; the two benchmarks import WORKTREE_ROOT. \u00a74: the guard test passes at head and fails at base naming the offenders, its positive control reaches every top-level directory and asserts the reader is live, the two-line hook shim runs the checkout's interpreter with PYTHONPATH set to the checkout, relativize --check reads staged files and exits nonzero, and the superseded scan plus _scanned_json and RECEIPT_DIRECTORIES are deleted. Held below full marks only for the self-contradicting sentence the hand-repair left in figure-and-solver-audit-landed.html.",
+    "reuse": "No new machinery: the guard test adds no pattern matching of its own (the docstring and code call worktree_path_offenders), the deletion removes a duplicate scan, the hook is three lines, and the Python scripts reuse the existing WORKTREE_ROOT constant. The only new module is the guard test file the plan names.",
+    "scope_discipline": "The range a04e8ff81..fb17b44c9 changes 74 files: 48 .sh, 10 .sbatch, 9 .py, 5 under docs/evidence, the landing fragment and the report. Every path is inside the manifest's declared write paths; nova/database/filepath.py is declared but untouched. No plan file is edited, no PNG or SVG changes, nothing invokes uv sync, and no script is executed against a solver or a SLURM partition \u2014 the heavy pytest (596 s) ran in place on the fleet compute node (job 1277272), which the allocation rule permits."
+  },
+  "limitations": [
+    "The reviewed run's three-file pytest arm (596 s) was not re-run by this review; the guard test alone (35 s) and the hook mechanism were re-run instead. The 47-passed head figure is read from the reviewed run's gate-head-pytest.log.",
+    "The base offender count (70) was reproduced with the census command and with head's predicate over base-revision content, not by re-running the full guard test inside a base tree extraction.",
+    "The two benchmark default roots resolve to a since-removed worktree; whether a portable default is wanted is a plan-level question, not resolved here."
+  ],
+  "node": "review-of-acnwp-launch-scripts-and-guard",
+  "project": "nova",
+  "raw_text": "VERDICT goal: \u00a73 and \u00a74 delivered in one commit fb17b44c9: 58 shell/sbatch launch scripts + 4 Python launch scripts resolve their root at run time; the two benchmark importers take WORKTREE_ROOT; the five residual data files are repaired or reworded; tests/test_artifacts_carry_no_worktree_paths.py and scripts/git-hooks/pre-commit land; filepath relativize --check is added; the superseded receipt scan is deleted.\nVERDICT done_when: Reproduced independently: census at head lists only nova/database/filepath.py (exempt); 48 .sh + 10 .sbatch pass bash -n; 9 changed .py compile; probe 62/62 lines print this worktree's toplevel; guard test 2 passed EXIT=0 at head; predicate returns 70 offenders at base and 0 at head; hook --check rejects EXIT=1 then accepts EXIT=0 in a scratch repo.\nVERDICT write_paths: Diff a04e8ff81..fb17b44c9 touches 74 files, all inside the manifest's declared write paths; no plan file edited; no PNG/SVG; no solver or SLURM submission.\nVERDICT manifest: Read; status complete; single commit fb17b44c9; gate logs gate-head-pytest, guard-at-head, negative-control-guard-at-base, hook-scratch-arms, probe_roots present. after_suite.revision mislabels the base sha (finding).\nVERDICT diff: Read: 62 launch scripts given a run-time root (realpath-first shell idiom / git rev-parse in Python), 5 residual data files repaired or reworded, benchmarks import WORKTREE_ROOT, nova/database/scripts.py gains relativize --check and _staged_files/_staged_text, tests/test_render_receipt_paths.py drops the superseded scan + helpers, new guard test and hook.\nCALL_SITES: worktree_path_offenders consumed by tests/test_artifacts_carry_no_worktree_paths.py (both tests) and by nova/database/scripts.py relativize --check; relativize_worktree_paths still consumed by the relativize apply path; WORKTREE_ROOT imported by the two benchmarks.\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: Every \u00a73 and \u00a74 deliverable is present and independently re-derived. \u00a73: the census at head lists only nova/database/filepath.py, so no launch script contains the pattern; each of the 62 scripts given a run-time root evaluates to this worktree's git toplevel (probe 62/62), and the shell idiom is the plan's realpath-first BASH_SOURCE form; the four Python scripts use git rev-parse from Path(__file__).resolve().parent; the two benchmarks import WORKTREE_ROOT. \u00a74: the guard test passes at head and fails at base naming the offenders, its positive control reaches every top-level directory and asserts the reader is live, the two-line hook shim runs the checkout's interpreter with PYTHONPATH set to the checkout, relativize --check reads staged files and exits nonzero, and the superseded scan plus _scanned_json and RECEIPT_DIRECTORIES are deleted. Held below full marks only for the self-contradicting sentence the hand-repair left in figure-and-solver-audit-landed.html.\nSCORE evidence: 17\nJUSTIFICATION evidence: Independently reproduced, in this worktree: (1) the guard test at head \u2014 2 passed, EXIT=0 (review-guard-at-head.log); (2) the census \u2014 base 71 files incl. exempt filepath.py (70 offenders), head only filepath.py (0 offenders); (3) worktree_path_offenders fed head's predicate over base content \u2014 base 70 offenders, head 0; (4) the hook's --check mechanism in a scratch git repo \u2014 staged offender exits 1 naming it, after relativize exits 0 (review-hook-check.log); (5) bash -n on 48 .sh and 10 .sbatch (0 failures) and compile() on 9 .py (0 failures); (6) probe_roots.log 62 OK lines. Marked down because the manifest's after_suite.revision and gate-head-pytest.log's '# revision:' header name the base sha a04e8ff81 rather than the head fb17b44c9, so the head arm's own record misidentifies the revision it tested.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The range a04e8ff81..fb17b44c9 changes 74 files: 48 .sh, 10 .sbatch, 9 .py, 5 under docs/evidence, the landing fragment and the report. Every path is inside the manifest's declared write paths; nova/database/filepath.py is declared but untouched. No plan file is edited, no PNG or SVG changes, nothing invokes uv sync, and no script is executed against a solver or a SLURM partition \u2014 the heavy pytest (596 s) ran in place on the fleet compute node (job 1277272), which the allocation rule permits.\nSCORE durability: 17\nJUSTIFICATION durability: The \u00a74 guard is durable by construction: tests/test_artifacts_carry_no_worktree_paths.py scans every tracked file through the one predicate, carries a positive control that asserts the scan reaches a file in every top-level directory and that the reader returns non-empty content, and runs unmarked in the fast lane. The hook plus relativize --check is the commit-time arm. Held below full because core.hooksPath is deliberately not set (the plan defers enabling to the coordinator), so at head the commit-time guard is present but inert until enabled, and the guard's reach excludes binary files, leaving the tracked .pstats dump unguarded.\nSCORE fit: 19\nJUSTIFICATION fit: The change sits at the plan's named seam: it reuses \u00a72's worktree_path_offenders and relativize_worktree_paths rather than defining a second rule, uses the realpath-first idiom the plan cites from scripts/nova_lane/run.sh, and adds --check as a mode on the existing filepath click group rather than a new command. The hook is the single commit-time check the plan designates, a two-line shim delegating to the subcommand.\nSCORE reuse: 19\nJUSTIFICATION reuse: No new machinery: the guard test adds no pattern matching of its own (the docstring and code call worktree_path_offenders), the deletion removes a duplicate scan, the hook is three lines, and the Python scripts reuse the existing WORKTREE_ROOT constant. The only new module is the guard test file the plan names.",
+  "review_run_id": "r-20261006T105255319956-review-of-acnwp-launch-scripts-and-guard",
+  "review_scope": "Independent review of the \u00a73 launch-script run-time-root node and the \u00a74 guard it carries: the 62 launch scripts given a run-time root, the five residual data files, the two benchmark importers, the new guard test, the relativize --check mode, the pre-commit hook and the deletion of the superseded scan. Read-only: an independent re-run of the guard test, the census at base and head, the offender predicate over both revisions, the hook --check mechanism in a scratch repo, bash -n and a compile check; no solver run, no figure render, no full-suite arm.",
+  "reviewed_base_sha": "a04e8ff81190a1131a4b75742f220001fc533b34",
+  "reviewed_commits": [
+    "fb17b44c9717169806b6cd7106be4010bc68b39b"
+  ],
+  "reviewed_head_sha": "fb17b44c9717169806b6cd7106be4010bc68b39b",
+  "reviewed_run_id": "r-20261006T100839563604-acnwp-launch-scripts-and-guard",
+  "reviewer": "review-of-acnwp-launch-scripts-and-guard",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T11:02:00+00:00",
+  "total": 111,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T105255319956-review-of-acnwp-launch-scripts-and-guard/review-guard-at-head.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T105255319956-review-of-acnwp-launch-scripts-and-guard/review-census.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T105255319956-review-of-acnwp-launch-scripts-and-guard/review-hook-check.log"
+  ]
+}

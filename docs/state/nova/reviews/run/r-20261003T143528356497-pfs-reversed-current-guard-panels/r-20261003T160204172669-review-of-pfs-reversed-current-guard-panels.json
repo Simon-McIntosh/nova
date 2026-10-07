@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "artifacts": "docs/figures/playable-forward-solve/reversed-current-guard/{diagnosis.png (row 50), diagnosis-row30.png, diagnosis-row55.png} regenerated and independently reproduced here: rendering only from the committed diagnosis.json gives sha256 b9729fa0...bf7471 (diagnosis.png), 5ec7b6e3...512b7293b2 (row30), c415bb51...8ac7bf765 (row55) and 7675919d...2c97a4 (render-receipt.json), each identical to the committed file. diagnosis.json: shot 22475, revision 9c4a2257aba7, host 98dci4-clu-2018, wall_rz_m 37 points; row 30 converged CONVERGED 3 trips residual 0.0; row 50 unconverged ACTIVE_SET_SETTLED 11 trips residual null; row 55 unconverged ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED 16 trips residual 0.13798999335500364; all three refuse class DIVERTED (NoQualifiedAxisError). Census O-candidate counts post-fix 0/0/2 against 30/30/30 padding on the pre-repair payloads.",
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+    "9c4a2257a",
+    "c0dfe1f00"
+  ],
+  "completed_at": "2026-10-03T16:13:33.307Z",
+  "delta_note": "First review of this run. The diff range is 0dfce2a0d (the node's orientation base and the pre-repair artifact revision) to c0dfe1f00 (its landed head, the revision this review is keyed on). Two commits: 9c4a2257a (census masked by retained_valid, panels retitled, empty centroid panel removed) and c0dfe1f00 (census drawn through the nova.media painters, render-only path added, receipt and regenerated panels committed). I reproduced the guard and both controls first-hand and independently reproduced the committed panels by rendering only from the committed receipt (byte-identical).",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T16:02:24Z",
+  "evidence_inputs": "The pre-repair defect reproduces: scratch/r30.json reports 30 o_candidates all at (r_m,z_m)=(0.0,0.0) with candidate_slots 30, and the post-fix committed receipt reports 0 for row 30, 0 for row 50 and 2 for row 55 with o_retained_valid marking only the live slots \u2014 the fix is the retained_valid mask in _census_rows (benchmarks/reversed_current_guard_diagnosis.py:110). Guard: JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_reversed_current_guard_panels.py -> 5 passed (EXIT=0) at c0dfe1f00. Negative controls reproduced here: control A (base revision's pre-repair PNGs, no receipt) -> 5 failed (EXIT=1); control B (receipt built from the pre-repair payloads) -> test_census_rows_are_admitted_candidates_not_padding and test_panels_are_titled_for_the_state_each_one_shows fail, 2 failed/3 passed (EXIT=1).",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/reversed_current_guard_diagnosis.py",
+      "line": "845",
+      "severity": "follow-on",
+      "text": "the receipt records revision 9c4a2257aba7 (the solve commit) and _render_receipt copies it into render-receipt.json, but the three committed PNGs were drawn at c0dfe1f00, which is the commit that adds the media-painter drawing code and regenerates them; a reader who resolves the receipt's revision against the tree therefore finds the figures drawn by a later revision than the one stamped, so the stamp names the solve rather than the drawing code. Minor: the diagnostic numbers come from the solve and do not depend on the painters, so the staleness is a labelling gap, not a wrong measurement."
+    },
+    {
+      "file": "tests/test_reversed_current_guard_panels.py",
+      "line": "109",
+      "severity": "follow-on",
+      "text": "test_panels_are_titled_for_the_state_each_one_shows validates each PNG only by existence and size>5000 and compares the title by re-deriving it through the same census_title() the driver used to write it, so the guard cannot fail on a re-render that keeps the receipt but omits the first wall, the EFIT axis or the admission verdict from the panel, nor on a PNG that no longer matches its render-receipt entry. The independent render-only byte-identity check I ran (sha256 match for all three PNGs and the render-receipt) closes the stale-PNG case here, but it is not part of the guard."
+    }
+  ],
+  "follow_ons": "Outside this node's write scope and not blocking it: (1) the receipt's revision field names the solve revision (9c4a2257a) rather than the revision the panels were drawn at, so a reader cannot tell the drawing code revision from the receipt alone; (2) the guard validates the PNG only by existence and size, so it would not catch a re-render that omitted the first wall or the admission verdict \u2014 closing that belongs in the test, not this node's artifacts.",
+  "gate_arms_note": "The reviewed manifest carries baseline_suite and after_suite as null (it ran no full-suite arms), so added_failure_count is derived from the reviewed run's own committed gate logs: the pre-repair arm is scratch/negative-control.log (7 FAILED lines, EXIT=1) and the head arm is scratch/test-green.log (5 passed, 0 FAILED, EXIT=0). reckon.crew.review.added_failures_from_gate_logs over those two texts returns (0, []), so the head added no failing test the pre-repair arm did not already fail, hence added_failure_count 0 and added_failure_ids []. With an empty added set there is no failure_attribution.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the driver is invoked as a benchmark entry point; no production call sites",
+    "diff": "Read commit by commit against base 0dfce2a0d: 9c4a2257a masks the census by retained_valid, retitles the panels and removes the empty centroid panel; c0dfe1f00 draws the census through the nova.media painters, adds the render-only path, commits the receipt and regenerates the three PNGs; 8 files changed, all inside the declared scope.",
+    "done_when": "No done-when string was quoted for this followup; the reviewed manifest names the gate tests/test_reversed_current_* requires the titles to re-derive from the receipt and requires a red negative control, and I read and reproduced both.",
+    "goal": "The followup f-fsaudit-repair-reversed-current-guard-diagnosis-panels asked to persist a receipt beside the three panels, title each census panel by the terminal state it actually holds (carrying the residual), draw the first wall and the admission verdict, and drop or fill the empty 'achieved vs EFIT target z' middle panel; all four landed and the pre-repair census padding at R=0 is removed.",
+    "manifest": "Read; status complete, commits 9c4a2257a and c0dfe1f00 named, the gate command and its 5-passed result recorded, and baseline_suite/after_suite present as null.",
+    "write_paths": "The manifest declares benchmarks/reversed_current_guard_diagnosis.py, tests/test_reversed_current_guard_panels.py, the pfs-reversed-current-guard-panels fragment and the reversed-current-guard figure tree; git diff --name-status 0dfce2a0d..c0dfe1f00 lists only paths inside those grants."
+  },
+  "justifications": {
+    "durability": "The guard exists and is shown to fire: control A (committed pre-repair panels, receipt absent) reddens 5/5 and control B (a receipt built from the pre-repair payloads) reddens the padding and title assertions, 2 failed/3 passed, both EXIT=1, both reproduced here. But test_panels_are_titled_for_the_state_each_one_shows (tests/test_reversed_current_guard_panels.py:111) compares the render-receipt's stored title against census_title() re-derived from the same driver function, and the PNG itself is checked only for existence and size>5000 (line 109), so a future re-render that dropped the wall or the verdict line while refreshing the receipt would stay green, and nothing asserts the drawn PNG carries the title.",
+    "evidence": "I reproduced the run's own gate (5 passed, EXIT=0) and both negative-control arms myself, checked the committed diagnosis.json carries the claimed row facts, and confirmed rendering only from the committed receipt reproduces all three PNGs and render-receipt.json byte for byte (sha256 identical, RENDER_EXIT=0). One shortfall: the receipt's own revision field reads 9c4a2257aba7 (the solve commit) while the panels and the receipt were committed at c0dfe1f00 through media painters added in that later commit, so the receipt does not name the revision the figures were drawn at, and the render-receipt copies that same solve revision (benchmarks/reversed_current_guard_diagnosis.py:812,845).",
+    "fit": "The change follows the module's receipt-driven idiom (a render-only path that rebuilds from the committed receipt with no solve, rows persisted as they land), draws through the committed nova.media painters (ink.trace_axes, poloidal.draw_wall, poloidal.draw_nulls) that the repo rules require, states mechanisms in docstrings, deletes the dead _error_label helper rather than leaving it, and both commits carry a conventional subject with a substantive body and no attribution trailer; the naming scan over the three touched source/HTML paths returns nothing.",
+    "goal_fidelity": "benchmarks/reversed_current_guard_diagnosis.py now composes two panels: _draw_figure (line 355 onward) renders a relative-residual trace titled by _state_label, and _draw_census_panel draws the first wall (poloidal.draw_wall over the receipt's wall_rz_m, 37 points), the EFIT axis and the admitted X-nulls via poloidal.draw_nulls, with census_title composing '<state> \u2014 class DIVERTED refused (NoQualifiedAxisError)'. The dead centroid band panel and _error_label are deleted, and _census_rows now filters by the census's own retained_valid so the zero-filled padding no longer plots 30 candidates at R=0 (row 30 has 0 O-candidates post-fix against 30 padding slots pre-fix; row 55 has 2). The committed receipt carries row 30 CONVERGED residual 0.0, row 50 unconverged ACTIVE_SET_SETTLED 11 trips residual null, row 55 ACTIVE_SET_ITERATION_BUDGET_EXHAUSTED 16 trips residual 1.380e-01, all three refusing the requested class.",
+    "scope_discipline": "git diff --name-status 0dfce2a0d..c0dfe1f00 lists exactly the eight declared paths (the benchmark, the test, the fragment, diagnosis.json, render-receipt.json and the three PNGs) and nothing else, all within the manifest's granted write paths."
+  },
+  "node": "review-of-pfs-reversed-current-guard-panels",
+  "plan": "nova:playable-forward-solve",
+  "previous_review_record": null,
+  "prior_findings_answered": [],
+  "project": "nova",
+  "raw_text": "VERDICT goal: the followup asked for a committed receipt, per-state census panel titles, a drawn first wall and admission verdict, and the empty centroid panel dropped; all four landed and the R=0 census padding is masked away.\nVERDICT done_when: no done-when string was quoted; the manifest names tests/test_reversed_current_guard_panels.py and a negative control, and I read and reproduced both.\nVERDICT write_paths: git diff --name-status 0dfce2a0d..c0dfe1f00 lists only paths inside the manifest's declared write paths.\nVERDICT manifest: read; status complete, commits 9c4a2257a and c0dfe1f00, gate 5 passed, baseline_suite/after_suite null.\nVERDICT diff: read commit by commit against base 0dfce2a0d; eight files changed, all inside scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: two panels now, residual trace titled by state and a poloidal census panel drawing the 37-point first wall, the EFIT axis, admitted X-nulls and the admission verdict, with the census masked by retained_valid so the zero-filled padding no longer plots at R=0.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate 5 passed EXIT=0 reproduced; both negative controls reproduced; committed receipt carries the claimed row facts; render-only from the committed receipt reproduces all three PNGs and render-receipt.json byte for byte; the receipt's revision stamp names the solve revision rather than the drawing revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: exactly the eight declared paths changed, all inside the granted write paths.\nSCORE durability: 16\nJUSTIFICATION durability: the guard reddens 5/5 on the pre-repair panels and 2/5 on a pre-repair receipt, reproduced here, but the PNG is validated only by size and the title comparison re-derives through the same function the driver wrote, so a re-render dropping the wall or verdict would stay green.\nSCORE fit: 18\nJUSTIFICATION fit: receipt-driven render-only idiom, committed nova.media painters, mechanism docstrings, dead helper removed, conventional bodies with no attribution and no plan label, clean naming scan.\nFINDING benchmarks/reversed_current_guard_diagnosis.py:845 follow-on: the receipt's revision is the solve revision 9c4a2257aba7 while the panels were drawn at c0dfe1f00, so the stamp does not name the drawing revision.\nFINDING tests/test_reversed_current_guard_panels.py:109 follow-on: the PNG is checked only for existence and size>5000 and the title is compared against the same driver function, so the guard cannot fail on a re-render that omits the wall or verdict.\n",
+  "review_base_sha": "bedd9ed6dc98ffcd246b47b203df895c5630c7e9",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261003T160204172669-review-of-pfs-reversed-current-guard-panels",
+  "reviewed_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "reviewed_commit": "c0dfe1f00febca8e1fb5ea0dd2ea52956cefc413",
+  "reviewed_head_sha": "c0dfe1f00febca8e1fb5ea0dd2ea52956cefc413",
+  "reviewed_run_id": "r-20261003T143528356497-pfs-reversed-current-guard-panels",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-reversed-current-guard-panels",
+  "reviewer_node": "review-of-pfs-reversed-current-guard-panels",
+  "reviewer_run_id": "r-20261003T160204172669-review-of-pfs-reversed-current-guard-panels",
+  "reviewing_run_id": "r-20261003T160204172669-review-of-pfs-reversed-current-guard-panels",
+  "run_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a78",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T16:14:00Z",
+  "total": 91,
+  "verdict": "pass"
+}

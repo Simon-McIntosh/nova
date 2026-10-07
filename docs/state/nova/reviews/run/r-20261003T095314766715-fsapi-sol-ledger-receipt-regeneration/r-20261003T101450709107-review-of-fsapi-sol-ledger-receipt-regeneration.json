@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_source": "Derived from the reviewed run's own gate logs. Head arm: gate-sol-ledger-render.log (revision a6fe0d05b, tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-sol-ledger-receipt-regeneration) ends '4 passed in 8.98s' with 'EXIT=0'. Second gate gate-net-census-read.log (same revision) ends 'EXIT=0' with 'NEGATIVE-CONTROL OK: old receipt raised ValueError'. Third gate gate-census-h200.log ends 'NOVA_LANE_EXIT_STATUS=0'. gate-census-regeneration.log reads 'EXIT=124' (the login-node CPU attempt that hit its wall and was re-run on the H200 lane); it carries no failing test id, so it contributes nothing to the failing-id set. The head arm is readable and its failing-id set is empty, so added_failure_count is 0. No readable base arm for tests/test_sol_ledger_render.py exists in the run's logs (the node is a data regeneration whose focused module passes at both base and head); an independent re-run of the same module at base a6fe0d05 in this review is also 4 passed, confirming the module was green before and after and the node adds no failure.",
+  "completed_at": "2026-10-03T10:23:24.260Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T10:15:11Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solve-api/fsapi-sol-ledger-receipt-regeneration.html",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence fragment (and the manifest, echoed in the commit body) states 'All 328 changed float fields moved at the last-bit level only -- max relative change 2.3e-13 on physical quantities', but 2.3e-13 is the max over the headline aggregate scalars only (ledger.common_sol). Over the full changed population of physical quantities (|value|>1) the max relative change is 1.619e-10, at per_cell[111].current_a (1.7545606765386679 -> 1.7545606762546715). The conclusion that the drift is numerical rather than physical is unaffected and independently confirmed here, but the stated bound does not cover the per-cell fields the sentence claims to bound. Recommend restating the figure as the headline-scalar bound (2.3e-13) separate from the per-cell bound (1.6e-10), both numerical."
+    }
+  ],
+  "follow_ons": [
+    "Out of scope, pre-existing: the reviewed run reports a still-open followup that the receipt regeneration should carry clip_mode under the request-field contract; the plan's next item (f-20260909T210712175233, the transport seam in imas-ambix / equilibrium_sweep) is a separate node and is not part of this review's remit.",
+    "Full-suite delta at the merged head is not settled here: this node regenerates a committed data receipt and its focused module passes at both base and head, so a whole-suite run at the integrated head belongs to the separately dispatched test node, not to this review."
+  ],
+  "independent_checks": [
+    {
+      "check": "reader guard reproduced with its negative control",
+      "command": "PYTHONPATH=$PWD JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python /tmp/reader_probe.py  (imports benchmarks/net_current_scaling_census.py and calls _read_sol_ledger against each committed receipt)",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T101450709107-review-of-fsapi-sol-ledger-receipt-regeneration/review-reader-probe.log",
+      "result": "NEW: status=read-from-committed-receipt clip_mode=chord residual=2.724886869861623e-14 converged=True. OLD(negative-control): RAISED ValueError: \"... predates the 'clip_mode' receipt key and carries the retired clip-mode key instead\". Guard fires both ways.",
+      "revision": "c65d983223054fedac666a354cce782e0edb4fc2 (new) and a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47 (old)",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-fsapi-sol-ledger-receipt-regeneration"
+    },
+    {
+      "check": "focused module re-run at base",
+      "command": "PYTHONPATH=$PWD JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_sol_ledger_render.py -q",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T101450709107-review-of-fsapi-sol-ledger-receipt-regeneration/review-test-base.log",
+      "result": "4 passed in 8.47s; EXIT=0. Matches the reviewed run's head gate (4 passed in 8.98s); the module is green before and after and reads no clip_mode key.",
+      "revision": "a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-fsapi-sol-ledger-receipt-regeneration"
+    },
+    {
+      "check": "full structural + float comparison of the old and new committed receipts",
+      "command": "git show a6fe0d05b:<receipt> and git show c65d9832:<receipt> into /tmp, then /tmp/cmp_receipts.py, /tmp/cmp_floats.py, /tmp/cmp2.py",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T101450709107-review-of-fsapi-sol-ledger-receipt-regeneration/review-receipt-compare.txt",
+      "result": "path sets equal except {/support_clip_mode/available,/support_clip_mode/reason} -> {/clip_mode}; 1 categorical change (/source_revision); 1071 changed float leaf paths; per_cell key set identical with 0 categorical diffs and 314 float diffs; max relative change over |value|>1 = 1.619e-10 at /per_cell[111]/current_a; four leaves with rel>1e-6 all have |value|<=7e-13; topology_branch.axis[1] rel = 5.035e-01.",
+      "revision": "a6fe0d05b (old) vs c65d9832 (new)",
+      "tree": "scratch"
+    }
+  ],
+  "item_verdicts": {
+    "durability": "PASS. Commit c65d9832 carries a conventional subject ('chore(benchmarks): record the clip mode under clip_mode in the SOL ledger receipt') and a non-empty body explaining what changed and why, is the reviewed worktree HEAD (git -C <reviewed worktree> rev-parse HEAD = c65d9832...), and the reviewed worktree is clean. No AI attribution is present. The evidence fragment is committed alongside.",
+    "figures_regenerated": "PASS. The panel sol-ledger-current.png (255507 -> 255143 bytes) and sol-ledger-current.svg (114 lines changed) are redrawn from the regenerated receipt, and sol-ledger-render.json's six changed lines are exactly the receipt/png/svg absolute paths repointed at this worktree; the title text and canvas metrics are unchanged (common-SOL total 1072.71 A split 844.49 A in the 16 fitted-cut cells + 228.22 A in the 15 fully open cells, identical to the old receipt's split).",
+    "float_drift_is_numerical": "PASS in conclusion, with a corrected figure. The receipt's floats changed, and every change is numerical noise, not physical: the changed set is 314 per_cell float leaves plus the top-level scalars and the render sub-receipt's mirrors. Over the headline aggregate quantities the max relative change is indeed 2.3e-13 (ledger.common_sol 1072.7057484194079 -> 1072.7057484191655, rel 2.3e-13) and 3.1e-14 (ledger.core / plasma_current_a, rel 3.2e-14); both are the last few ulps of a float64. Over the FULL changed population the max relative change on a quantity of magnitude > 1 is 1.619e-10, at per_cell[111].current_a (1.7545606765386679 -> 1.7545606762546715); the four leaves with relative change above 1e-6 are all values of order 1e-13 or smaller where the relative measure is meaningless (see naive_0.50_field). A 1.6e-10 relative drift in a per-cell ampere value across 1248 commits of equilibrium/solver change is floating-point reduction drift, not a physical change, and it sits far below the printed two-decimal precision the verdict and title use. The conclusion holds; the manifest's blanket 'max 2.3e-13' applies to the headline scalars only and does not bound the per-cell fields.",
+    "goal": "PASS. The node's goal -- the committed SOL ledger census receipt must carry clip_mode (not the retired support_clip_mode) so benchmarks/net_current_scaling_census.py reads it instead of raising -- is met at head c65d9832. Independently confirmed by direct extraction from both commits: old receipt (a6fe0d05b) has key support_clip_mode = {available:false, reason:'...'}; new receipt (c65d9832) has key clip_mode = 'chord' and no support_clip_mode. The retired key is gone.",
+    "naive_0_50_field": "NAMED AND EXPLAINED. The 'naive 0.50' figure in the manifest is topology_branch.axis[1]: 1.0176606877547874e-13 -> 2.049496285730968e-13, rel 5.035e-01 (mirrored exactly at render.nulls.axis[1]). It is NOT a physical change: both values are of order 1e-13, i.e. essentially zero, so the relative measure has no physical meaning -- a quantity indistinguishable from zero changed by another quantity indistinguishable from zero. The same holds for the other three large-relative leaves: fixed_point_residual 1.57e-14 -> 2.72e-14 (rel 0.42, the solver residual at its machine floor) and render.nulls.strike_points[0][1] 3.53e-13 -> 6.90e-13 (rel 0.49, a near-zero coordinate). topology_branch.axis[0] (1.0138, rel 9.2e-15) and boundary_flux (1.5406, rel 1.9e-14) confirm the genuine, non-zero quantities drift only at the last few ulps.",
+    "reader_guard_fires": "PASS, reproduced with its negative control. Calling the real benchmarks/net_current_scaling_census._read_sol_ledger (imported, receipt path pointed at each committed receipt) returns status 'read-from-committed-receipt', clip_mode 'chord', residual 2.724886869861623e-14, converged True on the new receipt, and raises ValueError on the retired-key receipt. The guard is load-bearing and the change is what closes it.",
+    "scope": "PASS. The commit touches exactly five paths, all inside the node's declared write scope: docs/figures/forward-solve-api/sol-ledger-census/{sol-ledger-census.json, sol-ledger-current.png, sol-ledger-current.svg, sol-ledger-render.json} and docs/evidence/fragments/forward-solve-api/fsapi-sol-ledger-receipt-regeneration.html. No product source, no test, no plan HTML, no shared index is touched (git show --stat c65d9832).",
+    "verdict_and_categoricals_identical": "PASS. Between the old and new committed receipts: verdict text identical, booking_line identical, converged_boolean identical (True), source_revision changed as expected (3d8315dde084cd2af5bbc5e16052b143b411f7ee -> a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47). Cell counts identical: 157 per_cell rows, common_sol_split.common_sol_cut_cell_count = 16 and common_sol_uncut_cell_count = 15 unchanged. All non-float per_cell fields (cell_index, domain, production_clip_included, production_clip_cut, fitted_separatrix_through, analytic_separatrix_through) have zero diffs across all 157 rows. The only non-float leaf change anywhere in the receipt is source_revision plus the clip_key rename itself."
+  },
+  "justifications": {
+    "durability": "The reviewed commit has a conventional bodied message with no AI attribution, is the reviewed worktree HEAD, the worktree is clean, and the evidence fragment and gate logs are committed/durable alongside it.",
+    "evidence": "The record rests on the run's readable head gate (test module 4 passed), an independently reproduced reader guard with a firing negative control, an independent base re-run of the same test module (4 passed), and a full structural and float-level comparison of both committed receipts. The one deduction is a quantitative overstatement in the manifest and evidence fragment: the blanket 'all 328 changed float fields moved at the last-bit level only, max relative 2.3e-13' is true only for the headline aggregate scalars, whereas the full changed population drifts up to 1.619e-10 relative (per_cell[111].current_a). The corrected figure does not change the conclusion -- both are floating-point reduction drift across 1248 solver commits, far below the printed two-decimal precision -- but the stated bound does not cover the per-cell fields it claims to bound, so the evidence dimension is scored 17 rather than higher.",
+    "fit": "The change reuses the existing fit: the committed driver benchmarks/sol_ledger_current_census.py is re-run with its committed arguments and the committed reader/guard is left to do its job, rather than authoring new machinery or hand-editing the receipt. Re-running the driver (rather than patching the JSON key) is what makes the receipt reproducible and keeps the figure and render receipt consistent with it.",
+    "goal_fidelity": "The node's goal is met exactly: the committed receipt now carries clip_mode='chord' and no support_clip_mode, and the consumer benchmarks/net_current_scaling_census._read_sol_ledger reads it without raising (independently reproduced, with the retired-key receipt raising ValueError as the negative control). Verdict, cell counts and all categorical fields are identical between the two receipts.",
+    "scope_discipline": "The commit touches exactly the five paths inside the declared write scope and nothing else: no product source, no test, no plan file, no shared index."
+  },
+  "node": "review-of-fsapi-sol-ledger-receipt-regeneration",
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT pass (94/100). The reviewed run at head c65d9832 (base a6fe0d05) regenerates docs/figures/forward-solve-api/sol-ledger-census/sol-ledger-census.json so it carries clip_mode='chord' instead of the retired support_clip_mode key, which had made benchmarks/net_current_scaling_census.py raise on it. Verified independently: the old committed receipt (a6fe0d05b) has support_clip_mode = {available:false,...} and no clip_mode; the new one (c65d9832) has clip_mode='chord' and no support_clip_mode. The consumer _read_sol_ledger, imported and run against each receipt, returns read-from-committed-receipt / clip_mode=chord / residual 2.72e-14 / converged True on the new receipt and raises ValueError on the retired-key receipt -- the guard is load-bearing and the change closes it. Verdict text, booking_line, converged_boolean, the 157 per_cell rows' non-float fields, and the common_sol_split counts (16 cut / 15 uncut) are all identical between the two receipts; the only categorical change is source_revision plus the clip-key rename. Floats moved only numerically: max relative change on the headline aggregates is 2.3e-13 (ledger.common_sol) and 3.2e-14 (ledger.core/plasma_current_a); over the full population of physical quantities the max is 1.619e-10 at per_cell[111].current_a. The 'naive 0.50' in the manifest is topology_branch.axis[1] (1.018e-13 -> 2.049e-13, rel 0.504), a value of order 1e-13 where the relative measure is meaningless -- not a physical change; the only other large-relative leaves (fixed_point_residual at its 1e-14 machine floor, render.nulls.strike_points[0][1] at 3.5e-13) are also near-zero values. The panel and render receipt are redrawn from the regenerated receipt; the render.json changes are only the repointed absolute paths. Scope is exactly the five declared paths. added_failure_count 0 (head arm readable, empty failing-id set; the module is also 4 passed at base in an independent re-run). One minor evidence-accuracy finding: the 'max relative 2.3e-13 over all 328 float fields' claim bounds only the headline scalars, not the per-cell currents (true max 1.6e-10), which does not affect the conclusion.",
+  "review_run_id": "r-20261003T101450709107-review-of-fsapi-sol-ledger-receipt-regeneration",
+  "review_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-fsapi-sol-ledger-receipt-regeneration",
+  "reviewed_base_sha": "a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47",
+  "reviewed_commit": "c65d983223054fedac666a354cce782e0edb4fc2",
+  "reviewed_head_sha": "c65d983223054fedac666a354cce782e0edb4fc2",
+  "reviewed_node": "fsapi-sol-ledger-receipt-regeneration",
+  "reviewed_run_id": "r-20261003T095314766715-fsapi-sol-ledger-receipt-regeneration",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-sol-ledger-receipt-regeneration",
+  "reviewer_node": "review-of-fsapi-sol-ledger-receipt-regeneration",
+  "reviewer_run_id": "r-20261003T101450709107-review-of-fsapi-sol-ledger-receipt-regeneration",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T10:22:00.000000+00:00",
+  "total": 94,
+  "verdict": "pass"
+}

@@ -1,0 +1,76 @@
+{
+  "absent": [
+    "no pytest suite arm exists for this node: the reviewed run declared baseline_suite=null and after_suite=null, and the change touches only pyproject.toml and uv.lock, which no test imports",
+    "the executed uv lock --check proves the lock matches pyproject's declared dependency set, not that pytest-timeout import-hooks fire a timeout at 300 s during a real suite run (the done-when scopes that to the separately dispatched test node)"
+  ],
+  "absent_items": [
+    {
+      "disposition": "out of scope for this node by its own done-when ('verifying the merged result belongs to a separately dispatched test node'); the review records the declaration and the lock check only.",
+      "item": "an end-to-end pytest run under the new timeout hook"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "56ee52a8de48066198ec4f6556e8a2021c0b013f",
+    "96b6e8c1e6e505ff922c4700250242bea25f03f3"
+  ],
+  "completed_at": "2026-10-01T21:24:11.856Z",
+  "dispatched_at": "2026-10-01T21:07:28Z",
+  "findings": [
+    {
+      "file": "docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log header's `revision:` line names the base commit a71934910 rather than the commit the change landed in. The landing commit 56ee52a8 is named only in the `--- landed` block at the foot (commit: / head at write:), so a reader re-issuing the gate from the header alone would run it against the wrong revision. State the landing commit on the header line when the receipt is captured after the commit lands."
+    },
+    {
+      "file": "docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the evidence path the node's own scope picked is under the .gitignore `*.log` rule (.gitignore:119), so the log was ignored and absent from the dependency commit 56ee52a8 \u2014 the defect fc304df8795 this run repaired. The repair force-added the single file (`git add -f`), which works but leaves the class unrepaired: the next node writing an evidence log to a *.log path hits the same gap. Prefer a tracked extension for evidence logs, or an explicit .gitignore negation for docs/evidence/**."
+    },
+    {
+      "file": "docs/evidence/fragments/nova-portfolio-replan/replan-pytest-timeout-and-xdist.html",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's evidence link is href=\"/nova/../docs/evidence/replan-2026-09-24/fast-lane/dependency-change.log\", which cannot resolve in the SPA \u2014 docs/ is served at /nova/, so the target is /nova/evidence/replan-2026-09-24/fast-lane/dependency-change.log. The project-absolute form with the embedded `..` is a malformed src; rewrite it as the served path."
+    }
+  ],
+  "gate_arms_note": "the reviewed run declared neither baseline_suite nor after_suite (both null in its manifest and in its machine classification record), so it produced no suite arms from which any failure id could be added; added_failure_count is 0 and added_failure_ids is empty by that absence, not by a measured zero. This node's own spec makes the node's gate a dependency-level check (uv lock --check plus a hook-active config), not a pytest suite arm, so no suite result is claimed for the node itself.",
+  "plan": "nova:nova-portfolio-replan",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "at 96b6e8c1e: git cat-file -e HEAD:<log> -> EXIT=0; the committed tree carries the 19-line log (blob present in 96b6e8c1e, 1 file changed, 19 insertions)",
+    "before": "at parent 56ee52a8: git cat-file -e 56ee52a8:docs/evidence/replan-2026-09-24/fast-look/dependency-change.log -> fatal: exists on disk, but not in '56ee52a8', EXIT=128",
+    "finding_id": "fc304df8795"
+  },
+  "review_run_id": "r-20261001T210714745578-review-of-replan-pytest-timeout-and-xdist",
+  "reviewed_base_sha": "a71934910d2a0835dd9f6ab35576eef5c2f44754",
+  "reviewed_head_sha": "96b6e8c1e6e505ff922c4700250242bea25f03f3",
+  "reviewed_revision": "96b6e8c1e6e505ff922c4700250242bea25f03f3",
+  "reviewed_run_id": "r-20261001T191537244113-replan-pytest-timeout-and-xdist",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/replan-pytest-timeout-and-xdist",
+  "reviewer_node": "review-of-replan-pytest-timeout-and-xdist",
+  "reviewer_run_id": "r-20261001T210714745578-review-of-replan-pytest-timeout-and-xdist",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:28.655442+00:00",
+  "total": 94,
+  "verdict": "pass",
+  "verified_independently": [
+    "pyproject.toml at 96b6e8c1e declares pytest-timeout>=2.4.0 and pytest-xdist>=3.8.0 in [dependency-groups].dev (lines 131-132) and sets timeout = 300 under [tool.pytest.ini_options] (line 272)",
+    "uv.lock at 96b6e8c1e carries pytest-timeout and pytest-xdist as dev-group members (uv.lock:2200-2201, 2286-2287) with their package entries (uv.lock:3188, 3200)",
+    "uv lock --check rerun by this review in a scratch tree holding only the committed pyproject.toml and uv.lock resolves 287 packages and exits 0 (LOCK_CHECK_EXIT=0), matching the reviewed run's log line",
+    "the reviewed worktree is clean at 96b6e8c1e with no uncommitted work"
+  ]
+}

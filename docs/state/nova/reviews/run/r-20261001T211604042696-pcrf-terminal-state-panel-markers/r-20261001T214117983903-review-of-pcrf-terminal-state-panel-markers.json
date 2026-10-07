@@ -1,0 +1,79 @@
+{
+  "absent": [
+    "no pytest suite arm exists for this node: the reviewed run declared baseline_suite=null and after_suite=null, and its change touches only a re-rendered figure, a census JSON and an evidence fragment, none of which a test imports",
+    "no automated regression guard exists for the draw-order default: a future edit to render()'s default or the analytic-column branch would not fail any test, only a fresh manual re-render"
+  ],
+  "absent_items": [
+    {
+      "disposition": "out of scope for this node: its write paths reach benchmarks/plasma_cell_terminal_state.py and docs artifacts, but no tests/ path, so a guard belongs to a separately dispatched node (recorded under follow-on below).",
+      "item": "an automated test that render(draw_order='reference-last') leaves zero panel-state pixels on the analytic panel"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "48a40fab18be098a17ea5df6d631c1b153a027f2",
+    "0efc4ad0d277c008112231ba1a28ce137999059c"
+  ],
+  "completed_at": "2026-10-01T22:03:46.440Z",
+  "dispatched_at": "2026-10-01T21:41:42Z",
+  "findings": [
+    {
+      "file": "benchmarks/plasma_cell_terminal_state.py",
+      "line": "307",
+      "severity": "follow-on",
+      "text": "follow-on: the draw-order fix is correct and at HEAD, but nothing automated defends it. _cluster_pixel_census (lines 248-301) returns the census and render() (line 433) stores it into the receipt under marker_pixel_census, yet no test asserts panel_pixels==0 for the analytic panel under the default order. The stated node scope excluded tests/, so the guard belongs to a follow-on node: assert the census on a re-render of the committed receipt (no solve), red when draw_order is reversed."
+    },
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-markers-census.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: this census file is a hand-assembled derivative of the receipt's own marker_pixel_census key (written by render() at line 433 into terminal-state-trip-arms.json), not an artifact the benchmark emits. This review confirmed the two agree exactly, but by construction they can drift the next time the figure is re-rendered without re-assembling the JSON. Prefer emitting terminal-state-markers-census.json from render() beside the figure, so the committed census and the receipt cannot disagree."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "gate_arms_note": "the reviewed run declared neither baseline_suite nor after_suite (both null in its manifest and in its machine classification record), so it produced no suite arms from which any failure id could be added; added_failure_count is 0 and added_failure_ids is empty by that absence, not by a measured zero. The node's gate is a re-render of a figure from a committed receipt (no solve), not a pytest suite arm, so no suite result is claimed for the node itself.",
+  "notes": "The node was dispatched to make the analytic panel draw its reference markers above the small panel-state markers, with an explicit branch: if the default order already did so at HEAD, say so with line numbers and change nothing in source. The source fix landed earlier at e8b613cef and is an ancestor of the reviewed head, so the node produced no source change. Its deliverable is the re-rendered figure plus a census recording the overpaint count in both draw orders, which this review reproduced byte-for-byte and value-for-value. Durability is marked below full because the fix is defended only by the presence of the correct default and a manual re-render, with no automated assertion guarding it (recorded as a follow-on).",
+  "plan": "nova:plasma-cell-read-fidelity",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "this review independently re-ran the node's gate in a scratch tree: reference-last analytic panel reference_pixels=675 panel_pixels=0 (EXIT=0); the declared negative control draw_order=panel-last gives reference_pixels=300 panel_pixels=333 (EXIT=0), i.e. reference pixels fall 675->300 as the panel markers overpaint them",
+    "before": "at base 48a40fab1 the source fix was already present (commit e8b613cef, ancestor); the reported defect was that the analytic column drew its null set twice, so the small panel-state markers overpainted the large reference markers",
+    "finding_id": "analytic-panel-overpaint (carried from review 95, r-20260923T051120272884)"
+  },
+  "review_run_id": "r-20261001T214117983903-review-of-pcrf-terminal-state-panel-markers",
+  "reviewed_base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+  "reviewed_head_sha": "0efc4ad0d277c008112231ba1a28ce137999059c",
+  "reviewed_revision": "0efc4ad0d277c008112231ba1a28ce137999059c",
+  "reviewed_run_id": "r-20261001T211604042696-pcrf-terminal-state-panel-markers",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-panel-markers",
+  "reviewer_node": "review-of-pcrf-terminal-state-panel-markers",
+  "reviewer_run_id": "r-20261001T214117983903-review-of-pcrf-terminal-state-panel-markers",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:28.678061+00:00",
+  "total": 95,
+  "verdict": "pass",
+  "verified_independently": [
+    "the commit 0efc4ad0d is the reviewed head and its worktree is clean (git status --porcelain empty)",
+    "commit e8b613cef ('fix(benchmarks): draw the analytic null set once and keep reference markers legible') is an ancestor of the reviewed head: git merge-base --is-ancestor e8b613cef 0efc4ad0d -> exit 0, so the 'no source change required' claim is true",
+    "benchmarks/plasma_cell_terminal_state.py at the reviewed head is byte-identical to this worktree's copy (diff empty: SOURCE-IDENTICAL-AT-MY-HEAD); DRAW_ORDERS=('reference-last','panel-last') at line 303, render default draw_order='reference-last' at line 307 and argparse default at line 596",
+    "the analytic column draws its null set once in the reference style (elif column==0, lines 376-382) and every other column draws the panel-state markers first and the reference markers after (else, lines 383-389), so no reference marker is overpainted; the original ordering is reachable only under the panel-last branch (lines 365-375)",
+    "every line number cited in the evidence fragment resolves to the construct it names (307, 596, 365-375, 376-382, 383-389, 248-301)",
+    "re-ran the node's gate in a TMPDIR scratch tree with /home/ITER/mcintos/Code/nova/.venv/bin/python, JAX_PLATFORMS=cpu, --render-only: both arms exit 0; marker_pixel_census reproduced the committed census exactly for both arms (ref panels {675,0},{674,88},{674,88}; neg panels {300,333},{654,115},{654,115})",
+    "the re-rendered PNG is byte-identical to the committed docs/figures/plasma-cell-read-fidelity/terminal-state-markers/terminal-state-trip-arms.png (cmp -> PNG-IDENTICAL)",
+    "positive control on the absence: the census box centred on the analytic saddle cluster reports reference_pixels=675 under reference-last, so the box contains detected reference markers and panel_pixels=0 is a true absence rather than an empty box; the negative control reverses this (panel_pixels=333)",
+    "the negative-control log records the declared mutation (reference-last 675 -> panel-last 300) and ends with a bare EXIT=0 line; the mutation's observable is a census value rather than a red test, which is the node's declared design (its write paths reach no test path)",
+    "the evidence fragment's links are project-absolute (/nova/figures/...), which is the form the reckon SPA resolves"
+  ]
+}

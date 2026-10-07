@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:46:12.861Z",
+  "dispatched_at": "2026-10-06T01:41:07Z",
+  "findings": [
+    {
+      "anchor": "nova/definitions.py:6",
+      "id": "reuse_search-1",
+      "reason": "\u00a73 must resolve the root for the Python branch from the rule: \"the toplevel of whichever checkout the script runs in\" is only guaranteed by resolving from the script's own file location, so replacing `nova.definitions.root_dir` with the script's own `Path(__file__)` (or the same `git rev-parse --show-toplevel` from its directory) makes the two branches agree and removes a wrong-tree output path.",
+      "text": "\u00a73 chooses `nova.definitions.root_dir` as the root owner for a Python launch script that already imports nova, but `root_dir = os.path.dirname(class_dir)` is an import-time value pinned to whichever checkout `nova` was imported from; measured now on this workstation the editable pointer at `.venv/lib/python3.14/site-packages/_editable_impl_nova_stella.pth` reads `/home/ITER/mcintos/Code/nova`, so a launch script running inside a worktree without `PYTHONPATH` set gets the main checkout's root, not its own, and would write its output beneath the wrong tree \u2014 the exact editable-repoint hazard AGENTS.md documents. The shell branch (which resolves from `BASH_SOURCE`) does not have this failure, so the two branches of \u00a73 disagree on what \"the script's root\" means",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/nova_lane/run.sh:300",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 should cite the existing three-file idiom as the form to reuse (or factor it into one shell helper sourced by the scripts it rewrites), which fixes the missing `realpath -e` and keeps one definition of \"the script's root\" rather than 64 hand-written variants.",
+      "text": "\u00a73 instructs that every launch script derive its root with `ROOT=\"$(git -C \"$(dirname \"${BASH_SOURCE[0]}\")\" rev-parse --show-toplevel)\"`, but a settled form of exactly this idiom already exists and is used by `scripts/nova_lane/run.sh:300`, `scripts/playable_server/run.sh:72` and `scripts/regenerate_solovev_certificate.sh:6`; the settled form resolves the script path first (`realpath -e -- \"${BASH_SOURCE[0]}\"`) and only then runs `git -C`, whereas the plan's proposed one-liner omits `realpath -e`, so a script invoked through a relative path or one that changes directory before the line runs resolves the wrong directory and the plan would spread a weaker copy of the idiom across ~64 launch scripts instead of naming and reusing the robust one",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "c231e25f7ebd5aac406d71b19f98929eca11adf87dc7515a77cbe483ddcd9edf",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 18,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:48:24.158195+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:48:23.623613+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T014049046038-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "40c70e19b29c51b2a15d13635a1e3f781caa9805",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one function, `relativize_worktree_paths(text) -> (text, unmapped)`, hides the census of spellings (absolute, `~`, JSON-escaped slashes, a line-wrapped log path), both roots with and without the leading dot, the per-repository mapping and the idempotence guarantee; the two constants and the script sit outside as shared data and the edge runner.",
+    "duplicate_owner": "a finding \u2014 \u00a73 inlines a repository-root resolution idiom that already exists and is settled in three scripts, and the plan's variant is weaker than the settled one.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. \u00a72 names the added surface in its own text (\"one public function, two module constants, and one command with two modes\") and states why nothing can be retired (\"Nothing in nova rewrites or rejects worktree paths today, so nothing retires except the receipt-directory scan named in \u00a74\"); \u00a74 names the two tests it deletes (`test_no_receipt_directory_json_records_a_worktree_path` and `test_the_scan_reaches_every_receipt` in `tests/test_render_receipt_paths.py`); \u00a73 adds no new family entry.",
+    "reuse_search": "a finding \u2014 the plan cites `repository_relative` and `nova.definitions.root_dir` for the Python side, but \u00a73 reuses `nova.definitions.root_dir` as the run-time root owner, and that value is import-time and resolves to whichever tree `nova` was imported from, not the script's own checkout.",
+    "thin_wrapper": "pass \u2014 the plan adds `relativize_worktree_paths` over `repository_relative` and states why it cannot be folded in (\"takes and returns text rather than a path and it reports what it left unmapped\"); the hook is a two-line shim over the script and the script is named as the only way to run the function over files, each justified in the plan's own text."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "12f7221fb9667808b3669af3eb8c8362417c8f82654faeea51b215c7cb15ced5",
+    "s2": "53195d6a5fa61e21c605a70b82b927de45b901cce0172f440c6f65d09260b3e7",
+    "s3": "2b3bb031f1a33f53e69b08221dc6e5db28ed907c7cb2736bbab99d4b3af8d0d1",
+    "s4": "f8210fbaa6ab50b6b1f59a4ee4ce9a86e3f285e66260aa8e419c7d46f1d47822",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:48:09.372000+00:00"
+}

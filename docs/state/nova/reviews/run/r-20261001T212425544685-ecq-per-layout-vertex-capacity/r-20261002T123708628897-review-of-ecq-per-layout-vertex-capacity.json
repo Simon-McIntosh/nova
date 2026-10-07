@@ -1,0 +1,100 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run carries no structured baseline_suite/after_suite, so the arms are read from its own named gate logs. Baseline arm (base c00300b91): base-two-modules.log, 2 failed, 9 passed, BASE_EXIT=1, failing ids [tests/test_domain_participation_continuity.py::test_non_crossing_cell_participation_is_continuous_through_label_flip, tests/test_forward_moment_class.py::test_curved_boundary_support_promotes_every_cut_cell_before_moment_selection]. After arm (head): head-importers.log, 2 failed, 75 passed, 2 skipped, HEAD_IMPORTERS_EXIT=1 with the same two failing ids. The failure sets are identical, so the change adds zero failing identifiers; both failures are pre-existing and unrelated to the changed capacity path (a continuity-ratio assertion and a test's own SimpleNamespace topology missing x_point; the head traceback points at the test fixture, not the change). The run's declared gate tests/test_equilibrium_separatrix_clip.py (28 passed, EXIT=0) and tests/test_equilibrium_forward_operator.py (7 passed both arms) add none.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T123708628897-review-of-ecq-per-layout-vertex-capacity/indep-census-diverted-head.log: head 61b291089 diverted-single-null derived_vertex_capacity 290, one_arc_bound 162, refused_cell_count 0, included_cells 86, realised_maximum_vertex_count 134",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T123708628897-review-of-ecq-per-layout-vertex-capacity/indep-census-diverted-base.log: base c00300b91 diverted-single-null derived_vertex_capacity 162, refused_cell_count 0, included_cells 86, realised_maximum_vertex_count 134 (clip and forward_operator modules resolved from the base scratch tree)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/negative-control-one-arc-bound.log: 1 failed, EXIT=1, test_spline_clip_admits_a_two_run_layout_at_the_two_run_bound",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/gate-module-after.log: 28 passed in 125.88 s, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/head-importers.log: 2 failed, 75 passed, 2 skipped in 513.72 s, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/base-two-modules.log: 2 failed, 9 passed in 81.53 s, EXIT=1"
+  ],
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:3464"
+  ],
+  "commits_read": [
+    "5b84f5bcb7dbc2e1d7451f49440996d61cafd480",
+    "7cac2452606e4fa8c8483f96b5f186955cf93a31",
+    "61b2910890cea4b5f0528dd2c2c036f8dd39ad89"
+  ],
+  "completed_at": "2026-10-02T13:00:14.502Z",
+  "dispatched_at": "2026-10-02T12:37:29Z",
+  "evidence_inputs": "Reviewed base/head pair c00300b91596dc94060c074ebe9bf735b5892174 -> 61b2910890cea4b5f0528dd2c2c036f8dd39ad89; run commits 5b84f5bcb -> 7cac24526 -> 61b291089. Independently confirmed: base c00300b91 realizes refused 0 / included 86 / max 134 on the diverted row, so the plan premise that the row refuses a cell under the one-arc bound 162 does not reproduce at the declared base; the committed base receipt carrying refused 1 / included 85 is a stale measurement from da67cfc54. Independently confirmed: head 61b291089 derives 290 on that row while the committed head census receipt records 162, so the receipt is stale relative to the wired head. The two importer failures are identical at base and head in tests/test_domain_participation_continuity.py and tests/test_forward_moment_class.py and are outside this node's changed path.",
+  "findings": [
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/capacity/census-diverted-single-null.json",
+      "line": "4",
+      "severity": "follow-on",
+      "text": "follow-on: the committed head census receipt reports derived_vertex_capacity 162 and omits the head's per-layout value, but the landed head code produces 290 (independently reproduced: derived 290, refused 0, included 86, max 134); the census ran 11:17-11:30 before the wiring commit 61b291089 at 12:20 and was never re-run, so the committed receipt understates the head capacity and contradicts the manifest's artifact claim of 162 to 290."
+    },
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/capacity/censused-rows.json",
+      "line": "diverted-single-null",
+      "severity": "follow-on",
+      "text": "follow-on: the committed head census table carries the same stale diverted row (derived_vertex_capacity 162) as census-diverted-single-null.json; both were produced before the production wiring landed and should be regenerated at head so the receipts match the code they claim to measure."
+    },
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/capacity/census-diverted-single-null.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the file's c00300b91 content records refused_cell_count 1 and included_cells 85, but running c00300b91 with that revision's own census script yields refused 0 and included 86, so the committed base receipt is a stale measurement from the earlier revision da67cfc54 that c00300b91 already resolves; the run's blocker is founded on the fresh measurement but did not flag this contradiction between the plan's premise and the committed base receipt."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T212425544685-ecq-per-layout-vertex-capacity/manifest.md",
+      "line": "tests",
+      "severity": "follow-on",
+      "text": "follow-on: baseline_suite and after_suite are null, so the two suite arms are not carried as structured records; the added-failure derivation rests on the named base-two-modules.log (2 failed, 9 passed, EXIT=1) and head-importers.log (2 failed, 75 passed, 2 skipped, EXIT=1), whose failing ids are identical."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "522",
+      "severity": "follow-on",
+      "text": "follow-on: the exception clause `except TypeError, ValueError:` is written as a bare tuple without parentheses; it parses and behaves as (TypeError, ValueError) in Python 3, so it is not a defect, but the parenthesised form is the intended and portable spelling."
+    }
+  ],
+  "gate_arms_note": "Reviewed baseline arm: base c00300b91, base-two-modules.log 2 failed, 9 passed, EXIT=1. Reviewed after arm: head 61b291089, head-importers.log 2 failed, 75 passed, 2 skipped, EXIT=1. Independently reproduced here: base census diverted row refused 0, included 86, max 134 (indep-census-diverted-base.log); head census diverted row derived 290, refused 0, included 86, max 134 (indep-census-diverted-head.log). Both arms reached their summary line, so both are readable.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "one production call site reached: nova/equilibrium/forward_operator.py:3464 passes level_run_count into AtomicCellMesh.traced_clip.",
+    "diff": "Read commit by commit against c00300b91: separatrix_clip.py derives the per-layout capacity, forward_operator.py threads the count, tests assert admission and refusal, census receipts and the evidence fragment updated.",
+    "done_when": "The fail-closed refusal is kept and exercised (tests/test_equilibrium_separatrix_clip.py:725), the derivation and wiring are landed and gated, but the diverted single-null row realises no refused cell at base c00300b91, so the clause that motivated the change cannot be shown; the node records this as its blocker.",
+    "goal": "The node goal is the plan's open decision to widen the traced vertex bound to a two-run layout: nova/equilibrium/separatrix_clip.py:76 derives level_run_count*128+straight, the production caller declares the count from the admitted saddle, tests/test_equilibrium_separatrix_clip.py:704 admits a two-run layout; the specific diverted-row demonstration is unmet because the base defect does not reproduce.",
+    "manifest": "Read; committed (status blocked) with a checkpoint, commits, changed_paths, tests and test_logs. The baseline_suite and after_suite arms are null.",
+    "write_paths": "Thirteen changed paths; forward_operator.py and the docs/figures/.../capacity/ receipts lie outside the recorded orientation_write_paths, declared in changed_paths."
+  },
+  "justifications": {
+    "durability": "The change is guarded by two tests: tests/test_equilibrium_separatrix_clip.py:704 asserts a two-run layout is admitted at 260 vertices and area 0.75, and :725 asserts the same layout is refused against the one-arc bound. The declared negative control (force the one-arc bound by dropping the per-layout run multiplier) reddens :704 with assert 1 == 0 and EXIT=1, an assertion the head passes, so the guard genuinely fires; a return of the fixed single-arc bound or the loss of the refusal path fails the suite.",
+    "evidence": "The named gate logs corroborate the landing (gate-module-after.log 28 passed EXIT=0; head/base-forward-operator.log 7 passed EXIT=0 both arms; negative-control-one-arc-bound.log 1 failed, EXIT=1 on test_spline_clip_admits_a_two_run_layout_at_the_two_run_bound, a test the head passes). The run's own base re-measurement (base-census-correct.log diverted refused 0, max 134) is independently reproduced here at base c00300b91: refused 0, included 86, max 134. But the committed census receipts do not match the landed head: docs/figures/exact-clip-moment-quadrature/capacity/census-diverted-single-null.json and censused-rows.json report derived_vertex_capacity 162 at head, while the head code produces 290 (independently reproduced: derived 290, refused 0, included 86, max 134); the census ran at 11:17/11:30 before the wiring commit 61b291089 landed at 12:20 and was never re-run. The reviewed manifest also records baseline_suite and after_suite as null, so the added-failure derivation rests on the named logs rather than structured arms.",
+    "fit": "The level_run_count threaded as a Python integer preserves the fixed compile-time shape, the new names (_layout_level_run_count, level_run_count, one_arc_bound) state mechanism with no plan, sprint or ticket token, and the docstrings explain the one-versus-two-run bound. The except clause at forward_operator.py:522 is written as `except TypeError, ValueError:` and parses in Python 3 as the intended tuple, so it behaves as (TypeError, ValueError) and is only a style oddity.",
+    "goal_fidelity": "nova/equilibrium/separatrix_clip.py:76 derives the per-layout capacity as level_run_count * 128 + straight and threads it as a Python int through AtomicCellMesh.traced_clip (separatrix_clip.py:2147) to the production caller nova/equilibrium/forward_operator.py:3464-3469, where _layout_level_run_count reads the admitted saddle vertex (2 with a concrete saddle, 1 without); tests/test_equilibrium_separatrix_clip.py:704 admits a two-run layout at vertex_count 260, area 0.75, refused 0, capacity 264, so the multi-run derivation is implemented and its positive path asserted. The motivating defect is unreproducible: independently running the census at base c00300b91 gives refused_cell_count 0, included 86, max 134 against the one-arc bound 162, so no row the changed bound widens is currently refused and the wider bound buys nothing measurable - the node reports this honestly rather than claiming the demonstration.",
+    "scope_discipline": "git diff --name-status c00300b91..61b291089 lists thirteen paths. The production caller nova/equilibrium/forward_operator.py and the two test-file edits are required to make the derivation real; the census scripts and receipts under docs/figures/exact-clip-moment-quadrature/capacity/ and the evidence fragment are declared in changed_paths. Two of them - forward_operator.py and the capacity/ directory - lie outside the run's recorded orientation_write_paths (which name separatrix_clip.py, the test file, the evidence fragment and docs/figures/exact-clip-moment-quadrature/ecq-per-layout-vertex-capacity); the deviation is transparent in changed_paths but was not inside the recorded grant."
+  },
+  "plan": "nova:exact-clip-moment-quadrature",
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261001T212425544685-ecq-per-layout-vertex-capacity (node ecq-per-layout-vertex-capacity, plan nova:exact-clip-moment-quadrature section 4), revision c00300b91 -> 61b291089, status blocked.\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: separatrix_clip.py:76 derives level_run_count*128+straight and forward_operator.py:3464 threads the count from the admitted saddle, with tests/test_equilibrium_separatrix_clip.py:704 admitting a two-run layout at 260 vertices and area 0.75; the diverted-row demonstration is unmet because the base defect does not reproduce.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate logs and negative control corroborate the landing and the base re-measurement is independently reproduced, but the committed head census receipt (162) contradicts the landed head code (independently 290) and the committed base receipt (refused 1) is stale, and baseline_suite/after_suite are null.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: thirteen declared paths; forward_operator.py and docs/figures/exact-clip-moment-quadrature/capacity/ lie outside the recorded orientation_write_paths though they are required for the wiring and receipts.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_equilibrium_separatrix_clip.py:704 admits and :725 refuses; the declared negative control reddens :704 (1 failed, EXIT=1).\nSCORE fit: 18\nJUSTIFICATION fit: Python-int level_run_count preserves the fixed shape, names state mechanism with no plan or ticket token; `except TypeError, ValueError:` parses as the intended tuple.\nFINDING docs/figures/exact-clip-moment-quadrature/capacity/census-diverted-single-null.json:4 follow-on: committed head census reports derived 162 where the head code gives 290.\nFINDING docs/figures/exact-clip-moment-quadrature/capacity/censused-rows.json:diverted-single-null follow-on: same stale row in the head census table.\nFINDING docs/figures/exact-clip-moment-quadrature/capacity/census-diverted-single-null.json:1 follow-on: the c00300b91 receipt records refused 1 / included 85 but running that revision's own script gives refused 0 / included 86; the receipt is a stale measurement from da67cfc54.\nFINDING manifest.md:tests follow-on: baseline_suite and after_suite are null; the arms are read from the named logs.\nFINDING nova/equilibrium/forward_operator.py:522 follow-on: bare-tuple exception clause is valid but the parenthesised form is intended.\n",
+  "review_run_id": "r-20261002T123708628897-review-of-ecq-per-layout-vertex-capacity",
+  "reviewed_base_sha": "c00300b91596dc94060c074ebe9bf735b5892174",
+  "reviewed_head_sha": "61b2910890cea4b5f0528dd2c2c036f8dd39ad89",
+  "reviewed_revision": "61b2910890cea4b5f0528dd2c2c036f8dd39ad89",
+  "reviewed_run_id": "r-20261001T212425544685-ecq-per-layout-vertex-capacity",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-per-layout-vertex-capacity",
+  "reviewer_node": "review-of-ecq-per-layout-vertex-capacity",
+  "reviewer_run_id": "r-20261002T123708628897-review-of-ecq-per-layout-vertex-capacity",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "scope_discipline": 16
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T12:58:00Z",
+  "total": 81,
+  "verdict": "pass"
+}

@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T19:09:28.054Z",
+  "dispatched_at": "2026-10-05T19:04:40Z",
+  "findings": [
+    {
+      "anchor": "scripts/playable_server/run.sh:63",
+      "id": "duplicate_owner-1",
+      "reason": "the author should route the serving submission through the lane owner or state in \u00a76 why a long-lived serving job cannot use it.",
+      "text": "the serving launcher hard-codes its own `PARTITION=betelgeuse`/`RESERVATION=gpu_0003_grpA`/`CACHE_ROOT` and sbatch argv instead of routing through the placement owner `scripts/nova_lane/run.sh` (which already carries the H200\u2192titan\u2192CPU rung ladder and `rung_sbatch_flags`); \u00a76's \"three existing pieces compose it, none new\" does not cite either lane launcher, so the fourth copy of submit-to-betelgeuse drifts from the rung rules the queue policy is written in",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/labeller_batch/run.sh:1",
+      "id": "duplicate_owner-2",
+      "reason": "fold the two labeller launchers onto `scripts/nova_lane/run.sh` or state why each needs its own sbatch.",
+      "text": "the labeller work adds `scripts/labeller_batch/run.sh` and keeps `scripts/labeller_parallel/run.sh`, each issuing its own sbatch, beside the two lane launchers; the plan's own `f-pfs-one-labeller-writer` retires the parallel *writer* but says nothing about the duplicate *launchers*, so the scheduler-submission surface grows rather than consolidating on the one placement owner named above",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "apps/playable/main.py:280",
+      "id": "duplicate_owner-3",
+      "reason": "already captured by the plan's recorded `f-pfs` FilePath followup (duplicate_owner-3), which is not yet landed; re-noted here only to confirm it still reproduces.",
+      "text": "the app composes its session directory as `Path.home() / \".local/share/nova/playable/sessions\"` and `scripts/playable_server/run.sh:75` composes `${HOME}/.local/share/nova/playable/allocation.log`, both by hand, while user-scoped paths are owned by `nova/database/filepath.py` `FilePath`; confirmed reproducing at HEAD",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "apps/playable/main.py:92",
+      "id": "interface_budget-1",
+      "reason": "\u00a77 and \u00a78 must each carry an interface line accounting for the options and modules they add, which is exactly what the unlanded `f-pfs` interface_budget followup schedules.",
+      "text": "\u00a77 adds `--decoder`, `--machine`, `--view` (main.py:92\u201394) and the public `FrameDecoder`/`DecodedFrame` types, and \u00a78 adds `--engine` plus the public modules `nova/equilibrium/shape_inverse.py` and `nova/equilibrium/batched_labeller.py`, while the week's budget is public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 and neither section's text retires, merges, or explains why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "f7718169578b36f52b76f52044c148edf5b92bcaa6efc12013975277bb3233d7",
+  "plan_slug": "playable-forward-solve",
+  "plan_version": 356,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T190418003021-plan-review-of-playable-forward-solve",
+  "reviewed_blob_sha": "89038d03078bea0d00b222673c5dd12d1bd6b0cc",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `nova/equilibrium/steering_frames.py` hides the whole session layout, the frame assembly and the store behind one typed record plus a write/read pair, and states explicitly that a frame is assembled-not-computed across four carriers; `apps/playable/session.py` hides the solve loop behind a solve-callable protocol so the production and reduced routes swap without the app changing. One record behind several consumers, not several shallow wrappers over the same machinery.",
+    "duplicate_owner": "a finding \u2014 \u00a76 deliverable A adds `scripts/playable_server/run.sh` as a fresh submit-to-betelgeuse launcher while `scripts/nova_lane/run.sh` already owns placement (rung ladder, `rung_sbatch_flags`, `--dry-run`/`--in-place`/`--force-submit`), and the plan cites neither it nor `scripts/h200_test_lane/run.sh` (zero mentions of either). The path-resolution duplicate (`apps/playable/main.py:280`) and the labeller-writer duplicate are already recorded and are confirmed below.",
+    "interface_budget": "a finding \u2014 supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a77 adds three CLI options and a public protocol and \u00a78 adds two public modules and an option, and neither section's text names what it retires or merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the design sections name the existing mechanisms they extend, and each was confirmed in code: the constraint vocabulary is `nova/equilibrium/inverse.py` (`Control.update_constraints`, lines 186\u2013202) over `nova/geometry/plasmapoints.py` `ControlPoints` (\u00a72); the reduced route is `nova/equilibrium/reduced_newton.py` (\u00a73); the poloidal renderer is `apps/pulsedesign/poloidal_view.py`, imported at `apps/playable/main.py:61` (\u00a74); the session store is a netCDF/xarray group, the store nova already owns (\u00a75).",
+    "thin_wrapper": "pass \u2014 the one wrapper the plan adds, the `FrameDecoder` protocol in `apps/playable/camera.py`, is justified in \u00a77 by the coupled-repository rule (nova must never import imas-ambix), which is a reason the underlying decoder cannot be extended in place. The justification is present in the section text."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T19:10:36.721586+00:00"
+}

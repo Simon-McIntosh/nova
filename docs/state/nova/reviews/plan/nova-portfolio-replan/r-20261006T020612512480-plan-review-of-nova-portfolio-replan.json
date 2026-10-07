@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:10:35.122Z",
+  "dispatched_at": "2026-10-06T02:06:30Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/conservation.py:146",
+      "id": "reuse_search-1",
+      "reason": "the node would pass its gate having left a fourth copy of exactly the algebra it exists to consolidate, and the checklist it trusts is demonstrably incomplete.",
+      "text": "a fourth independent uniform-axis validator (\"must be uniformly spaced and increasing\", np.diff/allclose over rtol 1e-12) sits in `LatticePolicy.__post_init__` beside the three the plan names (map_extraction.py:109, diiid_efit.py:38, mast_efit.py:44); the census the plan adopts as its checklist (reckon docs/research/data/crew-pattern-review/code-depth/code-depth.json, rank 5) lists only the three, so replan-small-primitives' done-when \"the census's duplicate list for that group must read zero afterwards\" reports a false zero while conservation.py's copy remains",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/nova-portfolio-replan.html \u00a74 replan-small-primitives",
+      "id": "duplicate_owner-1",
+      "reason": "without a named owner the node either creates the three new modules the plan forbids or guesses, and the done-when (\"each group names the copies it retires\") is unsatisfiable as written.",
+      "text": "the node names an owning file for only one of its four groups (the trimmed-string/canonical-digest pair, correctly placed on nova/imas/machine_evidence.py:33/64); for the other three it says \"one uniform-axis validator\", \"one owned read-only array constructor\", \"one atomic receipt writer\" without naming where each consolidated implementation lives, while the census checklist it adopts points each of them at a brand-new module \u2014 nova/utilities/axes.py:uniform_axis, nova/utilities/arrays.py:readonly_copy, nova/io/json.py:write_atomic \u2014 none of which exists today; that contradicts the node's own binding line \"No new public module\", so the node cannot satisfy its rule and its checklist at once",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/db_entry.py:15",
+      "id": "duplicate_owner-2",
+      "reason": "the plan directs consolidation onto a class no caller uses and misreads a duplicate construction path as evidence of a shared owner, which is the opposite of the reuse the node claims.",
+      "text": "\u00a75 replan-dbentry-constructor calls `class DBEntry` in nova/imas/db_entry.py \"the existing owner\" and would route 15 modules through it, but that class has zero call sites (no importer of the module anywhere, absent from nova/imas/__init__.py), while the operative construction is `imas.DBEntry(...)` directly in ~21 places under nova/; the citation of nova/imas/dataset.py:729 as a site that \"already carries\" the owner's DD-version policy is a second direct `imas.DBEntry` construction (dataset.py:728-736), i.e. a call site to convert, not evidence the owner's policy is shared",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7d4963517649a30af42bded7f4987db429bd8dbf382760650cb21ec2bf0a0511",
+  "plan_slug": "nova-portfolio-replan",
+  "plan_version": 28,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T02:14:20.851986+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T02:14:21.372955+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T02:14:19.604032+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T020612512480-plan-review-of-nova-portfolio-replan",
+  "reviewed_blob_sha": "aceaa1301c800b2c059f6f1f895ac77993e614e4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan proposes no new module (it explicitly forbids one in replan-small-primitives) and consolidates behind owners that already exist (constraint.py `_flux_jacobian_image`, machine_evidence.py); nothing new is added that spreads behaviour thin.",
+    "duplicate_owner": "a finding \u2014 replan-small-primitives names no owning file for three of its four groups, and the db_entry owner it does name (nova/imas/db_entry.py:15) has no call sites at all.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds to none of these families (it retires duplicated implementations and adds only module docstrings and tests), so there is no added surface to account for.",
+    "reuse_search": "a finding \u2014 the plan adopts the census candidate list as its checklist, but that list omits a fourth uniform-axis validator at nova/equilibrium/conservation.py:146, so the census's own search is incomplete.",
+    "thin_wrapper": "pass \u2014 every \u00a75 node routes call sites through an existing owner (nova/imas/db_entry.py, nova/database/filepath.py) and the plan states the policy is \"extended \u2026 rather than replaced by a new opener\", which is the justification the item asks for."
+  },
+  "section_digests": {
+    "_document": "d8955ff15584087c7d7eca1aca77e8cca0110efbac8657a65b20c684231fd648",
+    "s1": "58ad1730dc7612f2dc456bf4599af55a71ceb55e5ed306ccf2229dd7bc011ac6",
+    "s2": "7b91ed2a58ab9aaae272d528c052c40f54ca4422ec97d9111051a88840cdbc66",
+    "s3": "69f113368c428a995aa7d308edeff811c658d2946119c0ee44e68f1e414847d0",
+    "s4": "e08d0ff1a07df16370264bff3ecc2c64c02ca8d6fdeb3c79c1f8b8b2be70f32b",
+    "s5": "176995b0ef65c712f258381d0f7388303e654dda4a455d4fe8295f232b69a4a5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:14:04.887278+00:00"
+}

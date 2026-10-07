@@ -1,0 +1,45 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T03:39:52.118866+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos/cocos-scout.md",
+      "line": "69",
+      "text": "the psi-map consumer cell labels itself grep-verified yet omits eleven benchmarks/ files that read efit_psirz: six appear nowhere in the report (diiid_vacuum_gate.py:59,79; diiid_poloidal_figures.py:200,268; poloidal_convergence_atlas.py:570; diiid_negative_tail_attribution.py:322; diiid_diverted_solve_overlay.py:516; diiid_unclaimed_current_origin.py:599) and five only under other quantities (diiid_root_convention_sweep.py:313; diiid_vacuum_sensitivity_sweep.py:106; diiid_solenoid_inclusion_ladder.py:237; diiid_circuit_driven_vacuum.py:280; diiid_circuit_driven_forward_validation.py:342), so node (c)'s survey of where the translation lands is incomplete even though the factors themselves are unaffected."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos/cocos-scout.md",
+      "line": "100",
+      "text": "the done-when element requiring the recommended location of the translation posed as a question for the lead is absent from the report: the location decision is deferred to node (c) here, and the residual observations at :105 explicitly claim no defect while offering no recommendation, so the lead is given nothing to adjudicate."
+    }
+  ],
+  "justifications": {
+    "durability": "nothing fails if the report's factors or receipts drift \u2014 no test or check reads them \u2014 though the sha256-pinned receipts and the re-runnable driver beside them (measure_sign_tuple.py) keep the measurement reproducible.",
+    "evidence": "the three receipts hash-match their stated digests and every number in the table at cocos-scout.md:27-38 reproduces from five_frame_sign_tuple.json including the falsifying total-flux comparison, but the done-when's location element is not demonstrated and the consumer cell's grep-verified label overstates its enumeration.",
+    "fit": "the drivers reuse the repository's own conventions module (diiid_corpus_conventions.py) and reproduce the benchmark's frame selector (diiid_forward_gs_match.py:547-565 cited at cocos-scout.md:21) rather than reimplementing them, and the driver filenames carry no plan label, version or banned suffix.",
+    "goal_fidelity": "cocos-scout.md:67-75 carries all seven consumed quantities with derived factors and the ambix-translates statement, but two goal elements fall short \u2014 the psi-map consumer cell at :69 omits eleven reading files, and the required recommended location (:100 defers it to node (c)) is absent.",
+    "scope_discipline": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos is the declared fence and everything produced lies inside it; the worktree HEAD equals its base ef5504ea with an empty git status, and changed_paths opens with the word none."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: cocos-scout.md:67-75 carries all seven consumed quantities with derived factors and the ambix-translates statement, but two goal elements fall short \u2014 the psi-map consumer cell at :69 omits eleven reading files, and the required recommended location (:100 defers it to node (c)) is absent.\nSCORE evidence: 16\nJUSTIFICATION evidence: the three receipts hash-match their stated digests and every number in the table at cocos-scout.md:27-38 reproduces from five_frame_sign_tuple.json including the falsifying total-flux comparison, but the done-when's location element is not demonstrated and the consumer cell's grep-verified label overstates its enumeration.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos is the declared fence and everything produced lies inside it; the worktree HEAD equals its base ef5504ea with an empty git status, and changed_paths opens with the word none.\nSCORE durability: 8\nJUSTIFICATION durability: nothing fails if the report's factors or receipts drift \u2014 no test or check reads them \u2014 though the sha256-pinned receipts and the re-runnable driver beside them (measure_sign_tuple.py) keep the measurement reproducible.\nSCORE fit: 18\nJUSTIFICATION fit: the drivers reuse the repository's own conventions module (diiid_corpus_conventions.py) and reproduce the benchmark's frame selector (diiid_forward_gs_match.py:547-565 cited at cocos-scout.md:21) rather than reimplementing them, and the driver filenames carry no plan label, version or banned suffix.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos/cocos-scout.md:69 the psi-map consumer cell labels itself grep-verified yet omits eleven benchmarks/ files that read efit_psirz: six appear nowhere in the report (diiid_vacuum_gate.py:59,79; diiid_poloidal_figures.py:200,268; poloidal_convergence_atlas.py:570; diiid_negative_tail_attribution.py:322; diiid_diverted_solve_overlay.py:516; diiid_unclaimed_current_origin.py:599) and five only under other quantities (diiid_root_convention_sweep.py:313; diiid_vacuum_sensitivity_sweep.py:106; diiid_solenoid_inclusion_ladder.py:237; diiid_circuit_driven_vacuum.py:280; diiid_circuit_driven_forward_validation.py:342), so node (c)'s survey of where the translation lands is incomplete even though the factors themselves are unaffected.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/diiid-cocos/cocos-scout.md:100 the done-when element requiring the recommended location of the translation posed as a question for the lead is absent from the report: the location decision is deferred to node (c) here, and the residual observations at :105 explicitly claim no defect while offering no recommendation, so the lead is given nothing to adjudicate.\n",
+  "review_run_id": "r-20260917T033952118866-review-of-dvf-cocos-scout",
+  "reviewed_run_id": "r-20260916T210526365533-dvf-cocos-scout",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "xhigh",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260917T033952118866-review-of-dvf-cocos-scout",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T04:18:42.453231+00:00",
+  "total": 77
+}

@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:32:53.595Z",
+  "dispatched_at": "2026-10-04T17:22:33Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:2113",
+      "id": "duplicate_owner-1",
+      "reason": "without naming the retained kernel the two implementation nodes will write a second GMRES inside `solve.py` and the working one dies with the old module, which is the parallel-owner drift the retirement is meant to prevent.",
+      "text": "the plan deletes `fixed_point.py` wholesale and proposes `solve.fixed_point` as \"Newton-GMRES on the map's own JVP\" applied \"at one call site served from a `lax.scan`\", but the generic GMRES kernel (`_gmres_classical_gram_schmidt`, `_gmres_lstsq`, `_gmres_restart_start`, `_gmres_dot`, `:2185`) and the fixed-capacity scan solver state machine (`_NewtonIterationState:552`, `_NewtonGlobalizationState:590`, the outer `jax.lax.scan` at `:4955`) already live in `fixed_point.py` and are exactly that mechanism; the design's only retention clause is the blanket \"linear-algebra helpers can remain private dependencies\", which never names the GMRES kernel or says where it moves once `fixed_point.py` is deleted",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/solve_request.py:631",
+      "id": "duplicate_owner-2",
+      "reason": "two receipts for one solve will diverge on exactly the fields the \u00a75 \"history agrees with the terminal receipt\" clause tests, so the design should extend `ForwardSolveReceipt` or state why per-step granularity cannot live in the existing owner.",
+      "text": "`ForwardSolveReceipt` already owns the per-step solve history (`residual_history:637`, `mask_history:638`, `amplitude_history:640`) and is the declared host-facing serialization seam, yet the design defines a new `SolveResult` carrying its own \"fixed-capacity history\" and \"one history record per accepted Newton step\" plus a separately recorded initial/stop state, without citing `solve_request.py` as the owner to extend",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/accuracy_cost_ladder/measure.py:1",
+      "id": "duplicate_owner-3",
+      "reason": "the ambitious compile-cost clauses are the least-likely-to-hold part of the plan and rebuilding a meter in the test file will produce a second, weaker instrument that does not reconcile with the archived StableHLO/executable-size receipts, whereas extending the existing profiler makes the numbers comparable on day one.",
+      "text": "the compile-cost clauses of \u00a76 (`test_one_program_per_shape`, `test_executable_size`, `test_cold_compile_wall`, `test_cold_compile_host_memory`, `test_single_operator_body` via optimized HLO) describe a compile/reuse meter that already exists: `measure.py`'s `profile-gpu` \"runs the fixed-shape ten-Newton, thirty-GMRES solver on a CUDA device... records... the compiled StableHLO from which loop trip counts are extracted\", alongside `scripts/device_kernel_port/measure_unpaired_compile.py` and the reuse map `scripts/accuracy_cost_ladder`/`scripts/device_kernel_reuse/reuse-report.md`; the design cites neither and proposes fresh test identities",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "87bc9584f2e795db57b43ab19aea18af47d623693677629bfd90286985c0688e",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 16,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T172220967085-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "74f53c23a703d1b010e00cd574da1b795e251587",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 four module-qualified functions (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`) each hide substantial behaviour (contour-tree kernel on the wall-clipped hex carrier, sub-cell axis-connected fragment connectivity, augmented Newton/GMRES/line-search on the live composed map, and the implicit binder derivative) behind a single signature and one pytree result; the surface is smaller than what it conceals and the design does not spread the complexity across parallel small wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan retires three existing mechanisms (`fixed_point.py`'s GMRES/Newton-scan kernels, the `ForwardSolveReceipt` history, and the `scripts/` compile/reuse instrument) and re-creates each in a new module (`solve.py`, a new `SolveResult` receipt, new `test_cold_compile_*`/`test_one_program_per_shape` meters) without naming the existing owner to extend; each is emitted as a finding below.",
+    "reuse_search": "pass \u2014 the design performed and cited a genuine search of `nova/equilibrium`: 17 null-role and 23 region-role inventory rows, each carrying a real source binding, all four interface components bind to a named existing mechanism, and every marker I spot-checked resolves (`topology.py:1125 read_qualification`, `contour_tree.py:384 build_contour_tree`, `stencil_mesh.py:449 flux_field_polynomial`, `forward_operator.py:830 _FixedDesignNull2D` and `:2323 class ForwardFluxOperator`, `fixed_point.py:4410 _active_set_newton_krylov`, `clip_quadrature.py:714 clipped_support_current_moments`); it cites the retained tests and instruments it extends and explicitly distinguishes generators from consumers. Its one search gap \u2014 the `scripts/` instrumentation that owns compile/reuse measurement \u2014 is carried as a duplicate_owner finding below.",
+    "thin_wrapper": "pass \u2014 the design gives an explicit extend-vs-wrap reason for each component rather than defaulting to a wrapper: `gs.apply` \"replaces the map `ForwardFluxOperator` performs today rather than wrapping it\"; chord is declared \"a quadrature degree of the same function\" of the one booking, not a second route; the plan's \u00a76 states `topology.py` \"is replaced in place\". No component is added as a pass-through over machinery that could instead be extended."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:50:44.741860+00:00"
+}

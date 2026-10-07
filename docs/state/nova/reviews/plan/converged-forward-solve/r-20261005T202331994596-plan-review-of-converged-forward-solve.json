@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T20:27:46.628Z",
+  "dispatched_at": "2026-10-05T20:23:44Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:3166",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a72 must name and retire the consumer-facing read authority (`ForwardFluxOperator.read`), and \u00a76 must state the class's fate, or the replacement leaves the old read route live beside the new one.",
+      "text": "\u00a72 states it replaces `Topology.read` and `read_with_connectivity`, but the read that the route's consumers actually invoke is `ForwardFluxOperator.read` (plus `read_with_current_moments` at :3191 and `read_census` at :1600); `Topology.read` is an internal layer beneath `ForwardFluxOperator.read`, so the plan names the wrong authority, and \u00a76 deletes \"the solver and booking authority in `forward_operator.py`\" without stating whether the `ForwardFluxOperator` class itself survives \u2014 the class `ForwardProfile.operator` is typed as (`forward.py:556`).",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/shape_inverse.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a76 must add `shape_inverse.py` and its two test modules to the re-point acceptance rows, or the retrieval of `ForwardFluxOperator` breaks a tested consumer that neither the text nor the census names.",
+      "text": "`shape_inverse.py` is a live, tested consumer of the `ForwardFluxOperator` authority \u00a76 deletes: it calls `profile.operator.read(...)` nine times (:313, :330, :475, :799, :981, :1131, :1189, :1393, :1638) plus `operator.flux_map`, `coupling_current_moments`, `external` and `current_moment_image`, and is exercised by `tests/test_shape_inverse.py`, `tests/test_shape_inverse_negative_control.py`, `apps/playable/production.py` and two benchmarks. The plan names the labeller and the two transport modules as consumers to re-point but never mentions `shape_inverse.py`; because it binds the operator through the duck-typed `ForwardProfile.operator` attribute and not through a module import, \u00a76's import-based census (\"no module under `nova/equilibrium` other than `topology.py` locates a null or classifies a region\") cannot see it.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "93e50c9cfdc6e185f807f87589b4edcb007232fad41a895368e171ea766baf0d",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 34,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T20:29:02.813660+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T20:29:03.599728+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T202331994596-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "4de96e9b2c01d8694c5284315aa659dfdd8d73ef",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72 to \u00a75 each land one public function behind one module and one call site (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`), hiding the read, the booking, the map with its carried derivatives, and the Newton-GMRES solve respectively; the plan states the new modules are `current.py`, `gs.py`, `solve.py`, each one function, not a family of wrappers.",
+    "duplicate_owner": "a finding \u2014 \u00a72 names `Topology.read` and `read_with_connectivity` in `topology.py` as the read it replaces, but the read authority the live consumers actually call is `ForwardFluxOperator.read` in `forward_operator.py:3166`, and the plan never names it or its duck-typed consumers.",
+    "interface_budget": "pass \u2014 supplied counts public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; every section that adds surface names in its own text what it retires (\u00a72 retires `Topology.read`/`read_with_connectivity`; \u00a73 retires `clipped_support_current_moments`; \u00a74 retires the `ForwardFluxOperator` map; \u00a75 retires `newton_krylov`, `picard` and `operator_request_body`; \u00a76 names the deletion list), so no section grows a family without accounting for it, and the net public surface is reduced.",
+    "reuse_search": "pass \u2014 the plan's rulings name the specific reuse candidates with a cite-or-justify rule: the single-site GMRES kernel and Armijo search in `fixed_point.py` (\u00a75 ruling), the field-null kernels `nova/biot/null.py` and `nova/biot/fieldnull.py` (\u00a72 ruling), the operand-identity machinery in `forward_operator.py` (\u00a74 ruling), the exact-clip helpers in `clip_quadrature.py` and the moment owner `polygon_moments.py` (\u00a73 and \u00a710 rulings), and the contour-tree authority `contour_tree.py`/`contour_tree_mesh.py` (\u00a77 ruling).",
+    "thin_wrapper": "pass \u2014 each section that carries existing helpers states the cite-or-justify rule and \u00a74/\u00a76 explicitly say `gs.apply` \"replaces the map `ForwardFluxOperator` performs today rather than wrapping it\", so the wrapper item's required justification is present."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T20:29:02.135408+00:00"
+}

@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T15:31:13.311Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:33:36Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_reduced_newton_constraint_bounds.py",
+      "line": 191,
+      "severity": "follow-on",
+      "text": "The after-suite gate arm ran at revision 0dfce2a0d with the fix as an uncommitted working-tree change, so after_suite.revision reads 0dfce2a0d - the pre-fix commit - identically to baseline_suite.revision, and neither arm names the fix commit 5faacc773. A reader taking after_suite.revision at face value would read the two arms as the same tree; only the post-run docs status (empty in gate-head.log, modified in repro-docs-write.log) distinguishes them. The content is sound (0dfce2a0d plus the fix) and the review's independent head re-run at 5faacc773 reproduces 2 passed / EXIT=0 / receipt unchanged, but the arm label is not the revision that was tested."
+    },
+    {
+      "file": "docs/evidence/fragments/constraint-augmented-newton-krylov/cank-bound-test-writes-tmp-path.html",
+      "line": 45,
+      "severity": "follow-on",
+      "text": "The attribution table records the writer-revision arm as 40.8556693262511 while the receipt committed by that same revision reads 40.85566932623417 (the value in docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json at HEAD). The two differ by ~1.7e-11 absolute (~4e-13 relative), so the writer revision did not bit-reproduce the artifact it is cited to explain, and the node measured it once. The conclusion stands because the 40.86-to-54.65 A move is four orders of magnitude larger, but the fragment presents the writer value and the committed value as the same arm without flagging the difference - the determinism basis is two bit-equal base runs plus one non-reproducing writer run, not a matched pair at either revision."
+    },
+    {
+      "file": "docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The follow-up asks that the committed receipt be regenerated only through an explicit measurement driver; the node added none, so the receipt is now frozen at the writer revision's value (40.85566932623417) that the base solver no longer produces (54.64758697677363 at 0dfce2a0d) and nothing validates its content. The test asserts only that the receipt is byte-unchanged, not that any current code reproduces it. The artifact is therefore known to disagree with the solver and no test, driver or report pins the disagreement."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143313642333-cank-bound-test-writes-tmp-path/scratch/negative-control.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "The negative-control run aborted (SIGABRT, EXIT=134) inside a JAX compile before the short test summary, so the log carries no FAILED id and the assertion that fired is only inferrable from the leading F progress marker plus the post-run docs modification. The review independently reproduced the same signature (first test fails, committed receipt sha256 rewritten, EXIT=134), so the guard demonstrably fires, but the node's own red log does not show the failing assertion by name. The abort appears to be a JAX compile/cache crash on the failing-first-test path rather than a consequence of the mutation, and it is outside this node's declared scope."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's baseline_suite (revision 0dfce2a0d, command runs pytest on tests/test_reduced_newton_constraint_bounds.py, completed=true, exit_status=0, 0 failed / 2 passed, log scratch/repro-docs-write.log) and after_suite (revision 0dfce2a0d, same file, completed=true, exit_status=0, 0 failed / 2 passed, log scratch/gate-head.log) both ran to their summary lines and both name their log on disk. added_failure_ids is after_suite.failure_ids minus baseline_suite.failure_ids; both arms are empty, so added_failure_count=0. The pair is not a pass/fail discriminator but a docs-hygiene discriminator: the baseline arm ran the pre-fix test (3-arg _write_receipt, RECEIPT_PATH.write_text) and its post-run `git status --porcelain docs/` reads `M docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json`, while the after arm's post-run docs status is empty. Confirmed on disk that 0dfce2a0d is pre-fix (`git show 0dfce2a0d:tests/...` still has the 3-arg writer) and that 5faacc773's parent is 0dfce2a0d. One labelling defect: the after arm was gated before the fix was committed, so both arms record revision 0dfce2a0d and neither names the fix commit 5faacc773 (see finding 1); the after arm's content is 0dfce2a0d plus the uncommitted fix. Independently reproduced by the review: a head gate re-run at 5faacc773 in a scratch extraction gives 2 passed, EXIT=0, docs receipt sha256 unchanged (review-head-gate.log), and the negative control re-run gives a failed first test and a rewritten committed receipt, EXIT=134 (review-negctrl.log).",
+  "justifications": {
+    "durability": "The fix is committed locally (5faacc773, parent 0dfce2a0d), detached and unpushed as expected for a worker; the coordinator owns the merge and push. The added assertion is a real regression guard rather than decoration: the negative control shows it goes red when the committed write is reintroduced (review-negctrl.log). Two weaknesses. The committed receipt now has no producer: the test asserts it is untouched but no test or driver asserts any current code reproduces it, so a future change that further moves the over-ceiling current leaves the artifact silently stale (finding 3). And the guard is skipped entirely when RECEIPT_PATH does not exist (`if committed is not None:`), so a tree without the tracked receipt would exercise no guard at all - a shadow of the fail-open pattern - though the file is tracked and so normally present.",
+    "evidence": "Independently reproduced first-hand. Head gate re-run at the reviewed head 5faacc773 in a scratch git-archive extraction gives 2 passed, EXIT=0, and the extracted committed receipt is byte-unchanged (sha256 5cafb095b05444698a47559c9c7afd73b3674d1cf6a8f30ad54a7a287a608e14 before and after; review-head-gate.log). The declared negative control was independently re-run by pointing the writer back at RECEIPT_PATH.parent: the first test fails (leading F) and the committed receipt is rewritten (sha256 5cafb095...->27d011ee1900197f1e78ce7605dc7bb7c1c38d05563e6094250dcba7b385274c), EXIT=134 (review-negctrl.log) - so the guard is shown to fire on the exact behaviour it names, and the docs-dirty defect reproduces at base. Deductions. (a) Gate-arm labelling: after_suite records revision 0dfce2a0d, the pre-fix commit, because the gate ran before the fix was committed; baseline_suite and after_suite therefore name the same revision though their trees differ, and neither arm names the fix (finding 1). (b) The writer-revision arm (40.8556693262511) does not bit-reproduce the receipt committed by that revision (40.85566932623417): a ~1.7e-11 absolute difference the node recorded but did not flag as a reproducibility caveat, measuring the writer revision only once (finding 2). The 40.86->54.65 attribution is unaffected - the move is four orders of magnitude larger than the discrepancy. (c) The node's negative-control log aborted (SIGABRT, EXIT=134) before its summary, so it carries no FAILED id and the assertion that fired is only inferrable from the leading F plus the post-run docs modification (finding 4); the same signature reproduces in the review's independent negative control.",
+    "fit": "Minimal and idiomatic. The writer gains one positional `directory` parameter and writes `directory / 'receipt.json'`; the test uses pytest's `tmp_path` and adds one `is_file` check and one byte-identity assertion. No new helper module, no new abstraction, no plan label in names or comments, and no change to the solver or to the committed artifact. The writer docstring ('Persist both admission outcomes beneath ``directory`` for this run') states the mechanism, not the ticket.",
+    "goal_fidelity": "The driving follow-up (plan nova:constraint-augmented-newton-krylov, the item 'stop tests/test_reduced_newton_constraint_bounds.py writing the supplied compensator-bound receipt, and attribute the 40.86 to 54.65 A change in its over-ceiling compensating current') has two done-when clauses. Both are met. (1) The test writes nothing under docs/: the writer gained a `directory` argument and the test passes pytest `tmp_path`; post-run `git status --porcelain docs/` is empty in the run's own after arm (gate-head.log) and in the review's independent head re-run (review-head-gate.log). (2) The report names the cause: two base runs at 0dfce2a0d are bit-equal at 54.64758697677363 (scratch/repro-docs-write.log and scratch/base2.log, the value byte-confirmed in the preserved bt-base2 receipt on disk) while the writer revision d884fe594 reads 40.8556693262511, a 33% move, so code changed between d884fe594 and the base rather than run-to-run noise. Not full marks because the follow-up's first clause also asks that the committed receipt be regenerated 'only through an explicit measurement driver'; no driver was added, so docs/figures/constraint-augmented-newton-krylov/compensator-bound/receipt.json is now an artifact with no producer, still carrying the writer revision's value (40.85566932623417) that the current base solver (0dfce2a0d) no longer reproduces (finding 3).",
+    "scope_discipline": "The review range 0dfce2a0d..5faacc773 touches exactly two paths, tests/test_reduced_newton_constraint_bounds.py and docs/evidence/fragments/constraint-augmented-newton-krylov/cank-bound-test-writes-tmp-path.html, both inside the run's granted write paths. No other product source, test, plan, shared index or concurrent-node path is touched. The reviewed worktree is clean at 5faacc773 (git status shows nothing outside .venv) and the committed receipt still reads 40.85566932623417, so the docs receipt the run's own base reproduction dirtied was restored. The single commit carries a conventional subject and an explanatory body with no plan, ticket or version identifier in the subject, the body or the added source. The writer signature change and the added assertion are the only source edits. Deducted one only for the frozen artifact recorded under goal_fidelity, which is inside the granted path but left without a producer."
+  },
+  "node": "review-of-cank-bound-test-writes-tmp-path",
+  "project": "nova",
+  "review_base_sha": "97387aa826303d375fbfbb821134e604563ad8f2",
+  "review_run_id": "legacy-d73c1a8354c3",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "reviewed_commit": "5faacc773ef38fb9126e7f3c1a41ae510af47e1f",
+  "reviewed_commits": [
+    "5faacc773ef38fb9126e7f3c1a41ae510af47e1f"
+  ],
+  "reviewed_head_sha": "5faacc773ef38fb9126e7f3c1a41ae510af47e1f",
+  "reviewed_run_id": "r-20261003T143313642333-cank-bound-test-writes-tmp-path",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cank-bound-test-writes-tmp-path",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:56:23Z",
+  "total": 88,
+  "verdict": "pass"
+}

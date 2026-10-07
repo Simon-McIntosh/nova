@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own gate arms. baseline_suite.failure_ids=[] and after_suite.failure_ids=[] with completed=true on both; the base arm log (docs/.../equals-form/baseline-suite.log, arm=base revision=a83018126) ends '7 passed in 13.01s' EXIT=0 and the after arm log (docs/.../equals-form/after-suite.log, arm=head revision=4af94d326) ends '8 passed in 14.61s' EXIT=0. The one-test delta is the newly added equals-form test; no failing test id appears in either arm, so added_failure_count=0 is a measured clean delta.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/tmp/review2-fsri-9RxiqH: independent scratch reproduction at reviewed head 10946c59 (green 8 passed EXIT=0; negative control 1 failed 7 passed EXIT=1; restored 8 passed)",
+    "docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/equals-form/gate.log at 10946c59: 8 passed in 15.87s, EXIT=0",
+    "docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/equals-form/negative-control.log at 10946c59: 1 failed, 7 passed, EXIT=1",
+    "docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/equals-form/baseline-suite.log and after-suite.log: 7 passed / 8 passed, both EXIT=0",
+    "git diff --check a83018126..10946c59: empty; trailing-whitespace grep over 8 .log files: 0 matches each"
+  ],
+  "blocking_findings": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "5f967cc3d8f6d627fe72aec5371e793b51c5ae38",
+    "1830dbd6ce2d17b213ae280f75e8d2e3e1e2222e",
+    "1d30b46fafdf4350691f314e39d7e68ed5b6ca18",
+    "4af94d32676cf04437f57c9d61639e6bf2829301",
+    "10946c5974bb97765b1e3a4f0a0091818bf1414a"
+  ],
+  "completed_at": "2026-10-02T09:14:53.945Z",
+  "dispatched_at": "2026-10-02T08:58:25Z",
+  "evidence_inputs": {
+    "existing_guard": "scripts/nova_lane/run.sh pytest_timeout_argument at base a83018126 already handled --timeout=*, so the node correctly added missing coverage rather than reimplementing the working guard.",
+    "independent_gate": "Scratch-tree run at reviewed head 10946c59 (gitdir-pinned to the reviewed worktree) reproduced 8 passed EXIT=0 and, on mutation, exactly one failing equals-form test.",
+    "live_plan": "nova:forward-solver-route-integrity \u00a74, version 51: commit the --timeout=value regression test and strip evidence-log trailing whitespace.",
+    "prior_review": "r-20261002T082859261387-review-of-fsri-lane-timeout-equals-form-test at head 1d30b46f recorded a blocking trailing-whitespace finding and a blocking blank-arm finding, both resolved at head 10946c59.",
+    "source_goal": "f-fsri-lane-timeout-equals-form-test requires the equals-form regression test beside the split-form test and the trailing-whitespace cleanup of the test-timeout logs."
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-timeout-equals-form-test.html",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's focused-gate row quotes '8 passed in 16.38s' while the committed gate.log it cites ends '8 passed in 15.87s'; the wall-clock figure in the evidence disagrees with its own cited log. Cosmetic, does not affect the goal or the negative-control verdict."
+    }
+  ],
+  "follow_ons": [
+    "Reconcile the focused-gate wall-clock figure in docs/evidence/fragments/forward-solver-route-integrity/fsri-lane-timeout-equals-form-test.html with its cited gate.log, or cite a log whose summary matches."
+  ],
+  "gate_arms_note": "baseline_suite revision a83018126c9e2a92a00690ccf3ccc80316d6b4fe, 7 passed, EXIT=0, completed=true, failure_ids=[]. after_suite revision 4af94d32676cf04437f57c9d61639e6bf2829301, 8 passed, EXIT=0, completed=true, failure_ids=[]. Head 10946c597 is a log-only child of 4af94d32 (git diff --name-only 4af94d326 10946c59 lists only the three equals-form .log files), so the arm measured the same code and tests as the reviewed head.",
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all five commits against a83018126. 4af94d32 strips trailing whitespace from the equals-form control log only; 10946c59 adds the three suite logs and nothing else, so code and tests at head 10946c59 are byte-identical to 4af94d32 where the arms ran.",
+    "done_when": "Independently reproduced at reviewed head 10946c59 in a scratch tree: 8 passed EXIT=0; removing the --timeout=* branch from pytest_timeout_argument makes exactly test_dry_run_pytest_keeps_the_callers_equals_form_timeout fail (1 failed, 7 passed EXIT=1); restoring it returns 8 passed.",
+    "goal": "The requested equals-form regression test is present at tests/test_nova_lane_launcher.py:98-119 and the trailing-whitespace cleanup now covers the whole glob: every one of the 8 .log files under docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/ has zero trailing-whitespace lines, and git diff --check a83018126..10946c59 is empty.",
+    "manifest": "The source manifest now records completed, readable baseline_suite and after_suite arms with revision, command, exit_status, log_path, completed=true and empty failure_ids; the prior review's blank-arm blocking finding is resolved.",
+    "write_paths": "All 8 changed paths in a83018126..10946c59 are contained by the source node's declared write roots (tests/test_nova_lane_launcher.py, the test-timeout docs root, the evidence fragment, and the fsri figure root)."
+  },
+  "justifications": {
+    "durability": "Independently mutating pytest_timeout_argument to drop the --timeout=* branch makes exactly the new test fail under the environment default; the test defends the retained-bound behaviour rather than restating a green suite.",
+    "evidence": "The gate (8 passed EXIT=0), the negative control (1 failed 7 passed EXIT=1) and the base/head arms (7 passed, 8 passed) are all present, readable and independently reproduced at head; the only defect is the fragment's 16.5. vs 15.87s metric disagreement with its cited log.",
+    "fit": "tests/test_nova_lane_launcher.py:98-119 mirrors the adjacent split-form timeout test and reuses the existing _launch and _h200_submission_line helpers without touching launcher semantics.",
+    "goal_fidelity": "tests/test_nova_lane_launcher.py:98-119 supplies --timeout=45 with NOVA_LANE_TEST_TIMEOUT=7200 and asserts one retained timeout token and no injected default; the requested whitespace-only cleanup now covers every .log under the glob and git diff --check is empty.",
+    "scope_discipline": "git diff --name-only a83018126..10946c59 lists only tests/test_nova_lane_launcher.py and files beneath the declared docs roots."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "prior_findings_resolution": {
+    "blank_baseline_after_suites": "resolved - manifest.md baseline_suite and after_suite are populated with revision, command, exit_status, log_path, completed=true, failure_ids=[]; both backing logs end at a pytest summary line with EXIT=0.",
+    "gate_log_revision_label": "resolved - gate.log:1 now reads 'arm=head revision=4af94d326' plus a note that the adding commit is its immediate log-only child; after-suite.log carries the same revision label. The prior review classified this as follow-on, and the label is now explicit and explained.",
+    "trailing_whitespace_in_test_timeout_logs": "resolved - grep -nE '[ \\t]+$' over all 8 .log files under docs/figures/forward-solver-route-integrity/lane-launcher/test-timeout/ returns 0 matches each, and git diff --check a83018126..10946c59 is empty."
+  },
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: a83018126c9e2a92a00690ccf3ccc80316d6b4fe\nREVIEWED_HEAD_SHA: 10946c5974bb97765b1e3a4f0a0091818bf1414a\nVERDICT goal: tests/test_nova_lane_launcher.py:98-119 supplies --timeout=45 with NOVA_LANE_TEST_TIMEOUT=7200 and asserts one retained timeout; the trailing-whitespace cleanup now covers every .log under the test-timeout glob and git diff --check a83018126..10946c59 is empty.\nVERDICT done_when: independently reproduced at 10946c59 - green gate 8 passed EXIT=0, mutation removes the --timeout=* branch and fails exactly the equals-form test (1 failed, 7 passed EXIT=1), restore returns 8 passed.\nVERDICT write_paths: all 8 changed paths in a83018126..10946c59 are inside the source node's declared roots.\nVERDICT manifest: baseline_suite and after_suite are populated completed arms with empty failure_ids; added_failure_count=0 is a measured delta.\nVERDICT diff: 4af94d32 strips whitespace from the control log only and 10946c59 adds the suite logs only; code and tests at head are identical to the arm revision 4af94d32.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the equals-form regression test is present and the whitespace cleanup now spans the whole glob with an empty git diff --check.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate, negative control and both arms are present and independently reproduced; the fragment's 16.38s disagrees with its cited log's 15.87s.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every changed path lies within the four declared write roots.\nSCORE durability: 20\nJUSTIFICATION durability: an independent mutation of pytest_timeout_argument makes exactly the new test fail.\nSCORE fit: 19\nJUSTIFICATION fit: the new test mirrors the adjacent split-form test and reuses the existing helpers.\nFINDING docs/evidence/fragments/forward-solver-route-integrity 16.38s vs gate.log 15.87s follow-on: the evidence fragment's headline gate time disagrees with its cited log.",
+  "recommendation": "promote",
+  "review_run_id": "r-20261002T085807018367-review-2-of-fsri-lane-timeout-equals-form-test",
+  "reviewed_base_sha": "a83018126c9e2a92a00690ccf3ccc80316d6b4fe",
+  "reviewed_commit": "10946c5974bb97765b1e3a4f0a0091818bf1414a",
+  "reviewed_head_sha": "10946c5974bb97765b1e3a4f0a0091818bf1414a",
+  "reviewed_revision": "10946c5974bb97765b1e3a4f0a0091818bf1414a",
+  "reviewed_run_id": "r-20261002T080506940179-fsri-lane-timeout-equals-form-test",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-lane-timeout-equals-form-test",
+  "reviewer_node": "review-2-of-fsri-lane-timeout-equals-form-test",
+  "reviewer_run_id": "r-20261002T085807018367-review-2-of-fsri-lane-timeout-equals-form-test",
+  "scores": {
+    "durability": 20,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T09:05:00Z",
+  "total": 96,
+  "verdict": "pass"
+}

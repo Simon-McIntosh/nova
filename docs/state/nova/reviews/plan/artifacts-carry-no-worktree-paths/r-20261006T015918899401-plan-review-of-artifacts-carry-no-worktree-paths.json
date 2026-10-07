@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:06:34.567Z",
+  "dispatched_at": "2026-10-06T01:59:36Z",
+  "findings": [
+    {
+      "anchor": "reckon/crew/routing.py:463",
+      "id": "reuse_search-1",
+      "reason": "nova carries no reckon dependency (no reckon entry in pyproject.toml), so the grammar cannot be imported and must be re-encoded, and \u00a71 already documents both roots inline; only a citation of the owning file is missing, which changes wording rather than design.",
+      "text": "the plan's matcher encodes the worktree layout (`.reckon-worktrees` under the repository parent at line 463, and the legacy `tempfile.gettempdir()/\"reckon-worktrees\"` at line 470) whose owner is reckon, but \u00a71 and \u00a72 justify the grammar only against nova files (`repository_relative`, the `filepath` click group, the launchers); if reckon changes its root or layout, the nova matcher drifts silently",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/artifacts-carry-no-worktree-paths.html:113",
+      "id": "deep_module-1",
+      "reason": "the section must scope the no-collateral/same-line-endings promise to single-line spans, or drop the wrapped spelling to the \"left unmapped and reported\" path it already defines, before the implementer can honour both at once.",
+      "text": "\u00a72 requires the matcher to cover \"a single path split across two lines by a log's line wrap\" while the same section promises \"changes nothing outside the matched spans: the same bytes elsewhere, the same line endings\"; a span that contains a log's newline cannot be rewritten to a bare repository-relative path without changing that line ending, so the two statements cannot both hold for that spelling, and any JSON string whose path is re-wrapped risks the still-parses guarantee",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "tests/test_render_receipt_paths.py:50",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's own retire-accounting should name these helpers for deletion with the tests, so the guard has one owner and no orphaned scaffolding.",
+      "text": "\u00a74 deletes `test_no_receipt_directory_json_records_a_worktree_path` (line 73) and its positive control `test_the_scan_reaches_every_receipt` (line 57), but `_scanned_json` (line 50) and `RECEIPT_DIRECTORIES` (line 45) exist only to serve those two tests and are left behind as a directory-limited scanner beside the new repo-wide guard; a later reader sees a live scan that no longer runs",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "2a95b063077b78704b15674a6161dd4b84bf5d75e997c22cf0f0702f2422fab7",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 27,
+  "project": "nova",
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:08:28.594163+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:08:29.368622+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T02:08:27.645112+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T015918899401-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "f294faf116420d50cdc2c0b0fb6f040f2779f3b9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the single entry point must cover a worktree path split across two lines by a log's line wrap, a case its own \"the same line endings\" contract cannot satisfy.",
+    "duplicate_owner": "a finding \u2014 \u00a74 supersedes two tests in tests/test_render_receipt_paths.py but leaves their receipt-directory scanner in place as a second, now dead, owner of the scanning responsibility.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 accounts for its added function, two constants and subcommand and states why nothing in the refusal family retires, and \u00a74 names the two tests it supersedes.",
+    "reuse_search": "a finding \u2014 the matcher proposed for nova/database/filepath.py re-encodes the worktree-root layout that reckon owns at reckon/crew/routing.py:463, and the plan cites only nova mechanisms for that grammar.",
+    "thin_wrapper": "pass \u2014 the one subcommand and the two-line hook are the only wrappers; the hook is necessarily a shim and \u00a74 routes later read-only checks through it rather than adding a second mechanism."
+  },
+  "section_digests": {
+    "_document": "b3ee7454a1ec0e2a83ead33be101d05fd7fa85adf3552b0da221baf2489ca36b",
+    "s1": "e81d0eaac65459a36097b2baeed47f1dfefb2399efcd0ef47fec7b864e551225",
+    "s2": "44075d5cbd280843a02088a9e8f7008a7aaf1b157ef4c29429a691bf6acb76d6",
+    "s3": "af55126bd0713335b2716da37306ca4e7716c52a12337e9d50c6a6e28ad05475",
+    "s4": "10d93ab787b09c16106891cbe87215c53435d91487ff6a69933b6d77fd19fa58",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:08:10.218964+00:00"
+}

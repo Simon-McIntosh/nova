@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:42:24.115Z",
+  "dispatched_at": "2026-10-05T15:33:41Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/figure-and-solver-audit.html:60",
+      "id": "reuse_search-1",
+      "reason": "the reuse map fixes what \u00a71/\u00a74 extend versus re-derive, and a review plan that re-implements an existing instrument spends its reviewers twice.",
+      "text": "\u00a71 adds a per-figure review-and-score process and \u00a74 a per-class score aggregation without naming any prior art, yet nova already pins caption numbers mechanically in the committed render tests and reckon already stores per-dimension review scores",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/figure-and-solver-audit.html:74",
+      "id": "deep_module-1",
+      "reason": "one scored-figure record shape behind one reader/writer would make every directory's score comparable and make \u00a74's aggregation mechanical instead of a re-read.",
+      "text": "the four \u00a71 axes (rules, numbers, physics, honesty) and the score arithmetic live only in prose, so neither the per-figure result nor the \u00a74 roll-up is a queryable record and the same judgement is re-derived by hand per directory",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "reckon/crew/review.py:88",
+      "id": "duplicate_owner-1",
+      "reason": "the lane-fitness record is the dispatch-scope evidence, and it should be a projection of the store that owns the scores, not a second aggregation that can disagree with it.",
+      "text": "\u00a74 writes a parallel per-class score record beside reckon's review store instead of extending its `scores` view with a per-class grouping; a forked score path drifts from the store the reviews are actually written to",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e3b00206fd56f4776e916418103fa191149446fac8456ffee3094c08b9c97216",
+  "plan_slug": "figure-and-solver-audit",
+  "plan_version": 102,
+  "project": "nova",
+  "responses": {
+    "deep_module-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "The four-axis score was a one-off audit judgement and closed with its sections on 2026-09-21. No further figure scoring is planned here, so a scored-figure module would have no second caller. A recurring score record belongs in the store that owns review scores, which is reckon review.py.",
+      "when": "2026-10-05T18:30:54.901455+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "Foreign owner. Section 4 built the table once from the audit rows and, as its title says, handed it to reckon (f-fsa-audit-003-lane-fitness-record, resolved 2026-09-21). Extending the scores view of reckon review.py with a per-class grouping is reckon work, and this plan keeps no second aggregation going forward.",
+      "when": "2026-10-05T18:30:55.568633+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "s22-nova",
+      "reason": "The scoring of sections 1 to 4 ran once, over figures that had already landed, and closed on 2026-09-21. Its instruments are now reused, not re-derived. This plan authored tests/renderer_wall_scan.py and tests/test_renderer_contours_inside_wall.py, and every repair since has extended them. The only remaining node repairs the paths in four receipts and dispatches no further scoring.",
+      "when": "2026-10-05T18:30:53.929998+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T153301228569-plan-review-of-figure-and-solver-audit",
+  "reviewed_blob_sha": "0379422296fc37569b80415ab7a823c675a8ff26",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the plan's one substantial new behaviour, scoring a figure against four axes out of 100 with itemised deductions, is owned by no module; it is produced ad hoc by eleven reviewers and pasted into HTML.",
+    "duplicate_owner": "a finding \u2014 \u00a74's per-class lane-fitness counts are a duplicate of reckon's existing review-score store and its `scores` reader (reckon/crew/review.py:88 REVIEW_DIMENSIONS; the view that reads per-dimension scores filtered by plan/node/run_id), which is the owner to extend rather than a hand-built HTML table beside it.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan adds no public definition, CLI option, MCP view or refusal family, and its review records land as evidence anchors and followups, so no section adds surface against any family.",
+    "reuse_search": "a finding \u2014 the plan cites no search of the mechanisms it rests on: nova's per-directory render receipts and their tests (tests/test_limiter_read_render.py, tests/test_renderer_contours_inside_wall.py) and reckon's review-score store (reckon/crew/review.py) both already exist and are neither cited nor extended.",
+    "thin_wrapper": "pass \u2014 the plan consumes the promoted gates and receipts as they stand; it adds an independent human review layer, not a code wrapper over existing machinery, and states why it does not trust the worker's own gate (a self-authored gate measures internal consistency, not correctness)."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T18:30:12.296658+00:00"
+}

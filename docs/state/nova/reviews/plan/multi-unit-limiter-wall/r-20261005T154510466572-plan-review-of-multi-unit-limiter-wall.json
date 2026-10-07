@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:56:15.240Z",
+  "dispatched_at": "2026-10-05T15:45:51Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/wall_mask.py:138",
+      "id": "deep_module-1",
+      "reason": "the plan's \u00a71 representation is exactly these invariants (offsets monotone, one closure/kind per unit), and a single `PackedWall` type constructed by `pack_wall_units` would enforce them instead of leaving each consumer to re-derive them.",
+      "text": "`pack_wall_units` returns a bare `(vertices, offsets)` tuple and the \"packed wall\" survives only as parallel arrays `wall_unit_offsets`, `wall_unit_closed` and `_wall_unit_vessel` threaded through roughly 180 occurrences across `forward_operator.py`, `connectivity_boundary.py`, `topology.py`, `mast_chain_factory.py` and `frame/firstwall.py`",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/media/sources/frame.py:56",
+      "id": "thin_wrapper-1",
+      "reason": "this wrapper is precisely the second implementation through which the picture/solve disagreement \u00a75 claims to prevent returns, so the section must share the owner's containment or justify the fork.",
+      "text": "`inside_wall_units` re-implements the vessel-minus-material containment over `WallUnit`s rather than calling a shared function, and \u00a75 gives no reason the containment could not be shared with the solver's path",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/wall_mask.py:68",
+      "id": "duplicate_owner-1",
+      "reason": "the owner `nova/equilibrium/wall_mask.py` should carry the pointwise occupiable-region test beside its `inside_polygon` and `build_wall_mask`, and the four seams should call it, so a point on an open material blade is judged by one rule rather than four.",
+      "text": "four divergent occupiable-region tests exist instead of one owned mechanism: `nova/equilibrium/connectivity_boundary.py:233` (`_points_inside_wall_units`, JAX, used by the solver and by `topology.py`), `nova/equilibrium/contour_tree_mesh.py:89` (`_inside_wall_units`, shapely `covers` union, open units ignored), `nova/equilibrium/steering_frames.py:540` (`_inside_occupiable_region`, closed units only), and `nova/media/sources/frame.py:56` (open-material line excluded)",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a6b5daf8895786124e3bfb1b2c08249a8a84e514d7c2f59f7dbe20701a97f43d",
+  "plan_slug": "multi-unit-limiter-wall",
+  "plan_version": 40,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T154510466572-plan-review-of-multi-unit-limiter-wall",
+  "reviewed_blob_sha": "16cfe73218a26ef19cb5c4867ef604c8463a96b0",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the \"packed wall\" is not a module; it is three parallel arrays threaded through the operator and its consumers with no type owning their invariants.",
+    "duplicate_owner": "a finding \u2014 four divergent implementations of occupiable-region containment exist across the seams, none in the declared reuse authority `nova/equilibrium/wall_mask.py`, so the plan re-implements rather than extends the owner.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the sections under active design (\u00a73 solver consumers) add receipt fields (`wall_unit_index`, `strike_unit`) but no CLI option, MCP view, public definition or refusal family, so no section adds counted surface and none must name a retirement.",
+    "reuse_search": "pass \u2014 the plan searched the codebase (the cited scout `~/.config/reckon/crew/reports/nova/s19-labeller/wall-units-scout.md` exists) and reuses `WallUnit`/`build_wall_mask` from `nova/equilibrium/wall_mask.py`; no second wall type is authored and \u00a76 makes citing that type a node contract.",
+    "thin_wrapper": "a finding \u2014 `nova/media/sources/frame.py:inside_wall_units` re-implements occupiable containment as a thin layer over `inside_polygon` instead of extending the shared mechanism, and \u00a75 states no reason the solver's containment could not be shared."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T16:37:40.714930+00:00"
+}

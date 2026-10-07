@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "absent_note": "The reviewed run names no baseline_suite or after_suite gate log, so its added-failure count is unmeasured rather than a measured zero; it is a docs node whose gate is the committed check script check_boundary_wall_proximity_captions.py.",
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no baseline_suite or after_suite gate log (its gate is a committed check script, not a pytest suite pair), so the added-failure count was not taken rather than recorded as a measured zero.",
+  "completed_at": "2026-10-03T14:57:09.993Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:36:30Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/playable-forward-solve/boundary-wall-proximity-routing/area-evidence-explicit-gate/boundary-wall-proximity.png",
+      "line": "-",
+      "severity": "follow-on",
+      "text": "The current panel's own rendered suptitle (inside the PNG) still reads '10/12 trainable slices (83.3%) carry a measured floating boundary beyond 50 mm ... the effect is confined to the non-diverted group as predicted', the exact confinement claim the driving followup flags as one that cannot fail on a census whose diverted group is empty. The fragment caption corrects this in prose, but the served image is unchanged because the panel was not re-rendered; a reader who sees only the image still meets the flagged claim. The done-when's 'never recaption around a defect' clause and its 'report the out-of-scope driver as a blocker' fallback were not followed; the driver path was noted only under follow_ons."
+    },
+    {
+      "file": "docs/evidence/archive/playable-forward-solve-landed.html",
+      "line": "1931",
+      "severity": "follow-on",
+      "text": "The served archive where the followup located the defect still carries the two identical shared captions (lines 1931 and 1935, each '<figcaption>boundary-wall-proximity. Recovered from worktree pfs-boundary-routing at 6ab5ae30.</figcaption>'). The corrected captions were written to the new fragment per the brief, so the contradiction persists on the served page until the fragment is merged/promoted. Out of the node's declared write paths, hence follow-on."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's manifest carries no baseline_suite/after_suite fields; its gate is the check script docs/figures/playable-forward-solve/boundary-routing/check_boundary_wall_proximity_captions.py, recorded in tests/test_logs with a green log (31/31, EXIT=0) and two red arms (EXIT=1). I reproduced the green run and an independent number mutation (30/31, EXIT=1). added_failure_count is therefore unmeasured (None), not 0.",
+  "justifications": {
+    "durability": "The change adds a self-contained committed guard, check_boundary_wall_proximity_captions.py, that resolves each caption number in its own receipt and exits nonzero on a number disagreement, a caption with no binding, or a title not naming its gate; I confirmed it fails on an injected number mutation (30/31, EXIT=1), so it is a guard that can fail, not a present-and-green assertion. Deducted because it is a manual script under docs/figures rather than a test collected by pytest, so nothing runs it automatically, and the panel images it does not re-render still carry the flagged title.",
+    "evidence": "The gate the done-when names is the committed check script docs/figures/playable-forward-solve/boundary-routing/check_boundary_wall_proximity_captions.py, and I reproduced it first-hand at the reviewed head 66542c9de: 31/31 passed, EXIT=0, every one of the 31 bindings resolving in the boundary-wall-proximity.json beside its own panel; an independent mutation of one caption number (.aggregate.all.floating_boundary_count 0 -> 7) gives 30/31 and EXIT=1, so the check can fail. Deducted because the fragment's currency claim ('the explicit-branch-gate census is the current one') is inferred from generated_at ordering and the non-degenerate distance column, not from the check script's own bindings, and the check does not machine-verify it; and because the reviewed manifest names no baseline_suite/after_suite gate logs, so the added-failure derivation is unmeasured rather than a measured zero.",
+    "fit": "The fragment follows the repo's evidence-fragment idiom (project-absolute src, one landing section) and the script follows the module style (argparse, named constants, regex parsers, EXIT=<code> last line); the mandatory naming check over the two changed paths returns no plan label, stage name, superseded-name suffix or attribution.",
+    "goal_fidelity": "The node goal - separate the two boundary-wall-proximity panels that shared one caption and reported opposite results - is met in the fragment docs/evidence/fragments/playable-forward-solve/pfs-boundary-wall-proximity-captions.html: each panel now has its own data-gate figure with a gate-naming h3 title ('without the explicit branch gate (superseded)' / 'behind the explicit branch gate (current)'), its own evidence-fragment caption with every number bound to a named JSON path, the diverted group stated empty so the confinement claim is untested, and the non-gated census dated and withdrawn. Deducted because the done-when also required regeneration through the committed nova.media painters and, the driver being out of scope, that its path be reported as a blocker; neither was done - the panels were recaptioned in place, so the current panel's own in-image suptitle still asserts the confinement claim the followup flags (see findings).",
+    "scope_discipline": "git diff --stat 0dfce2a0d..66542c9de returns exactly the two declared paths - the fragment (89 insertions) and the check script (204 insertions), 293 insertions and zero deletions - with nothing under nova/, no plan, no shared index, and the reviewed worktree clean. Both commits carry a conventional subject with a body and no attribution."
+  },
+  "node": "review-of-pfs-boundary-wall-proximity-captions",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to separate the two boundary-wall-proximity panels that shared one caption and reported opposite results; the fragment docs/evidence/fragments/playable-forward-solve/pfs-boundary-wall-proximity-captions.html gives each panel its own gate-naming title and receipt-bound caption.\nVERDICT done_when: the done-when names a committed check script that exits nonzero if a caption number disagrees with its own receipt, its log ending EXIT=0 and a run against the shared pre-repair caption ending nonzero; the manifest records the script, its green run and two red arms, and I reproduced 31/31 EXIT=0 and a mutation EXIT=1.\nVERDICT write_paths: read the manifest's declared paths; the diff 0dfce2a0d..66542c9de touches exactly the fragment and the check script under docs/figures/playable-forward-solve/boundary-routing, all inside them.\nVERDICT manifest: read; it records tests with EXIT=0 31/31, three test_logs, a negative_control_log, commits 3f27a4138 and 66542c9de, and claims both images opened - which I confirmed by opening both PNGs.\nVERDICT diff: read commit by commit against base 0dfce2a0d; two files, 293 insertions, zero deletions, all inside scope, with conventional bodies and no attribution.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: The node goal - separate the two boundary-wall-proximity panels that shared one caption and reported opposite results - is met in the fragment docs/evidence/fragments/playable-forward-solve/pfs-boundary-wall-proximity-captions.html: each panel now has its own data-gate figure with a gate-naming h3 title ('without the explicit branch gate (superseded)' / 'behind the explicit branch gate (current)'), its own evidence-fragment caption with every number bound to a named JSON path, the diverted group stated empty so the confinement claim is untested, and the non-gated census dated and withdrawn. Deducted because the done-when also required regeneration through the committed nova.media painters and, the driver being out of scope, that its path be reported as a blocker; neither was done - the panels were recaptioned in place, so the current panel's own in-image suptitle still asserts the confinement claim the followup flags (see findings).\nSCORE evidence: 17\nJUSTIFICATION evidence: The gate the done-when names is the committed check script docs/figures/playable-forward-solve/boundary-routing/check_boundary_wall_proximity_captions.py, and I reproduced it first-hand at the reviewed head 66542c9de: 31/31 passed, EXIT=0, every one of the 31 bindings resolving in the boundary-wall-proximity.json beside its own panel; an independent mutation of one caption number (.aggregate.all.floating_boundary_count 0 -> 7) gives 30/31 and EXIT=1, so the check can fail. Deducted because the fragment's currency claim ('the explicit-branch-gate census is the current one') is inferred from generated_at ordering and the non-degenerate distance column, not from the check script's own bindings, and the check does not machine-verify it; and because the reviewed manifest names no baseline_suite/after_suite gate logs, so the added-failure derivation is unmeasured rather than a measured zero.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 0dfce2a0d..66542c9de returns exactly the two declared paths - the fragment (89 insertions) and the check script (204 insertions), 293 insertions and zero deletions - with nothing under nova/, no plan, no shared index, and the reviewed worktree clean. Both commits carry a conventional subject with a body and no attribution.\nSCORE durability: 17\nJUSTIFICATION durability: The change adds a self-contained committed guard, check_boundary_wall_proximity_captions.py, that resolves each caption number in its own receipt and exits nonzero on a number disagreement, a caption with no binding, or a title not naming its gate; I confirmed it fails on an injected number mutation (30/31, EXIT=1), so it is a guard that can fail, not a present-and-green assertion. Deducted because it is a manual script under docs/figures rather than a test collected by pytest, so nothing runs it automatically, and the panel images it does not re-render still carry the flagged title.\nSCORE fit: 18\nJUSTIFICATION fit: The fragment follows the repo's evidence-fragment idiom (project-absolute src, one landing section) and the script follows the module style (argparse, named constants, regex parsers, EXIT=<code> last line); the mandatory naming check over the two changed paths returns no plan label, stage name, superseded-name suffix or attribution.\nFINDING docs/figures/playable-forward-solve/boundary-routing/area-evidence-explicit-gate/boundary-wall-proximity.png:- follow-on: the current panel's own rendered suptitle inside the PNG still asserts the confinement claim the followup flags ('the effect is confined to the non-diverted group as predicted') on a census whose diverted group is empty; the fragment caption corrects it in prose but the served image was not re-rendered, and the done-when's alternative to report the out-of-scope driver as a blocker was not taken.\nFINDING docs/evidence/archive/playable-forward-solve-landed.html:1931 follow-on: the served archive still carries the two identical shared captions at lines 1931 and 1935, so the contradiction the followup names persists on the served page until the corrected fragment is merged; this is outside the node's declared write paths.",
+  "review_base_sha": "ce718d4d72522ac059927d722f27847755824439",
+  "review_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143606251211-pfs-boundary-wall-proximity-captions/logs/check-captions-green.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143606251211-pfs-boundary-wall-proximity-captions/logs/check-captions-red-pre-repair.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T143606251211-pfs-boundary-wall-proximity-captions/logs/check-captions-red-mutation.log"
+  ],
+  "review_run_id": "legacy-e9e726618d4f",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "0dfce2a0d1b3bfe8592c88601ef48f0cf49ffeb2",
+  "reviewed_commit": "66542c9de7518d840817121fa35683d1e76aacae",
+  "reviewed_commits": [
+    "3f27a413885a37e779a25fb628df6959fa894c8f",
+    "66542c9de7518d840817121fa35683d1e76aacae"
+  ],
+  "reviewed_head_sha": "66542c9de7518d840817121fa35683d1e76aacae",
+  "reviewed_run_id": "r-20261003T143606251211-pfs-boundary-wall-proximity-captions",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/pfs-boundary-wall-proximity-captions",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:10:06Z",
+  "total": 88,
+  "verdict": "pass"
+}

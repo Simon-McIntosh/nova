@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_source": "Derived from the reviewed run's readable baseline_suite and after_suite fields: both completed with failure_count 2 and exactly the same ids: tests/test_route_solve_requests.py::test_request_execution_is_bit_identical_to_the_keyword_fixture and tests/test_forward_receipt_raster.py::test_reduced_hex_request_receipt_records_absent_raster_flux. Their set difference is [].",
+  "after_gate_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/after-suite.log",
+  "baseline_gate_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/baseline-suite.log",
+  "completed_at": "2026-10-03T09:24:59Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T09:14:47Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "2354",
+      "severity": "follow-on",
+      "text": "follow-on: reject clip_mode=None. __post_init__ still accepts None and _active_support_clip_mode returns it unchanged at line 2716; downstream checks distinguish only chord and chord_cells, so explicit None can select a non-chord path. No reviewed production caller passes None and this is not a restored global."
+    },
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": "95",
+      "severity": "follow-on",
+      "text": "follow-on: the later assigned review tree again contains _SUPPORT_CLIP_MODE plus set_support_clip_mode/support_clip_mode at its current lines 95-127 and differs from f80. This does not alter this range verdict; run the no-process-global guard at merged head."
+    }
+  ],
+  "follow_ons": [
+    "Tighten ForwardFluxOperator clip-mode validation to reject None and add a direct invalid-mode test.",
+    "Run tests/test_clip_mode_has_no_process_global.py at the eventual merged head because a later tree revision has reintroduced the retired API."
+  ],
+  "independent_check": {
+    "command": "JAX_PLATFORMS=cpu PYTHONPATH=/tmp/fsapi-review.9Y46RA /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest --import-mode=importlib -p no:cacheprovider /tmp/fsapi-review.9Y46RA/tests/test_clip_mode_has_no_process_global.py",
+    "module": "/tmp/fsapi-review.9Y46RA/nova/equilibrium/forward_operator.py",
+    "result": "1 passed in 12.40s; EXIT=0",
+    "revision": "f80a679b91abfc32670cfeb8dbff1d6fb91e5718",
+    "tree": "/tmp/fsapi-review.9Y46RA"
+  },
+  "item_verdicts": {
+    "default_and_bridge": "PASS with a hardening follow-on. Head forward_operator.py line 2341 defaults clip_mode to chord and line 2714 returns only the instance mode; solve_request.py lines 495, 522, and 556 use literal chord defaults. forward.py lines 2690-2694 records request.clip_mode in the receipt.",
+    "durability": "PASS. The conventional commit, complete manifest, evidence fragment, and reproducible base/head/red logs are durable.",
+    "explicit_routing": "PASS. test_forward_solve_clip_mode_request.py lines 26-39 constructs chord/exact/chord_cells requests, lines 43-47 spies on with_clip_mode, and lines 76-94 assert request/receipt/operator routing and cache-key separation.",
+    "global_deletion": "PASS by source and line. Base forward_operator.py lines 95-127 are deleted. Head tests/test_clip_mode_has_no_process_global.py lines 10 and 14-25 reject the retired names as ast.Name, ast.Attribute, and ast.alias nodes; lines 29-40 scan nova, benchmarks, scripts, and tests. The archival-head guard passed 1/1.",
+    "goal": "PASS at f80a679b: reproduction.log gives omitted_request_clip_mode=exact under the old setter; the commit removes the module global, setter, getter, and solve_request bridge.",
+    "production_default": "PASS. test_forward_support_clip_mode.py lines 105-148 compares omitted-mode moments bit-for-bit with the main-checkout chord construction; the reviewed diff replaces only the explicit-mode setter call with operator.with_clip_mode.",
+    "scope": "PASS. The range changes exactly the two implementation files, five scoped tests, and the assigned evidence fragment; no plan or shared index changes.",
+    "suite_delta": "PASS. Both suite logs end completed=true, failure_count=2, EXIT=1 with the same two ids, so added failures are zero."
+  },
+  "justifications": {
+    "durability": "The commit, evidence fragment, manifest, and quoted logs are readable and retained. The reviewed commit is an ancestor of the assigned tree while this record judges only the declared range.",
+    "evidence": "Evidence includes a true base reproduction, completed baseline/head delta, red mutation naming forward_operator.py, focused route tests, and an independent archival AST guard. The static AST cases directly cover required module definitions, attributes, and aliases.",
+    "fit": "Literal defaults remove the lazy process bridge and the change follows immutable operator cloning and typed receipt provenance; allowing None is the remaining mismatch.",
+    "goal_fidelity": "The target behavior is implemented and independently guarded, but forward_operator.py line 2354 still permits clip_mode=None. The literal default remains chord and no reviewed production caller passes None; validation should nevertheless close the finite mode set.",
+    "scope_discipline": "Every changed path is in the reviewed manifest and assigned scope; no live plan or unrelated production route was edited."
+  },
+  "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/negative-control.log",
+  "node": "review-of-fsapi-clip-mode-global-deletion",
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-ons (92/100). Base behavior reproduced: an omitted request inherits global exact. Commit f80a679b deletes the global, setter, getter, and request bridge; literal chord defaults replace them, and explicit modes route to the operator and receipt. Independent archived-head guard: 1 passed. Supplied red control: 1 failed, EXIT=1. Baseline/head suites have identical two failures, so added_failure_count is 0. Follow-ons: reject explicit None and verify the eventual merged head.",
+  "review_run_id": "r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion",
+  "reviewed_base_sha": "2acc1ff9151326b7ab2891948e2b46b34fe377dc",
+  "reviewed_commit": "f80a679b91abfc32670cfeb8dbff1d6fb91e5718",
+  "reviewed_head_sha": "f80a679b91abfc32670cfeb8dbff1d6fb91e5718",
+  "reviewed_run_id": "r-20261003T082403871267-fsapi-clip-mode-global-deletion",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-clip-mode-global-deletion",
+  "reviewer_node": "review-of-fsapi-clip-mode-global-deletion",
+  "reviewer_run_id": "r-20261003T091420501229-review-of-fsapi-clip-mode-global-deletion",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/reproduction.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/baseline-suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/focused-tests.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/negative-control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T082403871267-fsapi-clip-mode-global-deletion/after-suite.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T09:20:00.000000+00:00",
+  "total": 92,
+  "verdict": "pass-with-follow-ons"
+}

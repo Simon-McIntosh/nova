@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest has no baseline_suite or after_suite arm. Its eight committed gate logs report the four observed failures but contain no base-versus-head comparison, so added_failures_from_gate_logs is unmeasured rather than a measured zero.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run did not arm a baseline/head pair; the four listed failures are observed outcomes, not attributable additions",
+  "artifacts": [
+    "docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-file-verification.html",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/h200-whole-file.log",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/cpu-prefix.log",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/cpu-host-iteration.log",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/cpu-sirius-accelerator-routes.log",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/cpu-batch-portfolio.log",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/cpu-differentiable.log",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/cpu-sirius-batched-ensemble.log",
+    "docs/figures/forward-solver-route-integrity/forward-solve-file-verification/cpu-sirius-topology-portfolio.log"
+  ],
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "85c7c512a",
+    "9a70815f6",
+    "047405ee3313fb69999d97640d8739b917d24ee7",
+    "4b985c4e4",
+    "4f53fa908cc9b0d35083d4230171efd206fef532"
+  ],
+  "completed_at": "2026-10-02T21:20:05Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T21:12:58Z",
+  "evidence_inputs": "Reviewed bd439c315c5ec9db523d22e0eb5addc164be7a33..4f53fa908cc9b0d35083d4230171efd206fef532. H200 job 1280471 committed h200-whole-file.log records 4 failed, 25 passed in 905.35 s at bd439c315. CPU committed logs cover 13 prefix outcomes (1 fail, 12 pass), 6 host-iteration outcomes (all pass), 1 accelerator-route pass, 2 initial batch outcomes (both pass), 5 differentiability outcomes (3 fail, 2 pass), then completed Sirius reruns for the two timed-out tests (both pass): 29 terminal outcomes total. The four H200 failures match CPU logs: profile-owned support 31/625 mismatch with max absolute difference 173.4314; moment map 0.7598863825264144/6692 below 1.0; conductor-flux error 63.47875092912272/152035 above 0.001; conductor-current error 11.313969220454661/440912 above 0.001. The two Sirius rerun headers state REVISION=047405ee3313fb69999d97640d8739b917d24ee7, while the fragment and manifest claim every job ran at bd439c315. git diff --name-status bd439c315..047405ee shows only the fragment and three previously committed evidence logs, so neither source nor tests/test_equilibrium_forward_solve.py changed; the completion evidence remains applicable but the provenance prose is false.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-file-verification.html",
+      "line": "30",
+      "severity": "follow-on",
+      "text": "The fragment says every job ran at bd439c315c5ec9db523d22e0eb5addc164be7a33, but both committed Sirius rerun logs begin REVISION=047405ee3313fb69999d97640d8739b917d24ee7. The intervening range is evidence-only, so this does not invalidate the two passing outcomes, but the reader-facing provenance must name the actual rerun revision and explain why the unchanged source/test tree permits the comparison."
+    }
+  ],
+  "follow_ons": "Correct the fragment and reviewed manifest to identify the two Sirius reruns as revision 047405ee3313fb69999d97640d8739b917d24ee7, and retain the evidence-only diff statement that establishes source and tests/test_equilibrium_forward_solve.py were unchanged from bd439c315. No solver or test repair is within this review's scope.",
+  "gate_arms_note": "No gate was re-run by the reviewer. The reviewed run's own committed logs are the evidence: H200 whole-file completion, five completed CPU groups, one timed-out CPU group with two completed Sirius replacements. The review verified log headers, individual outcomes, terminal summaries, failure values, and revision-to-tree consistency.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: the reviewed range records test evidence and a fragment only; it does not change product runtime code",
+    "diff": "The five commits add one fragment and eight committed logs under the reviewed manifest's two declared evidence paths. git diff --check reports trailing whitespace inside raw pytest logs; that is captured command output, not an unrelated source edit.",
+    "done_when": "met: all 29 collected test ids have a terminal committed outcome; the four H200 failures are reproduced in CPU logs at the stated printed values; the two tests interrupted by the all_debug time limit both complete and pass in separate Sirius logs.",
+    "goal": "met: the node provides a complete two-device whole-file disposition without claiming a device-specific failure. The exact test-source provenance for two reruns needs the recorded correction in the follow-on.",
+    "manifest": "status complete; commits end at 4f53fa908cc9b0d35083d4230171efd206fef532; baseline_suite and after_suite are empty, so added failures are unmeasured rather than zero.",
+    "write_paths": "The reviewed range stays within the declared figure directory and evidence fragment. The reviewed run's tree snapshot is clean for its dedicated worktree."
+  },
+  "justifications": {
+    "durability": "All eight gate logs and the outcome table are committed at the reviewed head, including the two Sirius replacement runs after the all_debug timeout. A later reader can reopen every named log and reconcile the reported result to a terminal line.",
+    "evidence": "The H200 whole-file log, the completed CPU shards, and the table agree on 25 passes and four cross-device failures. The failure assertions and measured values reconcile across the H200 and CPU logs. Evidence quality is reduced because the two Sirius headers identify 047405ee rather than the bd439c315 revision claimed by the fragment and manifest; source and test content are unchanged across that evidence-only interval, but the provenance statement remains inaccurate.",
+    "fit": "The fragment gives a compact, reader-facing job table, cites committed log names, separates common failures from device-specific ones, and states the previous timeout resolution. It needs the small revision correction so the prose matches the receipts it cites.",
+    "goal_fidelity": "The work answers the requested verification question: all 29 collected outcomes are accounted for, no H200-only failure remains, and the four failures are explicitly classified from real logs rather than a passing-suite inference. The Sirius source-revision discrepancy is a record defect, not a test-source divergence, because the range from bd439c315 to 047405ee changes only evidence files.",
+    "scope_discipline": "The reviewed commits are evidence-only and remain inside the exact figure directory and fragment declared by the reviewed manifest. No production source, tests, plan HTML, or unrelated artifact appears in the range."
+  },
+  "plan": "nova:forward-solver-route-integrity",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: bd439c315c5ec9db523d22e0eb5addc164be7a33\nREVIEWED_HEAD_SHA: 4f53fa908cc9b0d35083d4230171efd206fef532\nVERDICT goal: complete 29-test, two-device outcome accounting is present; no failure is H200-only.\nVERDICT done_when: 29 terminal outcomes; four failure values agree across H200 and CPU; two Sirius timeout replacements complete and pass.\nVERDICT write_paths: evidence-only range stays inside the declared figure directory and fragment.\nVERDICT manifest: complete; no baseline/head arm, so added failures are unmeasured.\nVERDICT diff: five commits, one fragment and eight committed logs; raw pytest logs carry trailing whitespace.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: The evidence answers the requested whole-file disposition, but the completion logs must be described at their actual revision.\nSCORE evidence: 16\nJUSTIFICATION evidence: Results and four measured cross-device failures reconcile, but two Sirius headers contradict the fragment's stated source revision.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: All reviewed changes are inside declared evidence paths; no production source or test file changed.\nSCORE durability: 20\nJUSTIFICATION durability: Every named outcome is in a committed, reopenable gate log.\nSCORE fit: 18\nJUSTIFICATION fit: The table is readable and complete, but its all-jobs-at-one-revision sentence must match the logs.\nFINDING docs/evidence/fragments/forward-solver-route-integrity/fsri-forward-solve-file-verification.html:30 follow-on: Correct the claimed revision for the two Sirius reruns to 047405ee3313fb69999d97640d8739b917d24ee7 and preserve the evidence-only-diff rationale.",
+  "review_base_sha": "e53e1141d23dd38f5e72b72dfc2c05bf283aa9c9",
+  "review_run_id": "r-20261002T211226552427-review-of-fsri-forward-solve-file-verification",
+  "reviewed_base_sha": "bd439c315c5ec9db523d22e0eb5addc164be7a33",
+  "reviewed_commit": "4f53fa908cc9b0d35083d4230171efd206fef532",
+  "reviewed_head_sha": "4f53fa908cc9b0d35083d4230171efd206fef532",
+  "reviewed_revision": "4f53fa908cc9b0d35083d4230171efd206fef532",
+  "reviewed_run_id": "r-20261002T184908677651-fsri-forward-solve-file-verification",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-forward-solve-file-verification",
+  "reviewer_node": "review-of-fsri-forward-solve-file-verification",
+  "reviewer_run_id": "r-20261002T211226552427-review-of-fsri-forward-solve-file-verification",
+  "scores": {
+    "durability": 20,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a71",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T21:23:00+00:00",
+  "total": 93,
+  "verdict": "pass"
+}

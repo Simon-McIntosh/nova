@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-06T09:40:25Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/batched_labeller.py:120",
+      "id": "reuse_search-1",
+      "reason": "\u00a71's remaining work is the launch-count and bit-identity receipt against the existing route, not a new program, so the section must be rewritten to extend `BatchedLabeller` and cite it.",
+      "text": "\u00a71 (\"put the whole slice solve inside one compiled program with a fixed trip budget and masked convergence instead of the host ladder\") is already `_make_solver`/`BatchedLabeller`, a dynamic-arg copy of the production fixed trip loop with masked convergence (`finished`) and in-program backtracking factors (`factors`, `choose`, `lax.map(score, candidates)`); the plan proposes rebuilding it",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/batched_labeller.py:699",
+      "id": "reuse_search-2",
+      "reason": "\u00a72 must reconcile with the existing vmap read and either measure/repair the existing pass or state what it replaces, rather than propose a parallel batch read.",
+      "text": "\u00a72 (\"a batch of slices reads in one fixed-shape program\") is already `self.operator.read(state_value, requested_value)` inside the vmapped `one()` (`jax.vmap(one)` at line 725, batch sharding at 729), i.e. the topology read already runs once per batch element inside one fixed-shape compiled program",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/shape_inverse.py:1201",
+      "id": "reuse_search-3",
+      "reason": "\u00a73 should be scoped as tightening the existing loop's tolerance (default `TURNING_POINT_RELATIVE_TOLERANCE = 0.1`, \u00a73 wants 5 percent) and banking the receipt, not authoring a loop that is present.",
+      "text": "\u00a73 (\"add a Newton outer loop on the achieved shape: re-linearise at the admitted state and iterate until commanded and achieved motions agree to a stated tolerance, still under the admission line search and the 20 kA ceiling\") already exists in `solve_shape_inverse`: `current_step_ceiling=CURRENT_STEP_CEILING_A` (20 000 A, line 75), the admission line search (`_moves_toward_command`, `MERIT_RESOLVABLE_STEP_FRACTION`), the secant-refreshed tangent (`_secant_refreshed_tangent`, lines 1511/1546), the bounded loop `while not converged and len(iteration_history) < maximum_iterations` (line 34) and the achieved-over-commanded gain correction",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:3718",
+      "id": "reuse_search-4",
+      "reason": "\u00a75 is an extension of this cold-start branch (feed the first read's own read back as its shadow), and it must name that owner rather than describe a new two-pass read.",
+      "text": "\u00a75 (\"read the first iterate twice, the second read shadowed by the first\") already has its owner: `_previous_wall_shadow` returns \"the prior iterate's wall mask, or no mask on a cold start\", and `_residual_shadow_components_from_read` feeds it to `wall_height_shadow_mask` (line 3750); the cold start is the exact gap \u00a75 names",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/labeller_batch/shard.py:2",
+      "id": "reuse_search-5",
+      "reason": "\u00a76 must cite and extend `scripts/labeller_batch/{shard,receipt}.py` rather than propose the job and receipt as new.",
+      "text": "\u00a76 (\"the labeller over the decoder's shot list as one sharded job writing every shot's session as it lands \u2026 resumable by shot, with a completion receipt\") is already `scripts/labeller_batch`: `shard.py` (\"Write forward-solve steering sessions for one shard of MAST shots\", `resumed: True` at line 708, per-shot manifest with `converged`/`qualified`/`policy_digest`) and `receipt.py` (\"Aggregate forward-labeller shot manifests into a completion receipt\", emitting `converged_fraction`, `qualified_fraction`, `gpu_hours`, `policy_digests`)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/batched_labeller.py:875",
+      "id": "deep_module-1",
+      "reason": "the honest change is to keep one entry point and fix the throughput of the existing program, so \u00a71/\u00a72 must state whether they add an entry point or amend the existing one.",
+      "text": "\u00a71 proposes a per-slice compiled program and \u00a72 a batch read as two further entry points beside the existing `solve_batched_labeller`/`BatchedLabeller` one-program-per-batch solver, so the same compiled core (trip loop, backtracking, conditioning, read) gains three public surfaces for one capability",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/forward_operator.py:3718",
+      "id": "thin_wrapper-1",
+      "reason": "the change is likely one call site in the existing cold-start branch, so \u00a75 should extend it or justify a second path.",
+      "text": "\u00a75's read-twice adds a second read path over `_previous_wall_shadow`/`_residual_shadow_components_from_read` with no statement of why the existing cold-start branch cannot simply pass the first read's own wall mask to the second read",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/labeller_batch/shard.py:2",
+      "id": "duplicate_owner-1",
+      "reason": "naming the owners lets the author extend `scripts/labeller_batch/` and the existing read pass instead of forking a second job driver and a second read path.",
+      "text": "\u00a76 duplicates the decoder-corpus job owner (`shard.py`, plus `receipt.py:2` for the completion receipt) instead of extending it, and \u00a72 duplicates the topology-read owner already held by `BatchedLabeller` (`batched_labeller.py:699`) over `ForwardFluxOperator.read`",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "ba3048051277f5e910c42bb8af56e65633b71275b408f48da544b8acfb609b58",
+  "plan_slug": "labeller-throughput-and-shape-inverse",
+  "plan_version": 4,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T093959761301-plan-review-of-labeller-throughput-and-shape-inverse",
+  "reviewed_blob_sha": "c9b5578fb2571043af6061d8baf2a2aeaa55a8d5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a71 and \u00a72 would add a per-slice compiled program and a batch read as separate entry points beside the existing single one-program-per-batch solver, adding public surface over the same solver core rather than deepening one module.",
+    "duplicate_owner": "a finding \u2014 \u00a76 re-proposes the decoder-corpus shard job and its completion receipt, both already owned by `scripts/labeller_batch/`; \u00a72 re-proposes the topology read already owned by `BatchedLabeller`/`ForwardFluxOperator`.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan's sections add no CLI option, MCP view, published definition or refusal family, and the one parameter \u00a73 implies (`turning_point_relative_tolerance`) already exists.",
+    "reuse_search": "a finding \u2014 the plan proposes \u00a71 (one compiled program per slice), \u00a72 (a batched on-device topology read), \u00a73 (an achieved-shape Newton outer loop), \u00a75 (a shadow for the cold first iterate) and \u00a76 (a sharded decoder-corpus job with a completion receipt) as new work, each of which already exists in nova and none of which the plan names.",
+    "thin_wrapper": "a finding \u2014 \u00a75's \"read the first iterate twice\" is a thin layer over the existing cold-start shadow path in `forward_operator.py` without saying why that path cannot simply supply the first read as its own shadow."
+  },
+  "section_digests": {
+    "_document": "928cf3381f41373d82eb6974e597b970c732ec7361061020292d6e874fc47eae",
+    "s-contract": "024e5c38e24ed51f6d760b3911b720ffcba28d41775eab656834caf6abfab099",
+    "s0": "fcc6bc611e5a6e762eba3cc8413fbee594d639d7e4fb7b8a7d8571a9c9757adf",
+    "s1": "c9894c04e721a4315064317f1af18c33c6ba4a858104a5367f3299c0dd0a8741",
+    "s2": "4c238cae020d586130746fb46274679d7f3ceb5fece0613e627b841c87f3cfb0",
+    "s3": "7728ab6273d0d10802352c1123db5593fb45ec40d19def3c1a175696c9ee59f5",
+    "s4": "bddafd10abc7a1acdef975c8f36efe663376d8c0bab288a9598fe325ee167599",
+    "s5": "793d52fe684678361c1aa6ac5cff69510d045d042c56528eebb0e6f6d77f7bc6",
+    "s6": "05ef31be8536e7ca9c96da053d237fdc66dd99221378f10c28853405a9d90ec6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.421107+00:00"
+}

@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "1c023858f308f13adbf7290c318434afbb5e0b31",
+  "blocking_finding_count": 0,
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/database/scripts.py:58 (the filepath relativize --check mode invoked by scripts/git-hooks/pre-commit)"
+  ],
+  "completed_at": "2026-10-06T12:53:59.994Z",
+  "dispatched_at": "2026-10-06T12:42:00Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T113551108285-acnwp-guard-follow-ons/logs/after_suite.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the reviewed run's manifest names logs/after_suite.log (48 bytes, one progress line) as its completed head arm, but that file carries no summary line and no EXIT; the head arm's completion is evidenced only by logs/head_test_database.log, logs/head_test_render_receipt_paths.log and logs/head_test_solve_program_size.log, each EXIT=0. A reader trusting the manifest's after_suite.completed=true finds an unreadable log."
+    }
+  ],
+  "follow_on_finding_count": 1,
+  "gate_logs": {
+    "base": {
+      "command": "pytest tests/test_database.py tests/test_render_receipt_paths.py tests/test_solve_program_size.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T113551108285-acnwp-guard-follow-ons/logs/baseline_suite.log",
+      "revision": "1c023858f308f13adbf7290c318434afbb5e0b31"
+    },
+    "head": {
+      "command": "pytest tests/test_database.py tests/test_render_receipt_paths.py tests/test_solve_program_size.py",
+      "completed": false,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T113551108285-acnwp-guard-follow-ons/logs/after_suite.log",
+      "revision": "dc944c4156b562d0ce384080dc95894192970c1e"
+    }
+  },
+  "head_log_revision": "dc944c415",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 1 production call site(s)",
+    "diff": "read commit by commit against base dc944c415; the change is the index reader plus the divergence test plus the fragment update.",
+    "done_when": "the fix commits add the divergence test tests/test_filepath.py:303 and record gate_a.log and negctl_d.log; the run's after_suite.log is truncated so the head arm's completion rests on logs/head_test_*.log.",
+    "goal": "the reviewed commits repair the guard's commit check to decide from the index blob, closing the blocking finding the prior review raised at nova/database/scripts.py:58.",
+    "manifest": "read; names commits 469233f2a,dc944c415,5632c2e21,53663defc and four negative controls, but its after_suite log_path is a truncated 48-byte file.",
+    "write_paths": "all five changed paths are inside the manifest's declared write paths."
+  },
+  "justifications": {
+    "durability": "tests/test_filepath.py:303 asserts the index reader reports a file staged while it named a worktree path and then edited clean, which reddens if the index reader fell back to the working tree.",
+    "evidence": "the fix is verified by reproduction (review-repro-index-vs-worktree.log) and by gate_a.log (46 passed, 3 skipped), but the reviewed run's after_suite.log is a 48-byte truncated capture and no suite was re-run at 53663defc.",
+    "fit": "worktree_path_text and worktree_path_index_text (nova/database/filepath.py:167,178) join the existing reader family, and the module-private cross-module import the prior review flagged is gone.",
+    "goal_fidelity": "nova/database/scripts.py:58 now reads index content through worktree_path_index_text (nova/database/filepath.py:178) instead of the working tree, closing the prior blocking finding.",
+    "reuse": "worktree_path_index_text extends the filepath reader family and no other module reads staged git content (grep over nova/ found only nova/database/filepath.py).",
+    "scope_discipline": "every path in the diff (git diff --stat dc944c415 53663defc) is inside the manifest's declared write paths."
+  },
+  "limitations": [
+    "The reviewed run's three-module pytest suite was not re-run at the reviewed head 53663defc; the added-failure count is derived from the run's own baseline_suite.log (complete, EXIT=0) and after_suite.log (truncated, no summary), both zero-failure, so added_failure_count is 0.",
+    "The commit check was reproduced through the filepath predicate and readers imported from scratch trees of dc944c415 and 53663defc (review-repro-index-vs-worktree.log), not by invoking scripts/git-hooks/pre-commit end to end; the hook was not itself run.",
+    "My own arm of the new reader tests (review-head-reader-tests.log) reports 4 passed, 1 failed, where the single failure (test_worktree_path_candidates_search_the_working_tree) is scaffolding: my scratch tree was extracted with git archive and is not a git repository, so the candidate search raised 'not a git repository'. The tests that cover the change passed.",
+    "The reviewed run's gate_a.log and negctl_d.log were read, not re-run."
+  ],
+  "node": "review-of-acnwp-guard-follow-ons",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed commits repair the guard's commit check to decide from the index blob, closing the blocking finding the prior review raised at nova/database/scripts.py:58; reproduced at the base revision (worktree reader returns []) and at the head (index reader returns ['receipt.json']) in review-repro-index-vs-worktree.log.\nVERDICT done_when: the run's done_when is the section-6 gate; the fix commits add the divergence test tests/test_filepath.py:303 and record gate_a.log (46 passed, 3 skipped) and negctl_d.log, but the run's own after_suite.log is truncated, so the head arm's completion rests on logs/head_test_database.log, logs/head_test_render_receipt_paths.log and logs/head_test_solve_program_size.log.\nVERDICT write_paths: read the manifest's declared paths; all five changed paths (nova/database/filepath.py, nova/database/scripts.py, tests/test_artifacts_carry_no_worktree_paths.py, tests/test_filepath.py, docs/evidence/fragments/artifacts-carry-no-worktree-paths/acnwp-guard-follow-ons.html) are inside them.\nVERDICT manifest: read the reviewed run's manifest; it names commits 469233f2a,dc944c415,5632c2e21,53663defc and four negative controls, but its after_suite names logs/after_suite.log (48 bytes, one progress line, no summary or EXIT) as its completed head arm.\nVERDICT diff: read commit by commit against base dc944c415 -- 5632c2e21 renames the private reader to public worktree_path_text, adds worktree_path_index_text reading the staged blob via `git show :path`, points scripts.py:58 at it, and adds the divergence test; 53663defc updates the evidence fragment; every changed path is inside the declared scope.\nCALL_SITES: nova/database/scripts.py:58 (the filepath relativize --check mode invoked by scripts/git-hooks/pre-commit)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/database/scripts.py:58 now reads index content through worktree_path_index_text (nova/database/filepath.py:178) instead of the working tree, closing the prior blocking finding.\nSCORE evidence: 16\nJUSTIFICATION evidence: the fix is verified by reproduction (review-repro-index-vs-worktree.log) and by gate_a.log (46 passed, 3 skipped), but the reviewed run's after_suite.log is a 48-byte truncated capture and no suite was re-run at the reviewed head 53663defc.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (git diff --stat dc944c415 53663defc) is inside the manifest's declared write paths.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_filepath.py:303 asserts the index reader reports a file staged while it named a worktree path and then edited clean, which reddens if the index reader fell back to the working tree.\nSCORE fit: 19\nJUSTIFICATION fit: worktree_path_text and worktree_path_index_text (nova/database/filepath.py:167,178) join the existing reader family, and the module-private cross-module import the prior review flagged is gone.\nSCORE reuse: 20\nJUSTIFICATION reuse: worktree_path_index_text extends the filepath reader family and no other module reads staged git content (grep over nova/ found only nova/database/filepath.py).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T113551108285-acnwp-guard-follow-ons/logs/after_suite.log:1 follow-on: the reviewed run's manifest names logs/after_suite.log as its completed head arm, but that file holds one 48-byte progress line with no summary and no EXIT; the head arm's completion is carried only by logs/head_test_database.log, logs/head_test_render_receipt_paths.log and logs/head_test_solve_program_size.log, each EXIT=0.\nreviewed_base_sha: dc944c4156b562d0ce384080dc95894192970c1e\nreviewed_head_sha: 53663defc787862dad63c97e4c8af06b7cdf4c9d",
+  "review_run_id": "r-20261006T124143161602-review-of-acnwp-guard-follow-ons",
+  "review_scope": "Independent read-only review, outside the reviewed worktree, of the commits r-20261006T113551108285-acnwp-guard-follow-ons gained after its prior review (dc944c415): 5632c2e21 (the commit check decides from index content) and 53663defc (the evidence fragment). The diff was read from the shared object store; the prior blocking finding at nova/database/scripts.py:58 and the follow-on at nova/database/filepath.py:167 were checked for closure by reproduction in scratch trees and by reading the run's own gate logs.",
+  "reviewed_base_sha": "dc944c4156b562d0ce384080dc95894192970c1e",
+  "reviewed_commits": [
+    "5632c2e21",
+    "53663defc787862dad63c97e4c8af06b7cdf4c9d"
+  ],
+  "reviewed_head_sha": "53663defc787862dad63c97e4c8af06b7cdf4c9d",
+  "reviewed_run_id": "r-20261006T113551108285-acnwp-guard-follow-ons",
+  "reviewer": "review-of-acnwp-guard-follow-ons",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T12:51:43.433337+00:00",
+  "total": 113,
+  "verification_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T124143161602-review-of-acnwp-guard-follow-ons/review-repro-index-vs-worktree.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261006T124143161602-review-of-acnwp-guard-follow-ons/review-head-reader-tests.log"
+  ]
+}

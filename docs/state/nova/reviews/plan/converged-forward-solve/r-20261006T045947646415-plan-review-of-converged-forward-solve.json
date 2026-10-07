@@ -1,0 +1,34 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T05:08:36.243Z",
+  "dispatched_at": "2026-10-06T05:00:04Z",
+  "findings": [],
+  "plan_fingerprint": "e65149173ce2412b43bc06085ea8263ddb88d0d31dd19f2dd151da3c12d66efc",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 85,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261006T045947646415-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "6b3196d8b7364cbda5836080855bd429cca5f84f",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design consolidates the 54-file / 17-null-site / 23-region machinery into four single-entry modules (topology.py `read`, current.py `book`, gs.py `apply`, solve.py `fixed_point`), each hiding substantial behaviour (fragment/membership read with null census and normal-form saddle support; clipped-fragment booking; the map with its implicit-Picard, moment-map and boundary-flux derivative bundle; Newton-GMRES on the map's own JVP with a line search) behind one function signature \u2014 surface shrinks, depth increases, and the split is by stage of one pipeline rather than wrappers over the same call.",
+    "duplicate_owner": "pass \u2014 every recurring duplicate is bound to a named owner rather than forked: path/receipt placement to nova/database/filepath.py (FilePath); compile-program counting to scripts/h200_test_lane/cache_guard.py (\"No node builds a second compilation counter\"); constraint-row scale/tolerance to nova/equilibrium/constraint.py (ConstraintPair/ConstraintRecord, \"no second declaration of a row scale exists in solve.py\"); polygon moments to nova/equilibrium/polygon_moments.py (\"after retirement polygon_moments.py is the only module under nova that integrates a monomial over a polygon\"); null evaluation to nova/biot/null.py + fieldnull.py; the fixed-point kernel to be moved before \u00a76 deletes fixed_point.py. I found no mechanism the plan re-implements while an owner exists untouched.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0: no section adds net surface to any of these four families. \u00a72 extends `ForwardSolvePolicy` in place (TopologyPolicy already at nova/equilibrium/solve_request.py:233,327); \u00a73/\u00a74/\u00a75 add three module functions but each section names in its own text what it retires (`clipped_support_current_moments`; the `ForwardFluxOperator` map; `newton_krylov`/`picard`/`operator_request_body`), and \u00a76 states the retirement list (promotion/recovery rungs, frozen/live split, live-read fallback, active-set/anderson/reduced-Newton/chord routes, `fixed_point.py`, `reduced_newton.py`, and the solver+booking authority in `forward_operator.py`). Every section either names a retirement or is a pure prose/inventory section, so nothing adds surface unaccounted for.",
+    "reuse_search": "pass \u2014 every proposed mechanism names the existing mechanism it replaces or reuses, and the citations resolve: `topology.read` cites `Topology.read`/`read_with_connectivity`/`read_qualification`/`split_flux_map` in nova/equilibrium/topology.py and reuses `build_contour_tree` from nova/equilibrium/contour_tree.py (the landed read calls it at topology.py:2907); `current.book` cites `clipped_support_current_moments` in nova/equilibrium/clip_quadrature.py:714 plus a recorded moment-owner ruling naming nova/equilibrium/polygon_moments.py as the single polygon-moment owner; `gs.apply` cites the `ForwardFluxOperator` map and the `_flatten_*`/`_SourceLayout`/`_OperatorPytreeAux` operand machinery in nova/equilibrium/forward_operator.py:147-227,2079-2260,2323; `solve.fixed_point` cites `newton_krylov`/`picard`/`operator_request_body` and the `_single_site_krylov` kernel in nova/equilibrium/fixed_point.py:972,2619; layout/path/compile-count owners are cited (nova/database/filepath.py FilePath+repository_relative, scripts/h200_test_lane/cache_guard.py, nova/equilibrium/constraint.py ConstraintPair/ConstraintRecord, nova/equilibrium/coefficient_carrier.py) and each was confirmed present.",
+    "thin_wrapper": "pass \u2014 no new module is a thin layer over machinery it could extend: \u00a74 states `gs.apply` \"replaces the map `ForwardFluxOperator` performs today rather than wrapping it\"; \u00a75 states `solve.fixed_point` \"replaces newton_krylov, picard and the request body operator_request_body\" and keeps only the single-site pattern as a private helper; \u00a72 replaces the read in place in topology.py; \u00a73 carries the clip-quadrature helpers as private helpers behind the one booking call site. Each substitution states why the owner is replaced."
+  },
+  "section_digests": {
+    "_document": "9e5331ea1a4b63239cfe7c8e9b4aca7a44924ce0b16c47420e4d6a0ee855f4c5",
+    "s0": "66bed59341ceddd2b2d61465f1233d35c4d59c22234d867f09b1e4a337b0b482",
+    "s1": "e3926ed31983268b83ff4f7fe6feb947700172eb86a0d601549966b9cd8f4e20",
+    "s2": "254b21ab4574a4654af4914ed85cd161db29a25975ca66c1cadc0169b816d17d",
+    "s3": "bfa74835b32e89f1d009029df7d262e2ff3a2ec8c1b385240ffd1944e826f14c",
+    "s4": "7d23b7b52a53c7baf79319043739e7f1a16c13c17507bb66d13c97607c5eed19",
+    "s5": "7d065f3d2a0cd7837dbcc5e5df468c3df2a608776346c22c209ab7a7595cc0ce",
+    "s6": "7d71ea2158135f26f4d2ad95e6f32e582e3479791b56228cae60d5cb4b3fad9d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T06:52:27.758724+00:00"
+}

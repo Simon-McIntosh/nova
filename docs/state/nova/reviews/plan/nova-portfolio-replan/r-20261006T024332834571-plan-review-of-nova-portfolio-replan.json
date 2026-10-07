@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T02:50:11.675Z",
+  "dispatched_at": "2026-10-06T02:43:52Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/nova-portfolio-replan.html:135",
+      "id": "reuse_search-1",
+      "reason": "\u00a73's status write would stop carrying single-grid-solver-cutover as blocked by a gate that has landed, and f-replan-004 refactor (1) would be dropped as complete.",
+      "text": "the plan records single-grid-solver-cutover as correctly blocked by gate g-s19-clip-mode-lands-first because `_SUPPORT_CLIP_MODE=\"chord\"` sits at `nova/equilibrium/forward_operator.py:107`, but that process-global does not exist: line 107 is `_CHORD_REVERTED_CELLS`, a repo-wide scan finds no `_SUPPORT_CLIP_MODE` in any source file, and clip mode is already request-owned (`nova/equilibrium/solve_request.py:577`, `nova/equilibrium/forward_operator.py:2341`) with a guard test forbidding the retired name (`tests/test_clip_mode_has_no_process_global.py`), landed at commits 09a0b9b90 and f80a679b9 \u2014 so the gate's precondition is closed, and \u00a75's `f-replan-004` refactor (1) (line 106) is likewise already done.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/database/filepath.py",
+      "id": "duplicate_owner-1",
+      "reason": "the consolidated primitives should land with the owner package that already exists for them, or the section must state why it diverges from the census home it cites as its checklist.",
+      "text": "the plan homes the one atomic receipt writer in the path-resolution module `nova/database/filepath.py` (\"beside `repository_relative`\"), and the uniform-axis validator in the domain module `nova/equilibrium/map_extraction.py`, although `nova/io/` (egress.py, ingest.py, geqdsk.py, \u2026) already exists as the repo's I/O owner and `nova/utilities/` as the generic-primitive owner, and the census names `nova/io/json.py` and `nova/utilities/axes.py`; the plan's \"no new public module\" rule quietly overrides its own checklist, and a media source importing a validator from the equilibrium map extractor inverts the dependency direction.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e92a039ddfaa2f07f518a1cc37b2bd872c4aadd310b96757649cc3f634899126",
+  "plan_slug": "nova-portfolio-replan",
+  "plan_version": 34,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "nova-fd",
+      "reason": "",
+      "when": "2026-10-06T02:53:31.202496+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "nova-fd",
+      "reason": "The _SUPPORT_CLIP_MODE text sits in the body of f-replan-004, a followup already resolved; the clip mode it described landed as a ForwardSolvePolicy field and the global was deleted at 091588305, and converged-forward-solve section 6 collapses SupportClipMode to the exact clip. The plan's live text makes no current claim about that gate.",
+      "when": "2026-10-06T02:53:31.197138+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T024332834571-plan-review-of-nova-portfolio-replan",
+  "reviewed_blob_sha": "1c4911b1bdc08509498b460bc82d4b01238d0fe9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 no new module is proposed; each consolidation lands as one function in an existing owner (residual implementation in constraint.py, atomic writer, uniform-axis validator), so complexity is hidden behind a single interface rather than spread across wrappers.",
+    "duplicate_owner": "a finding \u2014 the consolidated atomic receipt writer is homed in the path-resolution module, not in the repo's existing I/O owner that the plan's own census names.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 this week; the only section adding a public surface (replan-small-primitives, the one uniform-axis check) names in its own text the copies it retires (diiid_efit.py, mast_efit.py, LatticePolicy), and the other four \u00a75 nodes delete or reroute rather than add.",
+    "reuse_search": "a finding \u2014 the plan searched and cites the census groups it consolidates (constraint.py residual/dual-image RANK 4, machine_evidence.py owners RANK 9/10), but its account of the clip-mode machinery it lists as unlanded is stale: the process-global and its gate no longer exist.",
+    "thin_wrapper": "pass \u2014 the plan explicitly drops the census's read-only-array group (\"a shared helper over it would be a thin wrapper\") and, where it does add a function, extends the existing owner (e.g. require_string/canonical_json in machine_evidence.py) rather than a parallel one; the rubric's usual failure is avoided."
+  },
+  "section_digests": {
+    "_document": "d8955ff15584087c7d7eca1aca77e8cca0110efbac8657a65b20c684231fd648",
+    "s1": "58ad1730dc7612f2dc456bf4599af55a71ceb55e5ed306ccf2229dd7bc011ac6",
+    "s2": "7b91ed2a58ab9aaae272d528c052c40f54ca4422ec97d9111051a88840cdbc66",
+    "s3": "69f113368c428a995aa7d308edeff811c658d2946119c0ee44e68f1e414847d0",
+    "s4": "0fd4196896e7767911f9f536c635279a10274509c33cd6c6547349b6ef15dcac",
+    "s5": "edcd4da2faa55ad2aba8d2fe37bce2029b24cf4c1f0edf9a050a806270eb35f1"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T02:51:12.415712+00:00"
+}

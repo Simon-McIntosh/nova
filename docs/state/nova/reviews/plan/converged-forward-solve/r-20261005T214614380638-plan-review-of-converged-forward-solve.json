@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T21:49:36.652Z",
+  "dispatched_at": "2026-10-05T21:46:27Z",
+  "findings": [
+    {
+      "anchor": "nova/imas/mast_parity_chain.py:29",
+      "id": "duplicate_owner-1",
+      "reason": "the plan claims its import census spans the whole package but names no `nova.imas` consumer, so \u00a76 will meet an unplanned importer of a deleted module.",
+      "text": "imports `newton_krylov` from `nova.equilibrium.fixed_point`, the route \u00a75 replaces and \u00a76 deletes, from outside the `nova/equilibrium` and `nova/transport` subpackages the consumer rulings name; it is a direct caller of the old solver that must be re-pointed before deletion",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/biot/boundary.py:12",
+      "id": "duplicate_owner-2",
+      "reason": "deleting `ForwardFluxOperator` without re-pointing this biot-layer importer breaks a boundary module the plan never lists.",
+      "text": "imports `ForwardFluxOperator` from `nova/equilibrium/forward_operator.py`, the operator class \u00a76 retires, from the `nova.biot` layer where \u00a76's census expects only `null.py`/`fieldnull.py` to survive",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/equilibrium/steering_frames.py:991",
+      "id": "duplicate_owner-3",
+      "reason": "the retired active-set attributes are still read in-tree, so the freeze/retire must name this consumer or supply its replacement.",
+      "text": "reads `equilibrium.fixed_point.active_set_iterations`, the active-set plumbing \u00a76 retires with the ladders; the plan's transport/apps consumer rulings do not name it",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/ (177 files import `fixed_point`, `reduced_newton` or `forward_operator`)",
+      "id": "duplicate_owner-4",
+      "reason": "177 benchmark entries resolving through the deleted modules is a large unnamed scope, and the plan should state whether they are re-pointed, archived as before-arm evidence, or deleted, before the retirement node dispatches.",
+      "text": "\u00a76 states that \"every deleted module's tests\" are re-pointed or deleted, but the benchmark corpus that binds these modules at module level is neither named nor given a policy",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "11c69d0a39356ec37ea5955f03eda8af3184dda79bc57aec59f07423b765df12",
+  "plan_slug": "converged-forward-solve",
+  "plan_version": 39,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T21:50:49.285274+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T21:50:49.901696+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T21:50:50.367546+00:00"
+    },
+    "duplicate_owner-4": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-05T21:50:50.848205+00:00"
+    }
+  },
+  "review_run_id": "r-20261005T214614380638-plan-review-of-converged-forward-solve",
+  "reviewed_blob_sha": "11454203509c214c5fff989150e17514bc83d390",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design replaces a 54-file / 54,102-line sprawl with four functions of one interface each (`topology.read`, `current.book`, `gs.apply`, `solve.fixed_point`) that each hide hundreds of lines behind a pure, traced call; the interface is smaller than what it hides, which is the definition of depth.",
+    "duplicate_owner": "a finding \u2014 \u00a76's retirement enumerates a partial consumer set, but the three modules it deletes are imported across the package by files no ruling names, so the stated census (\"covers the whole `nova` package, not `nova/equilibrium` alone\") is contradicted by the tree it must run against; the benchmark corpus that consumes all three is not addressed at all.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. Every section that adds a definition names what it retires in its own text (\u00a72 retires the null/region authorities, \u00a73 the clip entry, \u00a74 the map, \u00a75 the NK/Picard routes), and \u00a76 prunes the request surface (`SolveRoute` 6\u21921, `SupportClipMode` deleted, eight policy fields removed) while stating the before/after field counts as the accounting the reduction rests on.",
+    "reuse_search": "pass \u2014 the plan cites the existing mechanism for every subsystem it adds, and each citation resolves to a real symbol: `contour_tree.build_contour_tree` (`nova/equilibrium/contour_tree.py:384`) over `contour_tree_mesh.build_contour_mesh` (`contour_tree_mesh.py:193`), `polygon_moments.polygon_monomial_moments`/`polygon_density_moments` (`polygon_moments.py:141,187`), `ConstraintPair`/`ConstraintRecord` (`constraint.py:237,1843`), `nova/biot/null.py` (`Null1D`/`Null2D`/`inside_or_near_source_cell`, lines 32/45/232) and `nova/biot/fieldnull.py`, the `forward_operator.py` operand-layout helpers, `clip_quadrature.py`'s exact-clip helpers, and the `fixed_point.py` GMRES kernel plus `_backtracking_scores`/`_select_backtracking_candidate`. The sixteen composed-review rulings in the plan body each pin a file and a symbol, and the seven cite-or-justify candidates are all present in the tree.",
+    "thin_wrapper": "pass \u2014 every new module names the mechanism it *replaces* rather than wrapping: \u00a72 replaces `Topology.read`/`read_with_connectivity` (`topology.py:1396,1376`), \u00a73 replaces `clipped_support_current_moments` and the `forward_operator.py` support partition, \u00a74 replaces the map `ForwardFluxOperator` performs (`forward_operator.py:2323`), \u00a75 replaces `newton_krylov`/`picard`/`operator_request_body` (`fixed_point.py:5003,2874,972`). `forward.py` shrinks to a request/receipt adapter rather than growing a parallel layer."
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T21:50:48.773098+00:00"
+}

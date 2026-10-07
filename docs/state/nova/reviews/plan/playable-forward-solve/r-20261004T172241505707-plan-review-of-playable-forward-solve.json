@@ -1,0 +1,51 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:33:56.344Z",
+  "dispatched_at": "2026-10-04T17:22:55Z",
+  "findings": [
+    {
+      "anchor": "scripts/playable_server/run.sh:141",
+      "id": "duplicate_owner-1",
+      "reason": "Deliverable A in \u00a76 should declare the serving launcher a thin caller of scripts/nova_lane/run.sh (mode=script over scripts/playable_server/payload.sh), as the test lane already is; otherwise the two copies of the H200 reservation/cache/TMPDIR contract drift independently and neither is the owner.",
+      "text": "the launcher hand-rolls its own sbatch submission array (partition=betelgeuse, reservation=gpu_0003_grpA, --gpus=h200:1, --mem, --time, the shared interpreter) and its own TMPDIR handling instead of being a thin caller of scripts/nova_lane/run.sh, which the comment at its own header states owns \"placement, submission, the rung/job/revision header and the --mem/TMPDIR rules\"; scripts/h200_test_lane/run.sh:40 already `exec`s that owner, so this is a second copy of the reservation contract",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/playable_server/run.sh:22",
+      "id": "duplicate_owner-2",
+      "reason": "a serving cache root deliberately isolated from the pinned prewarm cache is a defensible choice rather than a fork of the pin contract, so this is a naming/ownership note and the plan need not change; the cache-contract owner is scripts/h200_test_lane/cache_guard.py.",
+      "text": "a second compilation-cache root /work/.../playable-serving is hardcoded in the launcher and the payload configures the JAX cache contract itself",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "apps/playable/shape.py:107",
+      "id": "thin_wrapper-1",
+      "reason": "two generators of the same control-point set will drift and there is no stated reason ControlPoints cannot be extended (a supplied commanded axis/gap set); the plan should extend ControlPoints or say why the steering vocabulary must diverge from it.",
+      "text": "PlasmaShape.control_points re-derives the outer/upper/inner/lower/X-point geometry inline and explicitly only \"match[es] the pulse-design ControlPoints convention\" rather than using nova/geometry/plasmapoints.py:143 ControlPoints / PlasmaPoints, which the plan's \u00a72 names as the generator of that point set from axis, minor radius, elongation, triangularities and squareness",
+      "type": "thin_wrapper",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "58a776fbf367443bff6874b9e8eb951f0d456b3bb384a63ab94e62767c410acb",
+  "plan_slug": "playable-forward-solve",
+  "plan_version": 354,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T172241505707-plan-review-of-playable-forward-solve",
+  "reviewed_blob_sha": "76eda453d584c8ade5562ea0eac2ce6a0f952f2d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the SteeringFrame contract in nova/equilibrium/steering_frames.py confines the per-frame record shape, the group-backed netCDF session store and the assemble/read join (assemble_frame, write_session, read_session, frames_from_session) behind a small interface over ~1950 lines, and budgets the renderer channels out of it.",
+    "duplicate_owner": "a finding \u2014 scripts/playable_server/run.sh forks the compute-lane submission path that scripts/nova_lane/run.sh owns and that scripts/h200_test_lane is already a thin caller of.",
+    "reuse_search": "a finding \u2014 the plan cites the forward inverse design, the pulse-design control points and the pulsedesign view, but proposes new H200 serving-launch machinery without citing scripts/nova_lane/run.sh, the repository's compute-lane launcher that owns placement and submission.",
+    "thin_wrapper": "a finding \u2014 apps/playable/shape.py adds a PlasmaShape control-point holder that re-derives the control-point geometry inline instead of reusing or extending nova/geometry/plasmapoints.py, whose generator the plan names in \u00a72."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.474253+00:00"
+}

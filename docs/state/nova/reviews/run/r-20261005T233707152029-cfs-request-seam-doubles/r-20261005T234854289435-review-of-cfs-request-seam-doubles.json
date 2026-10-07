@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed manifest's recorded baseline_suite and after_suite failure_ids: after (0 failed, 5 passed) minus baseline (3 failed, 2 passed) removes all three baseline ids (test_request_path_is_bit_identical_and_defaults_round_trip_through_json, test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch, test_compilation_cache_receipt_observes_reuse_not_the_request_field) and adds none. The head arm is clean, so the store's log-level reader (annotate_review_of_run) also yields 0 added here; the id-reconciliation gap noted in the baseline arm cannot produce a false positive because the head arm records no failures to mismatch.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-05T23:58:30.322Z",
+  "decision": "approved",
+  "dispatched_at": "2026-10-05T23:49:08Z",
+  "evidence": {
+    "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T233707152029-cfs-request-seam-doubles/cfs-request-seam-doubles-gate.log",
+    "annotate_added_failure_count": 0,
+    "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T233707152029-cfs-request-seam-doubles/negative-control-base.log",
+    "changed_path_count": 2,
+    "independent_reproduction_logs": [
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T234854289435-review-of-cfs-request-seam-doubles/independent-gate-head-exact.log",
+      "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T234854289435-review-of-cfs-request-seam-doubles/independent-gate-head-importlib.log"
+    ],
+    "live_plan_path": "/home/ITER/mcintos/Code/nova/docs/plans/converged-forward-solve.html",
+    "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T233707152029-cfs-request-seam-doubles/negative-control-base.log",
+    "reviewed_commits": [
+      "9b0f196bf95809a2f6be207fee8c1af99270cf85",
+      "14aa0591a33c944445af0fad47b7115e78fff572"
+    ],
+    "reviewed_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T233707152029-cfs-request-seam-doubles/manifest.md"
+  },
+  "findings": [
+    {
+      "file": "tests/test_forward_solve_request.py",
+      "line": "148",
+      "severity": "follow-on",
+      "text": "follow-on: The baseline arm runs a renamed scratch copy of the test (scratch/test_forward_solve_request_base.py under the run directory) while the manifest names the reviewed worktree as measurement_cwd, so its FAILED node ids reduce against the worktree and can never equal the head arm's tests/test_forward_solve_request.py::... ids. Repro: negative-control-base.log records three failures under .../scratch/test_forward_solve_request_base.py::test_..., and the reviewed manifest's baseline_suite.failure_ids record bare, path-free ids (after_suite records none), so the two arms cannot be reconciled id-for-id by the store's log reader. Unlike the sibling cfs-policy-tuple node this does not corrupt added_failure_count here, because the head arm is clean (0 failures) and nothing can be misattributed as added; the hazard is latent and would bite if a future head arm carried a failure. Re-run the baseline arm against the committed file at the base revision using the same module path so the two arms compare id-for-id."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "No production call sites: the change is confined to tests/test_forward_solve_request.py and its evidence fragment; no product source is touched.",
+    "diff": "The base-to-head diff is a test-scaffolding repair. It adds a local _NullTarget dataclass (response + a deterministic Null1D locator of the production FluxTarget.null type), registers it as a pytree so the traced solve path can carry it, patches the prescribing module's _LinearTarget symbol, and adds a _completed_profile helper that supplies the operator area entry plus the other host-geometry attributes ForwardFluxOperator._compute_geometry_identity reads. No assertion is weakened or removed; only fixture setup changes.",
+    "done_when": "The node's own gate reproduces independently: at reviewed head 14aa0591 the recorded command run from the reviewed worktree reports 5 passed, EXIT=0 (independent-gate-head-exact.log), and an importlib-mode run over the absolute worktree path reports 5 passed (independent-gate-head-importlib.log). The negative control at base 302f160fc reports 3 failed, 2 passed, EXIT=1, the three ids each raising AttributeError: '_LinearTarget' object has no attribute 'null' at nova/equilibrium/forward_operator.py:2599. The evidence fragment adds no figure, which is correct for a fixture repair.",
+    "goal": "tests/test_forward_solve_request.py now carries the stationary-point locator and operator area entry that ForwardFluxOperator._compute_geometry_identity reads, so the three request-seam tests that drive a solve no longer raise AttributeError on the hand-built object.__new__ operator; the file is restored to 5 passed at head.",
+    "manifest": "The reviewed run's manifest.md is complete and internally consistent: baseline_suite (302f160fc, 3 failed 2 passed, completed true), after_suite (9b0f196b, 0 failed 5 passed, completed true), readable log paths, negative_control_log, measurement_module and measurement_cwd named. Its recorded failure_ids derive to zero added failures. The measurement_module points at a scratch copy, so the arms cannot be reconciled id-for-id by the store's log reader, but no false added count arises because the head arm is clean.",
+    "write_paths": "The base-to-head diff touches exactly two paths, tests/test_forward_solve_request.py and docs/evidence/fragments/converged-forward-solve/cfs-request-seam-doubles.html, both inside the node's granted write paths; no product source changed. The concurrent cfs-policy-tuple node shares the same test path and edits the POLICY_FIELDS tuple, so a merge of the two touches this file."
+  },
+  "justifications": {
+    "durability": "The repair is test scaffolding rather than a guard: it restores three request-seam tests by supplying the host geometry the production operator owns but the object.__new__ fixture omitted. The negative control demonstrates it removes exactly the three AttributeError failures, and the double carries the locator as the production Null1D type so a type drift would surface. It is not a new guard, and a future addition to the geometry-identity inputs would require extending the double, which is the same brittleness the production fixture has.",
+    "evidence": "The head gate is recorded and independently reproduced (5 passed both in the recorded default import mode run from the reviewed worktree and in an importlib-mode run over the absolute path), and the negative control records the base revision's 3 failed / 2 passed with the same AttributeError at forward_operator.py:2599. The evidence fragment names each arm's revision correctly (gate at 9b0f196bf, base 302f160fc). Evidence is docked for the baseline arm's renamed-scratch-copy recording, which prevents id-for-id reconciliation by the store reader, though it does not corrupt the added-failure count here.",
+    "fit": "Both commits use a conventional subject with a body stating why, no plan or ticket identifiers appear, and the evidence fragment follows the standard evidence-doc head with project/plan meta. The repair reuses the existing fixture through a module-symbol monkeypatch rather than duplicating operator construction.",
+    "goal_fidelity": "The change does precisely what the assigned repair requires: it carries the stationary-point locator and the operator area entry the geometry identity reads onto the request-seam doubles, and nothing more. Verified against the live product that reads them: ForwardFluxOperator._compute_geometry_identity consumes self.grid.null, self.wall.null and self.area (nova/equilibrium/forward_operator.py:2599).",
+    "reuse": "No new machinery is introduced: a single small double and one helper reuse the existing shared linear fixture, and the double is registered as a pytree so the existing traced solve path carries it without a parallel code path.",
+    "scope_discipline": "Exactly two granted paths changed, no product source touched, and the three residual failures that the concurrent cfs-policy-tuple node owns are reported as a scope note rather than triaged outside the write fence; the scratch-copy baseline recording is the only reconciliation blemish and is reported as a follow-on."
+  },
+  "limitations": [
+    "The baseline arm ran a renamed scratch copy (test_forward_solve_request_base.py), so its node ids do not reconcile id-for-id with the head arm's; no false added-failure count arises because the head arm records no failures.",
+    "The _completed_profile helper sets several geometry-identity inputs (cell_average_stencil, cell_average_weight, inside_material, moment_geometry, wall_unit_*) to None placeholders, so the geometry-identity digest computed in these tests is not a faithful digest; this is acceptable for request-seam tests that assert request/receipt behaviour, not identity content.",
+    "No merged-head suite was run; this reviews the node's own commits and their recorded arms only, reproduced independently at the reviewed head."
+  ],
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 302f160fc4866c4f283feac35a0e8ee69019e8de\nREVIEWED_HEAD_SHA: 14aa0591a33c944445af0fad47b7115e78fff572\nVERDICT goal: tests/test_forward_solve_request.py now carries the stationary-point locator and operator area entry that ForwardFluxOperator._compute_geometry_identity reads, so the three request-seam tests that drive a solve no longer raise AttributeError on the hand-built object.__new__ operator; the file is restored to 5 passed at head.\nVERDICT done_when: The node's own gate reproduces independently at reviewed head 14aa0591 (5 passed, EXIT=0) and the negative control at base 302f160fc reports 3 failed, 2 passed, EXIT=1, the three ids each AttributeError: '_LinearTarget' object has no attribute 'null' at nova/equilibrium/forward_operator.py:2599. The evidence fragment adds no figure, correct for a fixture repair.\nVERDICT write_paths: The base-to-head diff touches exactly two paths, tests/test_forward_solve_request.py and docs/evidence/fragments/converged-forward-solve/cfs-request-seam-doubles.html, both granted, no product source changed.\nVERDICT manifest: baseline_suite (302f160fc, 3 failed 2 passed, completed true), after_suite (9b0f196b, 0 failed 5 passed, completed true), readable logs and measurement fields named; recorded failure_ids derive to zero added failures; the scratch-copy baseline cannot be reconciled id-for-id by the store reader.\nVERDICT diff: A test-scaffolding repair adding a _NullTarget double (with a deterministic Null1D locator of the production FluxTarget.null type), a pytree registration, a module-symbol monkeypatch, and a _completed_profile helper supplying the operator area and other geometry-identity inputs; no assertion weakened or removed.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: The change does precisely what the assigned repair requires and nothing more; verified against the live product that reads grid.null, wall.null and area at nova/equilibrium/forward_operator.py:2599.\nSCORE evidence: 17\nJUSTIFICATION evidence: The head gate is recorded and independently reproduced (5 passed), and the negative control records the base revision's 3 failed with the same AttributeError; docked because the baseline arm ran a renamed scratch copy so its ids cannot be reconciled id-for-id by the store reader, though no false added count arises here.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Exactly two granted paths changed, no product source touched, and the shared-path merge note with cfs-policy-tuple is reported rather than triaged outside the fence.\nSCORE durability: 18\nJUSTIFICATION durability: The repair restores three request-seam tests by supplying the host geometry the object.__new__ fixture omitted; the negative control demonstrates it removes exactly those failures, and the double carries the production Null1D type so type drift would surface. It is scaffolding, not a new guard, and a new geometry-identity input would require extending it.\nSCORE fit: 19\nJUSTIFICATION fit: Both commits carry a conventional subject and a why-body with no plan or ticket identifiers, and the evidence fragment follows the standard evidence-doc head with correct per-arm revisions.\nSCORE reuse: 19\nJUSTIFICATION reuse: No new machinery: one small double and one helper reuse the existing shared linear fixture, and the double is registered as a pytree so the existing traced solve path carries it.\nFINDING tests/test_forward_solve_request.py:148 follow-on: The baseline arm runs a renamed scratch copy (scratch/test_forward_solve_request_base.py) while the manifest names the reviewed worktree as measurement_cwd, so its FAILED ids reduce against the worktree and never match the head arm's ids; this does not corrupt added_failure_count here because the head arm is clean, but the hazard is latent. Re-run the baseline arm against the committed file at the base revision using the same module path so the two arms compare id-for-id.",
+  "review_run_id": "r-20261005T234854289435-review-of-cfs-request-seam-doubles",
+  "review_scope": "Test-side repair of the forward solve request doubles under plan \u00a72 (topology read): the shared linear fixture's _LinearTarget lacked the null locator and the object.__new__ operator lacked the area entry ForwardFluxOperator._compute_geometry_identity reads; the node supplied them in tests/test_forward_solve_request.py, restoring the file to 5 passed at head.",
+  "reviewed_base_sha": "302f160fc4866c4f283feac35a0e8ee69019e8de",
+  "reviewed_head_sha": "14aa0591a33c944445af0fad47b7115e78fff572",
+  "reviewed_run_id": "r-20261005T233707152029-cfs-request-seam-doubles",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:59:00.000000+00:00",
+  "total": 113
+}

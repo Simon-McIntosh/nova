@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 7,
+  "call_sites": [
+    "benchmarks/shafranov_combination_discriminator.py:1242",
+    "benchmarks/shafranov_combination_discriminator.py:1328",
+    "benchmarks/shafranov_combination_discriminator.py:1432",
+    "benchmarks/shafranov_pair_receipt.py:643",
+    "benchmarks/shafranov_pair_receipt.py:1260",
+    "benchmarks/shafranov_pair_receipt.py:1539",
+    "benchmarks/shafranov_pair_receipt.py:1602"
+  ],
+  "completed_at": "2026-10-03T18:15:49.764Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T18:07:01Z",
+  "findings": [
+    {
+      "file": "tests/test_renderer_wall_scan.py",
+      "line": "6",
+      "severity": "follow-on",
+      "text": "follow-on: the scanner's pytest wrapper deliberately asserts no total count of unguarded sites, so the four repaired draw_flux_contours sites are pinned by no automated test; a regression that drops wall=units would pass the suite and only a manual scanner run would catch it."
+    }
+  ],
+  "gate_arms_note": "The reviewed run records real arms. baseline_suite (revision b4a5897f0, exit 0, 51 passed) and after_suite (revision c7642107a, exit 0, 51 passed) both ran the three test files importing the changed modules; neither log carries a FAILED or ERROR line, so after - base = {} and added_failure_count = 0. Its own gate arms are the scanner logs head-arm.log (EXIT=0) and base-arm.log (EXIT=1, four sites). I reproduced both over my own scratch extraction of the base-content files: head EXIT=0 (review-scan-head.log) and base EXIT=1 listing exactly shafranov_combination_discriminator.py:930, shafranov_pair_receipt.py:442, :459, :1073 (review-scan-base.log). The done-when's 'zero added failures' clause is met unchanged: both arms are 51 passed / 0 failed.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 7 production call site(s)",
+    "diff": "read commit c7642107a against base b4a5897f0; two source files and one fragment, four call sites each gained wall=units; each site's units is the _wall_units(profile.operator) tuple the adjacent draw_wall call already consumes.",
+    "done_when": "the done_when names tests/renderer_wall_scan.py over the two files exiting 0 at head and 1 at base listing exactly the four sites, plus every test file importing a changed module passing with zero added failures; the manifest records both arms and I reproduced both.",
+    "goal": "the node goal is to route every unguarded scattered-field renderer call in this batch through the wall mask so no figure draws field outside the vessel; the four calls the scanner named now pass wall=units and no other logic changed.",
+    "manifest": "read; it records head-arm EXIT=0, base-arm EXIT=1 listing the four sites, 51 passed in both suite arms, commit c7642107a and its four gate log paths.",
+    "write_paths": "read the manifest's declared paths; the diff touches only benchmarks/shafranov_combination_discriminator.py, benchmarks/shafranov_pair_receipt.py and docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-shafranov.html, all inside them."
+  },
+  "justifications": {
+    "durability": "the four repaired sites are pinned by the tests/renderer_wall_scan.py CLI only, whose pytest wrapper tests/test_renderer_wall_scan.py:6-9 asserts no total count, so dropping wall=units from any site would not redden the suite.",
+    "evidence": "both scanner logs and both suite logs name their revision, tree and command, and I independently reproduced head EXIT=0 and base EXIT=1 listing exactly the four sites.",
+    "fit": "each edit passes the same typed wall the adjacent nova/media/poloidal.py draw_wall call uses and follows the drivers' existing _wall_units idiom.",
+    "goal_fidelity": "the four sites the scanner named at base (benchmarks/shafranov_combination_discriminator.py:930, benchmarks/shafranov_pair_receipt.py:442, :459, :1073) each now pass wall=units and tests/renderer_wall_scan.py reports none at head.",
+    "scope_discipline": "the diff is two source files and one evidence fragment, every path inside the manifest's declared write paths and no nova/ source touched."
+  },
+  "node": "review-of-fsa-wall-mask-shafranov",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to route every unguarded scattered-field renderer call in this batch through the wall mask so no figure draws field outside the vessel; the four calls the scanner named now pass wall=units and no other logic changed.\nVERDICT done_when: the done_when names tests/renderer_wall_scan.py over the two files exiting 0 at head and 1 at base listing exactly the four sites, plus every test file importing a changed module passing with zero added failures; the manifest records both arms and I reproduced both.\nVERDICT write_paths: read the manifest's declared paths; the diff touches only benchmarks/shafranov_combination_discriminator.py, benchmarks/shafranov_pair_receipt.py and docs/evidence/fragments/figure-and-solver-audit/fsa-wall-mask-shafranov.html, all inside them.\nVERDICT manifest: read; it records head-arm EXIT=0, base-arm EXIT=1 listing the four sites, 51 passed in both suite arms, commit c7642107a and its four gate log paths.\nVERDICT diff: read commit c7642107a against base b4a5897f0; two source files and one fragment, four call sites each gained wall=units; each site's units is the _wall_units(profile.operator) tuple the adjacent draw_wall call already consumes.\nCALL_SITES: benchmarks/shafranov_combination_discriminator.py:1242, benchmarks/shafranov_combination_discriminator.py:1328, benchmarks/shafranov_combination_discriminator.py:1432, benchmarks/shafranov_pair_receipt.py:643, benchmarks/shafranov_pair_receipt.py:1260, benchmarks/shafranov_pair_receipt.py:1539, benchmarks/shafranov_pair_receipt.py:1602\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the four sites the scanner named at base (benchmarks/shafranov_combination_discriminator.py:930, benchmarks/shafranov_pair_receipt.py:442, :459, :1073) each now pass wall=units and tests/renderer_wall_scan.py reports none at head.\nSCORE evidence: 18\nJUSTIFICATION evidence: both scanner logs and both suite logs name their revision, tree and command, and I independently reproduced head EXIT=0 and base EXIT=1 listing exactly the four sites.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff is two source files and one evidence fragment, every path inside the manifest's declared write paths and no nova/ source touched.\nSCORE durability: 11\nJUSTIFICATION durability: the four repaired sites are pinned by the tests/renderer_wall_scan.py CLI only, whose pytest wrapper tests/test_renderer_wall_scan.py:6-9 asserts no total count, so dropping wall=units from any site would not redden the suite.\nSCORE fit: 19\nJUSTIFICATION fit: each edit passes the same typed wall the adjacent nova/media/poloidal.py draw_wall call uses and follows the drivers' existing _wall_units idiom.\nFINDING tests/test_renderer_wall_scan.py:6 follow-on: the scanner's pytest wrapper deliberately asserts no total count of unguarded sites, so the four repaired draw_flux_contours sites are pinned by no automated test; a regression that drops wall=units would pass the suite and only a manual scanner run would catch it.",
+  "review_run_id": "legacy-304cc97301f4",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "b4a5897f0124cbaab701273cf3851bed68c61a32",
+  "reviewed_commit": "c7642107a2e58459834d9d9787dfc72150e2cc24",
+  "reviewed_commits": [
+    "c7642107a2e58459834d9d9787dfc72150e2cc24"
+  ],
+  "reviewed_head_sha": "c7642107a2e58459834d9d9787dfc72150e2cc24",
+  "reviewed_run_id": "r-20261003T180644647707-fsa-wall-mask-shafranov",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-wall-mask-shafranov",
+  "reviewer_node": "review-of-fsa-wall-mask-shafranov",
+  "reviewing_run_id": "r-20261003T181629393845-review-of-fsa-wall-mask-shafranov",
+  "scores": {
+    "durability": 11,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T18:21:47Z",
+  "total": 87,
+  "verdict": "pass"
+}

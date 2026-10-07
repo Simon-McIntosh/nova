@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T05:36:56.352101+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/control-positive.json",
+      "line": "57",
+      "text": "check 1 holds: centroid_observed_m 6.064154626454205 m, compensating_field_t_* 0.002387200675934618 T, row_scaled_residual_sup 0.0013398458394898267 and boundary flux -0.5289095779831239 Wb (magnitude 0.528909578) reproduce the manifest's four values exactly at source_revision 442820bf (line 107)."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-cco-bounded-row-step-control/scripts/analytic_oracle_fixtures/measure.py",
+      "line": "713",
+      "text": "the 0.529 Wb boundary-flux offset is not gauge-free as recorded: the compensator column is axis-anchored (line 712 takes reference_radius = case.magnetic_axis[0] = 6.2 m, major_radius 6.2 at tests/rotating_equilibrium_references.py:867) while the comparison subtracts a boundary-anchored authored zero, because benchmarks/oracle_start_newton_probe.py:254 hardcodes analytic_authored_boundary_flux_wb 0.0 and line 255 sets the offset to the raw solved boundary flux, so the two numbers are compared in different flux gauges; at the recorded contact R = 7.718433652945465 m the column contributes B*pi*(R^2 - R0^2) = 1.584984e-01 Wb (magnitude; sign per the operator's response convention, which the artifact does not record), 29.97% of the reported offset and 3.24 times the 1e-3-of-span clause threshold (span 48.86 Wb at control-positive.json:80), so a perfect solve could not satisfy that clause in this gauge; the receipt must record, per arm, the compensator's value at the boundary contact (amplitude, column definition, reference radius) and the analytic total flux at that same point, which splits the offset into compensator gauge, analytic flux at the moved contact and solve error, and lets the clause be evaluated in one gauge."
+    },
+    {
+      "file": "/tmp/cco-protocol-module-3.log",
+      "line": "195",
+      "text": "check 3 holds: the head run's two failures test_eliminated_constraint_runs_through_typed_solve_with_outer_trace and test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows (lines 195-196, 2 failed 6 passed) share both ids with two of the base run's four failures (same ids at /tmp/cco-protocol-base.log:254-255), so this change adds no failure; those two ids are pre-existing at the base revision in the outer-trace route at nova/equilibrium/forward.py:2589."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205409901465-cco-bounded-row-step-control/manifest.md",
+      "line": "11",
+      "text": "check 4 holds: git show --name-only over the six listed commits (a096fecc, 8165d70f, 66e8e8c7, 34a6e995, 442820bf, 9fbe44b3) unions to nine files, each under a declared write path in line 3 (nova/equilibrium/constraint.py, scripts/analytic_oracle_fixtures/centroid_row.py, benchmarks/centroid_constrained_fixture_receipt.py, tests/test_centroid_constrained_fixture.py, tests/test_equilibrium_constraint_protocol.py, docs/evidence/archive/centroid-constrained-oracle-solve-landed.html, docs/plans/centroid-constrained-oracle-solve.html and the two docs/figures/centroid-constrained-oracle-solve panels), with no file outside them."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/receipt.json",
+      "line": "374",
+      "text": "negative_remains_outside_tenth_pitch is false: the unconstrained arm relaxed the same 20 mm seed to 6.057406900 m, 0.013138 pitches from the target and inside the tenth-of-pitch band, because at this displacement the map relaxes the seed to its own fixed point (retained baseline offset -6.123274e-03 m, matching the probe's -6.127877e-03 m), so the arm does not isolate the row's position effect here; the run's own follow_ons already record that the negative control needs a larger displacement, and it should be enlarged before the control is cited as discriminating."
+    }
+  ],
+  "justifications": {
+    "durability": "the two new fixture tests fail at base and pass at head (/tmp/cco-fixture-base.log:131 vs /tmp/cco-fixture-module-4.log:3) with zero added failures in both modules, but the certificate clauses are receipt-computed rather than test-enforced.",
+    "evidence": "all four fence checks reproduce from the stored artifacts and the receipt's clause values match the manifest's account clause for clause, but the boundary-flux offset is gauge-confounded (measure.py:713) and the negative control does not discriminate at this displacement (receipt.json:374).",
+    "fit": "the added names are mechanism-based (BoundedExteriorFieldUnknown, step_limit, bound_refusal at nova/equilibrium/constraint.py:472) with no plan, sprint or ticket identifiers in symbols, comments or filenames.",
+    "goal_fidelity": "the damped step control and the fail-closed refusal route are landed at nova/equilibrium/constraint.py:472 and the positive arm holds the positional clause, but the certificate stays unqualified - row_scaled_residual_sup 0.001339846 against the at-or-below-1e-12 clause, qualified false at control-positive.json:73-75 - and the boundary-level clause cannot be satisfied in the gauge the receipt compares in.",
+    "scope_discipline": "the --name-only union over the six commits from base ef5504ea to 9fbe44b3 names nine files, every one under the declared write paths read at manifest.md:3, and nothing outside them."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: the damped step control and the fail-closed refusal route are landed at nova/equilibrium/constraint.py:472 and the positive arm holds the positional clause, but the certificate stays unqualified - row_scaled_residual_sup 0.001339846 against the at-or-below-1e-12 clause, qualified false at control-positive.json:73-75 - and the boundary-level clause cannot be satisfied in the gauge the receipt compares in.\nSCORE evidence: 16\nJUSTIFICATION evidence: all four fence checks reproduce from the stored artifacts and the receipt's clause values match the manifest's account clause for clause, but the boundary-flux offset is gauge-confounded (measure.py:713) and the negative control does not discriminate at this displacement (receipt.json:374).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the --name-only union over the six commits from base ef5504ea to 9fbe44b3 names nine files, every one under the declared write paths read at manifest.md:3, and nothing outside them.\nSCORE durability: 16\nJUSTIFICATION durability: the two new fixture tests fail at base and pass at head (/tmp/cco-fixture-base.log:131 vs /tmp/cco-fixture-module-4.log:3) with zero added failures in both modules, but the certificate clauses are receipt-computed rather than test-enforced.\nSCORE fit: 18\nJUSTIFICATION fit: the added names are mechanism-based (BoundedExteriorFieldUnknown, step_limit, bound_refusal at nova/equilibrium/constraint.py:472) with no plan, sprint or ticket identifiers in symbols, comments or filenames.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/control-positive.json:57 check 1 holds: centroid_observed_m 6.064154626454205 m, compensating_field_t_* 0.002387200675934618 T, row_scaled_residual_sup 0.0013398458394898267 and boundary flux -0.5289095779831239 Wb (magnitude 0.528909578) reproduce the manifest's four values exactly at source_revision 442820bf (line 107).\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s19-codex-20260916/review-of-cco-bounded-row-step-control/scripts/analytic_oracle_fixtures/measure.py:713 the 0.529 Wb boundary-flux offset is not gauge-free as recorded: the compensator column is axis-anchored (line 712 takes reference_radius = case.magnetic_axis[0] = 6.2 m, major_radius 6.2 at tests/rotating_equilibrium_references.py:867) while the comparison subtracts a boundary-anchored authored zero, because benchmarks/oracle_start_newton_probe.py:254 hardcodes analytic_authored_boundary_flux_wb 0.0 and line 255 sets the offset to the raw solved boundary flux, so the two numbers are compared in different flux gauges; at the recorded contact R = 7.718433652945465 m the column contributes B*pi*(R^2 - R0^2) = 1.584984e-01 Wb (magnitude; sign per the operator's response convention, which the artifact does not record), 29.97% of the reported offset and 3.24 times the 1e-3-of-span clause threshold (span 48.86 Wb at control-positive.json:80), so a perfect solve could not satisfy that clause in this gauge; the receipt must record, per arm, the compensator's value at the boundary contact (amplitude, column definition, reference radius) and the analytic total flux at that same point, which splits the offset into compensator gauge, analytic flux at the moved contact and solve error, and lets the clause be evaluated in one gauge.\nFINDING /tmp/cco-protocol-module-3.log:195 check 3 holds: the head run's two failures test_eliminated_constraint_runs_through_typed_solve_with_outer_trace and test_eliminated_constraint_reports_no_root_and_refuses_multiple_rows (lines 195-196, 2 failed 6 passed) share both ids with two of the base run's four failures (same ids at /tmp/cco-protocol-base.log:254-255), so this change adds no failure; those two ids are pre-existing at the base revision in the outer-trace route at nova/equilibrium/forward.py:2589.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260916T205409901465-cco-bounded-row-step-control/manifest.md:11 check 4 holds: git show --name-only over the six listed commits (a096fecc, 8165d70f, 66e8e8c7, 34a6e995, 442820bf, 9fbe44b3) unions to nine files, each under a declared write path in line 3 (nova/equilibrium/constraint.py, scripts/analytic_oracle_fixtures/centroid_row.py, benchmarks/centroid_constrained_fixture_receipt.py, tests/test_centroid_constrained_fixture.py, tests/test_equilibrium_constraint_protocol.py, docs/evidence/archive/centroid-constrained-oracle-solve-landed.html, docs/plans/centroid-constrained-oracle-solve.html and the two docs/figures/centroid-constrained-oracle-solve panels), with no file outside them.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/centroid-step/receipt.json:374 negative_remains_outside_tenth_pitch is false: the unconstrained arm relaxed the same 20 mm seed to 6.057406900 m, 0.013138 pitches from the target and inside the tenth-of-pitch band, because at this displacement the map relaxes the seed to its own fixed point (retained baseline offset -6.123274e-03 m, matching the probe's -6.127877e-03 m), so the arm does not isolate the row's position effect here; the run's own follow_ons already record that the negative control needs a larger displacement, and it should be enlarged before the control is cited as discriminating.\n",
+  "review_run_id": "r-20260917T053656352101-review-of-cco-bounded-row-step-control",
+  "reviewed_run_id": "r-20260916T205409901465-cco-bounded-row-step-control",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260917T053656352101-review-of-cco-bounded-row-step-control",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T06:43:35.675398+00:00",
+  "total": 84
+}

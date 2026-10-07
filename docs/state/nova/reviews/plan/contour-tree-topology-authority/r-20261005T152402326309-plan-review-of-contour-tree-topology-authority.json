@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:39:04.946Z",
+  "dispatched_at": "2026-10-05T15:25:05Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/topology.py:69",
+      "id": "duplicate_owner-1",
+      "reason": "a forked private-wall read is a second owner that drifts, so section 5 must name private_wall_node_read and its forward_operator.py:3141 caller as retired, or state why it survives alongside the tree.",
+      "text": "section 4's limiter level is the highest signed flux over wall vertices outside the primary X-point's private region, which re-derives the private-wall-node read that private_wall_node_read (topology.py:69) already owns and that forward_operator.py:3141 consumes; section 5 names every other raster read it retires but never names this one",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/biot/plasmagrid.py:382",
+      "id": "duplicate_owner-2",
+      "reason": "the products differ (a host-side Target xarray stencil against a fixed-capacity JAX triangle array with wall vertices) and the module header already records the fork as a deliberate reuse-map idiom, so the author would decline.",
+      "text": "build_contour_mesh (contour_tree_mesh.py:193) re-runs the Delaunay-over-centres clipped to the wall polyline that PlasmaGrid.tessellate (plasmagrid.py:382) already performs, reusing wall_mask containment but not the tessellation owner",
+      "type": "duplicate_owner",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "d148b71148a4f5423474247005f3664e59dbc2e3307dcd430c94a7385269472c",
+  "plan_slug": "contour-tree-topology-authority",
+  "plan_version": 57,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T152402326309-plan-review-of-contour-tree-topology-authority",
+  "reviewed_blob_sha": "c6d382f21b0c4064dbc5593f3939faa06f4dfe9d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one module hides the join/split merge, the fixed-capacity union-find sweep, the receipt and the DD mapping behind build_contour_tree, ContourTreeResult and dd_emittable_nodes (616 lines); the carrier hides triangulation, vessel clipping and wall-vertex valuation behind build_contour_mesh (333 lines).",
+    "duplicate_owner": "a finding \u2014 section 4's private-wall level re-derives the read owned by topology.py:69 private_wall_node_read without retiring it or naming it in section 5's deletion list; the carrier also re-runs PlasmaGrid.tessellate's Delaunay-and-clip as a documented fork.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the sections that add surface name what they retire or replace, so no section adds surface unaccounted for.",
+    "reuse_search": "pass \u2014 the plan carries a committed reuse map (74 path:line citations) and the landed carrier header names its reuse rows against wall_mask.inside_polygon, wall_mask.WallUnit and the PlasmaGrid.tessellate idiom; sigma reuses the nova.io.cocos owner, the polish reuses topology._carrier_polish_layout, and the imas-efit Fortran contour tree is recorded and not ported.",
+    "thin_wrapper": "pass \u2014 sections 1 to 5 replace the raster read; section 5 deletes _axis_component_before_level, the sightline test, the raster hex partition, the census contact polish and class_margin / u / u_x / u_wall outright, and section 3 states its own replacement of the two censuses."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.298671+00:00"
+}

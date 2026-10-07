@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "head gate log logs/gate-fixture.log (revision=cf9b6e78...) reports '10 passed' with no FAILED/ERROR ids and EXIT=0; the reviewed baseline_suite is 'not run', so the reviewed change adds no failing test (a head gate with zero failures adds none).",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/centroid-constrained-oracle-solve/control-negative.png (237446 B)",
+    "docs/figures/centroid-constrained-oracle-solve/control-negative.svg (209059 B)",
+    "docs/figures/centroid-constrained-oracle-solve/control-positive.png (159373 B)",
+    "docs/figures/centroid-constrained-oracle-solve/control-positive.svg (115230 B)",
+    "docs/figures/centroid-constrained-oracle-solve/field-response/receipt.json (8 arms, 2 drawn / 6 measured-not-drawn)"
+  ],
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/equilibrium/constraint.py:_mesh_carried_point_flux",
+    "benchmarks/centroid_constrained_fixture_receipt.py:render_control_state"
+  ],
+  "commits_read": [
+    "fc2f43b74",
+    "cf9b6e78d"
+  ],
+  "completed_at": "2026-10-02T08:05:20.482Z",
+  "dispatched_at": "2026-10-02T07:42:54Z",
+  "evidence_inputs": {
+    "negative_persisted_state_digest_reproduced": "e59af771756bfe9a638c2ca69204af2be4fed67c9e85f608758b176883338864c recomputed over control-negative-state.npy matches the receipt",
+    "positive_panel_source": "committed receipt (no persisted positive terminal state exists)",
+    "positive_receipt_wall_contact_rz_m": [
+      7.711243498509007,
+      -1.2833930119030192
+    ]
+  },
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-control-figures-from-persisted-state/docs/evidence/fragments/centroid-constrained-oracle-solve/cco-control-figures-from-persisted-state.html",
+      "line": "58",
+      "severity": "follow-on",
+      "text": "the node's done-when requires every named control figure to be 'rendered from the persisted terminal state', but control-positive.{png,svg} is drawn from the committed receipt because no positive terminal state was ever persisted (the plan's forward-solver-route-integrity owns the missing state). The deviation is disclosed in the fragment and is physically justified, so it does not block, but the literal done-when is not met for the positive arm (only the receipt-stated topology and contact are drawn, not terminal contours)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063538147071-cco-control-figures-from-persisted-state/logs/render-both.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the reviewed run's recorded render log accounts only for the negative arm ('CENTROID_CONTROL_RENDERED arm=negative ... EXIT_negative=0'); the positive panel that is committed (digest 76b231cb7a609cc1) is recorded only in the run's stream, so the shipped control-positive.{png,svg} has no provenance in a named log a later reader can open."
+    }
+  ],
+  "follow_ons": [
+    "record the positive panel's render in a named log beside render-both.log so the committed control-positive.{png,svg} has provenance a reader can open",
+    "publish the persisted positive terminal state when forward-solver-route-integrity lands the positive arm's route, so both control panels can be redrawn from a state rather than one from a receipt"
+  ],
+  "gate_arms_note": "after_suite = 10 passed EXIT=0 at cf9b6e78d (10 passed, 4 warnings in 11.43s); negative_control_log = test_lattice_order_guard_refuses_a_prefix_sized_pool FAILED, 9 passed, EXIT=1.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "Read commits fc2f43b74 and cf9b6e78d against base 9ac842a60: the driver re-renders both panels under one shared ink and lists eight arms, a case is added to the fixture test, and both panels plus the fragment/archive are committed.",
+    "done_when": "Read the prompt.txt FENCE-EVIDENCE measure: the gate is tests/test_centroid_constrained_fixture.py, and the manifest records 10 passed EXIT=0 at head with a negative control 1 failed/9 passed EXIT=1.",
+    "goal": "Read the dispatched NODE goal (render the centroid control and field-response figures from persisted states and receipts, per followups f-cco-figures ; delivered: both control panels as PNG+SVG, eight field-response arms listed, guard pinned, fragment cites both followup ids.",
+    "manifest": "Read; status complete, names gate-fixture.log and negative-control.log with results.",
+    "write_paths": "Read the five declared write paths (figure dir, driver, test module, landed archive, landing fragment); every changed path is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_centroid_constrained_fixture.py:304 pins the cell-count refusal at nova/equilibrium/constraint.py:1189 and reddens when the pre-fix guard indexing is restored (1 failed, 9 passed, EXIT=1); the second assertion compares state[:3] to the same slice the function returns, so the refusal arm is what carries the guard.",
+    "evidence": "logs/gate-fixture.log records 'revision=cf9b6e78... 10 passed, 4 warnings in 11.43s EXIT=0' and logs/negative-control.log records the declared negative control '1 failed, 9 passed, EXIT=1' failing exactly test_lattice_order_guard_refuses_a_prefix_sized_pool, but the positive panel's render appears in neither named log.",
+    "fit": "the driver reuses the poloidal painters draw_flux_contours/draw_nulls/draw_wall and names the colours as module constants at benchmarks/centroid_constrained_fixture_receipt.py:906, matching the module's idiom with no forbidden names.",
+    "goal_fidelity": "benchmarks/centroid_constrained_fixture_receipt.py defines TERMINAL_INK/ANALYTIC_INK at benchmarks/centroid_constrained_fixture_receipt.py:906 and _draw_state draws both control panels under the shared ink and marks the limiter contact, and field-response/receipt.json lists all eight arms (2 drawn, 6 measured-and-not-drawn), delivering both followups; the positive panel is drawn from its committed receipt rather than a persisted state because none exists, a deviation the landing fragment discloses.",
+    "scope_discipline": "every path in the diff (driver, test module, two evidence html, four control figures and field-response/receipt.json) lies inside the five write paths declared in the reviewed manifest."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: benchmarks/centroid_constrained_fixture_receipt.py:906 defines the shared TERMINAL_INK and _draw_state marks the limiter contact; field-response/receipt.json lists all eight arms (2 drawn, 6 measured-and-not-drawn).\nVERDICT done_when: logs/gate-fixture.log at cf9b6e78d records 10 passed EXIT=0 and logs/negative-control.log records the declared negative control 1 failed/9 passed EXIT=1.\nVERDICT write_paths: all changed paths (driver, test, two evidence files, four figures, receipt.json) lie inside the five declared write paths.\nVERDICT manifest: Read; status complete; names gate-fixture.log and negative-control.log with results.\nVERDICT diff: Read fc2f43b74 and cf9b6e78d against 9ac842a60; the driver re-render, the eight-arm listing, the added test and the two panels are all present.\nCALL_SITES: nova/equilibrium/constraint.py:_mesh_carried_point_flux, benchmarks/centroid_constrained_fixture_receipt.py:render_control_state\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: benchmarks/centroid_constrained_fixture_receipt.py defines TERMINAL_INK/ANALYTIC_INK at benchmarks/centroid_constrained_fixture_receipt.py:906 and _draw_state draws both control panels under the shared ink and marks the limiter contact, and field-response/receipt.json lists all eight arms (2 drawn, 6 measured-and-not-drawn), delivering both followups; the positive panel is drawn from its committed receipt rather than a persisted state because none exists, a deviation the landing fragment discloses.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/gate-fixture.log records 'revision=cf9b6e78... 10 passed, 4 warnings in 11.43s EXIT=0' and logs/negative-control.log records the declared negative control '1 failed, 9 passed, EXIT=1' failing exactly test_lattice_order_guard_refuses_a_prefix_sized_pool, but the positive panel's render appears in neither named log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (driver, test module, two evidence html, four control figures and field-response/receipt.json) lies inside the five write paths declared in the reviewed manifest.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_centroid_constrained_fixture.py:304 pins the cell-count refusal at nova/equilibrium/constraint.py:1189 and reddens when the pre-fix guard indexing is restored (1 failed, 9 passed, EXIT=1); the second assertion compares state[:3] to the same slice the function returns, so the refusal arm is what carries the guard.\nSCORE fit: 18\nJUSTIFICATION fit: the driver reuses the poloidal painters draw_flux_contours/draw_nulls/draw_wall and names the colours as module constants at benchmarks/centroid_constrained_fixture_receipt.py:906, matching the module's idiom with no forbidden names.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-control-figures-from-persisted-state/docs/evidence/fragments/centroid-constrained-oracle-solve/cco-control-figures-from-persisted-state.html:58 follow-on: the node's done-when requires every named control figure to be 'rendered from the persisted terminal state', but control-positive.{png,svg} is drawn from the committed receipt because no positive terminal state was ever persisted (the plan's forward-solver-route-integrity owns the missing state). The deviation is disclosed in the fragment and is physically justified, so it does not block, but the literal done-when is not met for the positive arm (only the receipt-stated topology and contact are drawn, not terminal contours).\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T063538147071-cco-control-figures-from-persisted-state/logs/render-both.log:1 follow-on: the reviewed run's recorded render log accounts only for the negative arm ('CENTROID_CONTROL_RENDERED arm=negative ... EXIT_negative=0'); the positive panel that is committed (digest 76b231cb7a609cc1) is recorded only in the run's stream, so the shipped control-positive.{png,svg} has no provenance in a named log a later reader can open.\n",
+  "review_run_id": "r-20261002T074241635954-review-of-cco-control-figures-from-persisted-state",
+  "reviewed_base_sha": "9ac842a600928fd88b9b68ff531265be0cbb06d3",
+  "reviewed_head_sha": "cf9b6e78dd327cb9650288395a2728d0452e65bf",
+  "reviewed_revision": "cf9b6e78dd327cb9650288395a2728d0452e65bf",
+  "reviewed_run_id": "r-20261002T063538147071-cco-control-figures-from-persisted-state",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-control-figures-from-persisted-state",
+  "reviewer_node": "review-of-cco-control-figures-from-persisted-state",
+  "reviewer_run_id": "r-20261002T074241635954-review-of-cco-control-figures-from-persisted-state",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 20
+  },
+  "section": "2",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:28.723156+00:00",
+  "total": 87,
+  "verdict": "pass"
+}

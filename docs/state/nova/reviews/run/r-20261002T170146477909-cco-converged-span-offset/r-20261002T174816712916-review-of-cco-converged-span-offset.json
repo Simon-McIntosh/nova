@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's manifest records baseline_suite and after_suite as null and negative_control_log as none, because the node changed no test file and no product source; there are no readable suite arms from which a failure delta can be computed, so added_failure_count 0 and added_failure_ids [] record no observed added suite failures, not a claim that a suite ran. The node's own gate (the span-offset CPU re-read) exited 0 with the CENTROID_SPAN_OFFSET summary line in span-offset-cpu.log.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json (gauge_free_flux_offset_wb=+4.517667659749549, of_solved_span=+8.296782922901276e-2, of_analytic_span=+9.047428418924305e-2, level_clause_within_1e-3_of_span=false; compensator_span_contribution_wb=+1.478848100455632, compensator_span_of_solved_span=+2.715932775388238e-2; error_pitches=+8.4270663891465e-12, error_radius_ulps=+4422.0251399112585, one_ulp_radius_pitches=+1.905702957924752e-15, all_up_norm_m=+3.982069099533078e-15)",
+    "benchmarks/centroid_constrained_fixture_receipt.py:1845 span_offset_receipt added with --span-offset-receipt/--span-offset-source/--span-offset-root",
+    "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html (landing fragment, data-commit d8b36974a)",
+    "report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-converged-span-offset.md"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "d8b36974a397853a88cbaf56470b1b4e08c59025",
+    "6fabdca129468aa78b3ff6a70eae9ed03af5ec21"
+  ],
+  "completed_at": "2026-10-02T18:16:17.245Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T17:48:37Z",
+  "evidence_inputs": "Reviewed e372e13fadcaf063e52bac7e29af4c467bbedfdc..6fabdca129468aa78b3ff6a70eae9ed03af5ec21 (two commits, 280 insertions, 0 deletions, 3 files; git diff --check clean; reviewed worktree clean). The done-when's four quantities all land in span-offset.json and reproduce by independent arithmetic. Instrument control: gauge_free_flux_read reproduces two banked receipts (-0.9528507 Wb/-1.8962e-2 and -0.8267159 Wb/-1.6463e-2) matching the plan's recorded values, and the centroid reconstruction matches the receipt's recorded centroid to 1.2e-14 m under the receipt's own support_clip_mode='exact' (default clip gives 2.7e-4 m). Headline: the converged control's gauge-free span offset is +4.517668 Wb = +8.297e-2 of the 54.45 Wb solved span, failing the 1e-3-of-span clause by 83x; the compensator contributes +1.478848 Wb = +2.716e-2 of solved span (2.962e-2 of analytic), 8.5x/9.3x the 3.2e-3 predicted; the centroid row reaches 8.42e-12 pitches = 4422 radius-ulp and a one-ulp flux perturbation moves it ~4.5 radius-ulp, so 1e-12 pitches is reachable in double precision. Follow-ons: hardcoded main-checkout default path, a 100x typo in the committed fragment, the 9.3x basis, the b470e1fbb-vs-211d75798 provenance gap, and a headerless gate log.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "benchmarks/centroid_constrained_fixture_receipt.py",
+      "line": "1836",
+      "severity": "follow-on",
+      "text": "DEFAULT_SPAN_OFFSET_RECEIPT hardcodes the operator's main-checkout path /home/ITER/mcintos/Code/nova/docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/control-positive.json, while the same artifact is committed in-repo and reachable ROOT-relative (ROOT is defined at :56); a reader on another checkout or in CI hits FileNotFoundError, so the shipped default does not point at the committed artifact."
+    },
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html",
+      "line": "39",
+      "severity": "follow-on",
+      "text": "the reproduced second banked receipt is written \"-0.8267e-2\" where its value is -0.8267158876132186 Wb (i.e. -0.8267 Wb), so the committed fragment renders it 100x too small; the report at reports/nova/s22/cco-converged-span-offset.md gives it correctly as -0.8267 Wb."
+    },
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "the \"9.3x\" multiplier is quoted against \"2.717e-2 of the solved span\", but 2.717e-2/3.2e-3 = 8.49; the 9.3x holds only for the analytic-span fraction 2.962e-2 (2.717e-2/3.2e-3 = 8.49). The report states the basis; the fragment and the manifest landing line drop it, so the compensator's over-drive reads 9.3x where the solved-span basis gives 8.5x."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json",
+      "line": "0",
+      "severity": "follow-on",
+      "text": "provenance gap: the done-when identifies the source receipt by revision b470e1fbb (the merge that landed it), while the receipt records source_revision 211d75798c58c167 (the code revision that generated it); neither span-offset.json nor the fragment records b470e1fbb, so a reader reconciling the receipt against the done-when sees a different hash with no field tying the two together."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170146477909-cco-converged-span-offset/span-offset-cpu.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the gate log is a bare single output line (CENTROID_SPAN_OFFSET ...) with no header naming the revision it ran at, the tree, or the command, so the log cannot be tied to its revision by its own content; the manifest's tests field carries them instead."
+    }
+  ],
+  "gate_arms_note": "No suite arm was armed by the reviewed node (its write paths reach no test file) and its manifest records baseline_suite and after_suite as null, so no baseline/after delta exists; added_failure_count 0 and added_failure_ids [] therefore record an absence of readable suite arms, not a measured zero. This review did not re-run the suite: the node changed no test and no product source, so there is no regression surface a suite could reach.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production runtime call site reaches the change; the only entry is the benchmark module's own CLI (python -m benchmarks.centroid_constrained_fixture_receipt --span-offset-receipt), so CALL_SITES is none.",
+    "diff": "read commit by commit against base e372e13fa: d8b36974a adds the span_offset_receipt function, flag and source/root options; 6fabdca12 adds the 45-line fragment and the 70-line receipt; 280 insertions, 0 deletions, all inside the declared paths.",
+    "done_when": "the done-when names the state and receipt to re-read, the driver's span-offset computation, the 54.45 Wb span clause, the 3.2e-3 compensator prediction and the ulp perturbation; the manifest records the run with EXIT=0 and the CENTROID_SPAN_OFFSET line, and span-offset.json carries every named quantity.",
+    "goal": "the node's goal is to measure the converged centroid control's span offset and the floor its centroid row reaches -- benchmarks/centroid_constrained_fixture_receipt.py:1845 computes the gauge-free span offset and the 8.43e-12-pitch centroid error, and both are banked in span-offset.json.",
+    "manifest": "read; it reports status complete, commits d8b36974a and 6fabdca12, the tests command with EXIT=0 and the CENTROID_SPAN_OFFSET summary line, test_logs span-offset-cpu.log, and negative_control_log none (no test path in scope).",
+    "write_paths": "read the node's five declared paths; the diff's three files (benchmarks/centroid_constrained_fixture_receipt.py, docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html, docs/figures/.../span-offset/span-offset.json) are all inside them."
+  },
+  "justifications": {
+    "durability": "the node changes no test file (its write paths reach none) and no product source, so the new benchmark function benchmarks/centroid_constrained_fixture_receipt.py:1845 and its committed receipt have no assertion that reddens if the span-offset computation regresses; the declared negative control is none for that reason, and the only guard is the instrument-reproduction check recorded in the report rather than a committed test.",
+    "evidence": "span-offset.json records the source receipt, the state digest 41b9e055fbdcd4b7..., and the state is hash-checked against that digest on load (benchmarks/centroid_constrained_fixture_receipt.py:1888); the instrument is controlled by reproducing two banked receipts (-0.9528507 Wb/-1.8962e-2 and -0.8267159 Wb/-1.6463e-2) that match the plan's own recorded values, and the reconstruction reproduces the receipt's recorded centroid to 1.2e-14 m under the receipt's own support_clip_mode='exact'. Deductions: the gate log is a bare output line with no revision/tree/command header, and the committed fragment misstates the second reproduced receipt.",
+    "fit": "span_offset_receipt reuses the existing oracle_fixture.gauge_free_flux_read and ForwardProfile.current_moment_observation seams and adds only a CLI flag and a receipt schema, matching the surrounding driver idiom, and no symbol carries a plan label or version; deductions are the absolute main-checkout default path at :1836 and the of_span (analytic denominator) versus of_solved_span naming that the done-when's 54.45 Wb span does not match.",
+    "goal_fidelity": "benchmarks/centroid_constrained_fixture_receipt.py:1845 span_offset_receipt re-reads the receipt's topology/compensating_field_t through oracle_fixture.gauge_free_flux_read into span-offset.json and re-evaluates the row centroid on the persisted terminal state; all four requested quantities (span offset vs the 1e-3 clause, the compensator's own contribution vs the 3.2e-3 prediction, the centroid error in m and radius-ulp, and the one-ulp perturbation response) are present and every arithmetic identity in span-offset.json reproduces exactly (offset 4.517667659749549/54.45083596534281 = 8.296782922901276e-2; compensator 1.478848100455632/54.45083596534281 = 2.715932775388238e-2; error 3.927547300640607e-12 m / (0.46606341035820315 m pitch) = 8.4270663891465e-12 pitches = 4422.025 ulp of the 8.8818e-16 m radius ulp), so the goal's figures are computed, recorded and independently confirmed.",
+    "scope_discipline": "the two commits d8b36974a..6fabdca12 change exactly three files -- benchmarks/centroid_constrained_fixture_receipt.py, docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html and docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json -- every one inside the node's five declared write paths, 280 insertions and no deletion; git diff --check is clean, the reviewed worktree is clean, no plan meta line, test, or tolerance is touched."
+  },
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: e372e13fadcaf063e52bac7e29af4c467bbedfdc\nREVIEWED_HEAD_SHA: 6fabdca129468aa78b3ff6a70eae9ed03af5ec21\nVERDICT goal: the goal is to measure the converged control's span offset and centroid floor; benchmarks/centroid_constrained_fixture_receipt.py:1845 computes both and span-offset.json banks them.\nVERDICT done_when: the done-when names the receipt, the driver computation, the 54.45 Wb span clause, the 3.2e-3 prediction and the ulp perturbation; the manifest records EXIT=0 and every named quantity is in span-offset.json.\nVERDICT write_paths: the three changed files are all inside the node's five declared write paths.\nVERDICT manifest: read; status complete, commits d8b36974a and 6fabdca12, tests EXIT=0 with the CENTROID_SPAN_OFFSET summary, negative_control_log none (no test path in scope).\nVERDICT diff: read base e372e13fa..head 6fabdca12; 280 insertions across 3 files, nothing deleted, git diff --check clean, worktree clean.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/centroid_constrained_fixture_receipt.py:1845 span_offset_receipt re-reads the receipt's topology/compensating_field_t through oracle_fixture.gauge_free_flux_read into span-offset.json and re-evaluates the row centroid on the persisted terminal state; all four requested quantities (span offset vs the 1e-3 clause, the compensator's own contribution vs the 3.2e-3 prediction, the centroid error in m and radius-ulp, and the one-ulp perturbation response) are present and every arithmetic identity in span-offset.json reproduces exactly (offset 4.517667659749549/54.45083596534281 = 8.296782922901276e-2; compensator 1.478848100455632/54.45083596534281 = 2.715932775388238e-2; error 3.927547300640607e-12 m / (0.46606341035820315 m pitch) = 8.4270663891465e-12 pitches = 4422.025 ulp of the 8.8818e-16 m radius ulp), so the goal's figures are computed, recorded and independently confirmed.\nSCORE evidence: 16\nJUSTIFICATION evidence: span-offset.json records the source receipt, the state digest 41b9e055fbdcd4b7..., and the state is hash-checked against that digest on load (benchmarks/centroid_constrained_fixture_receipt.py:1888); the instrument is controlled by reproducing two banked receipts (-0.9528507 Wb/-1.8962e-2 and -0.8267159 Wb/-1.6463e-2) that match the plan's own recorded values, and the reconstruction reproduces the receipt's recorded centroid to 1.2e-14 m under the receipt's own support_clip_mode='exact'. Deductions: the gate log is a bare output line with no revision/tree/command header, and the committed fragment misstates the second reproduced receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits d8b36974a..6fabdca12 change exactly three files -- benchmarks/centroid_constrained_fixture_receipt.py, docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html and docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json -- every one inside the node's five declared write paths, 280 insertions and no deletion; git diff --check is clean, the reviewed worktree is clean, no plan meta line, test, or tolerance is touched.\nSCORE durability: 15\nJUSTIFICATION durability: the node changes no test file (its write paths reach none) and no product source, so the new benchmark function benchmarks/centroid_constrained_fixture_receipt.py:1845 and its committed receipt have no assertion that reddens if the span-offset computation regresses; the declared negative control is none for that reason, and the only guard is the instrument-reproduction check recorded in the report rather than a committed test.\nSCORE fit: 17\nJUSTIFICATION fit: span_offset_receipt reuses the existing oracle_fixture.gauge_free_flux_read and ForwardProfile.current_moment_observation seams and adds only a CLI flag and a receipt schema, matching the surrounding driver idiom, and no symbol carries a plan label or version; deductions are the absolute main-checkout default path at :1836 and the of_span (analytic denominator) versus of_solved_span naming that the done-when's 54.45 Wb span does not match.\nFINDING benchmarks/centroid_constrained_fixture_receipt.py:1836 follow-on: DEFAULT_SPAN_OFFSET_RECEIPT hardcodes the operator main-checkout path while the artifact is committed ROOT-relative.\nFINDING docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html:39 follow-on: the second reproduced receipt is written \"-0.8267e-2\" where its value is -0.8267159 Wb, 100x too small.\nFINDING docs/evidence/fragments/centroid-constrained-oracle-solve/cco-converged-span-offset.html:28 follow-on: \"9.3x\" is quoted against the solved-span fraction 2.717e-2 (which gives 8.5x); 9.3x holds only for the analytic-span fraction 2.962e-2.\nFINDING docs/figures/centroid-constrained-oracle-solve/cap-factor-repair/span-offset/span-offset.json:0 follow-on: the done-when names revision b470e1fbb but the receipt records source_revision 211d75798c58 and nothing ties them.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T170146477909-cco-converged-span-offset/span-offset-cpu.log:1 follow-on: the gate log is a bare output line with no revision/tree/command header.\nCHECKS\nDiff: e372e13fa..6fabdca12 changes three files, 280 insertions and 0 deletions; git diff --check clean; reviewed worktree clean.\nArithmetic: offset 4.517667659749549/solved 54.45083596534281 = 0.08296782922901276; /analytic 49.93316830559326 = 0.09047428418924305; compensator 1.478848100455632/solved = 0.02715932775388238; error 3.927547300640607e-12/0.46606341035820315 = 8.4270663891465e-12 pitches / 8.881784197001252e-16 = 4422.025 ulp; clause 1e-12 pitches = 4.660634e-13 m = 524.74 ulp -- all recomputed independently.\nInstrument: gauge_free_flux_read reproduces two banked receipts (-0.9528507 Wb and -0.8267159 Wb) matching the plan; reconstruction matches the receipt centroid to 1.2e-14 m under support_clip_mode='exact'; state digest 41b9e055fbdcd4b7 verified on load.\nProvenance: reviewed head 6fabdca129468aa78b3ff6a70eae9ed03af5ec21; konto base e372e13fadcaf063e52bac7e29af4c467bbedfdc; commits_read d8b36974a397853a88cbaf56470b1b4e08c59025 and 6fabdca129468aa78b3ff6a70eae9ed03af5ec21.\n",
+  "review_base_sha": "5baef21a458b90e0b2f53c2dd96b57d15f910669",
+  "review_run_id": "r-20261002T174816712916-review-of-cco-converged-span-offset",
+  "reviewed_base_sha": "e372e13fadcaf063e52bac7e29af4c467bbedfdc",
+  "reviewed_commit": "6fabdca129468aa78b3ff6a70eae9ed03af5ec21",
+  "reviewed_head_sha": "6fabdca129468aa78b3ff6a70eae9ed03af5ec21",
+  "reviewed_revision": "6fabdca129468aa78b3ff6a70eae9ed03af5ec21",
+  "reviewed_run_id": "r-20261002T170146477909-cco-converged-span-offset",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-converged-span-offset",
+  "reviewer_node": "review-of-cco-converged-span-offset",
+  "reviewer_run_id": "r-20261002T174816712916-review-of-cco-converged-span-offset",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T18:12:32.656774+00:00",
+  "total": 86,
+  "verdict": "pass-with-follow-ons"
+}

@@ -1,0 +1,41 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "benchmarks/shafranov_pair_receipt.py",
+      "line": "13",
+      "text": "the module docstring states that every panel draws both the reference and the terminal state's nulls, but terminal nulls are drawn only when a terminal state exists and all six rows of this run are refused, so the committed panels carry the reference set alone and the description overstates them."
+    },
+    {
+      "file": "benchmarks/shafranov_pair_receipt.py",
+      "line": "336",
+      "text": "on every refused row terminal_profile_combination carries the profiles-implied target (identical to target_combination on all six row files) although no terminal state exists, so the receipt asserts a terminal reading on a row that was refused and a reader must cross-read status to learn that the number is a target."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_equilibrium_constraint_protocol.py:753 converges the row to the imposed amplitude while :527 and :805 pin its two refusals, so a regression of the row or of its refusal contract fails the file.",
+    "evidence": "docs/figures/constraint-augmented-newton-krylov/shafranov/receipt.json records status refused on all six rows with the reason naming p_prime and gaps from -0.1213 to -0.1662 (magnetics lower), the two failing protocol ids reproduce as 2 failed / 9 passed in 80.53 s in a fresh all_debug process captured in head_gate.log and are the same ids the pristine-base log shows (base_gate.log: 2 failed, 6 passed in 23.19 s), the six panels exist with the wall on each, and the nine commits touch only the declared write paths.",
+    "fit": "the class follows the sibling constraint idiom in nova/equilibrium/constraint.py (dataclass fields and required_unknown at :1379-1381) and introduces no plan label in its added names or comments.",
+    "goal_fidelity": "nova/equilibrium/constraint.py:1354 states and implements the inverted large-aspect-ratio vertical-field identity exactly as the class docstring declares, and the six bank rows carry the refusal the done-when asks for.",
+    "scope_discipline": "git log af5a32bf..HEAD shows the nine commits 42d0514e through 49e7ce29 touch only nova/equilibrium/constraint.py, tests/test_equilibrium_constraint_protocol.py, benchmarks/shafranov_pair_receipt.py, docs/figures/constraint-augmented-newton-krylov/shafranov, docs/evidence/archive/constraint-augmented-newton-krylov-landed.html and docs/plans/constraint-augmented-newton-krylov.html, and nothing else."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/constraint.py:1354 states and implements the inverted large-aspect-ratio vertical-field identity exactly as the class docstring declares, and the six bank rows carry the refusal the done-when asks for.\nSCORE evidence: 18\nJUSTIFICATION evidence: docs/figures/constraint-augmented-newton-krylov/shafranov/receipt.json records status refused on all six rows with the reason naming p_prime and gaps from -0.1213 to -0.1662 (magnetics lower), the two failing protocol ids reproduce as 2 failed / 9 passed in 80.53 s in a fresh all_debug process captured in head_gate.log and are the same ids the pristine-base log shows (base_gate.log: 2 failed, 6 passed in 23.19 s), the six panels exist with the wall on each, and the nine commits touch only the declared write paths.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git log af5a32bf..HEAD shows the nine commits 42d0514e through 49e7ce29 touch only nova/equilibrium/constraint.py, tests/test_equilibrium_constraint_protocol.py, benchmarks/shafranov_pair_receipt.py, docs/figures/constraint-augmented-newton-krylov/shafranov, docs/evidence/archive/constraint-augmented-newton-krylov-landed.html and docs/plans/constraint-augmented-newton-krylov.html, and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_equilibrium_constraint_protocol.py:753 converges the row to the imposed amplitude while :527 and :805 pin its two refusals, so a regression of the row or of its refusal contract fails the file.\nSCORE fit: 18\nJUSTIFICATION fit: the class follows the sibling constraint idiom in nova/equilibrium/constraint.py (dataclass fields and required_unknown at :1379-1381) and introduces no plan label in its added names or comments.\nFINDING benchmarks/shafranov_pair_receipt.py:13 the module docstring states that every panel draws both the reference and the terminal state's nulls, but terminal nulls are drawn only when a terminal state exists and all six rows of this run are refused, so the committed panels carry the reference set alone and the description overstates them.\nFINDING benchmarks/shafranov_pair_receipt.py:336 on every refused row terminal_profile_combination carries the profiles-implied target (identical to target_combination on all six row files) although no terminal state exists, so the receipt asserts a terminal reading on a row that was refused and a reader must cross-read status to learn that the number is a target.\n",
+  "review_run_id": "legacy-315503f31e0f",
+  "review_run_id_source": "derived",
+  "reviewed_run_id": "r-20260917T094707958056-cank-shafranov-pair",
+  "reviewing_run_id": "r-20260917T150023351093-review-of-cank-shafranov-pair-2",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-17T17:46:52.480416+00:00",
+  "total": 92
+}

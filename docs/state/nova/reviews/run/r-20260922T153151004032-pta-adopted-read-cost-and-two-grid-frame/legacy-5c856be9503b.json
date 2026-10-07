@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:2922 ForwardFluxOperator._fixed_design_read (the priced adopted call)",
+    "nova/equilibrium/forward_operator.py:2899 ForwardFluxOperator.secondary_x_point (the same read over one flux map)",
+    "da3def20:nova/equilibrium/forward_operator.py:2686 (the pre-adoption production step - the landed artefacts are receipts and a docs-only renderer so no runtime path changes)"
+  ],
+  "completed_at": "",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/figures/plasma-cell-topology-authority/adopted-read-cost.json",
+      "line": "19",
+      "text": "the reference arm is the raw ring candidate caller grid.locator(grid_flux) while the pre-adoption production read called grid(grid_flux) at da3def20:nova/equilibrium/forward_operator.py:2686, so adopted_over_reference compares the full adopted census generator against a cheaper pre-adoption step and overstates the adoption penalty; the caveat is stated in the plan record, the anchor and the commit body but nowhere in this receipt's own fields, so a reader of the receipt alone takes pre_adoption_reference_ms (line 89) for the pre-adoption production read."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/adopted_read_cost.py",
+      "line": "194",
+      "text": "the instrument's positive control is recorded but not enforced - legacy_control_within_window is computed and measure() never refuses a receipt whose control arm drifted, so a run off a slow or different lane still exits 0 and lands a receipt whose every ratio is void."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against base 4112f5f8 - c10b933b4 adds",
+    "done_when": "the gate asserts the named measure per rung -",
+    "goal": "the goal asks for the adopted production read priced against its",
+    "manifest": "read, including the as-delivered copy; it records both",
+    "write_paths": "read the manifest's declared paths against the diff's"
+  },
+  "justifications": {
+    "durability": "nothing in the repository fails if these receipts regress, and the instrument's guard is only recorded - legacy_control_within_window at adopted_read_cost.py:194 is computed while measure() never refuses a receipt whose control drifted.",
+    "evidence": "cost-titan.log repeats the receipt's numbers and its first line names the revision, tree and command, and the like-for-like control at adopted_read_cost.py:113 lands 0.92-1.00 of its own reference, but pre_adoption_reference_ms (adopted-read-cost.json:89) names the ring caller where the pre-adoption production read called grid(grid_flux) (da3def20:nova/equilibrium/forward_operator.py:2686).",
+    "fit": "the renderer draws through the nova.media painters (render_two_grid_frame.py:61-75: draw_wall, draw_flux_contours on one shared level array, draw_nulls twice), poloidal_axes sets the axis off (nova/media/ink.py:165), generator scripts beside figures have precedent under docs/figures, and the symbols name mechanisms rather than plan labels.",
+    "goal_fidelity": "adopted-read-cost.json:2 states all_adopted_within_window false with the per-rung ratios, and two-grid-frame.json's verdict key states the mechanism sentence, though the reference prices the raw ring caller rather than the full pre-adoption read (adopted-read-cost.json:19).",
+    "scope_discipline": "all seven paths changed by c10b933b4 and c5cb010ee lie inside the four declared write paths, and nothing in the diff goes beyond the receipts, the figure and the landing record."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal asks for the adopted production read priced against its\npre-adoption reference on the same device and instrument, and for the two-grid\nMAST frame replayed under the adopted read; adopted-read-cost.json prices\ngrid(null_flux_pool(state)) against the recorded reference on one titan\nallocation (job 1275970) at 550, 1074 and 2616 cells, and two-grid-frame.json\nwith its png and svg replays four maps of MAST 22086/43 coil-edit index 10 and\ncarries the corroborating sentence.\nVERDICT done_when: the gate asserts the named measure per rung -\nadopted-read-cost.json:26 carries adopted_over_reference 3.152 with\nadopted_within_window false (6.079 and 15.126 at :94 and :162), :89 carries\npre_adoption_reference_ms 0.25745 equal to the pinned value (0.25523 and\n0.24349 beside it), reference_job_id 1275658 and reference_revision da3def20\nmatch the dispatch, the device is named cuda:0 on titan node 98dci4-gpu-0002\nwith warm compile excluded over 7 repeats of a 16-state batch, and\ntwo-grid-frame.json states the per-grid admission and the one-sentence\nmechanism verdict.\nVERDICT write_paths: read the manifest's declared paths against the diff's\nseven changed paths - the two receipts, the png, the svg,\nrender_two_grid_frame.py, the plan paragraph and the evidence anchor - and\nevery one lies inside docs/figures/plasma-cell-topology-authority, the plan,\nthe anchor, or the run's own reports directory.\nVERDICT manifest: read, including the as-delivered copy; it records both\ncommits, all seven changed paths, the three gates run in place of a test file\n(the like-for-like control, the x64 assertion in both drivers, the renderer\nlint and SVG null-set check), cost-titan.log as test_logs and as the bare\nnegative-control path, and the two findings it declined to triage; only the\nstatus was repaired, from the contract-correct in-progress to complete.\nVERDICT diff: read commit by commit against base 4112f5f8 - c10b933b4 adds\nonly the 235-line cost receipt, c5cb010ee adds the anchor paragraphs, the\n139-line renderer, the two-grid receipt, the png and svg, and a two-line plan\nrecord, and no package code is touched, which matches a measurement node\npricing census code that landed in earlier section nodes (da3def20 is an\nancestor of the base while the three census-adoption commits are not).\nCALL_SITES: nova/equilibrium/forward_operator.py:2922 ForwardFluxOperator._fixed_design_read (the priced adopted call), nova/equilibrium/forward_operator.py:2899 ForwardFluxOperator.secondary_x_point (the same read over one flux map), da3def20:nova/equilibrium/forward_operator.py:2686 (the pre-adoption production step - the landed artefacts are receipts and a docs-only renderer so no runtime path changes)\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: adopted-read-cost.json:2 states all_adopted_within_window false with the per-rung ratios, and two-grid-frame.json's verdict key states the mechanism sentence, though the reference prices the raw ring caller rather than the full pre-adoption read (adopted-read-cost.json:19).\nSCORE evidence: 16\nJUSTIFICATION evidence: cost-titan.log repeats the receipt's numbers and its first line names the revision, tree and command, and the like-for-like control at adopted_read_cost.py:113 lands 0.92-1.00 of its own reference, but pre_adoption_reference_ms (adopted-read-cost.json:89) names the ring caller where the pre-adoption production read called grid(grid_flux) (da3def20:nova/equilibrium/forward_operator.py:2686).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all seven paths changed by c10b933b4 and c5cb010ee lie inside the four declared write paths, and nothing in the diff goes beyond the receipts, the figure and the landing record.\nSCORE durability: 8\nJUSTIFICATION durability: nothing in the repository fails if these receipts regress, and the instrument's guard is only recorded - legacy_control_within_window at adopted_read_cost.py:194 is computed while measure() never refuses a receipt whose control drifted.\nSCORE fit: 18\nJUSTIFICATION fit: the renderer draws through the nova.media painters (render_two_grid_frame.py:61-75: draw_wall, draw_flux_contours on one shared level array, draw_nulls twice), poloidal_axes sets the axis off (nova/media/ink.py:165), generator scripts beside figures have precedent under docs/figures, and the symbols name mechanisms rather than plan labels.\nFINDING docs/figures/plasma-cell-topology-authority/adopted-read-cost.json:19 the reference arm is the raw ring candidate caller grid.locator(grid_flux) while the pre-adoption production read called grid(grid_flux) at da3def20:nova/equilibrium/forward_operator.py:2686, so adopted_over_reference compares the full adopted census generator against a cheaper pre-adoption step and overstates the adoption penalty; the caveat is stated in the plan record, the anchor and the commit body but nowhere in this receipt's own fields, so a reader of the receipt alone takes pre_adoption_reference_ms (line 89) for the pre-adoption production read.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s18-fable-20260922/pta-adopted-read-cost-and-two-grid-frame/adopted_read_cost.py:194 the instrument's positive control is recorded but not enforced - legacy_control_within_window is computed and measure() never refuses a receipt whose control arm drifted, so a run off a slow or different lane still exits 0 and lands a receipt whose every ratio is void.\nREVISION: c5cb010eee6286460efdd64c5a874629e83c4848\n",
+  "review_run_id": "legacy-5c856be9503b",
+  "review_run_id_source": "derived",
+  "reviewed_revision": "c5cb010eee6286460efdd64c5a874629e83c4848",
+  "reviewed_run_id": "r-20260922T153151004032-pta-adopted-read-cost-and-two-grid-frame",
+  "reviewer_node": "review-of-pta-adopted-read-cost-and-two-grid-frame",
+  "reviewing_run_id": "r-20260922T165257194901-review-of-pta-adopted-read-cost-and-two-grid-frame",
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-09-22T17:14:53.898921+00:00",
+  "total": 80
+}

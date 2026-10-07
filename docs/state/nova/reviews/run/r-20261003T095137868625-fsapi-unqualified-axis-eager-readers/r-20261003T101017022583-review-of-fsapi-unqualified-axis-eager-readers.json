@@ -1,0 +1,147 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_source": "Derived from the reviewed run's readable gate logs. fused-route-base.log (header revision a6fe0d05b, tree fsapi-unqualified-axis-eager-readers) ends '4 passed in 186.38s' with EXIT=0; eager-route-head.log (header revision fa0082982, post-commit) ends '4 passed in 108.95s' with EXIT=0. Neither log records a failing test id, so the set difference of failing ids is empty and the reviewed change adds zero failures. The two logs cover different focused files (test_fused_same_state_read.py at base, test_unqualified_axis_eager_routes.py at head); both are the node's focused gate rather than a full suite, and both are green.",
+  "caller_verification": {
+    "callers": [
+      {
+        "catch": "line 750 except NoQualifiedAxisError, wrapping measure_arm(args) at line 749 in main()'s arm mode",
+        "chain": "Both cited reads are inside measure_arm (def line 91), which is the guarded call. On refusal main prints a JSON object {outcome: no_qualified_axis, exception_class, exception_message}.",
+        "cited_sites": [
+          "line 235 operator._support_partition",
+          "line 291 operator.cell_current_moments"
+        ],
+        "covered": true,
+        "file": "benchmarks/plasma_cell_trip_panels.py"
+      },
+      {
+        "catch": "line 695 except NoQualifiedAxisError, wrapping measure(arguments.output) at line 694 in main()'s measure command",
+        "chain": "measure() (def 588) calls _solovev_measurement() and _mast_measurement(), which call _stage_census, _cell_geometry and _cell_zero_quadrature. All three cited reads are inside the guarded measure() call.",
+        "cited_sites": [
+          "line 227 operator._support_partition in _cell_geometry (def 226)",
+          "line 255 operator._support_partition in _cell_zero_quadrature (def 252)",
+          "line 321 operator._support_partition in _stage_census's nested partition (def 313)"
+        ],
+        "covered": true,
+        "file": "benchmarks/nan_tangent_localisation.py"
+      },
+      {
+        "catch": "line 1399 except NoQualifiedAxisError, wrapping _measure_row(...) at line 1392 in measure() (def 1368)",
+        "chain": "_measure_row (def 1258) calls _jacobian_diagnostics at line 1309, which calls _differentiable_partition_observables at 1083 and _partition_observables at 1104/1105. On refusal the row gets a named dict and prints 'MEASURED {outcome: no_qualified_axis,...}' rather than the smooth-solving keys.",
+        "cited_sites": [
+          "line 980 operator._support_partition in _partition_observables (def 968)",
+          "line 1016 operator._support_partition in _differentiable_partition_observables (def 1002)"
+        ],
+        "covered": true,
+        "file": "benchmarks/settled_mask_stall.py"
+      },
+      {
+        "catch": "line 354 except NoQualifiedAxisError, wrapping scalar_trace = trace(profile, flux, target_current) at line 353 in _localise (def 331)",
+        "chain": "_moment_trace is only ever reached as the `trace` callback selected in _localise; _localise is called from _case_measurement at line 429. The guarded eager call at 353 returns a named 'no_qualified_axis' dict before the jit/vmap path at 357, so no uncaught path remains.",
+        "cited_sites": [
+          "line 226 profile.operator._support_partition in _moment_trace (def 223)"
+        ],
+        "covered": true,
+        "file": "benchmarks/observable_route_discriminator.py"
+      },
+      {
+        "catch": "line 1095 except NoQualifiedAxisError, wrapping the _per_cell_moment_attribution(...) call inside _mode_measure_decomposed (def 951)",
+        "chain": "The cited read is inside _per_cell_moment_attribution, which is invoked only at the guarded call site in _mode_measure_decomposed; on refusal per_cell_attribution becomes a named 'no_qualified_axis' dict. Note: line 271 already had a pre-existing NoQualifiedAxisError catch around operator.read.",
+        "cited_sites": [
+          "line 404 operator._support_partition in _per_cell_moment_attribution (def 392)"
+        ],
+        "covered": true,
+        "file": "benchmarks/oracle_start_newton_probe.py"
+      },
+      {
+        "catch": "line 167 except NoQualifiedAxisError, wrapping report = measure() at line 165 in main() (def 164)",
+        "chain": "measure() (def 46) calls _production_physical_moments at line 66. On refusal main prints a named {outcome: no_qualified_axis,...} JSON object and returns without writing results.json.",
+        "cited_sites": [
+          "line 35 operator._support_partition in _production_physical_moments (def 33)"
+        ],
+        "covered": true,
+        "file": "scripts/moment_branch_integration/measure.py"
+      }
+    ],
+    "note": "Six eager benchmark/script callers verified by file and line. Each cited eager read is reached inside the added try/except NoQualifiedAxisError, which records a named 'no_qualified_axis' outcome rather than allowing a silent skip."
+  },
+  "completed_at": "2026-10-03T10:23:10.980Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T10:10:36Z",
+  "findings": [],
+  "follow_ons": [
+    "No post-commit head-arm run of tests/test_fused_same_state_read.py exists in the run logs; only a pre-commit run whose header names the base revision a6fe0d05b. The file was modified in fa0082982, so a head-arm run of it would close the done-when's 'the new test file and tests/test_fused_same_state_read.py pass ... in fresh processes' at head rather than inferring it.",
+    "Naming imprecision only: the reviewed plan calls the first covered host 'ForwardProfile.cell_current_moments', but the eager read is ForwardFluxOperator.cell_current_moments (forward_operator.py:3588), reached from ForwardProfile via its operator. No behavior is affected; a future plan edit could rename the host for accuracy.",
+    "Out of the six-cited-site scope, oracle_start_newton_probe.py has additional cell_current_moments reads (lines 501 via _current_booking, and 1910) and settled_mask_stall.py has eager operator.read calls (lines 1158/1308) that are not wrapped by the node's added catches. The S22 audit cited only line 406 for this file, so these were assessed as operating on qualified fixture/analytic states; they are noted for completeness, not asserted as defects."
+  ],
+  "independent_checks": [
+    {
+      "check": "head-arm run of the new route tests (fresh process, on the reviewed head)",
+      "command": "JAX_PLATFORMS=cpu TMPDIR=/tmp PYTHONPATH=<reviewed-tree> /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider <reviewed-tree>/tests/test_unqualified_axis_eager_routes.py -q",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T101017022583-review-of-fsapi-unqualified-axis-eager-readers/review-head-route-tests.log",
+      "result": "4 passed in 109.90s; EXIT=0 (reproduces the run's post-commit gate independently)",
+      "revision": "fa008298279bc04fec865dd914f783e74b37d8c1",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-unqualified-axis-eager-readers"
+    },
+    {
+      "check": "independent negative control: no-op the qualified-axis guard in a fresh process",
+      "command": "JAX_PLATFORMS=cpu TMPDIR=/tmp PYTHONPATH=<reviewed-tree>:<plugin-dir> /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -p negctl_plugin <reviewed-tree>/tests/test_unqualified_axis_eager_routes.py -q",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T101017022583-review-of-fsapi-unqualified-axis-eager-readers/review-negative-control.log",
+      "mutation": "pytest plugin setting nova.equilibrium.forward_operator.require_qualified_axis = None-returning noop at configure time (the module binds the name at forward_operator.py line 91 and calls it at lines 3163/3174/3316)",
+      "result": "3 failed, 1 passed in 104.59s; EXIT=1. The three unqualified-refusal cases fail with 'DID NOT RAISE NoQualifiedAxisError' (the normalised-linear branch reaches CurrentNormalisationError at forward_operator.py:3638), while the qualified-state test still passes. The guard, not the test scaffold, produces the refusal.",
+      "revision": "fa008298279bc04fec865dd914f783e74b37d8c1",
+      "tree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-unqualified-axis-eager-readers"
+    },
+    {
+      "check": "reviewed run's own negative control (cross-read, not re-run)",
+      "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T095137868625-fsapi-unqualified-axis-eager-readers/eager-route-negative.log",
+      "result": "Header names revision=fa0082982, tree=/tmp/nova-eager-axis-negative.md5GmO, measurement_module=/tmp/nova-eager-axis-negative.md5GmO/nova/equilibrium/forward_operator.py, measurement_cwd=/tmp/nova-eager-axis-negative.md5GmO. Body shows '.FFF' and 'DID NOT RAISE NoQualifiedAxisError' on the three refusal cases, ending '3 failed, 1 passed in 115.07s' with EXIT=1."
+    }
+  ],
+  "item_verdicts": {
+    "durability": "PASS. Commit fa0082982 is the reviewed worktree HEAD, has a conventional subject and a non-empty body stating what changed and why, and is accompanied by readable gate logs on disk and a complete manifest whose negative_control_log is a bare path resolving to a red log with EXIT=1.",
+    "fused_fixture_named_failure": "PASS. tests/test_fused_same_state_read.py:121-124 replaces the bare AssertionError with RuntimeError('relaxed-map fixture never left the qualified region within {HOST_EVALUATIONS} host evaluations'), so an exhausted search now fails for a stated reason that names the fixture and the budget.",
+    "goal": "PASS. The reviewed goal -- make every eager reader of the support partition handle the unqualified-axis refusal by name -- is met at fa0082982. All six cited benchmark/script callers now catch NoQualifiedAxisError and emit a named 'no_qualified_axis' outcome instead of a silent skip or an unclassified traceback (see caller_verification). No nova/ source changed, so the node is confined to migrating the eager callers and adding coverage.",
+    "scope": "PASS. git show --stat fa0082982 lists exactly the eight paths in the reviewed manifest's changed_paths (five benchmarks, scripts/moment_branch_integration/measure.py, and the two test files). No nova/ production source, plan HTML, shared index, or ungranted path is touched; the reviewed worktree HEAD is fa0082982 with no tracked modifications.",
+    "six_eager_callers": "PASS by file and line. Each cited read (plasma_cell_trip_panels.py:235/291, nan_tangent_localisation.py:227/255/321, settled_mask_stall.py:980/1016, observable_route_discriminator.py:226, oracle_start_newton_probe.py:404, scripts/moment_branch_integration/measure.py:35) sits inside the added try/except NoQualifiedAxisError at plasma:750, nan:695, settled:1399, observable:354, oracle:1095, measure.py:167 respectively. Each records an outcome dict carrying outcome='no_qualified_axis' plus exception class and message.",
+    "suite_delta": "PASS (focused gate). Readable base (a6fe0d05b) and head (fa0082982) gate logs are both green (4 passed each), so added_failure_count is 0 with an empty added_failure_ids set. Neither is a whole-suite run; the node's done-when specifies the focused gate.",
+    "three_production_hosts": "PASS with a naming caveat. tests/test_unqualified_axis_eager_routes.py:41-50 asserts each of the three eager reads raises NoQualifiedAxisError matching 'qualified magnetic-axis' on a genuinely unqualified state, and tests/test_unqualified_axis_eager_routes.py:35-38 serves the same three reads on a qualified state. The reads are profile.operator.cell_current_moments (ForwardFluxOperator.cell_current_moments, forward_operator.py:3588) and ForwardProfile._integral_state in both the linear (target_current=None) and normalised (target_current=1.0) branches, forward.py:1401. The plan text names the first host 'ForwardProfile.cell_current_moments', but no such method exists on ForwardProfile; the eager read is the operator method the profile holds (forward.py itself only calls it at line 955 inside _clip_consistent_seed). The substantive coverage of the three refusal points is met; the plan's host name is imprecise."
+  },
+  "justifications": {
+    "durability": "The reviewed commit is reachable as the reviewed tree HEAD, carries a bodied conventional message free of plan or ticket identifiers, and its evidence logs and manifest are durable files under the run directory.",
+    "evidence": "The record rests on the run's readable gate logs (base and head both green, added_failure_count 0), the reviewed run's own guard-removal negative control (3 failed with DID NOT RAISE, EXIT=1, with measurement_module and cwd named), plus two independent re-runs here: the head route gate (4 passed) and a fresh guard-no-op negative control (3 failed, 1 passed, EXIT=1). The one gap is the head arm of tests/test_fused_same_state_read.py: that file was modified in the commit, but the only run of it (fused-route-base.log) carries a header revision of the base sha a6fe0d05b at 11:53, eight minutes before the 12:01 commit, so a post-commit run of the modified file is not separately evidenced. The modification only changes an exception type on a path the passing tests do not execute, and the modified module is imported and exercised by the head route run, so the risk is low but the head-arm result is inferred.",
+    "fit": "The named-outcome pattern (a dict carrying outcome='no_qualified_axis' with the exception class and message) matches the pre-existing catch already present in benchmarks/xpoint_cell_allocation_rca.py and the read catch at settled_mask_stall.py:788, and the tests reuse the existing machine and _with_direct_samples fixtures rather than adding scaffolding. The cell_current_moments read is guarded at the operator boundary where the refusal originates, which is the narrowest correct site.",
+    "goal_fidelity": "Every eager reader named by the followup now converts the unqualified-axis refusal into a named outcome, and the three production eager reads that can raise are covered on both a qualified and an unqualified state. The only shortfall from the literal plan text is that the first host is the operator's cell_current_moments (forward_operator.py:3588) that the profile delegates to, not a method named ForwardProfile.cell_current_moments -- a plan-naming imprecision rather than a coverage gap.",
+    "scope_discipline": "The commit changes exactly the eight declared write paths and nothing else; no production nova/ module, plan file, or shared state is touched, consistent with the node's 'No change to nova/.' constraint."
+  },
+  "node": "review-of-fsapi-unqualified-axis-eager-readers",
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT pass (93/100). The reviewed run at head fa0082982 (base a6fe0d05b, no nova/ change) makes every eager reader of the support partition handle the NoQualifiedAxisError refusal by name. Verified by file and line: the six cited benchmark/script callers each catch the refusal and emit a named 'no_qualified_axis' outcome -- plasma_cell_trip_panels.py (reads 235/291 inside measure_arm, catch 750), nan_tangent_localisation.py (reads 227/255/321 inside measure, catch 695), settled_mask_stall.py (reads 980/1016 via _jacobian_diagnostics inside _measure_row, catch 1399), observable_route_discriminator.py (read 226 in _moment_trace, catch 354 in _localise), oracle_start_newton_probe.py (read 404 in _per_cell_moment_attribution, catch 1095), scripts/moment_branch_integration/measure.py (read 35 in _production_physical_moments, catch 167). The new tests/test_unqualified_axis_eager_routes.py serves a qualified state and refuses a genuinely unqualified one across the three eager reads (operator.cell_current_moments and both _integral_state branches); an independent head run reproduced 4 passed in 109.90s and an independent guard-no-op negative control produced 3 failed, 1 passed, EXIT=1 with 'DID NOT RAISE'. tests/test_fused_same_state_read.py now raises a named RuntimeError on an exhausted relaxed-map search. Readable base and head gate logs are both green, so added_failure_count is 0. The only evidence gap is the absence of a post-commit head-arm run of the modified fused-read test file, which is why evidence scores 17 rather than higher.",
+  "review_run_id": "r-20261003T101017022583-review-of-fsapi-unqualified-axis-eager-readers",
+  "reviewed_base_sha": "a6fe0d05bc5a301db46825e1d2a8c86a5f1b9e47",
+  "reviewed_commit": "fa008298279bc04fec865dd914f783e74b37d8c1",
+  "reviewed_head_sha": "fa008298279bc04fec865dd914f783e74b37d8c1",
+  "reviewed_run_id": "r-20261003T095137868625-fsapi-unqualified-axis-eager-readers",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsapi-unqualified-axis-eager-readers",
+  "reviewer_node": "review-of-fsapi-unqualified-axis-eager-readers",
+  "reviewer_run_id": "r-20261003T101017022583-review-of-fsapi-unqualified-axis-eager-readers",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T10:20:00.000000+00:00",
+  "total": 93,
+  "verdict": "pass"
+}

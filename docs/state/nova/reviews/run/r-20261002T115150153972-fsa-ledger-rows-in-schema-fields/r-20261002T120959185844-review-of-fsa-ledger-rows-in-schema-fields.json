@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "absent_evidence": [
+    "no baseline_suite or after_suite gate arm belongs to the reviewed run itself, so added failures are unmeasured rather than zero",
+    "no committed test guards the corrected historical row shape",
+    "no content digest pins the failed row's primary log"
+  ],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest carries empty baseline_suite and after_suite fields for this JSON-only correction, so Reckon's gate-log derivation has no two arms to compare and must not turn absence into a measured zero",
+  "assertion_review": {
+    "note": "The reviewed diff adds no source or test assertion. Its run-local schema gate has independent expectations: reinstating the base list command makes _normalized_gate_check(check) == check false, reinstating the top-level failures key makes the exact-row assertion fail, and perturbing an after_suite field makes the suite normalizer equality or primary-log reconciliation fail. Those assertions are meaningful, but because they were not committed as a test they support evidence more than durability."
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "reckon/ledger.py:237",
+    "reckon/ledger.py:2613",
+    "reckon/crew/summary.py:563"
+  ],
+  "commits_read": [
+    "ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93",
+    "9d15864983ccd1ba4c52420ef5c5b3f0d8d16848"
+  ],
+  "completed_at": "2026-10-02T12:24:03Z",
+  "dispatched_at": "2026-10-02T12:10:16Z",
+  "findings": [
+    {
+      "file": "docs/state/nova/crew.json",
+      "line": "201180",
+      "severity": "follow-on",
+      "text": "follow-on: the failed row's after_suite observation retains log_digest null, so its primary report log is not content-pinned; the exact contract did not require a digest and this does not block landing."
+    },
+    {
+      "file": "docs/state/nova/crew.json",
+      "line": "201174",
+      "severity": "follow-on",
+      "text": "follow-on: no committed test owns these historical row shapes, so a later textual rewrite can restore the noncanonical form without making a repository test red; the run-local schema receipt limits durability but this exact data repair can land."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's own manifest has baseline_suite and after_suite present but empty. Under reckon.crew.review.added_failures_from_gate_logs, either absent arm yields (null, []), so this record carries added_failure_count null and added_failure_ids [] rather than claiming zero added failures. Positive control: review-gate.log does see the two historical suite observations deliberately stored inside the ledger rows and reconciles their 3-failure and 0-failure contents; those are the data being repaired, not this reviewed run's base/head suite arms.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production readers or normalizers of the corrected ledger records",
+    "diff": "Commit 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848 has parent ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93 and changes one file in two row objects; the first stores its command as a string and moves three ids into after_suite, and the second adds its verified zero-failure after_suite observation.",
+    "done_when": "The done-when at prompt.txt:91-92 requires string commands, removal of the undeclared failures key, canonical after-suite observations, preserved gate verdicts and log binding, successful JSON loading and a two-row-only diff; review-gate.log independently asserts every clause and ends EXIT=0.",
+    "goal": "The source goal in prompt.txt:30 asks to move the two corrected rows' commands and failure ids into declared ledger fields; the diff does exactly that for the two named records.",
+    "manifest": "The source manifest is complete, names commit 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848 and docs/state/nova/crew.json, records both row outcomes and the schema gate, and agrees with the commit and receipts.",
+    "write_paths": "The reviewed diff contains only docs/state/nova/crew.json, which is inside the source node's declared write paths; the unused fragment and figure grants are untouched."
+  },
+  "justifications": {
+    "durability": "The run's schema gate would fail on the repaired list command, undeclared failures key, or non-normalized suite observation, but that check exists only as a run receipt rather than a committed regression test, so a later manual ledger edit can reintroduce the shape defect without a repository test failing.",
+    "evidence": "The independent check in review-gate.log reloaded both revisions, reproduced the base shape defect, round-tripped both head observations through reckon.ledger, matched the failed row to the primary log's 3 failed and 30 passed summary, and re-derived the passing row's 243371c8... digest and 43-pass summary; one point is withheld because the failed row's cited log remains unhashed.",
+    "fit": "Both records now use the declared gate-check and suite-observation spellings in reckon/ledger.py:237-309, including string commands, completed=true, exact failure counts, sorted failure ids, and values invariant under the canonical normalizers.",
+    "goal_fidelity": "At docs/state/nova/crew.json:201169-201188 the failed row now carries a runnable string command and its three failure ids under suite_delta.after_suite, while docs/state/nova/crew.json:215791-215802 gives the passing row the same declared observation shape without changing its verified log binding or digest.",
+    "scope_discipline": "The base-to-head diff changes only docs/state/nova/crew.json, exactly the two named run objects, with 29 insertions and 21 deletions and no non-run data change."
+  },
+  "limitations": [
+    "This review does not re-run either historical scientific suite; it reconciles the corrected ledger observations with the suites' persisted primary logs, which is the exact data-correction measure.",
+    "The repaired rows are historical data and the production call sites read them generically; the review verifies the reader and normalizer surfaces rather than claiming these two ids take a unique runtime branch."
+  ],
+  "notes": "Pass, 93/100. The exact schema correction is sound: the defect reproduces at base, only the two named records change, both head records round-trip through Reckon's normalizers, and the primary logs reconcile to three failures and zero failures respectively. The two findings are non-blocking follow-ons about evidence pinning and committed durability.",
+  "plan": "nova:figure-and-solver-audit",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source goal in prompt.txt:30 asks to move the two corrected rows' commands and failure ids into declared ledger fields; docs/state/nova/crew.json:201169-201188 and 215791-215802 do exactly that.\nVERDICT done_when: prompt.txt:91-92 requires string commands, removal of the undeclared failures key, canonical after-suite observations, preserved verdicts and log binding, successful JSON loading and a two-row-only diff; review-gate.log independently asserts every clause and ends EXIT=0.\nVERDICT write_paths: the base-to-head diff contains only docs/state/nova/crew.json, inside the reviewed node's declared scope; the unused fragment and figure grants are untouched.\nVERDICT manifest: the reviewed manifest names commit 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848 and docs/state/nova/crew.json, records both row outcomes and the final schema gate, and agrees with the commit and receipts.\nVERDICT diff: commit 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848 over ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93 changes one file and exactly two row objects, converting the first command and relocating its ids and adding both canonical after-suite observations.\nCALL_SITES: reckon/ledger.py:237, reckon/ledger.py:2613, reckon/crew/summary.py:563\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs/state/nova/crew.json:201169-201188 and 215791-215802 put the two records' commands and failure observations in the declared gate-check and suite-observation fields.\nSCORE evidence: 19\nJUSTIFICATION evidence: review-gate.log reproduces the base defect, proves both head round trips, matches the failed row's three ids and re-derives the passing row's digest; docs/state/nova/crew.json:201180 still carries a null failed-row digest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the ac83a864b..9d1586498 diff changes only docs/state/nova/crew.json and exactly the two run ids named by prompt.txt:91-92.\nSCORE durability: 14\nJUSTIFICATION durability: schema-gate.log would redden on each repaired shape regression, but docs/state/nova/crew.json:201174 has no committed regression test and the check survives only as a run receipt.\nSCORE fit: 20\nJUSTIFICATION fit: docs/state/nova/crew.json:201169-201188 and 215791-215802 use the canonical string command and sorted suite-observation shapes declared by reckon/ledger.py:237-309.\nFINDING docs/state/nova/crew.json:201180 follow-on: the failed row's after_suite observation retains log_digest null, so its primary report log is not content-pinned; the exact contract did not require a digest and this does not block landing.\nFINDING docs/state/nova/crew.json:201174 follow-on: no committed test owns these historical row shapes, so a later textual rewrite can restore the noncanonical form without making a repository test red; the run-local schema receipt limits durability but this exact data repair can land.",
+  "reproduction_of_repaired_defect": [
+    {
+      "after": "At head 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848, the command is a string invariant under _normalized_gate_check; failures is absent; suite_delta.after_suite is complete, invariant under normalized_suite_observation, and its three sorted ids match the primary log ending 3 failed, 30 passed in 223.55s.",
+      "before": "At base ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93, independent review printed: BASE_DEFECT first_command_type=list first_gate_round_trip=false both_suite_delta=null. The row also carried the three ids under top-level failures.",
+      "finding_id": "the limited-boundary row stored a list-valued command and three failure ids in an undeclared top-level key"
+    },
+    {
+      "after": "At head 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848, suite_delta.after_suite records revision 87b3c929e87d4e46478e8a394140f1307224f937, the same command, exit 0, completed true, zero failures, the after_suite.log path, and digest 243371c899ae7efdea987819ccd4d30950e799e9f2834e1cc599c9662c8ef57a, which review independently re-derived from the 43-pass log.",
+      "before": "At base ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93, the row's suite_delta was null even though its gate_check already cited the passing after_suite.log and its digest.",
+      "finding_id": "the baseline-state-array row had no declared suite observation for its verified passing gate"
+    }
+  ],
+  "review_run_id": "r-20261002T120959185844-review-of-fsa-ledger-rows-in-schema-fields",
+  "reviewed_base_sha": "ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93",
+  "reviewed_head_sha": "9d15864983ccd1ba4c52420ef5c5b3f0d8d16848",
+  "reviewed_revision": "9d15864983ccd1ba4c52420ef5c5b3f0d8d16848",
+  "reviewed_run_id": "r-20261002T115150153972-fsa-ledger-rows-in-schema-fields",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-ledger-rows-in-schema-fields",
+  "reviewer_node": "review-of-fsa-ledger-rows-in-schema-fields",
+  "reviewer_run_id": "r-20261002T120959185844-review-of-fsa-ledger-rows-in-schema-fields",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T12:17:26Z",
+  "total": 93,
+  "verdict": "pass",
+  "verified_independently": [
+    "the reviewed worktree is clean and its HEAD is exactly 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848",
+    "git show confirms 9d15864983ccd1ba4c52420ef5c5b3f0d8d16848 is a single commit over base ac83a864bd8a0497bb9f6a1318fbc468e1cd2f93 and changes only docs/state/nova/crew.json",
+    "parsing both revisions found exactly two changed run ids and identical non-runs content",
+    "at base, the first gate command is a list and _normalized_gate_check changes it, while both rows have suite_delta null",
+    "at head, both commands are strings and both after_suite mappings have no missing declared field and equal their canonical normalized form",
+    "the failed row's stored failure ids equal the three FAILED node ids in pytest-final.slurm.log, whose summary is 3 failed, 30 passed in 223.55s",
+    "the passing row's after_suite.log ends 43 passed in 9.30s and hashes to the stored digest 243371c899ae7efdea987819ccd4d30950e799e9f2834e1cc599c9662c8ef57a",
+    "the source commit message has a conventional subject, a non-empty body, and no attribution trailer"
+  ]
+}

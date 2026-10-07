@@ -1,0 +1,57 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T20:07:04.500451+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/exact_clip_moment_floor.py",
+      "line": "904",
+      "text": "the emitted route_upper_bound_note still asserts \"each route error is an upper bound and each margin a lower bound\" \u2014 the exact reading commit 47c9e501 corrected in the record and which this same function's docstring at lines 803-809 now denies (\"it is not an upper bound\") \u2014 and reports/nova/s19-local/exact-gauss-repairs/row-margin-table.json ships the false note in a machine-readable field, so the corrected record and the receipt it cites disagree."
+    },
+    {
+      "file": "benchmarks/exact_clip_moment_floor.py",
+      "line": "61",
+      "text": "REPORT_ROOT defaults to reports/nova/s19-local/exact-gauss rather than the -repairs directory this run was fenced to, so reproduce_decade.py \u2014 which sets only ROOT and REPORT_INPUT_ROOT \u2014 wrote row-margin-table.json and .md into the sibling node's evidence directory, an unstated write outside the declared write paths with the pre-repair value now on disk there."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042362879-ecq-order-study-record-repairs/manifest.md",
+      "line": "35",
+      "text": "the cited receipts do not resolve as written: the base arm is at reports/nova/s19-local/exact-gauss-order/default-route-base.npz (a sibling of the -repairs directory, not a subdirectory of it), the cited edge-order-rows/ directory does not exist, and the identity log sits on disk under the literal name default-*.log, so none of the three citations resolves; the manifest's evidence_inputs also attributes the base arm to the main tree at 38b7014e where the captured arm is the main tree's order-3 state at 700d8686, and an auditor sent to 38b7014e would not reproduce the comparison."
+    },
+    {
+      "file": "tests/test_exact_clip_moments.py",
+      "line": "1",
+      "text": "nothing fails if the headline repair regresses: no test references row_margin_table or other_error_term, so the field the record exists to repair is exercised only by the run itself and a reintroduced factor of ten would ship green."
+    },
+    {
+      "file": "docs/plans/exact-clip-moment-quadrature.html",
+      "line": "123",
+      "text": "the record says \"Four commits carry this pass\" and names four while the range 38b7014e..4b5c2944 holds five, the fifth (4b5c2944) named nowhere in either record, so a reader diffing the run cannot reconcile the count."
+    }
+  ],
+  "justifications": {
+    "durability": "Only the order-study map is pinned (tests/test_exact_clip_moments.py asserts the receipt schema and its per-path map); the repaired other_error_term field is referenced nowhere in tests/, so a reintroduced factor of ten would pass the suite.",
+    "evidence": "The done_when's five checks resolve from stored artifacts rather than the worker's account \u2014 reproduce_decade.log shows the pre-repair ratio of exactly 100.0, the nine-row table carries the stated denominators, edge-order-study.json holds selected_per_edge_order 4, and tests/test_exact_clip_moments.py passed at the tip in one fresh all_debug process (job 1273252, 8 passed in 55.75 s) \u2014 but the record's receipt list does not resolve as written and the base arm's revision is misattributed.",
+    "fit": "The env override added at benchmarks/exact_clip_moment_floor.py:67 matches the constant's existing idiom, all five commits carry bodies in the conventional form with no attribution lines, and no added source line carries a plan, sprint or ticket name.",
+    "goal_fidelity": "The four declared repairs land and are receipt-backed (reports/nova/s19-local/exact-gauss-repairs/row-margin-table.json carries other_error_term 1.146794e-04 on weak-110 and a budget of exactly one tenth of it on all nine rows, edge-order-study.json selects per-edge order 4 with order-1 radial 0.25259293521809256 and coefficients 0.2, 0.3, -0.35, and both doc copies state the route column at both orders), but the emitted receipt still asserts the reading the pass corrected.",
+    "scope_discipline": "The five commits stay inside the declared write paths, but the pre-repair reproduction wrote outside them: reports/nova/s19-local/exact-gauss/row-margin-table.json and .md were rewritten at 21:26 with the decade-off 1.146794e-03, into the sibling node's evidence directory and not the -repairs directory this run was fenced to."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: The four declared repairs land and are receipt-backed (reports/nova/s19-local/exact-gauss-repairs/row-margin-table.json carries other_error_term 1.146794e-04 on weak-110 and a budget of exactly one tenth of it on all nine rows, edge-order-study.json selects per-edge order 4 with order-1 radial 0.25259293521809256 and coefficients 0.2, 0.3, -0.35, and both doc copies state the route column at both orders), but the emitted receipt still asserts the reading the pass corrected.\nSCORE evidence: 17\nJUSTIFICATION evidence: The done_when's five checks resolve from stored artifacts rather than the worker's account \u2014 reproduce_decade.log shows the pre-repair ratio of exactly 100.0, the nine-row table carries the stated denominators, edge-order-study.json holds selected_per_edge_order 4, and tests/test_exact_clip_moments.py passed at the tip in one fresh all_debug process (job 1273252, 8 passed in 55.75 s) \u2014 but the record's receipt list does not resolve as written and the base arm's revision is misattributed.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: The five commits stay inside the declared write paths, but the pre-repair reproduction wrote outside them: reports/nova/s19-local/exact-gauss/row-margin-table.json and .md were rewritten at 21:26 with the decade-off 1.146794e-03, into the sibling node's evidence directory and not the -repairs directory this run was fenced to.\nSCORE durability: 8\nJUSTIFICATION durability: Only the order-study map is pinned (tests/test_exact_clip_moments.py asserts the receipt schema and its per-path map); the repaired other_error_term field is referenced nowhere in tests/, so a reintroduced factor of ten would pass the suite.\nSCORE fit: 18\nJUSTIFICATION fit: The env override added at benchmarks/exact_clip_moment_floor.py:67 matches the constant's existing idiom, all five commits carry bodies in the conventional form with no attribution lines, and no added source line carries a plan, sprint or ticket name.\nFINDING benchmarks/exact_clip_moment_floor.py:904 the emitted route_upper_bound_note still asserts \"each route error is an upper bound and each margin a lower bound\" \u2014 the exact reading commit 47c9e501 corrected in the record and which this same function's docstring at lines 803-809 now denies (\"it is not an upper bound\") \u2014 and reports/nova/s19-local/exact-gauss-repairs/row-margin-table.json ships the false note in a machine-readable field, so the corrected record and the receipt it cites disagree.\nFINDING benchmarks/exact_clip_moment_floor.py:61 REPORT_ROOT defaults to reports/nova/s19-local/exact-gauss rather than the -repairs directory this run was fenced to, so reproduce_decade.py \u2014 which sets only ROOT and REPORT_INPUT_ROOT \u2014 wrote row-margin-table.json and .md into the sibling node's evidence directory, an unstated write outside the declared write paths with the pre-repair value now on disk there.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T183042362879-ecq-order-study-record-repairs/manifest.md:35 the cited receipts do not resolve as written: the base arm is at reports/nova/s19-local/exact-gauss-order/default-route-base.npz (a sibling of the -repairs directory, not a subdirectory of it), the cited edge-order-rows/ directory does not exist, and the identity log sits on disk under the literal name default-*.log, so none of the three citations resolves; the manifest's evidence_inputs also attributes the base arm to the main tree at 38b7014e where the captured arm is the main tree's order-3 state at 700d8686, and an auditor sent to 38b7014e would not reproduce the comparison.\nFINDING tests/test_exact_clip_moments.py:1 nothing fails if the headline repair regresses: no test references row_margin_table or other_error_term, so the field the record exists to repair is exercised only by the run itself and a reintroduced factor of ten would ship green.\nFINDING docs/plans/exact-clip-moment-quadrature.html:123 the record says \"Four commits carry this pass\" and names four while the range 38b7014e..4b5c2944 holds five, the fifth (4b5c2944) named nowhere in either record, so a reader diffing the run cannot reconcile the count.",
+  "review_run_id": "r-20260917T200704500451-review-of-ecq-order-study-record-repairs",
+  "reviewed_base": "38b7014ee25891b59e66605d1a2f512c5271b6e6",
+  "reviewed_run_id": "r-20260917T183042362879-ecq-order-study-record-repairs",
+  "reviewed_tip": "4b5c29449db950311db60eda8c28cff7296874b8",
+  "reviewer_run_id": "r-20260917T200704500451-review-of-ecq-order-study-record-repairs",
+  "scores": {
+    "durability": 8,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T21:23:02.762829+00:00",
+  "total": 73
+}

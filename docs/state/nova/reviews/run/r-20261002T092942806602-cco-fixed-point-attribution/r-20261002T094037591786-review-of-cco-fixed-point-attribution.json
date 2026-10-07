@@ -1,0 +1,81 @@
+{
+  "absent": [
+    "no gate arm of any kind: the reviewed run is read-only and ran no suite, so the record carries no baseline_suite and no after_suite, so added_failure_count/added_failure_ids are 0/[] by absence of arms rather than by a measured set identity",
+    "no committed artifact and no negative control: the only write path is the report under the crew reports directory, so the run has no commit to redden and declared negative_control_log 'none'"
+  ],
+  "absent_items": [
+    {
+      "disposition": "not a defect: the reports' own records do not carry max|g|, so the decomposition is a derivation from the two recorded quantities (terminal residual and row residual) plus the recorded amplitude; the report labels the whole attribution 'probable, not proven' and names the per-step trace as the missing instrument, so the inference is disclosed rather than presented as measured",
+      "item": "an independent source for the terminal max|g| figure (about 2.386) used to decompose the terminal residual into max|g-x|"
+    },
+    {
+      "disposition": "not a defect: the report states the receipts do not record the initial level residual and marks the cap's early effect as inferred, consistent with the terminal state showing no binding cap",
+      "item": "whether the level row actually starts capped (the 1.238 Wb needed against the 1 Wb per-trip cap)"
+    },
+    {
+      "disposition": "follow-on: the report derives both from banked receipts and cites the mechanism in nova/equilibrium/constraint.py (the cap sets step = +/-step_limit with zero tangent, the refusal sets step = 0), and correctly fences both repairs to that file outside this node's scope; neither defect is active at the terminal state, so it does not touch the attribution",
+      "item": "reproduction of the damped_step defects (job 1273377 frozen at 0.0 T with cap tangent zero; job 1272453 at 2.27x bound with a refused step contributing no residual)"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "d598cd1931edec10fff7a069b0149bd048989503"
+  ],
+  "completed_at": "2026-10-02T09:58:04.886Z",
+  "dispatched_at": "2026-10-02T09:40:55Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/cco-fixed-point-attribution.md",
+      "line": "2. Mechanism (solver code facts)",
+      "severity": "follow-on",
+      "text": "follow-on: the report cites 'ForwardProfile.solve_with_constraints (forward.py:2179) hands G to fixed_point.newton_krylov'. No method named solve_with_constraints exists anywhere in the tree; forward.py:2179 is the fixed_point.newton_krylov call, which lives in ForwardProfile._solve_augmented_constraints (forward.py:2117). The cited line resolves; the method name is invented, so a reader following the name finds nothing."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "gate_arms_note": "The reviewed run is read-only investigation and ran no gate arm: its manifest records tests 'none run' and test_logs 'none', and no baseline_suite or after_suite exists in its run directory. added_failure_count is 0 and added_failure_ids is empty by ABSENCE of both arms, not by a measured head-minus-base set identity: there is no head suite and no base suite to subtract. This review therefore cannot and does not claim a zero added failures result for the reviewed run; the reviewed run's own deliverable is the report, not a code change.",
+  "justifications": {
+    "durability": "The deliverable is a durable report at a stable path. The repair is named as concrete arguments the existing pair builders already take (field_scale_t, initial_level_wb) plus a driver-only trace change, with no solver change, and the confirming measurement is specified to the fixture, seed digest, clip, lane and rung. Held below full because the central attribution is left explicitly unproven (the receipts carry no per-step trace) and the node is an investigation with no committed code or guard; a reader must run the named receipt to settle it.",
+    "evidence": "The report restates the measured state value-for-value against the plan section 2 records (row residual 1.3398458394898267e-03, gauge-free offset -1.6463130685184867e-02 of span, three-column 2.3214644865632295e-03 and -1.8962439950152867e-02, amplitudes [2.388599064870474e-03, -1.1059397227966279e-13, 1.2383665193033397], bound_refusal all false), and I independently resolved each code anchor it cites except one. Verified present and as characterised: compensator_step returns step = -row_residual (constraint.py:460); BoundedExteriorFieldUnknown.damped_step caps by min(1, step_limit/|r|), backtracks on a halving ladder, and sets step = 0 on a refusal (constraint.py:583); assemble_augmented_system (constraint.py:1883) is the G builder; _relative_residual is max|g-x|/max|g| (fixed_point.py:1050); the certificate driver uses recovery.NEWTON_STEPS and recovery.KRYLOV_ITERATIONS, whose values are 10 and 30 (measure.py:51-52); the GMRES is restart=maxiter=gmres_iterations with a zero initial guess and identity preconditioner (fixed_point.py:2623) and _certificate_solve_request is at solovev_certificate.py:2176; the fixture defaults DEFAULT_FIELD_SCALE_T=1e-3, DEFAULT_STEP_LIMIT=1.0, DEFAULT_LEVEL_SCALE_WB=1.0 hold and the level column is unbounded (level_bound_wb None, level_bound_is_field_bound False) with initial_level_wb defaulting to None. Held below full for one fabricated symbol: the report cites 'ForwardProfile.solve_with_constraints (forward.py:2179)', but no solve_with_constraints exists anywhere in the tree; line 2179 is the fixed_point.newton_krylov call inside ForwardProfile._solve_augmented_constraints (forward.py:2117), so the line resolves but the method name does not.",
+    "fit": "The report is scoped to plan section 2, targets the modules that section owns (nova/equilibrium/constraint.py, scripts/analytic_oracle_fixtures/centroid_row.py, the receipt driver), and carries no plan/ticket labels in any symbol; job ids, commit shas and clause labels appear only as artifact identifiers. It corrects the plan's own reading of the 1/286 ratio (the unit-gain u-update, not a Newton under-step), which the plan itself flagged as open, rather than silently restated it.",
+    "goal_fidelity": "The report answers exactly the node goal: it attributes why the three-column constrained solve reaches the analytic centroid but not the 1e-12 fixed point (verdict: the whole augmented iterate is still unconverged when the fixed 10-step/30-GMRES budget runs out, with the terminal residual carried by the flux block, not the row), rules the four gate candidates in or out with evidence each way, proposes one repair (field_scale_t 0.25 T, a seeded initial_level_wb, a per-step trace), and names the single GPU-class receipt that would confirm or refute it. It also addresses all four gate clauses including the CPU-abort ownership. I confirmed the load-bearing numbers it rests on reproduce: the compensated column scale 1.627789 m/T x 1e-3 T / 0.46606 m = 3.4927e-3 (the report's 1/286), the vertical leverage 4.916664e-3/0.46606 = 1.055e-2, the compensator flux pi x 2.3886e-3 x (7.718433652945465^2 - 6.2^2) = 0.15859 Wb = 3.217e-3 of the 49.2965 Wb span, and the two/three-column terminal max|g-x| 1.606e-3 / 2.651e-3 both above their rows' 1.34e-3 / 2.32e-3.",
+    "scope_discipline": "The node is read-only investigation with a single granted write path, the report; the worktree is clean at head (tree-snapshot status_entries empty) and the run made no commit, so nothing outside the fence was touched. The report stays in its lane and explicitly reports the CPU-abort ownership, the span-clause inconsistency and the damped_step defects as follow-ons for other sections rather than repairing them."
+  },
+  "notes": "Read-only review of a read-only attribution report. Verdict pass at 92: the report answers the node goal and all four gate clauses, and its load-bearing code facts, budget constants and arithmetic all reproduce. The single defect is one fabricated method name (solve_with_constraints for _solve_augmented_constraints), which does not change the mechanism but fails the anchor-exists check; scored under evidence. The added-failure fields are empty by absence of arms, disclosed in gate_arms_note rather than presented as a measured zero.",
+  "plan": "nova:centroid-constrained-oracle-solve",
+  "project": "nova",
+  "reproduction_of_repaired_defect": null,
+  "review_run_id": "r-20261002T094037591786-review-of-cco-fixed-point-attribution",
+  "reviewed_base_sha": "d598cd1931edec10fff7a069b0149bd048989503",
+  "reviewed_head_sha": "d598cd1931edec10fff7a069b0149bd048989503",
+  "reviewed_revision": "d598cd1931edec10fff7a069b0149bd048989503",
+  "reviewed_run_id": "r-20261002T092942806602-cco-fixed-point-attribution",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-fixed-point-attribution",
+  "reviewer_node": "review-of-cco-fixed-point-attribution",
+  "reviewer_run_id": "r-20261002T094037591786-review-of-cco-fixed-point-attribution",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T09:53:59Z",
+  "total": 92,
+  "verdict": "pass",
+  "verified_independently": [
+    "compensated column scale: 1.627789 m/T x 1e-3 T / 0.46606 m = 3.4927e-3, the report's 1/286 (reproduced)",
+    "vertical column leverage: 4.916664 m/T x 1e-3 T / 0.46606 m = 1.055e-2 (reproduced)",
+    "compensator span term: pi x 2.3886e-3 x (7.718433652945465^2 - 6.2^2) = 0.15859 Wb = 3.217e-3 of the 49.2965 Wb span, 3.2x the 1e-3 clause (reproduced)",
+    "terminal decomposition: 6.731e-4 x 2.386 = 1.606e-3 > row 1.3398e-3; 1.110e-3 x 2.388 = 2.651e-3 > row 2.3215e-3 (reproduced; max|g| itself is derived, not recorded)",
+    "field_scale_t = 0.25 T leverage: 1.627789 x 0.25/0.46606 = 0.873 and 4.916664 x 0.25/0.46606 = 2.637, both O(1) (reproduced)",
+    "budget constants NEWTON_STEPS=10 / KRYLOV_ITERATIONS=30 at scripts/oracle_rebaseline/measure.py:51-52 (reproduced)",
+    "code anchors compensator_step (constraint.py:460), damped_step (constraint.py:583), assemble_augmented_system (constraint.py:1883), _relative_residual (fixed_point.py:1050), _certificate_solve_request (solovev_certificate.py:2176), fixture defaults and unbounded level column (centroid_row.py:32-35,240-245) (reproduced)",
+    "NOT reproduced: the cited symbol ForwardProfile.solve_with_constraints does not exist (actual _solve_augmented_constraints, forward.py:2117)"
+  ]
+}

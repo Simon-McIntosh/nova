@@ -1,0 +1,49 @@
+{
+  "absent": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-17T14:50:20.377827+00:00",
+  "findings": [
+    {
+      "file": "benchmarks/solve_program_size_gate.py",
+      "line": "650",
+      "text": "the derivation template asserts the dumped module \"is byte-identical to the earlier census at revision {previous_receipt_revision}\"; the receipt records only a byte count (:918) and the sentence is emitted unconditionally, so it was never measured and it is false \u2014 the two dumps are size-equal (219,637,882 B) but differ in 1094 bytes, all before offset 253 KB, beginning at offset 2937 in the HLO Names table with the embedded compiling-checkout name (\u2026msc-marker-census-instrument\u2026 vs \u2026msc-marker-census-rebaseline\u2026; sha256 ffca59be3f2c\u2026 vs 97cee38e1ea6\u2026), so the sentence should either compare a recorded digest and refuse on mismatch or restate the support as the rule counts both dumps reproduce (120/79 sentinel copies, 122/208 read-body frames)."
+    },
+    {
+      "file": "docs/figures/millisecond-converged-solve/marker-census/report.md",
+      "line": "40",
+      "text": "the committed report ships the same false byte-identity sentence as the derivation's closing support, so the artifact a reader quotes must be corrected with the generator."
+    },
+    {
+      "file": "docs/evidence/archive/millisecond-converged-solve-landed.html",
+      "line": "716",
+      "text": "the evidence anchor repeats the false byte-identity claim beside the new 120-and-79 baseline, giving the archive a support the dumps themselves falsify."
+    }
+  ],
+  "justifications": {
+    "durability": "tests/test_solve_program_size.py:406, :424 and :438 fail if the zero-marker, uniform-column or foreign-checkout refusals regress \u2014 the last being the failure actually hit through the stale compilation cache \u2014 and the receipt and force-added figure are committed although PNGs are gitignored.",
+    "evidence": "the counts stand on a recorded measurement (300.json cites job 1272930's 345.483 s compile and 692,225 instructions, logged under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/marker-census-rebaseline/) and I reproduced the census tests independently in this worktree (8 passed, EXIT=0, log at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145020377827-review-of-msc-marker-census-rebaseline/review-tests.log), but the derivation's program-identity sentence is measurably false, so one recorded claim is untrustworthy as written.",
+    "fit": "the additions reuse the module's own vocabulary and layout (benchmarks/solve_program_size_gate.py:625 renders the report as its receipt and figure writers do) and introduce no plan-stage or version label in any name, file or comment.",
+    "goal_fidelity": "all four asks are landed and inspectable \u2014 both sentinel rules tabulated per marker on one dump (docs/figures/millisecond-converged-solve/marker-census/300.json, rows 120/122/444/534 and 79/208/1357/13496), the carried-forward counts and the restatement to 120 and 79 with its derivation (docs/figures/millisecond-converged-solve/marker-census/report.md:40), the synthetic-HLO refusal tests (tests/test_solve_program_size.py:406, :424, :438) and the module gate's zero-added result in the source manifest; one support sentence in that derivation is false as written, so not full marks.",
+    "scope_discipline": "git diff --name-only ad2c5ee1..HEAD lists exactly the seven declared paths and nothing else \u2014 benchmarks/solve_program_size_gate.py, tests/test_solve_program_size.py, docs/plans/millisecond-converged-solve.html, docs/evidence/archive/millisecond-converged-solve-landed.html, and the three files under docs/figures/millisecond-converged-solve/marker-census/."
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all four asks are landed and inspectable \u2014 both sentinel rules tabulated per marker on one dump (docs/figures/millisecond-converged-solve/marker-census/300.json, rows 120/122/444/534 and 79/208/1357/13496), the carried-forward counts and the restatement to 120 and 79 with its derivation (docs/figures/millisecond-converged-solve/marker-census/report.md:40), the synthetic-HLO refusal tests (tests/test_solve_program_size.py:406, :424, :438) and the module gate's zero-added result in the source manifest; one support sentence in that derivation is false as written, so not full marks.\nSCORE evidence: 16\nJUSTIFICATION evidence: the counts stand on a recorded measurement (300.json cites job 1272930's 345.483 s compile and 692,225 instructions, logged under /home/ITER/mcintos/.config/reckon/crew/reports/nova/s19-local/marker-census-rebaseline/) and I reproduced the census tests independently in this worktree (8 passed, EXIT=0, log at /home/ITER/mcintos/.config/reckon/crew/runs/r-20260917T145020377827-review-of-msc-marker-census-rebaseline/review-tests.log), but the derivation's program-identity sentence is measurably false, so one recorded claim is untrustworthy as written.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only ad2c5ee1..HEAD lists exactly the seven declared paths and nothing else \u2014 benchmarks/solve_program_size_gate.py, tests/test_solve_program_size.py, docs/plans/millisecond-converged-solve.html, docs/evidence/archive/millisecond-converged-solve-landed.html, and the three files under docs/figures/millisecond-converged-solve/marker-census/.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_solve_program_size.py:406, :424 and :438 fail if the zero-marker, uniform-column or foreign-checkout refusals regress \u2014 the last being the failure actually hit through the stale compilation cache \u2014 and the receipt and force-added figure are committed although PNGs are gitignored.\nSCORE fit: 18\nJUSTIFICATION fit: the additions reuse the module's own vocabulary and layout (benchmarks/solve_program_size_gate.py:625 renders the report as its receipt and figure writers do) and introduce no plan-stage or version label in any name, file or comment.\nFINDING benchmarks/solve_program_size_gate.py:650 the derivation template asserts the dumped module \"is byte-identical to the earlier census at revision {previous_receipt_revision}\"; the receipt records only a byte count (:918) and the sentence is emitted unconditionally, so it was never measured and it is false \u2014 the two dumps are size-equal (219,637,882 B) but differ in 1094 bytes, all before offset 253 KB, beginning at offset 2937 in the HLO Names table with the embedded compiling-checkout name (\u2026msc-marker-census-instrument\u2026 vs \u2026msc-marker-census-rebaseline\u2026; sha256 ffca59be3f2c\u2026 vs 97cee38e1ea6\u2026), so the sentence should either compare a recorded digest and refuse on mismatch or restate the support as the rule counts both dumps reproduce (120/79 sentinel copies, 122/208 read-body frames).\nFINDING docs/figures/millisecond-converged-solve/marker-census/report.md:40 the committed report ships the same false byte-identity sentence as the derivation's closing support, so the artifact a reader quotes must be corrected with the generator.\nFINDING docs/evidence/archive/millisecond-converged-solve-landed.html:716 the evidence anchor repeats the false byte-identity claim beside the new 120-and-79 baseline, giving the archive a support the dumps themselves falsify.",
+  "review_run_id": "r-20260917T145020377827-review-of-msc-marker-census-rebaseline",
+  "reviewed_run_id": "r-20260917T101100483704-msc-marker-census-rebaseline",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "reviewer_run_id": "r-20260917T145020377827-review-of-msc-marker-census-rebaseline",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-17T17:12:22.253668+00:00",
+  "total": 91
+}

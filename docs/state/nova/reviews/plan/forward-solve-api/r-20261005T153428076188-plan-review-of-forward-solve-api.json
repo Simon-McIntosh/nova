@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-05T15:45:57.245Z",
+  "dispatched_at": "2026-10-05T15:35:00Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/solve_request.py:186",
+      "id": "duplicate_owner-1",
+      "reason": "the resolver belongs in the owner it duplicates (`nova/jax/config.py`), so the plan should cite an extension of that owner rather than a parallel resolver with a second variable.",
+      "text": "`default_forward_compilation_cache_root()` is a second cache-root resolver beside the mechanism's owner `nova/jax/config.py:103 default_persistent_compilation_cache_root()`; it reads its own environment variable `NOVA_FORWARD_COMPILATION_CACHE_ROOT` (solve_request.py:224) where the owner reads `NOVA_COMPILATION_CACHE_ROOT` (config.py:100), and its result is then fed back into the owner's `configure_persistent_compilation_cache` at `nova/equilibrium/forward.py:2382`, so one logical cache now has two base resolvers and two env vars \u2014 the H200 pre-warm lane that exports the owner's variable leaves the forward default pointing at `~/.cache/nova/forward-compilation-cache/...` instead.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/forward-solve-api.html#s1",
+      "id": "interface_budget-1",
+      "reason": "with the budget at zero each section must, in its own text, account for the definitions it adds by naming the surface it retires or merges.",
+      "text": "\u00a71 lands `ForwardSolveRequest`, `ForwardSolvePolicy`, `ForwardSolveReceipt` and the `clip_mode` request field (all exported in `solve_request.py` `__all__`), and \u00a73 adds a transport request/receipt pair, against a frozen weekly budget of `public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0`; the sections' own text names no definition they retire or merge (the retirement of the `_SUPPORT_CLIP_MODE` global exists only as a separate followup, not in the section that adds the field), and states no reason nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "9302ea84a7c61afe8c9e0764bc3c30c3709a47f80cf7ddbdc1cdac5f36d1a1ba",
+  "plan_slug": "forward-solve-api",
+  "plan_version": 150,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261005T153428076188-plan-review-of-forward-solve-api",
+  "reviewed_blob_sha": "afe76010684a471ce7212c98c719575b675d82e4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `nova/equilibrium/solve_request.py` is a single module (683 lines) that hides the whole contract behind a small import surface: request construction, the version-keyed defaults table, deviation resolution, and the receipt are one unit, consumed as `ForwardSolveRequest`/`ForwardSolveReceipt` by `forward.py` and by `nova/transport/forward.py:22`. Complexity is concentrated, not spread across parallel wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan adds `default_forward_compilation_cache_root()` in `nova/equilibrium/solve_request.py`, a second compilation-cache-root resolver beside the owner of that mechanism, `default_persistent_compilation_cache_root()` in `nova/jax/config.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the design sections add public definitions (the request/policy/receipt types and the `clip_mode` request field, plus a transport request/receipt pair) and neither \u00a71 nor \u00a73 states, in its own text, what it retires or merges or why nothing can.",
+    "reuse_search": "pass \u2014 \u00a72 and \u00a73 name the mechanisms they extend rather than re-derive them: the request/receipt seam is `ForwardProfile.solve` in `nova/equilibrium/forward.py` (not a parallel solve path), \u00a72 migrates route bodies onto `profile.solve(request)` and cites the imas-ambix consumer (`imas_ambix.statespace.nova_ensemble_estimator`, which already captures the installed Nova revision), and \u00a73 explicitly states that transport \"already has its contract\" (`ForwardTransportInput`/`ForwardTransportReceipt` in `nova/transport/forward.py`) and only needs the shared defaults block, with TORAX kept as the declared optional extra (`pyproject.toml` `transport = [\"torax>=1.4.3\"]`). No section proposes a subsystem without naming what it extends.",
+    "thin_wrapper": "pass \u2014 the two translation helpers in `solve_request.py` earn their place because the machinery beneath them cannot do the job: `ForwardSolvePolicy.kernel_options()` maps one policy onto five structurally different kernel keyword sets (`newton_krylov`, `reduced_newton`, `picard`/`anderson`, `host`, `host_krylov`), and `from_defaults`/`resolve_forward_solve_policy` apply version-keyed deviations that the plain dataclass cannot. Neither is a pass-through over an existing entry point."
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.387177+00:00"
+}

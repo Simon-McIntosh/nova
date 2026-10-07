@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T14:56:55Z",
+  "delta_note": "First review record for this run. The reviewed node is report-only (goal f-fsa-painters-draw-field-outside-the-wall remainder): it inventories wall-unmasked scattered-field renderer call sites and edits no source, so there is no code diff and no gate arms to compare. reviewed_base_sha == reviewed_head_sha == a42dc665cf41a4a698ba95df16fee43cfe3c4a32 because the node authored no commit; the coordinator ruling recorded in resume-1-advice.txt sanctioned a report-only completion; check-manifest passes under that ruling (manifest-audit-refusal.log records the earlier stricter refusal, status complete with no commit).",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T14:28:57Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-renderer-call-sites-inside-wall.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "the deliverable is not versioned: it is written only to the crew reports directory (confirmed a non-Git tree: `git -C /home/ITER/mcintos/.config/reckon/crew/reports rev-parse --is-inside-work-tree` -> fatal: not a git repository), and the node authored no commit, so the 78-call inventory cannot be re-read at a42dc665 except through the prose revision stamp at report.md:3; the coordinator ruling licensed this for a report-only node, but a later repair batch cannot check what it is closing against a fixed revision of this report."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T142831974130-fsa-renderer-call-sites-inside-wall/renderer-source-scan.log",
+      "line": "8",
+      "severity": "follow-on",
+      "text": "the red source scan asserts `REFUSAL total=78 unguarded renderer calls` in aggregate but enumerates only two refusal lines (plasma_cell_fixed_point_attribution.py:424 and sol_ledger_current_census.py:415), and the companion renderer-coverage-check.log reports only `total=78 files=36`; no log preserves the per-site list of the 78, so a reader cannot reconcile the headline count from the logs the manifest names without re-deriving it, which I did independently (my own scan reproduced 16 raw tricontour calls and 52 draw_flux_contours-caller files, consistent with the report's 17 direct + 61 raster)."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-renderer-call-sites-inside-wall.md",
+      "line": "96",
+      "severity": "follow-on",
+      "text": "the guard proposal leaves its own scope unresolved: the report offers a flux-specific scan (breaks 74 calls) and a broader all-scattered-field scan (breaks 78, including four current diagnostics) and asks for an EFIT exemption, but the repair-batch table groups the four adjacent current-diagnostic calls into the flux batches (the `current and allocation renderers` row) without stating which scan a batch owner implements, so the batch write scopes do not yet select one of the two guard variants."
+    }
+  ],
+  "gate_arms_note": "Derived from the reviewed run's own manifest gate fields. baseline_suite is null/absent and after_suite is null/absent (manifest.md baseline_suite:, after_suite:). The node is report-only and ran no test-suite arm; its three recorded checks are inline python probes (renderer-coverage-check.log EXIT=0, renderer-source-scan.log expected EXIT=1, painter-refusal.log EXIT=0), none of which is a baseline/after suite pair. With no readable gate arms, added_failure_count=0 and added_failure_ids=[] by the empty-input rule rather than as a measured regression-free result; the zero bounds nothing about source, because no source changed.",
+  "justifications": {
+    "durability": "the report, its three evidence logs and the manifest are all preserved on disk with the reviewed worktree clean and the reviewed revision named in the report header and every log header; the node adopted the coordinator's report-only ruling and passed check-manifest. Deduction: nothing is committed to Git (the report path is a non-Git crew directory, `git -C reports rev-parse --is-inside-work-tree` -> fatal), so the deliverable is re-readable only by working-tree path and cannot be pinned to a42dc665 by a revision.",
+    "evidence": "the central claims reproduce against the reviewed source at a42dc665, which I re-derived independently in my own worktree: the named defect sites exist exactly as reported (benchmarks/plasma_cell_fixed_point_attribution.py:424 and :819 call poloidal.draw_flux_contours with no wall=), sol_ledger_current_census.py:415 calls tri-`contour` with no triangle mask, my scan reproduced 16 raw tricontour calls and 52 draw_flux_contours-caller files across benchmarks/ and docs/figures/, and I opened docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.png and confirmed grey contours cross the black wall at the upper-right and continue below both bottom tips. The positive controls verify (closed-forms/render.py:52 uses draw_scattered_contours with the required wall; contour_tree_explanatory_figure.py:308 pre-blanks via inside_wall_units before its :359 painter call; plasma_cell_trip_panels.py:406 is a post-filter that rejects any curve outside inside_wall_units at :417, so its exclusion from the 78 is correct). painter-refusal.log shows a real TypeError and imports poloidal from the assigned worktree (module.__file__ under fsa-renderer-call-sites-inside-wall). Deductions: the visual sample's six leak readings are subjective open-figure judgements, which the report itself discloses as a limit; and the aggregate scan logs enumerate no per-site list (see finding).",
+    "fit": "the deliverable is a mechanism-named inventory report that matches the plan's call for disjoint repair batches and a source-scan guard: every call site is given as file:line, the nine-batch table assigns disjoint file sets within benchmarks/ and separate subdirectories under docs/figures/, and the report explicitly names the guard's positive controls and negative fixture. It carries no source symbol and no filename the repository naming rules forbid (there is no source), the revision is stated in mechanism terms, and the four non-flux calls are labelled as adjacent risks rather than counted as flux. Minor: the repair-batch table's role labels (`current and allocation renderers`) do not by themselves select which of the two guard variants a batch implements.",
+    "goal_fidelity": "the reviewed goal (the wall-painter followup's inventory remainder: list the renderer call sites that draw a scattered or hull-interpolated field outside nova.media without a wall mask) is met end to end: the report reproduces the open defect at a42dc665 (verified), classifies 78 call expressions in 36 files into 17 direct Matplotlib and 61 raster-painter calls, separates 74 flux/flux-derived from four adjacent current-diagnostic calls, excludes five regular-grid/analytic and pre-masked controls with reasons, flags four serialized-raster calls whose provenance is unknown rather than counting them, and closes with an AST-plus-geometry guard proposal and nine disjoint repair batches whose subtotals sum to 78 (12+8+18+15+7+5+3+5+5). It is complete for the inventory; the guard test itself is correctly deferred to a separately dispatched node.",
+    "scope_discipline": "the node edited no source and produced no commit; it wrote only its granted report path (orientation_write_paths = the crew reports md) plus the run-directory evidence logs, and the reviewed worktree is clean (`git -C fsa-renderer-call-sites-inside-wall status --porcelain` -> empty). It touched no peer path, and the report is explicit that the proposed scan test and the regenerated figures are the next nodes' work, not this one's."
+  },
+  "node": "review-of-fsa-renderer-call-sites-inside-wall",
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261003T142831974130-fsa-renderer-call-sites-inside-wall (node fsa-renderer-call-sites-inside-wall, plan nova:figure-and-solver-audit section 3).\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the reviewed goal (the wall-painter followup's inventory remainder: list the renderer call sites that draw a scattered or hull-interpolated field outside nova.media without a wall mask) is met end to end: the report reproduces the open defect at a42dc665 (I verified the exact-mode figure leak by opening it), classifies 78 call expressions in 36 files into 17 direct Matplotlib and 61 raster-painter calls, separates 74 flux/flux-derived from four adjacent current-diagnostic calls, excludes five controls with reasons, flags four serialized-raster calls whose provenance is unknown, and closes with an AST-plus-geometry guard proposal and nine disjoint repair batches whose subtotals sum to 78.\n\nSCORE evidence: 18\nJUSTIFICATION evidence: the central claims reproduce against the reviewed source at a42dc665 and I re-derived them independently: plasma_cell_fixed_point_attribution.py:424 and :819 call draw_flux_contours with no wall=, sol_ledger_current_census.py:415 calls tricontour with no mask, my scan reproduced 16 raw tricontour calls and 52 draw_flux_contours-caller files, and the named figure visibly leaks. The positive controls verify (render.py:52, contour_tree_explanatory_figure.py:308/359, plasma_cell_trip_panels.py:406/417) and painter-refusal.log shows a real TypeError importing poloidal from the assigned worktree. Deductions: the visual sample is subjective (disclosed), and the aggregate scan logs enumerate no per-site list.\n\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: no source edited, no commit, writes limited to the granted report path and the run-directory logs, reviewed worktree clean, no peer path touched, and the guard test and figure regeneration are explicitly deferred to other nodes.\n\nSCORE durability: 16\nJUSTIFICATION durability: report, three logs and manifest are preserved and the revision is named in every header; the node adopted the coordinator's report-only ruling and passed check-manifest. But nothing is versioned: the report path is a non-Git crew directory, so the deliverable cannot be pinned to a42dc665 by a revision and a later batch cannot check what it closes against a fixed report.\n\nSCORE fit: 19\nJUSTIFICATION fit: a mechanism-named inventory with file:line call sites, a nine-batch table assigning disjoint file sets, and an explicit guard with named positive controls and a negative fixture; no forbidden symbols, no plan/ticket tokens in source (there is none). Minor: the batch table's role labels do not select one of the two guard variants.\n\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/fsa-renderer-call-sites-inside-wall.md:1 follow-on: the deliverable is not versioned (non-Git crew reports directory, no commit), so it is re-readable only by path and cannot be pinned to the reviewed revision.\n\nFINDING renderer-source-scan.log:8 follow-on: the red scan asserts REFUSAL total=78 but enumerates only two refusal lines, and no log preserves the per-site list of the 78, so the headline count cannot be reconciled from the named logs without re-deriving it.\n\nFINDING report.md:96 follow-on: the guard proposal offers a 74-call flux scan and a 78-call all-scattered scan without stating which variant a repair batch implements, so the batch scopes do not select a guard.\n",
+  "review_base_sha": "ce718d4d72522ac059927d722f27847755824439",
+  "review_run_id": "legacy-2ecf8c963cb7",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "reviewed_commit": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "reviewed_commit_count": 0,
+  "reviewed_head_sha": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "reviewed_run_id": "r-20261003T142831974130-fsa-renderer-call-sites-inside-wall",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-renderer-call-sites-inside-wall",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:05:00Z",
+  "total": 92
+}

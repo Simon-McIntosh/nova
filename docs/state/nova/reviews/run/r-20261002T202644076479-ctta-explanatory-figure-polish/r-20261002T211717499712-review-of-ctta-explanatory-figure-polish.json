@@ -1,0 +1,112 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "PYTHONPATH=<worktree> JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-polish/gate-after.log",
+    "revision": "11985735c020a39df74f76c75cbe6354e0e67d36 (worktree; committed as b03813fd668d0af7efccc91d371cb09f846ad7e2)"
+  },
+  "artifacts": [
+    "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.png (206978 bytes, < 300000 data-file cap)",
+    "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.svg (240569 bytes, < 300000 data-file cap)",
+    "docs/figures/contour-tree-topology-authority/explanatory/contour-tree-computed.json (receipt svg_sha256 211dc2f3e70814d16fcd87f82a7617bd2359c88f3872f190e9b465eeec825dca, independently recomputed and matched)",
+    "docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure-from-computed-tree.html",
+    "docs/evidence/fragments/contour-tree-topology-authority/ctta-explanatory-figure-polish.html",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T211717499712-review-of-ctta-explanatory-figure-polish/review-gate.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T211717499712-review-of-ctta-explanatory-figure-polish/review-negative-control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T211717499712-review-of-ctta-explanatory-figure-polish/review-stale-mutation.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T211717499712-review-of-ctta-explanatory-figure-polish/review-label-geometry.log"
+  ],
+  "baseline_suite": {
+    "command": "PYTHONPATH=<scratch-base>:<worktree> JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout 0 tests/test_contour_tree_explanatory_figure.py",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 6,
+    "failure_ids": [
+      "test_figure_draws_exactly_the_receipts_valid_nodes",
+      "test_committed_receipt_matches_the_computed_tree",
+      "test_committed_figure_files_exist",
+      "test_graph_omits_the_virtual_outside_sentinel",
+      "test_poloidal_panel_draws_no_lines_between_nodes",
+      "test_graph_labels_do_not_collide"
+    ],
+    "log_path": "docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-polish/base-arm.log",
+    "revision": "78e721dfb6e592658bb7c37b5183722fa183f4ea"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "b03813fd668d0af7efccc91d371cb09f846ad7e2"
+  ],
+  "completed_at": "2026-10-02T21:29:51.037Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T21:17:43Z",
+  "evidence_inputs": "Reviewed 11985735c020a39df74f76c75cbe6354e0e67d36..b03813fd668d0af7efccc91d371cb09f846ad7e2 (one commit, twelve paths, all six granted roots; reviewed worktree clean at detached HEAD b03813fd6). Re-ran the figure gate in a git-extracted scratch tree at the reviewed head: 6 passed EXIT=0 (95.83s). Re-ran the declared negative control (CONTOUR_TREE_FIGURE_FIXED_LABELS=1 on test_graph_labels_do_not_collide): 1 failed EXIT=1 with the exact assertion graph labels 'wall maximum' and 'outside (wall contact)' overlap. Reproduced the stale-figure mutation (one altered SVG coordinate): test_committed_figure_files_exist 1 failed EXIT=1. Independently recomputed the receipt svg_sha256 with a separate implementation and matched the committed bytes. Independently printed the head label boxes: wall maximum y=[379.8,405.2], outside y=[419.8,445.2], all six label pairs non-overlapping; at the fixed offset both sat at y=[422.97,448.36] and overlapped. added_failure_count/added_failure_ids derived from the reviewed run's own arms: baseline 6 failed, after 0 failed, so no added failures. The base arm fails all six through the merge-break KeyError (build_state), so the collision guard's own red is carried by the FIXED_LABELS control, not the base arm.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_explanatory_figure.py",
+      "line": 81,
+      "severity": "follow-on",
+      "text": "test_committed_receipt_matches_the_computed_tree pins node_count, edge_count, the node-minus-edge invariant and drawn_carrier_vertices, but not the receipt's caption. The caption carries the figure's numeric claims (13 nodes, 12 edges, 5 piecewise-linear extrema: 1 maximum and 4 minima, 5 further saddles, plus the outside node), and it is not drawn onto the figure (main() prints it and stores it in the receipt but never renders it), so the svg_sha256 guard cannot cover it either. A stale or hand-edited caption passes all six guards. Assert payload['caption'] == figure._caption(figure.build_state()) to pin the text the node exists to correct."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/ctta-explanatory-figure-polish/gate-after.log",
+      "line": "after_suite.revision",
+      "severity": "follow-on",
+      "text": "The reviewed manifest records after_suite.revision as the prose string 'worktree at 11985735c with the change now committed as b03813fd6' rather than a single resolvable revision. The log header names 11985735c (the base), and the change was uncommitted when the gate ran, so neither the record nor the log names the tree the passing run actually exercised. A later reader cannot resolve the after-arm revision from the record alone. Record the head sha once committed, or run the after arm after the commit."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's baseline and after arms are a guard-fired pair, not a pre-change regression baseline: the base arm runs the NEW test file against the base figure module (78e721dfb) and fails all six tests through build_state KeyError: 3 (the merge break the node repairs), so it does not by itself show the collision guard detecting a collision. The collision guard's red is demonstrated separately by the FIXED_LABELS control, which I reproduced (1 failed EXIT=1, exact overlap assertion). added_failure_count=0 and added_failure_ids=[] are derived as set(after.failure_ids) - set(baseline.failure_ids) = {} with after.failure_ids empty.",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "One commit, conventional subject and explanatory body, no AI trailer, no plan/version identifiers. Base-to-head name-status diff touches only the six granted roots: benchmarks/contour_tree_explanatory_figure.py, tests/test_contour_tree_explanatory_figure.py, the explanatory figure directory (png/svg/json), the two evidence fragments and the run-log directory. No product code outside the grant changed.",
+    "done_when": "All three required artefacts are present and independently reproduced: (1) head labels are collision-free and the FIXED_LABELS control is red with the exact overlap assertion; (2) test_committed_figure_files_exist fails on a one-coordinate SVG mutation and the receipt digest recomputes to the committed bytes; (3) the from-computed-tree fragment is updated to the delivered figure (no dashed poloidal edges) and the current six-guard set. Both committed figure files stay under the 300000-byte data-file cap (png 206978, svg 240569).",
+    "goal": "The dispatch goal is met: the private-region wall-maximum and outside-node labels no longer stack, and the word maximum is readable at the head placement (wall maximum y=[379.8,405.2], outside y=[419.8,445.2]). The caption correction (the outside node is typed CRITICAL_TYPE_OUTSIDE, so it is reported separately from the five piecewise-linear extrema) matches the merged tree's typing and the fragment's arithmetic (2 analytic nulls + 10 piecewise-linear critical points + 1 outside = 13 nodes).",
+    "manifest": "The reviewed manifest is complete, status complete, names the commit and all twelve changed paths, both arms, the declared negative control, no blockers. Its after_suite.revision is a prose string rather than a resolvable sha.",
+    "write_paths": "All twelve changed paths lie inside the six granted roots; the concurrent node ctta-sweep-cost-on-carrier-size's paths (nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py, benchmarks/contour_tree_brute_force.py) were not touched. The reviewed worktree is clean at b03813fd6."
+  },
+  "justifications": {
+    "durability": "The change is a single committed, clean revision (b03813fd6) with two committed, falsifiable guards (label-collision bounding-box test; SVG-vs-receipt-digest test), four committed logs including the base arm and two mutations, and two updated evidence fragments. Weaknesses: the receipt's caption text is not pinned by any guard (a caption edit passes), and the after arm's revision is recorded as prose. The commit is a detached HEAD and unpushed by design (the orchestrator owns the merge), which is the fleet contract.",
+    "evidence": "Every quantitative claim was independently reproduced: gate 6 passed EXIT=0 in a scratch tree at the reviewed head; negative control 1 failed EXIT=1 with the exact 'wall maximum'/'outside (wall contact)' overlap; stale-mutation 1 failed EXIT=1; receipt svg_sha256 matched a separate recomputation (211dc2f3...5dca); head label boxes reproduced non-overlapping and the fixed-offset boxes reproduced overlapping; base-arm summary (6 failed) matches the manifest failure_ids. Both committed figures are under the 300000-byte cap.",
+    "fit": "The renderer keeps using the nova.media ink painters (despined panels, contour levels, draw_nulls, direct labels), the fragment uses project-absolute src, deps are unchanged, and the commit follows the conventional subject+body grammar with no attribution. The added placement search is display-coordinate and located in the figure module, consistent with the repository's figure rules.",
+    "goal_fidelity": "The requested polish is delivered and visually verified: the two same-flux labels separate at the head and collide at the fixed offset. The incidental merge-break repair was necessary to make the artefact regenerate, is disclosed in the commit and fragment, and stays inside the granted file. Nothing beyond the goal (no new figure, no evidence prose beyond the named fragment) was added.",
+    "scope_discipline": "All twelve changed paths fall inside the six granted roots; no plan, sprint, shared index, or concurrent peer path was modified; the worktree is clean; the run's own manifest declares no leftover work."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: 11985735c020a39df74f76c75cbe6354e0e67d36\nREVIEWED_HEAD_SHA: b03813fd668d0af7efccc91d371cb09f846ad7e2\nVERDICT: pass\nSCORE goal_fidelity: 19\nSCORE evidence: 19\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 18\nCHECK: re-ran gate 6 passed EXIT=0; negative control 1 failed EXIT=1 (exact overlap); stale mutation 1 failed EXIT=1; receipt svg_sha256 independently recomputed; label boxes independently reproduced.\nFINDING follow-on: receipt caption text is not pinned by any guard.\nFINDING follow-on: after_suite.revision recorded as prose, not a resolvable sha.\nNOTE: base arm fails all six through the merge-break KeyError, so the collision guard's red is carried by the FIXED_LABELS control.\nADDED_FAILURE_COUNT: 0\nADDED_FAILURE_IDS: []",
+  "review_base_sha": "d0ff3101933508ffaaa758c02f46b596a42016c5",
+  "review_run_id": "r-20261002T211717499712-review-of-ctta-explanatory-figure-polish",
+  "reviewed_base_sha": "11985735c020a39df74f76c75cbe6354e0e67d36",
+  "reviewed_commit": "b03813fd668d0af7efccc91d371cb09f846ad7e2",
+  "reviewed_head_sha": "b03813fd668d0af7efccc91d371cb09f846ad7e2",
+  "reviewed_revision": "b03813fd668d0af7efccc91d371cb09f846ad7e2",
+  "reviewed_run_id": "r-20261002T202644076479-ctta-explanatory-figure-polish",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-explanatory-figure-polish",
+  "reviewer_node": "review-of-ctta-explanatory-figure-polish",
+  "reviewer_run_id": "r-20261002T211717499712-review-of-ctta-explanatory-figure-polish",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T21:31:00+00:00",
+  "total": 93,
+  "verdict": "pass"
+}

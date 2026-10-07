@@ -1,0 +1,92 @@
+{
+  "absent": [
+    "no pytest suite arm exists for this node: the reviewed run declared baseline_suite=null and after_suite=null, and its change touches a tests/ file plus docs artifacts, with the benchmark left byte-identical",
+    "render()'s default draw_order (benchmarks/plasma_cell_terminal_state.py line 307) and the argparse default (line 596) are not exercised by the guard: the test passes draw_order explicitly from its own hardcoded constant, so a change to the committed default would not fail the test"
+  ],
+  "absent_items": [
+    {
+      "disposition": "follow-on: the guard implements the follow-on's literal spec (render with the committed order, red when reversed), but hardcodes COMMITTED_DRAW_ORDER='reference-last' in the test rather than reading render's default, so the default value itself is not defended and the constant can drift from the source default.",
+      "item": "an assertion that the committed default (render default and --draw-order default) is reference-last"
+    },
+    {
+      "disposition": "out of scope for this node as declared: the manifest states the guard asserts only the analytic panel (census panels[0]) and the arm panels are not covered. On case 0 the committed census reads (674,88) for panels[1] and panels[2], left unasserted.",
+      "item": "an assertion on the arm panels (census panels[1] and panels[2], columns 1 and 2)"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "3a28b398cb83c7b2128fae9d551e6776b009d596",
+    "8c81f9a41df7cc43c94651b02729fe6bdb221702",
+    "8b39a96f2c090b1bef3bb55f3e01020f8f9049f4",
+    "b344cbbe484ac0693337cb2e49fc06a7629eacff"
+  ],
+  "completed_at": "2026-10-02T09:02:57.285Z",
+  "dispatched_at": "2026-10-02T08:33:16Z",
+  "findings": [
+    {
+      "file": "tests/test_plasma_cell_terminal_state_draw_order.py",
+      "line": "28",
+      "severity": "follow-on",
+      "text": "follow-on: the guard passes draw_order explicitly to render() from a test-local constant COMMITTED_DRAW_ORDER='reference-last' (line 24) and never reads render's default (benchmarks/plasma_cell_terminal_state.py line 307) or the argparse default (line 596). The prior review's concern was that a future edit to render()'s default would not fail any test; this guard closes the analytic-column-branch path (the negative control reddens it) but not the default path. A change of the source default to panel-last would leave the test green while the committed CLI figure overpainted. Read the default from the benchmark (or assert it equals the constant) so the two cannot drift."
+    },
+    {
+      "file": "tests/test_plasma_cell_terminal_state_draw_order.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the assertion covers only panels[0] (the analytic panel). The arm panels carry panel-state markers that legitimately differ in position from the reference set, and the committed census for case 0 reads 88 panel-state pixels on panels[1] and panels[2]; those are unasserted. If the node's subject is 'the analytic panel is not overpainted', this is correctly scoped, but a regression on the arm columns would be undetected here."
+    },
+    {
+      "file": "tests/test_plasma_cell_terminal_state_draw_order.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's supervisor record shows exit_code 137 (SIGKILL) with ended_during 'working', while its manifest reads status complete and its worktree is clean at the reviewed head. The kill landed after the manifest and all three commits were written, so no work was lost, but the run has no clean terminal exit record; a reader reasoning from exit_status would misclassify a complete node."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "gate_arms_note": "the reviewed run declared neither baseline_suite nor after_suite (both null in its manifest and in its machine classification record), so it produced no suite arms from which any failure id could be added; added_failure_count is 0 and added_failure_ids is empty by that absence, not by a measured zero. The node's gate is a single pytest that re-renders the committed terminal-state figure from its committed receipt with no solve, not a before/after suite pair, so no suite result is claimed for the node itself.",
+  "notes": "The node closes the follow-on the prior terminal-state panel-markers review recorded: it adds the missing automated guard around the analytic-panel marker draw order. The guard is a genuine fixpoint rather than a reimplementation - benchmarks/plasma_cell_terminal_state.py is byte-identical at base, at head, and at main HEAD, so the node added only the test and its records. This review reproduced both arms independently (module resolution confirmed against the reviewed worktree), and the two arms' disagreement on the same committed receipt is itself the proof that the asserted census comes from the render rather than the committed census key. Scores: goal_fidelity 20 (the follow-on's literal spec is implemented as written), evidence 19 (committed, header-stamped logs reproduced value-for-value with a positive control and a real red negative control; held below full by the run's SIGKILL terminal and the absence of any suite arm), fit 20 (tests/ + docs artifacts, CPU lane, no solve, no plan labels in code), durability 18 (the guard now runs in the default fast lane and reddens under the declared mutation, but the committed source default is unguarded and the arm panels are unasserted), scope_discipline 20 (diff is exactly the four declared paths).",
+  "plan": "nova:plasma-cell-read-fidelity",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "the reviewed head carries tests/test_plasma_cell_terminal_state_draw_order.py. This review re-ran its gate independently with cwd pinned to the reviewed worktree: reference-last gives the analytic panel reference_pixels=675 panel_pixels=0 (1 passed, EXIT=0); the declared negative control NOVA_TERMINAL_STATE_DRAW_ORDER=panel-last gives reference_pixels=300 panel_pixels=333 and the same assertion fails (1 failed, EXIT=1).",
+    "before": "at base 3a28b398c no test asserted the analytic-panel draw order: the committed order was defended only by render()'s default and a manual re-render, so a future edit to the analytic-column branch would raise no failure.",
+    "finding_id": "missing-automated-draw-order-guard (carried as follow-on from review of r-20261001T211604042696-pcrf-terminal-state-panel-markers, absent_item 'an automated test that render(draw_order=reference-last) leaves zero panel-state pixels on the analytic panel')"
+  },
+  "review_run_id": "r-20261002T083256879334-review-of-pcrf-terminal-state-draw-order-guard",
+  "reviewed_base_sha": "3a28b398cb83c7b2128fae9d551e6776b009d596",
+  "reviewed_head_sha": "b344cbbe484ac0693337cb2e49fc06a7629eacff",
+  "reviewed_revision": "b344cbbe484ac0693337cb2e49fc06a7629eacff",
+  "reviewed_run_id": "r-20261002T080417466107-pcrf-terminal-state-draw-order-guard",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-terminal-state-draw-order-guard",
+  "reviewer_node": "review-of-pcrf-terminal-state-draw-order-guard",
+  "reviewer_run_id": "r-20261002T083256879334-review-of-pcrf-terminal-state-draw-order-guard",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:28.747143+00:00",
+  "total": 97,
+  "verdict": "pass",
+  "verified_independently": [
+    "b344cbbe484ac0693337cb2e49fc06a7629eacff is the reviewed head of the reviewed worktree and its worktree is clean (git status --porcelain shows nothing but the .venv symlink)",
+    "base 3a28b398cb83c7b2128fae9d551e6776b009d596 is an ancestor of main; the head b344cbbe4 is not yet an ancestor of main, which is the expected pre-merge state",
+    "the base..head diff is exactly the four declared paths: tests/test_plasma_cell_terminal_state_draw_order.py, the two draw-order-guard gate logs, and the evidence fragment; benchmarks/plasma_cell_terminal_state.py is unchanged",
+    "benchmarks/plasma_cell_terminal_state.py is byte-identical across the reviewed worktree, the base revision 3a28b398c, and main HEAD (sha256 513c7342b563914ea6b3d3798d41479ca8a0df5385f42921a82becd643ef183b), so the node's 'benchmark unmodified' claim is true and render/_cluster_pixel_census were already callable",
+    "independently re-ran both arms with `env -C <reviewed-worktree>` so sys.path[0] resolves the reviewed worktree's benchmark; the imported module printed its __file__ under the reviewed worktree, and the arms reproduced value-for-value: reference-last reference_pixels=675 panel_pixels=0 EXIT=0; panel-last reference_pixels=300 panel_pixels=333 EXIT=1",
+    "census-derivation proof: the test reads one committed receipt (docs/figures/plasma-cell-read-fidelity/terminal-state-trip-arms.json) in both arms, and the two arms report different analytic-panel census values (675/0 vs 300/333); render() overwrites receipt['marker_pixel_census'] at line 433 before the test returns it, so the asserted census is derived from the render the test performs, not read from the committed census key",
+    "positive control on the absence: the guard asserts analytic['reference_pixels'] > 0 as well as == 0, and the run reports 675, so the census box holds detected known-present reference paint and panel_pixels==0 is a true absence rather than an empty box",
+    "the negative-control log ends with a bare EXIT=1 line and names the failing test id test_analytic_panel_reference_markers_not_overpainted, which the head arm does not fail",
+    "commit b344cbbe4 corrects the gate-log header revision from the base 3a28b398c (a revision at which the test does not exist) to 8b39a96f2 (a revision at which it does); the log's other header lines name the worktree, the absolute module path, and the command",
+    "all three node commits carry a non-empty body and no AI attribution (checked with a line-anchored trailer/prose grep)",
+    "the guard has no `slow` marker and lives under the configured testpaths, so it is collected by the repository's default fast lane (`-m 'not slow'`), not only by an explicit path"
+  ]
+}

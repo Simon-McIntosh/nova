@@ -1,0 +1,100 @@
+{
+  "absent": [
+    "The named runner _certificate_rows_as_processes was not exercised: it iterates only the four committed CERTIFICATE_ROWS of benchmarks/solve_program_size_gate.py and cannot carry the regeneration driver benchmarks/coil_edit_latency.py. The worker ran the regeneration through its own route under the same mapping sampler and recorded the deviation; this review treats the substitution as the faithful intent, not as a scope failure, but the follow-up's named mechanism remains unused.",
+    "The receipt-persisting step is not reproducible; see the evidence and durability findings."
+  ],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed run's own manifest declares no baseline_suite and no after_suite, and its manifest parses them as null (the commit 5da98592b changes no product source and no test file \u2014 only docs/figures and a docs/evidence fragment), so there are no base/head gate logs to difference, hence added_failure_count 0 and no added_failure_ids. The node's own done-when was a measurement receipt, not a suite delta; the reviewed run's two gate logs are the H200 and titan row logs, which carry no pytest summary line.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-regeneration-row.json: rows[0] completed true, edit_count 20, peak_maps 3538, max_map_count 1048576, solve_wall_milliseconds 165227.78, compile_wall_milliseconds 4752.51, exit_code 2, probe_wrapper_exit 2",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-latency.json: measurement_state complete, verdict FAIL, 20 edits summing solve wall 165227.781528607, runtime.host 98dci4-gpu-0003, scheduler.job_id 1280643",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-regeneration-probe.json: samples_written 735, peak_maps 3538, peak_sample maps 3538 (last_sample maps 2759), max_map_count 1048576",
+    "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/titan/coil-edit-regeneration-row.json: rows[0] completed true, edit_count 20, peak_maps 3294, max_map_count 65530, solve_wall_milliseconds 261718.71"
+  ],
+  "commits_read": [
+    "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+    "5da98592b3365f836b00f948c29be8b7f0983d9b"
+  ],
+  "completed_at": "2026-10-03T15:41:31.996Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T15:26:58Z",
+  "evidence_inputs": "Plan nova:cpu-compile-abort \u00a72; follow-up f-cca-coil-edit-regeneration-row. Reviewed base a42dc665cf41a4a698ba95df16fee43cfe3c4a32, head 5da98592b3365f836b00f948c29be8b7f0983d9b (single commit). The regeneration row completes its twenty-edit sweep inside the one-program mapping envelope (peak 3538 maps against 17620 for the second load and a 1048576 kernel cap) and its terminal state is the driver's latency gate FAIL (median warm wall 1870 ms H200 / 2706 ms titan against a 100 ms target), so the mapping cap the plan targets is not what binds this row. Two follow-ons: the in-job merge emitted a zeroed receipt and the committed receipt came from an unlogged login re-run, and the run did not use the shared compilation-cache root. The named runner _certificate_rows_as_processes was not exercised (recorded deviation).",
+  "evidence_record": "Independent review of r-20261003T142906581394-cca-coil-edit-regeneration-row at head 5da98592b (base a42dc665). The regeneration row is genuinely measured: driver receipt from H200 job 1280643 with 20 edits summing to the merged receipt's solve wall; probe positive control 735 samples peak 3538 maps. The mapping-cap conclusion (completes inside the one-program envelope; latency FAIL is the binding verdict) is corroborated. Two defects carried as follow-ons: the committed merged receipt was assembled by an unlogged login-node MERGE_ONLY re-run because the job's own merge read a zeroed driver receipt (log line 70), and the compile component was measured without the shared compilation-cache root.",
+  "failure_attribution": null,
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T142906581394-cca-coil-edit-regeneration-row/coil-edit-regen-row-1280643.log",
+      "line": "70",
+      "severity": "follow-on",
+      "text": "The sbatch job's own merge step printed ROW_RECEIPT with edit_count 0 and solve_wall_milliseconds 0 even though the same job's probe summary read peak_maps 3538, so the driver receipt was unreadable to run_coil_edit_row.py at that moment; the committed merged receipt (edit_count 20, solve_wall 165227.78) was instead produced by a separate login-node `MERGE_ONLY=1 ... run_coil_edit_row.py` re-run shown in the worker stream. Fix the in-job read so the job's own merge produces the receipt, or commit the merge driver so the regeneration is reproducible; either way the report and manifest should not attribute the committed receipt to job 1280643. The underlying measurement is genuine and reconciles with the driver receipt, so this is a provenance defect, not a fabricated result."
+    },
+    {
+      "file": "docs/figures/cpu-compile-abort/coil-edit-regeneration-row/coil-edit-latency.json",
+      "line": "runtime",
+      "severity": "follow-on",
+      "text": "The driver ran without the lane's shared compilation cache: the H200 log shows 'Error writing persistent compilation cache entry ... /home/ITER/mcintos/.cache/nova/jax-compilation/...' for jit_solve, jit_scan and friends, so NOVA_COMPILATION_CACHE_ROOT was unset and the first edit compiled cold (138012 ms). The solve wall is unaffected, but the compile wall (4752.51 ms) and the cache-miss counts were measured against the per-user location rather than the published pre-warm the plan's \u00a72 cache remedy depends on; a rerun that sets the shared root would record whether the lane's own programs were covered."
+    }
+  ],
+  "follow_ons": [
+    "Fix run_coil_edit_row.py's in-job read so the sbatch job produces the committed receipt, or commit the merge driver and both submit scripts so the receipt is reproducible; and correct the report/manifest attribution of the committed receipt to job 1280643.",
+    "Re-run the regeneration driver with NOVA_COMPILATION_CACHE_ROOT set to the published pre-warm root so the compile wall and cache-miss counts are measured against the lane's shared cache.",
+    "Settle the plan-level mismatch the manifest raises: either place the coil-edit regeneration inside the certificate-row mechanism or have the follow-up name its own run route."
+  ],
+  "gate_arms_note": "No readable reviewed-run baseline_suite/after_suite pair exists: classification.json parses baseline_suite=null and after_suite=null and the manifest omits both. Reviewed gate logs: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T142906581394-cca-coil-edit-regeneration-row/coil-edit-regen-row-1280643.log (H200, job 1280643) and coil-edit-regen-row-titan-1280646.log (titan, job 1280646); neither is a test suite. This review independently reconciled the committed merged receipt against the genuine driver receipt (solve walls sum to 165227.781528607) and confirmed the probe sampler saw the process (735 samples, peak 3538 maps).",
+  "item_verdicts": {
+    "done_when": "partially met: every datum the follow-up names is recorded, but the record is not reproducible from a logged command and the job that supposedly produced the committed receipt emitted a zeroed one (see evidence finding) .",
+    "goal": "met in substance: the row ran once in one H200 job (1280643) under the mapping sampler and a certificate-shaped per-row receipt was persisted beside the other rows with a receipt-relative state path and both exit fields (exit_code 2, probe_wrapper_exit 2), recording completed true, edit_count 20, peak_maps 3538 and solve_wall_milliseconds 165227.78.",
+    "manifest": "met: status is complete, commits and changed_paths are explicit, the two gate logs (H200 and titan) are named, and the SPEC deviation is stated; baseline_suite and after_suite are null because the commit changes no product source and no test file.",
+    "receipt": "defective provenance: the committed merged receipt reconciles with the genuine driver receipt coil-edit-latency.json, but was assembled by an unlogged login-node MERGE_ONLY re-run rather than by the sbatch job whose log prints a zeroed ROW_RECEIPT.",
+    "rung": "met: H200 job 1280643 is the named rung and the measurement of record; titan job 1280646 corroborates on the P100 rung; the driver receipt records runtime.host 98dci4-gpu-0003, device NVIDIA H200 NVL, and scheduler job_id 1280643.",
+    "write_paths": "met: the single commit touches only docs/figures/cpu-compile-abort/coil-edit-regeneration-row/** and docs/evidence/fragments/cpu-compile-abort/cca-coil-edit-regeneration-row.html; no file outside the declared fence occurs in git diff --name-status a42dc665..5da98592b."
+  },
+  "justifications": {
+    "durability": "One commit with a conventional subject ('feat(evidence): land coil-edit regeneration row receipt'), a substantive body, and no AI attribution trailer; the gitignored PNGs and the evidence fragment are committed, and the figures are force-added. Held to 12 because the record does not reproduce: the merge driver run_coil_edit_row.py and both submit scripts exist only in the crew run directory and are committed nowhere, so the receipt cannot be regenerated from the repository, and the receipt the job itself emitted (edit_count 0) contradicts the committed one, so a later reader cannot reconcile the persisted receipt with the job it names.",
+    "evidence": "The measurement is genuine and reconciles first-hand: the driver receipt coil-edit-latency.json is H200 output (runtime.host 98dci4-gpu-0003.iter.org, device NVIDIA H200 NVL, runtime.jax 0.11.0, scheduler.job_id 1280643) with measurement_state complete, verdict FAIL, gates.exactly_twenty_edits_recorded true, and 20 edits whose solve_wall_milliseconds sum to 165227.781528607, equal to the merged receipt's value; the probe summary has 735 written samples with peak_sample maps 3538 and last_sample maps 2759 (a positive control that the sampler saw the process, not an empty column). Deduction against it: the committed merged receipt was not produced by the logged job. The H200 job log line 70 prints ROW_RECEIPT {\"compile_wall_milliseconds\": 0.0, \"completed\": false, \"edit_count\": 0, \"exit_code\": 2, \"peak_maps\": 3538, \"probe_wrapper_exit\": 2, \"solve_wall_milliseconds\": 0} while the probe summary in the same job read peak_maps 3538, so at the job's own merge step the driver receipt was unreadable and the job wrote a zeroed receipt; the worker's stream then shows a login-node command `MERGE_ONLY=1 ROW_RUNG=h200 /home/ITER/mcintos/Code/nova/.venv/bin/python run_coil_edit_row.py 2>&1 | tail -3` that regenerated the committed receipt from the persisted driver receipt. The committed headline numbers are therefore correct, but the step that recorded them is unlogged and not reproducible from the job, and the report's claim that job 1280643 produced the committed receipt is inaccurate. Held to 14 also because the compile component was measured without the lane's shared cache: the log shows repeated 'Error writing persistent compilation cache entry ... /home/ITER/mcintos/.cache/nova/jax-compilation/...' warnings, so NOVA_COMPILATION_CACHE_ROOT was unset and the first edit compiled cold (138012 ms) rather than reading the published pre-warm.",
+    "fit": "The receipt is certificate-shaped (schema nova.coil-edit-regeneration-row and nova.coil-edit-regeneration-row-receipt) and sits beside the certificate rows under docs/figures/cpu-compile-abort/, matching the per-row receipt idiom the plan's earlier nodes established, with a receipt-relative state path and both exit fields as the receipt-hygiene node required. The figures obey the flux-map rules: the converged-vs-nonconverged panel draws line contours on stated levels, the wall, and both the magnetic axis triangle and the admitted saddle. Held at 16 because the gap between the follow-up's named mechanism and the route actually taken is a fit question the plan leaves open \u2014 the regeneration should either be placed in the certificate-row mechanism or the follow-up should name its own route.",
+    "goal_fidelity": "The follow-up f-cca-coil-edit-regeneration-row asked to run the row once through _certificate_rows_as_processes, persist its receipt beside the other rows with a receipt-relative state path and both exit fields, and record whether it completes, its mapping count at the program load, and its solve wall. Every requested datum is present in the committed receipt rows[0]: state_path is receipt-relative (panel-states.npz), exit_code and probe_wrapper_exit are both 2, completed is true, edit_count is 20, peak_maps is 3538 and solve_wall_milliseconds is 165227.78. The named runner was not exercised because _certificate_rows_as_processes iterates only the four committed CERTIFICATE_ROWS and cannot carry the separate driver benchmarks/coil_edit_latency.py; the deviation is stated in the report, the manifest and the evidence fragment, and the substitution used the same sampler (benchmarks/compile_abort_probe.py) that produced the certificate rows. Held below 20 because the SPEC was exact and the named mechanism, not merely its intent, is the thing the plan asked for.",
+    "scope_discipline": "The single commit 5da98592b changes only the declared write paths: git diff --name-status a42dc665..5da98592b lists 21 added files, all under docs/figures/cpu-compile-abort/coil-edit-regeneration-row/ and docs/evidence/fragments/cpu-compile-abort/. No file outside the fence was written, no plan or sprint state file was mutated by this run, and the run_coil_edit_row.py and .sbatch drivers live in the crew run directory rather than the repository. The login-node MERGE_ONLY re-run wrote the merged receipt inside the declared figure directory, still within the grant. Held at 19, not 20, only because that re-run was executed from the shared checkout's working tree rather than through a logged job."
+  },
+  "plan": "nova:cpu-compile-abort",
+  "project": "nova",
+  "raw_text": "VERDICT pass-with-follow-on: 77/100 at reviewed head 5da98592b3365f836b00f948c29be8b7f0983d9b (base a42dc665cf41a4a698ba95df16fee43cfe3c4a32). The coil-edit regeneration row completes twenty edits inside the one-program mapping envelope (peak_maps 3538) and fails on the driver latency gate, not the mapping cap. SCORE goal_fidelity: 16. SCORE evidence: 14. SCORE scope_discipline: 19. SCORE durability: 12. SCORE fit: 16. FINDING coil-edit-regen-row-1280643.log:70 the job's own ROW_RECEIPT printed edit_count 0 while the same job's probe read peak_maps 3538; the committed receipt came from an unlogged login MERGE_ONLY re-run. FINDING coil-edit-latency.json the run did not set NOVA_COMPILATION_CACHE_ROOT, so the first edit compiled cold. FOLLOW-ON: make the in-job merge reproducible and fix the receipt attribution. FOLLOW-ON: rerun with the shared cache root. FOLLOW-ON: settle the named-runner mismatch.",
+  "review_base_sha": "181ceafd0fab0654daaaac92bfa10c8d4b549f53",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261003T152641986937-review-of-cca-coil-edit-regeneration-row",
+  "reviewed_base_sha": "a42dc665cf41a4a698ba95df16fee43cfe3c4a32",
+  "reviewed_commit": "5da98592b3365f836b00f948c29be8b7f0983d9b",
+  "reviewed_head_sha": "5da98592b3365f836b00f948c29be8b7f0983d9b",
+  "reviewed_revision": "5da98592b3365f836b00f948c29be8b7f0983d9b",
+  "reviewed_run_id": "r-20261003T142906581394-cca-coil-edit-regeneration-row",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cca-coil-edit-regeneration-row",
+  "reviewer_node": "review-of-cca-coil-edit-regeneration-row",
+  "reviewer_run_id": "r-20261003T152641986937-review-of-cca-coil-edit-regeneration-row",
+  "reviewing_run_id": "r-20261003T152641986937-review-of-cca-coil-edit-regeneration-row",
+  "scores": {
+    "durability": 12,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "scope_discipline": 19
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T142906581394-cca-coil-edit-regeneration-row/coil-edit-regen-row-1280643.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T142906581394-cca-coil-edit-regeneration-row/coil-edit-regen-row-titan-1280646.log"
+  ],
+  "tests": "none: the reviewed run's deliverable is a persisted measurement receipt, not a test change; this review's check was reconciliation of the committed receipt against the driver receipt and the probe summary at head 5da98592b",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T15:38:23Z",
+  "total": 77,
+  "verdict": "pass-with-follow-on"
+}

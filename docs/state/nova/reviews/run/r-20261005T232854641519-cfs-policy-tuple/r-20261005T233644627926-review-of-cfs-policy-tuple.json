@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed manifest's recorded baseline_suite and after_suite failure_ids: after (3 failed) minus baseline (4 failed) removes ['tests/test_forward_solve_request.py::test_default_request_schema_resolves_from_the_installed_version_table'] and adds none. The store's log-level reader (annotate_review_of_run) disagrees and returns 3, because the baseline arm ran a renamed scratch copy whose node ids reduce against the worktree measurement_cwd and never match the head arm's ids; that reader would also cap this review's total at 5.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-05T23:45:20.128Z",
+  "decision": "changes-requested",
+  "dispatched_at": "2026-10-05T23:36:58Z",
+  "evidence": {
+    "after_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T232854641519-cfs-policy-tuple/cfs-policy-tuple-gate.log",
+    "annotate_added_failure_count": 3,
+    "baseline_suite_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T232854641519-cfs-policy-tuple/cfs-policy-tuple-baseline.log",
+    "changed_path_count": 2,
+    "live_plan_path": "/home/ITER/mcintos/Code/nova/docs/plans/converged-forward-solve.html",
+    "negative_control_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T232854641519-cfs-policy-tuple/cfs-policy-tuple-negative-control.log",
+    "reviewed_commits": [
+      "f92420d93521d4691a3ceb78d55be96b8ce77fc9"
+    ],
+    "reviewed_manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261005T232854641519-cfs-policy-tuple/manifest.md"
+  },
+  "findings": [
+    {
+      "file": "tests/test_forward_solve_request.py",
+      "line": "72",
+      "severity": "blocking",
+      "text": "blocking: The baseline arm runs a renamed scratch copy of the test (test_forward_solve_request_baseline.py under $TMPDIR) while the manifest names the reviewed worktree as measurement_cwd, so its FAILED node ids reduce to a scratch-relative path that can never equal the head arm's tests/test_forward_solve_request.py::... ids. Repro: annotate_review_of_run over this manifest returns added_failure_count 3 with the three shared ids, not the zero the manifest's own failure_ids give, and it then caps the review total at ADDED_FAILURES_TOTAL_CAP (5), overriding the reviewer's score. Re-run the baseline arm against the committed file at the base revision using the same module path (or record the arm's own directory) so the two arms compare id-for-id."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-policy-tuple.html",
+      "line": "9",
+      "severity": "follow-on",
+      "text": "follow-on: The fragment says \"Measured on the worktree at bf4151447\" while describing the head arm; cfs-policy-tuple-gate.log:1 records revision f92420d93521d4691a3ceb78d55be96b8ce77fc9, so the sentence conflates the base revision with the head measurement. Name each arm's revision explicitly so the fragment agrees with the log it cites."
+    },
+    {
+      "file": "tests/test_forward_solve_request.py",
+      "line": "72",
+      "severity": "follow-on",
+      "text": "follow-on: The three residual failures (test_request_path_is_bit_identical_and_defaults_round_trip_through_json, test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch, test_compilation_cache_receipt_observes_reuse_not_the_request_field) are AttributeError: '_LinearTarget' object has no attribute 'null' at nova/equilibrium/forward_operator.py:2599; they are present at baseline and outside this node's write scope, so they are preserved as follow-ons rather than treated as regressions of this change."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "The single-line tuple edit is the minimal correct repair: the dataclass carries topology: TopologyPolicy as its nineteenth field after compilation_cache, and the assertion compares field names in order, so appending \"topology\" in that position restores exact equality without weakening the guard.",
+    "done_when": "The node's own gate reproduces: head arm at f92420d93 passes test_default_request_schema_resolves_from_the_installed_version_table (3 failed, 2 passed), the three residuals are the pre-existing _LinearTarget 'null' AttributeError at nova/equilibrium/forward_operator.py:2599 present in the baseline arm too, and the negative control on the previous eighteen-field tuple fails with \"Left contains one more item: 'topology'\". The evidence fragment adds no figure, which is correct for a one-line tuple repair.",
+    "goal": "tests/test_forward_solve_request.py:45 now names the nineteen-field ForwardSolvePolicy on both sides of its exact-tuple assertion, integrating the request-surface repair the prior topology-read review assigned, with \"topology\" placed after \"compilation_cache\" exactly where nova/equilibrium/solve_request.py:322 declares it.",
+    "manifest": "The reviewed run's manifest.md is complete and internally consistent: baseline_suite (bf4151447, 4 failed 1 passed, completed true), after_suite (f92420d93, 3 failed 2 passed, completed true), readable log paths, negative_control_log and measurement fields named; its recorded failure_ids derive to zero added failures, but the baseline arm cannot be reconciled id-for-id by the store's own log reader.",
+    "write_paths": "The base-to-head diff touches exactly two paths, tests/test_forward_solve_request.py and docs/evidence/fragments/converged-forward-solve/cfs-policy-tuple.html, both inside the node's granted write paths; the test file changes one insertion and no deletions and no product source changed."
+  },
+  "justifications": {
+    "durability": "The exact-equality assertion provably detects the stale tuple, as the negative control demonstrates, though a future field addition will re-break it by design; that is the intended sensitivity of the guard rather than a defect.",
+    "evidence": "The head arm and the negative control are recorded to their log summaries with EXIT lines, but the baseline arm ran a renamed scratch copy so its node ids never match the head arm's, and the evidence fragment mislabels the head-arm measurement as taken at bf4151447 while the head gate log records revision f92420d93.",
+    "fit": "The commit follows the repository convention with a body stating why and a clean trailer, the edit reuses the existing test structure, and the evidence fragment follows the standard evidence-doc head.",
+    "goal_fidelity": "The change does precisely what the assigned repair requires and nothing more; the committed tuple matches the live dataclass field order verified at nova/equilibrium/solve_request.py:300-322.",
+    "reuse": "No new machinery was introduced; the repair restores the existing exact-tuple guard rather than adding a parallel assertion or a loosened comparison.",
+    "scope_discipline": "Exactly two granted paths changed, one insertion and zero deletions, no product source touched, and the three remaining file failures are correctly reported as follow-ons rather than triaged outside the write fence."
+  },
+  "limitations": [
+    "The store's canonical log reader (annotate_review_of_run) reports 3 added failures and caps the total at 5; the stored record derives 0 from the manifest's recorded failure_ids.",
+    "No merged-head suite was run; this reviews the node's own commit and its recorded arms only."
+  ],
+  "project": "nova",
+  "raw_text": "REVIEWED_BASE_SHA: bf4151447d0d56df5b52d2768ca72c289c8ec0ea\nREVIEWED_HEAD_SHA: f92420d93521d4691a3ceb78d55be96b8ce77fc9\nVERDICT goal: tests/test_forward_solve_request.py:45 now names the nineteen-field ForwardSolvePolicy on both sides of its exact-tuple assertion, integrating the request-surface repair the prior topology-read review assigned, with \"topology\" placed after \"compilation_cache\" exactly where nova/equilibrium/solve_request.py:322 declares it.\nVERDICT done_when: The node's own gate reproduces: head arm at f92420d93 passes test_default_request_schema_resolves_from_the_installed_version_table (3 failed, 2 passed), the three residuals are the pre-existing _LinearTarget 'null' AttributeError at nova/equilibrium/forward_operator.py:2599 present in the baseline arm too, and the negative control on the previous eighteen-field tuple fails with \"Left contains one more item: 'topology'\". The evidence fragment adds no figure, which is correct for a one-line tuple repair.\nVERDICT write_paths: The base-to-head diff touches exactly two paths, tests/test_forward_solve_request.py and docs/evidence/fragments/converged-forward-solve/cfs-policy-tuple.html, both inside the node's granted write paths; the test file changes one insertion and no deletions and no product source changed.\nVERDICT manifest: The reviewed run's manifest.md is complete and internally consistent: baseline_suite (bf4151447, 4 failed 1 passed, completed true), after_suite (f92420d93, 3 failed 2 passed, completed true), readable log paths, negative_control_log and measurement fields named; its recorded failure_ids derive to zero added failures, but the baseline arm cannot be reconciled id-for-id by the store's own log reader.\nVERDICT diff: The single-line tuple edit is the minimal correct repair: the dataclass carries topology: TopologyPolicy as its nineteenth field after compilation_cache, and the assertion compares field names in order, so appending \"topology\" in that position restores exact equality without weakening the guard.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: The change does precisely what the assigned repair requires and nothing more; the committed tuple matches the live dataclass field order verified at nova/equilibrium/solve_request.py:300-322.\nSCORE evidence: 15\nJUSTIFICATION evidence: The head arm and the negative control are recorded to their log summaries with EXIT lines, but the baseline arm ran a renamed scratch copy so its node ids never match the head arm's, and the evidence fragment mislabels the head-arm measurement as taken at bf4151447 while the head gate log records revision f92420d93.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: Exactly two granted paths changed, one insertion and zero deletions, no product source touched, and the three remaining file failures are correctly reported as follow-ons rather than triaged outside the write fence.\nSCORE durability: 19\nJUSTIFICATION durability: The exact-equality assertion provably detects the stale tuple, as the negative control demonstrates, though a future field addition will re-break it by design; that is the intended sensitivity of the guard rather than a defect.\nSCORE fit: 19\nJUSTIFICATION fit: The commit follows the repository convention with a body stating why and a clean trailer, the edit reuses the existing test structure, and the evidence fragment follows the standard evidence-doc head.\nSCORE reuse: 20\nJUSTIFICATION reuse: No new machinery was introduced; the repair restores the existing exact-tuple guard rather than adding a parallel assertion or a loosened comparison.\nFINDING tests/test_forward_solve_request.py:72 blocking: The baseline arm runs a renamed scratch copy of the test (test_forward_solve_request_baseline.py under $TMPDIR) while the manifest names the reviewed worktree as measurement_cwd, so its FAILED node ids reduce to a scratch-relative path that can never equal the head arm's tests/test_forward_solve_request.py::... ids. Repro: annotate_review_of_run over this manifest returns added_failure_count 3 with the three shared ids, not the zero the manifest's own failure_ids give, and it then caps the review total at ADDED_FAILURES_TOTAL_CAP (5), overriding the reviewer's score. Re-run the baseline arm against the committed file at the base revision using the same module path (or record the arm's own directory) so the two arms compare id-for-id.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-policy-tuple.html:9 follow-on: The fragment says \"Measured on the worktree at bf4151447\" while describing the head arm; cfs-policy-tuple-gate.log:1 records revision f92420d93521d4691a3ceb78d55be96b8ce77fc9, so the sentence conflates the base revision with the head measurement. Name each arm's revision explicitly so the fragment agrees with the log it cites.\nFINDING tests/test_forward_solve_request.py:72 follow-on: The three residual failures (test_request_path_is_bit_identical_and_defaults_round_trip_through_json, test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch, test_compilation_cache_receipt_observes_reuse_not_the_request_field) are AttributeError: '_LinearTarget' object has no attribute 'null' at nova/equilibrium/forward_operator.py:2599; they are present at baseline and outside this node's write scope, so they are preserved as follow-ons rather than treated as regressions of this change.",
+  "review_run_id": "r-20261005T233644627926-review-of-cfs-policy-tuple",
+  "review_scope": "One-line policy-tuple test repair assigned by the prior topology-read review; baseline evidence recording is the blocking issue.",
+  "reviewed_base_sha": "bf4151447d0d56df5b52d2768ca72c289c8ec0ea",
+  "reviewed_head_sha": "f92420d93521d4691a3ceb78d55be96b8ce77fc9",
+  "reviewed_run_id": "r-20261005T232854641519-cfs-policy-tuple",
+  "scores": {
+    "durability": 19,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-05T23:44:12.189359+00:00",
+  "total": 113
+}

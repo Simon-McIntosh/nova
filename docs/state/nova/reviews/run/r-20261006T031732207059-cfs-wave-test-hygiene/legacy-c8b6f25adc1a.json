@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 9,
+  "call_sites": [
+    "benchmarks/solovev_certificate.py:2240",
+    "benchmarks/solovev_certificate.py:2482",
+    "benchmarks/zero_residual_check.py:819",
+    "benchmarks/wholecell_rows_reposed_fixture.py:231",
+    "benchmarks/limited_row_shadow_census.py:328",
+    "benchmarks/exact_placement_discriminator.py:125",
+    "benchmarks/exact_clip_seed_amplitude.py:536",
+    "benchmarks/exact_clip_memory_scaling.py:274",
+    "benchmarks/net_current_scaling_census.py:445"
+  ],
+  "completed_at": "2026-10-06T03:53:09.584Z",
+  "dispatched_at": "2026-10-06T03:18:12Z",
+  "findings": [
+    {
+      "file": "tests/test_figure_panel_pin.py",
+      "line": "100",
+      "severity": "blocking",
+      "text": "blocking: benchmarks/solovev_certificate.py:2169 resolves the persisted panel under FIGURE_ROOT, but this module's private_root fixture (tests/test_figure_panel_pin.py:107) patches only certificate.ROOT, so three tests that passed at base now fail at head (test_two_renders_of_one_revision_move_the_container_and_not_the_panel, test_a_deliberately_altered_panel_does_not_satisfy_the_content_pin, test_the_render_stage_writes_into_the_served_figure_tree) and a plain run of the module writes panel.png/panel.svg into the tracked docs/figures/gs-absolute-accuracy/solovev tree \u2014 the defect class the node set out to remove, reintroduced in a module the node's gate never ran."
+    },
+    {
+      "file": "raster-head-alone.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the log the manifest cites as the head raster arm declares revision 18152a0d569d376ba65eba20bf172cc27ae4106f (the node base) at raster-head-alone.log:1 while the evidence fragment calls the same 1186.29 s arm 357e8231c, and the base arm raster-base-alone.log:1 ran at 7c4a76cafa41f4f5a4da06af19a0f0aac3271560 rather than the node base 18152a0d, so the 750.72/1186.29 s pair does not compare the node's base and head."
+    },
+    {
+      "file": "tests/test_equilibrium_diagnostics.py",
+      "line": "706",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt now writes to tmp_path, but no committed assertion fails if a tracked-path write is reintroduced, so the diagnostics half of the goal has no durable guard; the renderer half is guarded only indirectly by the certificate pin test, as the run's own negative control shows."
+    }
+  ],
+  "gate_arms_note": "The reviewed manifest carries both suite arms over the same three modules. baseline_suite revision 18152a0d569d376ba65eba20bf172cc27ae4106f exit 1 with failure ids tests/test_certificate_pin.py::test_pinned_certificate_retains_its_census_and_render_integrity and ::test_pinned_certificate_refuses_unqualified_production_rows (hygiene-gate-base.log: 2 failed, 3 passed); after_suite revision 357e8231c4872ce7be6487eafc67afbb2dc8ae45 exit 1 with failure id ::test_pinned_certificate_refuses_unqualified_production_rows (hygiene-gate-after.log: 1 failed, 4 passed). Added failures over the named logs are zero; the one remaining failure is pre-existing and unrelated (the pinned production receipt carries fifteen unqualified rows). The gate does not run tests/test_figure_panel_pin.py, which the change reddens by three tests.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 9 production call site(s)",
+    "diff": "read commit by commit against 18152a0d569d376ba65eba20bf172cc27ae4106f; 357e8231c changes benchmarks/solovev_certificate.py and tests/test_equilibrium_diagnostics.py (+16/-14), all inside scope, and 79b082527 adds the evidence fragment.",
+    "done_when": "the done-when requires the three named modules run in one process with git status clean and the pin test passing plus a negative control; hygiene-gate-after.log records 1 failed 4 passed with test_pinned_certificate_retains_its_census_and_render_integrity passing and hygiene-negative-control.log records the tracked PNG dirtied (EXIT=1), but the gate omits tests/test_figure_panel_pin.py, which the change breaks.",
+    "goal": "the goal names two figure-receipt tests and one raster timeout; tests/test_equilibrium_diagnostics.py:706 writes its receipt to tmp_path and benchmarks/solovev_certificate.py:2169 resolves a persisted panel under FIGURE_ROOT, so both named writers leave the tracked tree, and the raster timeout is reported as a concurrency artefact.",
+    "manifest": "read; it records status complete, commits 357e8231c4872ce7be6487eafc67afbb2dc8ae45 and 79b08252726938a494227fcaf369b2982d9935e6, both suite arms with module-qualified failure ids, six named logs and a negative-control path, but its raster head arm log names revision 18152a0d, not the head.",
+    "write_paths": "the manifest fences tests/test_equilibrium_diagnostics.py, tests/test_certificate_gate_live.py, benchmarks/solovev_certificate.py, the fragment and a figures directory; git diff 18152a0d569d376ba65eba20bf172cc27ae4106f..357e8231c4872ce7be6487eafc67afbb2dc8ae45 changes benchmarks/solovev_certificate.py and tests/test_equilibrium_diagnostics.py, all inside them."
+  },
+  "justifications": {
+    "durability": "the certificate pin test at tests/test_certificate_pin.py guards the renderer only indirectly (the run's negative control at hygiene-negative-control.log shows it fires when the tracked panel is rewritten), and tests/test_equilibrium_diagnostics.py:706 has no committed assertion that fails if a tracked-path receipt write returns.",
+    "evidence": "hygiene-gate-after.log records 1 failed 4 passed over the three named modules with a clean tracked tree and the pin test passing and hygiene-negative-control.log records the PNG dirtied (EXIT=1), but the gate omits tests/test_figure_panel_pin.py, where a base-vs-head reproduction shows three added failures.",
+    "fit": "benchmarks/solovev_certificate.py:2169 honours the module FIGURE_ROOT that benchmarks/exact_clip_memory_scaling.py:274 already overrides, and tests/test_equilibrium_diagnostics.py:706 uses the pytest tmp_path idiom, so the change follows the surrounding conventions.",
+    "goal_fidelity": "tests/test_equilibrium_diagnostics.py:706 writes to tmp_path and benchmarks/solovev_certificate.py:2169 honours FIGURE_ROOT, but the same resolution reddens tests/test_figure_panel_pin.py, so the goal to stop tests writing into tracked figure files is only partly met.",
+    "reuse": "`_figure_receipts` at benchmarks/solovev_certificate.py:1996 gained a keyword-only logical argument in place rather than a parallel helper, and `_render_persisted_row` reuses the existing FIGURE_ROOT owner, so no capability is forked.",
+    "scope_discipline": "git diff 18152a0d569d376ba65eba20bf172cc27ae4106f..357e8231c4872ce7be6487eafc67afbb2dc8ae45 touches only benchmarks/solovev_certificate.py and tests/test_equilibrium_diagnostics.py, both declared write paths, and edits no other file."
+  },
+  "node": "review-of-cfs-wave-test-hygiene",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: 18152a0d569d376ba65eba20bf172cc27ae4106f\nreviewed_head_sha: 79b08252726938a494227fcaf369b2982d9935e6\nVERDICT goal: the goal names two figure-receipt tests and one raster timeout; tests/test_equilibrium_diagnostics.py:706 writes its receipt to tmp_path and benchmarks/solovev_certificate.py:2169 resolves a persisted panel under FIGURE_ROOT, so both named writers leave the tracked tree, and the raster timeout is reported as a concurrency artefact.\nVERDICT done_when: the done_when requires the three named modules run in one process with git status clean and the pin test passing plus a negative control; hygiene-gate-after.log records 1 failed 4 passed with test_pinned_certificate_retains_its_census_and_render_integrity passing and hygiene-negative-control.log records the tracked PNG dirtied (EXIT=1), but the gate omits tests/test_figure_panel_pin.py, which the change breaks.\nVERDICT write_paths: the manifest fences tests/test_equilibrium_diagnostics.py, tests/test_certificate_gate_live.py, benchmarks/solovev_certificate.py, the fragment and a figures directory; git diff 18152a0d569d376ba65eba20bf172cc27ae4106f..357e8231c4872ce7be6487eafc67afbb2dc8ae45 changes benchmarks/solovev_certificate.py and tests/test_equilibrium_diagnostics.py, all inside them.\nVERDICT manifest: read; it records status complete, commits 357e8231c4872ce7be6487eafc67afbb2dc8ae45 and 79b08252726938a494227fcaf369b2982d9935e6, both suite arms with module-qualified failure ids, six named logs and a negative-control path, but its raster head arm log names revision 18152a0d, not the head.\nVERDICT diff: read commit by commit against 18152a0d569d376ba65eba20bf172cc27ae4106f; 357e8231c changes benchmarks/solovev_certificate.py and tests/test_equilibrium_diagnostics.py (+16/-14), all inside scope, and 79b082527 adds the evidence fragment.\nCALL_SITES: benchmarks/solovev_certificate.py:2240, benchmarks/solovev_certificate.py:2482, benchmarks/zero_residual_check.py:819, benchmarks/wholecell_rows_reposed_fixture.py:231, benchmarks/limited_row_shadow_census.py:328, benchmarks/exact_placement_discriminator.py:125, benchmarks/exact_clip_seed_amplitude.py:536, benchmarks/exact_clip_memory_scaling.py:274, benchmarks/net_current_scaling_census.py:445\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: tests/test_equilibrium_diagnostics.py:706 writes to tmp_path and benchmarks/solovev_certificate.py:2169 honours FIGURE_ROOT, but the same resolution reddens tests/test_figure_panel_pin.py, so the goal to stop tests writing into tracked figure files is only partly met.\nSCORE evidence: 13\nJUSTIFICATION evidence: hygiene-gate-after.log records 1 failed 4 passed over the three named modules with a clean tracked tree and the pin test passing and hygiene-negative-control.log records the PNG dirtied (EXIT=1), but the gate omits tests/test_figure_panel_pin.py, where a base-vs-head reproduction shows three added failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 18152a0d569d376ba65eba20bf172cc27ae4106f..357e8231c4872ce7be6487eafc67afbb2dc8ae45 touches only benchmarks/solovev_certificate.py and tests/test_equilibrium_diagnostics.py, both declared write paths, and edits no other file.\nSCORE durability: 10\nJUSTIFICATION durability: the certificate pin test at tests/test_certificate_pin.py guards the renderer only indirectly (the run's negative control at hygiene-negative-control.log shows it fires when the tracked panel is rewritten), and tests/test_equilibrium_diagnostics.py:706 has no committed assertion that fails if a tracked-path receipt write returns.\nSCORE fit: 16\nJUSTIFICATION fit: benchmarks/solovev_certificate.py:2169 honours the module FIGURE_ROOT that benchmarks/exact_clip_memory_scaling.py:274 already overrides, and tests/test_equilibrium_diagnostics.py:706 uses the pytest tmp_path idiom, so the change follows the surrounding conventions.\nSCORE reuse: 20\nJUSTIFICATION reuse: `_figure_receipts` at benchmarks/solovev_certificate.py:1996 gained a keyword-only logical argument in place rather than a parallel helper, and `_render_persisted_row` reuses the existing FIGURE_ROOT owner, so no capability is forked.\nFINDING tests/test_figure_panel_pin.py:100 blocking: benchmarks/solovev_certificate.py:2169 resolves the persisted panel under FIGURE_ROOT, but this module's private_root fixture (tests/test_figure_panel_pin.py:107) patches only certificate.ROOT, so three tests that passed at base now fail at head (test_two_renders_of_one_revision_move_the_container_and_not_the_panel, test_a_deliberately_altered_panel_does_not_satisfy_the_content_pin, test_the_render_stage_writes_into_the_served_figure_tree) and a plain run of the module writes panel.png/panel.svg into the tracked docs/figures/gs-absolute-accuracy/solovev tree, the defect class the node set out to remove, reintroduced in a module the node's gate never ran.\nFINDING raster-head-alone.log:1 follow-on: the log the manifest cites as the head raster arm declares revision 18152a0d569d376ba65eba20bf172cc27ae4106f (the node base) at raster-head-alone.log:1 while the evidence fragment calls the same 1186.29 s arm 357e8231c, and the base arm raster-base-alone.log:1 ran at 7c4a76cafa41f4f5a4da06af19a0f0aac3271560 rather than the node base 18152a0d, so the 750.72/1186.29 s pair does not compare the node's base and head.\nFINDING tests/test_equilibrium_diagnostics.py:706 follow-on: the receipt now writes to tmp_path, but no committed assertion fails if a tracked-path write is reintroduced, so the diagnostics half of the goal has no durable guard; the renderer half is guarded only indirectly by the certificate pin test, as the run's own negative control shows.\n",
+  "review_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "review_run_id": "legacy-c8b6f25adc1a",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "18152a0d569d376ba65eba20bf172cc27ae4106f",
+  "reviewed_commit": "79b08252726938a494227fcaf369b2982d9935e6",
+  "reviewed_head_sha": "79b08252726938a494227fcaf369b2982d9935e6",
+  "reviewed_run_id": "r-20261006T031732207059-cfs-wave-test-hygiene",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wave-test-hygiene",
+  "scores": {
+    "durability": 10,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T04:08:00.000000+00:00",
+  "total": 93
+}

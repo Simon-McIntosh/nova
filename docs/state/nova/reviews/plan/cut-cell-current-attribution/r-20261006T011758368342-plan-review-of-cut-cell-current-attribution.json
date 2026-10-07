@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:26:10.908Z",
+  "dispatched_at": "2026-10-06T01:18:14Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/separatrix_clip.py:335",
+      "id": "reuse_search-1",
+      "reason": "an implementing node reading \u00a73 would build or extend machinery that already exists and re-run a landed oracle; \u00a73 and \u00a77 must be collapsed to one gate that cites the receipt, or \u00a73 reduced to a pointer.",
+      "text": "\u00a73 proposes \"saddle vertex as a clip vertex, branch-paired chords, per-branch supports\" as a design to build, but the machinery is already on main: SaddleCellWedges (:335), padded_linear_current_moments (:378), _ordered_saddle_wedges (:1487, the branch pairing), traced_saddle_wedges (:2170) and the clip's saddle_vertex argument (separatrix_clip.py:933/1031/1156); \u00a77 itself records the same oracle as already landed (core-side current within 1e-13 of the analytic wedge integral at 110/300/500 cells) while \u00a73's done-when re-runs that oracle at 1e-6 and never cites the landing, so the two sections own the same gate and one of them re-runs delivered work",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/cut-cell-current-attribution.html:73",
+      "id": "reuse_search-2",
+      "reason": "\u00a78 dispatched as a merge would find nothing to merge and would produce its exact-clip tables over machinery already landed, so the section must be closed or repointed to the exact-clip tables alone, and \u00a75's held-stack premise is stale.",
+      "text": "\u00a75 states the \"held stacks\" 0372d3fc and 28a49bcb are \"neither merged nor discarded until \u00a72 lands\" and \u00a78:595's first action is \"Merge the held stacks 0372d3fc and 28a49bcb\", but both are already ancestors of main (`git merge-base --is-ancestor <sha> main` is true for each; 4551 commits behind main), and main's separatrix_clip.py already carries the arc_tracer/curve_evaluator ordered clip and forward_operator.py already carries the three-mode clip switch \u2014 the merge and the clip-default flip are done",
+      "type": "reuse_search",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "81f91e816b77a6fb5c37578eb0d45ab054610402c274adacda11c925a863ead8",
+  "plan_slug": "cut-cell-current-attribution",
+  "plan_version": 235,
+  "project": "nova",
+  "responses": {
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "nova-fd-decisions",
+      "reason": "Section 3 is deferred to converged-forward-solve section 3, whose booking takes saddle support from the null's normal form (lead ruling 2026-10-05); the 6cb5b3e25 decomposition showed the apex wedge does not move the diverted error, so SaddleCellWedges is not reused.",
+      "when": "2026-10-06T01:47:37.893449+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "nova-fd-decisions",
+      "reason": "",
+      "when": "2026-10-06T01:47:38.455084+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T011758368342-plan-review-of-cut-cell-current-attribution",
+  "reviewed_blob_sha": "c1bcf96fd7c0f43d3729aee957bdc444cba2129d",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the design extends existing deep modules (the clip in nova/equilibrium/separatrix_clip.py, the moment path in nova/equilibrium/clip_quadrature.py, _profile_support in nova/equilibrium/forward_operator.py) and keeps fixed-capacity padded shapes so no new wrapper surface is added.",
+    "duplicate_owner": "pass \u2014 the plan cites the owning documents by link (uniform-cell-clip-and-coupling owns the unified clip-and-moment path per \u00a74; null-identification-authority and plasma-cell-topology-authority own the reads) and does not fork placement, path resolution, scheduler queries or a state reader.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; the plan flips an existing internal mode switch (clip_mode \u2208 {chord, exact, chord_cells}, forward_operator.py:2705) and extends existing ledgers, adds no interface family, and \u00a72/\u00a74 name the chord clip's retirement.",
+    "reuse_search": "a finding \u2014 \u00a73 designs the saddle-wedge X-point clip and gives it an oracle gate, but that machinery (SaddleCellWedges, traced_saddle_wedges, _ordered_saddle_wedges, padded_linear_current_moments) already exists on main, and \u00a75/\u00a78 treat 0372d3fc and 28a49bcb as unmerged held stacks that are already ancestors of main.",
+    "thin_wrapper": "pass \u2014 \u00a77 wires the clip's existing saddle_vertex parameter (separatrix_clip.py:933/1031/1156) and \u00a72 rung A restores the existing traced_clip path; neither adds a parallel layer over the machinery."
+  },
+  "section_digests": {
+    "_document": "898b8d2636d6c5d74e4ce93991e1ea385eee3da7a6a444f42b1d617f2e565d23",
+    "c-run-r-20260918t133650330007-figure-recovery-stranded-worktrees-h": "f2ca5bab0a56eda6ce007eba1ace03fc18b92e9791126e7f2c6df9900ea8b13b",
+    "outboard-hole-booking-gate": "ad21f16e0c08776407c9bb087590244cde781fea6337ceb97142f2f241a59081",
+    "s-contract": "4f404edd71893da3bf01f4ba21a8602ad66f1ae6a5419054e6d6620fc0bc3168",
+    "s0": "94fd54ee6ddcae60d490a45b6e9605e4610175cdd41ebe4dcb8e844779f9d30c",
+    "s1": "1ae594eeccb3e9c258a1a026b84717472c27c9e46f7154a4a95ece542ad5e04a",
+    "s10": "312f359cb02c5156d5f721da9596d0fa34188dd5d29c922edd399e7dccf5f3b6",
+    "s11": "af9b6355dd6fabee60970c6b5b7e9d664ae4291fc357dbd0ec2182a858ab3329",
+    "s2": "013ff46ef64cfe94568fa375a3a9e3795f680ef56a67f4f8b80ac97f6ee4877e",
+    "s3": "f76a7acd3cc166f1aef9188eb52312ecf47c7cd7dc95fc2a9b1470fcde33acda",
+    "s4": "8507899810be7a005e33cdd600b3b55755bb4aea60e2c7138a035bc26643fdef",
+    "s5": "1e77d2d98bb305173977f11b5a9a13f9a1ab43b9c96248c1294046980a1794d5",
+    "s6": "7d6d9a6c7db609bc914e9814c2564420415b4f1789fe509c25ca244c802e2728",
+    "s7": "00a79376ac82488453506fa812e7bba5e1711278c79043a51ccd81581f2dcf60",
+    "s8": "aad27918778dd65a47e99942dcbe002e4f71282a17728055028f4be1a215cd59",
+    "s9": "e8a6ec8dea20becc61e6911153c607cc61f1433edfa2fee0d4d62e6bfaf78645"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:29:49.053983+00:00"
+}

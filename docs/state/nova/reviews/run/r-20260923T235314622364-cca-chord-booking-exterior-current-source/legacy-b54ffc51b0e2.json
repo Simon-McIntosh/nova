@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "30ff976f8bbc34f5fe06ce163faae8d1801fc32d",
+    "cfc94e41728dfff1de6cd8a59c6950a501eae749",
+    "283a2bc9a651060f82635763a62702eb78465011",
+    "4a9a3d3802cd2b2f4f46ed877dcdc8d17e91dbaa",
+    "e07af851b80b3a0c8ad9e5f0f8a02ac3bcd6f022",
+    "73708d4aaf49eb986cdbcc00279144129766280b",
+    "1109204d3d7a16aac142bb401585648199726792",
+    "1922127618d3c891fa6f79331db930739d57d669",
+    "21bc6d9ac41c42ca22f96f44ddef1f6fff12a73b",
+    "c75dac9a79cbd834e2ac7354f04c46e53507f112",
+    "4d8da5aaf8e62aaf5be7e873924addb7b22ecbfb",
+    "a7e334ca05dcaa4808cbe5dbc2ba437ec30cf3fa",
+    "b360956e025ad2b0ad65540783402f03169d2347",
+    "bae287a8be1177aabfc40cf9c6533ea848aa87ce",
+    "344884525015644db6dae2cf2aa18d37ad4375f7",
+    "b4589e1e428504928a4394dd64ac06faaffcb1e5",
+    "67e0a1c96e6d82b77648d30f94c896cb160e9fac",
+    "498e50f658226ef609693cd4c25887cef73f51bb"
+  ],
+  "completed_at": "",
+  "created_at": "2026-09-24T13:08:17.327620+00:00",
+  "dispatched_at": "",
+  "findings": [
+    {
+      "file": "docs/figures/cut-cell-current-attribution/chord-booking-trace/job.log",
+      "line": "1",
+      "text": "the committed log names only the script path, revision and device; the one-H200 reservation, --mem=64G, TMPDIR and uv-free payload the done_when requires are asserted in manifest.md and have no committed scheduler receipt beside report.json."
+    },
+    {
+      "file": "benchmarks/chord_booking_operation_trace.py",
+      "line": "450",
+      "text": "the positive control and the counterfactual assert run only inside a manually invoked evaluation script, so a regression in the traced claim would pass every automated lane."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the 18 commits commit by commit; 30ff976f8bbc34f5fe06ce163faae8d1801fc32d adds the driver, the last two change no benchmark code so the committed driver is the one that ran at b4589e1e4.",
+    "done_when": "the done_when numeric core is met and recorded - positive control max nonzero-cell relative error 2.274e-14 / 2.552e-15 against the archived booked currents, cell 64 at 550 A falling 43.153397908988666 -> 0 (fraction 0.0), map sup 0.007046062864364674 recorded, job.log committed, no nova/ file changed; the submission-shape claims rest on manifest prose.",
+    "goal": "read the source prompt goal and the live plan section; docs/figures/cut-cell-current-attribution/chord-booking-trace/report.json names \"local-quadratic pointwise confinement in _flux_selected_current_moments\" with source_reference nova/equilibrium/clip_quadrature.py:885 as the first stage that writes current for the exterior cells.",
+    "manifest": "read manifest.md; its commits, test_logs and artifacts agree with the row receipts and job.log, and its status: complete matches the landed worktree.",
+    "write_paths": "the diff from 1a6c3c519dd4ac02a4adb412d7126deb3fbad385 to 498e50f658226ef609693cd4c25887cef73f51bb touches 26 files, every one inside the five declared paths, with zero files under nova/."
+  },
+  "justifications": {
+    "durability": "the guards are asserts inside benchmarks/chord_booking_operation_trace.py:450 and benchmarks/chord_booking_operation_trace.py:531, which fire only when the benchmark is invoked by hand; no committed test fails if the benchmark or its counterfactual regresses.",
+    "evidence": "I confirmed the false-positive sets (2), (1, 12), (3, 7, 64), the ten largest separatrix-cut deficits per row, archived*moments*lambda identical to the base per-cell booked currents, and the counterfactual fraction 0.0; only the scheduler-shape claims lack a committed receipt.",
+    "fit": "the benchmark follows the sibling benchmarks/ idiom, calls configure_dtypes() before any jnp array at benchmarks/chord_booking_operation_trace.py:27, names no plan label, and its figure uses a project-absolute src.",
+    "goal_fidelity": "report.json names the operation and cites nova/equilibrium/clip_quadrature.py:885, and I re-read the base report docs/figures/cut-cell-current-attribution/diverted-chord-response/diverted-single-null-cells-500-chord.json to confirm cell 64 carries 43.153397908988666 A that the report reproduces.",
+    "scope_discipline": "all 26 changed files lie inside the declared paths, zero lie under nova/, and the plan and evidence records were appended (21/0 and 70/0 line deltas) rather than rewritten."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: read the source prompt goal and the live plan section; docs/figures/cut-cell-current-attribution/chord-booking-trace/report.json names \"local-quadratic pointwise confinement in _flux_selected_current_moments\" with source_reference nova/equilibrium/clip_quadrature.py:885 as the first stage that writes current for the exterior cells.\nVERDICT done_when: the done_when numeric core is met and recorded - positive control max nonzero-cell relative error 2.274e-14 / 4.636e-16 / 2.552e-15 against the archived booked currents, exterior cell 64 at 550 A falling 43.153397908988666 -> 0 (fraction 0.0), map sup 0.007046062864364674 recorded, job.log committed beside the report, and no nova/ file changed; the submission-shape claims (reservation, --mem, TMPDIR, shared interpreter, uv-free node) rest on manifest prose.\nVERDICT write_paths: the diff from 1a6c3c519dd4ac02a4adb412d7126deb3fbad385 to 498e50f658226ef609693cd4c25887cef73f51bb touches 26 files, every one inside the five declared paths, with zero files under nova/.\nVERDICT manifest: read manifest.md; its commits, test_logs and artifacts agree with the row receipts and job.log, and its status: complete matches the landed worktree at 498e50f658226ef609693cd4c25887cef73f51bb.\nVERDICT diff: read the 18 commits commit by commit; 30ff976f8bbc34f5fe06ce163faae8d1801fc32d adds the driver, the rest add controls and receipts, and the last two (67e0a1c96, 498e50f65) change no benchmark code, so the committed driver is the one that ran at b4589e1e428504928a4394dd64ac06faaffcb1e5.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: report.json names the operation and cites nova/equilibrium/clip_quadrature.py:885, and I re-read the base report docs/figures/cut-cell-current-attribution/diverted-chord-response/diverted-single-null-cells-500-chord.json to confirm cell 64 carries 43.153397908988666 A that the report reproduces.\nSCORE evidence: 17\nJUSTIFICATION evidence: I confirmed the false-positive sets (2), (1, 12), (3, 7, 64), the ten largest separatrix-cut deficits per row, archived*moments*lambda identical to the base per-cell booked currents, and the counterfactual fraction 0.0; only the scheduler-shape claims lack a committed receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all 26 changed files lie inside the declared paths, zero lie under nova/, and the plan and evidence records were appended (21/0 and 70/0 line deltas) rather than rewritten.\nSCORE durability: 13\nJUSTIFICATION durability: the guards are asserts inside benchmarks/chord_booking_operation_trace.py:450 and benchmarks/chord_booking_operation_trace.py:531, which fire only when the benchmark is invoked by hand; no committed test fails if the benchmark or its counterfactual regresses.\nSCORE fit: 19\nJUSTIFICATION fit: the benchmark follows the sibling benchmarks/ idiom, calls configure_dtypes() before any jnp array at benchmarks/chord_booking_operation_trace.py:27, names no plan label, and its figure uses a project-absolute src.\nFINDING docs/figures/cut-cell-current-attribution/chord-booking-trace/job.log:1 the committed log names only the script path, revision and device; the one-H200 reservation, --mem=64G, TMPDIR and uv-free payload the done_when requires are asserted in manifest.md and have no committed scheduler receipt beside report.json.\nFINDING benchmarks/chord_booking_operation_trace.py:450 the positive control and the counterfactual assert run only inside a manually invoked evaluation script, so a regression in the traced claim would pass every automated lane.\n",
+  "recommendation": "accept the named booking stage; the numeric gate is independently reproduced, and the two gaps are a scheduler receipt and an automated guard",
+  "review_run_id": "legacy-b54ffc51b0e2",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "1a6c3c519dd4ac02a4adb412d7126deb3fbad385",
+  "reviewed_head_sha": "498e50f658226ef609693cd4c25887cef73f51bb",
+  "reviewed_run_id": "r-20260923T235314622364-cca-chord-booking-exterior-current-source",
+  "reviewing_run_id": "r-20260924T123045117269-review-local-of-cca-chord-booking-trace",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "unknown",
+  "timestamp": "2026-10-07T11:53:28.616566+00:00",
+  "total": 89
+}

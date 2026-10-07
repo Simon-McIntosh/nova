@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "after_suite is completed with failure_count 0 and failure_ids []; the baseline_suite is also completed with failure_count 0 and failure_ids []. No head failure is newly added.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T002038975664-review-of-ctta-join-split-contour-tree/review-gate.log: 13 passed, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T002038975664-review-of-ctta-join-split-contour-tree/review-negative-control.log: 1 failed, 7 passed, EXIT=1",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T002038975664-review-of-ctta-join-split-contour-tree/probe-two-region-head.log: saddles [1, 4], n_nodes 6 n_edges 3",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T002038975664-review-of-ctta-join-split-contour-tree/probe-two-region-prefix.log: saddles [1], n_nodes 5 n_edges 2 (pre-fix reproduction)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T002038975664-review-of-ctta-join-split-contour-tree/probe-connected-vs-disconnected.log: connected two-wall diff 1 no orphans; disconnected two-region orphan node 5",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/evidence/baseline-a126966ff.log: 12 passed, EXIT=0",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261001T230257338103-ctta-join-split-contour-tree/evidence/after-a70aa0cb0.log: 13 passed, EXIT=0"
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "cc8883adcdd2d647b1edec225f3089988a798c35",
+    "2ef31f1d715a6e3cb2d1ad455e32c2672adae281",
+    "2118e335aaa3e913e66edce37123906afe0b9599",
+    "cffdb55979f11611db95b955479b6780f862dae3",
+    "dce30cab15fab11c155510b01e90a61ed2a655a2",
+    "ccce28720376b1eab447c59aaf4807811665d6a1",
+    "a126966ffcdc60671c5a750e3090e3e80ba0e854",
+    "3bb30654a62872d68260b0d5b979ab0eca0e5924",
+    "a70aa0cb0d4a49681525f8d579692714ad77c5e8"
+  ],
+  "completed_at": "2026-10-02T00:42:08.821Z",
+  "dispatched_at": "2026-10-02T00:20:52Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_tree_merge.py",
+      "line": "104",
+      "severity": "follow-on",
+      "text": "follow-on: the new per-region guard uses a disconnected edge carrier on which build_contour_tree emits an orphan node and node count minus edge count is 3 (probe: nodes {0:2,1:1,2:0,3:2,4:1,5:0}, edges [[0,1],[3,4],[4,5]], vertex 2 carries no edge); the assertion checks only the saddle set, so it cannot fail on that structural gap. A connected two-wall carrier, the realistic multi-region shape, yields a valid tree (diff 1, no orphans) and would guard the requirement without the unsupported disconnected case."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/tree/contour-tree-merge-no-sos.log",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: git diff --check still reports trailing whitespace in the committed negative-control receipt, carried over from the prior review."
+    },
+    {
+      "file": "nova/equilibrium/contour_tree.py",
+      "line": "220",
+      "severity": "follow-on",
+      "text": "follow-on: no production call site reaches build_contour_tree; ContourMesh integration and merged-state topology validation remain later nodes."
+    }
+  ],
+  "gate_arms_note": "Baseline arm at a126966ff: 12 passed, EXIT=0. After arm at a70aa0cb0: 13 passed, EXIT=0. Independent repeat at head a70aa0cb0: 13 passed, EXIT=0 (review-gate.log).",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches build_contour_tree; the reviewed manifest names ContourMesh integration as a later node.",
+    "diff": "The repair diff a126966ff..a70aa0cb0 changes 24 lines of contour_tree.py (global wall_seen to per-vertex wall_flag plus neighbour_wall) and adds a 13-line two-region test; git diff --check reports trailing whitespace only in the committed negative-control evidence log.",
+    "done_when": "The manifest's focused gate passes 13/13 at head and the run's declared negative control (reverting source 3bb30654a) reproduces; node count minus edge count is one on the connected fixtures, batched and per-state trees are identical, the over-capacity fixture reports refusal, and the focused guard can fail.",
+    "goal": "The dispatched goal is a jit/vmap-traceable join/split contour tree with simulation of simplicity and a per-region virtual-outside wall join; at a70aa0cb0 contour_tree.py implements all of these and the per-region join is confirmed by two independent fixtures.",
+    "manifest": "The source manifest carries a readable baseline_suite at a126966ff (12 passed, EXIT=0) and after_suite at a70aa0cb0 (13 passed, EXIT=0), both completed with zero failures, and a negative_control_log that reproduces.",
+    "write_paths": "All five changed paths shown by git diff are inside the declared paths in the reviewed prompt."
+  },
+  "justifications": {
+    "durability": "The repaired guard can fail: with the pre-fix source the new region test fails and the pre-fix probe yields saddles [1], so the guard is not vacuous. It is weakened by asserting only the saddle set on a disconnected fixture, missing the orphan-node and node-minus-edge structure there (see the first follow-on).",
+    "evidence": "Independent re-run of the declared gate at a70aa0cb0: 13 passed, EXIT=0 (review-gate.log). Both of the reviewed manifest's arms are readable and reconcile with their logs: baseline a126966ff 12 passed EXIT=0 and after a70aa0cb0 13 passed EXIT=0, closing the prior empty-baseline finding. An independent negative control (head test file against the pre-fix a126966ff source, module path confirmed) fails exactly test_each_wall_region_joins_outside_at_its_own_wall_vertex ([1] != [1, 4]).",
+    "fit": "The fixed-shape JAX receipt, the per-vertex wall_flag through lax.fori_loop, jit/vmap traceability, simulation-of-simplicity index tie breaking, and the DD critical_type mapping all follow nova's accelerator idiom and the section 1 contract; no raster enters the read.",
+    "goal_fidelity": "The second repair round (3bb30654a) makes the virtual-outside join per wall-bearing region: nova/equilibrium/contour_tree.py replaces the single global wall_seen bit with a per-vertex wall_flag and a neighbour_wall test. Independent probe at head a70aa0cb0: the two-region fixture now yields saddles [1, 4] (was [1]), and a connected two-wall carrier yields a valid tree (node count minus edge count 1, no orphan nodes).",
+    "scope_discipline": "git diff --name-only f9603c3b..a70aa0cb0 lists exactly five paths, all inside the reviewed prompt's granted write paths: nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py, docs/figures/contour-tree-topology-authority/tree/*.log, and docs/evidence/fragments/contour-tree-topology-authority/ctta-join-split-contour-tree.html."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The dispatched goal is a jit/vmap-traceable join/split contour tree with simulation of simplicity and a per-region virtual-outside wall join; at a70aa0cb0 contour_tree.py implements all of these and the per-region join is confirmed by two independent fixtures.\nVERDICT done_when: The manifest's focused gate passes 13/13 at head and the run's declared negative control (reverting source 3bb30654a) reproduces; node count minus edge count is one on the connected fixtures, batched and per-state trees are identical, the over-capacity fixture reports refusal, and the focused guard can fail.\nVERDICT write_paths: All five changed paths shown by git diff are inside the declared paths in the reviewed prompt.\nVERDICT manifest: The source manifest carries a readable baseline_suite at a126966ff (12 passed, EXIT=0) and after_suite at a70aa0cb0 (13 passed, EXIT=0), both completed with zero failures, and a negative_control_log that reproduces.\nVERDICT diff: The repair diff a126966ff..a70aa0cb0 changes 24 lines of contour_tree.py (global wall_seen to per-vertex wall_flag plus neighbour_wall) and adds a 13-line two-region test; git diff --check reports trailing whitespace only in the committed negative-control evidence log.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The second repair round (3bb30654a) makes the virtual-outside join per wall-bearing region: nova/equilibrium/contour_tree.py replaces the single global wall_seen bit with a per-vertex wall_flag and a neighbour_wall test. Independent probe at head a70aa0cb0: the two-region fixture now yields saddles [1, 4] (was [1]), and a connected two-wall carrier yields a valid tree (node count minus edge count 1, no orphan nodes).\nSCORE evidence: 18\nJUSTIFICATION evidence: Independent re-run of the declared gate at a70aa0cb0: 13 passed, EXIT=0 (review-gate.log). Both of the reviewed manifest's arms are readable and reconcile with their logs: baseline a126966ff 12 passed EXIT=0 and after a70aa0cb0 13 passed EXIT=0, closing the prior empty-baseline finding. An independent negative control (head test file against the pre-fix a126966ff source, module path confirmed) fails exactly test_each_wall_region_joins_outside_at_its_own_wall_vertex ([1] != [1, 4]).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only f9603c3b..a70aa0cb0 lists exactly five paths, all inside the reviewed prompt's granted write paths: nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py, docs/figures/contour-tree-topology-authority/tree/*.log, and docs/evidence/fragments/contour-tree-topology-authority/ctta-join-split-contour-tree.html.\nSCORE durability: 15\nJUSTIFICATION durability: The repaired guard can fail: with the pre-fix source the new region test fails and the pre-fix probe yields saddles [1], so the guard is not vacuous. It is weakened by asserting only the saddle set on a disconnected fixture, missing the orphan-node and node-minus-edge structure there (see the first follow-on).\nSCORE fit: 20\nJUSTIFICATION fit: The fixed-shape JAX receipt, the per-vertex wall_flag through lax.fori_loop, jit/vmap traceability, simulation-of-simplicity index tie breaking, and the DD critical_type mapping all follow nova's accelerator idiom and the section 1 contract; no raster enters the read.\nFINDING tests/test_contour_tree_merge.py:104 follow-on: follow-on: the new per-region guard uses a disconnected edge carrier on which build_contour_tree emits an orphan node and node count minus edge count is 3 (probe: nodes {0:2,1:1,2:0,3:2,4:1,5:0}, edges [[0,1],[3,4],[4,5]], vertex 2 carries no edge); the assertion checks only the saddle set, so it cannot fail on that structural gap. A connected two-wall carrier, the realistic multi-region shape, yields a valid tree (diff 1, no orphans) and would guard the requirement without the unsupported disconnected case.\nFINDING docs/figures/contour-tree-topology-authority/tree/contour-tree-merge-no-sos.log:22 follow-on: follow-on: git diff --check still reports trailing whitespace in the committed negative-control receipt, carried over from the prior review.\nFINDING nova/equilibrium/contour_tree.py:220 follow-on: follow-on: no production call site reaches build_contour_tree; ContourMesh integration and merged-state topology validation remain later nodes.\n",
+  "review_run_id": "r-20261002T002038975664-review-of-ctta-join-split-contour-tree",
+  "reviewed_base_sha": "f9603c3be1e2ced6d06bc28bdff8598b6cc153ed",
+  "reviewed_head_sha": "a70aa0cb0d4a49681525f8d579692714ad77c5e8",
+  "reviewed_revision": "a70aa0cb0d4a49681525f8d579692714ad77c5e8",
+  "reviewed_run_id": "r-20261001T230257338103-ctta-join-split-contour-tree",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-join-split-contour-tree",
+  "reviewer_node": "review-of-ctta-join-split-contour-tree",
+  "reviewer_run_id": "r-20261002T002038975664-review-of-ctta-join-split-contour-tree",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T02:40:43+02:00",
+  "total": 91,
+  "verdict": "pass"
+}

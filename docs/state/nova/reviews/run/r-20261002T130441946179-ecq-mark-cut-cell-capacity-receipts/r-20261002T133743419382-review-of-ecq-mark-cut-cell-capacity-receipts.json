@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [
+    {
+      "disposition": "follow-on: the followup enumerates {3072,3840,2816} and the node discharged that set exactly, so its compliance is literal; but the same swept value 2560 is marked in three files and left unmarked in two the node swept past, so the class straddles the enumeration and no arm settles it",
+      "item": "an arm showing that the swept capacity 2560 (= atomic_support_capacity 20 x 128) is either in the goal's target set or genuinely out of it"
+    },
+    {
+      "disposition": "follow-on: the change writes the marker and proves its arithmetic, but nothing exercises a downstream consumer that would fail if the marker were dropped; the marker's value is documentary",
+      "item": "a check that the provenance marker is consumed by any reader"
+    }
+  ],
+  "absent_observations": [
+    "no baseline_suite / after_suite arm: the reviewed run is documentation-only and declared neither, so added_failure_count=0 and added_failure_ids=[] are derived from absence rather than a measured set identity",
+    "no negative control: the reviewed run's write paths contain no test file and it declared none.",
+    "no guard against later silent removal of a provenance marker, and no instrument that treats a value outside the enumerated swept set {3072,3840,2816} as a target"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "d1adce6cb9f6e6f80626ce64655e4c524008282f",
+    "df8f2989b01ec660decc3ecbd061ce6ceb86bb63",
+    "4d3e055486c357dda0dafbf950b2c00ba2b27de5"
+  ],
+  "completed_at": "2026-10-02T14:07:37.073Z",
+  "dispatched_at": "2026-10-02T13:38:00Z",
+  "findings": [
+    {
+      "file": "docs/figures/exact-clip-moment-quadrature/ecq-mark-cut-cell-capacity-receipts/annotation-receipt.json",
+      "line": "sweep.target_value_files",
+      "severity": "follow-on",
+      "text": "follow-on: the sweep's target set {3072,3840,2816} omits the swept value 2560 (= atomic_support_capacity 20 x 128), so the sweep cannot see a whole class of the retired product. The evidence fragment claims 'Every receipt here was compiled against the swept product, so each recorded dimensions mapping now carries a block', but two receipts inside the node's own declared directory carry that product with no block: docs/figures/cut-cell-current-attribution/exact-clip-memory/complete-memory-parts/requested-500.json and .../final-memory-parts/requested-500.json each record exact_support_capacity 2560 and exact_quadrature_points_per_cell 163712 (= (2560-2) x 64) under a dimensions mapping and are unmarked (independently: base and head both 0 occurrences of dimensions_provenance; they are absent from the node's changed_paths). The node is inconsistent about the class: its annotator marks the same 2560 value in base-memory.json, complete-memory.json and final-memory.json (because those files were selected by a 3072 row) but not in the two requested-500 siblings. Two fixes are open and both are cheap: widen the target set so 2560 is swept, or state that only {3072,3840,2816} is in scope so the fragment's universal claim is withdrawn."
+    },
+    {
+      "file": "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-mark-cut-cell-capacity-receipts.html",
+      "line": "The three layouts and their current bounds",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment and the driver docstring state three layouts (152 = 128 + 24, 158 = 128 + 30, 150 = 128 + 22), but the artifact marks four distinct layouts: the 21 blocks decompose as (atomic 20 -> swept 2560 -> current 148) x3, (22 -> 2816 -> 150) x4, (24 -> 3072 -> 152) x9, (30 -> 3840 -> 158) x5. The 148 layout is real and correctly marked (traced_polygon_vertex_capacity(20) = 148, verified). The fragment's description therefore understates what the node actually did, which is the more complete outcome but which the text does not disclose."
+    },
+    {
+      "file": "docs/evidence/fragments/exact-clip-moment-quadrature/ecq-mark-cut-cell-capacity-receipts.html",
+      "line": "399 insertions, 0 deletions",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment and both commit bodies present '399 insertions, 0 deletions' as the git diff, but the git diff is 823 insertions for df8f2989b and 894 for base..head 4d3e0554; 399 is only the fifteen-receipt JSON subset. The claim that the diff is purely additive is true (0 deletions); the number attached to it is the subset, not the commit. This is the same imprecision the predecessor review flagged on r-20261002T084242862234, so the reporting habit is recurring rather than a one-off."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": null,
+    "baseline_suite": null
+  },
+  "gate_arms_note": "Derived from the reviewed run's own suites. The reviewed run carries no baseline_suite and no after_suite key in its manifest: it is a documentation change under docs/figures/ that touches no module and no test, and its write paths contain no test file. The added-failure count is therefore 0 and the id set empty by ABSENCE OF ANY CODE ARM, not by a measured before/after set identity. The log it cites (verify.log / mark_cut_cell.log) is the marker driver plus a numeric-diff verify step, not a pytest suite, and carries no baseline/after pair. This review did not re-run any suite because neither arm was declared and there is no source change to gate; the measure I reproduced instead is the marker's own arithmetic and the empty numeric diff.",
+  "justifications": {
+    "durability": "The marker is a durable machine-readable block written into each committed receipt beside the value it annotates, so a reader sees the retirement without leaving the file, and the driver is idempotent (an existing dimensions_provenance block is preserved rather than replaced). Held below full for two reasons, both inherited in shape from the predecessor node. There is no guard that a later edit cannot silently drop the marker, and no negative control falsifies the marker's presence: the reviewed run's write paths contain no test file and it declared none. And the sweep that is offered as the completeness proof tests only whether the substring 'dimensions_provenance' appears anywhere in a file, so a value outside its enumerated set is invisible to it (the 2560 class below).",
+    "evidence": "The substance is independently reproducible and I reproduced it. A path-keyed walk of every numeric value in the fifteen changed JSONs between base d1adce6cb and head 4d3e0554 reads 68241 numeric paths with 0 changed and 0 missing. Every one of the 21 added provenance blocks carries current_derived_value_for_this_layout equal to traced_polygon_vertex_capacity(straight) (148/150/152/158 for atomic capacities 20/22/24/30) and names the retiring revision f7fefbd7, which resolves to 'refactor(equilibrium): size the traced polygon capacity to its realised layout'. Base 0 -> head 1 (solve-memory-300) and 0 -> 3 (base-memory) occurrences of dimensions_provenance reproduce the marker's addition. The whole-tree sweep over tracked docs/figures reproduces: 37 files carry a quoted exact_support_capacity, exactly 34 of them hold a value in the swept set {3072,3840,2816}, and all 34 read marked with zero unmarked. But three reported figures do not reconcile with the tree. The commit body and fragment state the diff is '399 insertions' where git reports 823 for df8f2989b and 894 for base..head; 399 is the fifteen-receipt JSON subset only. The fragment states three layouts where the artifact marks four. And 'zero unmarked' holds only inside an enumerated target set that omits the swept value 2560 = 20 x 128, which this node itself marks in three files (base-memory, complete-memory, final-memory) yet leaves unmarked in two sibling receipts it swept past (below).",
+    "fit": "The change sits in the docs/figures receipt tree it maintains, reuses the predecessor annotator and the predecessor provenance form, and ships one focused driver plus a build-evidence fragment. Commit subjects are conventional and both carry bodies; no plan, sprint or ticket identifier and no AI attribution appears in any commit message, filename, symbol or comment (independently grepped). The driver docstring states the mechanism (spline_chain_samples_per_chord plus atomic_support_capacity; the swept product and its retiring revision as provenance data) and adds no abstraction beyond the one context arm. The one deviation the worker flagged (a context-mapping arm for the single receipt that records its dimensions under dimension_context with renamed fields) is necessary and minimal.",
+    "goal_fidelity": "The change marks the retired swept exact_support_capacity historical exactly where the driving followup f-ecq-memory-identification-swept-product names it: the fifteen committed receipts under cut-cell-current-attribution/clip-quadrature (four) and exact-clip-memory (eleven) each gain a dimensions_provenance block naming the retiring revision f7fefbd7, quoting the swept expression atomic_support_capacity * spline_chain_samples_per_chord, and stating the current derived bound 128 + atomic_support_capacity. Twenty-one blocks land across the fifteen files, every recorded number is left intact and every file parses. Held below full because the marker driver and its fragment describe three layouts (152/158/150) while the artifact actually marks four distinct layouts (148 = 128 + 20, 150, 152, 158), and because the fragment's universal claim that every receipt here carries a block is literally false for two sibling receipts in the same declared directory (below).",
+    "scope_discipline": "The landed diff is eighteen files, every one inside a declared write path: the fifteen data receipts under docs/figures/cut-cell-current-attribution/{clip-quadrature,exact-clip-memory}/, the evidence fragment under docs/evidence/fragments/exact-clip-moment-quadrature/, and the driver plus its receipt under docs/figures/exact-clip-moment-quadrature/ecq-mark-cut-cell-capacity-receipts/. No module and no test file is touched, so there is no code surface to regress; the diff is purely additive (894 insertions, 0 deletions). The driver reuses the predecessor annotator unchanged and adds only the one context arm its single dimension_context receipt requires."
+  },
+  "notes": "The reviewed node is a documentation-provenance change with no code arm: it marks the retired swept exact_support_capacity historical in the fifteen cut-cell receipts and leaves every recorded number intact. The substance is sound and independently verified (empty numeric diff over 68241 paths, correct arithmetic on all 21 blocks, a valid revision anchor, and a sweep that reproduces 34 marked / 0 unmarked for its enumerated set). Three evidence imprecisions and one scope gap keep the score at 86. (1) The sweep's target set {3072,3840,2816} omits the swept value 2560, so two requested-500 receipts in the node's own declared directory carry the retired product with no marker and the fragment's 'every receipt here ... carries a block' is false. (2) The fragment states three layouts where the artifact marks four (148/150/152/158). (3) '399 insertions' is the fifteen-receipt subset, not the commit's 823 or the range's 894 \u2014 the same imprecision the predecessor review flagged. None of these changes a recorded numeric value or lands outside the declared scope, and the diff is purely additive on eighteen in-scope files. The node's own deviation note (a context-mapping arm for the one dimension_context receipt) is necessary and minimal. Scores: goal_fidelity 18, evidence 14, scope_discipline 20, durability 15, fit 19; total 86.",
+  "plan": "nova:exact-clip-moment-quadrature",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "At head 4d3e0554 each recorded dimensions mapping in the fifteen targeted receipts carries a dimensions_provenance block marking exact_support_capacity historical, naming the retiring revision f7fefbd7, quoting the swept expression, and stating the current derived value (128 + atomic_support_capacity), while every recorded number is byte-identical (independently confirmed: 68241 numeric value paths, 0 changed, 0 missing).",
+    "before": "At base d1adce6cb the committed receipts under docs/figures/cut-cell-current-attribution/clip-quadrature/ and .../exact-clip-memory/ record exact_support_capacity as the swept product (atomic_support_capacity * spline_chain_samples_per_chord: 3072, 3840, 2816, and 2560) with no dimensions_provenance key; grep for dimensions_provenance reads 0 in solve-memory-300.json and base-memory.json, so a reader takes the swept value as the layout's current capacity.",
+    "finding_id": "the swept-product exact_support_capacity in the cut-cell receipts was presented as a current measurement with no indication it had been superseded"
+  },
+  "review_run_id": "r-20261002T133743419382-review-of-ecq-mark-cut-cell-capacity-receipts",
+  "reviewed_base_sha": "d1adce6cb9f6e6f80626ce64655e4c524008282f",
+  "reviewed_head_sha": "4d3e055486c357dda0dafbf950b2c00ba2b27de5",
+  "reviewed_revision": "4d3e055486c357dda0dafbf950b2c00ba2b27de5",
+  "reviewed_run_id": "r-20261002T130441946179-ecq-mark-cut-cell-capacity-receipts",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/ecq-mark-cut-cell-capacity-receipts",
+  "reviewer_node": "review-of-ecq-mark-cut-cell-capacity-receipts",
+  "reviewer_run_id": "r-20261002T133743419382-review-of-ecq-mark-cut-cell-capacity-receipts",
+  "scores": {
+    "durability": 15,
+    "evidence": 14,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T13:55:00+00:00",
+  "total": 86,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha 4d3e0554 has parent df8f2989b whose parent is reviewed_base_sha d1adce6cb, so the reviewed range is exactly the two commits claimed",
+    "the reviewed worktree is clean at head (git status --porcelain empty) and its HEAD is 4d3e055486c357dda0dafbf950b2c00ba2b27de5",
+    "git diff d1adce6cb..4d3e0554 is 18 files, 894 insertions, 0 deletions; every path lies under docs/figures/ or docs/evidence/ (no module, no test file); df8f2989b alone is 17 files / 823 insertions and 4d3e0554 alone is 1 file / 71 insertions",
+    "independently walked every numeric value path in the 15 changed receipt JSONs between base and head: 68241 numeric paths, 0 changed, 0 missing",
+    "independently checked all 21 added dimensions_provenance blocks: each exact_support_capacity.current_derived_value_for_this_layout equals traced_polygon_vertex_capacity(atomic_support_capacity) and each carries status historical and retired_by_revision f7fefbd780aae7ef3d9707722fc4d80a1f0742cd",
+    "the retiring revision f7fefbd780aae7ef3d9707722fc4d80a1f0742cd exists and reads 'refactor(equilibrium): size the traced polygon capacity to its realised layout'",
+    "base->head grep of dimensions_provenance reproduces the marker's addition: 0->1 in solve-memory-300.json, 0->3 in base-memory.json",
+    "the whole-tree sweep reproduces for its enumerated set: 34 files under tracked docs/figures carry a quoted exact_support_capacity in {3072,3840,2816} and all 34 read marked (zero unmarked); the 34 includes mark_swept_capacity_receipts.py, matched by the quoted 3072 inside its own report snippet",
+    "the sweep is incomplete beyond that set: three tracked files carry a quoted exact_support_capacity and read unmarked, two of them requested-500.json siblings under the node's own declared exact-clip-memory directory (value 2560) and one under millisecond-converged-solve/program-shapes/program-shape-census.json (values 152,154)",
+    "no AI attribution in either commit message; both subjects are conventional and both carry bodies; no plan/sprint/ticket identifier appears in any changed path or in the driver symbols or comments"
+  ]
+}

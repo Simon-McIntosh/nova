@@ -1,0 +1,49 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "set difference of pytest FAILED/ERROR node ids: after_suite.log minus base-gate.log",
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-02T18:35:08.823Z",
+  "dispatched_at": "2026-10-02T16:49:26Z",
+  "findings": [],
+  "gate_arms_note": "baseline arm is a collection error (the new symbols are absent at base), so non-vacuity is carried by the mutation reproduction: assert 0 == 3",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read the source and test diff d0f91aa52..b2e3ca240: one typed constant, the virtual-slot assignment retyped from 0 to CRITICAL_TYPE_OUTSIDE, and a selector helper; the focused test also re-asserts the node-minus-edge-one invariant and per-region wall joins.",
+    "done_when": "The four-file gate is 32 passed EXIT=0 at the fix revision; the focused test fails at the base source and under the declared mutation; I independently re-ran the focused test at the committed head (1 passed EXIT=0) and reproduced its failure under the mutation in a scratch extraction (assert 0 == 3, EXIT=1).",
+    "goal": "The node delivers its goal: the padded virtual outside slot is typed CRITICAL_TYPE_OUTSIDE (3), outside the DD 0/1/2 vocabulary, and dd_emittable_nodes() excludes it from the DD contour_tree mapping while the tree keeps the node and its arcs (node count minus edge count one).",
+    "manifest": "The manifest is honest and complete in its core fields: status complete, the fix commit and the three gate logs named, and its baseline_suite/after_suite arms name the two logs the added-failure count derives from.",
+    "write_paths": "Only the granted surface moved: nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py, and three logs under docs/figures/contour-tree-topology-authority/virtual-node/; the declared evidence fragment and the contour_tree_layout.py reference dict were left untouched."
+  },
+  "justifications": {
+    "durability": "the added focused test is a real assertion that fires under the mutation, but head-gate.log is committed and named for the head while its own header records the base revision d0f91aa52 and 10 passed, and it is uncited by the manifest.",
+    "evidence": "after-suite.log records 32 passed EXIT=0; I re-ran tests/test_contour_tree_merge.py::test_virtual_slot_is_typed_outside_and_excluded_from_dd at head (1 passed EXIT=0) and in a scratch extraction with the slot retyped to 0 (assert 0 == 3 at tests/test_contour_tree_merge.py:263, EXIT=1).",
+    "fit": "the new constant and helper sit in the module that owns the tree and its DD-vocabulary comment, reuse the fixed-shape array idiom, and the layout reference dict was correctly left alone.",
+    "goal_fidelity": "nova/equilibrium/contour_tree.py:406 retypes the virtual slot and :455 gives dd_emittable_nodes as result.node_valid & (result.critical_type != CRITICAL_TYPE_OUTSIDE), which is exactly the follow-on's ask that the DD mapping skip the slot.",
+    "scope_discipline": "the diff touches only the three declared paths plus the three named logs; no write outside the declared implementation-and-evidence surface was found, though the manifest's changed_paths omits head-gate.log."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node delivers its goal: the padded virtual outside slot is typed CRITICAL_TYPE_OUTSIDE (3), outside the DD 0/1/2 vocabulary, and dd_emittable_nodes() excludes it from the DD contour_tree mapping while the tree keeps the node and its arcs (node count minus edge count one).\nVERDICT done_when: The four-file gate is 32 passed EXIT=0 at the fix revision; the focused test fails at the base source and under the declared mutation; I independently re-ran the focused test at the committed head (1 passed EXIT=0) and reproduced its failure under the mutation in a scratch extraction (assert 0 == 3, EXIT=1).\nVERDICT write_paths: Only the granted surface moved: nova/equilibrium/contour_tree.py, tests/test_contour_tree_merge.py, and three logs under docs/figures/contour-tree-topology-authority/virtual-node/; the declared evidence fragment and the contour_tree_layout.py reference dict were left untouched.\nVERDICT manifest: The manifest is honest and complete in its core fields: status complete, the fix commit and the three gate logs named, and its baseline_suite/after_suite arms name the two logs the added-failure count derives from.\nVERDICT diff: Read the source and test diff d0f91aa52..b2e3ca240: one typed constant, the virtual-slot assignment retyped from 0 to CRITICAL_TYPE_OUTSIDE, and a selector helper; the focused test also re-asserts the node-minus-edge-one invariant and per-region wall joins.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nSCORE evidence: 20\nSCORE scope_discipline: 19\nSCORE durability: 18\nSCORE fit: 20\nJUSTIFICATION goal_fidelity: nova/equilibrium/contour_tree.py:406 retypes the virtual slot and :455 gives dd_emittable_nodes as result.node_valid & (result.critical_type != CRITICAL_TYPE_OUTSIDE), which is exactly the follow-on's ask that the DD mapping skip the slot.\nJUSTIFICATION evidence: after-suite.log records 32 passed EXIT=0; I re-ran tests/test_contour_tree_merge.py::test_virtual_slot_is_typed_outside_and_excluded_from_dd at head (1 passed EXIT=0) and in a scratch extraction with the slot retyped to 0 (assert 0 == 3 at tests/test_contour_tree_merge.py:263, EXIT=1).\nJUSTIFICATION scope_discipline: the diff touches only the three declared paths plus the three named logs; no write outside the declared implementation-and-evidence surface was found, though the manifest's changed_paths omits head-gate.log.\nJUSTIFICATION durability: the added focused test is a real assertion that fires under the mutation, but head-gate.log is committed and named for the head while its own header records the base revision d0f91aa52 and 10 passed, and it is uncited by the manifest.\nJUSTIFICATION fit: the new constant and helper sit in the module that owns the tree and its DD-vocabulary comment, reuse the fixed-shape array idiom, and the layout reference dict was correctly left alone.\n",
+  "review_run_id": "legacy-b27f0ab9051c",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "d0f91aa521b789a900fd5ff425cb712f60114edf",
+  "reviewed_head_sha": "b2e3ca2408d6aa8338ed5555f6fca24517b2bacc",
+  "reviewed_run_id": "r-20261002T164903995177-ctta-virtual-node-not-a-critical-point",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-virtual-node-not-a-critical-point",
+  "scores": {
+    "durability": 18,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "scope_discipline": 19
+  },
+  "section": "contour-tree-topology-authority#s2",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T19:19:20.443879+00:00",
+  "total": 97
+}

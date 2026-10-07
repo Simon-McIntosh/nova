@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T01:28:58.433Z",
+  "dispatched_at": "2026-10-06T01:23:03Z",
+  "findings": [
+    {
+      "anchor": "nova/scripts/render_misfit_figures.py:28",
+      "id": "reuse_search-1",
+      "reason": "\u00a74's done-when (\"nothing committed may name a worktree again\") is false for this file unless the matcher and the guard constant cover both worktree roots.",
+      "text": "the plan's rule and \u00a74 guard are anchored on the literal `.reckon-worktrees` (the constant holds \"the worktree root's directory name\"), but this committed artifact names a worktree under a second root, `/home/ITER/mcintos/.cache/reckon-worktrees/nova-a0f1e0938fc2/s5-followup/...`, whose bytes are `cache/reckon-worktrees` and so do not contain `.reckon-worktrees`; `git grep -l '\\.reckon-worktrees'` returns 1,148 files while `git grep -l 'reckon-worktrees'` returns 1,149, the extra being this file, so \u00a72 rewrites nothing there and the \u00a74 guard passes a path that points into a removed worktree",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/artifacts-carry-no-worktree-paths.html:44",
+      "id": "reuse_search-2",
+      "reason": "\u00a73 enumerates a fixed count, so a worker following it skips launch scripts the exhaustive done-when still requires rewritten.",
+      "text": "the census that scopes the nodes omits `benchmarks/` (3 files, e.g. `benchmarks/backend_divergence_forensics.py:23`) and `nova/scripts/` (`nova/scripts/render_misfit_figures.py`), and counts \"one under tests/\" where the tree carries two (`tests/test_render_receipt_paths.py` and `tests/exact_section_route_results.json`); \u00a73 then fixes its node to \"Each of the 64 launch scripts\" (`:115`) while the census files number 1,149 outside `docs/plans` and `docs/state`, and the `.py` launch scripts alone are 7, not 6",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "pyproject.toml:121",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a74's premise is unchecked, and if the repository intends the declared framework, a raw hook duplicates the commit-time-check owner rather than extending it.",
+      "text": "\u00a74 asserts \"nova has no pre-commit framework, so the commit-time check is a plain checked-in hook, scripts/git-hooks/pre-commit\" (`:152`), but `pre-commit>=4.2.0` is a declared dev dependency and `AGENTS.md:150` documents the pre-commit hook workflow (\"The pre-commit hook runs checks through `.venv/bin/python3`\"); the plan must either configure the declared framework or state why a raw `core.hooksPath` hook is chosen over it and what happens to the existing setting",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "b99a0a0a71045564a20fcfee4bc5ae51afa1cd27aa66607e914241b211540166",
+  "plan_slug": "artifacts-carry-no-worktree-paths",
+  "plan_version": 8,
+  "project": "nova",
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:32:37.811886+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:32:35.723229+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "s22-nova",
+      "reason": "",
+      "when": "2026-10-06T01:32:36.599919+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T012250941051-plan-review-of-artifacts-carry-no-worktree-paths",
+  "reviewed_blob_sha": "744ba03f27e5d59779c797753dc4ca15e38593a4",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 one public function `relativize_worktree_paths(text)` returns the rewritten text together with the unmapped spans, with the lexical matcher, the nova/other-repository mapping and idempotence all hidden behind it, and `repository_relative` delegating to the same matcher.",
+    "duplicate_owner": "a finding \u2014 \u00a74 adds a bespoke `scripts/git-hooks/pre-commit` commit-time check while the repository already declares the `pre-commit` framework as a dependency and documents its hook workflow; the plan asserts that framework's absence without checking.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds one public definition and states why it cannot be merged into `repository_relative`, and \u00a74 names the two tests it retires (`test_no_receipt_directory_json_records_a_worktree_path`, `test_the_scan_reaches_every_receipt`), so the added surface is accounted for in its own text.",
+    "reuse_search": "a finding \u2014 the plan cites and extends the real owner `repository_relative` (`nova/database/filepath.py:62`, S22 merge `88a14b2ad`), but its artifact search is incomplete: it names only the `Code/.reckon-worktrees` root and a fixed launch-script count, missing a second worktree root and two directories that already carry the pattern.",
+    "thin_wrapper": "pass \u2014 \u00a72 states its case for a separate text-level function (\"It cannot be folded into repository_relative, because it takes and returns text rather than a path and it reports what it left unmapped\"), so this is not a parallel wrapper over the existing reader but a justified extension with one definition."
+  },
+  "section_digests": {
+    "_document": "efdf7a9a3a3fa57f5f2f4b064b17ba4ef4aee264a509e7aa846151cf2dd31bff",
+    "s1": "467c6df96654a7215fa3ee071733bbf678c3d6b8264b55ed779eec21484661d7",
+    "s2": "321966a8b0908290910976c0d4dbc07d70bfb0fd9f682fbd35672a051c3b3d1f",
+    "s3": "02e2920863ae0b909a39d9227a0e6bfe3ff11027ec0d07d68da9908af9b8f486",
+    "s4": "f01c8b8355edf97748933fdce8b11febe64243aaf9930f18ed13e5fe4d073349",
+    "s5": "c485bf736667af1fc094e1776987917efeb3ed4b61e8b54d572444c042632d1b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T01:32:19.123590+00:00"
+}

@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [
+    {
+      "disposition": "out of scope for this node: its write paths reach tests/test_plasma_cell_shadow_telemetry.py and docs artifacts, not a lane config or scripts/ path, so a lane-registration change belongs to a separately dispatched node (recorded under follow_ons below).",
+      "item": "a committed lane registration that runs tests/test_plasma_cell_shadow_telemetry.py, rather than the assertion that the default fast lane selects it because it carries no slow marker"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "48a40fab18be098a17ea5df6d631c1b153a027f2",
+    "8fe7445e5959cf2cb793f3a538ec62a5286b7779"
+  ],
+  "completed_at": "2026-10-01T22:32:38.920Z",
+  "dispatched_at": "2026-10-01T22:07:08Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/plasma-cell-read-fidelity/pcrf-shadow-telemetry-node-flux.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment labels its re-verification revision 'HEAD 48a40fab18be098a17ea5df6d631c1b153a027f2', which is the reviewed BASE, not the reviewed head 8fe7445e5 that the fragment was committed in. The result transfers to the head only because the commit is docs-only (git diff 48a40fab1..8fe7445e5 -- tests/test_plasma_cell_shadow_telemetry.py is empty), so the label reads as a currency claim the record does not itself establish; it should name the head, or state plainly that the gate ran at the base and the head is source-identical."
+    },
+    {
+      "file": "docs/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-negative-control.log",
+      "line": "2",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control log's second header line is an unsubstituted template ('revision /tmp/pcrf-shadow-negctl tree  command  module  cwd ') while the first line carries the real values, so one header row of the log names no revision, tree, command, module or cwd. The mutation itself is legible (line 1 names the scratch copy and the label-owned mutation) and the failure is real (1 failed, 2 passed, EXIT=1 at tests/test_plasma_cell_shadow_telemetry.py:170), but the duplicated header should be emitted only once, substituted."
+    },
+    {
+      "file": "tests/test_plasma_cell_shadow_telemetry.py",
+      "line": "156",
+      "severity": "follow-on",
+      "text": "follow-on: the migrated oracle still reads the private internal operator._wall_carrier_index (line 156) to build its label_owned comparator and operator._carrier_shadow_read (line 149) as the value under test. The record-hygiene item in followup f-pcrf-003 retires the nearest-in-material diagnostic column and the carrier index from the production read, so this test needs a companion edit at that time or it will fail to import the retired attribute; the worker correctly recorded this coupling."
+    }
+  ],
+  "gaps": [
+    "no distinct after-suite arm exists: the reviewed manifest's after_suite names the same gate log at the same base revision as baseline_suite, so no head-revision gate log exists to read and the added-failure comparison is one file against itself",
+    "no logged confirmation that the gate ran under the done-when's required environment: the gate log's own command line is '/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_plasma_cell_shadow_telemetry.py' with no TMPDIR=/tmp or JAX_PLATFORMS=cpu, so the required environment is asserted in the manifest but not visible in the log"
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_plasma_cell_shadow_telemetry.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-shadow-telemetry-node-flux/docs/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-gate.log",
+      "revision": "48a40fab18be098a17ea5df6d631c1b153a027f2"
+    },
+    "baseline_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest tests/test_plasma_cell_shadow_telemetry.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-shadow-telemetry-node-flux/docs/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-gate.log",
+      "revision": "48a40fab18be098a17ea5df6d631c1b153a027f2"
+    }
+  },
+  "gate_arms_note": "added_failure_count and added_failure_ids are derived from the reviewed run's own declared arms: baseline_suite and after_suite both name docs/figures/plasma-cell-read-fidelity/shadow-telemetry/shadow-telemetry-gate.log at revision 48a40fab1, whose last lines are '3 passed in 66.89s (0:01:06)' and 'EXIT=0' with no FAILED or ERROR node id, so the head set of failing ids minus the base set is empty. The count is a measured 0 over one log rather than a two-arm comparison: both arms point at the same file and the same base revision, so the 'after' arm does not measure the reviewed head.",
+  "notes": "The node was dispatched to migrate tests/test_plasma_cell_shadow_telemetry.py from the retired label-owned wall rule to the node-flux rule and put it in a lane. The migration is already in the base tree (2bf422abe, ancestor of the reviewed head) and recorded in the plan, so the dispatch was stale; the worker correctly treated it as a re-verification rather than reimplementing a working guard, which is exactly the EVIDENCE contract's instruction. The landed change is docs-only: an evidence fragment plus three gate logs. This review independently confirmed the three substantive claims (the file is migrated, the head gate is green, and the oracle reddens under the retired rule), so the node's state is sound. goal_fidelity is below full because the landed diff contains no change to the goal's own artifact \u2014 the goal holds at head by virtue of a pre-existing ancestor, not by this node's commit. evidence is below full because the after-suite arm duplicates the base arm (same log, same revision) rather than measuring the reviewed head, and the gate log's own command line omits the environment the done-when requires. scope_discipline is below full for the two stale recordings above rather than any out-of-scope write: every changed path is inside the declared write paths. No finding blocks: the node's subject is correct and its guard fires.",
+  "plan": "nova:plasma-cell-read-fidelity",
+  "project": "nova",
+  "reproduction_of_repaired_defect": {
+    "after": "this review independently confirmed the oracle is independent of the code under test (its _node_flux_private_mask at line 119 recomputes the rule without calling the production helper) and that substituting the retired label-owned read in the code under test reddens it: shadow-telemetry-negative-control.log fails test_carrier_private_wall_follows_the_node_flux_rule with 'Mismatched elements: 1 / 92' at tests/test_plasma_cell_shadow_telemetry.py:170 and ends EXIT=1, while the head gate log reads '3 passed' EXIT=0",
+    "before": "at base 48a40fab1 the migration is already present: commit 2bf422abe ('read the wall-node private shadow from node flux') is the last commit touching tests/test_plasma_cell_shadow_telemetry.py and is an ancestor of the reviewed head (git merge-base --is-ancestor -> exit 0); the retired label-owned rule appears only as the label_owned comparator at line 157, never as the oracle",
+    "finding_id": "shadow-telemetry-oracle-scores-the-retired-label-owned-rule (the defect the driving followup f-pcrf-003 names)"
+  },
+  "review_run_id": "r-20261001T220641056226-review-of-pcrf-shadow-telemetry-node-flux",
+  "reviewed_base_sha": "48a40fab18be098a17ea5df6d631c1b153a027f2",
+  "reviewed_head_sha": "8fe7445e5959cf2cb793f3a538ec62a5286b7779",
+  "reviewed_revision": "8fe7445e5959cf2cb793f3a538ec62a5286b7779",
+  "reviewed_run_id": "r-20261001T211540931442-pcrf-shadow-telemetry-node-flux",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pcrf-shadow-telemetry-node-flux",
+  "reviewer_node": "review-of-pcrf-shadow-telemetry-node-flux",
+  "reviewer_run_id": "r-20261001T220641056226-review-of-pcrf-shadow-telemetry-node-flux",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:28.675025+00:00",
+  "total": 91,
+  "verdict": "pass",
+  "verified_independently": [
+    "commit 8fe7445e5 is the reviewed head; its worktree is clean (git status --porcelain empty)",
+    "the reviewed commit is docs-only: git show --stat 8fe7445e5 lists 4 files, all under docs/ (the evidence fragment and three *.log), 94 insertions, 0 deletions, no source or test change",
+    "git diff 48a40fab18be098a17ea5df6d631c1b153a027f2 8fe7445e5959cf2cb793f3a538ec62a5286b7779 -- tests/test_plasma_cell_shadow_telemetry.py is empty, so the migrated test at head is byte-identical to the base and the 'no test-file edit was needed' claim is true",
+    "git log -1 -- tests/test_plasma_cell_shadow_telemetry.py is 2bf422abe ('test(equilibrium): read the wall-node private shadow from node flux', 68 insertions / 135 deletions) and git merge-base --is-ancestor 2bf422abe HEAD exits 0",
+    "the test file carries no pytest.mark.slow: grep for 'slow' returns nothing, so the default '-m not slow' lane selects it, matching the done-when",
+    "shadow-telemetry-collect.log shows the exact three collected ids including tests/test_plasma_cell_shadow_telemetry.py::test_carrier_private_wall_follows_the_node_flux_rule",
+    "shadow-telemetry-gate.log's first line names revision 48a40fab1, tree, command, and the imported module path nova/equilibrium/forward_operator.py, and its summary is '3 passed in 66.89s (0:01:06)' with a bare final line EXIT=0",
+    "the oracle recomputes the node-flux rule in _node_flux_private_mask (tests/test_plasma_cell_shadow_telemetry.py:119) from the fixture flux, admitted saddle flux and X-point height band without calling the production read, so it is not an assertion whose two sides move together",
+    "the negative control is a genuine falsification: the scratch copy's production read is mutated to the retired label-owned rule and the oracle demonstrably fails (1/92 wall nodes), which is the only way a green oracle shows it has teeth",
+    "the evidence fragment's links are project-absolute (/nova/figures/...), the form the reckon SPA resolves",
+    "the plan's section 2 node-flux landing and shadow-telemetry oracle migration records (docs/plans/plasma-cell-read-fidelity.html, ids wall-node-flux-landing and shadow-telemetry-oracle-migration) exist and record the same migration (2bf422abe / 635195df8) and the one-of-92 negative control, corroborating the worker's evidence_inputs"
+  ]
+}

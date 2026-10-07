@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Derived from the reviewed run's own baseline_suite and after_suite fields in its manifest.md, which are both empty (the reviewed change adds no product source or test, so no base/head pytest arm was armed). added_failures_from_gate_logs(None, None) returns unmeasured (count None, ids []), so the count is stored as unmeasured rather than as a measured zero.",
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "artifacts": [
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/receipt.json (valid JSON; active verdict no_growth_observed, release_established false; summary initial 1, final 1, growth_across_program_ladder 0, programs_compiled 20, alive_executable_graphs_after_drop 2, graphs_released_after_drop -1; withdrawn_post_hoc_analysis status withdrawn)",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/alive-graph-count.png (1400x700 RGBA, 53274 bytes; enabled arm only, flat at 1.0 over 20 distinct programs; no after-drop point; byte-reproducible from receipt.json)",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/alive-graph-count.svg (12053 bytes; same series, no 'after dropping' or 'settled reread' point; stable bytes under rerender)",
+    "docs/figures/millisecond-converged-solve/cuda-graph-count/measure_cuda_graph_count.py (412 lines; _run_arm refuses when the enabled arm emits no count, the disabled arm emits any, or the settled reread has no count between its markers)",
+    "docs/evidence/fragments/millisecond-converged-solve/mcs-alive-graph-count-series.html (aligned record; states the bounded not-process-cumulative conclusion)",
+    "report /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md (aligned; states the measured answer and the unmeasured release)"
+  ],
+  "blockers": "none",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "6b9fa435011793b757ec0506d7784be50ff1a005",
+    "82f26d0ac6984782693e7e48d06926a16664144f",
+    "217b698411ac47506df01d45d359be4a4950de58",
+    "a9c29fa75a5a09d12fa6a259bdfa4789c7dda902",
+    "37daba9a5d3f2594d182c27312967dd7556ae725",
+    "021e72442bdf0f4e81a807f9cabbe28c146931f8",
+    "993888eb40a9e6f103db2bf473087abe6311f1ff",
+    "0aac33c2dedddbe2b89139008f0e933af0766250",
+    "e43904110702c79ab73827f7876007674a9f20e9",
+    "183e51ab57aa42df62946d1595e18f6c26f658ed"
+  ],
+  "completed_at": "2026-10-02T21:38:34.737Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-02T21:29:06Z",
+  "evidence_inputs": "Read 8cbd46f3f..183e51ab5 (ten commits). Since the prior review at base 0aac33c2d two commits landed: e43904110 regenerated the PNG and SVG from the enabled job-1280456 markers only (PNG 60276->53274 bytes, SVG +231 lines) and aligned report/fragment/receipt to the ladder-only conclusion, and 183e51ab5 set svg.hashsalt and Date None for a stable SVG. Independent checks: ruff exit 0 and in-memory ast.parse OK on the instrument; the manifest's jq receipt gate exits 0; the SVG positive rg exits 0 and the negative rg ('after dropping|settled reread') exits 1; the report rg exits 0; reckon audit-doc on the fragment reports OK; and measure_cuda_graph_count.py --render-receipt against a copy of the committed receipt.json reproduced both alive-graph-count.png and alive-graph-count.svg byte-for-byte (cmp identical). The child builds 20 distinct shapes (64x64 .. 368x368, size_step 16). Headline numbers reconcile with titan-job-1280456.log (no_growth_observed, initial 1, final 1, after_drop 2, released -1). The reviewed manifest's baseline_suite and after_suite are both empty, so the added-failure count is unmeasured.",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md",
+      "line": "7",
+      "severity": "follow-on",
+      "text": "follow-on: the record concludes \"graphs do not accumulate per compiled program\" from a ladder that peaks at 2 alive graphs, never approaching the 1669-graph exhaustion the measurement exists to explain, so the generalisation beyond the measured regime is unsupported and the gap is not named."
+    }
+  ],
+  "follow_ons": "The node's own follow-on stands: build or expose an on-demand XLA alive-graph count query that fires after device synchronisation without graph dispatch, verify that surface, then run a fresh completed two-arm titan measurement. From this review: name the regime gap between the flat ladder (peak 2 alive graphs) and the motivating 1669-graph exhaustion before the no-accumulation conclusion is read as general; and either give the command-buffer-disabled arm a positive control or report its zero explicitly as an absence of lifecycle events rather than a measured reading (the report already does the latter).",
+  "gate_arms_note": "The reviewed node armed no pytest arms. Its gate is a ruff/py_compile/render-receipt/jq/rg sequence over receipt.json and the rendered figure plus a reckon audit-doc call (manifest tests field); I reproduced every named command (all pass). The measurement is titan job 1280456 (titan-job-1280456.log); the refusal is titan job 1280468 (titan-job-1280468.log).",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read commit by commit against 8cbd46f3f; e43904110 regenerates the PNG and SVG solely from the enabled job-1280456 program markers and aligns the report, fragment and receipt to the bounded conclusion, and 183e51ab5 stabilises the rendered SVG (svg.hashsalt plus Date None); git diff --check clean.",
+    "done_when": "The measure is a titan series of the count against programs compiled with a control arm beside it; the manifest records job 1280456 (no_growth_observed, twenty program markers each 1) and job 1280468's refusal, and the committed figure regenerates byte-identically from receipt.json:1.",
+    "goal": "The node goal is to establish whether the alive CUDA graph count accumulates per compiled executable (released on drop) or for the process, on a run that compiles many programs; the landed record now states the ladder result -- count 1 at program 1 and 1 at program 20, growth 0 over 20 distinct shapes -- so the count is not process-cumulative across this ladder, with release honestly left unmeasured (report mcs-alive-graph-count-series.md:7).",
+    "manifest": "Read; status complete, ten commits ending 183e51ab5, tests a ruff/py_compile/render-receipt/jq/rg gate whose every named command I reproduced (ruff exit 0, jq exit 0, SVG positive rg exit 0, SVG negative rg exit 1, report rg exit 0, audit-doc OK); baseline_suite and after_suite are empty so the added-failure count is unmeasured.",
+    "write_paths": "Read the manifest's four declared paths; the range 0aac33c2d..183e51ab5 changes five files, every one under docs/figures/millisecond-converged-solve/cuda-graph-count/ or the declared evidence fragment, plus the declared out-of-repo report."
+  },
+  "justifications": {
+    "durability": "the committed figure is regenerated by the committed instrument from receipt.json and is byte-stable under rerender (measure_cuda_graph_count.py:335-340 sets svg.hashsalt and Date None), and the settled-reread guard fired in job 1280468, but no committed test pins either, so both stay unguarded against regression.",
+    "evidence": "every headline number reconciles with titan-job-1280456.log and the committed PNG/SVG are byte-reproducible from receipt.json (I re-ran measure_cuda_graph_count.py --render-receipt and cmp returned identical); deductions for the disabled arm's zero being an absence of lifecycle events (receipt.json arms) and for the ladder never entering the motivating regime.",
+    "fit": "instrument and fragment are mechanism-worded with no plan label and the figure follows the data-ink rules (measure_cuda_graph_count.py:314-333 despines to left/bottom, one direct label, 3.0/2.6 pt lines, no grid).",
+    "goal_fidelity": "report mcs-alive-graph-count-series.md:7 states the measured answer \"not process-cumulative across programs in this ladder\" and keeps the release half explicit as unmeasured, but release-on-drop and the regime gap to the motivating 1669-graph failure remain unanswered.",
+    "scope_discipline": "git diff --numstat 0aac33c2d..183e51ab5 changes exactly five files, all inside the declared cuda-graph-count directory and the declared fragment (the out-of-repo report is declared); the reviewed worktree is clean."
+  },
+  "plan": "nova:millisecond-converged-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: The node goal is to establish whether the alive CUDA graph count accumulates per compiled executable (released on drop) or for the process, on a run that compiles many programs; the landed record now states the ladder result -- count 1 at program 1 and 1 at program 20, growth 0 over 20 distinct shapes -- so the count is not process-cumulative across this ladder, with release honestly left unmeasured (report mcs-alive-graph-count-series.md:7).\nVERDICT done_when: The measure is a titan series of the count against programs compiled with a control arm beside it; the manifest records job 1280456 (no_growth_observed, twenty program markers each 1) and job 1280468's refusal, and the committed figure regenerates byte-identically from receipt.json:1.\nVERDICT write_paths: Read the manifest's four declared paths; the range 0aac33c2d..183e51ab5 changes five files, every one under docs/figures/millisecond-converged-solve/cuda-graph-count/ or the declared evidence fragment, plus the declared out-of-repo report.\nVERDICT manifest: Read; status complete, ten commits ending 183e51ab5, tests a ruff/py_compile/render-receipt/jq/rg gate whose every named command I reproduced (ruff exit 0, jq exit 0, SVG positive rg exit 0, SVG negative rg exit 1, report rg exit 0, audit-doc OK); baseline_suite and after_suite are empty so the added-failure count is unmeasured.\nVERDICT diff: Read commit by commit against 8cbd46f3f; e43904110 regenerates the PNG and SVG solely from the enabled job-1280456 program markers and aligns the report, fragment and receipt to the bounded conclusion, and 183e51ab5 stabilises the rendered SVG (svg.hashsalt plus Date None); git diff --check clean.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: report mcs-alive-graph-count-series.md:7 states the measured answer \"not process-cumulative across programs in this ladder\" and keeps the release half explicit as unmeasured, but release-on-drop and the regime gap to the motivating 1669-graph failure remain unanswered.\nSCORE evidence: 17\nJUSTIFICATION evidence: every headline number reconciles with titan-job-1280456.log and the committed PNG/SVG are byte-reproducible from receipt.json (I re-ran measure_cuda_graph_count.py --render-receipt and cmp returned identical); deductions for the disabled arm's zero being an absence of lifecycle events (receipt.json arms) and for the ladder never entering the motivating regime.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --numstat 0aac33c2d..183e51ab5 changes exactly five files, all inside the declared cuda-graph-count directory and the declared fragment (the out-of-repo report is declared); the reviewed worktree is clean.\nSCORE durability: 15\nJUSTIFICATION durability: the committed figure is regenerated by the committed instrument from receipt.json and is byte-stable under rerender (measure_cuda_graph_count.py:335-340 sets svg.hashsalt and Date None), and the settled-reread guard fired in job 1280468, but no committed test pins either, so both stay unguarded against regression.\nSCORE fit: 16\nJUSTIFICATION fit: instrument and fragment are mechanism-worded with no plan label and the figure follows the data-ink rules (measure_cuda_graph_count.py:314-333 despines to left/bottom, one direct label, 3.0/2.6 pt lines, no grid).\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/s22/mcs-alive-graph-count-series.md:7 follow-on: the record concludes \"graphs do not accumulate per compiled program\" from a ladder that peaks at 2 alive graphs, never approaching the 1669-graph exhaustion the measurement exists to explain, so the generalisation beyond the measured regime is unsupported and the gap is not named.\n",
+  "review_base_sha": "46adc6c8b7ca4908d716e95cbe3b1c11832a7717",
+  "review_run_id": "r-20261002T212842805439-review-of-mcs-alive-graph-count-series",
+  "reviewed_base_sha": "8cbd46f3fdee9a61fbd48fb919cd7c0728d51567",
+  "reviewed_commit": "183e51ab57aa42df62946d1595e18f6c26f658ed",
+  "reviewed_head_sha": "183e51ab57aa42df62946d1595e18f6c26f658ed",
+  "reviewed_head_short": "183e51ab5",
+  "reviewed_revision": "183e51ab57aa42df62946d1595e18f6c26f658ed",
+  "reviewed_run_id": "r-20261002T170249718910-mcs-alive-graph-count-series",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/mcs-alive-graph-count-series",
+  "reviewer_node": "review-of-mcs-alive-graph-count-series",
+  "reviewer_run_id": "r-20261002T212842805439-review-of-mcs-alive-graph-count-series",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T21:40:00+00:00",
+  "total": 84,
+  "verdict": "fail"
+}

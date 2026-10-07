@@ -1,0 +1,95 @@
+{
+  "absent": [
+    "per-Newton-pass first-moment row residual series",
+    "run-specific committed evidence fragment",
+    "readable baseline_suite and after_suite arms"
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-03T13:50:51Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T13:20:24Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/measure.py",
+      "line": "180",
+      "severity": "blocking",
+      "text": "The exact done-when calls for the first-moment row residual at each Newton pass. positive.json records four accepted promotions and four relative_residual_after values but no row-residual history. step-replay.json has one row because the first trips=1 outer solve itself completes all four Newton promotions and qualifies; its row_residual_pitches is terminal only. Persist the row after each accepted Newton promotion or explicitly report that the per-pass observation cannot be recovered; the terminal qualification must not be described as satisfying the per-pass evidence clause."
+    },
+    {
+      "file": "docs/evidence/fragments/centroid-constrained-oracle-solve/cco-repaired-constrained-remeasure-receipt.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "The granted fragment path named by the run's landing contract was not written or committed. The H200 figures and numbers remain available in committed receipts and the external report, but the plan-side evidence anchor for this completed receipt is absent."
+    },
+    {
+      "file": "docs/figures/centroid-constrained-oracle-solve/repaired-remeasure-receipt/measure.py",
+      "line": "80",
+      "severity": "follow-on",
+      "text": "Both analytic and solved magnetic-axis marker sets are passed to draw_nulls, but the terminal triangle is plotted second at a nearly identical location, so the opened PNG reads as one visible triangle in each panel. Distinct marker shapes or a direct offset label would make both plotted null sets independently inspectable. No X-points are expected for these limited states."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's manifest leaves baseline_suite and after_suite empty, and its only named gate log is the H200 measurement, not a test suite. There are no readable suite arms or failure IDs to difference. added_failure_count=0 and added_failure_ids=[] mean no added failures can be identified from those absent arms; they do not assert a green suite. No test or product source path changed in the reviewed base-to-head diff.",
+  "justifications": {
+    "durability": "The positive and negative receipts and terminal states, no-row control, panel, request and replay are committed independently, and the full H200 log and report are retained. The per-promotion row observations were never persisted, so a later reader cannot reconstruct that requested sequence from the terminal state. The granted evidence fragment for this run is absent, leaving its landing evidence in a manifest line and an external report rather than a committed plan-side fragment.",
+    "evidence": "The H200 log ends MEASUREMENT_COMPLETE and EXIT=0. An independent arithmetic and digest check at review-check.log verifies both 772-value state hashes, the 215420-byte PNG hash, net span -0.0192645296152 Wb / 49.9070466272 Wb = -3.860082076e-4, positive global 2.6809907914e-14 and row 9.5285147896e-15 pitches versus 1.6601825236e-4, and no-row radial error 0.2549935901 mm versus 0.0773750329 mm tolerance, a 3.29555-fold refusal. The saved predecessor positive state has the same digest. history-audit.log positively detects four global residual entries before reporting the missing per-promotion row series.",
+    "fit": "The driver uses the existing fixture solve and first-moment row, explicitly requests exact clipping and preflights the receipt formatter. The panel was opened: analytic and constrained contours closely match on twelve shared levels, the wall is drawn, and the code plots both analytic and solved axis-marker sets in each panel; both states are limited and report no X-point. The near-coincident axis markers visually overlap. The positive net-of-compensator span calculation follows the plan's locked reading, and the no-row control applies the same derived row tolerance.",
+    "goal_fidelity": "The fresh exact-clip weak-110 H200 job produced the actual compensator, terminal residuals, net span, same-seed no-row refusal, persisted states and shared-level panel. The report correctly limits qualification to this row. The exact node done-when also requires the first-moment row residual at each Newton pass. Four accepted promotions have global after-residuals, but no per-promotion row-residual series; the separate replay contains only one terminal row. That required evidence is missing, so the exact node fails even though its terminal scientific verdict passes.",
+    "scope_discipline": "The four reviewed commits add exactly nine files under the granted repaired-remeasure-receipt figure directory; the external report is at its granted path. The driver is copied from the predecessor with only the panel source path changed. No solver source, test, plan, shared index or concurrent worker path was edited. Commit subjects have conventional form and bodies."
+  },
+  "node": "review-of-cco-repaired-constrained-remeasure-receipt",
+  "predecessor": {
+    "base_sha": "fda483e45007aa20084300afae13837d14efed88",
+    "commits": [
+      "564030e5f",
+      "6e70eb4c8",
+      "5d2d5eaf1",
+      "36b67cef4",
+      "0a688b2e3",
+      "9ca7d87ae",
+      "35baa7c1b"
+    ],
+    "finding": "Its H200 log reproduces KeyError: 'operator' and EXIT=1 after saving the positive state. Commit 36b67cef4 adds the missing context operator and a preflight; its preflight log ends EXIT=0. The completed run's positive state has the same binary64 SHA256, 0196d8cce7b0f3c5b7852bcc0e42ecd7ac154a3b5e11f81fedea8fe6bd77e04b, as the predecessor's saved state. The predecessor correctly withheld qualification because its compensator, residual and no-row receipt were absent.",
+    "head_sha": "35baa7c1b21ff53863b41f55408f1677cd9aa8cc",
+    "run_id": "r-20261003T121637673965-cco-repaired-constrained-remeasure"
+  },
+  "project": "nova",
+  "raw_text": "SCORE goal_fidelity: 16\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 18\nTOTAL: 88\nVERDICT: fail\nCHECKS: predecessor KeyError 'operator' EXIT=1 reproduced in its log and repaired preflight EXIT=0; fresh H200 MEASUREMENT_COMPLETE EXIT=0; persisted predecessor and current positive state digests match; both current state hashes and panel hash independently verified; terminal positive global 2.6809907914e-14, row 9.5285147896e-15 pitches, net span -3.860082076e-4; same-seed no-row radial error is 3.29555 times the derived tolerance; opened shared-level panel shows matching contours and wall, with both marker sets drawn but overlapping.\nFAILURE: The exact done-when requires first-moment row residual per Newton pass. Four primary Newton promotions have global residuals but no corresponding row series; one replay row is terminal only.\nFOLLOW-ONS: persist per-promotion row observations; add the run-specific evidence fragment; distinguish the overlapping axis markers. Baseline and after-suite arms are absent, so zero added failures is unmeasured.",
+  "review_base_sha": "03aa9c24f252594dded610d0d443e155e060a76b",
+  "review_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T135124142622-review-of-cco-repaired-constrained-remeasure-receipt/review-check.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T135124142622-review-of-cco-repaired-constrained-remeasure-receipt/history-audit.log"
+  ],
+  "review_run_id": "legacy-cd714b8f0042",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "35baa7c1b21ff53863b41f55408f1677cd9aa8cc",
+  "reviewed_commit": "7cfda7880b5da4a29e9b383f823f6d309c840ad1",
+  "reviewed_commits": [
+    "11006b4b6",
+    "10c9f66f4",
+    "9e642988c",
+    "7cfda7880"
+  ],
+  "reviewed_head_sha": "7cfda7880b5da4a29e9b383f823f6d309c840ad1",
+  "reviewed_run_id": "r-20261003T132000326731-cco-repaired-constrained-remeasure-receipt",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/cco-repaired-constrained-remeasure-receipt",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T14:06:10Z",
+  "total": 88,
+  "verdict": "fail"
+}

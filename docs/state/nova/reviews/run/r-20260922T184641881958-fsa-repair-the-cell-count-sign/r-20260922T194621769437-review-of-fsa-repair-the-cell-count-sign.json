@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-09-22T19:46:21.769437+00:00",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T194621769437-review-of-fsa-repair-the-cell-count-sign/review-negative-control.log",
+      "line": "1",
+      "text": "the log's first line paraphrases the declared mutation \u2014 'in the full title composer' against the declared 'in the title composer' \u2014 so the declared string appears nowhere in the log, and the completion check reads 'if declaration not in text' (reckon/crew/promotion.py:3361) and refuses this gate; the manifest's note asserts the line is verbatim, which it is not; the failure below the line is the declared condition and is right, so the repair is that one line (or a waiver with the reason)"
+    },
+    {
+      "file": "docs/figures/cut-cell-current-attribution/moment-order/report.md",
+      "line": "3",
+      "text": "the committed figure directory's report quotes the 2026-09-14 run while the receipt.json the node rewrote beside it carries the 2026-09-22 run: line 3's verdict reads 0.000133172 against the committed receipt's 0.000133523, line 16's order-zero envelope reads 0.00552576 against 0.005528514197275688, and the weak-110 order-zero table cell reads 0.00550727 against 0.00550968191; the node's own re-run refreshed the driver's designed report root (the crew reports surface, head digits at 2026-09-22 21:04), so the repo's banked copy alone is stale; the repair is regenerating it from the committed receipt and needs no lane"
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "e6a49e81d composes the title from abs(requested_cells) and returns the per-figure render record; a6978a420 re-renders the four figures and lands the plan and evidence records; both bodies are present",
+    "done_when": "reviewer re-ran the named gate on a git archive of the committed revision (7 passed, exit 0) and the declared control against a signed-title receipt (3 failed, 4 passed, exit 1, first finding signed cell count '-110')",
+    "goal": "read the prompt, the plan comment and both commits; the four moment-order titles print the magnitude in the receipt and in the drawn SVG comments where the base tree printed the sign, and the forward-state panel condition is disclosed as vacuous on these figures with a synthetic panel asserted to fail it",
+    "manifest": "status complete, both shas, eleven changed paths, the gate command with its 7-of-7 result, and after_suite exit 0 at the reviewed revision; check-manifest audits ok (exit 0, no findings)",
+    "write_paths": "the diff touches 14 files, all inside the six assigned paths; the evidence-archive change is 64 added and 0 removed; the plan comment is additive and the plan meta lines are untouched"
+  },
+  "justifications": {
+    "durability": "both commits carry bodies, the gate reproduces on the committed tree, and the regenerated figures are staged with -f; the deduction is the committed figure directory's report.md, left quoting the 2026-09-14 run beside the receipt.json the node rewrote with the 2026-09-22 numbers (finding 2)",
+    "evidence": "reproduced independently in scratch copies of the committed revision \u2014 the gate 7 passed, a signed-title receipt reddens exactly the cell-count condition with four findings, the base defect reproduces from the base SVGs and the base composer, and base against head 543 of 1256 row leaves differ with every adjudicated metric within 2.640e-03 relative (the order-two upper envelope, the exact disclosed figure) and the reaches-target map unchanged",
+    "fit": "the node answers the moment-order half of f-cca-repair-minor-rendering-defects, keeps the gate-b half and the audit items under follow_ons, cites the fence-mandated anchor beside its own record fragment, and does not close the followup",
+    "goal_fidelity": "the four figures, the receipt and the check meet the fence condition; the deduction is the delivered negative-control log, whose first line paraphrases the declared mutation instead of repeating it (finding 1)",
+    "scope_discipline": "the diff is exactly the fence's six paths; no concurrent node's path appears; the plan meta lines and the evidence archive's other sections are untouched, and the archive change is additive"
+  },
+  "node": "review-of-fsa-repair-the-cell-count-sign",
+  "project": "nova",
+  "raw_text": "REVIEWED_REVISION: a6978a4200313e2f77772ec3824c72d7af4fbe43\nreviewed base 1cfd3fd4c2e2458d77ab7dc978e98ae21d390e9d (the diff was taken against it)\nreviewed run r-20260922T184641881958-fsa-repair-the-cell-count-sign, role implement, reviewed by r-20260922T194621769437\n\nVERDICT goal: read the prompt, the plan comment and both commits; the four moment-order titles print the magnitude in the receipt and in the drawn SVG comments where the base tree printed the sign, and the forward-state panel condition is disclosed as vacuous on these figures with a synthetic panel asserted to fail it\nVERDICT done_when: reviewer re-ran the named gate on a git archive of the committed revision (7 passed, exit 0) and the declared control against a signed-title receipt (3 failed, 4 passed, exit 1, first finding signed cell count '-110')\nVERDICT write_paths: the diff touches 14 files, all inside the six assigned paths; the evidence-archive change is 64 added and 0 removed; the plan comment is additive and the plan meta lines are untouched\nVERDICT manifest: status complete, both shas, eleven changed paths, the gate command with its 7-of-7 result, and after_suite exit 0 at the reviewed revision; check-manifest audits ok (exit 0, no findings)\nVERDICT diff: e6a49e81d composes the title from abs(requested_cells) and returns the per-figure render record; a6978a420 re-renders the four figures and lands the plan and evidence records; both bodies are present\nCALL_SITES: none\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the four figures, the receipt and the check meet the fence condition; the deduction is the delivered negative-control log, whose first line paraphrases the declared mutation instead of repeating it (finding 1)\nSCORE evidence: 20\nJUSTIFICATION evidence: reproduced independently in scratch copies of the committed revision \u2014 the gate 7 passed, a signed-title receipt reddens exactly the cell-count condition with four findings, the base defect reproduces from the base SVGs and the base composer, and base against head 543 of 1256 row leaves differ with every adjudicated metric within 2.640e-03 relative (the order-two upper envelope, the exact disclosed figure) and the reaches-target map unchanged\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff is exactly the fence's six paths; no concurrent node's path appears; the plan meta lines and the evidence archive's other sections are untouched, and the archive change is additive\nSCORE durability: 19\nJUSTIFICATION durability: both commits carry bodies, the gate reproduces on the committed tree, and the regenerated figures are staged with -f; the deduction is the committed figure directory's report.md, left quoting the 2026-09-14 run beside the receipt.json the node rewrote with the 2026-09-22 numbers (finding 2)\nSCORE fit: 20\nJUSTIFICATION fit: the node answers the moment-order half of f-cca-repair-minor-rendering-defects, keeps the gate-b half and the audit items under follow_ons, cites the fence-mandated anchor beside its own record fragment, and does not close the followup\n\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260922T194621769437-review-of-fsa-repair-the-cell-count-sign/review-negative-control.log:1 the log's first line paraphrases the declared mutation \u2014 'in the full title composer' against the declared 'in the title composer' \u2014 so the declared string appears nowhere in the log, and the completion check reads 'if declaration not in text' (reckon/crew/promotion.py:3361) and refuses this gate; the manifest's note asserts the line is verbatim, which it is not; the failure below the line is the declared condition and is right, so the repair is that one line (or a waiver with the reason)\nFINDING docs/figures/cut-cell-current-attribution/moment-order/report.md:3 the committed figure directory's report quotes the 2026-09-14 run while the receipt.json the node rewrote beside it carries the 2026-09-22 run: line 3's verdict reads 0.000133172 against the committed receipt's 0.000133523, line 16's order-zero envelope reads 0.00552576 against 0.005528514197275688, and the weak-110 order-zero table cell reads 0.00550727 against 0.00550968191; the node's own re-run refreshed the driver's designed report root (the crew reports surface, head digits at 2026-09-22 21:04), so the repo's banked copy alone is stale; the repair is regenerating it from the committed receipt and needs no lane\n",
+  "review_run_id": "r-20260922T194621769437-review-of-fsa-repair-the-cell-count-sign",
+  "reviewed_revision": "a6978a4200313e2f77772ec3824c72d7af4fbe43",
+  "reviewed_run_id": "r-20260922T184641881958-fsa-repair-the-cell-count-sign",
+  "role": "review",
+  "scores": {
+    "durability": 19,
+    "evidence": 20,
+    "fit": 20,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-22T22:24:20.062615+00:00",
+  "total": 98
+}

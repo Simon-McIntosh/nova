@@ -1,0 +1,59 @@
+{
+  "absent_items": [
+    "interface_budget"
+  ],
+  "completed_at": "2026-10-04T17:13:43.014Z",
+  "dispatched_at": "2026-10-04T16:57:27Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/fixed_point.py:923",
+      "id": "reuse_search-1",
+      "reason": "a \u00a73 node reading the section text alone would rebuild the landed request enum and shared body instead of extending them; the section must cite `fixed_point.py` and state the actual remainder (whole-solve scheduling to reach the instruction ceiling), or it re-implements a landed design.",
+      "text": "\u00a73's design says \"the section implements one lax state machine whose sole operator body serves residual, merit, acceptance, recovery, reconciliation and Jacobian-vector requests\", but `OperatorRequestKind` (RESIDUAL/MERIT/ACCEPTANCE/RECOVERY/RECONCILIATION/JVP) at :923, `OperatorRequest` at :934, `operator_request` at :955, `operator_request_body` with the read-authority `jax.lax.switch` at :961-995, and the stream dispatchers at :2403, :2454 and :4600 already exist in that file",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/solve_program_size_gate.py:37",
+      "id": "duplicate_owner-1",
+      "reason": "the correct change is to re-base this owner's ceiling to the clipped-mode / 1000-cell target the plan wants, not to stand a parallel gate beside it.",
+      "text": "\u00a72's done-when adds \"an executable-size gate ... beside the memory gate\", but this module already owns an executable-size, instruction-count and compile-time gate: `MAX_300_EXECUTABLE_BYTES` at :37, `MAX_300_SOLVE_INSTRUCTIONS` at :39, `evaluate_gate` at :350 and `TARGET_300_EXECUTABLE_BYTES`",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "benchmarks/solve_profile_kernel_count.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "commissioning a new profiler duplicates an existing one; cite and re-run this benchmark in the requested mode instead.",
+      "text": "\u00a72's done-when asks for \"a JAX profiler trace of one 1000-cell whole-cell solve [that] tables kernel count, launch latency share and compute share\", which is exactly what this benchmark already produces per cell count (device kernels launched and distinct programs, summed kernel wall, host-to-device launch gap, share of wall in re-issued loop bodies, HLO op count, executable bytes, compile seconds)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/h200_test_lane/prewarm.sh:135",
+      "id": "duplicate_owner-3",
+      "reason": "after \u00a74 makes the guard count program-key entries (excluding the XLA autotune subtree), the shell count still reads the unpurged total; the shell path must delegate to the guard or the two receipts will disagree.",
+      "text": "`served_entries` is computed twice: `directory_entry_count` at `scripts/h200_test_lane/cache_guard.py:213`, and an inline `find \"${served_directory}\" -type f | wc -l ...` at `prewarm.sh:135-136` whose result gates the refusal at :137",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "47862af609a0462771500f99498396721b03567ebb78dd8a55354f5921b5e001",
+  "plan_slug": "forward-solver-route-integrity",
+  "plan_version": 112,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261004T165714168312-plan-review-of-forward-solver-route-integrity",
+  "reviewed_blob_sha": "166f9c8c3aa988ddc4049e9b5380c4127f7ca519",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a73's design is one request-kind enum, one shared primal/tangent body and",
+    "duplicate_owner": "a finding \u2014 \u00a72's done-when re-specifies an executable-size gate and a",
+    "reuse_search": "a finding \u2014 \u00a73's design presents a traced request state machine as machinery to",
+    "thin_wrapper": "pass \u2014 the \u00a71 repair, \u00a72 loop changes and \u00a74 guard change all edit mechanisms in"
+  },
+  "section_digests": {},
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:29.404345+00:00"
+}

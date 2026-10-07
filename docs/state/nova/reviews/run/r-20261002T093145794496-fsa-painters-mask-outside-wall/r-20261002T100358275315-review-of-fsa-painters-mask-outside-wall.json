@@ -1,0 +1,133 @@
+{
+  "absent": [
+    "no base arm in the reviewed run's own record: its done-when asks for 'no failure added against a stated base' but the manifest declares none was run, so the base half of that clause is asserted, not evidenced by the run",
+    "no test that a caller-side renderer's contour now stays inside the wall: the reusable painter is guarded, the ~40 renderer call sites the followup names are not, and no guard forces a caller to pass wall=",
+    "no completion of tests/test_playable_session.py at head: it imports nova.media and the run recorded EXIT=124 (540 s bound) with no failure seen"
+  ],
+  "absent_items": [
+    {
+      "disposition": "not a defect: the run's head logs carry the header 'rev d598cd193+worktree', the standard form for a gate run before the change was committed; I re-ran the same modules at the committed head d4f4c723f and reproduced every summary, so the recorded head arms are sound.",
+      "item": "an independent reproduction of the run's head arms by the run itself on the committed revision rather than the pre-commit worktree"
+    },
+    {
+      "disposition": "follow-on: the ~40 renderers and the ~30 _raster_field callers listed in the report still draw outside the wall; passing wall= or switching to draw_scattered_contours is a caller-side node per the painter-lane ruling, outside this node's fence.",
+      "item": "coverage of the caller-side renderer repairs the followup names"
+    }
+  ],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "nova/media/sources/frame.py:56 inside_wall_units (the predicate the mask reuses)",
+    "nova/media/poloidal.py draw_wall (the wall-unit collection the painters share)",
+    "benchmarks/plasma_cell_fixed_point_attribution.py:416 (the named figure's raster -> draw_flux_contours, the caller the owner must repoint)"
+  ],
+  "commits_read": [
+    "d598cd1931edec10fff7a069b0149bd048989503",
+    "d4f4c723f98731a00f975986bfe1430fbe19f618"
+  ],
+  "completed_at": "2026-10-02T10:31:09.382Z",
+  "dispatched_at": "2026-10-02T10:04:12Z",
+  "findings": [
+    {
+      "file": "tests/test_contour_inside_wall.py",
+      "line": "79",
+      "severity": "follow-on",
+      "text": "follow-on: the negative-control mutation reddens a test whose assertion is about the empty-mesh ValueError, not the wall geometry. test_wall_is_required_and_an_empty_mesh_is_refused fails under the mutation with 'DID NOT RAISE ValueError' because the all-false mask makes np.all(outside) false so the guard never fires; the three geometry tests fail for the direct reason. This is coherent and the control is legitimate, but it means the single negative control exercises the guard branch and the geometry together, so it does not isolate which half the mutation moved."
+    },
+    {
+      "file": "nova/media/poloidal.py",
+      "line": "196",
+      "severity": "follow-on",
+      "text": "follow-on: the followup f-fsa-painters-draw-field-outside-the-wall also asks that the benchmark and script renderers that triangulate a scattered field be masked. The node reported them by file and line (report at reports/nova/s22/fsa-painters-mask-outside-wall.md, ~40 call sites plus the ~30 _raster_field callers) and left them drawing outside the wall, and the named figure docs/figures/plasma-cell-read-fidelity/exact-mode-construction-comparison.png is unrepaired. This is the correct scope split -- the renderers are other plans' artifacts and outside the node fence -- but the followup is not fully discharged by adding the reusable painter alone; a caller-side node must pass wall= / switch to draw_scattered_contours."
+    },
+    {
+      "file": "tests/test_contour_inside_wall.py",
+      "line": "153",
+      "severity": "follow-on",
+      "text": "follow-on: test_raster_contours_blank_the_field_outside_the_wall asserts only that no contour vertex lands inside the slot rectangle, which is a weaker claim than the module's title (no vertex outside the wall). It does not assert, for the raster path, that every drawn vertex is inside the wall units as the scattered path's test does. A raster fixture whose blanking left a vertex outside the wall but not in the slot would pass."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "PYTHONPATH=<target-worktree> JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout=600 tests/test_contour_inside_wall.py tests/test_media.py tests/test_poloidal.py tests/test_poloidal_view.py tests/test_playable_camera.py tests/test_bank_drift_paired_probe.py tests/test_topology_parity_harness.py (each module its own process)",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T100358275315-review-of-fsa-painters-mask-outside-wall/logs/review-head-test_contour_inside_wall.log",
+      "revision": "d4f4c723f98731a00f975986bfe1430fbe19f618"
+    },
+    "baseline_suite": {
+      "command": "PYTHONPATH=<review-worktree> JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --timeout=600 tests/test_media.py tests/test_poloidal.py tests/test_poloidal_view.py tests/test_playable_camera.py tests/test_bank_drift_paired_probe.py tests/test_topology_parity_harness.py (each module its own process)",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T100358275315-review-of-fsa-painters-mask-outside-wall/logs/review-base-test_media.log",
+      "revision": "d598cd1931edec10fff7a069b0149bd048989503"
+    }
+  },
+  "gate_arms_note": "The reviewed run carries no baseline_suite and no after_suite key in its manifest (confirmed by grep over its run directory: manifest.md has neither, and classification.json's parsed manifest object has neither); it ran head arms only, because the change is additive. My added_failure_count/added_failure_ids are therefore derived from arms I ran myself, not from the reviewed run's own suite keys: base d598cd193 (source-identical tree) and head d4f4c723f, each running tests/test_media.py, test_poloidal.py, test_poloidal_view.py, test_playable_camera.py, test_bank_drift_paired_probe.py and test_topology_parity_harness.py in its own fresh process (JAX_PLATFORMS=cpu, -p no:cacheprovider, --timeout=600). Base: 46/9/16/15/11/9 all passed, 0 failed. Head: the same six plus tests/test_contour_inside_wall.py 7 passed, the six 46/9/16/15/11/9 all passed, 0 failed. Head-minus-base failure set is empty. tests/test_playable_session.py, which imports nova.media, was not run to completion on either arm (>540 s); the run recorded it EXIT=124 with no failure seen.",
+  "item_verdicts": {
+    "diff": "Read d4f4c723f against d598cd193; it is one commit adding two functions and one optional keyword to nova/media/poloidal.py, a new 164-line test module, and a 51-line evidence fragment -- 310 insertions, 0 deletions, no other path.",
+    "done_when": "The reviewed done-when requires: reuse the existing painters and wall units with no second wall representation (met -- inside_wall_units and the draw_wall unit collection are reused); every nova.media scattered-field painter masks triangles outside the wall units (met -- the one new painter masks a superset of the centroid rule); tests/test_contour_inside_wall.py fails when a drawn vertex is outside the polygon with the mask removed and passes after, JAX_PLATFORMS=cpu --timeout 0 (met -- 7 passed; negative control 4 failed, 3 passed, EXIT=1); no failure added against a stated base across the import-affected modules in fresh processes (met by my measured arms, though the run itself stated rather than measured the base); the report lists the out-of-nova.media renderers by file and line and names exact-mode-construction-comparison.png for its owner (met); the fragment cites the followup id (met).",
+    "goal": "The node's goal (the reviewed prompt, NODE/GOAL lines) is to mask scattered-node contour triangulations to the first wall in the nova.media poloidal painters per f-fsa-painters-draw-field-outside-the-wall; draw_scattered_contours + triangles_outside_wall do this for the scattered path and draw_flux_contours(wall=) for the raster path, so the landed change does what the goal states.",
+    "manifest": "The reviewed run's manifest is present and readable at its run path; it states the two repairs, the measure, the negative control (with a note that 4 of 7 fail under the mutation), the report and fragment artifacts, and returns the caller-side renderer edits and the test_playable_session timeout as follow_ons. Its account matches the code and the logs I read; its evidence_inputs claim 'change is additive so no baseline suite was run' is the one clause I had to measure myself.",
+    "write_paths": "The reviewed node's changed paths are exactly its declared fence: nova/media/poloidal.py, tests/test_contour_inside_wall.py, docs/evidence/fragments/figure-and-solver-audit/fsa-painters-mask-outside-wall.html, plus the report under reports/nova/s22/. No concurrent node's path is named in the diff."
+  },
+  "justifications": {
+    "durability": "The guard is real and falsifiable: removing the mask reddens four of the seven tests (verified against the recorded negative-control log, and reproduced by the mutation mechanism -- an all-false mask makes triangles_outside_wall return False everywhere, so the drawn vertices leave the wall, the mask flags nothing, and the all-outside ValueError never fires). The new test is default-collected, so the painter's contract is pinned. Held below 20 because the repository still carries the ~40 renderers the followup names that draw outside the wall with no guard that a caller passes wall=, and no test asserts that the raster-blanking path leaves the vessel interior's contour coverage intact alongside the blanking.",
+    "evidence": "Held below 20 because the reviewed run recorded no base arm even though its own done-when says 'no failure is added, against a stated base' -- it argued the change additive rather than measuring it. I measured it: base d598cd193 (review tree, whose nova/media/poloidal.py blob 6c860029 equals base) and head d4f4c723f (target worktree) each ran the same six nova.media-importing modules in their own fresh process and both are green with zero failures, so added_failure_count is 0 by a measured head-minus-base set identity, not by assertion. The negative control is recorded and reddens for the claimed reason (below). The one head arm the run could not finish, test_playable_session, hit its 540 s bound with no failure seen and is an incomplete measurement, not a pass.",
+    "fit": "The implementation reuses inside_wall_units and the wall-unit collection draw_wall already reads (no second wall representation, as the measure requires), names by mechanism (triangles_outside_wall, draw_scattered_contours), and carries no plan, sprint or ticket identifier in any symbol, filename or comment; the fragment cites the followup id as required. No abstraction beyond the two helpers and one optional keyword. Minor: the new wall parameter is the only unannotated argument on draw_scattered_contours.",
+    "goal_fidelity": "The goal and followup f-fsa-painters-draw-field-outside-the-wall asks that scattered-node triangulations be masked to the wall and a test added that fails when a drawn contour vertex lies outside the polygon. The node adds draw_scattered_contours and triangles_outside_wall (masks a triangle unless its centroid, three vertices and three edge midpoints are all inside the wall units -- a strict superset of the requested centroid rule, so it cannot draw outside where the requested rule would not), adds an optional wall= to draw_flux_contours that blanks grid points outside the units, and ships tests/test_contour_inside_wall.py. It does not edit the benchmark renderers the followup also names (its fence was nova/media/poloidal.py plus the test); instead it equips callers to opt in and lists those renderers by file and line in the report, which is the correct handling for an out-of-fence caller change.",
+    "scope_discipline": "The base..head diff is exactly the three declared paths -- nova/media/poloidal.py, tests/test_contour_inside_wall.py and docs/evidence/fragments/figure-and-solver-audit/fsa-painters-mask-outside-wall.html -- 310 insertions across 3 files, no other path touched. The report is written to the run-scoped reports directory the fence names. No concurrent node's path is touched."
+  },
+  "limitations": [
+    "I did not run tests/test_playable_session.py to completion on either arm (it exceeds the 540 s bound the run itself hit), so its contribution to the added-failure set is unmeasured on both sides.",
+    "the base arm I ran used the review worktree (9b1b1bb8d) whose nova/ and tests/ trees are byte-identical to base d598cd193 (git diff --name-only d598cd193 9b1b1bb8d -- nova tests is empty) rather than a fresh checkout of d598cd193 itself; the module set is therefore base-exact even though the tree HEAD is not.",
+    "the polygon-inside argument for the mask (all three vertices plus midpoints plus centroid inside => the linear-interpolated contour stays inside) is exact for a convex region and is verified empirically on the slot fixture for the concave one; I did not prove it for an arbitrary re-entrant wall."
+  ],
+  "measurement_cwd": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-painters-mask-outside-wall",
+  "measurement_module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-painters-mask-outside-wall/nova/media/poloidal.py",
+  "notes": "The reviewed node masks scattered-node contour triangulations to the first wall. The code is a clean, additive repair: draw_scattered_contours masks any triangle not wholly inside the wall units (a superset of the requested centroid rule, so it cannot draw outside where the rule would not) and draw_flux_contours gains an optional wall= that blanks grid points outside the units; both reuse inside_wall_units and the draw_wall unit collection with no second wall model. The new test is default-collected and its guard is falsifiable -- the recorded negative control (mask removed) reddens 4 of 7 with 13 of 443 drawn vertices outside the wall. Scope is exactly the three declared paths. I verified the base..head added-failure set is empty by running base and head arms myself, because the run recorded head arms only and argued the change additive; that absence of a run-recorded base arm, plus the incomplete test_playable_session arm and the unrepaired caller-side renderers, are the evidence deductions. Scores: goal_fidelity 18, evidence 16, scope_discipline 20, durability 15, fit 18. Total 87, verdict pass; none of the three findings blocks this node's landing.",
+  "plan": "nova:figure-and-solver-audit",
+  "project": "nova",
+  "reproduction_of_repaired_defect": [
+    {
+      "after": "At head d4f4c723f draw_scattered_contours masks every triangle that is not wholly inside the wall units and draw_flux_contours(wall=...) blanks grid points outside them. The defect is shown to reproduce and be closed on the fixture: the test test_unmasked_triangulation_of_the_same_nodes_draws_outside_the_wall asserts and confirms that the bare triangulation of the same nodes does draw outside the wall (7 passed at head), and with the mask removed the recorded negative-control log reads '13 of 443 drawn contour vertices lie outside the wall, first at [2.16741893 1.09782502]' with 4 failed, 3 passed, EXIT=1.",
+      "before": "At base d598cd193 nova/media/poloidal.py has no scattered-node contour painter and draw_flux_contours takes only a regular grid with no wall argument (blob 6c860029), so a caller that contours a hull-interpolated raster has no painter-level way to keep the field inside the vessel; the field is finite across the full convex hull of the nodes.",
+      "finding_id": "a scattered-node field contoured through an unmasked Delaunay triangulation draws flux outside the first wall across a concave vessel (followup f-fsa-painters-draw-field-outside-the-wall; the S18 exact-mode-construction-comparison.png)."
+    }
+  ],
+  "review_run_id": "r-20261002T100358275315-review-of-fsa-painters-mask-outside-wall",
+  "reviewed_base_sha": "d598cd1931edec10fff7a069b0149bd048989503",
+  "reviewed_head_sha": "d4f4c723f98731a00f975986bfe1430fbe19f618",
+  "reviewed_revision": "d4f4c723f98731a00f975986bfe1430fbe19f618",
+  "reviewed_run_id": "r-20261002T093145794496-fsa-painters-mask-outside-wall",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s22-nova/fsa-painters-mask-outside-wall",
+  "reviewer_node": "review-of-fsa-painters-mask-outside-wall",
+  "reviewer_run_id": "r-20261002T100358275315-review-of-fsa-painters-mask-outside-wall",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-07T11:53:28.783120+00:00",
+  "total": 87,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha d4f4c723f is a single commit whose parent is reviewed_base_sha d598cd193 (git log shows d4f4c723f -> d598cd193).",
+    "the reviewed worktree is clean at head (git status --porcelain empty) and its HEAD is d4f4c723f98731a00f975986bfe1430fbe19f618.",
+    "git diff --stat d598cd193 d4f4c723f is exactly 3 files / 310 insertions / 0 deletions: nova/media/poloidal.py, tests/test_contour_inside_wall.py, docs/evidence/fragments/figure-and-solver-audit/fsa-painters-mask-outside-wall.html.",
+    "the change is additive on the call surface: the new wall= keyword is inserted after linewidth and before **kwargs, and every existing draw_flux_contours caller I read passes at most five positional arguments (axes, radius, height, flux, levels) with color= as a keyword; I read the multi-line call sites at benchmarks/plasma_cell_production_ladder.py:712, benchmarks/limited_anchor_containment.py:603, benchmarks/null_census_assertion.py:419 and benchmarks/plasma_cell_map_fidelity.py:527 and none passes a sixth positional.",
+    "tests/test_contour_inside_wall.py 7 passed in a fresh process at head (my log logs/review-head-test_contour_inside_wall.log), matching the run's own logs/head-test.log (7 passed in 6.73s).",
+    "the negative control reproduces: the recorded logs/negative-control.log is the mask-removed mutation and reads 4 failed, 3 passed, EXIT=1; its first failure message names 13 of 443 vertices outside the wall, so the guard is shown able to fail rather than passing by construction.",
+    "base vs head arm differential measured by me: base tree (review worktree, poloidal.py == base blob 6c860029) and head tree (target worktree at d4f4c723f) each ran the six import-affected modules in fresh processes; both sets pass with 0 failures, so 0 failures are added by this change (added_failure_count 0, ids []).",
+    "nova.media.sources.frame.inside_wall_units(points, wall) exists at frame.py:56 and unites closed vessel interiors minus material interiors, matching the semantics triangles_outside_wall and draw_flux_contours rely on; the test imports the predicate and wall_unit/material_unit helpers from the same modules the production code uses, so the test and the guard cannot drift to different wall models."
+  ]
+}

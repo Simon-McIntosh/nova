@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "The reviewed manifest's after_suite arm (revision 2dce6bb3b, completed true) records 14 passed and 0 failures; the baseline_suite arm (revision f9603c3b, exit_status 4, completed false) collected nothing because tests/test_contour_tree_mesh.py does not exist at base (verified by git cat-file -e). The head arm adds no failing id over the empty baseline, so added_failure_count is 0 and added_failure_ids is empty. An independent repeat at the reviewed head b9658be0 records 14 passed, consistent.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T003152788581-review-of-ctta-hex-contour-mesh/review-gate.log: 14 passed, EXIT=0 at reviewed head b9658be0 (scratch extraction)",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T003152788581-review-of-ctta-hex-contour-mesh/review-overflow-repro.log: overflow=True, vertex array size 4, all validity masks empty, no valid triangle/edge index past capacity",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261002T003152788581-review-of-ctta-hex-contour-mesh/review-negative-control-overflow.log: 1 failed, EXIT=1 with the truncating build restored (tests/test_contour_tree_mesh.py:142)",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh/docs/figures/contour-tree-topology-authority/mesh/gate.log: 8 passed, EXIT=0",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh/docs/figures/contour-tree-topology-authority/mesh/head-suite.log: 14 passed, EXIT=0",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh/docs/figures/contour-tree-topology-authority/mesh/baseline-suite.log: no tests ran, EXIT=4"
+  ],
+  "call_sites": [],
+  "commits_read": [
+    "fcc5f34ba3f9bcb12fbda753a63dfcb7ed44e7a4",
+    "f1aab831210947817d3a0363e06ddd0351eff12b",
+    "2dce6bb3b112fe874b8ba97835640a5597cd87ae",
+    "b9658be0836c46c7d42b6c7c871eb71d9f160c63"
+  ],
+  "completed_at": "2026-10-02T00:43:53.092Z",
+  "dispatched_at": "2026-10-02T00:32:11Z",
+  "findings": [
+    {
+      "file": "docs/figures/contour-tree-topology-authority/mesh/gate.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the committed gate receipt names revision f1aab8312 (the overflow-repair commit) rather than the reviewed head b9658be0. The source and test trees are byte-identical across f1aab8312..b9658be0 (git diff --name-only over nova/* and tests/* is empty), so the receipt measures the reviewed code; only the header literal differs from the reviewed head sha."
+    },
+    {
+      "file": "docs/figures/contour-tree-topology-authority/mesh/negative-control-nearest-centre.log",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the nearest-centre negative control's header names revision f9603c3b while the tree it ran carried the module under mutation; the tree line states the mutation, so the control is legible, but the revision literal does not name the mutated tree."
+    }
+  ],
+  "gate_arms_note": "Reviewed manifest baseline_suite: revision f9603c3b, exit_status 4, completed false (mesh test absent at base). Reviewed manifest after_suite: revision 2dce6bb3b, exit_status 0, completed true, 14 passed. Committed gate.log: 8 passed, EXIT=0, header revision f1aab8312. Independent review gate at head b9658be0: 14 passed, EXIT=0 (review-gate.log).",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Four commits: fcc5f34ba adds the mesh module, tests, figure, gate receipt, evidence fragment; f1aab8312 repairs the overflow refusal; 2dce6bb3b records the baseline/head arms and overflow negative control; b9658be08 names the measured revision on the head-suite log.",
+    "done_when": "The mesh node's share of the \u00a72 done-when (mesh construction and the capacity-refusal clause) is met: the gate passes and an over-capacity build refuses visibly rather than truncating. The brute-force connectivity, V-E=1 and vmap clauses target the sibling tree node.",
+    "goal": "The dispatched goal is the piecewise-linear mesh carrier of \u00a72, shared with the tree node through a vertex and edge interface; nova/equilibrium/contour_tree_mesh.py supplies ContourMesh and build_contour_mesh as specified.",
+    "manifest": "The source manifest reports both gate arms: an unreadable baseline (mesh test absent at base, exit 4) and a readable head arm (14 passed).",
+    "write_paths": "All nine changed paths lie inside the declared write paths in the reviewed manifest."
+  },
+  "justifications": {
+    "durability": "The prior review's unobservable capacity guard is repaired and falsified: test_over_capacity_sets_overflow_flag now asserts that no valid vertex/edge/triangle is set and no valid index reaches the truncated capacity, and restoring the truncating _pad by mutation makes it fail at tests/test_contour_tree_mesh.py:142 with vertex_valid.any() True (EXIT=1, review-negative-control-overflow.log). The nearest-centre wall-valuation control is also red. The jit-traceability test covers the fixed-capacity pytree. vmap identity of the \u00a72 done-when belongs to the sibling tree node and is not tested here.",
+    "evidence": "The declared gate was independently repeated at the reviewed head b9658be0 via a git-archive scratch extraction (module.__file__ under the scratch tree), 14 passed, EXIT=0. The reviewed manifest now supplies both arms: baseline_suite (revision f9603c3b, exit_status 4, completed false) and after_suite (revision 2dce6bb3b, exit_status 0, completed true, 14 passed). The baseline arm is honestly unreadable (tests/test_contour_tree_mesh.py does not exist at base, verified by git cat-file), so the readable head arm carries the measurement and added failures are zero. Two negative controls are committed and both are red.",
+    "fit": "Fixed-capacity jax pytree with tree_flatten/tree_unflatten, host-side scipy Delaunay and shapely clipping following reuse-map rows 1-3, and reuse of nova.equilibrium.wall_mask (WallUnit, inside_polygon) match nova's idioms; the wall valuation uses the containing-triangle lookup the reuse map records as absent.",
+    "goal_fidelity": "nova/equilibrium/contour_tree_mesh.py builds the \u00a72 mesh carrier faithfully: the three-direction triangulation of the hex-centre lattice (scipy Delaunay, reuse-map row 1), clipped to the multi-unit vessel polygon, with wall vertices placed on the clipped polyline and valued by barycentric interpolation on the containing triangle of the same piecewise-linear field. The \u00a72 capacity/refusal clause that was the prior review's blocking defect is now met: an over-capacity build (vertex_capacity=4) returns overflow=True with every validity mask empty and every index blanked to -1, independently reproduced at head (review-overflow-repro.log).",
+    "scope_discipline": "git diff --name-only f9603c3b..b9658be0 lists exactly nine paths, all inside the reviewed manifest's declared write paths (nova/equilibrium/contour_tree_mesh.py, tests/test_contour_tree_mesh.py, the \u00a72 evidence fragment, and the mesh figures/receipts directory); no out-of-scope file was touched."
+  },
+  "plan": "nova:contour-tree-topology-authority",
+  "project": "nova",
+  "raw_text": "VERDICT goal: nova/equilibrium/contour_tree_mesh.py implements the section 2 mesh carrier (hex-centre Delaunay, multi-unit vessel clip, barycentric wall valuation) and now refuses an over-capacity build visibly.\nVERDICT done_when: The focused gate passes and the capacity-refusal clause is met; the tree-side clauses belong to the sibling node.\nVERDICT write_paths: All nine changed paths are inside the declared grant.\nVERDICT manifest: Both gate arms are supplied; the baseline is honestly unreadable (mesh test absent at base).\nVERDICT diff: Four commits add the module, tests, receipts and evidence fragment, repair the overflow refusal, and record the arms.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: faithful mesh carrier; the prior truncating overflow path now blanks arrays and masks so no consumer reads a corrupt carrier.\nSCORE evidence: 17\nJUSTIFICATION evidence: independent gate 14 passed at head; both arms supplied; two red negative controls; the gate receipt header names the repair commit, source-identical to head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff lists only the nine declared paths.\nSCORE durability: 17\nJUSTIFICATION durability: the capacity guard is now falsifiable and falsified by mutation; jit traceability covered.\nSCORE fit: 18\nJUSTIFICATION fit: jax fixed-capacity pytree, scipy Delaunay, shapely clip, wall_mask reuse follow nova idioms.\nFINDING docs/figures/contour-tree-topology-authority/mesh/gate.log:1 follow-on: the receipt names f1aab8312 rather than head b9658be0, but the source trees are identical.\nNOTE docs/figures/contour-tree-topology-authority/mesh/negative-control-nearest-centre.log:1 follow-on: control header names the base revision while the tree carried the mutated module.\n",
+  "review_run_id": "r-20261002T003152788581-review-of-ctta-hex-contour-mesh",
+  "reviewed_base_sha": "f9603c3be1e2ced6d06bc28bdff8598b6cc153ed",
+  "reviewed_head_sha": "b9658be0836c46c7d42b6c7c871eb71d9f160c63",
+  "reviewed_revision": "b9658be0836c46c7d42b6c7c871eb71d9f160c63",
+  "reviewed_run_id": "r-20261001T230318372995-ctta-hex-contour-mesh",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/ctta-hex-contour-mesh",
+  "reviewer_node": "review-of-ctta-hex-contour-mesh",
+  "reviewer_run_id": "r-20261002T003152788581-review-of-ctta-hex-contour-mesh",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "scope_discipline": 20
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-02T02:40:00+02:00",
+  "total": 90,
+  "verdict": "pass"
+}

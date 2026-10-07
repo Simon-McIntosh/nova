@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-03T12:57:11.149Z",
+  "dimensions_reviewed": [
+    "goal_fidelity",
+    "evidence",
+    "scope_discipline",
+    "durability",
+    "fit"
+  ],
+  "dispatched_at": "2026-10-03T12:43:27Z",
+  "failure_attribution": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-solver-route-integrity/fsri-moment-map-contract-after-first-moments.html",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment reports an H200 lane result while its log records PINNED_REVISION_MISMATCH (pinned eb565ed4cd2cf248c1996df5b6171b9e22bd9fce, serving 200bdeeb5022348711b8327c077a512a34e64549) and GPU_UTILISATION_AT_10S/30S/60S=0, so the run may have compiled on the host and the device use is unconfirmed; the reviewed manifest discloses both under follow_ons but the fragment does not qualify the H200 claim."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T124306427341-fsri-moment-map-contract-after-first-moments/manifest.md",
+      "line": "14",
+      "severity": "follow-on",
+      "text": "follow-on: the recorded gate command reaches benchmarks/moment_map_derivative_contract.py through the uncommitted scratch driver /home/ITER/mcintos/.cache/nova-moment-map-after-first-moments/test_moment_map_contract_job.py, which hardcodes the worktree path, so the exact gate is not reproducible from the committed tree."
+    },
+    {
+      "file": "benchmarks/moment_map_derivative_contract.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: no test asserts the staged relative errors the fragment tabulates; the scratch driver asserts only that report[stages] is non-empty, so a numerical regression moves the receipt without failing any test even though the derivative contract itself is guarded by the forward-solve test."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's manifest.md names no baseline_suite and no after_suite, so the added-failure derivation from the reviewed run's own gate logs is unmeasured (null), not a measured zero; the reviewed node carries a single gate log contract.log (2 passed in 159.95s, EXIT_STATUS=0) which is its head arm and reports no failing id.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read at commit 749d967f7 against base 200bdeeb5; one commit, one file, 81 insertions, all of it the new evidence fragment.",
+    "done_when": "the done-when names one H200 lane job running benchmarks/moment_map_derivative_contract.py and tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences; the reviewed manifest records job 1280616 and its log shows 2 passed in 159.95s with EXIT_STATUS=0, and the fragment states the job id and test outcome.",
+    "goal": "the node re-measures the moment-map derivative contract at the dispatch base 200bdeeb5, which contains the first-moment centroid hand-off 45f5ee8ef in nova/equilibrium/forward.py, and the fragment reports every staged relative error beside the S22 reading at 3825858f2; the goal is met.",
+    "manifest": "read; it states the gate ran as one H200 lane job 1280616 at base 200bdeeb5, records the receipt and log paths, and discloses under follow_ons the PINNED_REVISION_MISMATCH and the zero GPU utilisation samples.",
+    "write_paths": "the declared write paths are docs/figures/forward-solver-route-integrity/fsri-moment-map-contract-after-first-moments and the evidence fragment html; the reviewed diff touches exactly one path, the fragment html, and no source or test file."
+  },
+  "justifications": {
+    "durability": "the derivative contract the fragment asserts is guarded by the existing test tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences, but the staged relative errors the fragment tabulates are asserted by no test, and the scratch driver checks only that report[stages] is non-empty, so the numbers can drift without reddening the suite.",
+    "evidence": "the gate ran as H200 lane job 1280616 (log contract.log: 2 passed in 159.95s, EXIT_STATUS=0) and every fragment number reconciles with the receipt (axis flux 8.28e-10, boundary flux 1.40e-13, support partition and clip weights 9.21e-5); deducted because the exact command reaches the benchmark through an uncommitted scratch driver and because the lane log records GPU_UTILISATION_AT_10S/30S/60S=0 beside PINNED_REVISION_MISMATCH, so the H200 device use the lane label asserts is unconfirmed.",
+    "fit": "the node reuses the committed benchmark benchmarks/moment_map_derivative_contract.py rather than authoring machinery, places the fragment under the established docs/evidence/fragments/<plan>/<node>.html convention, and its symbols and filenames carry no version or ticket identifiers.",
+    "goal_fidelity": "the goal is a re-measurement of the derivative contract at a revision carrying the first-moment hand-off; the receipt names forward_module at 200bdeeb5, 45f5ee8ef is confirmed an ancestor of 200bdeeb5, and the fragment tabulates all eight benchmark stages plus the scalar control.",
+    "scope_discipline": "git show --stat 749d967f7 reports one file changed, the evidence fragment html, inside the declared write paths, with no nova/ source and no test file touched."
+  },
+  "node": "review-of-fsri-moment-map-contract-after-first-moments",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node re-measures the moment-map derivative contract at the dispatch base 200bdeeb5, which contains the first-moment centroid hand-off 45f5ee8ef in nova/equilibrium/forward.py, and the fragment reports every staged relative error beside the S22 reading at 3825858f2; the goal is met.\nVERDICT done_when: the done-when names one H200 lane job running benchmarks/moment_map_derivative_contract.py and tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences; the reviewed manifest records job 1280616 and its log shows 2 passed in 159.95s with EXIT_STATUS=0, and the fragment states the job id and test outcome.\nVERDICT write_paths: the declared write paths are docs/figures/forward-solver-route-integrity/fsri-moment-map-contract-after-first-moments and the evidence fragment html; the reviewed diff touches exactly one path, the fragment html, and no source or test file.\nVERDICT manifest: read; it states the gate ran as one H200 lane job 1280616 at base 200bdeeb5, records the receipt and log paths, and discloses under follow_ons the PINNED_REVISION_MISMATCH and the zero GPU utilisation samples.\nVERDICT diff: read at commit 749d967f7 against base 200bdeeb5; one commit, one file, 81 insertions, all of it the new evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the goal is a re-measurement of the derivative contract at a revision carrying the first-moment hand-off; the receipt names forward_module at 200bdeeb5, 45f5ee8ef is confirmed an ancestor of 200bdeeb5, and the fragment tabulates all eight benchmark stages plus the scalar control.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate ran as H200 lane job 1280616 (log contract.log: 2 passed in 159.95s, EXIT_STATUS=0) and every fragment number reconciles with the receipt (axis flux 8.28e-10, boundary flux 1.40e-13, support partition and clip weights 9.21e-5); deducted because the exact command reaches the benchmark through an uncommitted scratch driver and because the lane log records GPU_UTILISATION_AT_10S/30S/60S=0 beside PINNED_REVISION_MISMATCH, so the H200 device use the lane label asserts is unconfirmed.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 749d967f7 reports one file changed, the evidence fragment html, inside the declared write paths, with no nova/ source and no test file touched.\nSCORE durability: 14\nJUSTIFICATION durability: the derivative contract the fragment asserts is guarded by the existing test tests/test_equilibrium_forward_solve.py::test_the_moment_map_is_differentiable_against_finite_differences, but the staged relative errors the fragment tabulates are asserted by no test, and the scratch driver checks only that report[stages] is non-empty, so the numbers can drift without reddening the suite.\nSCORE fit: 18\nJUSTIFICATION fit: the node reuses the committed benchmark benchmarks/moment_map_derivative_contract.py rather than authoring machinery, places the fragment under the established docs/evidence/fragments/<plan>/<node>.html convention, and its symbols and filenames carry no version or ticket identifiers.\nFINDING docs/evidence/fragments/forward-solver-route-integrity/fsri-moment-map-contract-after-first-moments.html:1 follow-on: the fragment reports an H200 lane result while its log records PINNED_REVISION_MISMATCH (pinned eb565ed4cd2cf248c1996df5b6171b9e22bd9fce, serving 200bdeeb5022348711b8327c077a512a34e64549) and GPU_UTILISATION_AT_10S/30S/60S=0, so the run may have compiled on the host and the device use is unconfirmed; the reviewed manifest discloses both under follow_ons but the fragment does not qualify the H200 claim.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261003T124306427341-fsri-moment-map-contract-after-first-moments/manifest.md:14 follow-on: the recorded gate command reaches benchmarks/moment_map_derivative_contract.py through the uncommitted scratch driver /home/ITER/mcintos/.cache/nova-moment-map-after-first-moments/test_moment_map_contract_job.py, which hardcodes the worktree path, so the exact gate is not reproducible from the committed tree.\nFINDING benchmarks/moment_map_derivative_contract.py:1 follow-on: no test asserts the staged relative errors the fragment tabulates; the scratch driver asserts only that report[stages] is non-empty, so a numerical regression moves the receipt without failing any test even though the derivative contract itself is guarded by the forward-solve test.",
+  "review_run_id": "legacy-f1b2409eada9",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "200bdeeb5022348711b8327c077a512a34e64549",
+  "reviewed_commit": "749d967f73245afa582a7538cc19d99315924857",
+  "reviewed_head_sha": "749d967f73245afa582a7538cc19d99315924857",
+  "reviewed_run_id": "r-20261003T124306427341-fsri-moment-map-contract-after-first-moments",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsri-moment-map-contract-after-first-moments",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-03T13:12:00Z",
+  "total": 88
+}

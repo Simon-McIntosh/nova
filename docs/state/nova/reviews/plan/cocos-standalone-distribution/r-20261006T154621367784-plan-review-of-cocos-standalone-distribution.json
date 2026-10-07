@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-06T15:53:42.509Z",
+  "dispatched_at": "2026-10-06T15:46:35Z",
+  "findings": [
+    {
+      "anchor": "pyproject.toml:161",
+      "id": "duplicate_owner-1",
+      "reason": "the plan should name the member's version policy \u2014 extend the root's hatch-vcs/git-tag owner (one version for the workspace) \u2014 and add the version to the wheel-METADATA check, rather than leave a second version source to be invented at implementation time.",
+      "text": "the plan states nova-cocos is \"built with hatchling like the root\" but never states the workspace member's version source, while the root derives its version dynamically from git tags (`dynamic = [\"version\"]` at pyproject.toml:3, `[tool.hatch.version]` `source = \"vcs\"` + `version_scheme = \"post-release\"` at pyproject.toml:161-177); a member given no `[tool.hatch.version]` must hardcode a static version, which makes it a second owner of a number the repo's tags already own and lets the two drift silently, and \u00a71's done-when checks the wheel METADATA only for `Requires-Python` and the absence of `Requires-Dist`, so the drift is unverified.",
+      "type": "duplicate_owner",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "d4cfa6f9c8fd366bac9449e24e057da4eb69150be4b5c70df4cf72ae188e18d9",
+  "plan_slug": "cocos-standalone-distribution",
+  "plan_version": 2,
+  "project": "nova",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "reckon-build coordinator",
+      "finding": "duplicate_owner-1",
+      "reason": "v3: s1 names the member's version owner (dynamic version via hatch-vcs over this repository's tags, raw-options at the root, never static) and the done-when checks the wheel Version equals a root build at the same commit.",
+      "when": "2026-10-06T15:55:28.649104+00:00"
+    }
+  ],
+  "responses": {
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "reckon-build coordinator",
+      "reason": "v3: s1 names the member's version owner (dynamic version via hatch-vcs over this repository's tags, raw-options at the root, never static) and the done-when checks the wheel Version equals a root build at the same commit.",
+      "when": "2026-10-06T15:55:28.649104+00:00"
+    }
+  },
+  "review_run_id": "r-20261006T154621367784-plan-review-of-cocos-standalone-distribution",
+  "reviewed_blob_sha": "655e15a959697614010d4873028440f9763a43c9",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 `packages/nova-cocos/` moves one 224-line module whose small public-name interface (`convention`, `identify_convention`, `transform_factor`, `Convention`, `ConventionTransform`, `TRANSFORMATIONS`, the `*_LIKE` constants) hides the whole factor table and transformation algebra behind it; the plan adds no spread of shallow wrappers over the same machinery.",
+    "duplicate_owner": "a finding \u2014 the plan adds a new build owner (`packages/nova-cocos/pyproject.toml`) without naming its version source, while the root owns version derivation from git tags via hatch-vcs.",
+    "interface_budget": "pass \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 relocates an existing public surface into `nova_cocos` (no new names) rather than adding to any of the four families, and names the counterpart it retires (`nova/io/cocos.py`, \u00a72).",
+    "reuse_search": "pass \u2014 the plan's importer census is complete and correct against the tree (4 nova modules, 5 tests, 4 imas-ambix modules) and it cites why no existing installable form exists (nova's 3.14 floor and heavy deps), so the reuse map is present.",
+    "thin_wrapper": "pass \u2014 the only thin layer the plan adds, the `nova/io/cocos.py` re-export, is justified in its own text (imas-ambix's four editable-path imports would break) and the section that retires it is named (\u00a72), which is the justification the item requires."
+  },
+  "section_digests": {
+    "_document": "d969a1a00170ca5a79fead6a49cadec35d03e5636d305dbde5695a193c13eab1",
+    "s1": "1db3e2c6e636ddc080d5baec9907387f5224e8df95dfebd3b5311904440db2d1",
+    "s2": "6779869cd975a335ff2c04a5baa4b4c3a80e5679c185e9e0b996c1b80ec97895"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-06T15:55:18.049686+00:00"
+}

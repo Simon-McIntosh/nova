@@ -1,0 +1,58 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "scripts/h200_test_lane/prewarm.sh:100",
+    "scripts/h200_test_lane/prewarm.sh:111",
+    "scripts/h200_test_lane/run.sh:154"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-09-23T15:41:18.152991+00:00",
+  "findings": [
+    {
+      "file": "docs/evidence/archive/forward-solver-route-integrity-landed.html",
+      "line": "1248",
+      "text": "the landing record names wholly-hit helper programs jit__argmin, jit__argmax and jit__broadcast_arrays, but the CACHE_GUARD_RECEIPT it cites shows those three with zero hits (jit__argmax 0 hits and 2 misses, jit__broadcast_arrays 0 hits and 13 misses, jit__argmin absent from the 68 program profiles) while the programs that did hit are a different set (empty 1146, jit_scan 6, jit_iota 2, jit_less 2, jit_broadcast_in_dim 1, jit_split_flux_map 1); the clause that the lane's own solve programs are exactly the ones the pin does not carry understates a receipt in which 62 of 68 program profiles are miss-only."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T054725981050-fsri-prewarm-pin-covers-the-lane-programs/logs/h200-cache-guard-negative-control.log",
+      "line": "2",
+      "text": "the negative-control log's command line still carries a literal placeholder in place of the interpreter path while the green log regenerated at 958f5722b names the real interpreter and revision, so the declared gate pair differs in provenance."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against b1a3664b5: 958f5722b adds the PREWARM_ROW_NO_PROGRAMS refusal and its paired test plus a run.sh --gres change, 30f9ae4e4 retracts the sbatch --test-only queue claim, and 89fe2174d records the negative lane receipt in the plan section and the landing record.",
+    "done_when": "the done_when asks for one lane run reporting hits and zero compile seconds, and the gate measuring the guard half is tests/test_h200_cache_guard.py; its log records 5 passed in 46.50s at revision 958f5722b, and the lane run is recorded as a miss, so the objective half is recorded unmet rather than claimed met.",
+    "goal": "the reviewed node's goal is a pre-warm pin that covers the lane's own programs and is read by the lane with zero compile seconds; the three commits add a correct compile-row refusal and record the real lane run, but no pin rebuilt at the serving revision exists, so the section's pin-covers-the-lane outcome stays open.",
+    "manifest": "read; it lists the five commits with bodies and no attribution trailer, states the five-case gate green, declares the served_entries negative control reproduced as assert 7 == 3, and repeats the landing record's helper-program claim on its measurement reason line.",
+    "write_paths": "read the manifest's declared paths; every file in the three commits' diff (scripts/h200_test_lane/prewarm_row.py, scripts/h200_test_lane/run.sh, tests/test_h200_cache_guard.py, the plan and the cumulative landing record) sits inside them and no nova/ file is touched."
+  },
+  "justifications": {
+    "durability": "tests/test_h200_cache_guard.py:100 drives the refusal red on an idle target and green on the same row without --compile-row, an assertion independent of the value under test, though no test covers an already-warm compile row passing.",
+    "evidence": "docs/evidence/archive/forward-solver-route-integrity-landed.html:1236 carries the headline receipt numbers I re-read in the CACHE_GUARD_RECEIPT line, but line 1248 states a comparison that same receipt contradicts.",
+    "fit": "scripts/h200_test_lane/prewarm_row.py:124 reuses the existing PREWARM_ROW vocabulary and row and receipt idiom and adds no forbidden name.",
+    "goal_fidelity": "scripts/h200_test_lane/prewarm_row.py:122 adds the refusal the guard half of the goal needs, but no pin rebuilt at the serving revision exists, so the section's central outcome remains open.",
+    "scope_discipline": "the diff changes only scripts/h200_test_lane/prewarm_row.py, scripts/h200_test_lane/run.sh, tests/test_h200_cache_guard.py and the two nova docs, all inside the declared scope."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the reviewed node's goal is a pre-warm pin that covers the lane's own programs and is read by the lane with zero compile seconds; the three commits add a correct compile-row refusal and record the real lane run, but no pin rebuilt at the serving revision exists, so the section's pin-covers-the-lane outcome stays open.\nVERDICT done_when: the done_when asks for one lane run reporting hits and zero compile seconds, and the gate measuring the guard half is tests/test_h200_cache_guard.py; its log records 5 passed in 46.50s at revision 958f5722b, and the lane run is recorded as a miss, so the objective half is recorded unmet rather than claimed met.\nVERDICT write_paths: read the manifest's declared paths; every file in the three commits' diff (scripts/h200_test_lane/prewarm_row.py, scripts/h200_test_lane/run.sh, tests/test_h200_cache_guard.py, the plan and the cumulative landing record) sits inside them and no nova/ file is touched.\nVERDICT manifest: read; it lists the five commits with bodies and no attribution trailer, states the five-case gate green, declares the served_entries negative control reproduced as assert 7 == 3, and repeats the landing record's helper-program claim on its measurement reason line.\nVERDICT diff: read commit by commit against b1a3664b5: 958f5722b adds the PREWARM_ROW_NO_PROGRAMS refusal and its paired test plus a run.sh --gres change, 30f9ae4e4 retracts the sbatch --test-only queue claim, and 89fe2174d records the negative lane receipt in the plan section and the landing record.\nCALL_SITES: scripts/h200_test_lane/prewarm.sh:100, scripts/h200_test_lane/prewarm.sh:111, scripts/h200_test_lane/run.sh:154\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: scripts/h200_test_lane/prewarm_row.py:122 adds the refusal the guard half of the goal needs, but no pin rebuilt at the serving revision exists, so the section's central outcome remains open.\nSCORE evidence: 14\nJUSTIFICATION evidence: docs/evidence/archive/forward-solver-route-integrity-landed.html:1236 carries the headline receipt numbers I re-read in the CACHE_GUARD_RECEIPT line, but line 1248 states a comparison that same receipt contradicts.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff changes only scripts/h200_test_lane/prewarm_row.py, scripts/h200_test_lane/run.sh, tests/test_h200_cache_guard.py and the two nova docs, all inside the declared scope.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_h200_cache_guard.py:100 drives the refusal red on an idle target and green on the same row without --compile-row, an assertion independent of the value under test, though no test covers an already-warm compile row passing.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/h200_test_lane/prewarm_row.py:124 reuses the existing PREWARM_ROW vocabulary and row and receipt idiom and adds no forbidden name.\nFINDING docs/evidence/archive/forward-solver-route-integrity-landed.html:1248 the landing record names wholly-hit helper programs jit__argmin, jit__argmax and jit__broadcast_arrays, but the CACHE_GUARD_RECEIPT it cites shows those three with zero hits (jit__argmax 0 hits and 2 misses, jit__broadcast_arrays 0 hits and 13 misses, jit__argmin absent from the 68 program profiles) while the programs that did hit are a different set (empty 1146, jit_scan 6, jit_iota 2, jit_less 2, jit_broadcast_in_dim 1, jit_split_flux_map 1); the clause that the lane's own solve programs are exactly the ones the pin does not carry understates a receipt in which 62 of 68 program profiles are miss-only.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20260923T054725981050-fsri-prewarm-pin-covers-the-lane-programs/logs/h200-cache-guard-negative-control.log:2 the negative-control log's command line still carries a literal placeholder in place of the interpreter path while the green log regenerated at 958f5722b names the real interpreter and revision, so the declared gate pair differs in provenance.\n",
+  "review_run_id": "r-20260923T154118152991-review-2-of-fsri-prewarm-pin",
+  "reviewed_base_sha": "b1a3664b54ed5d7dd8f6f3b7b55798664bf8f7e7",
+  "reviewed_head_sha": "89fe2174d91bf54685a3e59aa79fc3019303545a",
+  "reviewed_run_id": "r-20260923T054725981050-fsri-prewarm-pin-covers-the-lane-programs",
+  "reviewing_run_id": "r-20260923T154118152991-review-2-of-fsri-prewarm-pin",
+  "scores": {
+    "durability": 16,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-id",
+  "timestamp": "2026-09-23T16:36:22.099991+00:00",
+  "total": 82
+}

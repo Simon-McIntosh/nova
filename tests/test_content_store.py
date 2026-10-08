@@ -3,25 +3,23 @@
 from __future__ import annotations
 
 import json
-import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Barrier
 
 import pytest
 
+from nova.database import content_store
 from nova.database.content_store import (
     MANIFEST_FILENAME,
     ContentStoreError,
-    create_private_directory,
     digest_hex,
-    linux_rename_no_replace,
-    open_pinned_object_root,
-    publish_directory_no_replace,
+    publish_files,
     read_regular_bytes,
     sha256_bytes,
     verified_destination,
     verified_object_root,
     verify_directory_files,
-    write_bytes_at,
 )
 
 
@@ -43,31 +41,13 @@ def _descriptor(files: dict[str, bytes]) -> bytes:
 
 
 def _entries(files: dict[str, bytes]) -> list[_Entry]:
-    return [
-        _Entry(name, sha256_bytes(data), len(data)) for name, data in files.items()
-    ]
+    return [_Entry(name, sha256_bytes(data), len(data)) for name, data in files.items()]
 
 
 def _publish(cache: Path, files: dict[str, bytes]) -> tuple[str, list[_Entry]]:
     descriptor = _descriptor(files)
     digest = "sha256:" + sha256_bytes(descriptor)
-    hex_digest = digest_hex(digest)
-    object_root = verified_object_root(cache, create=True)
-    descriptor_fd = open_pinned_object_root(object_root)
-    try:
-        name, temporary_fd = create_private_directory(descriptor_fd, hex_digest)
-        try:
-            for relative, data in files.items():
-                write_bytes_at(temporary_fd, relative, data)
-            write_bytes_at(temporary_fd, MANIFEST_FILENAME, descriptor)
-        finally:
-            os.close(temporary_fd)
-        published = publish_directory_no_replace(
-            linux_rename_no_replace(), descriptor_fd, name, hex_digest
-        )
-    finally:
-        os.close(descriptor_fd)
-    assert published is True
+    publish_files(cache, digest, _entries(files), files, descriptor)
     return digest, _entries(files)
 
 
@@ -109,18 +89,72 @@ def test_repeated_publication_keeps_the_first_object(tmp_path: Path) -> None:
     cache = tmp_path / "cache"
     digest, entries = _publish(cache, {"wall.nc": b"first"})
     directory = _verified_read(cache, digest, entries)
-    hex_digest = digest_hex(digest)
-
-    object_root = verified_object_root(cache, create=False)
-    descriptor_fd = open_pinned_object_root(object_root)
-    try:
-        name, temporary_fd = create_private_directory(descriptor_fd, hex_digest)
-        os.close(temporary_fd)
-        published = publish_directory_no_replace(
-            linux_rename_no_replace(), descriptor_fd, name, hex_digest
+    assert (
+        publish_files(
+            cache,
+            digest,
+            entries,
+            {"wall.nc": b"first"},
+            _descriptor({"wall.nc": b"first"}),
         )
-    finally:
-        os.close(descriptor_fd)
-
-    assert published is False
+        == directory
+    )
     assert (directory / "wall.nc").read_bytes() == b"first"
+
+
+def test_publish_files_rejects_changed_source_before_visibility(tmp_path: Path) -> None:
+    expected = b"expected"
+    actual = tmp_path / "wall.nc"
+    actual.write_bytes(b"altered!")
+    descriptor = _descriptor({"wall.nc": expected})
+    digest = "sha256:" + sha256_bytes(descriptor)
+    cache = tmp_path / "cache"
+
+    with pytest.raises(ContentStoreError, match="checksum mismatch"):
+        publish_files(
+            cache,
+            digest,
+            _entries({"wall.nc": expected}),
+            {"wall.nc": actual},
+            descriptor,
+        )
+
+    assert (
+        verified_destination(
+            verified_object_root(cache, create=False), digest_hex(digest)
+        )
+        is None
+    )
+
+
+def test_publish_files_concurrent_writers_leave_one_verified_object(
+    tmp_path: Path,
+) -> None:
+    files = {"wall.nc": b"same-payload"}
+    descriptor = _descriptor(files)
+    digest = "sha256:" + sha256_bytes(descriptor)
+    cache = tmp_path / "cache"
+    rendezvous = Barrier(2)
+
+    def publish() -> Path:
+        def create_together(root: int, name: str) -> tuple[str, int]:
+            private = content_store._create_private_directory(root, name)
+            rendezvous.wait(timeout=10)
+            return private
+
+        return publish_files(
+            cache,
+            digest,
+            _entries(files),
+            files,
+            descriptor,
+            private_directory_factory=create_together,
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        first, second = tuple(pool.map(lambda _: publish(), range(2)))
+
+    assert first == second
+    assert _verified_read(cache, digest, _entries(files)) == first
+    assert (first / "wall.nc").read_bytes() == files["wall.nc"]
+    assert [path.name for path in first.parent.iterdir()] == [digest_hex(digest)]

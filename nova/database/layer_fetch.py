@@ -14,17 +14,12 @@ from nova.database import content_store
 from nova.database.content_store import (
     MANIFEST_FILENAME,
     ContentStoreError,
-    create_private_directory,
-    destination_exists_at,
     digest_hex,
-    linux_rename_no_replace,
-    open_pinned_object_root,
-    publish_directory_no_replace,
+    publish_files,
     read_regular_bytes,
     verified_destination,
     verified_object_root,
     verify_directory_files,
-    write_bytes_at,
 )
 
 REGISTRY = "ghcr.io/iterorganization/efitpp-test-data"
@@ -135,38 +130,12 @@ def _publish_layer(
     identity_digest, size = content_store.file_content_identity(blob)
     manifest = _manifest_bytes(stored_name, identity_digest, size)
 
-    object_root = verified_object_root(cache_directory, create=True)
-    object_descriptor = open_pinned_object_root(object_root)
-    temporary_descriptor: int | None = None
-    try:
-        if destination_exists_at(object_descriptor, hex_digest):
-            return _verified_layer(verified_destination(object_root, hex_digest))
-        temporary_name, temporary_descriptor = create_private_directory(
-            object_descriptor, hex_digest
-        )
-        write_bytes_at(temporary_descriptor, stored_name, blob.read_bytes())
-        write_bytes_at(temporary_descriptor, MANIFEST_FILENAME, manifest)
-        temporary_path = Path("/proc/self/fd") / str(object_descriptor) / temporary_name
-        verify_directory_files(
-            temporary_path,
-            [_Declaration(stored_name, identity_digest, size)],
-            allow_manifest=True,
-        )
-        os.close(temporary_descriptor)
-        temporary_descriptor = None
-        publish_directory_no_replace(
-            linux_rename_no_replace(),
-            object_descriptor,
-            temporary_name,
-            hex_digest,
-        )
-    finally:
-        if temporary_descriptor is not None:
-            os.close(temporary_descriptor)
-        os.close(object_descriptor)
-
-    directory = verified_destination(
-        verified_object_root(cache_directory, create=False), hex_digest
+    directory = publish_files(
+        cache_directory,
+        f"sha256:{hex_digest}",
+        [_Declaration(stored_name, identity_digest, size)],
+        {stored_name: blob},
+        manifest,
     )
     return _verified_layer(directory)
 

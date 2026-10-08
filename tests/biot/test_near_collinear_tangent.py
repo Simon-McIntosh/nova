@@ -103,8 +103,12 @@ def test_truncated_tangent_fails_identity(monkeypatch):
         lambda left, d_left, right, d_right: d_left * right,
     )
     jax.clear_caches()
-    got, expected = _identity()
-    assert worst(got[1], expected[1]) > EXACT_TOLERANCE
+    try:
+        got, expected = _identity()
+        assert worst(got[1], expected[1]) > EXACT_TOLERANCE
+    finally:
+        monkeypatch.undo()
+        jax.clear_caches()
 
 
 def test_tangent_against_extended_precision():

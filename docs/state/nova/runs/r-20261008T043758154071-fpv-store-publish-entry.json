@@ -1,0 +1,1000 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex",
+  "base_sha": "33b293e5f9319791296a39d57e43a3b9db558f42",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 7648512,
+      "cached_input_tokens_cumulative": 7648512,
+      "input_tokens": 7768988,
+      "input_tokens_cumulative": 7768988,
+      "output_tokens": 25953,
+      "output_tokens_cumulative": 25953,
+      "reasoning_output_tokens": 8143,
+      "reasoning_output_tokens_cumulative": 8143
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 190,
+    "files": 4,
+    "removed": 171
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 594
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 601
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 590,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 595
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "28a8247b4edd547f85431e32302a9224c3f0cb72"
+  ],
+  "completed_at": "2026-10-08T04:49:57Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T04:38:51Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "env JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_content_store.py -q",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043758154071-fpv-store-publish-entry/test_content_store.py.log"
+  },
+  "impl_move": {
+    "at_complete": 0.25,
+    "at_dispatch": 0.2,
+    "plan": "forward-profile-validator-set",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.8677530852466415,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-11T10:03:44Z, which is after this node's 3600s horizon ending 2026-10-08T05:38:11.272453+00:00",
+    "horizon_ends_at": "2026-10-08T05:38:11.272453+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T04:38:09Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-11T10:03:44Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 520609,
+    "state": "quiet",
+    "utilisation_pct": 26.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T04:38:09Z",
+    "read_at": "2026-10-08T04:38:11Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 26.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T04:49:57Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043758154071-fpv-store-publish-entry/manifest.md",
+  "member": "disposable-r-20261008T043758154071-fpv-store-publish-entry",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_content_store.py::test_publish_files_rejects_changed_source_before_visibility"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_content_store.py::test_publish_files_rejects_changed_source_before_visibility"
+    ],
+    "declaration": "making the entry point skip its post-write verification must fail a store test that publishes a file whose bytes disagree with its declared digest",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043758154071-fpv-store-publish-entry/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043758154071-fpv-store-publish-entry/negative-control.log",
+    "test_paths": [
+      "tests/test_content_store.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fpv-store-publish-entry",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1275,
+          "cached_input_tokens": 641453,
+          "input_tokens": 642730,
+          "output_tokens": 1020,
+          "reasoning_output_tokens": 604,
+          "total_tokens": 643750,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "content_store gains one function that publishes a set of named files under a digest with the pinned-root, private-directory, post-write verification and no-replace protocol, returning the verified destination; materialize_machine_artifact in nova/imas/machine_artifact.py and _publish_layer in nova/database/layer_fetch.py both call it, and neither opens the pinned root nor calls the private-directory, byte-write or no-replace primitives directly; primitives that no module outside content_store imports after the change are private again; tests/test_content_store.py gains tests of the entry point including a concurrent double publish that leaves one intact object; tests/test_content_store.py, tests/test_machine_artifact.py, tests/test_machine_artifact_concurrency.py, tests/test_mast_artifact.py and tests/test_layer_fetch.py all pass in fresh processes with behaviour unchanged; every name imas-ambix imports from nova.imas.machine_artifact is still defined there; logs in the manifest",
+    "estimated_hours": 1.0,
+    "goal": "Give nova/database/content_store.py one composed publish entry point that both machine_artifact and layer_fetch publish through",
+    "id": "fpv-store-publish-entry",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T04:38:09Z",
+      "read_at": "2026-10-08T04:38:11Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 26.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043758154071-fpv-store-publish-entry/manifest.md",
+    "negative_control": "making the entry point skip its post-write verification must fail a store test that publishes a file whose bytes disagree with its declared digest",
+    "plan": "forward-profile-validator-set",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/database/content_store.py",
+      "nova/imas/machine_artifact.py",
+      "nova/database/layer_fetch.py",
+      "tests/test_content_store.py",
+      "docs/evidence/fragments/forward-profile-validator-set/fpv-store-publish-entry.html",
+      "docs/figures/forward-profile-validator-set/fpv-store-publish-entry"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.867525806284626,
+      "derived": 0.1531438007643849,
+      "drain_hours": 168.0,
+      "effective_limit": 0.1531438007643849,
+      "elapsed_fraction": 0.13922163705853172,
+      "elapsed_hours": 23.38923502583333,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T04:38:20+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.74,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.26,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.16764800000000002,
+      "decided_by": "window",
+      "margin": 0.569852,
+      "name": "fpv-store-publish-entry",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.26
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.246093,
+        "observed_at": "2026-10-08T04:38:20+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.26,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "fpv-store-publish-entry",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T04:38:20.246093+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Named lane: the local router grants this session no further slots, and this is a concurrency-sensitive refactor (renameat2 no-clobber publication through pinned /proc/self/fd descriptors) shared by two callers and imported across repositories. Moderate-hard, strict verification.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.761,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-profile-validator-set",
+  "plan_impl_at_dispatch": 0.2,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "28a8247b4edd547f85431e32302a9224c3f0cb72",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "33b293e5f9319791296a39d57e43a3b9db558f42",
+    "reviewed_head_sha": "28a8247b4edd547f85431e32302a9224c3f0cb72",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 116
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T043758154071-fpv-store-publish-entry",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s24-nova",
+  "session_harness": "codex",
+  "session_id": "01a119ce-f1e7-77d1-84dd-b7352978649e",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 7648512,
+    "cumulative_input_tokens": 15417500,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 34096
+  },
+  "time_budget": "60m",
+  "tool_steps": 84.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 666,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T04:50:01Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T04:39:09Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T043758154071-fpv-store-publish-entry",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 253,
+    "worker_pid": 962121
+  },
+  "worker_seconds": 666,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

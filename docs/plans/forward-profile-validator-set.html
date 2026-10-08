@@ -26,7 +26,7 @@
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-commits" content="aff62b24,646d21fb,28a8247b">
 <meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -115,6 +115,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261008-publish-entry-landed" data-who="reckon-build" data-when="2026-10-08T05:20:00Z">
     <div class="r-comment-body">fpv-store-publish-entry landed: publish_files in nova/database/content_store.py is the one composed publish entry; the machine-artifact materialiser and the layer fetch both use it, and the protocol primitives are private again. Five gates 82 passed, 3 skipped, zero added; review 116. Still open on §3: authentication faults are classified as an unreachable registry, and the six ITER digests are checked only for form.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T043758154071-fpv-store-publish-entry" data-who="reckon-build" data-when="2026-10-08T04:49:57Z">
+    <div class="r-comment-body"><p>Composed verified publish_files for machine artifacts and OCI layers; five fresh-process gates: 82 passed, 3 skipped; the post-write-verification mutation produced 1 new failing test.</p></div>
 </div>
 </section>
 </main>

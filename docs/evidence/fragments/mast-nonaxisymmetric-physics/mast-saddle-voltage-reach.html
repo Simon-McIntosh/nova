@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="mast-nonaxisymmetric-physics">
+<meta name="plan-evidence-for" content="mast-nonaxisymmetric-physics">
+<title>Uncorrected MAST saddle-loop voltage reachability</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Uncorrected MAST saddle-loop voltage — reachability</h1></header>
+<section id="landing">
+<p><strong>Verdict: reachable, partially.</strong> An uncorrected saddle-loop voltage — the raw XMB export with its axisymmetric poloidal-field pickup retained — is reachable for <strong>33 of the 36</strong> saddle loops over the vacuum cohort, through the level-1 XMB group at <code>xmb/sad_out_&lt;family&gt;&lt;nn&gt;</code>. It is not reachable for <code>saddle_m_10</code>, <code>saddle_m_11</code> and <code>saddle_m_12</code>, whose channels are absent from the store at every cohort shot. No fit was run and no sign was promoted.</p>
+<p><strong>Receipt.</strong> <code>benchmarks/mast_saddle_voltage_reach.py</code> wrote <a href="/nova/figures/mast-saddle-loops/reach.json">docs/figures/mast-saddle-loops/reach.json</a>, a per-loop record of every access path tried with its signal name, source and reachability per shot range. The pass ran on <code>all_debug</code> (job <code>1281983</code>, log <code>saddle-reach-all_debug.log</code>); a first identical pass (job <code>1281981</code>) produced the same cohort and the same 33/36 counts.</p>
+<p><strong>Frame.</strong> The vacuum cohort is the no-plasma, coil-driven, over-determined set of <code>nova.imas.mast_vacuum_cohort</code> (plasma-free below <code>5e3</code> A, a coil driven above <code>1e3</code> A, at least <code>40</code> field probes). Its own census reads every field waveform of the 17 111-shot store; this benchmark draws an even-strided 4000-shot sample across the whole range and applies the criteria in a light census reading only current-group peaks and field-group channel names. <strong>86 shots</strong> were admitted, spanning <strong>13725–28575</strong>. The verdict is a statement about that frame.</p>
+<p><strong>What each loop reached.</strong> Every <code>l</code> and <code>u</code> loop and <code>m_1</code>–<code>m_9</code> are present at the same 26 cohort shots (15051–25836); <code>l_3</code>/<code>l_4</code> and their <code>u</code> counterparts appear at only 3 of those shots (25818–25836), so a loop's raw channel is not co-extensive across the cohort. The three <code>m</code> loops with no channel at all are the exception the receipt names explicitly.</p>
+<p><strong>Published path and the pickup comparison.</strong> The published, pickup-removed product lives in the level-2 store-like store at <code>magnetics</code> under <code>b_field_tor_probe_saddle_voltage</code>; over this cohort the level-2 store is sparse, and no cohort shot resolved the published channel under the key probed, so the raw-minus-published difference and its comparison with the predicted poloidal-field pickup (<code>nova.imas.mast_vacuum_response</code>) is <strong>not reported here</strong> rather than reported as a negative. Establishing it is a follow-on.</p>
+<p><strong>Negative control.</strong> The deliberately misspelled channel <code>sad_out_zz99</code> was probed on every cohort shot and recorded unreachable on all 86 (<code>shots_where_present: 0</code>), so a name that resolves to no loop is reported unreachable rather than being graded — the receipt's own reachability test discriminates.</p>
+<p><strong>Why this matters for §5.</strong> The traversal sign a coil pulse fixes is measured from the pickup the published product removes; this node's job was only to establish whether that pickup is recoverable at all. It is, for 33 loops, through a path that keeps it. The admission, traversal-sign and n=1–6 nodes can proceed against the level-1 XMB channels, with the three <code>m</code> loops excluded and the level-2 published path treated as unavailable on this cohort.</p>
+</section>
+</main></body>
+</html>

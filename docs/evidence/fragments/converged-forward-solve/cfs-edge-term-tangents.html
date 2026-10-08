@@ -3,9 +3,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="cfs-edge-term-tangents"><meta name="plan-title" content="Polygon edge tangents">
-<meta name="plan-summary" content="Seven private edge tangent families, base identities, exact-integral audit and outstanding acceptance measurements">
+<meta name="plan-summary" content="Seven private edge tangent families, base identities, exact-integral audit, two qualified cold compile passes and zero added suite failures">
 <meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verifies" content="converged-forward-solve#s2">
-<meta name="plan-recorded-at" content="2026-10-08"><meta name="plan-verdict" content="incomplete">
+<meta name="plan-recorded-at" content="2026-10-08"><meta name="plan-verdict" content="pass">
 <meta name="plan-environment" content="H200 identity; CPU x64 reference; shared project interpreter">
 <title>Polygon edge tangents | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
@@ -13,11 +13,11 @@
 <h1 id="cfs-edge-term-tangents">Polygon edge tangents</h1>
 <h2 id="cfs-edge-term-tangents-record">Record</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
-<tr><td>Observed</td><td>2026-10-08T02:40:36.844255+00:00</td></tr>
+<tr><td>Observed</td><td>2026-10-08T04:01:35.912048+00:00</td></tr>
 <tr><td>Base revision</td><td>716d859f0b501797e28849ec8878f0243de80cb1 (inherited draft); its original base was 72112421cb157599b3e3e97b31f3d5f6246735d4</td></tr>
-<tr><td>Measured source head</td><td>5e6acbd41c0ddc764825228ff8fd811ba6df4ac5</td></tr>
-<tr><td>Commits</td><td>5e6acbd41 test(biot): adjudicate every exact edge identity disagreement; 7d5852510 test(biot): prove paired channel tangent refusal; baec3a5cf test(biot): assert primal bytes and record tangent qualification; 7efac47d9 test(biot): audit edge-end derivatives against the exact integral; 2a86d3ea5 test(biot): truncate the product rule used by edge geometry; de0fe46b9 test(biot): handle absent paired data in tangent metrics; 95044c7f6 feat(biot): differentiate polygon edge reductions explicitly; 6d14132d2 fix(biot): preserve edge tangent arithmetic order</td></tr>
-<tr><td>Acceptance state</td><td>Incomplete until both cold compile passes, repaired suite delta and verified mutation log complete. The worker does not close the plan section.</td></tr>
+<tr><td>Evidence checkout head</td><td>4b56476fc32caf49341159079bccbd5f96f74568</td></tr>
+<tr><td>Commits</td><td>4b56476fc test(biot): retain absolute control near vanishing edge integrals; 5e6acbd41 test(biot): adjudicate every exact edge identity disagreement; 7d5852510 test(biot): prove paired channel tangent refusal; baec3a5cf test(biot): assert primal bytes and record tangent qualification; 7efac47d9 test(biot): audit edge-end derivatives against the exact integral; 2a86d3ea5 test(biot): truncate the product rule used by edge geometry; de0fe46b9 test(biot): handle absent paired data in tangent metrics; 95044c7f6 feat(biot): differentiate polygon edge reductions explicitly; 6d14132d2 fix(biot): preserve edge tangent arithmetic order</td></tr>
+<tr><td>Acceptance state</td><td>Measured gates complete: seven H200 identities, seven mutation refusals, 14 cold compile ratios at most 3 and no added suite failures. The prescribed strict expected failure retains the near-end exact-integral derivative discrepancy. Coordinator owns plan-section closure.</td></tr>
 <tr><td>Run receipts</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents</td></tr>
 <tr><td>Primal route</td><td>No public signature or primal arithmetic changed. Every hand tangent returns the primal method result beside its tangent; identity rows assert byte equality within a shared compiled program.</td></tr>
 <tr><td>Shared algebra</td><td>Scalar product/quotient, range products, sums, scales, contractions, elliptic recurrences and graded quadrature tangents are reused from their established modules. _EdgeScalar only packages this algebra for explicit formulas; it does not trace or differentiate a primal program.</td></tr>
@@ -56,19 +56,19 @@
 <h2 id="cfs-edge-term-tangents-adjudication">Every CPU disagreement against the exact bound</h2>
 <table><thead><tr><th>Item</th><th>Measure</th></tr></thead><tbody>
 <tr><td>Coverage</td><td>615 points: all 603 CPU second-residual disagreements beyond 1e-13, plus fixed smooth and near-end controls; none of those disagreements is masked.</td></tr>
-<tr><td>Reference result</td><td>Running; the earlier full audit measured primal relative maximum 1.963e-9 and unchanged tangent maximum 5.160e-7.</td></tr>
+<tr><td>Reference result</td><td>NEAR_EDGE second_residual samples=615 base_primal_vs_reference_max=1.963e-09 base_primal_vs_reference_abs_max=1.052e-13 hand_vs_reference_max=5.160e-07 base_jvp_vs_reference_max=5.143e-07 smooth_control_tangent_max=7.526e-15 reference_one_sided_difference_max=3.017e-17</td></tr>
 <tr><td>Value control</td><td>The exact integral crosses zero. Its independent primal control accepts 1e-10 relative or 1e-13 absolute and prints both maxima; tangent tolerances are unchanged. The initial relative-only value control failed on the enlarged audit and its log is retained.</td></tr>
 <tr><td>Receipts</td><td>reference-adjudication.log (initial value-control failure); reference-adjudication-value-scale.log (explicit value scale).</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-negative">Declared product-rule truncation on H200</h2>
-<table><thead><tr><th>Row</th><th>Maximum relative error</th><th>Pytest refusal</th></tr></thead><tbody>
-<tr><td>edge_construction</td><td>3.335e+04</td><td>FAILED</td></tr>
-<tr><td>second_residual</td><td>1.415e+09</td><td>FAILED</td></tr>
-<tr><td>channel_split</td><td>6.221e+05</td><td>FAILED</td></tr>
-<tr><td>edge_integrands</td><td>3.504e+02</td><td>FAILED</td></tr>
-<tr><td>flux_line_moments</td><td>1.000e+00</td><td>FAILED</td></tr>
-<tr><td>flux_and_moment_terms</td><td>4.958e+02</td><td>FAILED</td></tr>
-<tr><td>edge_terms</td><td>3.438e+05</td><td>FAILED</td></tr>
+<table><thead><tr><th>Row</th><th>Normwise maximum</th><th>Elementwise maximum</th><th>Covered fraction</th><th>Pytest refusal</th></tr></thead><tbody>
+<tr><td>edge_construction</td><td>3.335e+04</td><td>3.335e+04</td><td>0.0000</td><td>FAILED</td></tr>
+<tr><td>second_residual</td><td>1.415e+09</td><td>1.415e+09</td><td>0.0000</td><td>FAILED</td></tr>
+<tr><td>channel_split</td><td>6.221e+05</td><td>9.690e+07</td><td>0.0000</td><td>FAILED</td></tr>
+<tr><td>edge_integrands</td><td>3.504e+02</td><td>3.504e+02</td><td>0.0000</td><td>FAILED</td></tr>
+<tr><td>flux_line_moments</td><td>1.000e+00</td><td>1.000e+00</td><td>0.0000</td><td>FAILED</td></tr>
+<tr><td>flux_and_moment_terms</td><td>4.958e+02</td><td>4.958e+02</td><td>0.0000</td><td>FAILED</td></tr>
+<tr><td>edge_terms</td><td>3.438e+05</td><td>3.438e+05</td><td>0.0000</td><td>FAILED</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-negative-record">Mutation receipt</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
@@ -84,32 +84,57 @@
 <tr><td>cold-compile-one</td><td>channel_split</td><td>6.750/6367</td><td>7.244/19810</td><td>17.119/16062</td><td>1.07</td><td></td></tr>
 <tr><td>cold-compile-one</td><td>edge_integrands</td><td>12.494/14898</td><td>22.444/52842</td><td>38.755/30432</td><td>1.80</td><td></td></tr>
 <tr><td>cold-compile-one</td><td>flux_line_moments</td><td>9.657/10888</td><td>17.116/38466</td><td>26.583/24075</td><td>1.77</td><td></td></tr>
-<tr><td>cold-compile-one</td><td>flux_and_moment_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-one</td><td>edge_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-two</td><td>edge_construction</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-two</td><td>second_residual</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-two</td><td>channel_split</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-two</td><td>edge_integrands</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-two</td><td>flux_line_moments</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-two</td><td>flux_and_moment_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-two</td><td>edge_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>flux_and_moment_terms</td><td>11.687/18124</td><td>31.179/64011</td><td>43.154/36034</td><td>2.67</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>edge_terms</td><td>12.344/15641</td><td>24.458/69643</td><td>39.940/31688</td><td>1.98</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>edge_construction</td><td>0.144/65</td><td>0.106/143</td><td>0.107/170</td><td>0.73</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>second_residual</td><td>0.220/5325</td><td>0.603/15529</td><td>0.521/13059</td><td>2.75</td><td>above 2.7</td></tr>
+<tr><td>cold-compile-two</td><td>channel_split</td><td>6.635/6367</td><td>7.100/19810</td><td>16.896/16062</td><td>1.07</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>edge_integrands</td><td>12.324/14898</td><td>22.097/52842</td><td>38.609/30432</td><td>1.79</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>flux_line_moments</td><td>9.670/10888</td><td>16.838/38466</td><td>26.348/24075</td><td>1.74</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>flux_and_moment_terms</td><td>11.504/18124</td><td>30.785/64011</td><td>42.730/36034</td><td>2.68</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>edge_terms</td><td>12.405/15641</td><td>24.347/69643</td><td>39.583/31688</td><td>1.96</td><td></td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-compile-method">Compile method</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
 <tr><td>Harness</td><td>tests/biot/tangent_identity.py::compile_ratio; median of seven, cache disabled before compilation, zero cache hits required, expanded equation counts printed. Two separate pytest processes, one H200 allocation, log per pass.</td></tr>
-<tr><td>Qualification</td><td>All seven ratios must be at most 3 in both passes. A pending cell is an unmet measure. Ratios above 2.7 are named even if they pass. Job 1281977 carries both passes; job 1281982 carries the corrected control and suite delta.</td></tr>
+<tr><td>Qualification</td><td>All seven ratios are at most 3 in both passes (14/14). Only second_residual exceeds 2.7: 2.78 and 2.75. Each pass reports 7 passed and EXIT=0; all 42 arm measurements have seven walls and zero cache hits. Completed job 1281977 carried both passes; completed job 1281982 carried the corrected control and suite delta.</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-suite">Repaired suite delta: one driver pass, sequential module processes</h2>
 <table><thead><tr><th>Arm</th><th>Receipt</th></tr></thead><tbody>
-<tr><td>baseline</td><td>{&quot;command&quot;: &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py&quot;, &quot;completed&quot;: false, &quot;exit_status&quot;: 1, &quot;failure_count&quot;: 1, &quot;failure_ids&quot;: [&quot;tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp&quot;], &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/baseline-suite.log&quot;, &quot;revision&quot;: &quot;716d859f0b501797e28849ec8878f0243de80cb1&quot;}</td></tr>
-<tr><td>after</td><td>{&quot;command&quot;: &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py&quot;, &quot;completed&quot;: false, &quot;exit_status&quot;: 0, &quot;failure_count&quot;: 0, &quot;failure_ids&quot;: [], &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/after-suite.log&quot;, &quot;revision&quot;: &quot;7d5852510c01c6901648e07aa19646e9824ec56b&quot;}</td></tr>
+<tr><td>baseline</td><td>{&quot;command&quot;: &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py&quot;, &quot;completed&quot;: true, &quot;exit_status&quot;: 1, &quot;failure_count&quot;: 1, &quot;failure_ids&quot;: [&quot;tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp&quot;], &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/baseline-suite.log&quot;, &quot;revision&quot;: &quot;716d859f0b501797e28849ec8878f0243de80cb1&quot;}</td></tr>
+<tr><td>after</td><td>{&quot;command&quot;: &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py&quot;, &quot;completed&quot;: true, &quot;exit_status&quot;: 0, &quot;failure_count&quot;: 0, &quot;failure_ids&quot;: [], &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/after-suite.log&quot;, &quot;revision&quot;: &quot;7d5852510c01c6901648e07aa19646e9824ec56b&quot;}</td></tr>
 </tbody></table>
-<h2 id="cfs-edge-term-tangents-suite-context">Suite provenance and remaining gates</h2>
+<h2 id="cfs-edge-term-tangents-suite-context">Suite provenance and follow-ons</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+<tr><td>Selection</td><td>Every tests/biot module ran in a fresh process with -m not slow and -k not compiles. Compile rows were measured independently in the two qualified passes; deselected slow tests are not claimed as executed.</td></tr>
+<tr><td>Recorded source revision</td><td>The after-suite receipt records 7d5852510c01c6901648e07aa19646e9824ec56b. Subsequent test-only commits expand the CPU reference audit and correct its near-zero primal value control, measured separately in reference-adjudication-value-scale.log; product source is unchanged.</td></tr>
+<tr><td>Delta</td><td>Completed baseline: one failure, test_tangent_matches_base_jvp in test_edge_term_tangents.py. Completed after: zero failures. Added failures: zero. Both aggregate receipts have terminal summaries and EXIT lines.</td></tr>
 <tr><td>Driver</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py; baseline source loaded with the shared git-show harness and canonical module names. Both arms carry their root conftest. Every module has its own log and EXIT status; aggregate logs are the single-line JSON receipt targets.</td></tr>
 <tr><td>Initial baseline bootstrap defect</td><td>Loading source as base_* changed __module__, defeating the kernel census reference rewriter. Its 40,412-equation refusal is scaffolding. Superseded job 1281976 was cancelled, peer jobs spared; the repaired pass uses canonical nova.biot names. Job 1281978 refused a stale queued revision; replacement 1281982 started at the committed head.</td></tr>
 <tr><td>Initial head fixture defect</td><td>Seven mutation-control tests stopped at a nonexistent momentchannel._product_tangent patch target. This was repaired and the earlier red log retained.</td></tr>
 <tr><td>Fence</td><td>No source outside the four assigned Python paths changed. The graded-quadrature repair and final point-jet custom-JVP wrapping remain separately owned work.</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-suite-modules">Per-module completion</h2>
+<table><thead><tr><th>Module</th><th>Baseline</th><th>After</th></tr></thead><tbody>
+<tr><td>test_edge_term_tangents.py</td><td>1 failed, 2 passed, 1 deselected in 52.96s</td><td>16 passed, 7 deselected, 1 xfailed in 97.36s (0:01:37)</td></tr>
+<tr><td>test_elliptic_tangent_recurrences.py</td><td>19 passed, 9 deselected, 3 warnings in 52.58s</td><td>19 passed, 9 deselected, 3 warnings in 50.63s</td></tr>
+<tr><td>test_kernel_compile_cost.py</td><td>8 passed, 2 xfailed in 258.59s (0:04:18)</td><td>8 passed, 2 xfailed in 261.72s (0:04:21)</td></tr>
+<tr><td>test_range_tangent_recurrences.py</td><td>40 passed, 13 deselected in 51.86s</td><td>40 passed, 13 deselected in 53.94s</td></tr>
+<tr><td>test_traced_section_moments.py</td><td>1 passed in 24.46s</td><td>1 passed in 25.10s</td></tr>
+<tr><td>test_vertex_edge_tangent_recurrences.py</td><td>15 passed, 7 deselected in 52.83s</td><td>15 passed, 7 deselected in 55.72s</td></tr>
+<tr><td>test_vertex_term_tangents.py</td><td>12 passed, 5 deselected, 1 xfailed in 402.96s (0:06:42)</td><td>12 passed, 5 deselected, 1 xfailed in 387.16s (0:06:27)</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-vertex">Corner identity figures after shared-harness migration</h2>
+<table><thead><tr><th>Row</th><th>Measured figures</th><th>Comparison</th></tr></thead><tbody>
+<tr><td>vertex</td><td>primal_max_relative=0.000e+00 jvp_program_primal_max_relative=0.000e+00 tangent_max_normwise_relative=0.000e+00 tangent_max_elementwise_relative=0.000e+00 elementwise_fail_normwise_pass=0 bound=1e-09 covered_fraction=1.0000 judged_by_base_jvp=10000 judged_by_reference=0 base_jvp_finite_fraction=1.0000 base_tangent_median_abs=1.103e-03</td><td>identical to baseline</td></tr>
+<tr><td>arsinh_terms</td><td>primal_max_relative=0.000e+00 jvp_program_primal_max_relative=0.000e+00 tangent_max_normwise_relative=0.000e+00 tangent_max_elementwise_relative=0.000e+00 elementwise_fail_normwise_pass=0 bound=1e-09 covered_fraction=1.0000 judged_by_base_jvp=8811 judged_by_reference=1189 base_jvp_finite_fraction=1.0000 base_tangent_median_abs=3.682e+00</td><td>identical to baseline</td></tr>
+<tr><td>against_first_arsinh</td><td>primal_max_relative=0.000e+00 jvp_program_primal_max_relative=0.000e+00 tangent_max_normwise_relative=0.000e+00 tangent_max_elementwise_relative=0.000e+00 elementwise_fail_normwise_pass=0 bound=1e-09 covered_fraction=1.0000 judged_by_base_jvp=10000 judged_by_reference=0 base_jvp_finite_fraction=1.0000 base_tangent_median_abs=2.362e+00</td><td>identical to baseline</td></tr>
+<tr><td>flux_moment_residuals</td><td>primal_max_relative=0.000e+00 jvp_program_primal_max_relative=0.000e+00 tangent_max_normwise_relative=0.000e+00 tangent_max_elementwise_relative=0.000e+00 elementwise_fail_normwise_pass=0 bound=1e-09 covered_fraction=1.0000 judged_by_base_jvp=10000 judged_by_reference=0 base_jvp_finite_fraction=1.0000 base_tangent_median_abs=1.340e+01</td><td>identical to baseline</td></tr>
+<tr><td>horizontal_flux_line_moments</td><td>primal_max_relative=0.000e+00 jvp_program_primal_max_relative=0.000e+00 tangent_max_normwise_relative=0.000e+00 tangent_max_elementwise_relative=0.000e+00 elementwise_fail_normwise_pass=0 bound=1e-09 covered_fraction=1.0000 judged_by_base_jvp=10000 judged_by_reference=0 base_jvp_finite_fraction=1.0000 base_tangent_median_abs=9.367e+00</td><td>identical to baseline</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-vertex-reference">Corner reference figures</h2>
+<table><thead><tr><th>Measure</th><th>Comparison</th></tr></thead><tbody>
+<tr><td>arsinh_terms radial samples=1189 base_primal_vs_reference_max=1.194e-11 hand_vs_reference_max=1.071e+00 base_jvp_vs_reference_max=1.071e+00 hand_vs_base_jvp_max=0.000e+00</td><td>identical to baseline; strict expected failure preserved</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-census">Every staged function in packed_analytic_moments</h2>
 <table><thead><tr><th>Function</th><th>Polygon calls</th><th>Rectangle calls</th><th>Private tangent status</th></tr></thead><tbody>

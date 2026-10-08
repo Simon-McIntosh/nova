@@ -20,7 +20,7 @@
   <title>Retire the Bespoke Machine-Description Layer | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-effort-hours" content="12.0">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
@@ -32,10 +32,11 @@
     <p>Nova grew a description-packaging layer because something had to carry the MAST geometry
     and nothing else did. That layer is now three separable things, and all three are better
     served elsewhere: a bespoke registry schema with its own digest scheme, a content-addressed
-    artifact cache with an OCI reference helper that nothing publishes through, and a
-    machine-specific builder that loads one machine's shot into IDSs. The map-driven producer in
-    <code>imas-ambix</code> replaces all three generically, so this plan removes them rather than
-    maintaining a second implementation.</p>
+    artifact cache with an OCI publication path, and a machine-specific builder that loads one
+    machine's shot into IDSs. The map-driven producer in <code>imas-ambix</code> replaces the
+    MAST-specific surfaces; the machine-generic publication capability and the DDv4 floor re-home
+    rather than disappear (§2, §3). So this plan removes the bespoke layer rather than maintaining
+    a second implementation.</p>
     <p><strong>The geometry is not what is being retired.</strong> The conductor and sensor
     description — including the restored P4-lower loop positions that made all 44 described loop
     positions unique and lifted the solve-input join from 39 to 43 of 46 reconstruction loops —
@@ -108,6 +109,12 @@
       </tbody>
     </table>
     <p><strong>Inventory corrections from the 2026-10-06 design review.</strong> The census of importers of the retired names finds seven sites the table above omits, and each is rewired before its import is deleted: <code>nova/media/sources/mast_efit.py:29</code> (<code>shaped_section_vertices</code> from <code>nova.catalog.mast_geometry</code>); <code>scripts/mast_reference_evidence/contours.py:110</code> (<code>MachineGeometryRegistry</code>); <code>nova/imas/mast_solve_inputs.py:74-75</code> and <code>nova/io/sourcemap.py:44</code>, which import <code>machine_drive</code> and <code>machine_evidence</code>, the two modules <code>machine_artifact.py</code> itself depends on; and in imas-ambix, <code>imas_ambix/gs/machine_identity.py:152</code>, <code>imas_ambix/gs/artifact_geometry.py:767</code> and <code>imas_ambix/gs/artifact_resolution.py:315-316</code>. The runtime owners that absorb registry identity on the ambix side are <code>default_registry()</code> in <code>imas_ambix/gs/machine_identity.py</code> and <code>imas_ambix/gs/artifact_resolution.py</code>, which imports <code>publish_refined_artifact</code>; they move in the same beat as the identity tests. The DDv4 floor's re-home imports DD-version enumeration from the installed <code>imas_data_dictionaries</code> package, exactly as <code>machine_artifact.py:18</code> does, rather than re-implementing it. The re-home node's first deliverable is the ambix module that owns the publication path: <code>imas_ambix/data/</code>, beside <code>description_identity.py</code>, unless that node shows the package cannot host it. The machine-agnostic content-addressed cache primitives are not retired: <code>forward-profile-validator-set</code> lifts them into a store under <code>nova/database/</code>, and only the machine-description parts of <code>machine_artifact.py</code> are deleted.</p>
+    <p><strong>Done-when, one node per inventory row:</strong> each §3 surface is removed or re-homed
+    per its disposition, and only after §4's equivalence holds. The DDv4 publication floor is
+    re-homed with its refusal test carried over; the calibration package is decoupled from the
+    registry; the ambix geometry source and identity tests migrate in coordination with imas-ambix;
+    and the full suite stays green at its accepted failure set with no new failure. Each row closes
+    on its own verdict.</p>
     <p>Nova keeps what it is for: the Green's-function kernels, the geometry parametrisation and
     solver, the calibration package (decoupled from the registry first), and the frame and biot
     machinery that consume a description someone else produced.</p>
@@ -129,13 +136,10 @@
     surfaces while the producer absorbs the generic capability. The decision should be re-put to
     the owner against this corrected inventory.</p>
     <p><strong>The equivalence gate is a comparison over existing machinery, not a build.</strong> The producer already asserts observable identity for a description whose geometry moves, in <code>imas_ambix/data/description_identity.py</code>, from the MAST map under <code>imas_ambix/data/machine_maps/</code>. The gate drives that producer and compares its description with the one nova's registry serves today.</p>
-    <p><em>Done-when:</em> every surface in the §3 inventory removed or re-homed per its
-    disposition, with the geometry verified equivalent through the producer beforehand — the same
-    44 unique loop positions and the same 43-of-46 join, demonstrated numerically, not asserted;
-    the DDv4 publication floor re-homed in the producer with its refusal test carried over; the
-    calibration package decoupled from the registry; the ambix geometry source and identity tests
-    migrated in coordination; and the full suite green at its accepted failure set with no new
-    failure.</p>
+    <p><em>Done-when:</em> the producer route reproduces the registry's description numerically,
+    not by assertion: the same 44 unique loop positions, the same 43-of-46 solve-input join, and
+    conductor geometry equal within a bound fixed before scoring, in a committed receipt. A mismatch
+    is reported as a finding. Nothing is deleted under §4.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -166,6 +170,11 @@
     <h4 class="r-fu-title">Equivalence demonstration first: no deletion while imas-ambix imports nova.imas.machine_artifact</h4>
     <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-b.md, machine-description-retirement row): draft with no retirement landed agrees with the code. imas-ambix imports nova.imas.machine_artifact (imas_ambix/gs/artifact_resolution.py:171,268), so a deletion here breaks imas-ambix the same day. Removal style is locked to clean-deletion. Sharpens f-mdr-001. Done when: the producer path reproduces the 44 unique loop positions and the 43-of-46 solve-input join numerically, with a committed receipt, and imas-ambix has migrated off nova.imas.machine_artifact before any file is deleted.</div>
     <pre class="r-fu-prompt">/reckon-build machine-description-retirement</pre>
+    </article>
+<article class="r-fu" data-id="f-mdr-ambix-migration" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="s24-nova coordinator" data-written-at="2026-10-08" data-recommends-skill="/reckon-build imas-ambix:nova-physics-consumer-integration" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">imas-ambix migrates off nova.imas.machine_artifact and the registry before any §3 deletion (foreign-owner)</h4>
+    <div class="r-fu-body"><p><strong>Exemption: foreign-owner.</strong> §3's deletions wait on imas-ambix no longer importing <code>nova.imas.machine_artifact</code>, <code>nova.imas.mast_geometry</code> or <code>nova.catalog.mast_geometry</code>: <code>imas_ambix/gs/machine_identity.py:152</code>, <code>imas_ambix/gs/artifact_geometry.py:767</code>, <code>imas_ambix/gs/artifact_resolution.py:171,268,315-316</code> and the identity tests. The ambix plan that owns that consumer boundary is <code>imas-ambix:nova-physics-consumer-integration</code>, which states the Ambix-side boundary is what is missing. The producer plan named in plan-depends-on is satisfied but is not this gate. The 2026-10-06 content review found the gate unowned; this pointer names its owner.</p></div>
+    <pre class="r-fu-prompt">/reckon-build imas-ambix:nova-physics-consumer-integration</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

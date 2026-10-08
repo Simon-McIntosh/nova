@@ -26,7 +26,7 @@
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-commits" content="aff62b24,646d21fb">
 <meta name="plan-impl" content="0.2">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -109,6 +109,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261008-layer-fetch-landed" data-who="reckon-build" data-when="2026-10-08T04:40:00Z">
     <div class="r-comment-body">gate test_layer_fetch passed (6 passed, 1 skipped); section open — the composed store publish entry and the credential-fault and digest-coverage hardening follow, then the analytic smoke rung. Evidence: layer-fetch.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T031843283750-fpv-layer-fetch" data-who="reckon-build" data-when="2026-10-08T04:07:34.172Z">
+    <div class="r-comment-body"><p>fpv-layer-fetch -- nova/database/layer_fetch.py fetches an OCI validator layer by sha256 digest (no mutable tag), verifies it and publishes it through nova/database/content_store.py; tests/data-manifest.json gains the efitpp_validator_layers case records (analytic pair; CORSICA 130506, DINA 105027, ASTRA 131046 input+reference) with digests re-derived from the pinned registry manifest; gate tests/test_layer_fetch.py 6 passed, 1 skipped, negative control EXIT=1.</p></div>
 </div>
 </section>
 </main>

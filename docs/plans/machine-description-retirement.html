@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-effort-hours" content="12.0">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;}">
 <meta name="plan-commits" content="d63bca23">
 <meta name="plan-impl" content="0.08">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -197,6 +197,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T021909705886-review-of-mdr-equivalence" data-who="reckon-build" data-when="2026-10-08T02:50:49.070Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T015726499185-mdr-equivalence stored as a parsed record scoring all six dimensions (goal_fidelity 18, evidence 15, scope_discipline 19, durability 16, fit 18, reuse 18; total 104, verdict pass); reviewed_base_sha 7334ffa6a574a0f1bc590b85958821dbc0079af6, reviewed_head_sha d63bca2353afb712bf05dea5fb9084f932dd24fb; added_failure_count null and added_failure_ids [] because the reviewed manifest declares no baseline_suite (after_suite head-tests.log is the only arm).</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261008-s4-deferred" data-who="s24-nova coordinator" data-when="2026-10-08T10:30:00Z">
+    <div class="r-comment-body">§4 declared deferred: the equivalence demonstration ran and measured the producer as not equivalent (evidence producer-equivalence). Its re-measure waits on imas-ambix reconciling the MAST map (f-mdr-ambix-map-reconcile); re-run benchmarks/mast_description_equivalence.py then, and its two red pin tests turn green only on equality. §3 deletions stay deferred behind that, the ambix consumer migration (f-mdr-ambix-migration), and the owner's DIII-D oras push.</div>
 </div>
 </section>
 </main>

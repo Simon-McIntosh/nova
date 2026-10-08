@@ -1,0 +1,1066 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 7,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "b57dfb24855ed7b650e25a7490c5a7d32d61d731",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 87289600,
+      "cached_input_tokens_cumulative": 87289600,
+      "input_tokens": 88253079,
+      "input_tokens_cumulative": 88253079,
+      "output_tokens": 180956,
+      "output_tokens_cumulative": 180956,
+      "reasoning_output_tokens": 78930,
+      "reasoning_output_tokens_cumulative": 78930
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 309,
+    "files": 6,
+    "removed": 8
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "tangent",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 3357,
+        "name": "__init__",
+        "path": "nova/biot/polygonanalytic.py"
+      },
+      "window_line": 3379
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 310,
+        "name": "compile_arm",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_term_tangents.py"
+      },
+      "run_function": {
+        "line": 310,
+        "name": "compile_arm",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 381
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_non_mast_imas_pulse_runs_generic_calibration_kernels",
+        "path": "tests/calibrate/test_portability.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 392
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 392
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_dataset_row",
+        "path": "tests/imas/test_diiid_machine_description.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 381
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_variant_set_exhausts_convention_digits_and_required_axes",
+        "path": "tests/imas/test_diiid_root_convention_sweep.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 381
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_conditioned_elliptic_combinations_match_a_high_precision_arbiter",
+        "path": "tests/test_biotgreens.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 380
+    },
+    {
+      "existing_function": {
+        "line": 466,
+        "name": "test_hexagonal_target_rule_convergence_against_the_double_integral_arbiter",
+        "path": "tests/test_biotsectionaverage.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 380
+    },
+    {
+      "existing_function": {
+        "line": 580,
+        "name": "test_smooth_merit_brackets_relative_sup_for_distributed_residuals",
+        "path": "tests/test_fixed_point.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 381
+    },
+    {
+      "existing_function": {
+        "line": 243,
+        "name": "test_registry_contains_all_census_source_gaps",
+        "path": "tests/test_mast_catalog_geometry.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 381
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_the_seeded_held_out_extension_is_pinned_across_campaigns_and_polarities",
+        "path": "tests/test_parity_tolerances.py"
+      },
+      "run_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 381
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "run_function": {
+        "line": 73,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 75
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_tangent_matches_base_jvp",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "run_function": {
+        "line": 97,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_dataset_row",
+        "path": "tests/imas/test_diiid_machine_description.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_variant_set_exhausts_convention_digits_and_required_axes",
+        "path": "tests/imas/test_diiid_root_convention_sweep.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_conditioned_elliptic_combinations_match_a_high_precision_arbiter",
+        "path": "tests/test_biotgreens.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "test_elongated_required_field_matches_area_equivalent_radius",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 123,
+        "name": "test_elongated_required_field_reduces_to_circular_at_unit_elongation",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_elongation_softens_required_field_by_half_logarithm",
+        "path": "tests/test_equilibrium_diagnostics.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 580,
+        "name": "test_smooth_merit_brackets_relative_sup_for_distributed_residuals",
+        "path": "tests/test_fixed_point.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 243,
+        "name": "test_registry_contains_all_census_source_gaps",
+        "path": "tests/test_mast_catalog_geometry.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_the_seeded_held_out_extension_is_pinned_across_campaigns_and_polarities",
+        "path": "tests/test_parity_tolerances.py"
+      },
+      "run_function": {
+        "line": 114,
+        "name": "test_tangent_against_extended_precision",
+        "path": "tests/biot/test_near_collinear_tangent.py"
+      },
+      "window_line": 118
+    },
+    {
+      "existing_function": {
+        "line": 1982,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 409,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1982,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1982
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "86b28314b7b34d92ca882e2abb6a68b7cb0eb2c5",
+    "79b6e772abb762501689e2f76db915890c05b84b",
+    "66c59793cd7f28eb32df511c3e7057fc06edb898",
+    "8774f684ba4759cf5540bf0ea468ef4fb8ddc4b2",
+    "ee1b01dcb8d760f615eb55a3612bd951417fc0b7",
+    "c2265a5108e7af4f73a4bbab4f0d097180d31072",
+    "ec0ddd1c9ab8870db55a32d8caf7aba99bec6482",
+    "f2ade4fd9610aea97884f41ebe344819fe371003",
+    "8f55bd3aa6724479284610db0fd18743b5e5fdcd",
+    "8304a29f6635bbc7f06e79730a8fe88defd9a9a3",
+    "fd271dd6eca2e62bc73a43666c066eb8ccbd0186",
+    "180431b0c8b9446e06da0b6581470cfb50e330bd",
+    "3845ef650d46e88ce17912a2ab1a34aa99da9b32"
+  ],
+  "completed_at": "2026-10-08T09:53:44Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T05:24:59Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "tests/biot/test_edge_term_tangents.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/biot/test_near_collinear_tangent.py -m not\\ slow -s -vv --timeout 3600",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites/h200-reference.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.0166722240746915,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-11T04:44:03Z, which is after this node's 3600s horizon ending 2026-10-08T06:24:30.792451+00:00",
+    "horizon_ends_at": "2026-10-08T06:24:30.792451+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T05:24:29Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-11T04:44:03Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 517829,
+    "state": "quiet",
+    "utilisation_pct": 29.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T05:24:29Z",
+    "read_at": "2026-10-08T05:24:30Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 29.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T09:53:44Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites/manifest.md",
+  "member": "disposable-r-20261008T052414309567-cfs-wrap-prerequisites",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_near_collinear_tangent.py::test_tangent_matches_base_jvp"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_near_collinear_tangent.py::test_tangent_matches_base_jvp"
+    ],
+    "declaration": "the near-collinear tangent with one term dropped under NOVA_TANGENT_TRUNCATION fails its identity row by test id",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites/negative-control.log",
+    "test_paths": [
+      "tests/biot/test_near_collinear_tangent.py",
+      "tests/equilibrium/test_topology_read.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-wrap-prerequisites",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 2661,
+          "cached_input_tokens": 760876,
+          "input_tokens": 763539,
+          "output_tokens": 1019,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 764558,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Prepare the three pieces the point-jet custom rule needs that do not depend on the graded-quadrature repair, under the locked decisions kernel-loop-representation = custom-derivative-rules and tangent-identity-tolerance = scan-tangents-1e-9 on converged-forward-solve. Done when: (1) _near_collinear_arsinh_difference in nova/biot/polygonanalytic.py, the one function the packed_analytic_moments census reaches without a private tangent (named at the end of docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html), has a private hand-written tangent returning the structure jax.jvp returns with respect to all floating inputs without calling jax.jvp, jax.grad or jax.jacfwd on the base; its rows in a new module tests/biot/test_near_collinear_tangent.py use the shared harness in tests/biot/tangent_identity.py: identity on 10,000 samples spanning the near-collinear domain its five polygon and four rectangle call sites form, within 1e-13 relative of jax.jvp of the base on the H200 (with disagreements adjudicated against a 50-digit mpmath reference as the edge node did), coverage 100 percent, a truncation control under NOVA_TANGENT_TRUNCATION=1 failing by test id, the primal bit-identical, and the cold compile within three times the primal on the shared CPU-seconds measurement; (2) the executable-size measure in tests/equilibrium/test_topology_read.py (the receipt's executable_bytes, around line 2599, and the clause check that compares it with COLD_READ_EXECUTABLE_BYTES) reads the size of the serialized executable (for example len of the bytes jax's compilation cache would store for that compiled program, or compiled.runtime_executable() serialized through the backend), not generated_code_size_in_bytes, which reads about 14 KB where the serialized executable is about 36 MB; show it on the 132-cell kernel-backed read in one H200 job with the persistent cache disabled, printing both figures, and keep the strict expected-failure markers on test_kernel_compile_growth unchanged; (3) the dead helper _field_coefficients in nova/equilibrium/topology.py, unused since the read moved to _sampled_flux, is deleted, with a repository-wide search for its name in nova/, tests/, benchmarks/ and scripts/ returning nothing after the deletion; (4) tests/biot and tests/equilibrium/test_topology_read.py -m 'not slow' pass by delta against orientation_base_sha in per-module fresh processes run one after another from one driver pass, both arms running the same test files and carrying the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable (no placeholders; wrap a loop in bash -c); (5) an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-wrap-prerequisites.html with plan-evidence-for converged-forward-solve, reckon audit-doc 0 errors. Do not touch nova/biot/gradedresidual.py, tests/biot/test_vertex_term_tangents.py or tests/biot/test_vertex_edge_tangent_recurrences.py, which the concurrent repair node owns. H200 rows run through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (those targets), one job with --time sized to finish; other gates run in place on the fleet allocation (the shell has SLURM_JOB_ID) with TMPDIR=/tmp, JAX_PLATFORMS=cpu and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree, never uv on a compute node. Any wait names every job it depends on in wait_condition and is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists. Every login-node uv command carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. No public signature changes. Run filepath relativize over the fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself.",
+    "estimated_hours": 3.0,
+    "goal": "Prepare the near-collinear tangent, the serialized executable-size measure and the dead-helper removal the point-jet custom rule needs",
+    "id": "cfs-wrap-prerequisites",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T05:24:29Z",
+      "read_at": "2026-10-08T05:24:30Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 29.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites/manifest.md",
+    "negative_control": "the near-collinear tangent with one term dropped under NOVA_TANGENT_TRUNCATION fails its identity row by test id",
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/polygonanalytic.py",
+      "tests/biot/test_near_collinear_tangent.py",
+      "nova/equilibrium/topology.py",
+      "tests/equilibrium/test_topology_read.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-wrap-prerequisites.html",
+      "docs/figures/converged-forward-solve/cfs-wrap-prerequisites"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.0165266028728634,
+      "derived": 0.15819280516583997,
+      "drain_hours": 168.0,
+      "effective_limit": 0.15819280516583997,
+      "elapsed_fraction": 0.1438116410598545,
+      "elapsed_hours": 24.160355698055554,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T05:24:36+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.71,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.29,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.20352199999999998,
+      "decided_by": "window",
+      "margin": 0.458978,
+      "name": "cfs-wrap-prerequisites",
+      "score": 0.6625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.29
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.280513,
+        "observed_at": "2026-10-08T05:24:36+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.29,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "cfs-wrap-prerequisites",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T05:24:36.280513+00:00",
+    "score": 0.6625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "codex",
+    "comment": "moderately hard: one hand-written tangent of a near-cancelling arsinh difference held to 1e-13 against jax.jvp with mpmath adjudication on the H200, plus an H200 compile measurement of a serialized executable; strict verification",
+    "confidence": 0.35,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "codex",
+    "jev_latency_ms": 367.27,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 3233.029,
+    "model": "gpt-6-sol",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 164372.927055,
+        "budget_reason": null,
+        "burn_multiple": 1.2150563883213037,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 158080,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.0248722215856483,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.028136697031163473,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 164372.927055,
+        "budget_reason": null,
+        "burn_multiple": 1.2150563883213037,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 158080,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.0248722215856483,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.028136697031163473,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 164372.927055,
+        "budget_reason": null,
+        "burn_multiple": 1.2150563883213037,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 158080,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 30.9,
+          "peak_utilisation_p90_pct": 45.5,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.0248722215856483,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.028136697031163473,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 10,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 158080,
+          "headroom_pct": 31.3,
+          "peak_utilisation_p50_pct": 57.2,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 103,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 5,
+          "passed": 26,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 2
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 68.238055,
+        "budget_reason": null,
+        "burn_multiple": 2.017119221321522,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 158080,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.9936106475115745,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 6,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1581463289963625,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 28.999999999999996,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 68.238055,
+        "budget_reason": null,
+        "burn_multiple": 2.017119221321522,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 158080,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.9936106475115745,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1581463289963625,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 28.999999999999996,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 68.238055,
+        "budget_reason": null,
+        "burn_multiple": 2.017119221321522,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 158080,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.9936106475115745,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": 0.1581463289963625,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 28.999999999999996,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.1,
+      "claude:claude-sonnet-5-5": 0.02,
+      "codex:gpt-6-astra": 0.03,
+      "codex:gpt-6-luna": 0.06,
+      "codex:gpt-6-sol": 0.43,
+      "hold": 0.03,
+      "local:deepseek-v4.1-flash": 0.33
+    },
+    "rendered_token_estimate": 2921,
+    "usage": {
+      "cost": 0.000273378,
+      "input_tokens": 6509,
+      "output_tokens": 147
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3845ef650d46e88ce17912a2ab1a34aa99da9b32",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "b57dfb24855ed7b650e25a7490c5a7d32d61d731",
+    "reviewed_head_sha": "3845ef650d46e88ce17912a2ab1a34aa99da9b32",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 17,
+      "reuse": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 105
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T052414309567-cfs-wrap-prerequisites",
+  "scope_acceptances": [
+    {
+      "path": "tests/biot/test_edge_term_tangents.py",
+      "reason": "the coordinator extended the scope to slow-mark edge identity rows whose CPU compile exceeds ten minutes, which hung the default CPU lane"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a119f8-f920-7391-aed9-4080c54f2c12",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 87289600,
+    "cumulative_input_tokens": 175542679,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 259886
+  },
+  "time_budget": "60m",
+  "tool_steps": 105.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 16125,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 7,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T09:53:47Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T09:47:16Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T052414309567-cfs-wrap-prerequisites",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2153,
+    "worker_pid": 128652
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

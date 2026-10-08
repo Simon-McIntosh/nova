@@ -13,12 +13,26 @@ by tens of percent with scheduler noise, and the expanded equation count is
 recorded beside it as the deterministic measure of the program's size.  A row
 whose median ratio exceeds ``COMPILE_REPORT`` is named in the evidence fragment
 even when it passes ``COMPILE_BOUND``.
+
+The ratio is taken on CPU seconds rather than wall: under concurrent load a
+tangent and a primal are descheduled by unrelated work, so their wall times move
+together and the ratio crosses the bound without the program having changed.
+CPU seconds count only the work the process did, so the same bound holds whether
+the machine is idle or saturated.  Each fresh process reports the CPU seconds it
+spent inside ``lowered.compile()`` (``time.process_time()`` before and after, all
+threads), which is the compile's own cost isolated from the interpreter start.
+The whole child's CPU seconds, from ``getrusage(RUSAGE_CHILDREN)`` deltas around
+the spawn, is recorded beside it but is not the asserted measure: a fresh child
+spends several seconds of CPU importing the interpreter and the module before it
+compiles anything, and that constant swamps the sub-second compile, so its ratio
+would sit near one and the row would measure the import rather than the program.
 """
 
 import importlib.util
 import json
 import os
 from pathlib import Path
+import resource
 import subprocess
 import sys
 import tempfile
@@ -119,7 +133,7 @@ def identity_row(name, primal, tangent, bound, *, extra=""):
 
 
 _COMPILE_PROBE = r"""
-import json, sys, time
+import json, os, sys, time
 import jax
 jax.config.update("jax_enable_compilation_cache", False)
 from nova.jax.config import configure_dtypes
@@ -135,6 +149,13 @@ module = __import__(module_name)
 case = module.CASES[name]
 arguments = (case[-2], case[-1])
 function = module.compile_arm(name, arm)
+if os.environ.get("NOVA_TANGENT_COMPILE_HEAVY") == "1" and arm == "tangent":
+    inner = function
+
+    def function(*arguments):
+        return jax.tree.map(
+            lambda a, b: a + b, inner(*arguments), inner(*arguments)
+        )
 def count(jaxpr):
     total = 0
     for equation in jaxpr.eqns:
@@ -147,17 +168,25 @@ def count(jaxpr):
     return total
 equations = count(jax.make_jaxpr(function)(*arguments).jaxpr)
 lowered = jax.jit(function).lower(*arguments)
+cpu_start = time.process_time()
 start = time.perf_counter()
 lowered.compile()
 wall = time.perf_counter() - start
+cpu = time.process_time() - cpu_start
 print(json.dumps({"name": name, "arm": arm, "compile_seconds": wall,
+                  "compile_cpu_seconds": cpu,
                   "equations": equations, "cache_hits": len(hits),
                   "cache_enabled": jax.config.jax_enable_compilation_cache}))
 """
 
 
+def _children_cpu_seconds(before, after):
+    """Return the CPU seconds (user plus system) a spawned child consumed."""
+    return (after.ru_utime - before.ru_utime) + (after.ru_stime - before.ru_stime)
+
+
 def compile_row(module_name, name, arm):
-    """Return one cold, cache-disabled compile row from a fresh process."""
+    before = resource.getrusage(resource.RUSAGE_CHILDREN)
     environment = dict(os.environ, JAX_ENABLE_COMPILATION_CACHE="false")
     environment.pop(_TRUNCATION_ENV, None)
     result = subprocess.run(
@@ -175,29 +204,47 @@ def compile_row(module_name, name, arm):
         env=environment,
         check=True,
     )  # fmt: skip
+    after = resource.getrusage(resource.RUSAGE_CHILDREN)
     row = json.loads(result.stdout.strip().splitlines()[-1])
+    row["process_cpu_seconds"] = _children_cpu_seconds(before, after)
     assert row["cache_hits"] == 0 and row["cache_enabled"] is False
     return row
 
 
+def _median(values):
+    return float(np.median(sorted(values)))
+
+
 def compile_ratio(module_name, name, repeats=COMPILE_REPEATS):
-    """Return the median tangent-over-primal compile ratio, printing every arm."""
+    """Return the median tangent-over-primal compile CPU ratio, printing every arm.
+
+    The ratio is taken on the CPU seconds each fresh process spent compiling --
+    load-insensitive, and the measure the row asserts on.  The wall and the whole
+    child's CPU are printed beside it for the record.
+    """
+
     rows = {
         arm: [compile_row(module_name, name, arm) for _ in range(repeats)]
         for arm in ("primal", "tangent", "jvp")
     }
     median = {}
     for arm, runs in rows.items():
-        walls = sorted(row["compile_seconds"] for row in runs)
         equations = {row["equations"] for row in runs}
         assert len(equations) == 1
-        median[arm] = float(np.median(walls))
+        cpu = [row["compile_cpu_seconds"] for row in runs]
+        walls = [row["compile_seconds"] for row in runs]
+        processes = [row["process_cpu_seconds"] for row in runs]
+        median[arm] = _median(cpu)
         print(
-            f"COMPILE {name} {arm} median_seconds={median[arm]:.3f} "
+            f"COMPILE {name} {arm} median_cpu_seconds={median[arm]:.3f} "
+            f"median_wall_seconds={_median(walls):.3f} "
+            f"median_process_cpu_seconds={_median(processes):.3f} "
             f"equations={equations.pop()} "
-            f"walls={','.join(f'{wall:.3f}' for wall in walls)} "
+            f"cpu={','.join(f'{value:.3f}' for value in cpu)} "
+            f"walls={','.join(f'{value:.3f}' for value in walls)} "
+            f"process_cpu={','.join(f'{value:.3f}' for value in processes)} "
             f"hits={sum(row['cache_hits'] for row in runs)}"
         )  # fmt: skip
     ratio = median["tangent"] / median["primal"]
-    print(f"COMPILE {name} median_tangent_over_primal={ratio:.2f}")
+    print(f"COMPILE {name} median_tangent_over_primal_cpu={ratio:.2f}")
     return ratio

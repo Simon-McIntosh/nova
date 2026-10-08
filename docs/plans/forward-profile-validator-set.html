@@ -26,7 +26,7 @@
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-commits" content="aff62b24,646d21fb,28a8247b,c36ef55c,5ae3ec94,f4ff7b6f,b762ae17,cc679621,9692e2b8,7c7fe7e0,228517df,d5961848,1dd08655,b736d9b8,4697003d,1ec3483d,e17138d4,4fc5a878,6b8afb52,aee4a68f,3a53bbc0">
 <meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="30">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -160,6 +160,9 @@ baseline/after arms).</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261008-rungs-deferred" data-who="reckon-build" data-when="2026-10-08T10:25:00Z">
     <div class="r-comment-body">rung 2 landed as a failing validation: the shipped solve returns a reference seed unchanged and refuses a vacuum seed at the topology read on all four CORSICA slices; the finding is recorded on converged-forward-solve §6 (plan comment c-s21-corsica-130506-evidence). Rungs 3 and 4 (DINA 105027, ASTRA 131046, band tightening) and the CORSICA re-run are deferred until converged-forward-solve §5 lands, so they measure the post-cutover solve; the re-run must add §4's non-contraction pin and a control that can fire. Rung 5 still waits on the cross-section-breadth decision. Evidence: corsica-130506.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T063930660089-fpv-corsica-130506" data-who="reckon-build" data-when="2026-10-08T08:30:56Z">
+    <div class="r-comment-body"><p>Independent conductor-vacuum seed on H200 job 1282093: 4/4 head solves raised NoQualifiedAxisError before a terminal receipt (12 failed checks, 0 passed, no timeouts). FF-prime 1.3x control at 150 s adds 0 failure IDs against its completed head and is non-discriminating. The 230 s reference lacks a closed axis-containing contour at boundary flux. Updated diagnostic captions in docs/evidence/fragments/forward-profile-validator-set/fpv-corsica-130506.html; 0 replacement panels available.</p></div>
 </div>
 </section>
 </main>

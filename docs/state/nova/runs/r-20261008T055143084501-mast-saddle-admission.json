@@ -1,0 +1,693 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "fe057dcc5259a8ba801e863f5c63ae963eec59d3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 13728128,
+      "cached_input_tokens_cumulative": 13728128,
+      "input_tokens": 13981842,
+      "input_tokens_cumulative": 13981842,
+      "output_tokens": 71767,
+      "output_tokens_cumulative": 71767,
+      "reasoning_output_tokens": 26177,
+      "reasoning_output_tokens_cumulative": 26177
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 6438,
+    "files": 10,
+    "removed": 48
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "declare_split",
+        "path": "benchmarks/mast_saddle_admission.py"
+      },
+      "window_line": 178
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_publication_artifact_records_are_stable_and_strict",
+        "path": "tests/test_diiid_forward_gs_match.py"
+      },
+      "run_function": {
+        "line": 141,
+        "name": "declare_split",
+        "path": "benchmarks/mast_saddle_admission.py"
+      },
+      "window_line": 178
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 479,
+        "name": "main",
+        "path": "benchmarks/mast_saddle_admission.py"
+      },
+      "window_line": 677
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 479,
+        "name": "main",
+        "path": "benchmarks/mast_saddle_admission.py"
+      },
+      "window_line": 694
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 479,
+        "name": "main",
+        "path": "benchmarks/mast_saddle_admission.py"
+      },
+      "window_line": 679
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "main",
+        "path": "tests/measure_external_wall_correction.py"
+      },
+      "run_function": {
+        "line": 479,
+        "name": "main",
+        "path": "benchmarks/mast_saddle_admission.py"
+      },
+      "window_line": 695
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 479,
+        "name": "main",
+        "path": "benchmarks/mast_saddle_admission.py"
+      },
+      "window_line": 686
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "2806d665fdef38fb056a2ccfa62b3fd0ec0151ca",
+    "641a8b33dae309f7cf435e43432ab8c69f80f8af",
+    "47c46cb8e81542bc69f244b8c6b3711aff75e66a",
+    "07260595944fe706f0ac3cf0beb69aa354cc1389",
+    "c3cc4e044f347e3088e38eb8daf664f5f75a256b"
+  ],
+  "completed_at": "2026-10-08T06:30:20Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T05:52:20Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --basetemp /tmp/mast-saddle-final-head /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_io_magnetics.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_ingest_import.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_mast_misfit_harmonics_saddle.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_mast_misfit_harmonics.py -q; 53 passed, 0 failed, EXIT=0. /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055143084501-mast-saddle-admission/baseline_gate.py -p no:cacheprovider --basetemp /tmp/mast-saddle-baseline-suite /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_io_magnetics.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_ingest_import.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_mast_misfit_harmonics_saddle.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-admission/tests/test_mast_misfit_harmonics.py -q; 8 failed, 45 passed, EXIT=1, all eight are the missing-reader/assembly regressions repaired at head. SLURM all_debug job 1282026 ran the literal benchmark command in limited-data-pass.log and completed EXIT=0; the default-mode job 1282025 refused insufficient served held-out shots before any fit (EXIT=1).",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055143084501-mast-saddle-admission/geometry-reader-reproduction.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.22,
+    "plan": "mast-nonaxisymmetric-physics",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-astra",
+    "burn_multiple": 2.1158546907268847,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-astra' is projected to exhaust at 2026-10-11T01:37:51Z, which is after this node's 3600s horizon ending 2026-10-08T06:51:50.938730+00:00",
+    "horizon_ends_at": "2026-10-08T06:51:50.938730+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T05:51:49Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-11T01:37:51Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 516189,
+    "state": "quiet",
+    "utilisation_pct": 31.0
+  },
+  "lane_declaration": {
+    "backend": "codex-astra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T05:51:49Z",
+    "read_at": "2026-10-08T05:51:50Z",
+    "resolved_backend": "codex-astra",
+    "utilisation_pct": 31.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T06:30:20Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055143084501-mast-saddle-admission/manifest.md",
+  "member": "disposable-r-20261008T055143084501-mast-saddle-admission",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_mast_misfit_harmonics_saddle.py::test_two_loop_assembly_keeps_identity_geometry_and_shot_counts"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_io_magnetics.py::test_sensor_identity_uses_opened_schema[3.39.0]",
+      "tests/test_io_magnetics.py::test_sensor_identity_uses_opened_schema[4.0.0]",
+      "tests/test_io_magnetics.py::test_sensor_identity_uses_opened_schema[4.1.1]",
+      "tests/test_io_magnetics.py::test_verified_mast_artifact_loop_names_and_contours",
+      "tests/test_mast_misfit_harmonics_saddle.py::test_contour_reversal_reverses_flux_and_open_contour_is_refused",
+      "tests/test_mast_misfit_harmonics_saddle.py::test_saddle_identity_must_resolve_in_ids",
+      "tests/test_mast_misfit_harmonics_saddle.py::test_sparse_loop_is_dropped_with_its_own_contour",
+      "tests/test_mast_misfit_harmonics_saddle.py::test_two_loop_assembly_keeps_identity_geometry_and_shot_counts"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_mast_misfit_harmonics_saddle.py::test_two_loop_assembly_keeps_identity_geometry_and_shot_counts"
+    ],
+    "declaration": "the geometry-permuted control must not reproduce the real held-out gain, and the synthetic two-loop assembly must fail when one loop position is swapped",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055143084501-mast-saddle-admission/final-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055143084501-mast-saddle-admission/final-negative-control.log",
+    "test_paths": [
+      "tests/test_io_magnetics.py",
+      "tests/test_mast_misfit_harmonics_saddle.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "mast-saddle-admission",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 63,
+          "cached_input_tokens": 721205,
+          "input_tokens": 721272,
+          "output_tokens": 2005,
+          "reasoning_output_tokens": 622,
+          "total_tokens": 723277,
+          "uncached_input_tokens": 4
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "ConstraintSet and assemble in nova/imas/mast_misfit_harmonics.py accept the saddle loops, using the uncorrected XMB voltages reachable per docs/figures/mast-saddle-loops/reach.json, raw keys resolved per family, the cohort admitted through light_census in nova/imas/mast_vacuum_cohort.py, geometry from the magnetics IDS through nova/imas/io_magnetics.py and never nova.catalog.mast_geometry; each loop traversal sign is carried as a two-valued nuisance, not fixed; benchmarks/mast_saddle_admission.py reports held-out residuals on xmb-bearing shots excluded from the fit, with the split stated before scoring, for the bank with and without the saddle loops; two controls (the saddle loops removed, and the per-loop geometry assignment permuted) must each remove the improvement, judged by comparing their gain with the real gain, not by a sign; per-loop shot counts are reported beside each loop contribution because 20 loops appear on 3 shots only; receipt and a residual figure under docs/figures/mast-saddle-admission; tests/test_mast_misfit_harmonics_saddle.py pins the assembly on a synthetic two-loop case; the data pass runs on all_debug as one job with its log in the manifest; no sign is promoted",
+    "estimated_hours": 1.0,
+    "goal": "Measure whether admitting the MAST saddle loops into the harmonic constraint set improves held-out vacuum residuals",
+    "id": "mast-saddle-admission",
+    "lane_declaration": {
+      "backend": "codex-astra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T05:51:49Z",
+      "read_at": "2026-10-08T05:51:50Z",
+      "resolved_backend": "codex-astra",
+      "utilisation_pct": 31.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T055143084501-mast-saddle-admission/manifest.md",
+    "negative_control": "the geometry-permuted control must not reproduce the real held-out gain, and the synthetic two-loop assembly must fail when one loop position is swapped",
+    "plan": "mast-nonaxisymmetric-physics",
+    "requested_backend": "codex-astra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/imas/mast_misfit_harmonics.py",
+      "benchmarks/mast_saddle_admission.py",
+      "tests/test_mast_misfit_harmonics_saddle.py",
+      "docs/figures/mast-saddle-admission",
+      "docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-admission.html",
+      "docs/figures/mast-nonaxisymmetric-physics/mast-saddle-admission",
+      "nova/imas/io_magnetics.py",
+      "tests/test_io_magnetics.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.183931649148042,
+      "derived": 0.1611772054026124,
+      "drain_hours": 168.0,
+      "effective_limit": 0.1611772054026124,
+      "elapsed_fraction": 0.1465247321841931,
+      "elapsed_hours": 24.61615500694444,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T05:51:57+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.6799999999999999,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.32,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.241664,
+      "decided_by": "window",
+      "margin": 0.49583600000000005,
+      "name": "mast-saddle-admission",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.32
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.158025,
+        "observed_at": "2026-10-08T05:51:57+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.32,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-astra",
+    "member": "codex",
+    "node": "mast-saddle-admission",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T05:51:57.158025+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Named lane: hard n-resolving inference node, lead directive sends hard work to codex, local lane congested for this session. The failure mode is a held-out gain that comes from added degrees of freedom rather than the saddle loops resolving n, which the two controls must catch; coverage is thin (26 xmb-bearing shots, 20 loops on 3). Deep reasoning, elevated risk.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.504,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "mast-nonaxisymmetric-physics",
+  "plan_impl_at_dispatch": 0.22,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c3cc4e044f347e3088e38eb8daf664f5f75a256b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "fe057dcc5259a8ba801e863f5c63ae963eec59d3",
+    "reviewed_head_sha": "c3cc4e044f347e3088e38eb8daf664f5f75a256b",
+    "scores": {
+      "durability": 17,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 16,
+      "reuse": 18,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 105
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T055143084501-mast-saddle-admission",
+  "scope_acceptances": null,
+  "scope_changed": true,
+  "section": "§5",
+  "session": "s24-nova",
+  "session_harness": "codex",
+  "session_id": "01a11a12-09e0-7d33-9b1a-392aaaedadcf",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 9,
+  "throughput": {
+    "cumulative_cached_input_tokens": 13728128,
+    "cumulative_input_tokens": 27709970,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 97944
+  },
+  "time_budget": "60m",
+  "tool_steps": 78.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2659,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T05:29:41Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-08T05:07:58Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T043927638886-fpv-analytic-smoke",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 11616,
+          "worker_pid": 1318861
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T05:29:41Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1336,
+        "log_fresh": false,
+        "manifest_commits": [
+          "c36ef55c8",
+          "5ae3ec946"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "e3c74b244e1471aae20f774ba240a4de1c07eb17b1d86478313d0ebd674549cf",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043927638886-fpv-analytic-smoke/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan forward-profile-validator-set --section '§5' --role review --spec-level exact --node review-of-fpv-analytic-smoke --goal 'attach an independent review to run r-20261008T043927638886-fpv-analytic-smoke' --done-when 'the review for r-20261008T043927638886-fpv-analytic-smoke stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T043927638886-fpv-analytic-smoke.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T043927638886-fpv-analytic-smoke.at-5ae3ec946bb2d161b45240526c7532764024a6fc.json --time-budget 60m --session s24-nova --allow-unreconciled-runs --local",
+        "node": "fpv-analytic-smoke",
+        "phase": "complete",
+        "plan": "forward-profile-validator-set",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T043927638886-fpv-analytic-smoke",
+        "session": "s24-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1362,
+        "terminal_at": "2026-10-08T05:29:11Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/fpv-analytic-smoke"
+      },
+      {
+        "backend": "codex-astra",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 263,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 3863,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T05:02:21Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T04:47:49Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T044638953254-mast-tf-average",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 311,
+          "worker_pid": 1016124
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T05:02:21Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2977,
+        "log_fresh": false,
+        "manifest_commits": [
+          "87d247246ea633a98d2175b4510076daaca2248a",
+          "1227e204bb0ee1b3cd2272ca950ab5a34213203d",
+          "d95f9296a500b9498421633b33f2cc9c2bbc398b"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "9ff013941d1e716150b6fd8903c3d38d97299e49d7dc8b23a0656805d2683eee",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044638953254-mast-tf-average/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "astra",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan mast-nonaxisymmetric-physics --section '§6' --role review --spec-level exact --node review-of-mast-tf-average --goal 'attach an independent review to run r-20261008T044638953254-mast-tf-average' --done-when 'the review for r-20261008T044638953254-mast-tf-average stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T044638953254-mast-tf-average.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T044638953254-mast-tf-average.at-d95f9296a500b9498421633b33f2cc9c2bbc398b.json --time-budget 60m --session s24-nova --allow-unreconciled-runs --local",
+        "node": "mast-tf-average",
+        "phase": "complete",
+        "plan": "mast-nonaxisymmetric-physics",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T044638953254-mast-tf-average",
+        "session": "s24-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 3003,
+        "terminal_at": "2026-10-08T05:01:51Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-tf-average"
+      }
+    ]
+  },
+  "wall_seconds": 2280,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T06:30:22Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T06:01:35Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T055143084501-mast-saddle-admission",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 618,
+    "worker_pid": 1978402
+  },
+  "worker_seconds": 2280,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

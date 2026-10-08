@@ -29,7 +29,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f,87d24724,1227e204,d95f9296,2806d665,641a8b33,47c46cb8,07260595,c3cc4e04">
 <meta name="plan-impl" content="0.32">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -183,6 +183,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261008-saddle-admission-landed" data-who="reckon-build" data-when="2026-10-08T06:50:00Z">
     <div class="r-comment-body">node (b) landed as a refused attribution: on the 3 usable xmb shots the geometry-permuted control matches the real gain (87.9 vs 87.3 %); the io_magnetics reader is repaired for DD 4.1.1. Section open — the 23 shots without voltage units are being calibrated (mast-saddle-voltage-units), after which the admission re-runs. Evidence: saddle-admission.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T055143084501-mast-saddle-admission" data-who="reckon-build" data-when="2026-10-08T06:30:20Z">
+    <div class="r-comment-body"><p>Reader repaired and full saddle contours admitted with binary traversal nuisance. Limited 2-fit/1-held-out comparison on 36 loops: real squared-residual gain 87.3168%, geometry-permuted gain 87.8757%, removed gain 0%; attribution refused, 23 shots lack raw voltage units, no sign promoted. [Residual figure and receipt](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-admission.html#mast-saddle-admission-residuals).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-passive-spectrum-landed" data-who="reckon-build" data-when="2026-10-08T04:35:00Z">
     <div class="r-comment-body">node 1 landed: 1 of 15 grouped passive directions identifiable above the floor with drive scales free (400/400 shots scored). Section open — the held-out fit of that one direction, with the drive-permutation control, is next; it must propagate through nova/circuit/propagate.py and read geometry without the retiring registry. Evidence: passive-spectrum.</div>

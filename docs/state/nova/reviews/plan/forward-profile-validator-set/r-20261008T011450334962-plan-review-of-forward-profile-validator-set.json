@@ -61,6 +61,13 @@
       "finding": "reasoning-1",
       "reason": "",
       "when": "2026-10-08T01:37:15.217569+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s24-nova",
+      "finding": "wiring-1",
+      "reason": "plan relationship fields are not writable through edit_plan (set on after is refused and text mode refuses metadata); the ordering is safe regardless: machine-description-retirement \u00a73 deletions are deferred behind the imas-ambix migration and the owner push, its \u00a73 text names this plan as the lifter, and the lift is this wave first node",
+      "when": "2026-10-08T01:37:32.543382+00:00"
     }
   ],
   "responses": {
@@ -81,6 +88,12 @@
       "by": "s24-nova",
       "reason": "",
       "when": "2026-10-08T01:36:58.543548+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "s24-nova",
+      "reason": "plan relationship fields are not writable through edit_plan (set on after is refused and text mode refuses metadata); the ordering is safe regardless: machine-description-retirement \u00a73 deletions are deferred behind the imas-ambix migration and the owner push, its \u00a73 text names this plan as the lifter, and the lift is this wave first node",
+      "when": "2026-10-08T01:37:32.543382+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-profile-validator-set/r-20261008T011450334962-plan-review-of-forward-profile-validator-set.json",

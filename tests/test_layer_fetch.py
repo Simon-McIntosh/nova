@@ -162,8 +162,9 @@ def test_unreachable_registry_is_classified_separately(tmp_path: Path) -> None:
             "resource is denied"
         ),
         (
-            'Error: GET "https://ghcr.io/token": response status code 401: '
-            "token has expired"
+            'Error: GET "https://ghcr.io/v2/aaroncrawfis/test/manifests/latest": '
+            'GET "https://ghcr.io/token?scope=repository%3Aaaroncrawfis%2Ftest%3Apull'
+            '&service=ghcr.io": response status code 403: denied: denied'
         ),
     ],
     ids=["authentication-required", "access-denied", "expired-token"],

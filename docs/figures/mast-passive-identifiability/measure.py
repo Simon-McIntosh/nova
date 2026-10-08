@@ -271,6 +271,7 @@ def main():
     screen = load_screen(args.screen)
     registry = MachineGeometryRegistry.default()
     cache, records, refused = {}, [], []
+    refinements = []
     compact, names, observations = None, None, 0
     args.progress.parent.mkdir(parents=True, exist_ok=True)
     args.progress.write_text("")
@@ -293,6 +294,33 @@ def main():
             continue
         if names is not None and names != group_names:
             raise ValueError("component families differ across geometry epochs")
+        if len(refinements) < 3:
+            _, fine_block, fine_row = shot_jacobian(
+                shot, cache[key], args.step / 2.0, screen
+            )
+            coarse_spectrum = projected_spectrum(
+                block[:, : len(group_names)],
+                block[:, len(group_names) :],
+                observation_count=row["observation_count"],
+            ).singular_values
+            fine_spectrum = projected_spectrum(
+                fine_block[:, : len(group_names)],
+                fine_block[:, len(group_names) :],
+                observation_count=fine_row["observation_count"],
+            ).singular_values
+            refinements.append(
+                {
+                    "shot": shot,
+                    "coarse_step_seconds": args.step,
+                    "fine_step_seconds": args.step / 2.0,
+                    "coarse_spectrum": coarse_spectrum.tolist(),
+                    "fine_spectrum": fine_spectrum.tolist(),
+                    "relative_spectrum_norm_change": float(
+                        np.linalg.norm(fine_spectrum - coarse_spectrum)
+                        / max(np.linalg.norm(fine_spectrum), np.finfo(float).tiny)
+                    ),
+                }
+            )
         names = group_names
         compact = (
             block
@@ -365,6 +393,7 @@ def main():
         "right_singular_directions": spectrum.directions.tolist(),
         "identifiable_direction_count": spectrum.identifiable_count,
         "promoted_parameters": [],
+        "integration_refinement": refinements,
         "interpretation": (
             "Local interval-scaled RMS sensitivity at nominal seeds "
             "with every coil scale projected out without penalty. Directions are "

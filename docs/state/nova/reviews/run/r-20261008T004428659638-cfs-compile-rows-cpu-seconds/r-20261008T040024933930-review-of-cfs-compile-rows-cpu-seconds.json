@@ -1,0 +1,151 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "Both reviewed arms ran, and each recorded failure_count 0 with no failing test ids. added_failure_count is therefore 0 and added_failure_ids is empty, derived directly from the reviewed run's own baseline_suite (delta-base.log) and after_suite (delta-after.log). Both arms are completed:false and both select -m 'not slow', so neither exercises the slow-marked compile-row assertion this node edits; the finite_part verdict flip (a red test id that was green at base) is recorded as a follow-on finding rather than in added_failure_ids, which the two arm logs do not carry.",
+  "after_suite": {
+    "arm": "after",
+    "command": "timeout 300 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest <module> -m 'not slow' -o addopts= -p no:cacheprovider --timeout=150 --timeout-method=signal -q -rf --tb=line, run once per module over the six modules under tests/biot, one module after another, PYTHONPATH set to the worktree",
+    "completed": false,
+    "exit_status": 124,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/delta-after.log",
+    "modules_green": 5,
+    "modules_timed_out": [
+      "tests/biot/test_vertex_term_tangents.py"
+    ],
+    "revision": "44702f0303d4749b5df8eac39abdbe8b33f763b3"
+  },
+  "baseline_suite": {
+    "arm": "base",
+    "command": "timeout 300 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest <module> -m 'not slow' -o addopts= -p no:cacheprovider --timeout=150 --timeout-method=signal -q -rf --tb=line, run once per module over the six modules under tests/biot, one module after another, PYTHONPATH set to the base tree",
+    "completed": false,
+    "exit_status": 124,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/delta-base.log",
+    "modules_green": 5,
+    "modules_timed_out": [
+      "tests/biot/test_vertex_term_tangents.py"
+    ],
+    "revision": "72112421cb157599b3e3e97b31f3d5f6246735d4"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "tests/biot/test_elliptic_tangent_recurrences.py:470 asserts ratio <= 3.0",
+    "tests/biot/test_range_tangent_recurrences.py:363 asserts ratio <= 3.0",
+    "tests/biot/test_vertex_edge_tangent_recurrences.py:485 asserts ratio <= 3.0"
+  ],
+  "commits_read": [
+    "79a6f515e",
+    "28c2e5e86",
+    "b1466efce",
+    "3a3039c8a",
+    "c8d645037",
+    "c545974aa",
+    "b2900e4d1",
+    "e9e29794f",
+    "44702f030",
+    "d63a5ab9e9f0b7107c81e28fa7da757e36fa069a"
+  ],
+  "completed_at": "2026-10-08T04:24:15.122Z",
+  "dispatched_at": "2026-10-08T04:01:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-compile-rows-cpu-seconds.html",
+      "line": "control paragraph",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control does not discriminate. The mutation NOVA_TANGENT_COMPILE_HEAVY=1 doubles the tangent program, but its only demonstrated refusal (negative-control-graded-residual.log, EXIT=1) is on graded_residual, which already exceeds the 3.0 CPU bound without the mutation; the re-run on complete_pole and contract (negative-control.log) shows complete_pole still passing under the mutation at 2.20 and is cut mid-contract, so no passing row is shown turning red. The mutation lifts a passing row's CPU ratio by only about 12 percent (2.20 against a shipped 1.97), so it is too weak to cross the bound for any row that passes today. A stronger control (for example summing four copies, or mutating the smallest row) would show the guard firing on a state that would otherwise pass."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-compile-rows-cpu-seconds.html",
+      "line": "delta paragraph",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's own delta arms are the source of the added-failure derivation, and both are incomplete. baseline_suite (delta-base.log) and after_suite and after (delta-after.log) are each completed:false with exit_status 124: five modules green and tests/biot/test_vertex_term_tangents.py cut by its own 300 s bound in both. More relevant to this node's change, the delta command selects -m 'not slow' and the assertion this node edits (test_tangent_compiles_within_three_primals) is slow-marked, so the delta arms never exercise the changed test; the four compile passes are its only evidence. The delta is still informative because the two arms are exactly symmetric and the cut module is unmodified, so no added failure is measured there, but the 'moves no module under tests/biot' claim rests on an arm set that excludes the changed row."
+    },
+    {
+      "file": "tests/biot/tangent_identity.py",
+      "line": "237",
+      "severity": "follow-on",
+      "text": "follow-on: the change moves one test id from pass to fail and the prescribed derivation cannot see it. At base the bound was asserted on wall, under which finite_part passed (wall ratio 2.30, from the pass1 log's 0.099/0.043) and graded_residual failed (wall 3.79); after, both fail on CPU (finite_part 4.59-4.67, graded_residual 4.47-3.48). So tests/biot now carries a red test_tangent_compiles_within_three_primals[finite_part] that was green at base. The node discloses this in the fragment (finite_part is the moved verdict) and it is the correct measure, but the delta arms exclude the slow rows, so this red id is unreachable from added_failure_ids derived from baseline_suite/after_suite. The coordinator should carry it as a known red on the CPU measure, not a delivered pass. The row's primal compile (0.044 s) is the smallest in the set, so the measure's own resolution is a large fraction of it, as the fragment notes."
+    },
+    {
+      "file": "tests/biot/tangent_identity.py",
+      "line": "171-175",
+      "severity": "follow-on",
+      "text": "follow-on: the asserted measure is time.process_time() inside the spawned probe, which counts CPU across all threads of the child; XLA compilation is multi-threaded, so the figure depends on how many threads the compile actually runs on that host. The four passes show the measure is stable under an eight-spinner load (every row moves at most 0.2 in ratio between a sequential and a loaded pass), so it is load-insensitive in the sense claimed; but a host with a different core count could shift the absolute CPU seconds. No action required for this node; recorded so a future rebaseline is not read as a regression."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "completed": false,
+      "exit_status": 124,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/delta-after.log",
+      "revision": "44702f0303d4749b5df8eac39abdbe8b33f763b3"
+    },
+    "baseline_suite": {
+      "completed": false,
+      "exit_status": 124,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/delta-base.log",
+      "revision": "72112421cb157599b3e3e97b31f3d5f6246735d4"
+    }
+  },
+  "gate_arms_note": "The reviewed run recorded exactly the two arms I read (baseline_suite -> delta-base.log, after_suite -> delta-after.log); I did not need to reproduce a missing arm. Both are incomplete (EXIT=124, tests/biot/test_vertex_term_tangents.py cut by its own 300 s bound in base and after alike) and neither contains the changed compile-row assertion because both select -m 'not slow'. added_failure_count 0 and no added ids follow from the two logs as recorded.",
+  "item_verdicts": {
+    "durability": "the assertion and the per-test timeout are real, but the guard is never shown firing on a state that would otherwise pass.",
+    "evidence": "the four-pass evidence is strong and reconciles exactly with the fragment; it is docked for incomplete delta arms and a non-discriminating negative control.",
+    "fit": "all names are mechanism names; the docstring explains the measure, not a tracker entry.",
+    "goal_fidelity": "the measure is what the node says: child CPU seconds inside lowered.compile(), median of seven, bound unchanged at 3.0, wall and whole-child CPU printed beside.",
+    "reuse": "extends the existing compile harness and adds one getrusage delta; its only redundancy is a redundant sort before np.median.",
+    "scope_discipline": "git diff --name-status lists exactly the five declared paths; commit subjects and bodies carry no plan or ticket identifier and no AI attribution."
+  },
+  "justifications": {
+    "durability": "The guard is real: the three test modules assert ratio <= 3.0 (test_elliptic:470, test_range:363, test_vertex_edge:485); a compile row spawns 21 fresh processes, so the row gets its own @pytest.mark.timeout(1800) (test_elliptic:466, test_range:359, test_vertex_edge:481) while every other test keeps the repository default; and the mutation NOVA_TANGENT_COMPILE_HEAVY=1 is wired into the probe at :152-158 so it doubles only the tangent program. It is docked because the guard's discriminating power is not demonstrated by any log in the run. The declared control log (negative-control-graded-residual.log) refuses on graded_residual, which already exceeds the 3.0 bound without the mutation, so passing there is not evidence of discrimination; the fragment concedes this and re-ran on complete_pole and contract, but negative-control.log shows complete_pole still PASSING under the mutation at ratio 2.20 (its shipped ratio is about 1.97) before the log is cut mid-contract, so no passing row is ever shown turning red under the mutation.",
+    "evidence": "The fragment's ten-row table reconciles exactly with the four pass logs: I read jobA-sequential-pass1.log, jobA-sequential-pass2.log, jobB-loaded-pass1.log and jobB-loaded-pass2.log and every ratio matches the table (complete_pole 1.97/1.98/2.15/2.14 ... finite_part 4.59/4.67/3.14/3.22, graded_residual 4.47/4.37/3.48/3.48), each pass reports '2 failed, 8 passed, 93 deselected', and the FAILED ids are exactly test_tangent_compiles_within_three_primals[finite_part] and [graded_residual] in all four passes. The wall-versus-CPU 'before' claim is verified exactly from pass1: graded_residual wall 0.531/0.140 = 3.79 and finite_part wall 0.099/0.043 = 2.30. Docked because the reviewed run's own delta arms (baseline_suite/after_suite) are both completed:false (EXIT=124, tests/biot/test_vertex_term_tangents.py cut by its own 300 s bound in both), and because the declared negative control's only demonstrated refusal is on a row already red.",
+    "fit": "Every name is a mechanism name: _children_cpu_seconds, compile_row, compile_ratio, _median, median_cpu_seconds, median_process_cpu_seconds, compile_cpu_seconds. No plan, sprint, ticket or version identifier appears in any symbol, comment or docstring. The module docstring (:17-30) explains the physics of the measure -- descheduling under load, the import constant the whole-child CPU carries -- rather than citing a tracker entry.",
+    "goal_fidelity": "The node's goal is to measure each fresh compile process by the CPU seconds it spends inside lowered.compile() (time.process_time() around exactly that call), assert the tangent-over-primal ratio on the median of seven CPU medians with the bound kept at 3.0, and print the wall and the whole-child CPU beside every arm. tests/biot/tangent_identity.py:171-175 takes the CPU around lowered.compile() inside the spawned probe, :237 asserts on median cpu, and :238-244 prints wall, cpu, process_cpu and equations; the bound is unchanged at 3.0 (test_elliptic:470, test_range:363, test_vertex_edge:485). The two rows that exceed it are named and left red rather than loosened, and the fragment states plainly that finite_part is the one row whose verdict the change moves. Docked one point because the discriminating half of the goal -- a control that shows the guard refuses a state that would otherwise pass -- is not demonstrated (see durability).",
+    "reuse": "The change extends the existing compile_row/compile_ratio harness and its _COMPILE_PROBE rather than adding a second instrument: compile_row now also records the whole child's CPU from getrusage(RUSAGE_CHILDREN) deltas (:189, :207-209) and compile_ratio asserts on the same seven-median it already computed (:237). Docked for a small redundancy: _median (:214) sorts before np.median, which already sorts.",
+    "scope_discipline": "git diff --name-status 72112421c d63a5ab9e is exactly the five declared paths -- A docs/evidence/fragments/converged-forward-solve/cfs-compile-rows-cpu-seconds.html, M tests/biot/tangent_identity.py, M tests/biot/test_elliptic_tangent_recurrences.py, M tests/biot/test_range_tangent_recurrences.py, M tests/biot/test_vertex_edge_tangent_recurrences.py -- 123 insertions, 12 deletions. No production module under nova/ is touched and no concurrent node's path appears. All ten commit subjects are conventional with mechanism wording, every one carries a body, and none carries an AI-attribution line."
+  },
+  "notes": "Independent review of the reviewed run at base 72112421c through head d63a5ab9e. The change makes the tangent compile rows load-insensitive by asserting on the CPU seconds a fresh child spends inside lowered.compile() instead of wall, keeps the 3.0 bound, gives the rows a 1800 s per-test timeout, and leaves the two rows that exceed the bound red rather than loosening it. It is correct, minimal and honest: the four-pass evidence is sound and the fragment reconciles exactly with the four pass logs. Three follow-on findings and one note, no blocking finding. The declared negative control does not discriminate (its only refusal is on an already-red row, and the re-run leaves complete_pole passing under the mutation). Both delta arms are incomplete and exclude the slow-marked row the change edits. finite_part flips from pass-by-wall to fail-by-CPU, so the change adds a red test id that the delta arms cannot see. Scores: goal_fidelity 18, evidence 16, scope_discipline 20, durability 16, fit 19, reuse 18. Total 107, verdict pass.",
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node replaces the tangent compile rows wall measure with the CPU seconds each fresh child spends inside lowered.compile() and asserts the tangent-over-primal ratio on the median of seven CPU medians, keeping the 3.0 bound. tests/biot/tangent_identity.py:171-175, 237 and 238-244 and the three module timeout markers do exactly this, and the two rows that exceed the bound are named and left red.\nVERDICT done_when: the reviewed runs evidence is its own four compile passes; the fragment reconciles exactly with the four pass logs and the two failing ids finite_part and graded_residual exceed 3.0 in all four.\nVERDICT write_paths: git diff --name-status 72112421c d63a5ab9e is exactly the five declared paths, 123 insertions, 12 deletions; no nova production file is touched.\nVERDICT manifest: read; its declared paths, the four pass logs, the negative control and the deliberate decision to leave the two rows red all match the code and logs I read.\nVERDICT diff: ten commits, five files (one evidence fragment added, the harness and the two modules gaining the timeout modified, one module and the three test modules edited).\nSCORE goal_fidelity: 18\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 16\nSCORE fit: 19\nSCORE reuse: 18\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-compile-rows-cpu-seconds.html:control follow: the declared negative control does not discriminate; its only demonstrated refusal is on graded_residual, which is already red without the mutation, and the re-run leaves complete_pole passing under the mutation at 2.20 before being cut mid-contract.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-compile-rows-cpu-seconds.html:delta follow: both delta arms are incomplete (EXIT=124) and both select -m not slow, so they never exercise the changed compile-row assertion.\nFINDING tests/biot/tangent_identity.py:237 follow: finite_part moves from pass-by-wall (2.30) to fail-by-CPU (4.59), adding a red test id the delta arms cannot see.\nCALL_SITE: tests/biot/test_elliptic_tangent_recurrences.py:470 asserts ratio <= 3.0\nCALL_SITE: tests/biot/test_range_tangent_recurrences.py:363 asserts ratio <= 3.0\nCALL_SITE: tests/biot/test_vertex_edge_tangent_recurrences.py:485 asserts ratio <= 3.0",
+  "review_run_id": "r-20261008T040024933930-review-of-cfs-compile-rows-cpu-seconds",
+  "reviewed_base_sha": "72112421cb157599b3e3e97b31f3d5f6246735d4",
+  "reviewed_commit": "d63a5ab9e9f0b7107c81e28fa7da757e36fa069a",
+  "reviewed_head_sha": "d63a5ab9e9f0b7107c81e28fa7da757e36fa069a",
+  "reviewed_revision": "d63a5ab9e9f0b7107c81e28fa7da757e36fa069a",
+  "reviewed_run_id": "r-20261008T004428659638-cfs-compile-rows-cpu-seconds",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-compile-rows-cpu-seconds",
+  "reviewer_node": "review-of-cfs-compile-rows-cpu-seconds",
+  "reviewer_run_id": "r-20261008T040024933930-review-of-cfs-compile-rows-cpu-seconds",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T04:25:00+00:00",
+  "total": 107,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha d63a5ab9e9f0b7107c81e28fa7da757e36fa069a is the reviewed worktree's HEAD (git -C <RW> rev-parse HEAD) and git status --porcelain is empty.",
+    "reviewed_base_sha 72112421cb157599b3e3e97b31f3d5f6246735d4 is an ancestor of head; git log --oneline 72112421c..d63a5ab9e lists the ten commits 79a6f515e, 28c2e5e86, b1466efce, 3a3039c8a, c8d645037, c545974aa, b2900e4d1, e9e29794f, 44702f030, d63a5ab9e.",
+    "git diff --name-status 72112421c..d63a5ab9e is exactly the five declared paths (123 insertions, 12 deletions); nothing under nova/ is touched.",
+    "all ten commit subjects are conventional, all ten carry a body, and grep -Eic on co-authored-by/generated with/claude/copilot over the ten bodies prints 0.",
+    "the four compile pass logs reconcile exactly with the fragment's ten-row table: all 40 ratio values match and each pass reports '2 failed, 8 passed, 93 deselected'.",
+    "the two FAILED ids in all four passes are exactly test_tangent_compiles_within_three_primals[finite_part] and [graded_residual], both above 3.0 in all four passes.",
+    "the fragment's wall-vs-CPU 'before' claim is exact from pass1: graded_residual wall 0.531/0.140=3.79, finite_part wall 0.099/0.043=2.30.",
+    "the declared mutation's only demonstrated refusal is on graded_residual (negative-control-graded-residual.log EXIT=1); the re-run (negative-control.log) shows complete_pole PASSING under the mutation at 2.20 and is cut mid-contract.",
+    "both delta arms are completed:false, EXIT=124; tests/biot/test_vertex_term_tangents.py is the cut module in base and after alike."
+  ]
+}

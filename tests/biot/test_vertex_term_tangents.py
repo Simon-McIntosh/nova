@@ -250,6 +250,9 @@ def _per_sample(got, reference):
     moment's tangent cancels from terms nine decades above it.  A scalar
     leaf is measured against itself.
     """
+    if got is None:
+        assert reference is None
+        return []
     if isinstance(got, list):
         if not got:
             return []

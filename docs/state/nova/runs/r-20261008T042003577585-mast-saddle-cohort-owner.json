@@ -414,6 +414,65 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "191ef560420791fc94edc3d1e0b864ba64d56434",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 2801469610,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261008T042003577585-mast-saddle-cohort-owner",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 2801469610,
+        "path": "/tmp/reckon-crew-scratch/r-20261008T042003577585-mast-saddle-cohort-owner"
+      }
+    ],
+    "scratch_warning": "run scratch for r-20261008T042003577585-mast-saddle-cohort-owner is 2801469610 bytes, above the 2147483648 byte budget",
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "191ef560420791fc94edc3d1e0b864ba64d56434",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-cohort-owner",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-08T04:43:38.060Z",
+            "session_id": "f3c3a926-b697-4849-a878-3c1ba6f8ef9c",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-cohort-owner"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session f3c3a926-b697-4849-a878-3c1ba6f8ef9c"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

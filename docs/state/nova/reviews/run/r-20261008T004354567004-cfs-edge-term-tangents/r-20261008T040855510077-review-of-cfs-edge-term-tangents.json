@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite: baseline (repaired-delta/baseline-suite.log, revision 716d859f, completed true) reports 1 failure [tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp]; after (repaired-delta/after-suite.log, revision 7d5852510, completed true) reports 0 failures []; no id present in the after arm and absent from the baseline arm, so zero added failures.",
+  "base_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/baseline-suite.log",
+  "base_log_revision": "716d859f0b501797e28849ec8878f0243de80cb1",
+  "call_site_count": 3,
+  "call_sites": [
+    "tests/biot/test_edge_term_tangents.py:146",
+    "nova/biot/polygonanalytic.py:3335",
+    "nova/biot/polygonanalytic.py:3662"
+  ],
+  "completed_at": "2026-10-08T04:39:55.288Z",
+  "dispatched_at": "2026-10-08T04:09:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html",
+      "line": "107",
+      "severity": "follow-on",
+      "text": "follow-on: the repaired suite driver's baseline arm runs the base revision's own test modules loaded through git show into a scratch tree, while the after arm runs the head modules, so the two arms do not run the same test set -- tests/biot/test_edge_term_tangents.py holds three tests at revision 716d859f and twenty-four at head. The recorded added-failure count zero therefore rests on the head arm being wholly green rather than on a like-for-like base-versus-head comparison of identical tests; running the head test modules against base code would state the claim directly."
+    },
+    {
+      "file": "tests/biot/test_edge_term_tangents.py",
+      "line": "262",
+      "severity": "follow-on",
+      "text": "follow-on: the 1e-13 exact-form bound is met only on the H200. The same committed row reads 1.720477860e-9 for second_residual on CPU (cpu-exact-rows.log) -- above even the 1e-9 scan bound, which the run records separately -- so the H200 zero is partly a property of the hand tangent and the base jvp lowering to identical code on that backend, not a device-independent identity. The locked 1e-13 should be read as an H200 measurement."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html",
+      "line": "149",
+      "severity": "follow-on",
+      "text": "follow-on: _near_collinear_arsinh_difference (five polygon and four rectangle calls in the census) still has no private tangent and is handed to the wrapping node. The done-when's enumerated quantities are all delivered, so this is not blocking, but the goal's 'every polygonanalytic edge term the Biot point jet differentiates' is complete only against that enumeration."
+    }
+  ],
+  "head_log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/after-edge-controls.log",
+  "head_log_revision": "7d5852510c01c6901648e07aa19646e9824ec56b",
+  "item_aggregate": 111,
+  "item_verdicts": {
+    "call_sites": "the new private tangents are called from tests/biot/test_edge_term_tangents.py and internally by _edge_terms_tangent and _channel_split_tangent; their intended production consumer is the separate custom-JVP wrapping node that this node's census hands off to.",
+    "diff": "read commit by commit over 716d859f0b501797e28849ec8878f0243de80cb1..a854ea58685b8a381a92f86937af0b0347aaa4bb (10 commits): fix(biot) preserves the left-associated slope and radius products and the square-root tangent order; feat(biot) differentiates the edge reductions explicitly; the remaining eight commits extend the tests, the shared harness and the evidence fragment.",
+    "done_when": "the done-when's seven clauses: (1) seven private tangents present for the enumerated quantities; (2) 10,000-sample identity with elementwise maxima and covered fraction printed at 100 percent, plus a 50-digit mpmath reference adjudicating near-edge disagreements; (3) the NOVA_TANGENT_TRUNCATION=1 mutation reported by id (negative-control-verified.log: 7 failed, EXIT=1); (4) two cold compile passes, 14/14 ratios at most 2.0 except second_residual 2.78/2.75, above-2.7 rows named; (5) primal byte equality asserted and a completed baseline/after suite pair; (6) tests/biot/test_vertex_term_tangents.py moved onto the shared harness with _vertex_quotient_tangent/_vertex_product_tangent gone and corner rows unchanged; (7) an audit-doc-clean fragment ending with the packed_analytic_moments census.",
+    "goal": "the node goal is the tangent of every polygonanalytic edge term the Biot point jet differentiates, and of Channel.split, identical to jax.jvp of the base; the diff adds _second_residual_tangent, _edge_integrands_tangent, _edge_flux_line_moments_tangent, _edge_flux_and_moment_terms_tangent and _edge_terms_tangent plus the _EdgeScalar/_EdgeReductionTangent algebra in nova/biot/polygonanalytic.py, preserves the _edge_tangent construction in arithmetic order and adds its 'radius' key, and makes momentchannel._channel_split_tangent refuse a paired channel; all seven H200 identity rows match jax.jvp of the base at max relative 0 with covered_fraction 1.0000 (after-edge-controls.log).",
+    "manifest": "read; it records the tests command and its result, test_logs, negative_control_log (negative-control-verified.log, EXIT=1), a completed baseline_suite (1 failure) and after_suite (0 failures) JSON pair, and measurement_module/measurement_cwd for the scratch base arm.",
+    "write_paths": "the manifest declares nova/biot/polygonanalytic.py, nova/biot/momentchannel.py, tests/biot/test_edge_term_tangents.py, tests/biot/test_vertex_term_tangents.py and docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html; git diff --name-only over 716d859f..a854ea5 lists exactly those five paths, no figure was written, and the plan was not edited."
+  },
+  "justifications": {
+    "durability": "the declared control fires: NOVA_TANGENT_TRUNCATION=1 drops the right-factor product term and reddens all seven identity rows by id (negative-control-verified.log, 7 failed, EXIT=1); test_truncated_tangent_fails_* runs in-module; the near-end exact-integral derivative gap is retained as a strict xfail naming the mechanism and the 5.160e-7 measured maximum.",
+    "evidence": "the identity is measured on 10,000 geometries with a positive control (nonzero base-tangent medians) and covered_fraction printed; a 50-digit mpmath reference at 50 points adjudicates the near-edge disagreements; the prior defect is shown to still reproduce (resume-reproduction.log: 8.134e-13 against the 1e-13 bound) before its repair reads 0; the baseline/after suite pair are completed single-line JSON receipts and audit-doc reports OK. Weaknesses are the device-contingent exact bound and the asymmetric baseline arm (see findings).",
+    "fit": "the added names describe mechanism (_EdgeScalar, _edge_select, _edge_range, _second_residual_tangent, _EdgeReductionTangent, _edge_integrands_tangent, _edge_flux_line_moments_tangent, _edge_flux_and_moment_terms_tangent, _edge_terms_tangent); the naming-label scan over added lines finds no plan, sprint, stage, version or ticket identifier and no attribution, and the only _new hit is object.__new__.",
+    "goal_fidelity": "all seven enumerated tangents are delivered and every H200 identity row matches jax.jvp of the base at max relative 0, elementwise 0, covered_fraction 1.0000; the primal half is asserted byte-identical; the one census helper left without a private tangent is handed to the wrapping node as the census exists to do.",
+    "reuse": "the change extends owners rather than forking them: it imports _tangent_sum, _tangent_difference, _contract_tangent, _product_range_tangent, _across_the_range_tangent and the vertex helpers (_vertex_tangent, _vertex_against_root_tangent, _arsinh_terms_tangent, _graded_residual_tangent) which all exist at the base revision (rangefunction.py is not in the diff), routes _channel_split_tangent into the shared split path, and moves both test modules onto one tests/biot/tangent_identity.py harness.",
+    "scope_discipline": "git diff --name-only over 716d859f..a854ea5 lists exactly the five manifest-declared paths and nothing else; no figure, plan, or pyproject file was touched; the measured scratch base module and cwd (measurement_module/measurement_cwd) are outside the tree as intended."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is the tangent of every polygonanalytic edge term the Biot point jet differentiates, and of Channel.split, identical to jax.jvp of the base; the diff adds _second_residual_tangent, _edge_integrands_tangent, _edge_flux_line_moments_tangent, _edge_flux_and_moment_terms_tangent and _edge_terms_tangent plus the _EdgeScalar/_EdgeReductionTangent algebra in nova/biot/polygonanalytic.py, preserves the _edge_tangent construction in arithmetic order and adds its 'radius' key, and makes momentchannel._channel_split_tangent refuse a paired channel; all seven H200 identity rows match jax.jvp of the base at max relative 0 with covered_fraction 1.0000 (after-edge-controls.log).\nVERDICT done_when: the done-when's seven clauses: (1) seven private tangents present for the enumerated quantities; (2) 10,000-sample identity with elementwise maxima and covered fraction printed at 100 percent, plus a 50-digit mpmath reference adjudicating near-edge disagreements; (3) the NOVA_TANGENT_TRUNCATION=1 mutation reported by id (negative-control-verified.log: 7 failed, EXIT=1); (4) two cold compile passes, 14/14 ratios at most 2.0 except second_residual 2.78/2.75, above-2.7 rows named; (5) primal byte equality asserted and a completed baseline/after suite pair; (6) tests/biot/test_vertex_term_tangents.py moved onto the shared harness with _vertex_quotient_tangent/_vertex_product_tangent gone and corner rows unchanged; (7) an audit-doc-clean fragment ending with the packed_analytic_moments census.\nVERDICT write_paths: the manifest declares nova/biot/polygonanalytic.py, nova/biot/momentchannel.py, tests/biot/test_edge_term_tangents.py, tests/biot/test_vertex_term_tangents.py and docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html; git diff --name-only over 716d859f..a854ea5 lists exactly those five paths, no figure was written, and the plan was not edited.\nVERDICT manifest: read; it records the tests command and its result, test_logs, negative_control_log (negative-control-verified.log, EXIT=1), a completed baseline_suite (1 failure) and after_suite (0 failures) JSON pair, and measurement_module/measurement_cwd for the scratch base arm.\nCALL_SITES: tests/biot/test_edge_term_tangents.py:146, nova/biot/polygonanalytic.py:3335, nova/biot/polygonanalytic.py:3662\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all seven enumerated tangents are delivered and every H200 identity row matches jax.jvp of the base at max relative 0, elementwise 0, covered_fraction 1.0000; the primal half is asserted byte-identical; the one census helper left without a private tangent is handed to the wrapping node as the census exists to do.\nSCORE evidence: 17\nJUSTIFICATION evidence: the identity is measured on 10,000 geometries with a positive control (nonzero base-tangent medians) and covered_fraction printed; a 50-digit mpmath reference at 50 points adjudicates the near-edge disagreements; the prior defect is shown to still reproduce (resume-reproduction.log: 8.134e-13 against the 1e-13 bound) before its repair reads 0; the baseline/after suite pair are completed single-line JSON receipts and audit-doc reports OK. Weaknesses are the device-contingent exact bound and the asymmetric baseline arm (see findings).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only over 716d859f..a854ea5 lists exactly the five manifest-declared paths and nothing else; no figure, plan, or pyproject file was touched; the measured scratch base module and cwd (measurement_module/measurement_cwd) are outside the tree as intended.\nSCORE durability: 18\nJUSTIFICATION durability: the declared control fires: NOVA_TANGENT_TRUNCATION=1 drops the right-factor product term and reddens all seven identity rows by id (negative-control-verified.log, 7 failed, EXIT=1); test_truncated_tangent_fails_* runs in-module; the near-end exact-integral derivative gap is retained as a strict xfail naming the mechanism and the 5.160e-7 measured maximum.\nSCORE fit: 19\nJUSTIFICATION fit: the added names describe mechanism (_EdgeScalar, _edge_select, _edge_range, _second_residual_tangent, _EdgeReductionTangent, _edge_integrands_tangent, _edge_flux_line_moments_tangent, _edge_flux_and_moment_terms_tangent, _edge_terms_tangent); the naming-label scan over added lines finds no plan, sprint, stage, version or ticket identifier and no attribution, and the only _new hit is object.__new__.\nSCORE reuse: 18\nJUSTIFICATION reuse: the change extends owners rather than forking them: it imports _tangent_sum, _tangent_difference, _contract_tangent, _product_range_tangent, _across_the_range_tangent and the vertex helpers (_vertex_tangent, _vertex_against_root_tangent, _arsinh_terms_tangent, _graded_residual_tangent) which all exist at the base revision (rangefunction.py is not in the diff), routes _channel_split_tangent into the shared split path, and moves both test modules onto one tests/biot/tangent_identity.py harness.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html:107 follow-on: follow-on: the repaired suite driver's baseline arm runs the base revision's own test modules loaded through git show into a scratch tree, while the after arm runs the head modules, so the two arms do not run the same test set -- tests/biot/test_edge_term_tangents.py holds three tests at revision 716d859f and twenty-four at head. The recorded added-failure count zero therefore rests on the head arm being wholly green rather than on a like-for-like base-versus-head comparison of identical tests; running the head test modules against base code would state the claim directly.\nFINDING tests/biot/test_edge_term_tangents.py:262 follow-on: follow-on: the 1e-13 exact-form bound is met only on the H200. The same committed row reads 1.720477860e-9 for second_residual on CPU (cpu-exact-rows.log) -- above even the 1e-9 scan bound, which the run records separately -- so the H200 zero is partly a property of the hand tangent and the base jvp lowering to identical code on that backend, not a device-independent identity. The locked 1e-13 should be read as an H200 measurement.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html:149 follow-on: follow-on: _near_collinear_arsinh_difference (five polygon and four rectangle calls in the census) still has no private tangent and is handed to the wrapping node. The done-when's enumerated quantities are all delivered, so this is not blocking, but the goal's 'every polygonanalytic edge term the Biot point jet differentiates' is complete only against that enumeration.\n",
+  "review_run_id": "r-20261008T040855510077-review-of-cfs-edge-term-tangents",
+  "reviewed_base_sha": "716d859f0b501797e28849ec8878f0243de80cb1",
+  "reviewed_head_sha": "a854ea58685b8a381a92f86937af0b0347aaa4bb",
+  "reviewed_run_id": "r-20261008T004354567004-cfs-edge-term-tangents",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T04:38:39.120413+00:00",
+  "total": 111
+}

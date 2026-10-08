@@ -502,12 +502,14 @@ def _near_corner_rows():
     old_error = relative(old, value)
     tangent_error = relative(hand, reference)
     strict_degraded = value_error > old_error
-    degraded = value_error > old_error + program_floor
+    program_degraded = value_error > old_error + program_floor
+    degraded = value_error > old_error + 1e-13
     rows = {
         "samples": index.size,
         "primal": value_error.max(),
         "base_primal": old_error.max(),
         "strict_less_accurate": int(strict_degraded.sum()),
+        "program_floor_less_accurate": int(program_degraded.sum()),
         "less_accurate": int(degraded.sum()),
         "hand": tangent_error.max(),
         "jvp": relative(primal_jvp, reference).max(),
@@ -549,6 +551,7 @@ def _near_corner_rows():
             f"base_value_relative_max={old_error[selected].max():.3e} "
             f"program_floor={program_floor[selected].max():.3e} "
             f"strict_less_accurate={int(strict_degraded[selected].sum())} "
+            f"program_floor_less_accurate={int(program_degraded[selected].sum())} "
             f"less_accurate={int(degraded[selected].sum())}"
         )
     print(f"NEAR_CORNER arsinh_terms radial samples={rows['samples']} "

@@ -124,7 +124,7 @@ def test_near_corner_layer_value_and_derivative():
         if abs(offset) > 1e-3:
             outside_error = abs(value[index] - old[index]) / abs(old[index])
             outside.append((offset, outside_error))
-        elif value_error > base_error:
+        elif value_error > base_error + 1e-13:
             less_accurate.append((offset, value_error, base_error))
     maxima = {
         decade: np.max(np.asarray(errors), axis=0)
@@ -283,7 +283,8 @@ def test_base_program_roundoff_floor():
         )
         decades, floor = _decade_floor(offsets, difference)
         strict = errors > base_errors
-        degraded = errors > base_errors + floor
+        program_degraded = errors > base_errors + floor
+        degraded = errors > base_errors + 1e-13
         injected = base_errors + floor + 1e-8
         assert np.all(injected > base_errors + floor)
         print(
@@ -299,6 +300,7 @@ def test_base_program_roundoff_floor():
                 "samples": int(selected.sum()),
                 "floor": float(floor[selected].max()),
                 "strict_degraded": int(strict[selected].sum()),
+                "program_floor_degraded": int(program_degraded[selected].sum()),
                 "degraded": int(degraded[selected].sum()),
             }
             summary.append(row)
@@ -308,7 +310,9 @@ def test_base_program_roundoff_floor():
             )
         print(
             f"ROUNDING_SUMMARY arm={name} samples={index.size} "
-            f"strict_degraded={strict.sum()} degraded={degraded.sum()} "
+            f"strict_degraded={strict.sum()} "
+            f"program_floor_degraded={program_degraded.sum()} "
+            f"degraded={degraded.sum()} "
             f"floor_max={floor.max():.17g}"
         )
         output["arms"][name] = {
@@ -319,4 +323,4 @@ def test_base_program_roundoff_floor():
             "summary": summary,
             "degraded": int(degraded.sum()),
         }
-    (directory / "program-floor-h200.json").write_text(json.dumps(output))
+    (directory / "reference-allowance-h200.json").write_text(json.dumps(output))

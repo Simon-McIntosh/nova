@@ -164,6 +164,9 @@ def inventory(
     signal_identities = [str(value) for value in control[SIGNAL_CHANNELS][...]]
     if not identities or not signal_identities:
         raise ValueError("the inventory control has no probe identities")
+    control_channels = {
+        f"cc_mt_{channel.rsplit('/', 1)[-1]}": channel for channel in signal_identities
+    }
     available = [shot for shot in shots if (level2 / f"{shot}.zarr").exists()]
     reason = (
         "no level-2 toroidal probe shot in the TF-only cohort"
@@ -173,6 +176,7 @@ def inventory(
     probes = [
         {
             "probe": identity,
+            "control_signal_channel": control_channels.get(identity),
             "verdict": "unresolved",
             "orientation_sign": None,
             "field_direction": None,
@@ -190,8 +194,10 @@ def inventory(
             probe.update(result)
             if result["verdict"] == "promoted":
                 probe.pop("reason", None)
-            elif "reason" not in result:
-                probe["reason"] = "held-out amplitude exceeds tolerance"
+            else:
+                probe["reason"] = result.get(
+                    "reason", "held-out amplitude exceeds tolerance"
+                )
             probe["held_out_relative_error"] = result.get(
                 "maximum_held_out_relative_error"
             )
@@ -213,6 +219,9 @@ def inventory(
             "shot": reference_shot,
             "probe_geometry_count": len(identities),
             "measured_channel_count": len(signal_identities),
+            "matched_geometry_count": sum(
+                identity in identities for identity in control_channels
+            ),
             "measured_channels": signal_identities,
             "in_cohort": reference_shot in shots,
         },

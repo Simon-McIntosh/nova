@@ -150,6 +150,18 @@ def test_unreachable_registry_is_classified_separately(tmp_path: Path) -> None:
         )
 
 
+def test_network_permission_denial_is_unreachable(tmp_path: Path) -> None:
+    layer = _layer("iter_corsica_130506", "reference")
+    with pytest.raises(layer_fetch.LayerRegistryUnreachable):
+        layer_fetch.fetch_layer(
+            str(layer["digest"]),
+            cache_directory=tmp_path / "store",
+            runner=_unreachable_runner(
+                "dial tcp 10.0.0.1:443: connect: permission denied"
+            ),
+        )
+
+
 @pytest.mark.parametrize(
     "message",
     [

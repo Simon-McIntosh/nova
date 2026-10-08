@@ -40,7 +40,10 @@ _UNREACHABLE_MARKERS = (
 _CREDENTIAL_MARKERS = (
     "unauthorized",
     "authentication required",
-    "denied",
+    "denied: requested access",
+    "access denied",
+    "401",
+    "403",
     "expired token",
     "token expired",
     "token has expired",

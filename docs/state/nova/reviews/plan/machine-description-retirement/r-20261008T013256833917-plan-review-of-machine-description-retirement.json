@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:48:49.384Z",
+  "dispatched_at": "2026-10-08T01:33:27Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/machine-description-retirement.html:42",
+      "id": "reasoning-1",
+      "reason": "a migration that is a future \u00a73 action cannot be the source the \u00a74 gate reads today; either the map already carries the geometry (making the \u00a73 \"migrate content\" disposition a no-op, and \u00a71 stale) or it does not (making the \u00a74 gate \u2014 which \u00a73 waits on \u2014 unreachable), and a node dispatched against either \u00a71/\u00a73 or \u00a74 resolves the contradiction wrongly.",
+      "text": "\u00a71 asserts the description \"migrates intact into the MAST map\" and \u00a73's inventory row (line 87) gives `nova/imas/mast_...` \"migrates content into the MAST map; module retires\", yet \u00a74 (line 138) says \"the producer already asserts observable identity ... from the MAST map under `imas_ambix/data/machine_maps/`\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/machine-description-retirement.html:128",
+      "id": "wiring-1",
+      "reason": "the plan's declared dependency is, by its own text, not the gate the deletions wait on; a coordinator reading only the relationship graph would dispatch \u00a73 deletions once the producer plan is satisfied, so the true gate needs to be a declared relationship rather than a followup note.",
+      "text": "\u00a74 states the external dependency (which `plan-depends-on` names as `imas-ambix:machine-map-transform-engine`) is \"satisfied for STARTING the equivalence demonstration ... but not for starting any deletion\" and \"runs backwards\", and the new followup says plainly \"The producer plan named in plan-depends-on is satisfied but is not this gate\"",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/machine-description-retirement.html:139",
+      "id": "done_when-1",
+      "reason": "an equivalence comparison is the classic always-passes gate (it can pass by comparing a producer against its own input), so without a declared control that a perturbed description is detected the node's whole measure rests on a check that may never fire.",
+      "text": "\u00a74's done-when requires \"the producer route reproduces the registry's description numerically ... conductor geometry equal within a bound fixed before scoring\", but declares no negative control and no bound, and its only failure clause is \"a mismatch is reported as a finding\"",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "5bc3c835002d7eb01e3a18b03af2209d3eafec35c5230356388514073e236a5f",
+  "plan_slug": "machine-description-retirement",
+  "plan_version": 10,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T013256833917-plan-review-of-machine-description-retirement",
+  "reviewed_blob_sha": "ad2c1f922ce8123601364988cffb4babd6826510",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file:line resolves (`nova/media/sources/mast_efit.py:29`, `scripts/mast_reference_evidence/contours.py:110`, `nova/imas/mast_solve_inputs.py:74-75`, `nova/io/sourcemap.py:44`, `nova/calibrate/sweep.py:801,805`, `imas_ambix/gs/machine_identity.py:152`, `imas_ambix/gs/artifact_geometry.py:767`, `imas_ambix/gs/artifact_resolution.py:171,268,315-316`), `machine_maps/mast.json` and `machine_maps/diii-d.json` both exist, commits `0dfda59a`/`1df19c16` resolve, and `imas-ambix:nova-physics-consumer-integration` resolves as a plan (extensionless hrefs resolved as `<path>.html`).",
+    "done_when": "a finding \u2014 \u00a74's done-when names no negative control and leaves its equality bound undeclared (\"equal within a bound fixed before scoring\"), so nothing in it shows the comparison can detect a mismatch.",
+    "evidence_paths": "pass \u2014 the gate outcome is \"a committed receipt\" committed to the repository; no scratchpad or node-local temporary path is relied on.",
+    "naming": "pass \u2014 the changed text introduces no plan label, ticket number or version tag into a symbol; the new followup id `f-mdr-ambix-migration` is a plan-document identifier, not a code name.",
+    "reasoning": "a finding \u2014 \u00a71 and \u00a73 state the conductor/sensor geometry \"migrates intact into the MAST map\" as a future action, while \u00a74 asserts the producer \"already\" produces the description from that same map, so the two sections disagree about where the geometry lives when \u00a74 runs.",
+    "single_goal": "pass \u2014 the split now gives \u00a73 \"one node per inventory row ... Each row closes on its own verdict\" and makes \u00a74 a single equivalence demonstration (\"Nothing is deleted under \u00a74\").",
+    "wiring": "a finding \u2014 \u00a73's deletions wait on imas-ambix migrating off `nova.imas.machine_artifact`, but the plan's `plan-depends-on` names only the producer plan (`imas-ambix:machine-map-transform-engine`) which \u00a74 and the new followup both say \"is not this gate\"; the actual gate is recorded only as a followup `data-recommends-skill`, not as a declared relationship."
+  },
+  "section_digests": {
+    "_document": "23f356db5402f93b10a327ce301ba4ad792baef75bb687ebf42c7cbb9e0952c8",
+    "s1": "7080cc74e977f8a4322b44a0009d6a37de04fade159fd3ec31b86136c53ffcf4",
+    "s2": "9a5109dba8d2acbab10879fd1a119f7aa731d0dba05a944a115c6ef75f19dec8",
+    "s3": "bacbeae90abcbac93d3a45ed403eb36feb86c2192415dede63f21168e47d5f37",
+    "s4": "46bca1d6c8a1d63cb2e3466e680390252876ad1dd3a40b3a1ed77c326fc6e660"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:54:33.279304+00:00"
+}

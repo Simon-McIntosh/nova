@@ -118,6 +118,23 @@ def signal_clock(group, key):
     return time, values
 
 
+def drive_scale(unit: str, drive, turns) -> float:
+    """Convert declared feed current or ampere-turns to ampere-turns."""
+    unit = unit.strip().lower()
+    if drive.reports_ampere_turns:
+        if unit not in {"ka * turn", "ka*turn", "ka.turn"}:
+            raise ValueError(
+                f"{drive.channel}: expected kiloampere-turns, got {unit!r}"
+            )
+        return 1000.0
+    if unit not in {"ka", "kiloamp", "kiloamps", "kiloampere", "kiloamperes"}:
+        raise ValueError(f"{drive.channel}: unknown feed-current unit {unit!r}")
+    count = turns[drive.family]
+    if count is None or not np.isfinite(count) or count == 0:
+        raise ValueError(f"{drive.family}: no finite winding turn count")
+    return 1000 * count * drive.turn_to_channel_current_ratio
+
+
 def pickup_geometry():
     """Compose saddle line integrals from the verified IDS and vacuum kernel."""
     import imas
@@ -207,16 +224,14 @@ def shot_estimates(root, identities, response, turns, *, bins=256):
     for drive in COIL_DRIVES:
         time, values = signal_clock(currents, drive.channel)
         unit = str(currents[drive.channel].attrs.get("units", "")).lower()
-        if unit not in {"ka", "kiloamp", "kiloamps", "kiloampere", "kiloamperes"}:
-            raise ValueError(f"{drive.channel}: unknown current unit {unit!r}")
-        factor = (
-            1
-            if drive.reports_ampere_turns
-            else turns[drive.family] * drive.turn_to_channel_current_ratio
-        )
-        drives.append((time, values * 1000 * factor))
+        factor = drive_scale(unit, drive, turns)
+        drives.append((time, values * factor))
         sources.append(
-            {"channel": drive.channel, "units": unit, "turn_multiplier": factor}
+            {
+                "channel": drive.channel,
+                "units": unit,
+                "ampere_turns_per_raw_unit": factor,
+            }
         )
     output = {}
     for identity in identities:

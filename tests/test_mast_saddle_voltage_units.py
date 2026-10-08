@@ -5,11 +5,24 @@ import pytest
 
 from benchmarks.mast_saddle_voltage_units import (
     GainEstimate,
+    drive_scale,
     estimate_gain,
     signal_clock,
     validate_known_units,
     voltage_scale,
 )
+from nova.imas.mast_vacuum_cohort import CoilDrive
+
+
+def test_ampere_turn_current_is_not_multiplied_by_winding_turns():
+    drive = CoilDrive("vertical", "vertical_current", "vertical", True)
+    assert drive_scale("kA * turn", drive, {"vertical": None}) == 1000
+    with pytest.raises(ValueError, match="expected kiloampere-turns"):
+        drive_scale("kA", drive, {"vertical": 9})
+    feed = CoilDrive("winding", "feed", "winding", False, 0.5)
+    assert drive_scale("kA", feed, {"winding": 20}) == 10000
+    with pytest.raises(ValueError, match="unknown feed-current unit"):
+        drive_scale("kA * turn", feed, {"winding": 20})
 
 
 def test_doubled_gain_is_recovered_without_promoting_sign():

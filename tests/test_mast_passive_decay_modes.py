@@ -859,3 +859,67 @@ class TestDrivenSensitivity:
                 np.array([0.0, 1.0]),
                 np.zeros((2, 1)),
             )
+
+
+def test_driven_cohort_keeps_partial_probe_coverage(monkeypatch):
+    """A finite transient remains usable when the surrounding record has gaps."""
+    import importlib.util
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    path = (
+        Path(__file__).parents[1]
+        / "docs/figures/mast-passive-identifiability/measure.py"
+    )
+    spec = importlib.util.spec_from_file_location("passive_spectrum_measurement", path)
+    measurement = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(measurement)
+    time = np.linspace(0.0, 3.0, 301)
+    current = np.where(time >= 0.3, 2000.0, 0.0)
+    probes = {f"probe{index}": np.where(time <= 2.0, 1.0, np.nan) for index in range(8)}
+    wave = ShotWaveforms(
+        shot=7,
+        time=time,
+        drives={"sol": current},
+        probes=probes,
+        sensors=probes,
+        plasma_current=np.zeros_like(time),
+        sample_mask=np.ones(time.size, dtype=bool),
+        baseline_mask=time < 0.3,
+    )
+    monkeypatch.setattr(measurement, "read_shot_waveforms", lambda _: wave)
+    monkeypatch.setattr(
+        measurement,
+        "read_error_field_drive",
+        lambda *args, **kwargs: SimpleNamespace(unmeasured=False),
+    )
+    model = SimpleNamespace(
+        families=("sol",),
+        targets=tuple(SimpleNamespace(channel=name) for name in probes),
+        response=np.ones((8, 1)),
+        admissible_probes=lambda _: np.ones(8, dtype=bool),
+    )
+    prepared = (
+        model,
+        np.eye(1),
+        np.array([2.0]),
+        np.ones((8, 1)),
+        np.ones((1, 1)),
+        ("vessel",),
+        {"vessel": (0.5, 2.0)},
+        np.ones(1),
+        np.array([[0.5, 1.5]]),
+        {"physical_digest": "synthetic"},
+    )
+    names, compact, row = measurement.shot_jacobian(
+        7,
+        prepared,
+        0.01,
+        SimpleNamespace(refused=lambda _: ()),
+    )
+    assert names == ("vessel",)
+    assert len(row["channels"]) == 8
+    assert 0 < row["observation_count"] < 8 * row["sample_count"]
+    assert row["observation_count"] == sum(row["channel_sample_counts"])
+    assert compact.shape == (2, 2)
+    assert np.isfinite(compact).all()

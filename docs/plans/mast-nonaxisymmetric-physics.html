@@ -18,8 +18,6 @@
   <title>MAST Non-axisymmetric Physics | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
-<meta name="plan-modified" content="2026-10-08">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -29,6 +27,10 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-effort-hours" content="16.0">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+<meta name="plan-commits" content="9eb100e5,c173d399">
+<meta name="plan-impl" content="0.06">
+<meta name="plan-version" content="12">
+<meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
   <main class="plan-doc">
@@ -159,7 +161,10 @@ Done when
     <div class="r-comment-body">Currency audit 2026-10-01 (docs/evidence/replan-2026-09-24/plan-currency-and-depth-a.md): status active with no impl line agrees with the code; the remaining scope is real. The next critical node is f-mnap-vacuum-refinement steps 1 and 2 (the evidence manifest and the nominal model, starting with passive R/L identification); that followup already carries a done-when, so no new followup is added.</div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T025624938982-review-of-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T03:32:42.302Z">
-    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — the review of r-20261008T015056150935-mast-saddle-voltage-reach (base f2bac518e, head 9eb100e5e) is stored, parsed and scored 6 dimensions (total 81, verdict fail) with a blocking finding that the node&#x27;s m_10..m_12 &quot;unreachable&quot; verdict is a zero-padding false negative on sad_out_m010/m011/m012 (true count 36/36, not 33/36).</p></div>
+    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — the review of r-20261008T015056150935-mast-saddle-voltage-reach (base f2bac518e, head 9eb100e5e) is stored, parsed and scored 6 dimensions (total 81, verdict fail) with a blocking finding that the node's m_10..m_12 "unreachable" verdict is a zero-padding false negative on sad_out_m010/m011/m012 (true count 36/36, not 33/36).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-saddle-reach-landed" data-who="reckon-build" data-when="2026-10-08T04:20:00Z">
+    <div class="r-comment-body">node (a) landed: uncorrected saddle voltage reachable for 36/36 loops via level-1 XMB, on 26 of 86 cohort shots (20 loops on 3 shots). Section open — node (c), the per-loop traversal sign, is next, and must move the light-census admission predicate into mast_vacuum_cohort.py and add a key-width test. Evidence: saddle-voltage-reach.</div>
 </div>
 </section>
 </main>

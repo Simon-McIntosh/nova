@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="mast-nonaxisymmetric-physics-landed">
+  <meta name="plan-title" content="MAST Non-axisymmetric Physics — landed record">
+  <meta name="plan-summary" content="Closure synthesis for MAST Non-axisymmetric Physics: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="mast-nonaxisymmetric-physics">
+  <meta name="plan-verdict" content="qualified">
+  <title>MAST Non-axisymmetric Physics — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>MAST Non-axisymmetric Physics — landed record</h1>
+  <p>Closure synthesis for MAST Non-axisymmetric Physics: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="saddle-voltage-reach">
+    <h2>§5(a) — an uncorrected saddle voltage is reachable for all 36 loops</h2>
+    <p><code>benchmarks/mast_saddle_voltage_reach.py</code> searched the MAST stores for a saddle-loop voltage with its axisymmetric poloidal-field pickup retained, over the vacuum cohort drawn from an even-strided 4,000-shot sample of the 17,111-shot level-1 store (shots 13725–28575). Receipt: <code>docs/figures/mast-saddle-loops/reach.json</code>.</p><p><strong>Verdict: reachable for 36 of 36 loops</strong> through the level-1 XMB channel <code>xmb/sad_out_&lt;family&gt;&lt;index&gt;</code>, once each raw key is read at the store's own width: the m family is spelled three-digit past loop 9 (<code>sad_out_m010</code>–<code>m012</code>). A first pass assumed two digits and reported those three loops absent; the independent review caught it.</p><p><strong>Coverage is thin, and it shapes the sign node.</strong> Of the 86 admitted cohort shots only 26 carry an XMB group at all. Sixteen loops (<code>l_1</code>, <code>l_2</code>, <code>u_1</code>, <code>u_7</code> and the twelve m loops) appear on all 26; the other twenty l and u loops appear on 3 shots (25818–25836). A traversal-sign verdict must therefore be stated per loop, with its shot count. The raw-minus-published pickup comparison is not established: the level-2 published key did not resolve on the cohort frame. A deliberately misspelled channel is recorded as unreachable rather than dropped.</p><p>Review at the corrected head: 87/120, no blocking finding. Its two follow-ons are folded into the sign node: the benchmark re-implements the vacuum-cohort admission predicate that <code>nova/imas/mast_vacuum_cohort.py</code> owns, and no test guards per-family key resolution.</p>
+  </section>
+
+</main>
+</body>
+</html>

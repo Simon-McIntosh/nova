@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="mast-nonaxisymmetric-physics">
+<meta name="plan-evidence-for" content="mast-nonaxisymmetric-physics">
+<title>Saddle reach benchmark owns no admission of its own</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body><main class="plan-doc">
+<header><h1>Saddle reach benchmark — admission owned by the cohort module</h1></header>
+<section id="mast-saddle-cohort-owner-landing">
+<p><strong>Verdict: single-source admission.</strong> <code>benchmarks/mast_saddle_voltage_reach.py</code> no longer declares the vacuum-cohort thresholds or restates its predicate. The light admission moved into <code>nova/imas/mast_vacuum_cohort.py</code> as <code>light_census()</code> returning a <code>LightCensus</code> whose <code>admitted()</code> method applies the module's own <code>PLASMA_FREE_CURRENT</code>, <code>EXCITATION_CURRENT</code> and a single <code>MINIMUM_PROBES = 40</code> constant that <code>select_vacuum_cohort()</code> now defaults to. The benchmark imports those constants for its receipt rather than re-stating them, and read the module's census for each candidate shot. Previously the benchmark carried its own <code>PLASMA_FREE_CURRENT</code>, <code>EXCITATION_CURRENT</code>, <code>MINIMUM_PROBES</code>, a private probe regex, a private drive-channel tuple and an <code>admits()</code> predicate: five places the cohort module could have drifted from without either noticing.</p>
+<p><strong>What the light census reads.</strong> Only the current-group peaks (plasma-freeness, deliberate excitation through the module's <code>COIL_DRIVES</code>) and the field-group channel names (the over-determining probe count, through the module's own <code>_CHANNEL_PATTERN</code>). It does not read field waveforms, which is the whole cost of the full <code>survey_shot()</code> census. Its one defensible divergence from the full survey is recorded on the dataclass: a probe whose sample shape does not join the field clock is dropped by the full survey and counted by name here, so the two counts can differ by such a channel.</p>
+<p><strong>Raw-key resolution.</strong> The benchmark's per-loop raw key is resolved from the store's own key set, never assumed at one width. A loop's candidates are offered at two digits and at three, and the store's key set decides: this is what makes <code>saddle_m_10</code> resolve to <code>sad_out_m010</code> where it would otherwise be reported absent.</p>
+<h2 id="mast-saddle-cohort-owner-measure">Measure</h2>
+<table id="mast-saddle-cohort-owner-tests">
+<thead><tr><th>Gate</th><th>Revision</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>new <code>tests/test_mast_saddle_voltage_reach.py</code> + five existing cohort suites</td><td>head <code>cbfb1ff2c</code></td><td><strong>121 passed, 2 failed</strong></td></tr>
+<tr><td>the five existing cohort suites</td><td>base <code>e2cffb94c</code></td><td><strong>116 passed, 2 failed</strong></td></tr>
+</tbody>
+</table>
+<p>The five added passing tests are the new file. The two failures — <code>test_mast_vacuum_refinement.py::test_refined_artifact_keeps_the_machine_it_describes</code> and <code>test_mast_probe_calibration.py::test_the_criterion_separates_the_two_planted_causes</code> — reproduce identically at the base revision, so they are pre-existing and no failure is added by this change.</p>
+<p><strong>Negative control.</strong> Forcing the raw-key candidates to a single two-digit width in a scratch tree (<code>return (f"sad_out_{family}{number:02d}",)</code>) turned the key-resolution test red: <code>assert None == 'sad_out_m010'</code>, exit <code>1</code>. The m-family loops are the ones the mutation breaks, which is the declared string. Log: <code>negative-control-2digit.log</code>.</p>
+<p><strong>Not regenerated.</strong> The committed receipt <code>docs/figures/mast-saddle-loops/reach.json</code> is untouched.</p>
+</section>
+</main></body>
+</html>

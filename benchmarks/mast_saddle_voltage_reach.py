@@ -38,41 +38,27 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 import numpy as np
+
+from nova.imas.mast_vacuum_cohort import (
+    EXCITATION_CURRENT,
+    MINIMUM_PROBES,
+    PLASMA_FREE_CURRENT,
+    light_census,
+)
 
 LEVEL1_STORE = Path("/work/projects/imas_gpu/mast/level1/shots")
 LEVEL2_STORE = Path("/work/projects/imas_gpu/mast/level2/shots")
 
 FAMILIES = ("l", "m", "u")
 PER_FAMILY = 12
-PLASMA_FREE_CURRENT = 5.0e3
-EXCITATION_CURRENT = 1.0e3
-MINIMUM_PROBES = 40
 SCAN_BUDGET = 300
 """Level-2 shots examined when the cohort frame carries no comparison shot."""
 MISSPELLED_CHANNEL = "sad_out_zz99"
 """A channel that names no loop: the receipt must report it unreachable."""
-
-_PROBE = re.compile(r"^(ccbv|obr|obv)\d{2}$")
-_DRIVE_CHANNELS = (
-    "sol_current",
-    "p2il_feed_current",
-    "p2iu_feed_current",
-    "p2ol_feed_current",
-    "p2ou_feed_current",
-    "p3l_feed_current",
-    "p3u_feed_current",
-    "p4l_feed_current",
-    "p4u_feed_current",
-    "p5l_feed_current",
-    "p5u_feed_current",
-    "p6l_current",
-    "p6u_current",
-)
 
 
 def raw_key_candidates(family: str, number: int) -> tuple[str, ...]:
@@ -126,78 +112,26 @@ def store_shots(limit: int | None) -> list[int]:
     return numbers[::stride][:limit]
 
 
-def census_shot(shot: int) -> dict | None:
-    """Apply the vacuum-cohort criteria to one shot with a light store read.
+def _census(shots: list[int], processes: int) -> list:
+    """Admit each candidate shot through the cohort module's own light census.
 
-    Only what the criteria need is read: the current-group peaks to decide
-    plasma-freeness and deliberate excitation, and the field-group channel names
-    to count the over-determining probes.  Field waveforms are not read, which is
-    the whole cost of the cohort module's own census.
+    The admission rules live in :mod:`nova.imas.mast_vacuum_cohort`, so this
+    benchmark reads the module's census rather than re-declaring its thresholds
+    or restating its predicate.
     """
 
-    try:
-        import zarr
-
-        group = zarr.open_group(f"{LEVEL1_STORE}/{shot}.zarr", mode="r")
-    except Exception:
-        return None
-    entry = {
-        "shot": shot,
-        "plasma_current_peak": 0.0,
-        "excited_families": [],
-        "probe_count": 0,
-        "absent_groups": [],
-    }
-    try:
-        amc = group["amc"]
-    except Exception:
-        entry["absent_groups"].append("amc")
-        return entry
-    keys = set(amc.keys())
-    if "plasma_current" in keys:
-        values = np.asarray(amc["plasma_current"][...], dtype=float)
-        finite = values[np.isfinite(values)]
-        entry["plasma_current_peak"] = (
-            float(np.max(np.abs(finite)) * 1.0e3) if finite.size else 0.0
-        )
-    else:
-        entry["absent_groups"].append("plasma_current")
-        return entry
-    excited = []
-    for channel in _DRIVE_CHANNELS:
-        if channel not in keys:
-            continue
-        values = np.asarray(amc[channel][...], dtype=float)
-        finite = values[np.isfinite(values)]
-        if finite.size and float(np.max(np.abs(finite)) * 1.0e3) >= EXCITATION_CURRENT:
-            excited.append(channel)
-    entry["excited_families"] = sorted(excited)
-    try:
-        amb = group["amb"]
-        entry["probe_count"] = sum(1 for k in amb.keys() if _PROBE.match(str(k)))
-    except Exception:
-        entry["absent_groups"].append("amb")
-    return entry
-
-
-def admits(entry: dict) -> bool:
-    """Return whether a census row satisfies the vacuum cohort's criteria."""
-
-    return (
-        not entry["absent_groups"]
-        and entry["plasma_current_peak"] < PLASMA_FREE_CURRENT
-        and bool(entry["excited_families"])
-        and entry["probe_count"] >= MINIMUM_PROBES
-    )
-
-
-def _census(shots: list[int], processes: int) -> list[dict]:
     if processes <= 1:
-        rows = [census_shot(s) for s in shots]
+        rows = [light_census(s, store=LEVEL1_STORE) for s in shots]
     else:
+        arguments = [(s, str(LEVEL1_STORE)) for s in shots]
         with ProcessPoolExecutor(max_workers=processes) as pool:
-            rows = list(pool.map(census_shot, shots, chunksize=16))
+            rows = list(pool.map(_light_census_one, arguments, chunksize=16))
     return [row for row in rows if row is not None]
+
+
+def _light_census_one(argument: tuple[int, str]):
+    shot, store = argument
+    return light_census(shot, store=store)
 
 
 def _resolve_raw(keys: set[str], loop: dict) -> str | None:
@@ -503,7 +437,7 @@ def main() -> None:
 
     candidates = store_shots(arguments.limit)
     census = _census(candidates, arguments.processes)
-    cohort_shots = sorted(row["shot"] for row in census if admits(row))
+    cohort_shots = sorted(row.shot for row in census if row.admitted())
 
     per_shot = reachability(cohort_shots)
     rows = summarise(cohort_shots, per_shot)

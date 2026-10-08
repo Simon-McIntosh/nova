@@ -25,7 +25,12 @@ level, or from the edge's line, and ``h`` the local curvature of the denominator
 The range is halved and each panel stretched by ``b = width sinh(s)`` from its own
 end.  That map is EXACT for the model's quadratic --
 ``w^2 + h^2 width^2 sinh^2 s = w^2 cosh^2 s`` -- so it carries what is left of the
-boundary layer after the logarithm has gone.
+boundary layer after the logarithm has gone. The layer's angular width is the
+end offset divided by the local denominator scale, even when that width is
+smaller than a fixed numerical floor. Clipping it would leave the integral's
+value almost unchanged but omit its narrow contribution to a target derivative.
+At an exactly vanishing denominator offset, the numerator's end value sets the
+remaining layer; when both vanish the regularised integrand needs no grading.
 
 What the ARC adds is that a panel no longer has to reach the end it is graded
 from.  Its two boundary layers still sit at ``a = 0`` and ``a = pi/2``, because
@@ -62,15 +67,6 @@ __all__ = ["QUARTER", "graded_residual"]
 # One end of the quarter range to the other, which is as far as either panel can
 # reach: the two layers sit at the ends of that range whatever the amplitude.
 QUARTER = 0.25 * np.pi
-
-# Narrowest boundary layer the graded panels chase before giving up on it.  It is
-# a guard rather than a trade-off: the configurations that used to collapse a
-# layer onto the range end -- a target level with an edge end, or on an edge's
-# extended line, or on a vertex -- are the ones whose logarithm is removed
-# analytically, and their width comes out of the OTHER end quantity instead of out
-# of this floor.  What is left for it to catch is a layer that is merely narrow.
-LAYER_FLOOR = 1e-8
-
 
 @lru_cache(maxsize=None)
 def _rule(nodes: int) -> tuple:
@@ -181,7 +177,7 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
         # all -- which is the whole gain, because a floor set low enough for that
         # case is what used to thin the nodes everywhere else.
         reach = xp.where(offset > 0.0, offset, xp.abs(end))
-        width = xp.where(reach > 0.0, xp.clip(reach / scale, LAYER_FLOOR, 1.0), 1.0)
+        width = xp.where(reach > 0.0, xp.clip(reach / scale, 0.0, 1.0), 1.0)
         held = width[:, None]
         start = xp.arcsinh(lower / width)[:, None]
         span = xp.arcsinh(upper / width)[:, None] - start
@@ -346,7 +342,7 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
         d_reach = xp.where(offset > 0.0, d_offset, xp.where(end >= 0.0, d_end, -d_end))
         ratio = reach / scale
         d_ratio = _quotient_tangent(reach, d_reach, scale, d_scale)
-        clipped, d_clipped = _clip_tangent(ratio, d_ratio, LAYER_FLOOR, 1.0, xp)
+        clipped, d_clipped = _clip_tangent(ratio, d_ratio, 0.0, 1.0, xp)
         width, d_width = _held_tangent(reach > 0.0, clipped, d_clipped, 1.0, xp)
         held, d_held = width[:, None], d_width[:, None]
 

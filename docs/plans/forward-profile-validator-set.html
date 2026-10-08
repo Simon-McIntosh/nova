@@ -24,9 +24,9 @@
 <meta name="plan-informs" content="gs-absolute-accuracy-gates">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-effort-hours" content="10.0">
-<meta name="plan-commits" content="aff62b24,646d21fb,28a8247b">
-<meta name="plan-impl" content="0.25">
-<meta name="plan-version" content="22">
+<meta name="plan-commits" content="aff62b24,646d21fb,28a8247b,c36ef55c,5ae3ec94,f4ff7b6f,b762ae17,cc679621">
+<meta name="plan-impl" content="0.3">
+<meta name="plan-version" content="23">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -130,6 +130,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T054057020599-review-of-fpv-analytic-smoke" data-who="reckon-build" data-when="2026-10-08T06:05:41.077Z">
     <div class="r-comment-body"><p>review of r-20261008T043927638886-fpv-analytic-smoke (fpv-analytic-smoke) stored, scores goal_fidelity 19 / evidence 14 / scope_discipline 20 / durability 17 / fit 17 / reuse 18, total 105, added_failure_count 0 (reviewed base a4b489cf7f56ad60b5c54741d15010d494004804, head 5ae3ec946bb2d161b45240526c7532764024a6fc); head gate reproduced 5 passed EXIT=0, declared control reproduced red EXIT=1 (residual 0.438122 &gt; 1e-3); 4 follow-on findings (fragment caption misstates the residual by ~900x, figure drawn with axes/ticks contrary to the media rules, unused extra_layers seam retained against the resume ruling, head log lacks the gate-log header and the manifest records no baseline/after arms).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-analytic-smoke-landed" data-who="reckon-build" data-when="2026-10-08T06:40:00Z">
+    <div class="r-comment-body">rung 1 smoke landed: analytic vacuum map residual 9.4e-10 of peak, COCOS identity, 1.5x control fails. Rung 1 closes when fpv-fetch-credential-faults lands; rung 2 (CORSICA 130506, four slices, LOOSE bands with the solve's own receipts) is next. Evidence: analytic-smoke.</div>
 </div>
 </section>
 </main>

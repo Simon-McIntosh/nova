@@ -337,12 +337,12 @@ def _truncated_product(left, d_left, right, d_right):
 
 @contextmanager
 def _truncated():
-    original = polygonanalytic._vertex_product_tangent
-    polygonanalytic._vertex_product_tangent = _truncated_product
+    original = polygonanalytic._product_tangent
+    polygonanalytic._product_tangent = _truncated_product
     try:
         yield
     finally:
-        polygonanalytic._vertex_product_tangent = original
+        polygonanalytic._product_tangent = original
 
 
 def _identity(name):

@@ -36,6 +36,9 @@ from __future__ import annotations
 import numpy as np
 
 from nova.biot.elliptic import (
+    _cn_pole_moment_tangent,
+    _harmonic_pole_moments_tangent,
+    _sn_pole_moment_tangent,
     harmonic_pole_moments,
     harmonic_pole_moments_paired,
     harmonic_root_moments,
@@ -747,3 +750,118 @@ def _across_tangent(
         + (d_weight_y * pole_y + weight_y * d_pole_y)
         + (d_weight_x * pole_x + weight_x * d_pole_x),
     )
+
+
+def _capped_shift_tangent(shift, d_shift, ceiling, xp):
+    """Return ``minimum(shift, ceiling)`` and its balanced tangent."""
+    capped = xp.minimum(shift, ceiling)
+    d_capped = xp.where(
+        shift < ceiling,
+        d_shift,
+        xp.where(shift == ceiling, 0.5 * d_shift, 0.0),
+    )
+    return capped, d_capped
+
+
+def _channel_poles_tangent(
+    channel,
+    factors,
+    d_factors,
+    moments,
+    d_moments,
+    parameter,
+    d_parameter,
+    parameter_complement,
+    d_parameter_complement,
+    xp,
+):
+    """Return :meth:`Channel.poles` and its tangent over one factorisation.
+
+    The two seeds are read through the channel's own bound family functions and
+    differentiated against the same modulus and complement the primal uses; the
+    pole families carry the moment stack's own tangent.  The cap's tangent is
+    balanced where the shift sits on ``POLE_CEILING`` exactly, mirroring
+    :func:`_capped_shift_tangent`.
+    """
+    shift_y, shift_x = factors[3], factors[4]
+    d_shift_y, d_shift_x = d_factors[3], d_factors[4]
+    capped_y, d_capped_y = _capped_shift_tangent(shift_y, d_shift_y, POLE_CEILING, xp)
+    capped_x, d_capped_x = _capped_shift_tangent(shift_x, d_shift_x, POLE_CEILING, xp)
+    seed_y = channel._cn_seed(capped_y)
+    seed_x = channel._sn_seed(capped_x)
+    _, d_seed_y = _cn_pole_moment_tangent(
+        capped_y,
+        d_capped_y,
+        parameter,
+        d_parameter,
+        parameter_complement=parameter_complement,
+        d_parameter_complement=d_parameter_complement,
+        xp=xp,
+    )
+    _, d_seed_x = _sn_pole_moment_tangent(
+        capped_x,
+        d_capped_x,
+        parameter,
+        d_parameter,
+        parameter_complement=parameter_complement,
+        d_parameter_complement=d_parameter_complement,
+        xp=xp,
+    )
+    poles = channel.poles(factors)
+    families = []
+    tangents = []
+    for capped, d_capped, seed, d_seed, mirrored, family in (
+        (capped_y, d_capped_y, seed_y, d_seed_y, False, poles[2]),
+        (capped_x, d_capped_x, seed_x, d_seed_x, True, poles[3]),
+    ):
+        families.append(family)
+        if family is None:
+            tangents.append(None)
+            continue
+        _, d_family = _harmonic_pole_moments_tangent(
+            capped,
+            d_capped,
+            seed,
+            d_seed,
+            moments,
+            d_moments,
+            channel.harmonics + 1,
+            mirrored=mirrored,
+        )
+        tangents.append(d_family)
+    return poles, (d_seed_y, d_seed_x, tangents[0], tangents[1])
+
+
+def _channel_split_tangent(
+    channel,
+    denominator,
+    d_denominator,
+    moments,
+    d_moments,
+    parameter,
+    d_parameter,
+    parameter_complement,
+    d_parameter_complement,
+    xp,
+):
+    """Return ``(factors, poles)`` for one denominator and its tangent.
+
+    ``d_denominator`` is the denominator's range-function tangent and
+    ``d_moments`` the moment stack's; both are the tangents of the primal the
+    channel reads, so the split the tangent returns is the split the primal
+    forms.
+    """
+    factors, d_factors = _factorise_tangent(denominator, d_denominator, xp)
+    poles, d_poles = _channel_poles_tangent(
+        channel,
+        factors,
+        d_factors,
+        moments,
+        d_moments,
+        parameter,
+        d_parameter,
+        parameter_complement,
+        d_parameter_complement,
+        xp,
+    )
+    return (factors, poles), (d_factors, d_poles)

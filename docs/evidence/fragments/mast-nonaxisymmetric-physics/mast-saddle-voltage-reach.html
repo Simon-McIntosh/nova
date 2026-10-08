@@ -13,13 +13,54 @@
 <body><main class="plan-doc">
 <header><h1>Uncorrected MAST saddle-loop voltage — reachability</h1></header>
 <section id="landing">
-<p><strong>Verdict: reachable, partially.</strong> An uncorrected saddle-loop voltage — the raw XMB export with its axisymmetric poloidal-field pickup retained — is reachable for <strong>33 of the 36</strong> saddle loops over the vacuum cohort, through the level-1 XMB group at <code>xmb/sad_out_&lt;family&gt;&lt;nn&gt;</code>. It is not reachable for <code>saddle_m_10</code>, <code>saddle_m_11</code> and <code>saddle_m_12</code>, whose channels are absent from the store at every cohort shot. No fit was run and no sign was promoted.</p>
-<p><strong>Receipt.</strong> <code>benchmarks/mast_saddle_voltage_reach.py</code> wrote <a href="/nova/figures/mast-saddle-loops/reach.json">docs/figures/mast-saddle-loops/reach.json</a>, a per-loop record of every access path tried with its signal name, source and reachability per shot range. The pass ran on <code>all_debug</code> (job <code>1281983</code>, log <code>saddle-reach-all_debug.log</code>); a first identical pass (job <code>1281981</code>) produced the same cohort and the same 33/36 counts.</p>
-<p><strong>Frame.</strong> The vacuum cohort is the no-plasma, coil-driven, over-determined set of <code>nova.imas.mast_vacuum_cohort</code> (plasma-free below <code>5e3</code> A, a coil driven above <code>1e3</code> A, at least <code>40</code> field probes). Its own census reads every field waveform of the 17 111-shot store; this benchmark draws an even-strided 4000-shot sample across the whole range and applies the criteria in a light census reading only current-group peaks and field-group channel names. <strong>86 shots</strong> were admitted, spanning <strong>13725–28575</strong>. The verdict is a statement about that frame.</p>
-<p><strong>What each loop reached.</strong> Every <code>l</code> and <code>u</code> loop and <code>m_1</code>–<code>m_9</code> are present at the same 26 cohort shots (15051–25836); <code>l_3</code>/<code>l_4</code> and their <code>u</code> counterparts appear at only 3 of those shots (25818–25836), so a loop's raw channel is not co-extensive across the cohort. The three <code>m</code> loops with no channel at all are the exception the receipt names explicitly.</p>
-<p><strong>Published path and the pickup comparison.</strong> The published, pickup-removed product lives in the level-2 store-like store at <code>magnetics</code> under <code>b_field_tor_probe_saddle_voltage</code>; over this cohort the level-2 store is sparse, and no cohort shot resolved the published channel under the key probed, so the raw-minus-published difference and its comparison with the predicted poloidal-field pickup (<code>nova.imas.mast_vacuum_response</code>) is <strong>not reported here</strong> rather than reported as a negative. Establishing it is a follow-on.</p>
-<p><strong>Negative control.</strong> The deliberately misspelled channel <code>sad_out_zz99</code> was probed on every cohort shot and recorded unreachable on all 86 (<code>shots_where_present: 0</code>), so a name that resolves to no loop is reported unreachable rather than being graded — the receipt's own reachability test discriminates.</p>
-<p><strong>Why this matters for §5.</strong> The traversal sign a coil pulse fixes is measured from the pickup the published product removes; this node's job was only to establish whether that pickup is recoverable at all. It is, for 33 loops, through a path that keeps it. The admission, traversal-sign and n=1–6 nodes can proceed against the level-1 XMB channels, with the three <code>m</code> loops excluded and the level-2 published path treated as unavailable on this cohort.</p>
+<p><strong>Verdict: reachable.</strong> An uncorrected saddle-loop voltage — the raw XMB export with its axisymmetric poloidal-field pickup retained is reachable for <strong>36 of the 36</strong> saddle loops over the vacuum-cohort frame, through the level-1 XMB group at <code>xmb/sad_out_&lt;family&gt;&lt;index&gt;</code>. Each loop's raw key was resolved from the store's own key set, because the <code>m</code> family beyond loop 9 is spelled with a three-digit index (<code>sad_out_m010</code>, <code>sad_out_m011</code>, <code>sad_out_m012</code>) while every other loop is two-digit (<code>sad_out_l12</code>): assuming one width reports <code>saddle_m_10</code> to <code>saddle_m_12</code> absent when the store carries them, which is the defect this pass corrects. No fit was run and no sign was promoted.</p>
+<p><strong>Coverage caveat.</strong> The admitted cohort is <strong>86</strong> shots, but only <strong>26</strong> of them carry an <code>xmb</code> group at all; <strong>60</strong> carry none, so over this frame an absent loop is partly a statement about acquisition era rather than about that loop. Within the 26 xmb-bearing shots every one of the 36 loops is present, at either 3 or 26 of those shots (per-loop counts in the table below). Whether a sign node can proceed rests on those 26 shots and not on the full 86.</p>
+<p><strong>Frame.</strong> The vacuum cohort is the no-plasma, coil-driven, over-determined set of <code>nova.imas.mast_vacuum_cohort</code> (plasma-free below <code>5e3</code> A, a coil driven above <code>1e3</code> A, at least <code>40</code> field probes). Its own census reads every field waveform of the store; this benchmark draws an even-strided 4000-shot sample across the whole range (shot range 13725–28575) and applies the criteria in a light census reading only current-group peaks and field-group channel names. The verdict is a statement about that frame.</p>
+<p><strong>Receipt.</strong> <code>benchmarks/mast_saddle_voltage_reach.py</code> wrote <a href="/nova/figures/mast-saddle-loops/reach.json">docs/figures/mast-saddle-loops/reach.json</a>. The pass ran on <code>all_debug</code> (job <code>1282006</code>, log <code>saddle-reach-all_debug.log</code>).</p>
+<p><strong>Raw minus published.</strong> On shot <code>14811</code> the raw <code>sad_out_m01</code> record and the published <code>XMB_SAD/OUT/M01</code> product were interpolated onto the published clock and differenced over <code>26190</code> overlapping samples: raw mean <code>0.272696</code> V, published mean <code>0.164532</code> V, difference mean <code>0.108164</code> V, difference RMS <code>0.108175</code> V. The difference is a standing offset, not a scaled copy of the coil pulse: the published product has had the axisymmetric pickup removed and the raw record has not, and the comparison is reported as that measured difference rather than as a fitted scale.</p><p>The loop's poloidal centre was read from the magnetics IDS arrays of the level-2 store at r=<code>1.9989999532699585</code> m, z=<code>0.014285714498588007</code> m over <code>28</code> vertices, the source the plan names in place of a catalog machine description. The coil-to-loop kernel the vacuum response composes needs the coil cross-sections, which the magnetics IDS does not carry, so the predicted-pickup comparison is recorded unavailable with that reason (<em>coil cross-sections for the response kernel are not present in the magnetics IDS; the catalog machine description that carries them is unavailable to this benchmark</em>) rather than sourced from the retired registry.</p>
+<p><strong>Negative control.</strong> The deliberately misspelled channel <code>sad_out_zz99</code> was probed on every cohort shot and recorded unreachable on all 86 (<code>shots_where_present: 0</code>), so a name that resolves to no loop is reported unreachable rather than graded.</p>
+<h2 id="mast-saddle-voltage-reach-coverage">Per-loop coverage</h2>
+<table id="mast-saddle-voltage-reach-coverage-table">
+<thead><tr><th>Loop</th><th>Raw key (resolved)</th><th>Raw shots</th><th>Raw range</th><th>Published shots</th></tr></thead>
+<tbody>
+    <tr><td><code>saddle_l_1</code></td><td><code>sad_out_l01</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_2</code></td><td><code>sad_out_l02</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_3</code></td><td><code>sad_out_l03</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_4</code></td><td><code>sad_out_l04</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_5</code></td><td><code>sad_out_l05</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_6</code></td><td><code>sad_out_l06</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_7</code></td><td><code>sad_out_l07</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_8</code></td><td><code>sad_out_l08</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_9</code></td><td><code>sad_out_l09</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_10</code></td><td><code>sad_out_l10</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_11</code></td><td><code>sad_out_l11</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_l_12</code></td><td><code>sad_out_l12</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_1</code></td><td><code>sad_out_m01</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_2</code></td><td><code>sad_out_m02</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_3</code></td><td><code>sad_out_m03</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_4</code></td><td><code>sad_out_m04</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_5</code></td><td><code>sad_out_m05</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_6</code></td><td><code>sad_out_m06</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_7</code></td><td><code>sad_out_m07</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_8</code></td><td><code>sad_out_m08</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_9</code></td><td><code>sad_out_m09</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_10</code></td><td><code>sad_out_m010</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_11</code></td><td><code>sad_out_m011</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_m_12</code></td><td><code>sad_out_m012</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_1</code></td><td><code>sad_out_u01</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_2</code></td><td><code>sad_out_u02</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_3</code></td><td><code>sad_out_u03</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_4</code></td><td><code>sad_out_u04</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_5</code></td><td><code>sad_out_u05</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_6</code></td><td><code>sad_out_u06</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_7</code></td><td><code>sad_out_u07</code></td><td>26</td><td>15051–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_8</code></td><td><code>sad_out_u08</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_9</code></td><td><code>sad_out_u09</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_10</code></td><td><code>sad_out_u10</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_11</code></td><td><code>sad_out_u11</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+    <tr><td><code>saddle_u_12</code></td><td><code>sad_out_u12</code></td><td>3</td><td>25818–25836</td><td>0</td></tr>
+</tbody>
+</table>
 </section>
 </main></body>
 </html>

@@ -1,0 +1,439 @@
+{
+  "revision": "3079d5466cb889e1ec395b601996f740c7ecf0aa",
+  "test_source": "tests/test_mast_passive_decay_modes.py",
+  "test_source_sha256": "81facabb563490b1c47b62dc8676e22a9cdba591e75570c5fc9ee0dff9fb809a",
+  "scheduler_job": "1281970",
+  "scope": "Synthetic resistor network under the existing uniform, toroidally closed ring assumptions; no cohort fit or product change.",
+  "verdict": "The connection hypothesis cannot explain an n = 0 resistivity saturation in the axisymmetric passive model and needs a 3-D current model to test.",
+  "hypothesis_supported": false,
+  "promoted_parameters": [],
+  "loop_emf_volt": [
+    3.0,
+    -4.0
+  ],
+  "loop_resistance_ohm": [
+    2.0,
+    5.0
+  ],
+  "isolated_ring_current_ampere": [
+    1.5,
+    -0.8
+  ],
+  "bridge_resistance_interval_ohm": [
+    0.05,
+    20.0
+  ],
+  "bridge_interval_provenance": "Synthetic test values, not a MAST contact-resistance estimate.",
+  "absolute_current_tolerance_ampere": 2e-13,
+  "network_equations": "I = diag(1/R) (emf - B.T V); B I = 0; one node potential fixed to zero.",
+  "analytic_identity": "For uniform rings, R_segment = R_loop * fraction. Sum segment KVL: R_loop * sum(fraction * I_segment) = emf_loop, since potential differences telescope. Global ring KCL gives sum(bridge currents) = 0.",
+  "unequal_spacing_finding": "Unequal spacing alone gives zero transfer under uniform loop emf. Nonzero transfer requires angular forcing/asymmetry; the positive controls retain zero toroidal mean.",
+  "zero_mode_definitions": {
+    "ring_current": "Arc-length weighted piecewise-constant current: sum(delta_angle/(2*pi) * I_segment).",
+    "localized_transfer": "Zeroth Fourier coefficient of discrete connection currents: sum(I_bridge); coefficients for n != 0 use exp(-i*n*angle)."
+  },
+  "axisymmetric_cases": [
+    {
+      "spacing": "single",
+      "connection_count": 1,
+      "angles_rad": [
+        0.0
+      ],
+      "bridge_resistance_ohm": 0.05,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 8.881784197001252e-16
+    },
+    {
+      "spacing": "single",
+      "connection_count": 1,
+      "angles_rad": [
+        0.0
+      ],
+      "bridge_resistance_ohm": 1.0,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 8.881784197001252e-16
+    },
+    {
+      "spacing": "single",
+      "connection_count": 1,
+      "angles_rad": [
+        0.0
+      ],
+      "bridge_resistance_ohm": 20.0,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 8.881784197001252e-16
+    },
+    {
+      "spacing": "opposite",
+      "connection_count": 2,
+      "angles_rad": [
+        0.0,
+        3.141592653589793
+      ],
+      "bridge_resistance_ohm": 0.05,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 1.7763568394002505e-15
+    },
+    {
+      "spacing": "opposite",
+      "connection_count": 2,
+      "angles_rad": [
+        0.0,
+        3.141592653589793
+      ],
+      "bridge_resistance_ohm": 1.0,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 1.7763568394002505e-15
+    },
+    {
+      "spacing": "opposite",
+      "connection_count": 2,
+      "angles_rad": [
+        0.0,
+        3.141592653589793
+      ],
+      "bridge_resistance_ohm": 20.0,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 1.7763568394002505e-15
+    },
+    {
+      "spacing": "eight_equal",
+      "connection_count": 8,
+      "angles_rad": [
+        0.0,
+        0.7853981633974483,
+        1.5707963267948966,
+        2.356194490192345,
+        3.141592653589793,
+        3.9269908169872414,
+        4.71238898038469,
+        5.497787143782138
+      ],
+      "bridge_resistance_ohm": 0.05,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 8.881784197001252e-16
+    },
+    {
+      "spacing": "eight_equal",
+      "connection_count": 8,
+      "angles_rad": [
+        0.0,
+        0.7853981633974483,
+        1.5707963267948966,
+        2.356194490192345,
+        3.141592653589793,
+        3.9269908169872414,
+        4.71238898038469,
+        5.497787143782138
+      ],
+      "bridge_resistance_ohm": 1.0,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 8.881784197001252e-16
+    },
+    {
+      "spacing": "eight_equal",
+      "connection_count": 8,
+      "angles_rad": [
+        0.0,
+        0.7853981633974483,
+        1.5707963267948966,
+        2.356194490192345,
+        3.141592653589793,
+        3.9269908169872414,
+        4.71238898038469,
+        5.497787143782138
+      ],
+      "bridge_resistance_ohm": 20.0,
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 0.0,
+      "max_transfer_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 0.0,
+      "dissipation_watt": 7.700000000000001,
+      "power_balance_error_watt": 8.881784197001252e-16
+    },
+    {
+      "spacing": "unequal",
+      "connection_count": 5,
+      "angles_rad": [
+        0.0,
+        0.31,
+        1.4,
+        3.8,
+        5.9
+      ],
+      "bridge_resistance_ohm": 0.05,
+      "ring_mean_ampere": [
+        1.4999999999999998,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 2.220446049250313e-16,
+      "max_transfer_ampere": 2.0992658757600967e-16,
+      "max_kirchhoff_residual_ampere": 2.6677292677511927e-16,
+      "dissipation_watt": 7.699999999999998,
+      "power_balance_error_watt": 1.7763568394002505e-15
+    },
+    {
+      "spacing": "unequal",
+      "connection_count": 5,
+      "angles_rad": [
+        0.0,
+        0.31,
+        1.4,
+        3.8,
+        5.9
+      ],
+      "bridge_resistance_ohm": 1.0,
+      "ring_mean_ampere": [
+        1.4999999999999998,
+        -0.8
+      ],
+      "max_ring_current_error_ampere": 2.220446049250313e-16,
+      "max_transfer_ampere": 1.0699215572284766e-16,
+      "max_kirchhoff_residual_ampere": 2.2392675311014236e-16,
+      "dissipation_watt": 7.699999999999999,
+      "power_balance_error_watt": 8.881784197001252e-16
+    },
+    {
+      "spacing": "unequal",
+      "connection_count": 5,
+      "angles_rad": [
+        0.0,
+        0.31,
+        1.4,
+        3.8,
+        5.9
+      ],
+      "bridge_resistance_ohm": 20.0,
+      "ring_mean_ampere": [
+        1.4999999999999998,
+        -0.7999999999999999
+      ],
+      "max_ring_current_error_ampere": 2.220446049250313e-16,
+      "max_transfer_ampere": 1.0168677603247161e-17,
+      "max_kirchhoff_residual_ampere": 2.220446049250313e-16,
+      "dissipation_watt": 7.699999999999999,
+      "power_balance_error_watt": 0.0
+    }
+  ],
+  "nonaxisymmetric_controls": [
+    {
+      "spacing": "eight_equal",
+      "angular_emf_amplitude_volt": 0.7,
+      "ring_current_ampere": [
+        [
+          1.8388412803412149,
+          1.640352653809195,
+          1.3596473461908043,
+          1.1611587196587851,
+          1.1611587196587847,
+          1.3596473461908043,
+          1.6403526538091955,
+          1.8388412803412153
+        ],
+        [
+          -1.1388412803412153,
+          -0.9403526538091955,
+          -0.6596473461908048,
+          -0.46115871965878474,
+          -0.4611587196587847,
+          -0.6596473461908046,
+          -0.9403526538091953,
+          -1.1388412803412151
+        ]
+      ],
+      "ring_mean_ampere": [
+        1.5,
+        -0.8
+      ],
+      "max_ring_mean_error_ampere": 0.0,
+      "max_transfer_ampere": 0.2807053076183907,
+      "transfer_ampere": [
+        -5.2867763077388404e-17,
+        0.19848862653201985,
+        0.2807053076183907,
+        0.19848862653202,
+        1.0908947192170183e-16,
+        -0.1984886265320198,
+        -0.2807053076183905,
+        -0.19848862653201987
+      ],
+      "transfer_fourier_zero_ampere": 4.440892098500626e-16,
+      "transfer_first_harmonic_abs_ampere": 1.1228212304735625,
+      "unweighted_mean_error_ampere": 0.0,
+      "max_kirchhoff_residual_ampere": 8.881784197001252e-16,
+      "dissipation_watt": 8.485974861331496,
+      "power_balance_error_watt": 3.552713678800501e-15
+    },
+    {
+      "spacing": "unequal",
+      "angular_emf_amplitude_volt": 0.7,
+      "ring_current_ampere": [
+        [
+          1.7649520871925124,
+          1.6707838095180791,
+          1.3077334638716702,
+          1.5487156033286202,
+          1.737084821916006
+        ],
+        [
+          -1.0649520871925124,
+          -0.9707838095180796,
+          -0.6077334638716705,
+          -0.8487156033286206,
+          -1.0370848219160058
+        ]
+      ],
+      "ring_mean_ampere": [
+        1.4999999999999996,
+        -0.7999999999999999
+      ],
+      "max_ring_mean_error_ampere": 4.440892098500626e-16,
+      "max_transfer_ampere": 0.36305034564640914,
+      "transfer_ampere": [
+        -0.02786726527650661,
+        0.09416827767443291,
+        0.36305034564640914,
+        -0.24098213945695027,
+        -0.18836921858738517
+      ],
+      "transfer_fourier_zero_ampere": 0.0,
+      "transfer_first_harmonic_abs_ampere": 0.620241081035646,
+      "unweighted_mean_error_ampere": 0.10585395716537782,
+      "max_kirchhoff_residual_ampere": 5.828670879282072e-16,
+      "dissipation_watt": 8.12305787319473,
+      "power_balance_error_watt": 3.552713678800501e-15
+    }
+  ],
+  "geometry_checkpoint_sha256": "fa04b9d07de5f6b66a41c6b1ab3db98bedb595d27eb556c71610f75ab4c9babe",
+  "modeled_case_ring_count": 24,
+  "modeled_case_rings_per_can": {
+    "p2_lower": 1,
+    "p2_upper": 1,
+    "p3_lower": 8,
+    "p3_upper": 8,
+    "p4_lower": 1,
+    "p4_upper": 1,
+    "p5_lower": 1,
+    "p5_upper": 1,
+    "p6_lower": 1,
+    "p6_upper": 1
+  },
+  "modeled_case_ring_names": [
+    "coil_cases_p2_lower",
+    "coil_cases_p2_upper",
+    "coil_cases_p3_lower_00",
+    "coil_cases_p3_lower_01",
+    "coil_cases_p3_lower_02",
+    "coil_cases_p3_lower_03",
+    "coil_cases_p3_lower_04",
+    "coil_cases_p3_lower_05",
+    "coil_cases_p3_lower_06",
+    "coil_cases_p3_lower_07",
+    "coil_cases_p3_upper_00",
+    "coil_cases_p3_upper_01",
+    "coil_cases_p3_upper_02",
+    "coil_cases_p3_upper_03",
+    "coil_cases_p3_upper_04",
+    "coil_cases_p3_upper_05",
+    "coil_cases_p3_upper_06",
+    "coil_cases_p3_upper_07",
+    "coil_cases_p4_lower",
+    "coil_cases_p4_upper",
+    "coil_cases_p5_lower",
+    "coil_cases_p5_upper",
+    "coil_cases_p6_lower",
+    "coil_cases_p6_upper"
+  ],
+  "physical_connection_count": {
+    "per_can": "Not fully enumerated by the inspected sources. Model cross-section counts are not connection counts.",
+    "documented_supports": "Edlington p.423: halo-current detectors around six support legs of the P2 and P3 PF coils; feeder-bar bellows provide an additional monitored path.",
+    "source": "[Edlington, pp.421 and 423](https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf)"
+  },
+  "source_receipt": "docs/figures/mast-coil-case-resistivity/receipt.json",
+  "conducting_model_source": "[Berkery, section 3](https://scientific-publications.ukaea.uk/wp-content/uploads/UKAEA-CCFE-PR2179.PDF)",
+  "limitations": [
+    "The resistive network is a test of symmetry/current conservation at an imposed linked-flux derivative, not a dynamic MAST fit or a 3-D inductance calculation.",
+    "Toroidal variation of material, cross-section, driving fields, or inductive coupling can mix harmonics; this result does not exclude a real 3-D connection effect.",
+    "The existing 0.900 micro-ohm metre saturation and real/permuted gains were read from the prior receipt, not remeasured.",
+    "No connection resistance is fitted; its no-coupling endpoint is unidentifiable from n = 0 observations because every tested resistance gives the same means."
+  ],
+  "negative_control": {
+    "mutation": "Add false 25 percent series resistance to both uniform rings in the bridge-connected network.",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/mutation.log",
+    "failure_count": 14,
+    "exit_status": 1
+  },
+  "figure": "network-current-modes.svg",
+  "validation": {
+    "baseline_summary": "53 passed, 1 warning in 45.88s",
+    "head": {
+      "revision": "3079d5466cb889e1ec395b601996f740c7ecf0aa",
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/head.log",
+      "completed": true,
+      "failure_count": 0,
+      "failure_ids": []
+    },
+    "mutation_summary": "14 failed, 53 deselected; EXIT=1",
+    "reproduction_script": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/record_network.py"
+  }
+}

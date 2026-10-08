@@ -1,0 +1,82 @@
+<section id="mast-coil-case-vessel-path-evidence">
+  <h3>Discrete vessel connections leave the axisymmetric ring current unchanged</h3>
+  <p><strong>The connection hypothesis cannot explain an n = 0 resistivity
+    saturation in the axisymmetric passive model and needs a 3-D current model
+    to test.</strong> This conclusion applies to toroidally closed, uniform rings
+    with axisymmetric linked-flux derivatives. No passive parameter was fitted
+    or promoted, no product module changed, and no cohort pass was run.</p>
+  <p>The discrete network solves Kirchhoff current conservation and Ohm's law
+    on two rings with total resistances 2 and 5 Ω and loop EMFs 3 and −4 V.
+    Their isolated currents are 1.5 and −0.8 A. Each ring segment's resistance
+    and uniform EMF scale with its angular fraction. Connections have positive
+    resistances 0.05, 1 and 20 Ω; these are synthetic test values, not sourced
+    contact resistances for MAST. One gauge potential is fixed; all other
+    potentials and branch currents are solved, including single-connection
+    self-loops and two-connection parallel arcs.</p>
+  <table id="mast-coil-case-vessel-path-results">
+    <thead><tr><th>Experiment</th><th>Measured result</th></tr></thead>
+    <tbody>
+      <tr><td>Uniform loop EMF: 1, 2 and 8 equally spaced connections, plus
+        5 unequal angles; three bridge resistances each</td><td>12 networks:
+        maximum ring-current change 2.22 × 10⁻¹⁶ A;
+        maximum transfer current 2.10 × 10⁻¹⁶ A.</td></tr>
+      <tr><td>Angular EMF positive control, 8 equal connections</td><td>Peak
+        transfer 0.280705 A; zeroth transfer Fourier coefficient
+        4.44 × 10⁻¹⁶ A; first-harmonic magnitude 1.122821 A;
+        mean ring-current change 0 A.</td></tr>
+      <tr><td>Angular EMF positive control, 5 unequal connections</td><td>Peak
+        transfer 0.363050 A; zeroth transfer Fourier coefficient 0 A;
+        first-harmonic magnitude 0.620241 A;
+        mean ring-current change 4.44 × 10⁻¹⁶ A.</td></tr>
+      <tr><td>Conservation and dissipation</td><td>Positive Joule dissipation
+        and source-power balance checked in every case at an absolute
+        tolerance of 2 × 10⁻¹³ in amperes or watts, respectively.</td></tr>
+      <tr><td>Regression and deliberate false loading</td><td>53 baseline
+        tests pass; 67 head tests pass. Adding false 25% series resistance
+        to connected rings fails all 14 added tests, with EXIT=1.</td></tr>
+    </tbody>
+  </table>
+  <p id="mast-coil-case-vessel-path-proof">For angular fractions f<sub>s</sub>,
+    segment KVL reads R f<sub>s</sub> I<sub>s</sub> =
+    E<sub>s</sub> − ΔV<sub>s</sub>. Summing around a closed ring cancels
+    every potential difference, so its n = 0 current is
+    Σ f<sub>s</sub>I<sub>s</sub> = E<sub>loop</sub>/R.
+    Summing current conservation over a ring gives Σ I<sub>bridge</sub> = 0,
+    the zeroth Fourier coefficient of the localized transfer currents.
+    Uniform angular EMF permits constant potentials on both rings, so every
+    bridge current vanishes even with unequal spacing. Unequal spacing alone
+    does not generate transfer. A zero-integral angular EMF supplies the
+    nonzero-transfer control.</p>
+  <figure id="mast-coil-case-vessel-path-current-modes">
+    <img src="/nova/figures/mast-passive-vessel-path/network-current-modes.svg"
+      alt="Angular ring-current deviations and localized bridge transfer for five unequally spaced connections under non-axisymmetric forcing.">
+    <figcaption>The unequal-spacing positive control uses a 0.7 V amplitude
+      angular EMF with zero integral around the case ring and 1 Ω bridges.
+      Case and vessel currents vary locally while their angle-weighted means
+      remain 1.5 and −0.8 A. Transfer is nonzero but sums to zero. An unweighted
+      mean of unequal arcs would falsely report a 0.105854 A mean-current
+      change; the tests explicitly distinguish it from the toroidal mean.
+    </figcaption>
+  </figure>
+  <p id="mast-coil-case-vessel-path-source-counts">The digest-verified
+    geometry checkpoint cited by the
+    <a href="/nova/figures/mast-passive-identifiability/spectrum.json">spectrum receipt</a>
+    contains <strong>24 modeled case rings</strong>: eight each for the upper
+    and lower P3 cans, and one each for the upper and lower P2, P4, P5 and P6
+    cans. Those are poloidal-section discretization counts, <strong>not
+    physical connection counts per can</strong>.
+    <a href="https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf">Edlington, pp. 421 and 423</a>
+    documents can-to-vessel paths through supports and feeder-bar bellows,
+    and detectors around six support legs of the P2 and P3 coils. It does not
+    give a complete connection count and angular map for every can.
+    <a href="https://scientific-publications.ukaea.uk/wp-content/uploads/UKAEA-CCFE-PR2179.PDF">Berkery, section 3</a>
+    models the conducting structure in 3-D before deriving effective segment
+    resistances.</p>
+  <p>Toroidal variation in material, conductor cross-section, driving fields
+    or inductive coupling can mix harmonics. This resistor-network result
+    does not exclude such a real 3-D effect, and does not identify a bridge
+    resistance: every tested bridge resistance gives the same n = 0 currents.
+    The prior 0.900 µΩ·m saturation remains unremeasured here.
+    <a href="/nova/figures/mast-passive-vessel-path/receipt.json">Receipt, per-case measurements and validation provenance</a>.
+    Tests are committed at <code>3079d5466cb889e1ec395b601996f740c7ecf0aa</code>.</p>
+</section>

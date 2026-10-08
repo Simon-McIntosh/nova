@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -42,12 +43,11 @@ _CREDENTIAL_MARKERS = (
     "authentication required",
     "denied: requested access",
     "access denied",
-    "401",
-    "403",
     "expired token",
     "token expired",
     "token has expired",
 )
+_CREDENTIAL_STATUS_PATTERN = re.compile(r"\b40[13]\b")
 
 Runner = Callable[[Sequence[str]], "subprocess.CompletedProcess[str]"]
 
@@ -198,7 +198,9 @@ def _classify_failure(
     output = (completed.stderr or completed.stdout or "").strip()
     text = f"{completed.stdout or ''}\n{completed.stderr or ''}".lower()
     summary = output[:200]
-    if any(marker in text for marker in _CREDENTIAL_MARKERS):
+    if _CREDENTIAL_STATUS_PATTERN.search(text) or any(
+        marker in text for marker in _CREDENTIAL_MARKERS
+    ):
         return LayerRegistryCredentialError(
             f"registry credentials rejected for {reference}: {summary}"
         )

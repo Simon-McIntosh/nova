@@ -29,7 +29,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f,87d24724,1227e204,d95f9296,2806d665,641a8b33,47c46cb8,07260595,c3cc4e04,ee164d5b">
 <meta name="plan-impl" content="0.32">
-<meta name="plan-version" content="31">
+<meta name="plan-version" content="32">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -188,7 +188,7 @@ Done when
     <div class="r-comment-body"><p>Reader repaired and full saddle contours admitted with binary traversal nuisance. Limited 2-fit/1-held-out comparison on 36 loops: real squared-residual gain 87.3168%, geometry-permuted gain 87.8757%, removed gain 0%; attribution refused, 23 shots lack raw voltage units, no sign promoted. [Residual figure and receipt](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-admission.html#mast-saddle-admission-residuals).</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T063126267152-review-of-mast-saddle-admission" data-who="reckon-build" data-when="2026-10-08T06:53:35.428Z">
-    <div class="r-comment-body"><p>Review of r-20261008T055143084501-mast-saddle-admission stored as a parsed six-dimension record (goal_fidelity 16, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 18; total 105, verdict pass, zero added failures) with two follow-on findings and no blocking finding; the node&#x27;s saddle-loop admission is a correct refusal of attribution (permuted-geometry control gain 87.88% does not fall below the real gain 87.32%).</p></div>
+    <div class="r-comment-body"><p>Review of r-20261008T055143084501-mast-saddle-admission stored as a parsed six-dimension record (goal_fidelity 16, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 18; total 105, verdict pass, zero added failures) with two follow-on findings and no blocking finding; the node's saddle-loop admission is a correct refusal of attribution (permuted-geometry control gain 87.88% does not fall below the real gain 87.32%).</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-passive-spectrum-landed" data-who="reckon-build" data-when="2026-10-08T04:35:00Z">
     <div class="r-comment-body">node 1 landed: 1 of 15 grouped passive directions identifiable above the floor with drive scales free (400/400 shots scored). Section open — the held-out fit of that one direction, with the drive-permutation control, is next; it must propagate through nova/circuit/propagate.py and read geometry without the retiring registry. Evidence: passive-spectrum.</div>
@@ -213,6 +213,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T055259046822-mast-coil-case-resistivity" data-who="reckon-build" data-when="2026-10-08T06:03:30Z">
     <div class="r-comment-body"><p>§4 coil-case source check: cited receipt finds stainless cans with vessel electrical connections, reference steel 0.811 µΩ·m at 300 K and 0.890 at 400 K, no sourced held-out case temperature/grade/segmentation multiplier above the 0.90 µΩ·m seed, so the bound and fit stay unchanged; focused gate 21 passed and uncited-claim control failed.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T063200025795-review-of-mast-coil-case-resistivity" data-who="reckon-build" data-when="2026-10-08T06:55:52.219Z">
+    <div class="r-comment-body"><p>Independent review of r-20261008T055259046822-mast-coil-case-resistivity stored at the two granted paths; verdict total 109/120 (goal_fidelity 18, evidence 18, scope_discipline 20, durability 16, fit 18, reuse 19), base fe057dcc, head ee164d5b7, added_failure_count 0; three follow-on findings (empty baseline_suite field, untied 0.90 anchor, can-temperature follow-on), no blocker. The count stands: no independent source puts coil-case resistivity above 0.90 micro-ohm metre; nothing promoted.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261008-tf-average-landed" data-who="reckon-build" data-when="2026-10-08T06:15:00Z">
     <div class="r-comment-body">node 1 landed as a negative result: no independent R*Bphi measurement exists in the store (577 shots with feed current, 564 reconstruction-only products, 0 independent comparisons at 2 %). Section open — the next §6 node needs an independent observable: toroidal-probe orientation resolved from coil pulses, or a sourced turn count. Evidence: tf-average.</div>

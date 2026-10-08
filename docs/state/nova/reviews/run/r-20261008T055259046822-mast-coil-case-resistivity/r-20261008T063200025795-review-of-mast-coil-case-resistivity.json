@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite gate logs: baseline_suite is empty in the reviewed manifest, and its base arm log base-gate.log reports revision fe057dcc5259a8ba801e863f5c63ae963eec59d3 with 20 passed and EXIT=0 (failure_count 0); after_suite reports revision ee164d5b7f25f137dfa71ad74ce0b1688d6c65e9 with completed=true, exit_status 0, failure_count 0 and failure_ids empty. added_failure_count is therefore 0 and added_failure_ids is empty. I confirmed the head arm independently by re-running tests/test_mast_seed_parameters.py at the reviewed head ee164d5b7 (21 passed, EXIT=0).",
+  "call_site_count": 1,
+  "call_sites": [
+    "tests/test_mast_seed_parameters.py:113"
+  ],
+  "completed_at": "2026-10-08T06:55:52.219Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-08T06:32:26Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's baseline_suite field is empty, so the base arm of the focused gate is not readable from the manifest's declared fields; it exists only as base-gate.log (revision fe057dcc5259a8ba801e863f5c63ae963eec59d3, 20 passed, EXIT=0). Populating baseline_suite would let a reader derive the added-failure count from the record rather than opening the raw log, which is how this review had to reconstruct added_failure_count=0."
+    },
+    {
+      "file": "tests/test_mast_seed_parameters.py",
+      "line": "113",
+      "severity": "follow-on",
+      "text": "follow-on: the added test asserts that every claim has a resolvable citation and that the four hypothesis labels are exactly as expected, but it never ties receipt seed_bound_micro_ohm_m (the literal 0.9) to nova.imas.mast_seed_parameters.STAINLESS_STEEL.resistivity_upper, so the single number the entire adjudication turns on can silently drift from the module constant the receipt claims to describe; the guard would stay green through that divergence."
+    },
+    {
+      "file": "docs/figures/mast-coil-case-resistivity/receipt.json",
+      "line": "86",
+      "severity": "follow-on",
+      "text": "follow-on: the hotter-case hypothesis is the physically closest route to the ceiling and is left unsourced only because no fitted-shot can temperature is measured - the reference steel crosses 0.90 micro-ohm metre at about 415 K (142 C) and the module's own interval already spans room temperature to the 200 C designed bake. The actionable follow-on is therefore a can-temperature estimate (thermal model or thermocouple record) rather than further resistivity sourcing, because the receipt has already shown a higher-resistivity grade is undocumented. The run lists this, but the receipt framing points the next node at the weaker of the two directions."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read commit ee164d5b7 against base fe057dcc5259a8ba801e863f5c63ae963eec59d3: it adds tests/test_mast_seed_parameters.py::test_coil_case_receipt_claims_have_citations (25 lines), the receipt docs/figures/mast-coil-case-resistivity/receipt.json (108 lines) and the evidence fragment (45 lines), totalling 178 insertions over three declared paths with no product source changed.",
+    "done_when": "Documentary measure: a citation-per-claim receipt plus an evidence fragment, four hypotheses adjudicated, module unchanged, nothing promoted. All delivered; I re-ran the gate at head ee164d5b7 (21 passed, EXIT=0) and reproduced the negative control (EXIT=1), and independently reproduced the two literature claims from the cited primary sources.",
+    "goal": "Establish from independent sources whether the MAST coil cases can carry effective toroidal resistivity above 0.90 micro-ohm metre, or record the negative result. The receipt and fragment answer by exclusion: cans are stainless with no named grade, no sourced value above the bound exists, the insulating breaks belong to diagnostic rails not the cans, and the only supported explanation is a vessel-coupled parallel path. Faithful to the dispatched done-when.",
+    "manifest": "Read; reports status complete, one commit ee164d5b7, tests 21 passed EXIT=0, a negative_control_log that fires, and after_suite completed=true failure_count=0 at the head revision. Its baseline_suite field is empty, so the base arm is not readable from the manifest's declared fields.",
+    "write_paths": "Read the reviewed manifest's declared paths; the diff against base fe057dcc5259a8ba801e863f5c63ae963eec59d3 is exactly the three paths declared, none outside them."
+  },
+  "justifications": {
+    "durability": "One test is added, test_coil_case_receipt_claims_have_citations, and it guards this node's substantive claim: that every receipt claim carries a citation resolving to a declared source and that all four hypotheses are adjudicated, with the negative control showing it fires (EXIT=1) when a citation is removed. It is a document-integrity guard rather than a numerical one, which is proportionate for a source-check node that changes no computation, but for that same reason it pins the receipt's structure and hypothesis set and cannot detect a wrong adjudication or a mistyped value, only a missing or dangling citation. Not higher because there is no measured behaviour in this node for the guard to falsify, and the receipt's central 0.90 anchor is not tied to the module constant it describes (see finding).",
+    "evidence": "The receipt reproduces and its load-bearing claims survive independent checking. I re-ran the focused gate at the reviewed head ee164d5b7f25f137dfa71ad74ce0b1688d6c65e9 (21 passed, EXIT=0) and reproduced the negative control in a scratch tree (a citation stripped from the seed claim reddens test_coil_case_receipt_claims_have_citations, EXIT=1). I then independently verified the two literature claims against the cited primary sources rather than the run's summary: the NBS SRM 798 high-temperature fit rho = 154.1 T^0.0997 - 191.0 micro-ohm cm (rho in micro-ohm cm, T in kelvin) reproduces the receipt's 0.811, 0.890 and 0.923 micro-ohm metre at 300, 400 and 450 K and the ~415 K crossing of 0.90 micro-ohm metre within rounding, and the MAST magnetic-diagnostics paper states directly that the PF coils sit inside stainless steel cans supported from the vessel wall and are electrically connected to the vessel via both the mechanical support structure and the vacuum bellows connection of feeder bars, which is exactly the receipt's connections and parallel-path claim. Not 20 because the reviewed manifest's own baseline_suite field is empty, so the base arm is readable only from base-gate.log and not from the manifest's declared fields (see finding).",
+    "fit": "The additions follow the file's and the repository's conventions: tests/test_mast_seed_parameters.py keeps its stdlib-plus-imports idiom (json and pathlib added beside the existing math and nova imports), the receipt lives under the established docs/figures/<node>/receipt.json convention shared by many sibling nodes, the fragment uses node-prefixed element ids and project-absolute src, and the commit carries a two-part message with a body. A label scan over the added lines finds no phase, stage, sprint, ticket or version identifier and no worktree path; the receipt keys on revisions and source locators rather than on plan identifiers.",
+    "goal_fidelity": "The node was dispatched to establish from independent sources whether the original MAST poloidal-field coil cans can carry an effective toroidal resistivity above the 0.90 micro-ohm metre bulk stainless bound the held-out fit saturates. Its documentary done-when asks for a citation-per-claim receipt under docs/figures/mast-coil-case-resistivity and an evidence fragment, adjudicating four hypotheses (higher-resistivity grade, temperature, toroidal insulating break, unmodelled parallel vessel path) as supported, refuted or unsourced, leaving nova/imas/mast_seed_parameters.py unchanged and nothing promoted if no independent source is found. The run delivers exactly that: receipt.json with 12 claims, 5 keyed sources and a citation on every claim; a fragment carrying the same four-row adjudication table; one hypothesis supported (the parallel vessel path is a documented topology) and three marked unsourced; the seed module untouched and no fit rerun. Not 20 because the section-4 question is answered only by exclusion: no independent resistivity source or break was found and no model extension was implemented, so the decisive physics now transfers wholly to a follow-on (a can-temperature or vessel-coupled model re-fit), which the run itself names.",
+    "reuse": "The node changes no product source, so it introduces no duplicated machinery; it reads the seed ceiling from nova/imas/mast_seed_parameters.py (STAINLESS_STEEL.resistivity_upper 9.0e-7 ohm m, confirming the cited 0.90 micro-ohm metre bound) and its bespoke per-receipt check matches the existing pattern of tests that read one docs/figures receipt (test_production_solver_receipt_stamp, test_outboard_census_receipt_consistency). No shared receipt validator exists to reuse, so a local assertion is the available option. Not 20 because the receipt stores the seed bound as a literal (0.9) rather than importing the module constant it cites, so the one number the whole adjudication turns on is free to drift from its source.",
+    "scope_discipline": "git diff fe057dcc5259a8ba801e863f5c63ae963eec59d3 ee164d5b7f25f137dfa71ad74ce0b1688d6c65e9 is exactly three paths, all inside the reviewed manifest's declared write paths: docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-coil-case-resistivity.html, docs/figures/mast-coil-case-resistivity/receipt.json, and tests/test_mast_seed_parameters.py. One commit, no out-of-scope source touched, no plan, sprint or index state mutated, and no worktree path in any changed file (the repository's pre-commit filepath guard would have refused one)."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T055259046822-mast-coil-case-resistivity (node mast-coil-case-resistivity, plan nova:mast-nonaxisymmetric-physics section 4; goal: establish from independent sources whether the MAST PF coil cases can carry effective toroidal resistivity above the 0.90 micro-ohm metre bulk stainless bound the held-out fit saturates).\n\nVERDICT goal: the citation-per-claim receipt and the evidence fragment deliver the dispatched documentary done-when; four hypotheses adjudicated (one supported: unmodelled parallel vessel path; three unsourced: higher-resistivity grade, hotter case, toroidal break); nova/imas/mast_seed_parameters.py unchanged; no fit rerun; nothing promoted.\nVERDICT done_when: I re-ran the focused gate at the reviewed head ee164d5b7 (21 passed, EXIT=0), reproduced the negative control in a scratch tree (EXIT=1), and independently reproduced the two literature claims from the cited primary sources (NBS SRM 798 fit gives 0.811/0.890/0.923 micro-ohm metre at 300/400/450 K and the ~415 K crossing; the MAST paper states the stainless cans are electrically connected to the vessel via supports and feeder-bar bellows).\nVERDICT write_paths: the diff against base fe057dcc5259a8ba801e863f5c63ae963eec59d3 is exactly three declared paths.\nVERDICT manifest: status complete, one commit, gate 21 passed, negative_control_log fires; baseline_suite is empty so the base arm is readable only from base-gate.log.\nVERDICT diff: 178 insertions over three paths (test 25 lines, receipt 108 lines, fragment 45 lines); no product source changed.\nCALL_SITES: tests/test_mast_seed_parameters.py:113\n\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the dispatched done-when is delivered exactly and the negative result is honestly recorded; not 20 because the section-4 question is answered only by exclusion and the decisive physics transfers to a follow-on.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate and the negative control both reproduce, and the two load-bearing literature claims independently reproduce from the cited primary sources; not 20 because the reviewed manifest's baseline_suite field is empty.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: exactly three declared paths in one commit; no plan, sprint or index state touched; no worktree path.\nSCORE durability: 16\nJUSTIFICATION durability: one added test guards citation integrity and hypothesis completeness and its negative control fires, but it is a document-integrity guard with no measured behaviour to falsify and does not tie the 0.90 anchor to its source constant.\nSCORE fit: 18\nJUSTIFICATION fit: file idiom, receipt convention, node-prefixed fragment ids and project-absolute src all respected; no forbidden label or worktree path.\nSCORE reuse: 19\nJUSTIFICATION reuse: no product source added and no machinery duplicated; the receipt stores the seed bound as a literal rather than importing the module constant, which is the only reuse gap.\n\nFINDING manifest.md:21 follow-on: baseline_suite is empty, so the base arm is readable only from base-gate.log (20 passed, EXIT=0); populating it lets added_failure_count be derived from the record.\nFINDING tests/test_mast_seed_parameters.py:113 follow-on: the new test never ties the receipt's literal 0.90 seed bound to STAINLESS... STAINLESS_STEEL.resistivity_upper, so the anchor can drift from the module it describes.\nFINDING docs/figures/mast-coil-case-resistivity/receipt.json:86 follow-on: the hotter-case route is the physically closest and is unsourced only for want of a fitted-shot can temperature; the actionable follow-on is a can-temperature estimate, not further resistivity sourcing.\n",
+  "review_run_id": "r-20261008T063200025795-review-of-mast-coil-case-resistivity",
+  "reviewed_base_sha": "fe057dcc5259a8ba801e863f5c63ae963eec59d3",
+  "reviewed_head_sha": "ee164d5b7f25f137dfa71ad74ce0b1688d6c65e9",
+  "reviewed_run_id": "r-20261008T055259046822-mast-coil-case-resistivity",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:47:30Z",
+  "total": 109
+}

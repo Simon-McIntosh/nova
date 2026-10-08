@@ -76,6 +76,13 @@
       "finding": "thin_wrapper-1",
       "reason": "",
       "when": "2026-10-08T01:10:04.772620+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "s24-nova",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-08T01:10:19.687282+00:00"
     }
   ],
   "responses": {
@@ -90,6 +97,12 @@
       "by": "s24-nova",
       "reason": "",
       "when": "2026-10-08T01:09:50.115820+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "s24-nova",
+      "reason": "",
+      "when": "2026-10-08T01:10:19.687282+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

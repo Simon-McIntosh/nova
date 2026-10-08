@@ -56,7 +56,7 @@ only if the current it represents is placed where both bands see it.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
@@ -113,10 +113,16 @@ class SensorClass:
     coupling: np.ndarray
     described: np.ndarray
     floor: np.ndarray
+    contours: tuple[np.ndarray | None, ...] = ()
+    traversal_options: tuple[tuple[int, ...], ...] = ()
 
     def __post_init__(self):
         """Reject a class whose arrays disagree about how many channels it has."""
         count = len(self.channel)
+        if self.contours and len(self.contours) != count:
+            raise MisfitMapError("contours must align with channels")
+        if self.traversal_options and len(self.traversal_options) != count:
+            raise MisfitMapError("traversal options must align with channels")
         shapes = {
             "r": self.r.shape,
             "z": self.z.shape,
@@ -159,6 +165,42 @@ class ConstraintSet:
     described: np.ndarray
     sample: np.ndarray
     shots: tuple[int, ...] = ()
+    contours: tuple[np.ndarray | None, ...] = ()
+    traversal_options: tuple[tuple[int, ...], ...] = ()
+    traversal_signs: tuple[int, ...] = ()
+
+    @property
+    def shot_counts(self) -> np.ndarray:
+        """Return each channel's finite shot count, including sparse loops."""
+        return np.isfinite(self.sample).sum(axis=0)
+
+    def realize_traversal(self, signs) -> ConstraintSet:
+        """Select nuisance signs for a fit without changing their allowed values.
+
+        A choice is conditional fit state, never a sensor calibration. Calling
+        this again replaces the choices rather than multiplying them together.
+        """
+        signs = tuple(signs)
+        options = self.traversal_options or ((1,),) * self.rows
+        if len(signs) != self.rows or any(
+            sign not in allowed for sign, allowed in zip(signs, options, strict=True)
+        ):
+            raise MisfitMapError("a traversal choice must belong to each row's options")
+        previous = np.asarray(self.traversal_signs or (1,) * self.rows)
+        factor = np.asarray(signs) / previous
+        return replace(
+            self, traversal_signs=signs, described=self.described * factor[:, None]
+        )
+
+    def traversal_factors(self) -> np.ndarray:
+        """Require an explicit nuisance realization for every ambiguous loop."""
+        if self.traversal_signs:
+            return np.asarray(self.traversal_signs)
+        if any(len(options) > 1 for options in self.traversal_options):
+            raise MisfitMapError(
+                "saddle traversal is unresolved; realize nuisance signs"
+            )
+        return np.ones(self.rows)
 
     @property
     def rows(self) -> int:
@@ -198,6 +240,13 @@ class ConstraintSet:
             described=self.described[mask],
             sample=self.sample[:, mask],
             shots=self.shots,
+            contours=tuple(p for p, keep in zip(self.contours, mask) if keep),
+            traversal_options=tuple(
+                p for p, keep in zip(self.traversal_options, mask) if keep
+            ),
+            traversal_signs=tuple(
+                p for p, keep in zip(self.traversal_signs, mask) if keep
+            ),
         )
 
 
@@ -297,6 +346,7 @@ def assemble(
     excluded = set(excluded)
     channels, position, height = [], [], []
     cosine, sine, flux, values, noises, described, samples = [], [], [], [], [], [], []
+    contours, options = [], []
     for sensor in classes:
         value, error, count = pooled_noise(sensor.coupling, sensor.floor)
         keep = (
@@ -317,6 +367,18 @@ def assemble(
         noises.append(error[keep])
         described.append(sensor.described[keep])
         samples.append(sensor.coupling[:, keep])
+        contours.extend(
+            p
+            for p, live in zip(sensor.contours or (None,) * len(sensor.channel), keep)
+            if live
+        )
+        options.extend(
+            p
+            for p, live in zip(
+                sensor.traversal_options or ((1,),) * len(sensor.channel), keep
+            )
+            if live
+        )
     if not channels:
         raise MisfitMapError(f"{group}: no channel clears the pooling requirement")
     return ConstraintSet(
@@ -332,28 +394,98 @@ def assemble(
         described=np.concatenate(described, axis=0),
         sample=np.concatenate(samples, axis=1),
         shots=tuple(int(shot) for shot in shots),
+        contours=tuple(contours),
+        traversal_options=tuple(options),
+    )
+
+
+def contour_flux(flux, contour: np.ndarray, *, quadrature: int = 8) -> np.ndarray:
+    """Integrate total axisymmetric flux around a cylindrical saddle contour.
+
+    Stokes' theorem gives linked flux as integral A_phi R dphi, hence integral
+    psi dphi / (2 pi) when psi is total poloidal flux. Straight segments are
+    interpreted in cylindrical coordinates; angular wraps take the short arc.
+    """
+    points = np.asarray(contour, dtype=float)
+    if (
+        points.ndim != 2
+        or points.shape[1] != 3
+        or len(points) < 4
+        or not np.isfinite(points).all()
+        or np.any(points[:, 0] <= 0)
+        or not np.allclose(points[0], points[-1], rtol=0, atol=1e-12)
+    ):
+        raise MisfitMapError(
+            "a saddle contour must be finite, closed and at positive radius"
+        )
+    points = points.copy()
+    points[:, 2] = np.unwrap(points[:, 2])
+    nodes, weights = np.polynomial.legendre.leggauss(quadrature)
+    delta = np.diff(points, axis=0)
+    samples = points[:-1, None, :] + (nodes[None, :, None] + 1) / 2 * delta[:, None, :]
+    values = np.asarray(flux(samples[..., 0].ravel(), samples[..., 1].ravel()))
+    factors = (delta[:, 2, None] * weights[None, :] / (4 * np.pi)).ravel()
+    return np.tensordot(factors, values, axes=(0, 0))
+
+
+def saddle_sensor_class(
+    magnetics, channels, coupling, described_flux, floor
+) -> SensorClass:
+    """Join raw-channel identities to the reader's full saddle contours.
+
+    ``channels`` uses IDS names. Raw-store numbering is resolved by the caller,
+    before this identity join. Both traversal signs remain allowed for every loop.
+    """
+    table = magnetics["flux_loop"]
+    by_name = {str(name): index for index, name in enumerate(table["name"])}
+    if len(by_name) != len(table["name"]):
+        raise MisfitMapError("magnetics carries duplicate flux-loop names")
+    contours, response = [], []
+    for name in channels:
+        if name not in by_name or int(table["type"][by_name[name]]) != 2:
+            raise MisfitMapError(f"no saddle contour named {name!r}")
+        index = by_name[name]
+        contour = np.column_stack(
+            [table[key][index] for key in ("r", "z", "phi")]
+        ).astype(float)
+        response.append(contour_flux(described_flux, contour))
+        contours.append(contour)
+    count = len(channels)
+    return SensorClass(
+        channel=tuple(channels),
+        r=np.array([np.mean(p[:-1, 0]) for p in contours]),
+        z=np.array([np.mean(p[:-1, 1]) for p in contours]),
+        radial_cosine=np.ones(count),
+        axial_sine=np.zeros(count),
+        reads_flux=True,
+        coupling=np.asarray(coupling, dtype=float),
+        described=np.asarray(response),
+        floor=np.asarray(floor, dtype=float),
+        contours=tuple(contours),
+        traversal_options=((-1, 1),) * count,
     )
 
 
 def harmonic_design(basis: th.ToroidalHarmonics, constraint: ConstraintSet):
-    """Return the harmonic columns each row reads, in that row's own units.
-
-    A flux row takes the column itself and a field row takes its curl projected
-    onto the row's sensitive axis, which is the whole difference between the two
-    sensor classes as far as the solve is concerned.
-    """
+    """Evaluate probe projections, toroidal flux and saddle contour functionals."""
+    factors = constraint.traversal_factors()
     design = np.empty((constraint.rows, len(basis.labels)), dtype=np.float64)
-    flux = constraint.reads_flux
+    contours = constraint.contours or (None,) * constraint.rows
+    saddle = np.array([p is not None for p in contours])
+    flux = constraint.reads_flux & ~saddle
     if flux.any():
         design[flux] = basis.flux(constraint.r[flux], constraint.z[flux])
-    if (~flux).any():
-        design[~flux] = basis.project(
-            constraint.r[~flux],
-            constraint.z[~flux],
-            constraint.radial_cosine[~flux],
-            constraint.axial_sine[~flux],
+    probe = ~constraint.reads_flux & ~saddle
+    if probe.any():
+        design[probe] = basis.project(
+            constraint.r[probe],
+            constraint.z[probe],
+            constraint.radial_cosine[probe],
+            constraint.axial_sine[probe],
         )
-    return design
+    for row in np.flatnonzero(saddle):
+        design[row] = contour_flux(basis.flux, contours[row])
+    return design * factors[:, None]
 
 
 @dataclass(frozen=True)
@@ -797,6 +929,9 @@ def resample_shots(constraint: ConstraintSet, *, draws: int = 200, seed: int = 0
             described=drawn.described,
             sample=drawn.sample,
             shots=drawn.shots,
+            contours=drawn.contours,
+            traversal_options=drawn.traversal_options,
+            traversal_signs=drawn.traversal_signs,
         )
 
 
@@ -934,21 +1069,29 @@ def ring_source_design(
     """
     rings = np.asarray(rings, dtype=np.float64).reshape(-1, 2)
     design = np.empty((constraint.rows, rings.shape[0]), dtype=np.float64)
-    flux = constraint.reads_flux
+    factors = constraint.traversal_factors()
+    contours = constraint.contours or (None,) * constraint.rows
+    saddle = np.array([p is not None for p in contours])
+    flux = constraint.reads_flux & ~saddle
+    probe = ~constraint.reads_flux & ~saddle
     for column, (radius, height) in enumerate(rings):
         if flux.any():
             design[flux, column] = greens_psi(
                 constraint.r[flux], constraint.z[flux], radius, height
             )
-        if (~flux).any():
+        if probe.any():
             axial, radial = greens_bz_br(
-                constraint.r[~flux], constraint.z[~flux], radius, height
+                constraint.r[probe], constraint.z[probe], radius, height
             )
-            design[~flux, column] = (
-                constraint.radial_cosine[~flux] * radial
-                + constraint.axial_sine[~flux] * axial
+            design[probe, column] = (
+                constraint.radial_cosine[probe] * radial
+                + constraint.axial_sine[probe] * axial
             )
-    return design
+        for row in np.flatnonzero(saddle):
+            design[row, column] = contour_flux(
+                lambda r, z: greens_psi(r, z, radius, height), contours[row]
+            )
+    return design * factors[:, None]
 
 
 def path_source_design(constraint: ConstraintSet, paths) -> np.ndarray:

@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:24:03.012Z",
+  "dispatched_at": "2026-10-08T01:14:07Z",
+  "findings": [
+    {
+      "anchor": "mast-nonaxisymmetric-physics.html#s5",
+      "id": "done_when-1",
+      "reason": "without a control (for example permuting the per-loop sign/geometry assignment, or fitting a parallel path with the saddle loops removed) the node's whole measure rests on a held-out residual that can improve for reasons other than the saddle loops resolving n, so the gate cannot show its guard fires.",
+      "text": "the \u00a75 done-when (\"saddle-loop predictions ... reproduce vacuum shots held out of the fit\") carries no declared negative control, unlike \u00a74's permuted-drive control",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "mast-nonaxisymmetric-physics.html#s5",
+      "id": "single_goal-1",
+      "reason": "the traversal sign is explicitly allowed to end \"undecided\" and the tail width is a deliverable owed to a donor plan, so the node has no single pass/fail outcome and cannot be reviewed or closed on one verdict.",
+      "text": "\u00a75 bundles four deliverables to close on one verdict: admission of the 36 saddle loops into the constraint set, per-loop traversal-sign promotion-or-undecided, the n = 1\u20136 P4/P5 harmonic re-measure, and the localised-tail width owed to `mast-misfit-toroidal-harmonics`",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "mast-nonaxisymmetric-physics.html#research",
+      "id": "anchors_resolve-1",
+      "reason": "the same URL is used by peer plans (`mast-catalog-geometry-recovery.html`) and the document is reachable through the Resources panel built from parsed state, so this is a stale href rather than a missing document, and correcting it does not change what a node builds.",
+      "text": "the `<a href=\"/nova/mast-source-resolution.html\">` link points at `docs/mast-source-resolution.html`, which does not exist; the file is at `docs/research/mast-source-resolution.html` and is served at `/nova/research/mast-source-resolution.html`",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "mast-nonaxisymmetric-physics.html#s4",
+      "id": "reasoning-1",
+      "reason": "the done-when claims grouped resistances \"improve held-out transient residuals\", which is only meaningful if the drive amplitude/turn semantics are grounded; otherwise a held-out improvement can come from a mis-scaled drive rather than a real resistance, and the node is sent at the wrong mechanism, so the plan should state how the driven-cohort excitation is grounded (measured amplitude, or a bound carried as uncertainty).",
+      "text": "\u00a74 extends the free-decay resistance fit to \"driven ramps and switch-offs\", but the cited module states in its own docstring \"Turn counts do not enter. The initial condition is fitted per shot rather than propagated from the drive\", and `mast_fitted_parameters.py` records the published ampere-turn semantics as still unconfirmed by the `VERTICAL_PAIR_EXPLAINED` negative result; a driven-transient fit requires the drive, so the same ungrounded amplitude that the free-decay method sidestepped is reintroduced into the fit",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7a386d134521d78e1db86b000bf4bc7c0c50e146bb882113346df4e2aa385397",
+  "plan_slug": "mast-nonaxisymmetric-physics",
+  "plan_version": 9,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T011344633559-plan-review-of-mast-nonaxisymmetric-physics",
+  "reviewed_blob_sha": "f4c637f2647391d57495f2397a69813fcedbd687",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the Research entry's `data-url`/`href` at `#research` is `/nova/mast-source-resolution.html`, but the document resolves to `docs/research/mast-source-resolution.html` (i.e. `/nova/research/mast-source-resolution.html`); every code anchor cited in \u00a74\u2013\u00a77 resolves (all named modules and symbols exist).",
+    "done_when": "a finding \u2014 \u00a75's done-when names no negative control, while \u00a74 declares one (permuted drive columns) and \u00a76/\u00a77 declare ablations.",
+    "evidence_paths": "pass \u2014 the plan routes evidence through the existing `fitted_evidence()`/`refined_evidence()` seam and names no scratchpad, node-local temp path, or other non-durable location.",
+    "naming": "pass \u2014 the plan's code-facing names carry no plan labels, stage names, ticket numbers or version tags; `P4/P5` and the `n2/n4/n6` leakage figures are physics quantities, not plan IDs, and no changelog prose introduces a symbol.",
+    "reasoning": "a finding \u2014 \u00a74's mechanism reintroduces the unconfirmed ampere-turn/drive confound it says the free decays were spent on, and its done-when claims identifiability without grounding the drive.",
+    "single_goal": "a finding \u2014 \u00a75 carries four separately-closable deliverables under one node.",
+    "wiring": "pass \u2014 `plan-depends-on nova-3d-native` resolves to a shipped `reckon-type=plan` document (`docs/nova-3d-native.html`, status shipped), and the \u00a75/\u00a77 links `mast-misfit-toroidal-harmonics` and `machine-description-retirement` both resolve to live plans under `docs/plans/`."
+  },
+  "section_digests": {
+    "_document": "39b24fc80be04896efa69f23e299e45ba90ea06bc09f70c1fd7e007b4aeec137",
+    "s1": "f4b8eb5def5568e59998ae548c63c33bccab1accde8469ae275e5c52200e6506",
+    "s2": "75b6ff86311477ed15da86c822cd295e2319afe6692e1c92dea6331fedd375ba",
+    "s3": "aa0ed83b4bd3bc1db5933706559b763d2ead68582e9f41eb88c537d79cb022ce",
+    "s4": "1bdd0a944af26d4388edaaa569ebd67450b273d26bf9038b342ec3096cddc96f",
+    "s5": "d879ca7ec7306444cd32842e720efe90c3580a812f90300ff0354f3f5f473150",
+    "s6": "3abd28e7b69d9fea9b9a4fc78afb5715bd4c4f05a7e8938ca32911fa18141144",
+    "s7": "b967a168312e3f7ac05bebdc125bda83cc4f422f453538eb2aee587e2ea41fd6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:25:26.715865+00:00"
+}

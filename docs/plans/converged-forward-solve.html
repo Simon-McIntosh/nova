@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="111">
+<meta name="plan-version" content="112">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -369,6 +369,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261008T052414309567-cfs-wrap-prerequisites" data-who="reckon-build" data-when="2026-10-08T09:53:44Z">
     <div class="r-comment-body"><p>The near-collinear private tangent passes final H200 identity at 4.574e-15 over 10000 samples, 50-digit reference at 1.079e-10, mutation refusal and 1.46 cold compile ratio; the 132-cell serialized executable is 36892631 bytes versus 14062 generated-code bytes. The dead helper has zero references, topology imports under CPU x64, and matched edge collection selects the same 11/24 IDs with three measured slow rows deselected.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T095411417513-review-of-cfs-wrap-prerequisites" data-who="reckon-build" data-when="2026-10-08T10:09:36.480Z">
+    <div class="r-comment-body"><p>Independent review of r-20261008T052414309567-cfs-wrap-prerequisites stored: reviews/nova/r-20261008T052414309567-cfs-wrap-prerequisites.json (status parsed, total 105, scores goal_fidelity 17 evidence 16 scope_discipline 19 durability 17 fit 18 reuse 18, reviewed_base_sha b57dfb2 reviewed_head_sha 3845ef65, added_failure_count 0 added_failure_ids []). Head near-collinear gate and the declared mutation were reproduced independently on CPU x64; the reviewed node&#x27;s after arm passed 3/3 and its prerequisites are verified.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

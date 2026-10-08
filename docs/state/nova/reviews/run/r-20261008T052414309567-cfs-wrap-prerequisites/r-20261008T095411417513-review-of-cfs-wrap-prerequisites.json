@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs. baseline-suite.json (revision b57dfb24855ed7b650e25a7490c5a7d32d61d731, log baseline-all-debug-binding.log) reports completed=false, exit_status 143, failure_count 2, failure_ids [tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[second_residual], tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_line_moments]]. after-suite.json (revision 8f55bd3aa6724479284610db0fd18743b5e5fdcd, log after-all-debug-binding.log) reports completed=false, exit_status 143, failure_count 2, failure_ids identical. after-minus-baseline is empty, so added_failure_count is 0 and added_failure_ids is empty. Both arms are incomplete (each stopped after module 1 of 9 at exit 143), so this delta is established only over the single comparable module, test_edge_term_tangents.py, and not over the full suite. The manifest's own baseline_suite/after_suite fields record the scoped arms (a git ls-tree base-absence check, completed=true failure_count=0, and the H200 near-collinear gate at 8774f684, completed=true failure_count=0), which likewise yield zero added failures. The two failing ids are CPU identity rows present in BOTH arms and are pre-existing, assigned by the run to a separate coordinator node, not regressions from this node. I confirmed the head near-collinear arm independently at 3845ef65 (3 passed / 1 deselected, EXIT=0).",
+  "call_site_count": 2,
+  "call_sites": [
+    "tests/equilibrium/test_topology_read.py:2507",
+    "tests/equilibrium/test_topology_read.py:2602"
+  ],
+  "completed_at": "2026-10-08T10:09:36.480Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-08T09:54:26Z",
+  "findings": [
+    {
+      "file": "tests/equilibrium/test_topology_read.py",
+      "line": "2602",
+      "severity": "follow-on",
+      "text": "follow-on: this change redefines the receipt key executable_bytes from the generated-code size (14,062 bytes) to the serialized runtime executable size (36,892,631 bytes) and adds a new generated_code_bytes key. The guard _qualify_cold_compile at line 2507 now compares the serialized size against the 50,000,000-byte clause, which is the intended repair and is proven by the two-sided control. The caveat for a later reader is that any receipt written before this revision carries executable_bytes in the old units, so a cross-revision comparison shows a ~2624x step that is a unit change, not growth; the field must be read beside the revision it was written at."
+    },
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "1518",
+      "severity": "follow-on",
+      "text": "follow-on: the deleted _field_coefficients helper had zero references at head across nova/tests/benchmarks/scripts and a base positive, so the deletion is clean; the residual risk is only that an untracked consumer outside those four trees (a notebook or other tooling) would now break, which the search cannot see. The head topology module imports under CPU x64, confirming the module still loads."
+    },
+    {
+      "file": "tests/biot/test_near_collinear_tangent.py",
+      "line": "65",
+      "severity": "follow-on",
+      "text": "follow-on: the identity row differentiates the base revision's primal pinned at b57dfb2, so the guard is a snapshot comparison that stays valid only while that base revision remains reachable in the object store. The 50-digit mpmath row over 16 selected indices is the independent check that does not depend on it, and it agrees (1.667e-10). A future base move should rebaseline the pin deliberately rather than silently."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read 3845ef65 against base b57dfb2: 309 insertions, 8 deletions over six paths - polygonanalytic.py +53, test_near_collinear_tangent.py +194 (new), test_edge_term_tangents.py +13/-2, topology.py -5, test_topology_read.py +3/-1, and a 49-line new evidence fragment.",
+    "done_when": "Reproduced the head gate at 3845ef650d46e88ce17912a2ab1a34aa99da9b32 (3 passed, 1 deselected, EXIT=0; identity 2.287e-15, reference 1.667e-10) and the declared mutation (fails by test id at 6.607e+02, covered 0.4236, EXIT=1) on CPU x64; verified base absence with a positive control and the dead-helper base-positive / head-zero-reference pair. The suite-level delta is not measurable: both arms stopped after 1 of 9 modules.",
+    "goal": "Scope: the point-jet wrapping prerequisites for the section-2 topology read. Deliver: a private tangent for the near-collinear stable/direct logarithm branches that returns the existing primal; the serialized read executable size with a two-sided guard control; deletion of the unreferenced _field_coefficients helper; and a fresh CPU edge-row marker census that reclassifies three compilation-heavy rows slow. All delivered; the section-2 topology-read acceptance itself is not attempted here and its two exploratory arms are fenced outside the gate.",
+    "manifest": "Read: status complete, thirteen commits, an H200 after arm at 8774f684ba4759cf5540bf0ea468ef4fb8ddc4b2 (3 passed / 1 deselected, EXIT=0), a near-collinear-base-absence baseline arm, a firing negative_control_log, and baseline_suite/after_suite fields recording the scoped arms. The run's own baseline-suite.json and after-suite.json record the matched all_debug suite arms at exit 143 with identical failure ids.",
+    "write_paths": "Diffed base b57dfb2 against head 3845ef65: exactly the six declared paths, none outside them."
+  },
+  "justifications": {
+    "durability": "A new test module guards the tangent with three live checks: a 10,000-sample identity against jax.jvp of the base revision's own function, a mutation refusal that drops a product-rule term and fires by test id (I reproduced the 6.607e+02 refusal), and a 50-digit mpmath reference over branch boundaries, plus a slow-marked cold-compile bound. The edge-row slow reclassification preserves every existing assertion and tolerance while moving three compilation-heavy rows to the H200 lane. Not higher because the guard compares against a single pinned base snapshot rather than an independent derivative for every sample (the 50-digit row covers only 16 selected indices), and the tangent covers one branch family.",
+    "evidence": "I reproduced the load-bearing checks independently in a scratch tree at the reviewed head 3845ef650d46e88ce17912a2ab1a34aa99da9b32. The head near-collinear gate re-ran on CPU x64 (3 passed, 1 deselected, EXIT=0) with identity tangent_max_relative=2.287e-15 and 50-digit reference hand/base maxima 1.667e-10, matching the run's own head near-collinear CPU receipt. The declared mutation reproduced on CPU: with NOVA_TANGENT_TRUNCATION=1 the product-rule term is dropped, test_tangent_matches_base_jvp fails by test id at tangent_max_relative=6.607e+02, covered_fraction=0.4236, EXIT=1, matching negative-control.log. Base absence has a positive control (the topology test path is present at base while the near-collinear module is absent). The dead-helper deletion has a base positive (def _field_coefficients at base line 2604) and zero head matches across nova/tests/benchmarks/scripts. The size guard is a two-sided control (50,000,001 bytes refused, 36,892,631 admitted). Not higher because both suite arms are incomplete (exit 143 after 1 of 9 modules) so no suite-level delta was established, several exploratory arms produced no summary, and h200-prerequisites.log retained a 0.495 failure before the trace-clear repair (documented in the fragment).",
+    "fit": "The additions follow the file and repository conventions: the tangent is a private function beside its primal in polygonanalytic.py, the test lives in tests/biot beside the sibling tangent modules and reuses the shared tangent_identity harness, the slow marker matches the repository marker policy for compilation-heavy rows, the fragment uses node-prefixed element ids and project-absolute src, and the source commits carry two-part conventional messages with bodies. A label scan over the added lines finds no phase, stage, sprint, ticket or version identifier.",
+    "goal_fidelity": "The node is the 'point-jet wrapping prerequisites' slice of plan section 2 (the topology read): a near-collinear logarithm tangent for the stable/direct asinh-difference branches, the serialized read-executable size, the dead _field_coefficients helper deletion, and the fresh CPU edge-row marker census. All four are delivered and recorded honestly in the evidence fragment. It is faithful to the dispatched prerequisite scope but not full marks: the section-2 done-when (the topology read placing the axis and every admitted X-point within one pitch at 132/300/550/1074/2616 cells) is not met here, and the two exploratory topology-read arms it attempted each hit a 1200 s wrapper limit with no summary, which the node correctly fences outside its gate rather than claiming.",
+    "reuse": "No duplicate machinery is introduced: the tangent reuses the shared _product_tangent and _quotient_tangent primitives imported into polygonanalytic.py and jax.lax.rsqrt, the test reuses the chain-rule harness in tests/biot/tangent_identity.py rather than re-implementing it, and the receipt change aligns the read's executable_bytes field with the serialized-size semantics the solve_program_size_gate benchmark already prefers (_effective_executable_bytes). Not 20 because the sample-case construction is bespoke to this module and the base revision sha is hard-coded in the test.",
+    "scope_discipline": "The diff b57dfb24855ed7b650e25a7490c5a7d32d61d731..3845ef650d46e88ce17912a2ab1a34aa99da9b32 is exactly six paths, all within the run's declared write scope: nova/biot/polygonanalytic.py, nova/equilibrium/topology.py, tests/biot/test_near_collinear_tangent.py (new), tests/biot/test_edge_term_tangents.py, tests/equilibrium/test_topology_read.py and docs/evidence/fragments/converged-forward-solve/cfs-wrap-prerequisites.html (new). No plan, sprint, index or primary-branch state was mutated. No added line carries a reckon-worktree path (only crew run-directory paths, which the filepath guard does not cover); no phase, stage, sprint or ticket label appears in the added lines. One declared figure path produced no file."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T052414309567-cfs-wrap-prerequisites (node cfs-wrap-prerequisites, plan nova:converged-forward-solve section 2; scope: point-jet wrapping prerequisites - near-collinear logarithm tangent, serialized read executable size, dead-helper deletion, fresh CPU edge-row marker census).\n\nVERDICT goal: the four prerequisite deliverables are present - a private _near_collinear_arsinh_difference_tangent returning the existing primal, a two-sided serialized-size guard, deletion of the unreferenced _field_coefficients, and slow-mark reclassification of three compilation-heavy edge rows. The section-2 topology-read acceptance itself is not attempted; the two exploratory arms timed out at 1200 s and are fenced outside the gate.\nVERDICT done_when: I re-ran the head near-collinear gate at 3845ef65 on CPU x64 (3 passed, 1 deselected, EXIT=0; identity 2.287e-15, 50-digit reference 1.667e-10) and reproduced the declared mutation (test_tangent_matches_base_jvp fails by test id at 6.607e+02, covered 0.4236, EXIT=1). Base absence has a positive control; the dead helper has a base positive and zero head references; the size guard refuses 50,000,001 bytes and admits 36,892,631.\nVERDICT write_paths: the diff base b57dfb2..head 3845ef65 is exactly the six declared paths.\nVERDICT manifest: status complete, thirteen commits, after arm at 8774f684 (3 passed, 1 deselected, EXIT=0), a firing negative_control_log, and matched suite arms both at exit 143 with identical failure ids.\nVERDICT diff: 309 insertions, 8 deletions over six paths; no product behaviour change beyond the added private helper and the dead-code deletion.\nCALL_SITES: tests/equilibrium/test_topology_read.py:2507, tests/equilibrium/test_topology_read.py:2602\n\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: faithful to the dispatched prerequisite scope; not 20 because the section-2 read acceptance is not met here.\nSCORE evidence: 16\nJUSTIFICATION evidence: head gate, mutation and all cheap controls reproduce independently; not higher because both suite arms are incomplete and no suite-level delta was established.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: exactly six declared paths, no plan/sprint/index state, no worktree path, no banned label.\nSCORE durability: 17\nJUSTIFICATION durability: identity, firing mutation refusal and 50-digit reference guard the tangent; the base-snapshot pin and one branch family cap it.\nSCORE fit: 18\nJUSTIFICATION fit: file idiom, shared harness reuse, slow-marker policy, node-prefixed fragment ids and two-part commit bodies all respected.\nSCORE reuse: 18\nJUSTIFICATION reuse: shared tangent primitives and the tangent_identity harness are reused and the receipt field is aligned with the benchmark's serialized-size semantics; not 20 for the bespoke sample construction and the hard-coded base sha.\n\nFINDING tests/equilibrium/test_topology_read.py:2602 follow-on: executable_bytes is redefined from generated-code bytes to serialized runtime bytes; the guard is repaired but pre-existing receipts now carry a ~2624x unit step.\nFINDING nova/biot/polygonanalytic.py:1518 follow-on: the deletion is clean across four trees; only an untracked external consumer would break.\nFINDING tests/biot/test_near_collinear_tangent.py:65 follow-on: the identity pin at base b57dfb2 is a snapshot; the 50-digit row is the independent check, and a base move should rebaseline the pin deliberately.\n",
+  "review_run_id": "r-20261008T095411417513-review-of-cfs-wrap-prerequisites",
+  "reviewed_base_sha": "b57dfb24855ed7b650e25a7490c5a7d32d61d731",
+  "reviewed_head_sha": "3845ef650d46e88ce17912a2ab1a34aa99da9b32",
+  "reviewed_run_id": "r-20261008T052414309567-cfs-wrap-prerequisites",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:06:31Z",
+  "total": 105
+}

@@ -1,0 +1,390 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "a4b489cf7f56ad60b5c54741d15010d494004804",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7472432,
+      "input_tokens_cumulative": 7472432,
+      "output_tokens": 23740,
+      "output_tokens_cumulative": 23740,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 2274,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "c36ef55c82b33f788336abd6ca282ccb71179a2c",
+    "5ae3ec946bb2d161b45240526c7532764024a6fc",
+    "f4ff7b6f0e86f6c41615a12e3a5f7b74c40c372e",
+    "b762ae17f93807f9b52a3657e37153ca1e9995a8",
+    "cc67962188f3a2212359920a7decc9f0531a8d2e"
+  ],
+  "completed_at": "2026-10-08T06:19:39.035Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T04:40:17Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "env JAX_PLATFORMS=cpu /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_forward_profile_analytic_smoke.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043927638886-fpv-analytic-smoke/logs/analytic-smoke-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2,
+    "plan": "forward-profile-validator-set",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T05:39:42.623036+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T04:39:42Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 18,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 11,
+    "mean_context": 112000,
+    "observed_at": "2026-10-08T04:39:24Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 18,
+      "aggregate_tokens_per_second": 509.006,
+      "detail": "",
+      "mean_tokens_per_second": 97.886,
+      "observed_at": "2026-10-08T04:39:24Z",
+      "runs": 5.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T06:19:39.035Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043927638886-fpv-analytic-smoke/manifest.md",
+  "member": "disposable-r-20261008T043927638886-fpv-analytic-smoke",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_forward_profile_analytic_smoke.py::test_analytic_vacuum_flux_matches_the_reference"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": null,
+    "control_failure_ids": [
+      "tests/test_forward_profile_analytic_smoke.py::test_analytic_vacuum_flux_matches_the_reference"
+    ],
+    "declaration": "scaling the reference plasma current by 1.5 before comparison must fail the Ip band",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043927638886-fpv-analytic-smoke/logs/analytic-smoke-negative-control.log",
+    "reason": "the dispatch-declared Ip mutation cannot exist for this case, which carries no plasma current; the coordinator replaced it at 05:08Z with scaling the coil current by 1.5, and logs/analytic-smoke-negative-control.log records that control failing test_analytic_vacuum_flux_matches_the_reference (1 failed, residual 0.438 against the 1e-3 bound), which the head arm passes; the log lacks only an EXIT line, and the re-review reproduced the red control independently",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043927638886-fpv-analytic-smoke/logs/analytic-smoke-negative-control.log",
+    "test_paths": [
+      "tests/data-manifest.json",
+      "tests/test_forward_profile_analytic_smoke.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "fpv-analytic-smoke",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1224,
+          "cached_input_tokens": 642728,
+          "input_tokens": 643954,
+          "output_tokens": 1242,
+          "reasoning_output_tokens": 131,
+          "total_tokens": 645196,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "A module nova/imas/validator_case.py opens a fetched validator layer pair (fetch_layer from nova/database/layer_fetch.py) as imas-python DBEntry objects at the per-dataset dd_version from tests/data-manifest.json, converting NetCDF to a per-case HDF5 directory with master.h5 the way imas-efit nc2hdf5 does, never with h5py on IMAS data; tests/test_forward_profile_analytic_smoke.py builds the machine from the input bundle own IDSs, solves the analytic case under the shipped forward defaults, and gates the solve against the reference at bands written in the test before scoring (normalised psi map with an absolute cross-section area guard, Ip, magnetic axis), alongside the solve own receipts (converged flag, terminal residual); it skips cleanly when the registry is unreachable; one poloidal line-contour panel of the solved state beside the reference on shared levels, both null sets, the wall and the terminal residual in the caption, lands under docs/figures/forward-profile-validator-set; the test runs in a fresh process (on all_debug with JAX_PLATFORMS=cpu if it exceeds ten CPU seconds) with its log in the manifest; a deviation from the reference is reported as a finding and the solve is not modified",
+    "estimated_hours": 1.0,
+    "goal": "Solve the fetched analytic validator case with the forward profile solve and gate it against its reference in a fresh process",
+    "id": "fpv-analytic-smoke",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T04:39:42Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 18,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 11,
+      "mean_context": 112000,
+      "observed_at": "2026-10-08T04:39:24Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 18,
+        "aggregate_tokens_per_second": 509.006,
+        "detail": "",
+        "mean_tokens_per_second": 97.886,
+        "observed_at": "2026-10-08T04:39:24Z",
+        "runs": 5.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T043927638886-fpv-analytic-smoke/manifest.md",
+    "negative_control": "scaling the reference plasma current by 1.5 before comparison must fail the Ip band",
+    "plan": "forward-profile-validator-set",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/imas/validator_case.py",
+      "tests/test_forward_profile_analytic_smoke.py",
+      "docs/figures/forward-profile-validator-set",
+      "docs/evidence/fragments/forward-profile-validator-set/fpv-analytic-smoke.html",
+      "docs/figures/forward-profile-validator-set/fpv-analytic-smoke",
+      "tests/data-manifest.json"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3631369.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fpv-analytic-smoke",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T04:39:51.941818+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Moderate-hard: first end-to-end validator rung. Pitfalls: DD version handling on load (use the manifest dd_version, check homogeneous_time), configure_dtypes before building any array, and the forward solve is under active change by a concurrent sprint, so deviations are findings and the solve code is read-only. Strict verification.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.346,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "forward-profile-validator-set",
+  "plan_impl_at_dispatch": 0.2,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "cc67962188f3a2212359920a7decc9f0531a8d2e",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "5ae3ec946bb2d161b45240526c7532764024a6fc",
+    "reviewed_head_sha": "cc67962188f3a2212359920a7decc9f0531a8d2e",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 20,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 117
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261008T043927638886-fpv-analytic-smoke",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s24-nova",
+  "session_harness": "claude",
+  "session_id": "4a1a8319-b73a-4e88-810c-db86b9bb059e",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 5,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 23157649,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1042.341,
+    "generated_tokens": 97222,
+    "generation_seconds": 689.088,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 67.2,
+    "machine_seconds": 353.253,
+    "peak_input_tokens": 154765,
+    "tokens_per_second": 141.09,
+    "wall_tokens_per_second": 93.27
+  },
+  "time_budget": "60m",
+  "tool_steps": 68.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 5962,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T06:19:42Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-08T06:02:10Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T043927638886-fpv-analytic-smoke",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 13398,
+    "worker_pid": 1987166
+  },
+  "worker_seconds": 5893,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

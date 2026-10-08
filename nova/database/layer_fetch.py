@@ -26,7 +26,7 @@ REGISTRY = "ghcr.io/iterorganization/efitpp-test-data"
 ORAS_EXECUTABLE = "oras"
 
 # Transport failures leave the layer's state unknown, so callers may skip; a
-# decisive registry answer (an unknown digest) is a fetch error instead.
+# registry authentication failure is decisive and must not hide behind a skip.
 _UNREACHABLE_MARKERS = (
     "connection refused",
     "connection reset",
@@ -36,8 +36,14 @@ _UNREACHABLE_MARKERS = (
     "i/o timeout",
     "network is unreachable",
     "tls handshake timeout",
+)
+_CREDENTIAL_MARKERS = (
     "unauthorized",
     "authentication required",
+    "denied",
+    "expired token",
+    "token expired",
+    "token has expired",
 )
 
 Runner = Callable[[Sequence[str]], "subprocess.CompletedProcess[str]"]
@@ -49,6 +55,10 @@ class LayerFetchError(Exception):
 
 class LayerRegistryUnreachable(LayerFetchError):
     """The registry could not be reached, so the layer's state is unknown."""
+
+
+class LayerRegistryCredentialError(LayerFetchError):
+    """Registry credentials are missing, expired or lack required access."""
 
 
 class LayerDigestMismatch(LayerFetchError):
@@ -185,6 +195,10 @@ def _classify_failure(
     output = (completed.stderr or completed.stdout or "").strip()
     text = f"{completed.stdout or ''}\n{completed.stderr or ''}".lower()
     summary = output[:200]
+    if any(marker in text for marker in _CREDENTIAL_MARKERS):
+        return LayerRegistryCredentialError(
+            f"registry credentials rejected for {reference}: {summary}"
+        )
     if any(marker in text for marker in _UNREACHABLE_MARKERS):
         return LayerRegistryUnreachable(
             f"registry unreachable for {reference}: {summary}"

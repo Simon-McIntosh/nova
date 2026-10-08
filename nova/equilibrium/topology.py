@@ -2601,11 +2601,6 @@ def _point_values(field, points):
     return jax.vmap(evaluate)(flat).reshape(points.shape[:-1])
 
 
-def _field_coefficients(field, geometry):
-    values = _point_values(field, geometry.sample_points)
-    return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
-
-
 def _sampled_flux(field, geometry):
     """Fit coefficients and contour-cell flux from one batched value pass."""
     sample = geometry.sample_points.reshape(-1, 2)

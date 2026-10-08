@@ -40,7 +40,24 @@
   "plan_slug": "forward-profile-validator-set",
   "plan_version": 8,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "s24-nova",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-08T01:36:42.812134+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "s24-nova",
+      "reason": "",
+      "when": "2026-10-08T01:36:42.812134+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-profile-validator-set/r-20261008T011450334962-plan-review-of-forward-profile-validator-set.json",
   "review_run_id": "r-20261008T011450334962-plan-review-of-forward-profile-validator-set",
   "reviewed_blob_sha": "746556e07b0b661d59532e27cfd6cfab2cbcf658",
   "rubric": "content",

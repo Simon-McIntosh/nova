@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import json
-import os
 import re
-import shutil
 from dataclasses import dataclass
 from functools import wraps
 from pathlib import Path
@@ -28,18 +26,14 @@ from nova.imas.machine_evidence import (
 from nova.database.content_store import (
     MANIFEST_FILENAME,
     ContentStoreError,
-    copy_file_at as _copy_file_at,
-    create_private_directory as _create_private_directory,
-    destination_exists_at as _destination_exists_at,
+    _create_private_directory as _create_private_directory,
     digest_hex as _digest_hex,
     entry_metadata as _entry_metadata,
     file_content_identity as _file_identity,
     hdf5_consistency_field as _hdf5_consistency_field,
     inventory_files as _inventory_files,
-    linux_rename_no_replace as _linux_rename_no_replace,
-    open_pinned_object_root as _open_pinned_object_root,
-    pinned_root_path as _pinned_root_path,
-    publish_directory_no_replace as _publish_directory_no_replace,
+    _linux_rename_no_replace as _linux_rename_no_replace,
+    publish_files as _publish_files,
     read_regular_bytes as _read_regular_bytes,
     require_contained as _require_contained,
     safe_relative_name as _safe_relative_name,
@@ -49,8 +43,6 @@ from nova.database.content_store import (
     verified_destination as _verified_destination,
     verified_object_root as _verified_object_root,
     verify_directory_files as _verify_directory_files,
-    visible_root_matches_descriptor as _visible_root_matches_descriptor,
-    write_bytes_at as _write_bytes_at,
 )
 
 OCI_MANIFEST_MEDIA_TYPE = "application/vnd.oci.image.manifest.v1+json"
@@ -756,80 +748,20 @@ def materialize_machine_artifact(
     manifest.validate()
     source = Path(source_directory)
     _verify_directory_files(source, manifest.files, allow_manifest=False)
-    digest_hex = _digest_hex(manifest.digest)
-    rename_no_replace = _linux_rename_no_replace()
-    object_root = _verified_object_root(cache_directory, create=True)
-    object_descriptor = _open_pinned_object_root(object_root)
-    temporary_name: str | None = None
-    temporary_descriptor: int | None = None
-    temporary_path: Path | None = None
-    try:
-        if _destination_exists_at(object_descriptor, digest_hex):
-            if not _visible_root_matches_descriptor(object_root, object_descriptor):
-                raise MachineArtifactError(
-                    "cache object root changed during materialization"
-                )
-            resolved = resolve_machine_artifact(
-                cache_directory,
-                manifest.digest,
-                allow_incomplete=not manifest.complete,
-            )
-            if resolved.manifest.canonical_bytes() != manifest.canonical_bytes():
-                raise MachineArtifactError(
-                    f"cache object {manifest.digest} has a different manifest"
-                )
-            return resolved
-
-        temporary_name, temporary_descriptor = _create_private_directory(
-            object_descriptor,
-            digest_hex,
-        )
-        temporary_path = Path("/proc/self/fd") / str(object_descriptor) / temporary_name
-        for artifact_file in manifest.files:
-            _copy_file_at(
-                source / artifact_file.name,
-                temporary_descriptor,
-                artifact_file.name,
-            )
-        _write_bytes_at(
-            temporary_descriptor,
-            MANIFEST_FILENAME,
-            manifest.canonical_bytes(),
-        )
-        _verify_directory_files(
-            temporary_path,
-            manifest.files,
-            allow_manifest=True,
-        )
-        os.close(temporary_descriptor)
-        temporary_descriptor = None
-        _publish_directory_no_replace(
-            rename_no_replace,
-            object_descriptor,
-            temporary_name,
-            digest_hex,
-        )
-        _pinned_root_path(object_descriptor, object_root.parent)
-        if not _visible_root_matches_descriptor(object_root, object_descriptor):
-            raise MachineArtifactError(
-                "cache object root changed during materialization"
-            )
-        resolved = resolve_machine_artifact(
-            cache_directory,
-            manifest.digest,
-            allow_incomplete=not manifest.complete,
-        )
-        if resolved.manifest.canonical_bytes() != manifest.canonical_bytes():
-            raise MachineArtifactError(
-                f"cache object {manifest.digest} has a different manifest"
-            )
-        return resolved
-    finally:
-        if temporary_descriptor is not None:
-            os.close(temporary_descriptor)
-        if temporary_path is not None:
-            shutil.rmtree(temporary_path, ignore_errors=True)
-        os.close(object_descriptor)
+    _publish_files(
+        cache_directory,
+        manifest.digest,
+        manifest.files,
+        {item.name: source / item.name for item in manifest.files},
+        manifest.canonical_bytes(),
+        private_directory_factory=_create_private_directory,
+        rename_factory=_linux_rename_no_replace,
+    )
+    return resolve_machine_artifact(
+        cache_directory,
+        manifest.digest,
+        allow_incomplete=not manifest.complete,
+    )
 
 
 @_lifted

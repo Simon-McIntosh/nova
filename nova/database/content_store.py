@@ -9,7 +9,7 @@ from ctypes import CDLL, c_char_p, c_int, get_errno
 from errno import EEXIST, EINVAL, ENOSYS, ENOTEMPTY, EOPNOTSUPP, EPERM
 from pathlib import Path, PurePosixPath
 from stat import S_ISDIR, S_ISLNK, S_ISREG
-from typing import Any, Iterable, Protocol
+from typing import Any, Callable, Iterable, Mapping, Protocol
 
 MANIFEST_FILENAME = "manifest.json"
 _HEX_PATTERN = re.compile(r"[0-9a-f]+")
@@ -362,7 +362,7 @@ def digest_hex(digest: str) -> str:
     return value
 
 
-def linux_rename_no_replace() -> Any:
+def _linux_rename_no_replace() -> Any:
     required_flags = ("O_DIRECTORY", "O_NOFOLLOW")
     if any(not hasattr(os, name) for name in required_flags):
         raise ContentStoreError(
@@ -389,7 +389,7 @@ def linux_rename_no_replace() -> Any:
     return rename_no_replace
 
 
-def open_pinned_object_root(object_root: Path) -> int:
+def _open_pinned_object_root(object_root: Path) -> int:
     flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
     try:
         descriptor = os.open(object_root, flags)
@@ -412,7 +412,7 @@ def open_pinned_object_root(object_root: Path) -> int:
     return descriptor
 
 
-def pinned_root_path(descriptor: int, cache_root: Path) -> Path:
+def _pinned_root_path(descriptor: int, cache_root: Path) -> Path:
     proc_path = Path("/proc/self/fd") / str(descriptor)
     resolved = require_contained(proc_path, cache_root, "pinned cache object root")
     opened = os.fstat(descriptor)
@@ -422,7 +422,7 @@ def pinned_root_path(descriptor: int, cache_root: Path) -> Path:
     return resolved
 
 
-def visible_root_matches_descriptor(object_root: Path, descriptor: int) -> bool:
+def _visible_root_matches_descriptor(object_root: Path, descriptor: int) -> bool:
     visible = entry_metadata(object_root)
     if visible is None or S_ISLNK(visible.st_mode) or not S_ISDIR(visible.st_mode):
         return False
@@ -430,7 +430,7 @@ def visible_root_matches_descriptor(object_root: Path, descriptor: int) -> bool:
     return (visible.st_dev, visible.st_ino) == (opened.st_dev, opened.st_ino)
 
 
-def destination_exists_at(descriptor: int, digest_hex: str) -> bool:
+def _destination_exists_at(descriptor: int, digest_hex: str) -> bool:
     try:
         metadata = os.stat(digest_hex, dir_fd=descriptor, follow_symlinks=False)
     except FileNotFoundError:
@@ -448,7 +448,7 @@ def destination_exists_at(descriptor: int, digest_hex: str) -> bool:
     return True
 
 
-def create_private_directory(descriptor: int, digest_hex: str) -> tuple[str, int]:
+def _create_private_directory(descriptor: int, digest_hex: str) -> tuple[str, int]:
     for _ in range(32):
         name = f".{digest_hex}.{secrets.token_hex(12)}"
         try:
@@ -466,7 +466,7 @@ def create_private_directory(descriptor: int, digest_hex: str) -> tuple[str, int
     raise ContentStoreError("cannot allocate a unique private cache directory")
 
 
-def copy_file_at(source: Path, directory_descriptor: int, name: str) -> None:
+def _copy_file_at(source: Path, directory_descriptor: int, name: str) -> None:
     parts = PurePosixPath(name).parts
     current = os.dup(directory_descriptor)
     try:
@@ -507,7 +507,7 @@ def copy_file_at(source: Path, directory_descriptor: int, name: str) -> None:
         os.close(current)
 
 
-def write_bytes_at(directory_descriptor: int, name: str, data: bytes) -> None:
+def _write_bytes_at(directory_descriptor: int, name: str, data: bytes) -> None:
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
     try:
         descriptor = os.open(name, flags, 0o600, dir_fd=directory_descriptor)
@@ -517,7 +517,7 @@ def write_bytes_at(directory_descriptor: int, name: str, data: bytes) -> None:
         stream.write(data)
 
 
-def publish_directory_no_replace(
+def _publish_directory_no_replace(
     rename_no_replace: Any,
     object_descriptor: int,
     source_name: str,
@@ -548,3 +548,87 @@ def publish_directory_no_replace(
     raise ContentStoreError(
         f"cannot publish cache object {destination_name}"
     ) from error
+
+
+def publish_files(
+    cache_directory: Path | str,
+    digest: str,
+    files: Iterable[ContentFile],
+    sources: Mapping[str, Path | bytes],
+    manifest_bytes: bytes,
+    *,
+    private_directory_factory: Callable[[int, str], tuple[str, int]] | None = None,
+    rename_factory: Callable[[], Any] | None = None,
+) -> Path:
+    """Publish named files atomically and return their verified destination."""
+
+    declarations = tuple(files)
+    names = [item.name for item in declarations]
+    validate_portable_name_set(names)
+    if len(names) != len(set(names)) or set(names) != set(sources):
+        raise ContentStoreError("published sources differ from declared files")
+    for item in declarations:
+        validate_hex(item.sha256, (64,), f"sha256 for {item.name!r}")
+        if (
+            isinstance(item.size, bool)
+            or not isinstance(item.size, int)
+            or item.size < 0
+        ):
+            raise ContentStoreError(f"size for {item.name!r} must be non-negative")
+    digest_name = digest_hex(digest)
+    object_root = verified_object_root(cache_directory, create=True)
+    object_descriptor = _open_pinned_object_root(object_root)
+    temporary_name: str | None = None
+    temporary_descriptor: int | None = None
+    try:
+        if not _destination_exists_at(object_descriptor, digest_name):
+            private_directory_factory = (
+                _create_private_directory
+                if private_directory_factory is None
+                else private_directory_factory
+            )
+            temporary_name, temporary_descriptor = private_directory_factory(
+                object_descriptor, digest_name
+            )
+            temporary_path = (
+                Path("/proc/self/fd") / str(object_descriptor) / temporary_name
+            )
+            for name, source in sources.items():
+                if isinstance(source, bytes):
+                    _write_bytes_at(temporary_descriptor, name, source)
+                else:
+                    _copy_file_at(Path(source), temporary_descriptor, name)
+            _write_bytes_at(temporary_descriptor, MANIFEST_FILENAME, manifest_bytes)
+            verify_directory_files(temporary_path, declarations, allow_manifest=True)
+            os.close(temporary_descriptor)
+            temporary_descriptor = None
+            rename_factory = (
+                _linux_rename_no_replace if rename_factory is None else rename_factory
+            )
+            _publish_directory_no_replace(
+                rename_factory(), object_descriptor, temporary_name, digest_name
+            )
+        _pinned_root_path(object_descriptor, object_root.parent)
+        if not _visible_root_matches_descriptor(object_root, object_descriptor):
+            raise ContentStoreError("cache object root changed during publication")
+        destination = verified_destination(object_root, digest_name)
+        if destination is None:
+            raise ContentStoreError(
+                f"cache object {digest} is missing after publication"
+            )
+        manifest_path = destination / MANIFEST_FILENAME
+        if entry_metadata(manifest_path) is None:
+            raise ContentStoreError(f"artifact manifest is missing at {manifest_path}")
+        verify_directory_files(destination, declarations, allow_manifest=True)
+        if read_regular_bytes(manifest_path) != manifest_bytes:
+            raise ContentStoreError(f"cache object {digest} has a different manifest")
+        return destination
+    finally:
+        if temporary_descriptor is not None:
+            os.close(temporary_descriptor)
+        if temporary_name is not None:
+            shutil.rmtree(
+                Path("/proc/self/fd") / str(object_descriptor) / temporary_name,
+                ignore_errors=True,
+            )
+        os.close(object_descriptor)

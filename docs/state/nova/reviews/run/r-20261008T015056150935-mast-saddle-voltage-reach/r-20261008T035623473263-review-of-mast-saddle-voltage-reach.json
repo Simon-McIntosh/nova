@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T04:19:33.229Z",
+  "dispatched_at": "2026-10-08T03:57:07Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_saddle_voltage_reach.py",
+      "line": "52",
+      "severity": "follow-on",
+      "text": "follow-on: the module re-declares EXCITATION_CURRENT=1e3, PLASMA_FREE_CURRENT=5e3 and MINIMUM_PROBES, and re-implements the vacuum-cohort admission predicate (census_shot/admits) and a store enumeration (store_shots at :108), which nova/imas/mast_vacuum_cohort.py already owns at lines 263, 274, 597 and select_vacuum_cohort:718. Section 5 of the owning plan says to extend the owners rather than adding a parallel path, and the owner already exposes a store reader, so the light-census admission lacks the seam it should live behind; the values agree today and will silently diverge if the owner's criteria change."
+    },
+    {
+      "file": "benchmarks/mast_saddle_voltage_reach.py",
+      "line": "57",
+      "severity": "follow-on",
+      "text": "follow-on: the sole control is a deliberately misspelled channel name (sad_out_zz99), which reports unreachable over the cohort because no shot carries it; it cannot falsify the family-specific key-width defect the prior review found, because it never touches the m-family spelling. No test or assertion guards the resolve-from-keys behaviour, so a future one-width assumption would regress unobserved."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the two commits against base f2bac518e: 9eb100e5 adds the benchmark, fragment and receipt; c173d3991 (the repair this review covers) rewrites all three, resolving each raw key from the store key set, regenerating the fragment from the receipt, and deleting the retired-registry import. three added files, no production source, no test.",
+    "done_when": "section 5's first deliverable is the reachability question; the node answers it with a per-loop receipt over an 86-shot even-strided vacuum cohort (26 carry xmb) and two exit-0 passes (saddle-reach-all_debug.log job 1282006), and performs no fit and promotes no sign. no pytest gate exists for this node.",
+    "goal": "the node's goal is to record whether an uncorrected MAST saddle-loop voltage is reachable for the vacuum cohort; benchmarks/mast_saddle_voltage_reach.py probes the level-1 xmb group per loop and writes docs/figures/mast-saddle-loops/reach.json, which now reports 36 of 36 loops reachable through xmb/sad_out_<family><index> with each loop's raw key resolved from the store's own key set.",
+    "manifest": "read; it names the benchmark, the receipt, the fragment, two exit-0 job logs and the misspelled-channel control, and its account matches the receipt and the log, including the corrected 36/36 headline.",
+    "write_paths": "the node's declared roots are benchmarks/mast_saddle_voltage_reach.py, docs/figures/mast-saddle-loops and docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html; git diff --name-status f2bac518e c173d3991 is exactly those three added paths."
+  },
+  "justifications": {
+    "durability": "no test references benchmarks/mast_saddle_voltage_reach.py; the only control is MISSPELLED_CHANNEL at benchmarks/mast_saddle_voltage_reach.py:57, a random name that cannot falsify the three-digit m-family spelling, so a width regression is now guarded by the resolve-from-keys approach but by no assertion that would redden.",
+    "evidence": "docs/figures/mast-saddle-loops/reach.json is a traceable receipt over the level-1 store with per-loop raw_key_resolved spellings and a negative-control row, and the fragment at docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html now reproduces it exactly; the comparisons section carries six shots but the fragment narrates only shot 14811, so the six-shot RMS range the manifest cites is not shown in the prose.",
+    "fit": "the retired-registry import is gone and the module reads saddle geometry from the magnetics IDS as the plan directs, but it re-declares the cohort criteria constants at benchmarks/mast_saddle_voltage_reach.py:52-54 that its owner already defines.",
+    "goal_fidelity": "benchmarks/mast_saddle_voltage_reach.py:203 resolves each loop's raw key from the store's own key set and the receipt reports 36/36 reachable, correcting the m_10..m_12 false negative the prior review recorded at this node's first head.",
+    "reuse": "benchmarks/mast_saddle_voltage_reach.py:108 store_shots and the census_shot/admits admission predicate at :129-191 re-implement nova/imas/mast_vacuum_cohort.py:597 store_shots and select_vacuum_cohort, and the criteria constants at :52-54 duplicate mast_vacuum_cohort.py:263,274, without extending that owner.",
+    "scope_discipline": "git diff --name-status f2bac518e c173d3991 lists exactly the three declared added paths and nothing under nova/ or tests/."
+  },
+  "notes": "Independent review of r-20261008T015056150935-mast-saddle-voltage-reach at head c173d3991e82167cc72bd06a8591ed0862e411c0 against base f2bac518e47057cec01dd505c6dbbba7c8892b3c. The node answers section 5's first deliverable -- whether an uncorrected saddle-loop voltage, pickup retained, is reachable for the vacuum cohort -- by probing the level-1 XMB group per loop over an 86-shot even-strided cohort (26 carry xmb, 60 do not) and writing a per-loop receipt. All three findings the prior review recorded at head 9eb100e5e are repaired and independently confirmed fixed: the m_10..m_12 zero-padding false negative is gone, reach now being 36/36 with each loop's raw key resolved from the store's own key set, and the store confirm the three-digit names sad_out_m010, sad_out_m011 and sad_out_m012 present on the same 26 cohort shots as sad_out_m09 while sad_out_m10/m11/m12 are absent and the l and u families stay two-digit; the fragment now reproduces the receipt, carrying a per-loop coverage table that matches reach.json and stating that 60 of the 86 admitted shots carry no xmb group, which resolves the prior second finding; and the retired-catalog MachineGeometryRegistry import is deleted, grep finding no MachineGeometryRegistry or catalog.mast_geometry reference, with the coil kernel recorded unavailable and its reason stated. Two follow-on observations remain, neither blocking. No fit was run and no sign was promoted, which is what this node -- section 5's first of four -- is scoped to answer.",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: f2bac518e47057cec01dd505c6dbbba7c8892b3c\nreviewed_head_sha: c173d3991e82167cc72bd06a8591ed0862e411c0\nVERDICT goal: the node's goal is to record whether an uncorrected MAST saddle-loop voltage is reachable for the vacuum cohort; benchmarks/mast_saddle_voltage_reach.py probes the level-1 xmb group per loop and writes docs/figures/mast-saddle-loops/reach.json, which now reports 36 of 36 loops reachable through xmb/sad_out_<family><index> with each loop's raw key resolved from the store's own key set.\nVERDICT done_when: section 5's first deliverable is the reachability question; the node answers it with a per-loop receipt over an 86-shot even-strided vacuum cohort (26 carry xmb) and two exit-0 passes (saddle-reach-all_debug.log job 1282006), and performs no fit and promotes no sign. no pytest gate exists for this node.\nVERDICT write_paths: the node's declared roots are benchmarks/mast_saddle_voltage_reach.py, docs/figures/mast-saddle-loops and docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html; git diff --name-status f2bac518e c173d3991 is exactly those three added paths.\nVERDICT manifest: read; it names the benchmark, the receipt, the fragment, two exit-0 job logs and the misspelled-channel control, and its account matches the receipt and the log, including the corrected 36/36 headline.\nVERDICT diff: read the two commits against base f2bac518e: 9eb100e5 adds the benchmark, fragment and receipt; c173d3991 (the repair this review covers) rewrites all three, resolving each raw key from the store key set, regenerating the fragment from the receipt, and deleting the retired-registry import. three added files, no production source, no test.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/mast_saddle_voltage_reach.py:203 resolves each loop's raw key from the store's own key set and the receipt reports 36/36 reachable, correcting the m_10..m_12 false negative the prior review recorded at this node's first head.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/figures/mast-saddle-loops/reach.json is a traceable receipt over the level-1 store with per-loop raw_key_resolved spellings and a negative-control row, and the fragment at docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html now reproduces it exactly; the comparisons section carries six shots but the fragment narrates only shot 14811, so the six-shot RMS range the manifest cites is not shown in the prose.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status f2bac518e c173d3991 lists exactly the three declared added paths and nothing under nova/ or tests/.\nSCORE durability: 13\nJUSTIFICATION durability: no test references benchmarks/mast_saddle_voltage_reach.py; the only control is MISSPELLED_CHANNEL at benchmarks/mast_saddle_voltage_reach.py:57, a random name that cannot falsify the three-digit m-family spelling, so a width regression is now guarded by the resolve-from-keys approach but by no assertion that would redden.\nSCORE fit: 15\nJUSTIFICATION fit: the retired-registry import is gone and the module reads saddle geometry from the magnetics IDS as the plan directs, but it re-declares the cohort criteria constants at benchmarks/mast_saddle_voltage_reach.py:52-54 that its owner already defines.\nSCORE reuse: 5\nJUSTIFICATION reuse: benchmarks/mast_saddle_voltage_reach.py:108 store_shots and the census_shot/admits admission predicate at :129-191 re-implement nova/imas/mast_vacuum_cohort.py:597 store_shots and select_vacuum_cohort, and the criteria constants at :52-54 duplicate mast_vacuum_cohort.py:263,274, without extending that owner.\nFINDING benchmarks/mast_saddle_voltage_reach.py:52 follow-on: the module re-declares EXCITATION_CURRENT=1e3, PLASMA_FREE_CURRENT=5e3 and MINIMUM_PROBES, and re-implements the vacuum-cohort admission predicate (census_shot/admits) and a store enumeration (store_shots at :108), which nova/imas/mast_vacuum_cohort.py already owns at lines 263, 274, 597 and select_vacuum_cohort:718. Section 5 of the owning plan says to extend the owners rather than adding a parallel path, and the owner already exposes a store reader, so the light-census admission lacks the seam it should live behind; the values agree today and will silently diverge if the owner's criteria change.\nFINDING benchmarks/mast_saddle_voltage_reach.py:57 follow-on: the sole control is a deliberately misspelled channel name (sad_out_zz99), which reports unreachable over the cohort because no shot carries it; it cannot falsify the family-specific key-width defect the prior review found, because it never touches the m-family spelling. No test or assertion guards the resolve-from-keys behaviour, so a future one-width assumption would regress unobserved.\n",
+  "review_method": "Read-only source, receipt, fragment and commit inspection; direct zarr reads of the level-2 level-1 store to re-test the m-family key-width claim the prior review raised; grep for the retired-registry import and for call sites. No fit, no sign promotion, no production source changed.",
+  "review_run_id": "r-20261008T035623473263-review-of-mast-saddle-voltage-reach",
+  "reviewed_base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "reviewed_head_sha": "c173d3991e82167cc72bd06a8591ed0862e411c0",
+  "reviewed_run_id": "r-20261008T015056150935-mast-saddle-voltage-reach",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-voltage-reach",
+  "reviewer_node": "review-of-mast-saddle-voltage-reach",
+  "reviewer_run_id": "r-20261008T035623473263-review-of-mast-saddle-voltage-reach",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T04:21:39.841447+00:00",
+  "total": 87,
+  "verdict": "fail",
+  "verified_independently": [
+    "reviewed_head_sha c173d3991e82167cc72bd06a8591ed0862e411c0 is the reviewed worktree HEAD and git status --porcelain is empty; reviewed_base_sha f2bac518e47057cec01dd505c6dbbba7c8892b3c is two commits back, with 9eb100e5e the intervening head the prior review read.",
+    "git diff --name-status f2bac518e c173d3991 is exactly three added paths: benchmarks/mast_saddle_voltage_reach.py, docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html and docs/figures/mast-saddle-loops/reach.json.",
+    "independently read the level-1 store: for shots 15051, 25818 and 25836 the xmb keys carry sad_out_m010, sad_out_m011 and sad_out_m012 and no sad_out_m10/m11/m12; sad_out_l01..l03 and sad_out_u01..u03 are two-digit, so the three-digit width is specific to the m triple.",
+    "the head receipt docs/figures/mast-saddle-loops/reach.json records uncorrected_reachable for 36 of 36 loops, with raw_key_resolved sad_out_m010/m011/m012 for saddle_m_10..m_12, over cohort 86 admitted from 4000 candidates, shots_with_xmb 26 and shots_without_xmb 60.",
+    "the fragment's per-loop table reproduces the receipt row-for-row and its headline now reads that 26 of the 86 admitted shots carry xmb, so the fragment no longer contradicts reach.json.",
+    "no production call site: grep -rn mast_saddle_voltage_reach nova/ tests/ finds no match, and the benchmark imports no nova module.",
+    "the retired-registry import is gone: grep for MachineGeometryRegistry and catalog.mast_geometry in benchmarks/mast_saddle_voltage_reach.py returns nothing."
+  ]
+}

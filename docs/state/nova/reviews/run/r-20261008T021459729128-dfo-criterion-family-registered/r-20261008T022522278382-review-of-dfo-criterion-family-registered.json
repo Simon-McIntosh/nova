@@ -1,0 +1,110 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "a94a9538a7745ca837779abffe7494119e34d153"
+  ],
+  "completed_at": "2026-10-08T03:01:24.294Z",
+  "dispatched_at": "2026-10-08T02:26:05Z",
+  "findings": [
+    {
+      "file": "benchmarks/diiid_repaired_solve_remeasure.py",
+      "line": "254",
+      "severity": "follow-on",
+      "text": "follow-on: SHIPPED_RESIDUAL_BOUND binds forward_case.GATE_RESIDUAL_TOLERANCE at line 55, which now resolves to the registered 1.0e-5, but the record keys \"meets_shipped_hard_coded_1e_6\" / \"at_or_below_shipped_hard_coded_1e_6\" / \"above_shipped_hard_coded_1e_6\" still name the retired 1e-6, so a key states a threshold the value no longer is; reachable through the same constant this node's guard now blesses, and outside this node's declared write paths."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "env -C /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-criterion-family-registered TMPDIR=/tmp UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-criterion-family-registered uv run --no-sync pytest -q tests/test_derived_criterion_family.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T022522278382-review-of-dfo-criterion-family-registered/review-head-gate.log",
+      "revision": "a94a9538a7745ca837779abffe7494119e34d153"
+    },
+    "baseline_suite": {
+      "command": "env -C /tmp/reckon-crew-scratch/r-20261008T022522278382-review-of-dfo-criterion-family-registered/base TMPDIR=/tmp PYTHONPATH=/tmp/reckon-crew-scratch/r-20261008T022522278382-review-of-dfo-criterion-family-registered/base UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv uv run --no-sync pytest -q -rA tests/test_derived_criterion_family.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 14,
+      "failure_ids": [
+        "tests/test_derived_criterion_family.py::test_all_terminal_observables_have_separate_derived_bounds",
+        "tests/test_derived_criterion_family.py::test_banked_receipt_matches_regeneration",
+        "tests/test_derived_criterion_family.py::test_consumer_constants_are_replaced_not_inherited",
+        "tests/test_derived_criterion_family.py::test_coupled_bound_is_configuration_and_channel_dependent",
+        "tests/test_derived_criterion_family.py::test_coupled_relation_refuses_unmeasured_interpolation",
+        "tests/test_derived_criterion_family.py::test_diiid_anchor_is_an_achieved_residual_not_an_error_estimate",
+        "tests/test_derived_criterion_family.py::test_diiid_mesh_law_describes_the_stall_not_a_gate",
+        "tests/test_derived_criterion_family.py::test_diiid_passability_is_reported_from_banked_measurements",
+        "tests/test_derived_criterion_family.py::test_diiid_reference_accuracy_is_traced_without_norm_equation",
+        "tests/test_derived_criterion_family.py::test_every_criterion_names_its_receipt_inputs",
+        "tests/test_derived_criterion_family.py::test_one_map_parity_uses_the_banked_float64_roundoff_band",
+        "tests/test_derived_criterion_family.py::test_receipt_covers_three_consumers_without_solves",
+        "tests/test_derived_criterion_family.py::test_terminal_parity_requires_exact_seed_alignment",
+        "tests/test_derived_criterion_family.py::test_unchallenged_family_members_are_byte_unchanged"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T022522278382-review-of-dfo-criterion-family-registered/review-base-gate.log",
+      "revision": "b0ff19bab4bcb7b12265031742977ecbea3468df"
+    }
+  },
+  "gate_arms_note": "added_failure_count and added_failure_ids are measured over the reviewed run's own gate command (tests/test_derived_criterion_family.py). The reviewed run recorded only the head gate (final-gate.log, 16 passed, EXIT=0) and no baseline arm, so I reproduced the same command at base b0ff19bab in a scratch tree (review-base-gate.log, 1 passed 14 errors, EXIT=1: the pre-change guard at benchmarks/derived_criterion_family.py:235-236 raises 'the DIII-D hard-coded gate reading changed' because the consumer no longer carries the retired 1.0e-6 literal). The head-minus-base FAILED/ERROR id set is empty, so the count is a measured 0: the node added no failing test and repaired fourteen errored ones.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit a94a9538 against base b0ff19bab; one commit, three files, 23 insertions and 7 deletions - the guard re-pointed at benchmarks/derived_criterion_family.py:235-237, one test updated and one regression test added, and three stale bank source digests refreshed.",
+    "done_when": "the done-when asks that at a head containing b0ff19bab _diiid_criterion no longer raise on the absent literal, that tests/test_derived_criterion_family.py pass in a fresh process, and that criterion-family.json reproduce unchanged or be re-banked with every changed field listed; at head a94a9538 the guard checks the registered alias (line 235-237), I re-ran the gate in a fresh process (16 passed, EXIT=0, review-head-gate.log), and the bank is re-banked with exactly the three changed source digests listed in the manifest beside a reason.",
+    "goal": "the node's goal is that benchmarks/derived_criterion_family.py read the DIII-D gate as the registered 1e-5 criterion rather than guarding the retired 1e-6 literal; benchmarks/derived_criterion_family.py:235-237 now requires \"GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE\" in the consumer source instead of \"GATE_RESIDUAL_TOLERANCE = 1.0e-6\", matching the goal.",
+    "manifest": "read; it names the guard re-point, the fresh-process gate (16 passed) with its logs, the re-banked source digests with the reason, and the negative control, and its account matches the code, the bank and the logs I read.",
+    "write_paths": "read the manifest's declared paths; git diff b0ff19bab a94a9538a --name-status is exactly benchmarks/derived_criterion_family.py, tests/test_derived_criterion_family.py and docs/figures/forward-operator-refinement/criterion-family.json, all inside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/test_derived_criterion_family.py:253-263 restores the retired \"GATE_RESIDUAL_TOLERANCE = 1.0e-6\" literal into the consumer source and asserts the guard refuses it, a substitution the reverted guard would accept, so the test reddens on the regression it guards.",
+    "evidence": "the done-when's gate tests/test_derived_criterion_family.py passes 16/16 in a fresh process at head a94a9538 (review-head-gate.log ends \"16 passed ... EXIT=0\" and the run's own final-gate.log agrees), and the three re-banked source digests equal the committed files' sha256 at head, so the bank reproduces.",
+    "fit": "the guard at benchmarks/derived_criterion_family.py:235-237 keeps the module's substring fail-closed idiom and its RuntimeError message names the mechanism with no plan or ticket identifier.",
+    "goal_fidelity": "benchmarks/derived_criterion_family.py:235-237 replaces the retired-literal check with \"GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE\", which is exactly the goal, though it also refreshes three bank source digests the goal does not name (a small, done-when-permitted side repair).",
+    "reuse": "the change re-points the existing _diiid_criterion guard at benchmarks/derived_criterion_family.py:232-237 rather than adding a second instrument, forking no capability the repository already owns.",
+    "scope_discipline": "git diff b0ff19bab a94a9538a --name-status is exactly the three declared paths with no production solver file and no concurrent node's path touched."
+  },
+  "notes": "Independent review of r-20261008T021459729128-dfo-criterion-family-registered at head a94a9538 vs base b0ff19bab. The node repairs exactly the regression the sibling review r-20261008T021252434381-review-of-dfo-gate-pin recorded as blocking: gate-pin removed the literal 'GATE_RESIDUAL_TOLERANCE = 1.0e-6' from benchmarks/diiid_forward_gs_match.py, which the old _diiid_criterion guard required. This change re-points that guard at the registered alias 'GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE' and updates the test accordingly, adding a regression test that restores the retired literal and asserts the refusal. The change also refreshes three stale bank source digests, which the done-when permits and the manifest lists with a reason; the three digests match the committed files at head, and no bank measurement field changed. The landed change is correct, minimal and inside its declared scope. added_failure_count is a measured 0 over a base arm I reproduced (14 errors at base) and the head arm (16 passed). One follow-on, outside this node's scope and the same the sibling review raised: benchmarks/diiid_repaired_solve_remeasure.py:254 names the retired 1e-6 in record keys while SHIPPED_RESIDUAL_BOUND now resolves to 1.0e-5. Scores: goal_fidelity 19, evidence 19, scope_discipline 20, durability 19, fit 19, reuse 20. Total 116, verdict pass.",
+  "plan": "nova:diiid-forward-onboarding",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that benchmarks/derived_criterion_family.py read the DIII-D gate as the registered 1e-5 criterion rather than guarding the retired 1e-6 literal; benchmarks/derived_criterion_family.py:235-237 now requires \"GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE\" in the consumer source instead of \"GATE_RESIDUAL_TOLERANCE = 1.0e-6\", matching the goal.\nVERDICT done_when: the done-when asks that at a head containing b0ff19bab _diiid_criterion no longer raise on the absent literal, that tests/test_derived_criterion_family.py pass in a fresh process, and that criterion-family.json reproduce unchanged or be re-banked with every changed field listed; at head a94a9538 the guard checks the registered alias (line 235-237), I re-ran the gate in a fresh process (16 passed, EXIT=0, review-head-gate.log), and the bank is re-banked with exactly the three changed source digests listed in the manifest beside a reason.\nVERDICT write_paths: read the manifest's declared paths; git diff b0ff19bab a94a9538a --name-status is exactly benchmarks/derived_criterion_family.py, tests/test_derived_criterion_family.py and docs/figures/forward-operator-refinement/criterion-family.json, all inside the declared scope.\nVERDICT manifest: read; it names the guard re-point, the fresh-process gate (16 passed) with its logs, the re-banked source digests with the reason, and the negative control, and its account matches the code, the bank and the logs I read.\nVERDICT diff: read commit a94a9538 against base b0ff19bab; one commit, three files, 23 insertions and 7 deletions - the guard re-pointed at benchmarks/derived_criterion_family.py:235-237, one test updated and one regression test added, and three stale bank source digests refreshed.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/derived_criterion_family.py:235-237 replaces the retired-literal check with \"GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE\", which is exactly the goal, though it also refreshes three bank source digests the goal does not name (a small, done-when-permitted side repair).\nSCORE evidence: 19\nJUSTIFICATION evidence: the done-when's gate tests/test_derived_criterion_family.py passes 16/16 in a fresh process at head a94a9538 (review-head-gate.log ends \"16 passed ... EXIT=0\" and the run's own final-gate.log agrees), and the three re-banked source digests equal the committed files' sha256 at head, so the bank reproduces.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff b0ff19bab a94a9538a --name-status is exactly the three declared paths with no production solver file and no concurrent node's path touched.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_derived_criterion_family.py:253-263 restores the retired \"GATE_RESIDUAL_TOLERANCE = 1.0e-6\" literal into the consumer source and asserts the guard refuses it, a substitution the reverted guard would accept, so the test reddens on the regression it guards.\nSCORE fit: 19\nJUSTIFICATION fit: the guard at benchmarks/derived_criterion_family.py:235-237 keeps the module's substring fail-closed idiom and its RuntimeError message names the mechanism with no plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change re-points the existing _diiid_criterion guard at benchmarks/derived_criterion_family.py:232-237 rather than adding a second instrument, forking no capability the repository already owns.\nFINDING benchmarks/diiid_repaired_solve_remeasure.py:254 follow-on: SHIPPED_RESIDUAL_BOUND binds forward_case.GATE_RESIDUAL_TOLERANCE at line 55, which now resolves to the registered 1.0e-5, but the record keys \"meets_shipped_hard_coded_1e_6\" / \"at_or_below_shipped_hard_coded_1e_6\" / \"above_shipped_hard_coded_1e_6\" still name the retired 1e-6, so a key states a threshold the value no longer is; reachable through the same constant this node's guard now blesses, and outside this node's declared write paths.",
+  "review_run_id": "r-20261008T022522278382-review-of-dfo-criterion-family-registered",
+  "reviewed_base_sha": "b0ff19bab4bcb7b12265031742977ecbea3468df",
+  "reviewed_commit": "a94a9538a7745ca837779abffe7494119e34d153",
+  "reviewed_head_sha": "a94a9538a7745ca837779abffe7494119e34d153",
+  "reviewed_revision": "a94a9538a7745ca837779abffe7494119e34d153",
+  "reviewed_run_id": "r-20261008T021459729128-dfo-criterion-family-registered",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-criterion-family-registered",
+  "reviewer_node": "review-of-dfo-criterion-family-registered",
+  "reviewer_run_id": "r-20261008T022522278382-review-of-dfo-criterion-family-registered",
+  "scores": {
+    "durability": 19,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T02:52:00.000000+00:00",
+  "total": 116,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha a94a9538a7745ca837779abffe7494119e34d153 is the reviewed worktree's HEAD (git -C <worktree> rev-parse HEAD) and git status --porcelain is empty.",
+    "reviewed_base_sha b0ff19bab4bcb7b12265031742977ecbea3468df is HEAD^ (git rev-parse a94a9538^).",
+    "git diff b0ff19bab a94a9538a --name-status is exactly three paths: M benchmarks/derived_criterion_family.py, M docs/figures/forward-operator-refinement/criterion-family.json, M tests/test_derived_criterion_family.py (23 insertions, 7 deletions); no file under nova/ or scripts/ is touched.",
+    "the guard now accepts the registered alias: benchmarks/derived_criterion_family.py:235 is 'if \"GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE\" not in consumer_source:', and the consumer benchmarks/diiid_forward_gs_match.py:192 is 'GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE' with REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5 at line 188.",
+    "the gate passes at head in a fresh process: I re-ran 'env -C <reviewed worktree> TMPDIR=/tmp UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=<worktree> uv run --no-sync pytest -q tests/test_derived_criterion_family.py' -> 16 passed in 5.12s, EXIT=0 (review-head-gate.log); the run's own final-gate.log records 16 passed EXIT=0.",
+    "the base arm reproduces the regression the node repairs: at base b0ff19bab (scratch tree) the guard at benchmarks/derived_criterion_family.py:236 raises 'the DIII-D hard-coded gate reading changed' and the gate reports 1 passed 14 errors EXIT=1 (review-base-gate.log).",
+    "the three re-banked bank digests equal the committed files' sha256 at head a94a9538: event-resolved-amplification.json 87ed69a4..., tests/test_equilibrium_forward_reference.py b5ca86a4..., benchmarks/diiid_forward_gs_match.py 508038b9...; the stored values at base were bf26f40c..., 8df3bd2d..., 648496f0..., so the bank was stale at base and the node refreshed only those three fields (git diff shows 3 changed lines in criterion-family.json).",
+    "the durability test is a real mutation: tests/test_derived_criterion_family.py:253-263 replaces 'GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE' with the retired 'GATE_RESIDUAL_TOLERANCE = 1.0e-6' and asserts pytest.raises(RuntimeError, match='gate must read the registered residual tolerance'); a reverted guard would accept the substituted source, so the test reddens on the regression."
+  ]
+}

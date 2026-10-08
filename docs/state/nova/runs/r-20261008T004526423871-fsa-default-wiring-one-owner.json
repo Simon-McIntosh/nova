@@ -1,0 +1,705 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "72112421cb157599b3e3e97b31f3d5f6246735d4",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 4215911,
+      "input_tokens_cumulative": 4215911,
+      "output_tokens": 14975,
+      "output_tokens_cumulative": 14975,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 88,
+    "files": 3,
+    "removed": 121
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "test_exact_bank_replay_request_names_every_policy_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "run_function": {
+        "line": 105,
+        "name": "_bank_replay_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "window_line": 106
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "test_diiid_match_request_names_every_registered_budget_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "run_function": {
+        "line": 145,
+        "name": "_diiid_match_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "window_line": 146
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "7cd5574fd2215085c70f538b9390e5d4fdd4bf69",
+    "c487d8e7742c88ee1ed604d3e2a7a7b868290517",
+    "6b176f703b7ef65f91d2fdc42fddc2681974c9e4"
+  ],
+  "completed_at": "2026-10-08T01:37:38.978Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T00:45:56Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsa-default-wiring-one-owner /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -rA tests/test_default_wiring.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004526423871-fsa-default-wiring-one-owner/fsa-head-arm.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.985,
+    "plan": "forward-solve-api",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T01:30:31.905611+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T00:45:31Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 20,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 1,
+    "headroom": 15,
+    "mean_context": 120000,
+    "observed_at": "2026-10-08T00:45:11Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 20,
+      "aggregate_tokens_per_second": 71.438,
+      "detail": "",
+      "mean_tokens_per_second": 357.192,
+      "observed_at": "2026-10-08T00:45:11Z",
+      "runs": 0.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T01:37:38.978Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004526423871-fsa-default-wiring-one-owner/manifest.md",
+  "member": "disposable-r-20261008T004526423871-fsa-default-wiring-one-owner",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_default_wiring.py::test_production_routes_call_no_private_solver_kernel[solovev-oracle-and-rebaseline]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_default_wiring.py::test_production_routes_call_no_private_solver_kernel[solovev-oracle-and-rebaseline]"
+    ],
+    "declaration": "a production route edited to call a private solver kernel directly fails the moved check by test id",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004526423871-fsa-default-wiring-one-owner/fsa-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004526423871-fsa-default-wiring-one-owner/fsa-negative-control.log",
+    "test_paths": [
+      "tests/test_default_wiring.py",
+      "tests/test_route_default_wiring.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fsa-default-wiring-one-owner",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1615,
+          "cached_input_tokens": 567861,
+          "input_tokens": 569478,
+          "output_tokens": 1688,
+          "reasoning_output_tokens": 460,
+          "total_tokens": 571166,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Give the production default-wiring check one owner. tests/test_default_wiring.py and tests/test_route_default_wiring.py both assert that every production solve route resolves the declared ForwardSolvePolicy defaults through the public seam, each with its own REQUIRED_DEFAULTS tuple and RecordingProfile; the design review of forward-solve-api found them duplicate owners. Done when: (1) every assertion tests/test_route_default_wiring.py makes that tests/test_default_wiring.py does not already make, in particular that production routes call no private solver kernel, lives in tests/test_default_wiring.py over its existing ProductionEntryPoint table and RecordingProfile, with no second REQUIRED_DEFAULTS and no second recording class; (2) tests/test_route_default_wiring.py is deleted; (3) negative control: a scratch copy of one production route edited to call a private solver kernel directly makes the moved check fail by test id, log kept in the run directory; (4) tests/test_default_wiring.py passes at head, and both files' tests pass at the run orientation_base_sha, each in a fresh process with JAX_PLATFORMS=cpu, run in place on the fleet allocation (the shell has SLURM_JOB_ID) with TMPDIR=/tmp and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree (orientation_worktree in the manifest), never uv on a compute node; baseline_suite and after_suite are single-line JSON whose log_path names one log file and whose command is literally runnable; (5) the test ids each arm collected are listed in the manifest so a reader sees nothing was lost. Every login-node uv command carries --no-sync and nothing runs uv sync. No production code changes. Commit with a conventional subject and a body; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Give the production default-wiring check one owner in tests/test_default_wiring.py",
+    "id": "fsa-default-wiring-one-owner",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T00:45:31Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 20,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 1,
+      "headroom": 15,
+      "mean_context": 120000,
+      "observed_at": "2026-10-08T00:45:11Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 20,
+        "aggregate_tokens_per_second": 71.438,
+        "detail": "",
+        "mean_tokens_per_second": 357.192,
+        "observed_at": "2026-10-08T00:45:11Z",
+        "runs": 0.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004526423871-fsa-default-wiring-one-owner/manifest.md",
+    "negative_control": "a production route edited to call a private solver kernel directly fails the moved check by test id",
+    "plan": "forward-solve-api",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_default_wiring.py",
+      "tests/test_route_default_wiring.py",
+      "docs/evidence/fragments/forward-solve-api/fsa-default-wiring-one-owner.html",
+      "docs/figures/forward-solve-api/fsa-default-wiring-one-owner"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1061550.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fsa-default-wiring-one-owner",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T00:45:34.136515+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.55,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 363.532,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2213.549,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 147646.027101,
+        "budget_reason": null,
+        "burn_multiple": 1.277261979583925,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53917,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.21847060068287,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.02613292577293566,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 147646.027101,
+        "budget_reason": null,
+        "burn_multiple": 1.277261979583925,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53917,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.21847060068287,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.02613292577293566,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 147646.027101,
+        "budget_reason": null,
+        "burn_multiple": 1.277261979583925,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53917,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 30.9,
+          "peak_utilisation_p90_pct": 45.5,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.21847060068287,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.02613292577293566,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 1,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 53917,
+          "headroom_pct": 76.6,
+          "peak_utilisation_p50_pct": 55.0,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 98,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 21,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 125
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 30.153101,
+        "budget_reason": null,
+        "burn_multiple": 0.9473564411163454,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53917,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.187209026608796,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.12772383735251336,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 30.153101,
+        "budget_reason": null,
+        "burn_multiple": 0.9473564411163454,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53917,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.187209026608796,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.12772383735251336,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 30.153101,
+        "budget_reason": null,
+        "burn_multiple": 0.9473564411163454,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 53917,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.187209026608796,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.12772383735251336,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.04,
+      "claude:claude-sonnet-5-5": 0.02,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0.02,
+      "codex:gpt-6-sol": 0.27,
+      "hold": 0.04,
+      "local:deepseek-v4.1-flash": 0.61
+    },
+    "rendered_token_estimate": 2185,
+    "usage": {
+      "cost": 0.000238434,
+      "input_tokens": 5677,
+      "output_tokens": 150
+    }
+  },
+  "plan": "forward-solve-api",
+  "plan_impl_at_dispatch": 0.985,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6b176f703b7ef65f91d2fdc42fddc2681974c9e4",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "72112421cb157599b3e3e97b31f3d5f6246735d4",
+    "reviewed_head_sha": "6b176f703b7ef65f91d2fdc42fddc2681974c9e4",
+    "scores": {
+      "durability": 19,
+      "evidence": 19,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 116
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T004526423871-fsa-default-wiring-one-owner",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "50e88cd4-f02b-4643-b1a3-494d5d59ab8a",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 11520370,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 676.091,
+    "generated_tokens": 62931,
+    "generation_seconds": 452.231,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 80.2,
+    "machine_seconds": 223.86,
+    "peak_input_tokens": 184613,
+    "tokens_per_second": 139.16,
+    "wall_tokens_per_second": 93.08
+  },
+  "time_budget": "45m",
+  "tool_steps": 70.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 3102,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T01:37:44Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-08T01:26:16Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T004526423871-fsa-default-wiring-one-owner",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 12126,
+    "worker_pid": 3357794
+  },
+  "worker_seconds": 3063,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

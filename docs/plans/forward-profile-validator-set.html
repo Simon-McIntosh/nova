@@ -22,11 +22,11 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S24">
 <meta name="plan-informs" content="gs-absolute-accuracy-gates">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;deferred&quot;}">
 <meta name="plan-effort-hours" content="10.0">
-<meta name="plan-commits" content="aff62b24,646d21fb,28a8247b,c36ef55c,5ae3ec94,f4ff7b6f,b762ae17,cc679621,9692e2b8,7c7fe7e0,228517df,d5961848,1dd08655,b736d9b8">
-<meta name="plan-impl" content="0.4">
-<meta name="plan-version" content="28">
+<meta name="plan-commits" content="aff62b24,646d21fb,28a8247b,c36ef55c,5ae3ec94,f4ff7b6f,b762ae17,cc679621,9692e2b8,7c7fe7e0,228517df,d5961848,1dd08655,b736d9b8,4697003d,1ec3483d,e17138d4,4fc5a878,6b8afb52,aee4a68f,3a53bbc0">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -136,7 +136,7 @@
     <div class="r-comment-body"><p>fpv-fetch-credential-faults: credential failures are classified only by registry authentication phrases; transport messages with permission denied, ports 401/403/4030, or 403 ms remain unreachable. All 8 pinned layers verified; final gate 23 passed, 0 skipped.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T065700004992-review-of-fpv-fetch-credential-faults" data-who="reckon-build" data-when="2026-10-08T07:16:22.725Z">
-    <div class="r-comment-body"><p>review-of-fpv-fetch-credential-faults: delta d5961848f -&gt; b736d9b874 retires the prior review&#x27;s bare-401/403 inversion and keeps the auth-vs-unreachable distinction phrase-based; head gate 23 passed, 0 skipped, EXIT=0; guard fires under an emptied-markers mutant (12 credential ids red, EXIT=1). Two follow-ons: a red intermediate commit 1dd08655c, and empty baseline_suite/after_suite manifest fields.</p></div>
+    <div class="r-comment-body"><p>review-of-fpv-fetch-credential-faults: delta d5961848f -&gt; b736d9b874 retires the prior review's bare-401/403 inversion and keeps the auth-vs-unreachable distinction phrase-based; head gate 23 passed, 0 skipped, EXIT=0; guard fires under an emptied-markers mutant (12 credential ids red, EXIT=1). Two follow-ons: a red intermediate commit 1dd08655c, and empty baseline_suite/after_suite manifest fields.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T054057020599-review-of-fpv-analytic-smoke" data-who="reckon-build" data-when="2026-10-08T06:05:41.077Z">
     <div class="r-comment-body"><p>review of r-20261008T043927638886-fpv-analytic-smoke (fpv-analytic-smoke) stored, scores goal_fidelity 19 / evidence 14 / scope_discipline 20 / durability 17 / fit 17 / reuse 18, total 105, added_failure_count 0 (reviewed base a4b489cf7f56ad60b5c54741d15010d494004804, head 5ae3ec946bb2d161b45240526c7532764024a6fc); head gate reproduced 5 passed EXIT=0, declared control reproduced red EXIT=1 (residual 0.438122 &gt; 1e-3); 4 follow-on findings (fragment caption misstates the residual by ~900x, figure drawn with axes/ticks contrary to the media rules, unused extra_layers seam retained against the resume ruling, head log lacks the gate-log header and the manifest records no baseline/after arms).</p></div>
@@ -157,6 +157,9 @@ baseline/after arms).</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20261008-rung1-closed" data-who="reckon-build" data-when="2026-10-08T07:20:00Z">
     <div class="r-comment-body">rung 1 complete: §3 collapsed (store, fetch, pinned records, credential faults) and the analytic smoke rung landed. Rung 2, CORSICA 130506 at four slices on the H200 lane, is in flight.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-rungs-deferred" data-who="reckon-build" data-when="2026-10-08T10:25:00Z">
+    <div class="r-comment-body">rung 2 landed as a failing validation: the shipped solve returns a reference seed unchanged and refuses a vacuum seed at the topology read on all four CORSICA slices; the finding is recorded on converged-forward-solve §6 (plan comment c-s21-corsica-130506-evidence). Rungs 3 and 4 (DINA 105027, ASTRA 131046, band tightening) and the CORSICA re-run are deferred until converged-forward-solve §5 lands, so they measure the post-cutover solve; the re-run must add §4's non-contraction pin and a control that can fire. Rung 5 still waits on the cross-section-breadth decision. Evidence: corsica-130506.</div>
 </div>
 </section>
 </main>

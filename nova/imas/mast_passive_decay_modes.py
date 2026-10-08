@@ -1420,7 +1420,7 @@ def driven_field(
     model; subtracting a later current pedestal cannot reconstruct missing history.
     """
 
-    from scipy.signal import lfilter
+    from nova.circuit.propagate import integrate_eddy_ode, zoh_mode_response
 
     time = np.asarray(time, dtype=float)
     drives = np.asarray(drives, dtype=float)
@@ -1449,24 +1449,12 @@ def driven_field(
     rates, vectors = eigh(np.diag(resistance), inductance)
     if np.any(rates <= 0.0):
         raise DecayModeError("driven circuit must have strictly positive decay rates")
-    increments = np.diff(drives, axis=0) @ mutual.T @ vectors
+    linked_flux = drives @ mutual.T @ vectors
     steps = np.diff(time)
-    modes = np.zeros((time.size, resistance.size))
     if np.allclose(steps, steps[0], rtol=1e-10, atol=1e-14):
-        factor = np.exp(-steps[0] * rates)
-        gain = -np.expm1(-steps[0] * rates) / (steps[0] * rates)
-        for mode in range(resistance.size):
-            modes[1:, mode] = lfilter(
-                [-gain[mode]], [1.0, -factor[mode]], increments[:, mode]
-            )
+        modes = zoh_mode_response(1.0 / rates, steps[0], linked_flux)
     else:
-        factor = np.exp(-steps[:, None] * rates)
-        gain = -np.expm1(-steps[:, None] * rates) / (steps[:, None] * rates)
-        for sample in range(1, time.size):
-            modes[sample] = (
-                factor[sample - 1] * modes[sample - 1]
-                - gain[sample - 1] * increments[sample - 1]
-            )
+        modes, _ = integrate_eddy_ode(1.0 / rates, time, linked_flux)
     return modes @ (coupling @ vectors).T + drives @ direct.T
 
 

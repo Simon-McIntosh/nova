@@ -1,0 +1,90 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:25:06.807Z",
+  "dispatched_at": "2026-10-08T01:14:44Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/diiid-forward-onboarding.html:21",
+      "id": "wiring-1",
+      "reason": "an orchestrator sizing \u00a711 from the roadmap sees no dependency and can dispatch it before the cutover the section says it must wait for.",
+      "text": "plan-depends-on declares only `flux-function-forward-equilibrium`, but \u00a75's gate-state note (\"waits on single-grid-solver-cutover\", line 777 also states it) and \u00a711's done-when (\"queued as the first node after single-grid-solver-cutover lands\", line 373) both make the plan's live sections depend on `single-grid-solver-cutover` landing first; that plan declares `plan-blocks=\"efit-baseline-demonstration\"` and does not block this one, so the dependency exists in prose but in neither plan's relationship fields",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-forward-onboarding.html:106",
+      "id": "done_when-1",
+      "reason": "the declared measure is not the measure the section was authored against, so a re-open would re-apply an inapplicable bar.",
+      "text": "\u00a72's done-when still reads \"reproduces the challenge starter-kit vacuum check (reported R\u00b2\u22480.94 class)\", but decision `vacuum-gate-measure` (line 406) records that the published 0.94 scores a *fitted* exterior decomposition and \"the gate as written cannot pass or fail the entry premise\", replacing it with the plasma-subtraction differencing measure whose preregistered bar is 0.4952670786; the section passed on the replacement (per-frame R\u00b2 quartiles 0.99325/0.99908/0.99967), not on the 0.94 line the done-when still names",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-forward-onboarding.html:174",
+      "id": "done_when-2",
+      "reason": "\u00a75 is a live, buildable section, and a node reading only the done-when would score against a floor the forward-operator-refinement adjudication returned NO_DEFENSIBLE_DIIID_TOLERANCE_DERIVED for.",
+      "text": "\u00a75's done-when measures \"extracted flux functions re-solve to the labeled map at the grid-resolution floor\", but the section's own gate-state note at line 164 states that \"the 'grid-resolution floor' phrasing in the done-when below is superseded by f-dfo-004's re-scope to the label-representability ceiling (median interior R\u00b2 0.949)\", and f-dfo-004's body confirms the bar is set relative to that ceiling; the docu-when was left carrying the superseded text",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/diiid-forward-onboarding.html:373",
+      "id": "single_goal-1",
+      "reason": "both halves are assertions about one criterion's provenance and the node closes on one verdict, but the two measures are independent enough that a reviewer should read them separately; flagging so the author can split if desired rather than as a blocking defect.",
+      "text": "\u00a711 states two deliverables in one node: \"Build the estimator the forward-operator-reflecting adjudication asked for\" and, \"In the same node, repair the pin in `benchmarks/diiid_forward_gs_match.py`: `GATE_RESIDUAL_TOLERANCE` is 1.0e-6 \u2026 and must either read the registered value or carry its derivation\", with both surfacing in the done-when (\"the estimator reproduces an analytic fixture's known error order\" and \"the gate constant matches its registration\")",
+      "type": "single_goal",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/diiid-forward-onboarding.html:726",
+      "id": "anchors_resolve-1",
+      "reason": "the file is a retired follow-on reference in a landed comment; \u00a711 and the live sections do not cite it, so no node acts on the dead pointer.",
+      "text": "comment `c-20260823T1012-repaired-ring` names `benchmarks/diiid_machine_ids_export.py` as the owner of an orphaned 82-vertex assertion a cleanup node will retire, but no file of that name exists in the tree (only `benchmarks/diiid_ids_machine_description.py` and `benchmarks/diiid_machine_description.py`), so the pointer no longer resolves",
+      "type": "anchors_resolve",
+      "would_change": false
+    },
+    {
+      "anchor": "docs/plans/diiid-forward-onboarding.html:373",
+      "id": "reasoning-1",
+      "reason": "a node following \u00a711 literally could retain the un-derived constant the cited correction says must be restored, changing the gate's outcome for every future run.",
+      "text": "\u00a711 instructs that the gate constant \"must either read the registered value or carry its derivation\", but the comment it cites as its source (`c-20260823T0935-criterion-correction`, the \"2026-08-23 criterion-correction comment\") records that \"the re-evaluation run must apply the REGISTERED tolerance \u2014 restoring the gate as registered, not moving it\"; the \"or carry its derivation\" escape permits keeping the untraced 1.0e-6, which is the opposite of the correction the text grounds itself on",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "e55c3fd7f3b9d8f3d001bcecc0334c590e94eddd0812a02edaad78489caadc7a",
+  "plan_slug": "diiid-forward-onboarding",
+  "plan_version": 83,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T011414804262-plan-review-of-diiid-forward-onboarding",
+  "reviewed_blob_sha": "2a483b2256a1a8ff57be4fb9270117dcaf56908b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the retired followup pointer `benchmarks/diiid_machine_ids_export.py` no longer resolves; all other cited modules, symbols, plans, decision keys and archive anchors resolve.",
+    "done_when": "a finding \u2014 two done-whens (\u00a72, \u00a75) still name bars that the plan's own later decisions replaced, so a node reading the done-when line applies a superseded measure.",
+    "evidence_paths": "pass \u2014 every artifact in `plan-artifacts` is a durable path (`docs/figures/...` in git, or a `/work/projects/imas_gpu/...` GPFS pointer); no session scratchpad path is asserted as a record location.",
+    "naming": "pass \u2014 \u00a711 introduces no new symbol or filename, and the symbols it names (`_fit_held_out_ladder`, `_fit_power_order`, `richardson_fine_error`, `GATE_RESIDUAL_TOLERANCE`) are existing mechanism-describing identifiers, not plan labels.",
+    "reasoning": "a finding \u2014 \u00a711's instruction that the gate constant \"must either read the registered value or carry its derivation\" contradicts the 2026-08-23 criterion-correction comment it cites, which requires the registered value be restored.",
+    "single_goal": "a finding \u2014 \u00a711 bundles two deliverables, an estimator build and a gate-constant repair, behind one verdict.",
+    "wiring": "a finding \u2014 \u00a75's gate and \u00a711's post-cutover run both require `single-grid-solver-cutover` to land, yet `plan-depends-on` declares only `flux-function-forward-equilibrium`."
+  },
+  "section_digests": {
+    "_document": "1262a3a9c501256f0151a11f2d946238498381d08828d61d3ed7907162905b7a",
+    "s1": "93422ba9d21f9babc9db8404d0b5d3baacc2dfcad92746920eafe6ff42ba6c3f",
+    "s10": "5ee1fe9cb9dcf861dfbad8f85760cfa4b0dbefb3578041932893626d3f7be4e9",
+    "s10-scope": "99a32da276a358e2ea6ef26ddfb2cd3cb65fca803e8c6598885c297bdb4cb503",
+    "s11": "138fe95cf18b77b36c54672376e0c86d155102058f541a7865365d36a52ef7fc",
+    "s2": "6dc707b667cb2b940d5c7398b61ca1e58f11abc9b70857562711b8997b0e5903",
+    "s3": "05a034ec04d583fb2d43ad261a6397912db06afde06e4ce7dc238a482622059a",
+    "s4": "21de21a78d530e113d622d30e73d0d09f5f8ce8286c9770e28e0eff423269639",
+    "s5": "94060ead95779d5308d9858eb8645b45fa4cd508ac4d14067e39f244d37ec939",
+    "s6": "f4c6afb6fed9ae0e7c47256df88c024b9b3b34a1093536c06ad255caabde0b19",
+    "s7": "2393ec96f7265159170a4c5c3f5556a8a420197555e6257edd1507b4f11be511",
+    "s8": "9749656a81898fed5a467452b690521b29cec261ec10fe7b3d1eff63b1f79de3",
+    "s9": "92e83ce527c957fba282edd3688125dde1c3cd41bd6b886ef404db91c6b617ef"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:30:22.206953+00:00"
+}

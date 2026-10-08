@@ -210,6 +210,16 @@ def _cases():
 CASES = _cases()
 
 
+def test_channel_split_refuses_paired_data():
+    channel = object.__new__(momentchannel.Channel)
+    channel.paired_moments = ()
+    with pytest.raises(ValueError, match="unpaired channel") as refused:
+        momentchannel._channel_split_tangent(
+            channel, None, None, None, None, None, None, None, None, jnp
+        )
+    print(f"PAIRED_CHANNEL_REFUSAL={refused.value}")
+
+
 def _truncated_product(left, d_left, right, d_right):
     """Drop the right factor's product-rule term."""
     if d_left is None:

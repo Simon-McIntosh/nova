@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "benchmarks/diiid_repaired_solve_remeasure.py:55",
+    "benchmarks/strict_exit_incidence.py:670",
+    "benchmarks/diiid_prescribed_profile_forward.py:188",
+    "benchmarks/diiid_forward_gs_match.py:1900"
+  ],
+  "commits_read": [
+    "b0ff19bab4bcb7b12265031742977ecbea3468df"
+  ],
+  "completed_at": "2026-10-08T02:40:58.609Z",
+  "dispatched_at": "2026-10-08T02:13:38Z",
+  "findings": [
+    {
+      "file": "benchmarks/derived_criterion_family.py",
+      "line": "235",
+      "severity": "blocking",
+      "text": "blocking: the change removes the literal text GATE_RESIDUAL_TOLERANCE = 1.0e-6 that _diiid_criterion asserts is present in benchmarks/diiid_forward_gs_match.py, so the guard now raises RuntimeError the DIII-D hard-coded gate reading changed; tests/test_derived_criterion_family.py::test_banked_receipt_matches_regeneration errors at head while the guard passes at base, a reachable regression in a sibling outside this node's declared write paths."
+    },
+    {
+      "file": "tests/test_derived_criterion_family.py",
+      "line": "243",
+      "severity": "follow-on",
+      "text": "follow-on: test_source_registration_changes_fail_closed replaces the now-absent literal GATE_RESIDUAL_TOLERANCE = 1.0e-6 with 2.0e-6, so the replace is a no-op and the test still passes only because the guard reddens on the missing literal for an unrelated reason; its intended assertion no longer exercises the literal-substitution path."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest -p no:cacheprovider tests/test_diiid_forward_gs_match.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015304108875-dfo-gate-pin/gate-head.log",
+      "revision": "b0ff19bab4bcb7b12265031742977ecbea3468df"
+    },
+    "baseline_suite": {
+      "command": "env -C /tmp/reckon-crew-scratch/r-20261008T021252434381-review-of-dfo-gate-pin/review-dfo-gate-pin-base TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-gate-pin /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -rA /tmp/reckon-crew-scratch/r-20261008T021252434381-review-of-dfo-gate-pin/review-dfo-gate-pin-base/tests/test_diiid_forward_gs_match.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T021252434381-review-of-dfo-gate-pin/review-base-arm.log",
+      "revision": "f2bac518e47057cec01dd505c6dbbba7c8892b3c"
+    }
+  },
+  "gate_arms_note": "added_failure_count and added_failure_ids are measured over the reviewed run's own gate command (tests/test_diiid_forward_gs_match.py): its after_suite is the run's own gate-head.log at head b0ff19bab (9 passed, EXIT=0, empty FAILED/ERROR id set) and the reviewed run recorded no baseline arm, so I reproduced the same command at base f2bac518 in a scratch tree (review-base-arm.log, 8 passed, EXIT=0, empty id set); the head-minus-base id set is empty, so the count is a measured 0. The sibling regression in tests/test_derived_criterion_family.py is outside the reviewed run's gate command, so it is recorded as a finding, not in this count.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 4 production call site(s)",
+    "diff": "read commit b0ff19bab against base f2bac518; one commit, three files, the constant aliased in place and one regression test added, with no production solver file touched.",
+    "done_when": "the done-when is the gate constant reading its registered value; the reviewed run's own gate-head.log records the head gate at 9 passed EXIT=0, tests/test_diiid_forward_gs_match.py:29-33 asserts the alias and the 1.0e-5 literal, and negative-control-red.log (1 failed, EXIT=1) shows it reddens on the old literal.",
+    "goal": "the node's goal is that GATE_RESIDUAL_TOLERANCE in benchmarks/diiid_forward_gs_match.py read its registered 1e-5 criterion; line 192 now aliases GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE (1.0e-5 declared at line 188).",
+    "manifest": "read; it names the changed paths, gate-head.log (9 passed), negative-control-red.log (1 failed, EXIT=1) and the follow-on on derived_criterion_family.py; its account matches the code and logs I read.",
+    "write_paths": "read the manifest's declared paths; the base..head diff is exactly benchmarks/diiid_forward_gs_match.py, tests/test_diiid_forward_gs_match.py and docs/evidence/fragments/diiid-forward-onboarding/dfo-gate-pin.html."
+  },
+  "justifications": {
+    "durability": "tests/test_diiid_forward_gs_match.py:30-31 reddens when GATE_RESIDUAL_TOLERANCE is set back to 1.0e-6 (negative-control-red.log: 1 failed, EXIT=1), though two of its three assertions compare constants that move together so only the 1.0e-5 literal is independent.",
+    "evidence": "tests/test_diiid_forward_gs_match.py:30-33 asserts the alias and the 1.0e-5 literal and is recorded green in the reviewed run's own gate-head.log, but the gate covers only the focused file and did not reach the consumer benchmarks/derived_criterion_family.py:235.",
+    "fit": "benchmarks/diiid_forward_gs_match.py:189-192 follows the module's registered-constant idiom with a note naming the problem it removes and no plan or ticket identifier.",
+    "goal_fidelity": "benchmarks/diiid_forward_gs_match.py:192 aliases GATE_RESIDUAL_TOLERANCE to REGISTERED_RESIDUAL_TOLERANCE declared 1.0e-5 at line 188, which is exactly the goal.",
+    "reuse": "the change aliases the module's existing REGISTERED_RESIDUAL_TOLERANCE rather than defining a second criterion, forking no capability.",
+    "scope_discipline": "git diff f2bac518 b0ff19bab is exactly the three declared write paths with no production solver file and no concurrent node's path touched."
+  },
+  "notes": "Independent review of r-20261008T015304108875-dfo-gate-pin at head b0ff19bab vs base f2bac518. The landed change is correct and minimal: it aliases GATE_RESIDUAL_TOLERANCE to the module's own REGISTERED_RESIDUAL_CONSTANT and adds a regression test that reddens on the old literal (verified by the reviewed run's negative control). It touches exactly the three declared write paths. One blocking finding sits outside the node's scope: removing the literal breaks the fail-closed registration guard in benchmarks/derived_criterion_family.py, whose test errors at head, outside this node's declared write paths so it is reported rather than fixed here. A concurrent node dfo-criterion-family-registered may own that repair. Scores: goal_fidelity 19, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 20. Total 114. A third reachable consumer notes follow on: benchmarks/diiid_repaired_solve_remeasure.py binds SHIPPED_RESIDUAL_BOUND = GATE_RESIDUAL_TOLERANCE and its literal key label at_or_below_shipped_hard_coded_1e_6 is now stale.",
+  "plan": "nova:diiid-forward-onboarding",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that GATE_RESIDUAL_TOLERANCE in benchmarks/diiid_forward_gs_match.py read its registered 1e-5 criterion; line 192 now aliases GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE (1.0e-5 declared at line 188).\nVERDICT done_when: the done-when is the gate constant reading its registered value; the reviewed run's own gate-head.log records the head gate at 9 passed EXIT=0, tests/test_diiid_forward_gs_match.py:29-33 asserts the alias and the 1.0e-5 literal, and negative-control-red.log (1 failed, EXIT=1) shows it reddens on the old literal.\nVERDICT write_paths: read the manifest's declared paths; the base..head diff is exactly benchmarks/diiid_forward_gs_match.py, tests/test_diiid_forward_gs_match.py and docs/evidence/fragments/diiid-forward-onboarding/dfo-gate-pin.html.\nVERDICT manifest: read; it names the changed paths, gate-head.log (9 passed), negative-control-red.log (1 failed, EXIT=1) and the follow-on on derived_criterion_family.py; its account matches the code and logs I read.\nVERDICT diff: read commit b0ff19bab against base f2bac518; one commit, three files, the constant aliased in place and one regression test added, with no production solver file touched.\nCALL_SITES: benchmarks/diiid_repaired_solve_remeasure.py:55, benchmarks/strict_exit_incidence.py:670, benchmarks/diiid_prescribed_profile_forward.py:188, benchmarks/diiid_forward_gs_match.py:1900\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/diiid_forward_gs_match.py:192 aliases GATE_RESIDUAL_TOLERANCE to REGISTERED_RESIDUAL_TOLERANCE declared 1.0e-5 at line 188, which is exactly the goal.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/test_diiid_forward_gs_match.py:30-33 asserts the alias and the 1.0e-5 literal and is recorded green in the reviewed run's own gate-head.log, but the gate covers only the focused file and did not reach the consumer benchmarks/derived_criterion_family.py:235.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f2bac518 b0ff19bab is exactly the three declared write paths with no production solver file and no concurrent node's path touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_diiid_forward_gs_match.py:30-31 reddens when GATE_RESIDUAL_TOLERANCE is set back to 1.0e-6 (negative-control-red.log: 1 failed, EXIT=1), though two of its three assertions compare constants that move together so only the 1.0e-5 literal is independent.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/diiid_forward_gs_match.py:189-192 follows the module's registered-constant idiom with a note naming the problem it removes and no plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change aliases the module's existing REGISTERED_RESIDUAL_TOLERANCE rather than defining a second criterion, forking no capability.\nFINDING benchmarks/derived_criterion_family.py:235 blocking: the change removes the literal text GATE_RESIDUAL_TOLERANCE = 1.0e-6 that _diiid_criterion asserts is present in benchmarks/diiid_forward_gs_match.py, so the guard now raises RuntimeError the DIII-D hard-coded gate reading changed; tests/test_derived_criterion_family.py::test_banked_receipt_matches_regeneration errors at head while the guard passes at base, a reachable regression in a sibling outside this node's declared write paths.\nFINDING tests/test_derived_criterion_family.py:243 follow-on: test_source_registration_changes_fail_closed replaces the now-absent literal GATE_RESIDUAL_TOLERANCE = 1.0e-6 with 2.0e-6, so the replace is a no-op and the test still passes only because the guard reddens on the missing literal for an unrelated reason; its intended assertion no longer exercises the literal-substitution path.",
+  "review_run_id": "r-20261008T021252434381-review-of-dfo-gate-pin",
+  "reviewed_base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "reviewed_commit": "b0ff19bab4bcb7b12265031742977ecbea3468df",
+  "reviewed_head_sha": "b0ff19bab4bcb7b12265031742977ecbea3468df",
+  "reviewed_revision": "b0ff19bab4bcb7b12265031742977ecbea3468df",
+  "reviewed_run_id": "r-20261008T015304108875-dfo-gate-pin",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-gate-pin",
+  "reviewer_node": "review-of-dfo-gate-pin",
+  "reviewer_run_id": "r-20261008T021252434381-review-of-dfo-gate-pin",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T02:33:09.630053+00:00",
+  "total": 114,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha b0ff19bab4bcb7b12265031742977ecbea3468df is the reviewed worktree's HEAD (git -C <worktree> rev-parse HEAD) and git status --porcelain is empty.",
+    "reviewed_base_sha f2bac518e47057cec01dd505c6dbbba7c8892b3c is HEAD^; git diff f2bac518 b0ff19bab4bcb7b12265031742977ecbea3468df --name-status is exactly the three declared paths (M benchmarks/diiid_forward_gs_match.py, A docs/evidence/fragments/diiid-forward-onboarding/dfo-gate-pin.html, M tests/test_diiid_forward_gs_match.py), 28 insertions 1 deletion, no file under nova/ touched.",
+    "the gate constant reads its registered value: benchmarks/diiid_forward_gs_match.py:192 is GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE with REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5 at line 188 and preregistration()['solver']['relative_residual_tolerance'] = REGISTERED_RESIDUAL_TOLERANCE at line 402.",
+    "the added regression test reddens on the pre-change literal: negative-control-red.log reruns tests/test_diiid_forward_gs_match.py::test_gate_residual_tolerance_reads_the_registered_criterion with the literal restored to 1.0e-6 -> 1 failed, EXIT=1 (assert 1e-06 == 1e-05).",
+    "the reachable sibling regression reproduces at head and not at base: in a scratch tree holding the base benchmarks/diiid_forward_gs_match.py the guard string GATE_RESIDUAL_TOLERANCE = 1.0e-6 is present (count 1) and absent at head (count 0); running tests/test_derived_criterion_family.py::test_banked_receipt_matches_regeneration from the reviewed worktree at head errors with RuntimeError 'the DIII-D hard-coded gate reading changed' (benchmarks/derived_criterion_family.py:236, review-sibling-regression-head.log, EXIT=1)."
+  ]
+}

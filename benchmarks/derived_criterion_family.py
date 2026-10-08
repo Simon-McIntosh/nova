@@ -232,8 +232,10 @@ def _diiid_criterion(
 ) -> dict[str, Any]:
     if "REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5" not in consumer_source:
         raise RuntimeError("the DIII-D registered residual reading changed")
-    if "GATE_RESIDUAL_TOLERANCE = 1.0e-6" not in consumer_source:
-        raise RuntimeError("the DIII-D hard-coded gate reading changed")
+    if "GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE" not in consumer_source:
+        raise RuntimeError(
+            "the DIII-D gate must read the registered residual tolerance"
+        )
 
     rungs = mesh["rungs"]
     coarse = float(rungs[0]["solver"]["terminal_relative_residual"])

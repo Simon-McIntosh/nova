@@ -1212,9 +1212,9 @@
     "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json": "f2b14c3b0b974991db9def51b6a67a2dd93ad4f3d866d1afcebf191d9e8d46ce",
     "docs/figures/mast-catalog-gpu-solve/jitted-eager-parity-gate.json": "2e6bf51cb3134bce2c9da3c5a55a23a32df3d3544d3d17143ca969e1e00af6b1",
     "docs/figures/mast-catalog-gpu-solve/parity-divergence-attribution.json": "2c2c856375b53f0d4bfdce81133dbcef39b314acad6c3a59f2b1b52849cca7f7",
-    "docs/figures/forward-operator-refinement/event-resolved-amplification.json": "bf26f40c41712de34e6b17c18a128172f68ac9929072266c3d0fac4393228e49",
-    "tests/test_equilibrium_forward_reference.py": "8df3bd2daab83bd681f7fbbd9b8b2e464e30a23088e4abc498811d315ca6cccb",
-    "benchmarks/diiid_forward_gs_match.py": "648496f0d17f1fd24d48feff47daa27136d5fc5ba8349cd220a996a4c1e5709c",
+    "docs/figures/forward-operator-refinement/event-resolved-amplification.json": "87ed69a446764decf1ac63cd299aef9368bf28c661efac428e30d32b4ba43be6",
+    "tests/test_equilibrium_forward_reference.py": "b5ca86a4ef9ee5addc414518a32493be1deb73faca466d979b3b0ec4ee604290",
+    "benchmarks/diiid_forward_gs_match.py": "508038b9771d7ff742eeba149f35a9890cc84b1fa3da4640ca46b4dc705de805",
     "benchmarks/jitted_eager_parity_gate.py": "438ad2cc872b5d697b714c79b7df79992633c3a21ddaf02d95f3c601ca540690"
   }
 }

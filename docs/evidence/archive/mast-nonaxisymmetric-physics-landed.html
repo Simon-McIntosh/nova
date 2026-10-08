@@ -60,6 +60,11 @@
     <p><code>benchmarks/mast_toroidal_probe_orientation.py</code> sought to infer each toroidal-field probe's orientation from shots that drive a known toroidal field with no plasma, promoting it only on held-out agreement within 2 %. Receipt: <code>docs/figures/mast-toroidal-probe-orientation/receipt.json</code>.</p><p><strong>Verdict: 36 of 36 catalog probes unresolved.</strong> None of the 577 toroidal-field-only vacuum shots carries level-2 toroidal-probe data, and no independently sourced, signed absolute TF reference exists. The positive-control shot sees only 3 measured channels. Synthetic tests pin the inference: a flipped probe is inferred as flipped, and an inference above 2 % held-out is reported unresolved. Review 94/120. Follow-ons left as debt while §6 is deferred: the cohort adapter duplicates the TF-average benchmark's, and the rendered receipt is not test-guarded.</p><p><strong>Consequence:</strong> together with the TF-average result, §6 has no independent observable of the toroidal field in this archive. It is deferred until a toroidal-probe record on vacuum shots, or a sourced TF turn count with a calibrated feed-current channel, is found.</p>
   </section>
 
+  <section id="coil-case-temperature">
+    <h2>§4 — no can temperature is recorded for the fitted shots</h2>
+    <p><code>benchmarks/mast_coil_case_temperature.py</code> searched for coil-case can or vessel temperature evidence on each of the 168 shots the passive held-out fit used. Receipt: <code>docs/figures/mast-coil-case-temperature/receipt.json</code>. <strong>0 of 131 training and 0 of 37 held-out shots have a sourced can temperature</strong>, so all 168 stay unknown rather than assumed. The cited reference steel reaches 0.900 µΩ·m at 415.15 K (414.4–415.9 K from tabulation rounding), so a warm can remains physically possible but is not evidenced. A test pins the temperature-to-resistivity conversion on the cited reference points, and a 100 K shift moves the implied resistivity across the threshold. Review 101/120. Follow-ons left as debt: the 0.900 ceiling is restated rather than imported from <code>mast_seed_parameters.py</code>, the store-metadata read duplicates the TF-average benchmark's, and the rendered receipt is not test-guarded.</p>
+  </section>
+
 </main>
 </body>
 </html>

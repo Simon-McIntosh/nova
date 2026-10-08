@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="cfs-wrap-prerequisites"><meta name="plan-title" content="Point-jet wrapping prerequisites">
-<meta name="plan-summary" content="Near-collinear tangent and read executable measured; three CPU-expensive edge rows marked slow, matched suite arms running">
+<meta name="plan-summary" content="Near-collinear tangent and read executable measured; matched suite arms timed out in the second of nine modules">
 <meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="partial">
 <meta name="plan-recorded-at" content="2026-10-08">
 <title>Point-jet wrapping prerequisites | nova</title>
@@ -36,7 +36,12 @@
 </tbody></table>
 <p>Each row ran once in its own CPU process with a 900 s pytest timeout. The three long compiles were stopped after their ten-minute classification was established; no pytest verdict is claimed for them. The same parameter markers apply to each row&#x27;s identity and dropped-term check, since both call the same JIT identity path. Their H200 identity evidence remains in the edge-term record; assertions and tolerances are unchanged.</p>
 <h2 id="cfs-wrap-prerequisites-suite">Suite comparison</h2>
-<p>The first serial CPU driver stopped in the baseline edge-integrand compile after more than 1,000 s and produced no suite delta. The three measured slow identity rows and their dropped-term controls are now excluded from the fast selection; the four shorter edge identity rows remain selected. Two all_debug jobs, 1282049 for the orientation base and 1282050 for the head, are running the same eight Biot files and topology read file, one fresh process per module with the repository root conftest. The base arm copies the marked edge test file before collection. Completion and the failure delta are pending those jobs&#x27; terminal summaries.</p>
+<p>The first serial CPU driver stopped in the baseline edge-integrand compile after more than 1,000 s and produced no suite delta. The three measured slow identity rows and their dropped-term controls were then excluded from the fast selection; the four shorter edge identity rows remain selected. All_debug jobs 1282049 (orientation base) and 1282050 (head) selected the same eight Biot files and topology read file, one fresh process per module with the repository root conftest. The base arm copied the marked edge test file before collection.</p>
+<table><thead><tr><th>Arm</th><th>Finished module</th><th>Second module</th><th>Job result</th></tr></thead><tbody>
+<tr><td>Orientation base</td><td>Edge terms: 2 failed, 8 passed, 13 deselected, 1 xfailed in 760.25 s</td><td>Elliptic recurrences: first 3 selected rows passed; no module summary</td><td>TIMEOUT at 00:59:16</td></tr>
+<tr><td>Head</td><td>Edge terms: 2 failed, 8 passed, 13 deselected, 1 xfailed in 767.74 s</td><td>Elliptic recurrences: first 3 selected rows passed; no module summary</td><td>TIMEOUT at 00:59:16</td></tr>
+</tbody></table>
+<p>The completed edge module has the same two failure IDs in both arms: <code>second_residual</code> and <code>flux_line_moments</code>. Each job finished only one of nine modules and printed no <code>SUITE_COMPLETED</code> marker, so the full not-slow suite delta is unreadable. The two collector receipts have <code>completed: false</code>; the remaining elliptic rows require a separate scope or execution budget before this gate can be judged.</p>
 <h2 id="cfs-wrap-prerequisites-receipts">Receipts</h2>
-<p>Run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites</code>. Logs: <code>h200-prerequisites.log</code>, <code>h200-reference.log</code>, <code>negative-control.log</code>, <code>size-guard-control-qualified.log</code>, <code>baseline-suite.log</code> and <code>after-suite.log</code>. The first H200 job also records its 132-cell JSON receipt.</p>
+<p>Run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites</code>. Logs: <code>h200-prerequisites.log</code>, <code>h200-reference.log</code>, <code>negative-control.log</code>, <code>size-guard-control-qualified.log</code>, <code>baseline-all-debug-binding.log</code> and <code>after-all-debug-binding.log</code>. The first H200 job also records its 132-cell JSON receipt; <code>baseline-suite.json</code> and <code>after-suite.json</code> record the incomplete arms.</p>
 </main></body></html>

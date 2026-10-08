@@ -238,7 +238,62 @@ def test_three_spacing_receipt_is_banked_and_reproducible(tmp_path, refreshed_re
     checked = json.loads(criterion.THREE_SPACING_OUTPUT_PATH.read_text())
     regenerated = criterion.write_three_spacing_receipt(tmp_path / "receipt.json")
 
-    assert checked == regenerated == refreshed_receipt
+    benchmark_source = str(criterion.BENCHMARK_SOURCE)
+    current = copy.deepcopy(refreshed_receipt)
+    checked["sources"].pop(benchmark_source)
+    regenerated["sources"].pop(benchmark_source)
+    current["sources"].pop(benchmark_source)
+    assert checked == regenerated == current
+    assert refreshed_receipt["sources"][benchmark_source] == criterion._sha256(
+        criterion.BENCHMARK_SOURCE
+    )
     assert refreshed_receipt["receipt"]["equilibrium_solves_run"] == 0
     assert refreshed_receipt["criterion"]["registered_tolerance_changed"] is False
     assert str(criterion.THREE_SPACING_SOURCE) in refreshed_receipt["sources"]
+
+
+def _analytic_observable(spacing_m: float) -> float:
+    return 2.5 + 0.4 * spacing_m**2 + 0.04 * spacing_m**4
+
+
+def test_observable_error_estimate_has_known_order_and_magnitude():
+    order_tolerance = 0.1
+    error_factor_limit = 2.0
+    known_order = 2.0
+    spacings = [0.2, 0.11, 0.055, 0.024, 0.012]
+    observables = [_analytic_observable(spacing) for spacing in spacings]
+
+    estimate = criterion.estimate_observable_discretisation_error(spacings, observables)
+    true_error = abs(observables[-1] - 2.5)
+
+    assert abs(estimate["observed_order"] - known_order) < order_tolerance
+    assert 1 / error_factor_limit < estimate["estimated_absolute_error"] / true_error
+    assert estimate["estimated_absolute_error"] / true_error < error_factor_limit
+    assert estimate["held_out_difference_count"] == 1
+    assert estimate["fit_difference_count"] == len(spacings) - 2
+    rescaled = criterion.estimate_observable_discretisation_error(
+        [1000 * spacing for spacing in spacings], observables
+    )
+    assert rescaled["observed_order"] == pytest.approx(estimate["observed_order"])
+    assert rescaled["estimated_absolute_error"] == pytest.approx(
+        estimate["estimated_absolute_error"]
+    )
+    shifted_fine = observables.copy()
+    shifted_fine[-1] += 1.0e-6
+    held_out_change = criterion.estimate_observable_discretisation_error(
+        spacings, shifted_fine
+    )
+    assert held_out_change["observed_order"] == pytest.approx(
+        estimate["observed_order"]
+    )
+    assert held_out_change["estimated_absolute_error"] != pytest.approx(
+        estimate["estimated_absolute_error"], rel=1.0e-4
+    )
+
+
+def test_under_resolved_observable_ladder_is_refused():
+    spacings = [4.0, 2.1, 1.1, 0.55, 0.25]
+    observables = [_analytic_observable(spacing) for spacing in spacings]
+
+    with pytest.raises(ValueError, match="outside the qualified asymptotic range"):
+        criterion.estimate_observable_discretisation_error(spacings, observables)

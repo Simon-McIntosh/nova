@@ -7,6 +7,8 @@ from dataclasses import fields
 from collections import Counter
 import hashlib
 import json
+import multiprocessing
+import pickle
 from pathlib import Path
 import subprocess
 
@@ -200,7 +202,7 @@ def shot_jacobian(shot, prepared, step, screen):
         if keep[i]
         and target.channel not in refused
         and target.channel in wave.probes
-        and np.isfinite(wave.probes[target.channel][indices]).all()
+        and np.count_nonzero(np.isfinite(wave.probes[target.channel][indices])) >= 8
     ]
     if len(selected) < 8:
         raise ValueError("fewer than eight finite, far-field, non-refused probes")
@@ -218,19 +220,39 @@ def shot_jacobian(shot, prepared, step, screen):
         intervals,
     )
     quiet = np.interp(time, wave.time, wave.baseline_mask.astype(float)) == 1.0
-    passive -= passive[quiet].mean(axis=0)
-    nuisance -= nuisance[quiet].mean(axis=0)
     # Score the drive and the following switch-off tail, not the quiet prefix.
     active = np.any(np.abs(currents) >= EXCITATION_CURRENT, axis=1)
     occupied = np.flatnonzero(active)
     if not occupied.size:
         raise ValueError("resampled drives have no deliberate excitation")
     score = (time >= time[occupied[0]]) & (time <= time[occupied[-1]] + 0.1)
+    supported = np.column_stack(
+        [
+            np.interp(
+                time,
+                wave.time,
+                np.isfinite(wave.probes[model.targets[i].channel]).astype(float),
+            )
+            == 1.0
+            for i in selected
+        ]
+    )
+    scored = supported & score[:, None]
+    for column in range(len(selected)):
+        baseline = supported[:, column] & quiet
+        if np.count_nonzero(baseline) < 8 or np.count_nonzero(scored[:, column]) < 8:
+            scored[:, column] = False
+            continue
+        passive[:, column] -= passive[baseline, column].mean(axis=0)
+        nuisance[:, column] -= nuisance[baseline, column].mean(axis=0)
+    admitted_columns = np.flatnonzero(scored.sum(axis=0) >= 8)
+    if admitted_columns.size < 8:
+        raise ValueError("fewer than eight probes with baseline and transient coverage")
     matrix = (
         np.column_stack(
             [
-                passive[score].reshape(-1, len(names)),
-                nuisance[score].reshape(-1, len(scales)),
+                passive[scored],
+                nuisance[scored],
             ]
         )
         / SENSOR_FLOOR
@@ -238,7 +260,8 @@ def shot_jacobian(shot, prepared, step, screen):
     compact = np.linalg.qr(matrix, mode="r")
     row = {
         "shot": shot,
-        "channels": [model.targets[i].channel for i in selected],
+        "channels": [model.targets[selected[i]].channel for i in admitted_columns],
+        "channel_sample_counts": scored.sum(axis=0)[admitted_columns].tolist(),
         "sample_count": int(score.sum()),
         "observation_count": matrix.shape[0],
         "window_seconds": [float(time[score][0]), float(time[score][-1])],
@@ -258,6 +281,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--progress", type=Path, required=True)
     parser.add_argument("--step", type=float, default=0.001)
+    parser.add_argument("--processes", type=int, default=4)
     args = parser.parse_args()
     if args.step <= 0:
         parser.error("step must be positive")
@@ -284,8 +308,37 @@ def main():
         key = configuration.physical_digest
         if key not in cache:
             print(f"GEOMETRY building={key}", flush=True)
-            cache[key] = prepare(configuration)
-            print(f"GEOMETRY ready={key}", flush=True)
+            import nova.imas.mast_passive_inductance as owner
+            from nova.biot.polygon import polygon_greens
+
+            with multiprocessing.get_context("fork").Pool(args.processes) as pool:
+
+                def blocked_greens(radius, height, vertices):
+                    if radius.size < 1024:
+                        return polygon_greens(radius, height, vertices)
+                    blocks = pool.starmap(
+                        polygon_greens,
+                        [
+                            (r, z, vertices)
+                            for r, z in zip(
+                                np.array_split(radius, args.processes),
+                                np.array_split(height, args.processes),
+                                strict=True,
+                            )
+                        ],
+                    )
+                    return tuple(
+                        np.concatenate([block[i] for block in blocks]) for i in range(3)
+                    )
+
+                owner.polygon_greens = blocked_greens
+                try:
+                    cache[key] = prepare(configuration)
+                finally:
+                    owner.polygon_greens = polygon_greens
+            cache_path = args.progress.parent / ("geometry-" + key + ".pickle")
+            cache_path.write_bytes(pickle.dumps(cache[key]))
+            print(f"GEOMETRY ready={key} cache={cache_path}", flush=True)
         try:
             group_names, block, row = shot_jacobian(shot, cache[key], args.step, screen)
         except (ValueError, KeyError, FileNotFoundError) as error:
@@ -374,7 +427,7 @@ def main():
             {
                 key: value
                 for key, value in row.items()
-                if key not in ("channels", "source_identities")
+                if key not in ("channels", "source_identities", "channel_sample_counts")
             }
             for row in records
         ],
@@ -404,6 +457,7 @@ def main():
             "rodgr circuits excluded; result conditional on that reduced circuit model",
             "vertical drive scales use an explicitly assumed decade interval",
             "uniform linear current interpolation; refinement recorded separately",
+            "each probe is scored only on finite interpolation-supported samples",
             "admitted channels use the recorded pooled systematic sensor floor",
             "zero initial passive current; no unmeasured prior history inferred",
         ],

@@ -34,7 +34,9 @@ _CASE_TEMPERATURE = re.compile(
     re.IGNORECASE,
 )
 _VESSEL_OR_BAKE = re.compile(r"vessel.*temp|temp.*vessel|bake|heater", re.I)
-_TEMPERATURE = re.compile(r"temp|thermocouple|bake|heater", re.I)
+_TEMPERATURE = re.compile(
+    r"(?<![a-z])(?:temp(?:erature)?|thermocouple|bake|heater)(?![a-z])", re.I
+)
 
 
 def reference_resistivity(temperature_k: float) -> float:

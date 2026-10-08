@@ -53,10 +53,20 @@ def test_plasma_temperature_cannot_be_classified_as_can_evidence() -> None:
                 "label": "Coil case temperature",
                 "units": "K",
             },
+            "efm/all_times/.zattrs": {
+                "name": "efm/all_times",
+                "description": "All times of attempted reconstruction",
+                "units": "s",
+            },
         }
     )
     assert [row["path"] for row in channels["unrelated"]] == ["act/ss_temperature"]
     assert [row["path"] for row in channels["case"]] == ["case/coil_case_temperature"]
+    assert not any(
+        row["path"] == "efm/all_times"
+        for category in channels.values()
+        for row in category
+    )
     with pytest.raises(ValueError, match="sensor-to-can mapping"):
         _refuse_unmapped_temperature(11884, channels)
 
@@ -87,5 +97,13 @@ def test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence() -> None:
     )
     assert all(row["source_sha256"] for row in receipt["shots"])
     assert receipt["counts"]["unknown"] == 168
+    assert set(receipt["excluded_plasma_temperature_channels"]) == {
+        "20420",
+        "20586",
+        "21001",
+        "22165",
+        "24654",
+        "24784",
+    }
     sliding_joint_shot = next(row for row in receipt["shots"] if row["shot"] == 25722)
     assert "not a PF can reading" in sliding_joint_shot["operations_context"]

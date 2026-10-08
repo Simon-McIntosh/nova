@@ -1,0 +1,45 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:45:06.773Z",
+  "dispatched_at": "2026-10-08T01:31:57Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/mast-nonaxisymmetric-physics.html:56",
+      "id": "reasoning-1",
+      "reason": "the mechanism names the correct owner (`nova/imas/mast_misfit_harmonics.py`) in the same paragraph, so the mislocated clause is descriptive colour and does not redirect the work.",
+      "text": "\u00a75 states \"nothing in nova/calibrate/ reads it [the saddle-loop geometry]\", but the constraint bank \u00a75 extends to consume them is `ConstraintSet`/`assemble`/`bank_shots` in `nova/imas/mast_misfit_harmonics.py`; `nova/calibrate/` holds no saddle-loop consumer. The ownership sentence risks sending a node to search `nova/calibrate/` for the absent consumer rather than to the module \u00a75 actually extends",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "c48d04310ac841584af06b9962e047b978101e29bf073d844367d6e5513283ce",
+  "plan_slug": "mast-nonaxisymmetric-physics",
+  "plan_version": 10,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T013126375618-plan-review-of-mast-nonaxisymmetric-physics",
+  "reviewed_blob_sha": "bb0e5a14d86073b7481a189b4ff82ab24d1be832",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module resolves in the tree (`mast_fitted_parameters.py`, `mast_passive_decay_modes.py`, `mast_passive_inductance.py`, `mast_vacuum_cohort.py`, `mast_seed_parameters.py`, `mast_geometry.py`, `io_magnetics.py`, `mast_misfit_harmonics.py`, `mast_vacuum_response.py`, `machine_evidence.py`) and every named symbol resolves (`VERTICAL_PAIR_EXPLAINED`, `PASSIVE_DECAY_INTERVAL`, `PASSIVE_DOMINANT_SHARE`, `PASSIVE_DECAY_SHOTS`, `PASSIVE_DECISIVE_ATTRIBUTIONS`, `NOMINAL_SLOWEST_MODE`, `ConstraintSet`/`assemble`/`bank_shots`, `sensor_adjudication_records`, `TurnDisposition`/`aggregate_turns`, `fitted_evidence`/`refined_evidence`, `SUPERSEDED_SEED_PATHS`).",
+    "done_when": "pass \u2014 \u00a74 names a negative control (\"permutes the drive columns across shots must remove the held-out improvement\") and a falsifiable passivity test (positive dissipation, eigenvalues of L\u207b\u00b9R positive); \u00a75 names two controls (fit with the loops removed, and per-loop geometry assignment permuted), either of which must remove the improvement.",
+    "evidence_paths": "pass \u2014 the sections name measurement outputs (singular spectrum, held-out residuals, traversal-sign disposition, tail width), not session-scratch paths; no node-local or ephemeral path is asserted.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach the new symbols or prose; the leak-free \u00a75 language names mechanisms (identifiability, traversal sign, localised-tail width).",
+    "reasoning": "a finding \u2014 \u00a74's stated root cause matches its cited evidence and its mechanism produces its done-when; \u00a75 states the same 36\u201343 % P4/P5 residue and the same even-n leakage bounds (n2 0.9798, n4 0.9207, n6 0.8270) that `mast-misfit-toroidal-harmonics.html` carries, and its cited `mast_misfit_harmonics.py` is indeed the \"harmonic maps of the MAST vacuum misfit, per drive group\" module. One locator inconsistency: \u00a75 says \"nothing in nova/calibrate/ reads it\" while the consuming constraint bank it extends lives in `nova/imas/mast_misfit_harmonics.py`, not `nova/calibrate/`.",
+    "single_goal": "pass \u2014 \u00a75 explicitly decomposes into four ordered nodes (a)\u2013(d), each closing on its own verdict; \u00a74 carries one deliverable.",
+    "wiring": "pass \u2014 \u00a75's data-links (`mast-misfit-toroidal-harmonics`, `machine-description-retirement`) both resolve to existing plans, and \u00a77's links to \u00a74/\u00a75/\u00a76 are consistent; \u00a74 declares no link and needs none (its inputs are sibling `nova/imas/mast_*` modules)."
+  },
+  "section_digests": {
+    "_document": "39b24fc80be04896efa69f23e299e45ba90ea06bc09f70c1fd7e007b4aeec137",
+    "s1": "f4b8eb5def5568e59998ae548c63c33bccab1accde8469ae275e5c52200e6506",
+    "s2": "75b6ff86311477ed15da86c822cd295e2319afe6692e1c92dea6331fedd375ba",
+    "s3": "aa0ed83b4bd3bc1db5933706559b763d2ead68582e9f41eb88c537d79cb022ce",
+    "s4": "9b962f21334ef169722d5b028ca54856e6c2d1a347db8b3eda4dd46e3cdc567c",
+    "s5": "b96bcf620116225cae23083aa0d73aa95089c417048675f9f662202fb729cc83",
+    "s6": "3abd28e7b69d9fea9b9a4fc78afb5715bd4c4f05a7e8938ca32911fa18141144",
+    "s7": "b967a168312e3f7ac05bebdc125bda83cc4f422f453538eb2aee587e2ea41fd6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:47:17.832001+00:00"
+}

@@ -1,0 +1,449 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "codex-astra",
+  "base_sha": "646b68b8e9481178e41cc2059c8a9a534fa9b9b3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 6706048,
+      "cached_input_tokens_cumulative": 6706048,
+      "input_tokens": 6891096,
+      "input_tokens_cumulative": 6891096,
+      "output_tokens": 31478,
+      "output_tokens_cumulative": 31478,
+      "reasoning_output_tokens": 7417,
+      "reasoning_output_tokens_cumulative": 7417
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 635,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 278,
+        "name": "main",
+        "path": "benchmarks/mast_tf_average.py"
+      },
+      "window_line": 391
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 278,
+        "name": "main",
+        "path": "benchmarks/mast_tf_average.py"
+      },
+      "window_line": 390
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 278,
+        "name": "main",
+        "path": "benchmarks/mast_tf_average.py"
+      },
+      "window_line": 402
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "87d247246ea633a98d2175b4510076daaca2248a",
+    "1227e204bb0ee1b3cd2272ca950ab5a34213203d",
+    "d95f9296a500b9498421633b33f2cc9c2bbc398b"
+  ],
+  "completed_at": "2026-10-08T05:02:17Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T04:47:32Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "nova/imas/mast_fitted_parameters.py",
+    "xmb/cc_mt_201..212",
+    "arbitrary/unspecified",
+    "error_field_02/05",
+    "1629.64/1611.33",
+    "turn/conductor"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --basetemp /tmp/mast-tf-average-verification -q /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-tf-average/tests/test_mast_tf_average.py -> 18 passed, EXIT=0; baseline existing TF blocker -> 1 passed; synthetic current x1.1 mutation -> 1 failed, 17 passed, EXIT=1; all_debug job 1282011 ran /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044638953254-mast-tf-average/data-pass-inline.sh -> EXIT=0 (first attempt 1282010 failed the positive control and is retained).",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044638953254-mast-tf-average/baseline.log"
+  },
+  "impl_move": {
+    "at_complete": 0.27,
+    "at_dispatch": 0.12,
+    "plan": "mast-nonaxisymmetric-physics",
+    "verdict": "moved"
+  },
+  "lane_advisory": {
+    "backend": "codex-astra",
+    "burn_multiple": 1.856244023939655,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-astra' is projected to exhaust at 2026-10-11T10:36:33Z, which is after this node's 3600s horizon ending 2026-10-08T05:46:52.920016+00:00",
+    "horizon_ends_at": "2026-10-08T05:46:52.920016+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T04:46:51Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-11T10:36:33Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 520087,
+    "state": "quiet",
+    "utilisation_pct": 26.0
+  },
+  "lane_declaration": {
+    "backend": "codex-astra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T04:46:51Z",
+    "read_at": "2026-10-08T04:46:52Z",
+    "resolved_backend": "codex-astra",
+    "utilisation_pct": 26.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T05:02:17Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044638953254-mast-tf-average/manifest.md",
+  "member": "disposable-r-20261008T044638953254-mast-tf-average",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_mast_tf_average.py::test_independent_current_matches_field"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_mast_tf_average.py::test_independent_current_matches_field"
+    ],
+    "declaration": "scaling the TF coil current by 1.1 in the synthetic case must fail the tolerance",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044638953254-mast-tf-average/negative-control-inline.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044638953254-mast-tf-average/negative-control-inline.log",
+    "test_paths": [
+      "tests/test_mast_tf_average.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "mast-tf-average",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1921,
+          "cached_input_tokens": 653532,
+          "input_tokens": 655455,
+          "output_tokens": 692,
+          "reasoning_output_tokens": 292,
+          "total_tokens": 656147,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "benchmarks/mast_tf_average.py writes a receipt under docs/figures/mast-tf-average that names the measured R*Bphi observable it used with its source and provenance (a TF coil current channel with its turn count, toroidal-field probes, or another store product) and every candidate it rejected with the reason; over the TOROIDAL_FIELD_ONLY shots of nova/imas/mast_calibration_cohort.py, the nominal TF average is compared shot by shot with that measurement against a pre-registered relative agreement tolerance of 2 percent, and the verdict is promoted (median and 95th-percentile relative difference within 2 percent), bounded (stated interval) or unresolved; if no independent measurement exists the receipt says so with the paths tried rather than comparing the model with itself; toroidal-probe orientation is treated as the unresolved quantity mast_seed_parameters.py records, never assumed; no plasma response or passive mismatch is absorbed into a TF correction; tests/test_mast_tf_average.py pins the comparison on a synthetic case; the data pass runs on all_debug as one job with its log in the manifest",
+    "estimated_hours": 1.0,
+    "goal": "Compare the nominal MAST toroidal-field axisymmetric average R*Bphi with an independent measurement on toroidal-field-only vacuum shots",
+    "id": "mast-tf-average",
+    "lane_declaration": {
+      "backend": "codex-astra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T04:46:51Z",
+      "read_at": "2026-10-08T04:46:52Z",
+      "resolved_backend": "codex-astra",
+      "utilisation_pct": 26.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T044638953254-mast-tf-average/manifest.md",
+    "negative_control": "scaling the TF coil current by 1.1 in the synthetic case must fail the tolerance",
+    "plan": "mast-nonaxisymmetric-physics",
+    "requested_backend": "codex-astra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/mast_tf_average.py",
+      "tests/test_mast_tf_average.py",
+      "docs/figures/mast-tf-average",
+      "docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-tf-average.html",
+      "docs/figures/mast-nonaxisymmetric-physics/mast-tf-average"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.8560252241714374,
+      "derived": 0.1540927333720238,
+      "drain_hours": 168.0,
+      "effective_limit": 0.1540927333720238,
+      "elapsed_fraction": 0.14008430306547617,
+      "elapsed_hours": 23.534162914999996,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T04:47:01+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.74,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.26,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.16764800000000002,
+      "decided_by": "window",
+      "margin": 0.569852,
+      "name": "mast-tf-average",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.26
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.986494,
+        "observed_at": "2026-10-08T04:47:01+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.26,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-astra",
+    "member": "codex",
+    "node": "mast-tf-average",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T04:47:01.986494+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Named lane: lead directive sends hard work to codex, and the local router grants this session few slots. Hard: the TF reference product is recorded absent in nova and toroidal-probe orientation is unresolved, so the risk is comparing the model with a quantity derived from itself. Deep reasoning, elevated risk. Read IMAS data with imas-python only.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5020.064,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "mast-nonaxisymmetric-physics",
+  "plan_impl_at_dispatch": 0.12,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d95f9296a500b9498421633b33f2cc9c2bbc398b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "646b68b8e9481178e41cc2059c8a9a534fa9b9b3",
+    "reviewed_head_sha": "d95f9296a500b9498421633b33f2cc9c2bbc398b",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 17,
+      "reuse": 19,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T044638953254-mast-tf-average",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "s24-nova",
+  "session_harness": "codex",
+  "session_id": "01a119d6-dde1-73e0-98c0-35577ba2fc67",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 18,
+  "throughput": {
+    "cumulative_cached_input_tokens": 6706048,
+    "cumulative_input_tokens": 13597144,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 38895
+  },
+  "time_budget": "60m",
+  "tool_steps": 127.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 885,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T05:02:21Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T04:47:49Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T044638953254-mast-tf-average",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 311,
+    "worker_pid": 1016124
+  },
+  "worker_seconds": 885,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

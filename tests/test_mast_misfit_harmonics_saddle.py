@@ -106,3 +106,37 @@ def test_saddle_identity_must_resolve_in_ids():
         mh.saddle_sensor_class(
             two_loops(), ["missing"], [[1], [2]], PolynomialFlux.flux, [0.1]
         )
+
+
+def test_control_gain_is_compared_with_real_gain_not_its_sign():
+    from benchmarks.mast_saddle_admission import admission_verdict
+
+    assert admission_verdict(0.2, 0.0, 0.01)
+    assert not admission_verdict(0.2, 0.0, 0.19)
+    assert not admission_verdict(0.2, 0.15, 0.0)
+    assert not admission_verdict(-0.2, 0.0, -0.3)
+
+
+def test_waveform_fit_recovers_shared_response_with_binary_nuisance():
+    from benchmarks.mast_saddle_admission import fit_bank, score
+
+    design = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 2.0], [3.0, -1.0]])
+    coefficients = np.array([[2.0, 1.0], [3.0, -2.0]])
+    signs = np.array([1, 1, -1, 1])
+    generator = np.random.default_rng(26)
+    current = generator.normal(size=(40, 2))
+    response = (design @ coefficients) * signs[:, None]
+    y = current @ response.T
+    xx = np.repeat((current.T @ current)[None], 4, axis=0)
+    xy = y.T @ current
+    yy = np.sum(y * y, axis=0)
+    count = np.full(4, 40)
+    stats = xx, xy, yy, count
+    fitted, choices, detail = fit_bank(
+        design, stats, np.ones(4), np.array([False, False, True, True])
+    )
+    residual, _ = score(design, fitted, choices, stats)
+    np.testing.assert_allclose(residual, 0, atol=1e-7)
+    np.testing.assert_allclose(fitted, coefficients, atol=1e-4)
+    np.testing.assert_array_equal(choices, signs)
+    assert detail["normal_rank"] == 4

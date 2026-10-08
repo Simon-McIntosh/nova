@@ -35,6 +35,7 @@ from tangent_identity import (  # noqa: E402
     compile_ratio,
     identity_row,
     load_base_module,
+    relative_error,
     truncation_active,
     worst,
     finite_fraction,
@@ -314,6 +315,7 @@ def test_tangent_compiles_within_bound(name):
 
 _EDGE_REFERENCE_PROBE = r"""
 import json, sys
+from multiprocessing import get_context
 import mpmath as mp
 mp.mp.dps = 50
 
@@ -351,7 +353,8 @@ def reference(record):
     difference = (displaced-value)/step
     error = abs(difference-derivative)/max(abs(derivative),mp.mpf('1e-100'))
     return float(value),float(derivative),float(error)
-print(json.dumps([reference(row) for row in json.load(sys.stdin)]))
+with get_context("fork").Pool(4) as pool:
+    print(json.dumps(pool.map(reference, json.load(sys.stdin))))
 """
 
 
@@ -359,8 +362,8 @@ print(json.dumps([reference(row) for row in json.load(sys.stdin)]))
 def _near_edge_reference_rows():
     """Audit smooth controls and both ends against the 50-digit exact integral.
 
-    The fixed audit includes the CPU identity's largest discrepancy as well as
-    targets near both endpoints and the extended line. Every full-domain sample
+    The audit includes every disagreement above the exact identity bound, plus
+    fixed controls near both endpoints and the extended line. Every domain sample
     remains in the base-JVP identity row; this independent reference measures
     where reproducing the program's derivative differs from the integral.
     """
@@ -385,6 +388,8 @@ def _near_edge_reference_rows():
         ]
     )
     got, expected, _ = _identity("second_residual")
+    disagreement = relative_error(got[1], expected[1]) > EXACT_TOLERANCE
+    indices = np.unique(np.concatenate((indices, np.flatnonzero(disagreement))))
     primals, tangents = CASES["second_residual"][-2:]
     records = []
     for index in indices:

@@ -20,9 +20,10 @@
   <title>Retire the Bespoke Machine-Description Layer | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-10-02">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-10-08">
 <meta name="plan-effort-hours" content="12.0">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
 </head>
 <body>
   <main class="plan-doc">
@@ -106,6 +107,7 @@
         </tr>
       </tbody>
     </table>
+    <p><strong>Inventory corrections from the 2026-10-06 design review.</strong> The census of importers of the retired names finds seven sites the table above omits, and each is rewired before its import is deleted: <code>nova/media/sources/mast_efit.py:29</code> (<code>shaped_section_vertices</code> from <code>nova.catalog.mast_geometry</code>); <code>scripts/mast_reference_evidence/contours.py:110</code> (<code>MachineGeometryRegistry</code>); <code>nova/imas/mast_solve_inputs.py:74-75</code> and <code>nova/io/sourcemap.py:44</code>, which import <code>machine_drive</code> and <code>machine_evidence</code>, the two modules <code>machine_artifact.py</code> itself depends on; and in imas-ambix, <code>imas_ambix/gs/machine_identity.py:152</code>, <code>imas_ambix/gs/artifact_geometry.py:767</code> and <code>imas_ambix/gs/artifact_resolution.py:315-316</code>. The runtime owners that absorb registry identity on the ambix side are <code>default_registry()</code> in <code>imas_ambix/gs/machine_identity.py</code> and <code>imas_ambix/gs/artifact_resolution.py</code>, which imports <code>publish_refined_artifact</code>; they move in the same beat as the identity tests. The DDv4 floor's re-home imports DD-version enumeration from the installed <code>imas_data_dictionaries</code> package, exactly as <code>machine_artifact.py:18</code> does, rather than re-implementing it. The re-home node's first deliverable is the ambix module that owns the publication path: <code>imas_ambix/data/</code>, beside <code>description_identity.py</code>, unless that node shows the package cannot host it. The machine-agnostic content-addressed cache primitives are not retired: <code>forward-profile-validator-set</code> lifts them into a store under <code>nova/database/</code>, and only the machine-description parts of <code>machine_artifact.py</code> are deleted.</p>
     <p>Nova keeps what it is for: the Green's-function kernels, the geometry parametrisation and
     solver, the calibration package (decoupled from the registry first), and the frame and biot
     machinery that consume a description someone else produced.</p>
@@ -126,6 +128,7 @@
     beat without either a deprecation window or a scope cut that retires only the MAST-specific
     surfaces while the producer absorbs the generic capability. The decision should be re-put to
     the owner against this corrected inventory.</p>
+    <p><strong>The equivalence gate is a comparison over existing machinery, not a build.</strong> The producer already asserts observable identity for a description whose geometry moves, in <code>imas_ambix/data/description_identity.py</code>, from the MAST map under <code>imas_ambix/data/machine_maps/</code>. The gate drives that producer and compares its description with the one nova's registry serves today.</p>
     <p><em>Done-when:</em> every surface in the §3 inventory removed or re-homed per its
     disposition, with the geometry verified equivalent through the producer beforehand — the same
     44 unique loop positions and the same 43-of-46 join, demonstrated numerically, not asserted;
@@ -165,6 +168,11 @@
     <pre class="r-fu-prompt">/reckon-build machine-description-retirement</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20261008-s24-classification" data-who="s24-nova coordinator" data-when="2026-10-08T01:30:00Z">
+    <div class="r-comment-body">S24 build classification: §1 and §2 are context. §3's deletions are deferred: they wait on the equivalence gate, on imas-ambix migrating off nova.imas.machine_artifact, and on DIII-D publication moving to the producer after the owner's oras push (deadline 2026-10-18). §4's equivalence demonstration (f-mdr-001, sharpened by f-mdr-currency-2026-10-01) is the one node buildable now; nothing is deleted under it. §3 and §4 now carry the design review's inventory corrections and reuse targets.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

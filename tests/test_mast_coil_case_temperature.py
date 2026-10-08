@@ -27,9 +27,9 @@ def test_cited_reference_points(temperature_k: float, expected: float) -> None:
 def test_synthetic_can_temperature_crosses_the_fit_ceiling() -> None:
     cooler_can_k = 350.0
     warmer_can_k = 450.0
-    assert warmer_can_k - cooler_can_k == 100.0
     assert reference_resistivity(cooler_can_k) < FIT_CEILING
     assert reference_resistivity(warmer_can_k) > FIT_CEILING
+    assert warmer_can_k - cooler_can_k == 100.0
     assert crossing_temperature(FIT_CEILING) == pytest.approx(415.15151515)
 
 
@@ -87,6 +87,7 @@ def test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence() -> None:
     )
     assert receipt["counts"]["training"] == 131
     assert receipt["counts"]["held_out"] == 37
+    assert receipt["split_source"] == "docs/figures/mast-passive-held-out/split.json"
     assert receipt["positive_control"]["metadata_records_present"] == 168
     assert {row["shot"] for row in receipt["shots"]} == set(
         split["training"] + split["held_out"]

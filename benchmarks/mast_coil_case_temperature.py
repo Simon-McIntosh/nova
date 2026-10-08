@@ -172,7 +172,7 @@ def build_receipt(split_path: Path = SPLIT, store: Path = SHOT_STORE) -> dict[st
             "Does sourced can temperature put the reference steel at the "
             "fitted resistivity ceiling?"
         ),
-        "split_source": str(split_path),
+        "split_source": split_path.resolve().relative_to(ROOT).as_posix(),
         "material_source": reference["sources"]["nist"],
         "bake_source": reference["sources"]["akers"],
         "public_programme_source": {

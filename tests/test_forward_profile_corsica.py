@@ -123,7 +123,12 @@ def cases(tmp_path_factory):
     assert jax.config.jax_enable_x64 is True
     try:
         bundle = vc.resolve_validator_case(
-            "iter_corsica_130506", store_root=tmp_path_factory.mktemp("corsica-store")
+            "iter_corsica_130506",
+            store_root=(
+                vc.default_store_root()
+                if os.environ.get(vc.STORE_ROOT_ENVIRONMENT)
+                else tmp_path_factory.mktemp("corsica-store")
+            ),
         )
     except vc.LayerRegistryUnreachable as error:
         pytest.skip(f"validator registry unreachable: {error}")

@@ -742,3 +742,323 @@ class TestTransientReading:
         assert payload["excitation_family"] == "p4"
         assert payload["window_span"] > 0.0
         assert math.isfinite(payload["signal_to_noise"])
+
+
+class TestDrivenSensitivity:
+    """Driven sensitivities separate decay shape from uncertain drive amplitude."""
+
+    @staticmethod
+    def jacobian(*, collinear=False, step=1e-4):
+        from nova.imas.mast_passive_decay_modes import grouped_driven_jacobian
+
+        time = np.linspace(0.0, 3.0, 301)
+        currents = np.minimum(time, 0.5)[:, None]
+        rates = np.array([2.0, 2.0 if collinear else 5.0])
+        return grouped_driven_jacobian(
+            np.eye(2),
+            rates,
+            np.ones((1, 2)),
+            np.ones((2, 1)),
+            np.array([[0.2]]),
+            time,
+            currents,
+            ("case", "vessel"),
+            {"case": (0.5, 2.0), "vessel": (0.5, 2.0)},
+            np.ones(1),
+            np.array([[0.5, 1.5]]),
+            difference_step=step,
+        )
+
+    def test_two_groups_have_two_directions_and_collinear_groups_have_one(self):
+        from nova.imas.mast_passive_decay_modes import projected_spectrum
+
+        counts = []
+        for collinear in (False, True):
+            names, passive, nuisance = self.jacobian(collinear=collinear)
+            assert names == ("case", "vessel")
+            result = projected_spectrum(
+                passive.reshape(-1, 2) / 1e-4,
+                nuisance.reshape(-1, 1) / 1e-4,
+            )
+            counts.append(result.identifiable_count)
+            assert result.nuisance_rank == 1
+        assert counts == [2, 1]
+
+    def test_drive_aligned_passive_direction_is_removed(self):
+        from nova.imas.mast_passive_decay_modes import projected_spectrum
+
+        time = np.linspace(0.0, 1.0, 101)
+        drive_response = np.exp(-time)
+        passive = np.column_stack([drive_response, time * drive_response]) / 1e-3
+        for width in (1e-12, 1.0, 1e12):
+            result = projected_spectrum(passive, passive[:, :1] * width)
+            assert np.count_nonzero(result.fixed_drive_singular_values > 1.0) == 2
+            assert result.identifiable_count == 1
+            assert result.singular_values[-1] < 1e-9
+
+    def test_piecewise_linear_drive_matches_analytic_current(self):
+        from nova.imas.mast_passive_decay_modes import driven_field
+
+        for time in (np.linspace(0.0, 1.0, 101), np.array([0.0, 0.01, 0.2, 1.0])):
+            result = driven_field(
+                np.array([[2.0]]),
+                np.array([4.0]),
+                np.array([[3.0]]),
+                np.array([[0.5]]),
+                np.array([[0.2]]),
+                time,
+                time[:, None],
+            )
+            expected = -3.0 * 0.5 / 4.0 * (1.0 - np.exp(-2.0 * time)) + 0.2 * time
+            np.testing.assert_allclose(result[:, 0], expected, rtol=1e-12, atol=1e-14)
+
+    def test_derivative_converges_and_drive_column_contains_induced_response(self):
+        from nova.imas.mast_passive_decay_modes import driven_field
+
+        _, passive, nuisance = self.jacobian()
+        _, refined, _ = self.jacobian(step=5e-5)
+        np.testing.assert_allclose(passive, refined, rtol=2e-7, atol=1e-10)
+        time = np.linspace(0.0, 3.0, 301)
+        current = np.minimum(time, 0.5)[:, None]
+        field = driven_field(
+            np.eye(2),
+            np.array([2.0, 5.0]),
+            np.ones((1, 2)),
+            np.ones((2, 1)),
+            np.array([[0.2]]),
+            time,
+            current,
+        )
+        np.testing.assert_allclose(nuisance[:, :, 0], 0.5 * field, atol=1e-14)
+        assert np.max(np.abs(nuisance[:, 0, 0] - 0.1 * current[:, 0])) > 0.1
+
+    def test_compressed_rows_preserve_rms_spectrum(self):
+        from nova.imas.mast_passive_decay_modes import projected_spectrum
+
+        _, passive, nuisance = self.jacobian()
+        passive, nuisance = passive[:, 0], nuisance[:, 0]
+        original = projected_spectrum(passive, nuisance)
+        compact = np.linalg.qr(np.column_stack([passive, nuisance]), mode="r")
+        result = projected_spectrum(
+            compact[:, :2], compact[:, 2:], observation_count=301
+        )
+        np.testing.assert_allclose(
+            result.singular_values, original.singular_values, rtol=1e-12
+        )
+
+    def test_nonpassive_circuit_is_refused(self):
+        from nova.imas.mast_passive_decay_modes import driven_field
+
+        with pytest.raises(DecayModeError, match="invalid driven"):
+            driven_field(
+                np.eye(1),
+                np.array([-1.0]),
+                np.ones((1, 1)),
+                np.ones((1, 1)),
+                np.ones((1, 1)),
+                np.array([0.0, 1.0]),
+                np.zeros((2, 1)),
+            )
+
+
+def test_driven_cohort_keeps_partial_probe_coverage(monkeypatch):
+    """A finite transient remains usable when the surrounding record has gaps."""
+    import importlib.util
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    path = (
+        Path(__file__).parents[1]
+        / "docs/figures/mast-passive-identifiability/measure.py"
+    )
+    spec = importlib.util.spec_from_file_location("passive_spectrum_measurement", path)
+    measurement = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(measurement)
+    time = np.linspace(0.0, 3.0, 301)
+    current = np.where(time >= 0.3, 2000.0, 0.0)
+    probes = {f"probe{index}": np.where(time <= 2.0, 1.0, np.nan) for index in range(8)}
+    wave = ShotWaveforms(
+        shot=7,
+        time=time,
+        drives={"sol": current},
+        probes=probes,
+        sensors=probes,
+        plasma_current=np.zeros_like(time),
+        sample_mask=np.ones(time.size, dtype=bool),
+        baseline_mask=time < 0.3,
+    )
+    monkeypatch.setattr(measurement, "read_shot_waveforms", lambda _: wave)
+    monkeypatch.setattr(
+        measurement,
+        "read_error_field_drive",
+        lambda *args, **kwargs: SimpleNamespace(unmeasured=False),
+    )
+    model = SimpleNamespace(
+        families=("sol",),
+        targets=tuple(SimpleNamespace(channel=name) for name in probes),
+        response=np.ones((8, 1)),
+        admissible_probes=lambda _: np.ones(8, dtype=bool),
+    )
+    prepared = (
+        model,
+        np.eye(1),
+        np.array([2.0]),
+        np.ones((8, 1)),
+        np.ones((1, 1)),
+        ("vessel",),
+        {"vessel": (0.5, 2.0)},
+        np.ones(1),
+        np.array([[0.5, 1.5]]),
+        {"physical_digest": "synthetic"},
+    )
+    names, compact, row = measurement.shot_jacobian(
+        7,
+        prepared,
+        0.01,
+        SimpleNamespace(refused=lambda _: ()),
+    )
+    assert names == ("vessel",)
+    assert len(row["channels"]) == 8
+    assert 0 < row["observation_count"] < 8 * row["sample_count"]
+    assert row["observation_count"] == sum(row["channel_sample_counts"])
+    assert compact.shape == (2, 2)
+    assert np.isfinite(compact).all()
+
+
+@pytest.fixture
+def spectrum_measurement():
+    """Load the executable measurement driver without invoking its entry point."""
+    import importlib.util
+    from pathlib import Path
+
+    path = (
+        Path(__file__).parents[1]
+        / "docs/figures/mast-passive-identifiability/measure.py"
+    )
+    spec = importlib.util.spec_from_file_location("passive_factor_measurement", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_persisted_factors_reproduce_joint_spectrum_and_keep_missing_shots(
+    spectrum_measurement,
+    tmp_path,
+):
+    """A restart needs only durable factors, not the interrupted process's arrays."""
+    module = spectrum_measurement
+    generator = np.random.default_rng(93)
+    matrices = [generator.normal(size=(20, 3)), generator.normal(size=(17, 3))]
+    for shot, matrix in enumerate(matrices, start=1):
+        module.write_factor(
+            tmp_path / f"{shot}.npz",
+            np.linalg.qr(matrix, mode="r"),
+            {
+                "shot": shot,
+                "contract": "matching",
+                "status": "admitted",
+                "observation_count": len(matrix),
+            },
+        )
+    module.write_factor(
+        tmp_path / "3.npz",
+        np.empty((0, 3)),
+        {
+            "shot": 3,
+            "contract": "matching",
+            "status": "refused",
+            "observation_count": 0,
+            "reason": "no quiet prefix",
+        },
+    )
+    (tmp_path / "4.npz.interrupted.tmp").write_bytes(b"incomplete writer")
+    compact, records, refused, missing, observations = module.assemble_factors(
+        [1, 2, 3, 4],
+        tmp_path,
+        "matching",
+        3,
+    )
+    assert len(records) == 2
+    assert [row["shot"] for row in refused] == [3]
+    assert missing == [4]
+    assert observations == 37
+    joined = np.vstack(matrices)
+    expected = module.projected_spectrum(joined[:, :2], joined[:, 2:])
+    result = module.projected_spectrum(
+        compact[:, :2],
+        compact[:, 2:],
+        observation_count=observations,
+    )
+    np.testing.assert_allclose(
+        result.singular_values, expected.singular_values, rtol=1e-12
+    )
+
+
+@pytest.mark.parametrize("identity,shot", [("foreign", 5), ("matching", 6)])
+def test_factor_with_wrong_identity_is_refused(
+    spectrum_measurement, tmp_path, identity, shot
+):
+    module = spectrum_measurement
+    path = tmp_path / "5.npz"
+    module.write_factor(
+        path,
+        np.eye(3),
+        {
+            "shot": 5,
+            "contract": "matching",
+            "status": "admitted",
+            "observation_count": 10,
+        },
+    )
+    with pytest.raises(ValueError, match="identity mismatch"):
+        module.read_factor(path, identity, 3, shot)
+
+
+def test_nonfinite_factor_is_refused(spectrum_measurement, tmp_path):
+    module = spectrum_measurement
+    path = tmp_path / "5.npz"
+    matrix = np.eye(3)
+    matrix[0, 0] = np.nan
+    module.write_factor(
+        path,
+        matrix,
+        {
+            "shot": 5,
+            "contract": "matching",
+            "status": "admitted",
+            "observation_count": 10,
+        },
+    )
+    with pytest.raises(ValueError, match="invalid QR factor"):
+        module.read_factor(path, "matching", 3, 5)
+
+
+def test_completed_factor_is_reused_without_rescoring(
+    spectrum_measurement, tmp_path, monkeypatch
+):
+    module = spectrum_measurement
+    module.write_factor(
+        tmp_path / "5.npz",
+        np.eye(3),
+        {
+            "shot": 5,
+            "contract": "matching",
+            "status": "admitted",
+            "observation_count": 10,
+        },
+    )
+    monkeypatch.setattr(module, "_DIRECTORY", tmp_path, raising=False)
+    monkeypatch.setattr(
+        module,
+        "_CONTRACT",
+        {
+            "identity": "matching",
+            "groups": ["case", "vessel"],
+            "drives": ["coil"],
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(
+        module, "shot_jacobian", lambda *args: pytest.fail("rescored completed shot")
+    )
+    assert module.score_task((5, False)) == (5, "", "admitted", "reused")

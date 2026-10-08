@@ -1,4 +1,4 @@
-"""Identify passive resistance from free decays, with the inductance in the loop.
+"""Identify passive resistance from free decays and coil-driven transients.
 
 A decay pattern is a **mode**: a specific mixture of every circuit at once, set
 by the inductance and the resistance together.  So scoring an observed pattern
@@ -20,7 +20,8 @@ shot -- the amplitudes the switch-off happened to leave behind.  Because the
 amplitudes are free and linear, they are projected out exactly, and what is
 actually being fitted is the resistance model shared by every shot.
 
-**Turn counts do not enter.**  The initial condition is fitted per shot rather
+**Turn counts do not enter the free-decay fit.** The initial condition is fitted
+per shot rather
 than propagated from the drive, so nothing here depends on how many turns a coil
 has or on what its supply did.  That is deliberate: the excitation sets the
 amplitudes and the passive circuit sets everything else, and only the second is
@@ -33,6 +34,11 @@ measured section geometry times its material's resistivity, so the unknowns are 
 few resistivity multipliers -- one per class of conductor, declared before
 fitting -- and the geometry does the rest.  Whether a multiplier is identified at
 all is measured by profiling it, not assumed from the fit converging.
+
+Driven-transient sensitivities propagate the recorded coil currents from a quiet
+initial state and project every drive-scale column out of the grouped resistance
+Jacobian. Their RMS spectrum measures local sensitivity above the sensor floor;
+it does not promote a parameter or replace held-out prediction tests.
 """
 
 from __future__ import annotations
@@ -1325,3 +1331,209 @@ def leave_one_out(
         }
         for name, values in spread.items()
     }
+
+
+@dataclass(frozen=True)
+class DrivenSpectrum:
+    """Local interval-scaled sensitivities in RMS sensor-floor units.
+
+    A unit parameter displacement is the smaller log-distance from the seed to
+    either bound. Singular values above one resolve combinations of groups, not
+    necessarily individual groups. Projection allows every nuisance coefficient
+    to vary without penalty; it is conservative relative to a bounded fit. This
+    local calculation is not a certification over all parameter values.
+    """
+
+    singular_values: np.ndarray
+    fixed_drive_singular_values: np.ndarray
+    directions: np.ndarray
+    nuisance_rank: int
+
+    @property
+    def identifiable_count(self) -> int:
+        """Count orthogonal passive directions exceeding the RMS sensor floor."""
+
+        return int(np.count_nonzero(self.singular_values > 1.0))
+
+
+def projected_spectrum(
+    passive: np.ndarray,
+    nuisance: np.ndarray,
+    *,
+    observation_count: int | None = None,
+) -> DrivenSpectrum:
+    """Project whitened nuisance columns out before computing the passive SVD.
+
+    Inputs may be the columns of an economy QR factor accumulated over shots;
+    ``observation_count`` then retains the number of original scalar readings.
+    RMS normalization deliberately avoids claiming independent repeated samples
+    average a systematic sensor floor away.
+    """
+
+    passive = np.asarray(passive, dtype=float)
+    nuisance = np.asarray(nuisance, dtype=float)
+    if (
+        passive.ndim != 2
+        or nuisance.ndim != 2
+        or passive.shape[0] != nuisance.shape[0]
+        or not np.isfinite(passive).all()
+        or not np.isfinite(nuisance).all()
+        or min(passive.shape) == 0
+    ):
+        raise DecayModeError("sensitivity matrices must be finite with shared rows")
+    count = passive.shape[0] if observation_count is None else observation_count
+    if count < passive.shape[0]:
+        raise DecayModeError("observation count cannot be smaller than matrix rows")
+    # Normalize columns so a narrow interval cannot hide an independent nuisance.
+    norms = np.linalg.norm(nuisance, axis=0)
+    active = nuisance[:, norms > 0.0] / norms[norms > 0.0]
+    left, values, _ = np.linalg.svd(active, full_matrices=False)
+    tolerance = (
+        np.finfo(float).eps * max(active.shape) * values[0] if values.size else 0.0
+    )
+    rank = int(np.count_nonzero(values > tolerance))
+    basis = left[:, :rank]
+    projected = passive - basis @ (basis.T @ passive)
+    _, singular, directions = np.linalg.svd(projected, full_matrices=False)
+    fixed = np.linalg.svd(passive, compute_uv=False)
+    return DrivenSpectrum(
+        singular / math.sqrt(count), fixed / math.sqrt(count), directions, rank
+    )
+
+
+def driven_field(
+    inductance: np.ndarray,
+    resistance: np.ndarray,
+    coupling: np.ndarray,
+    mutual: np.ndarray,
+    direct: np.ndarray,
+    time: np.ndarray,
+    drives: np.ndarray,
+) -> np.ndarray:
+    """Propagate ``L i' + R i = -M u'`` from zero passive current.
+
+    Currents ``drives`` are ampere-turns, shaped (samples, coils); the returned
+    field is (samples, probes). Inputs are piecewise linear between samples.
+    The generalized symmetric eigenproblem uses every passive mode. Each step
+    integrates its constant forcing exactly, including for nonuniform clocks.
+    The caller must start before excitation, or supply a different initial-state
+    model; subtracting a later current pedestal cannot reconstruct missing history.
+    """
+
+    from scipy.signal import lfilter
+
+    time = np.asarray(time, dtype=float)
+    drives = np.asarray(drives, dtype=float)
+    resistance = np.asarray(resistance, dtype=float)
+    inductance = np.asarray(inductance, dtype=float)
+    coupling = np.asarray(coupling, dtype=float)
+    mutual = np.asarray(mutual, dtype=float)
+    direct = np.asarray(direct, dtype=float)
+    if (
+        time.ndim != 1
+        or time.size < 2
+        or drives.shape != (time.size, mutual.shape[1])
+        or inductance.shape != (resistance.size, resistance.size)
+        or mutual.shape[0] != resistance.size
+        or coupling.shape[1] != resistance.size
+        or direct.shape != (coupling.shape[0], mutual.shape[1])
+        or any(
+            not np.isfinite(a).all()
+            for a in (time, drives, resistance, inductance, coupling, mutual, direct)
+        )
+        or np.any(resistance <= 0.0)
+        or np.any(np.diff(time) <= 0.0)
+        or not np.allclose(inductance, inductance.T, rtol=1e-12, atol=0.0)
+    ):
+        raise DecayModeError("invalid driven circuit matrices, clock or resistance")
+    rates, vectors = eigh(np.diag(resistance), inductance)
+    if np.any(rates <= 0.0):
+        raise DecayModeError("driven circuit must have strictly positive decay rates")
+    increments = np.diff(drives, axis=0) @ mutual.T @ vectors
+    steps = np.diff(time)
+    modes = np.zeros((time.size, resistance.size))
+    if np.allclose(steps, steps[0], rtol=1e-10, atol=1e-14):
+        factor = np.exp(-steps[0] * rates)
+        gain = -np.expm1(-steps[0] * rates) / (steps[0] * rates)
+        for mode in range(resistance.size):
+            modes[1:, mode] = lfilter(
+                [-gain[mode]], [1.0, -factor[mode]], increments[:, mode]
+            )
+    else:
+        factor = np.exp(-steps[:, None] * rates)
+        gain = -np.expm1(-steps[:, None] * rates) / (steps[:, None] * rates)
+        for sample in range(1, time.size):
+            modes[sample] = (
+                factor[sample - 1] * modes[sample - 1]
+                - gain[sample - 1] * increments[sample - 1]
+            )
+    return modes @ (coupling @ vectors).T + drives @ direct.T
+
+
+def grouped_driven_jacobian(
+    inductance: np.ndarray,
+    resistance: np.ndarray,
+    coupling: np.ndarray,
+    mutual: np.ndarray,
+    direct: np.ndarray,
+    time: np.ndarray,
+    currents: np.ndarray,
+    groups: Sequence[str],
+    resistance_intervals: Mapping[str, tuple[float, float]],
+    drive_scales: np.ndarray,
+    drive_intervals: np.ndarray,
+    *,
+    difference_step: float = 1e-4,
+) -> tuple[tuple[str, ...], np.ndarray, np.ndarray]:
+    """Return interval-scaled passive and drive derivatives at the nominal seed.
+
+    Resistance intervals bound multipliers of the nominal circuit resistances.
+    Drive intervals bound signed ampere-turns per recorded ampere. All intervals
+    must contain their seeds strictly; no zero-width interval can fix a drive.
+    Returned arrays have shape (samples, probes, parameters), with passive
+    columns ordered by sorted component-family name and drive columns retaining
+    the caller's coil order. Drive derivatives include direct AND induced fields.
+    """
+
+    scales = np.asarray(drive_scales, dtype=float)
+    intervals = np.asarray(drive_intervals, dtype=float)
+    currents = np.asarray(currents, dtype=float)
+    resistance = np.asarray(resistance, dtype=float)
+    names = tuple(sorted(set(groups)))
+    if (
+        len(groups) != resistance.size
+        or not names
+        or intervals.shape != (scales.size, 2)
+        or currents.shape != (len(time), scales.size)
+        or not np.isfinite(intervals).all()
+        or not np.isfinite(scales).all()
+        or np.any(intervals[:, 0] >= scales)
+        or np.any(intervals[:, 1] <= scales)
+        or not 0.0 < difference_step < 0.1
+    ):
+        raise DecayModeError("every grouped parameter needs an open finite interval")
+    drive = currents * scales
+
+    def field_at(values: np.ndarray, inputs: np.ndarray) -> np.ndarray:
+        return driven_field(inductance, values, coupling, mutual, direct, time, inputs)
+
+    passive = []
+    for name in names:
+        lower, upper = resistance_intervals[name]
+        if not (0.0 < lower < 1.0 < upper < math.inf):
+            raise DecayModeError(
+                f"group {name} interval must enclose its positive seed"
+            )
+        radius = min(-math.log(lower), math.log(upper))
+        step = min(difference_step, radius / 2.0)
+        mask = np.asarray([group == name for group in groups], dtype=float)
+        plus = field_at(resistance * np.exp(step * mask), drive)
+        minus = field_at(resistance * np.exp(-step * mask), drive)
+        passive.append((plus - minus) * (radius / (2.0 * step)))
+    nuisance = []
+    for coil, scale in enumerate(scales):
+        inputs = np.zeros_like(currents)
+        radius = min(scale - intervals[coil, 0], intervals[coil, 1] - scale)
+        inputs[:, coil] = currents[:, coil] * radius
+        nuisance.append(field_at(resistance, inputs))
+    return names, np.stack(passive, axis=-1), np.stack(nuisance, axis=-1)

@@ -1,0 +1,752 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 18511360,
+      "cached_input_tokens_cumulative": 18511360,
+      "input_tokens": 18694373,
+      "input_tokens_cumulative": 18694373,
+      "output_tokens": 51574,
+      "output_tokens_cumulative": 51574,
+      "reasoning_output_tokens": 21279,
+      "reasoning_output_tokens_cumulative": 21279
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1351,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_call_site_record",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "build_receipt_from_data",
+        "path": "benchmarks/derived_convergence_criterion.py"
+      },
+      "window_line": 484
+    },
+    {
+      "existing_function": {
+        "line": 65,
+        "name": "_fixture_summary",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "build_receipt_from_data",
+        "path": "benchmarks/derived_convergence_criterion.py"
+      },
+      "window_line": 490
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "build_receipt_from_data",
+        "path": "benchmarks/derived_convergence_criterion.py"
+      },
+      "window_line": 485
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "measure_production_receipt",
+        "path": "tests/test_conditioning_shrinkage.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "build_receipt_from_data",
+        "path": "benchmarks/derived_convergence_criterion.py"
+      },
+      "window_line": 482
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 557,
+        "name": "build_three_spacing_receipt_from_data",
+        "path": "benchmarks/derived_convergence_criterion.py"
+      },
+      "window_line": 685
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "013fcc42730b8efa27bdacccd72a839ddaede9b1",
+    "4f92683f697e506ce9ed3190f92da41d017b2b55",
+    "3a1c0bd41711f2aec7002529db7897a199b5b3f5"
+  ],
+  "completed_at": "2026-10-08T02:38:39Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T01:52:52Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "benchmarks/efit_forward_parity_slice.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-error-estimator/tests/test_derived_convergence_criterion.py -q --basetemp /tmp/dfo-after-nnmvy72t/pytest-temp; EXIT=1, 1 pre-existing failure, 15 passed",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015153719966-dfo-error-estimator/baseline-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.8,
+    "plan": "diiid-forward-onboarding",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.0592086650769914,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-13T21:00:39Z, which is after this node's 3600s horizon ending 2026-10-08T02:52:09.281697+00:00",
+    "horizon_ends_at": "2026-10-08T02:52:09.281697+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T01:52:07Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-13T21:00:39Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 530571,
+    "state": "quiet",
+    "utilisation_pct": 13.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T01:52:07Z",
+    "read_at": "2026-10-08T01:52:09Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 13.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T02:38:39Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015153719966-dfo-error-estimator/manifest.md",
+  "member": "disposable-r-20261008T015153719966-dfo-error-estimator",
+  "negative_control": {
+    "added_failure_ids": [
+      "../../../../../../../../tmp/dfo-order-control-bwf3fog5/test_derived_convergence_criterion.py::test_observable_error_estimate_has_known_order_and_magnitude"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_derived_convergence_criterion.py::test_three_spacing_receipt_is_banked_and_reproducible"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "../../../../../../../../tmp/dfo-order-control-bwf3fog5/test_derived_convergence_criterion.py::test_observable_error_estimate_has_known_order_and_magnitude"
+    ],
+    "declaration": "an under-resolved ladder (spacings outside the asymptotic range) must be refused, and the analytic-fixture check must fail when the known order is perturbed by 0.5",
+    "head_failure_ids": [
+      "tests/test_derived_convergence_criterion.py::test_three_spacing_receipt_is_banked_and_reproducible"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015153719966-dfo-error-estimator/negative-control-followon.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015153719966-dfo-error-estimator/negative-control-followon.log",
+    "test_paths": [
+      "tests/test_derived_convergence_criterion.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "dfo-error-estimator",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1303,
+          "cached_input_tokens": 412821,
+          "input_tokens": 414126,
+          "output_tokens": 367,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 414493,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "tests/test_derived_convergence_criterion.py proves the estimate on an analytic fixture with a closed-form discretisation error: the fitted order within 0.1 of the known order and the error magnitude within a factor of 2, both bounds written in the test before scoring; the same file refuses a deliberately under-resolved ladder rather than reporting it; the file passes in a fresh process (on all_debug if it exceeds ten CPU seconds) with the log path in the manifest; a log-log error-against-spacing figure for the fixture lands under docs/figures/discretisation-error-estimator",
+    "estimated_hours": 1.0,
+    "goal": "Extend benchmarks/derived_convergence_criterion.py with a non-circular, spacing-independent discretisation-error estimate of one observable across a resolution ladder",
+    "id": "dfo-error-estimator",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T01:52:07Z",
+      "read_at": "2026-10-08T01:52:09Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 13.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015153719966-dfo-error-estimator/manifest.md",
+    "negative_control": "an under-resolved ladder (spacings outside the asymptotic range) must be refused, and the analytic-fixture check must fail when the known order is perturbed by 0.5",
+    "plan": "diiid-forward-onboarding",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§11",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "benchmarks/derived_convergence_criterion.py",
+      "tests/test_derived_convergence_criterion.py",
+      "docs/figures/discretisation-error-estimator",
+      "docs/evidence/fragments/diiid-forward-onboarding/dfo-error-estimator.html",
+      "docs/figures/diiid-forward-onboarding/dfo-error-estimator"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.0590690131114637,
+      "derived": 0.1350242507614088,
+      "drain_hours": 168.0,
+      "effective_limit": 0.1350242507614088,
+      "elapsed_fraction": 0.12274931887400799,
+      "elapsed_hours": 20.621885570833342,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T01:52:17+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.87,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.13,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.04630600000000001,
+      "decided_by": "window",
+      "margin": 0.6911940000000001,
+      "name": "dfo-error-estimator",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.13
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.788055,
+        "observed_at": "2026-10-08T01:52:17+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.13,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "dfo-error-estimator",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T01:52:17.788055+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "codex",
+    "comment": "Moderate-to-hard numerical analysis, strict verification: a Richardson / solution-difference error estimator whose failure mode is a circular estimate that reports a solver stall as the discretisation error. Benchmark-side only; must not touch nova/equilibrium forward_operator, clip_quadrature, fixed_point or the topology read, which a concurrent sprint holds.",
+    "confidence": 0.36,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "codex",
+    "jev_latency_ms": 413.604,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 546.315,
+    "model": "gpt-6-sol",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 151635.002472,
+        "budget_reason": null,
+        "burn_multiple": 1.2618568585657552,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 60852,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.1723019042592595,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026584390441097318,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 151635.002472,
+        "budget_reason": null,
+        "burn_multiple": 1.2618568585657552,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 60852,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.1723019042592595,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026584390441097318,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 151635.002472,
+        "budget_reason": null,
+        "burn_multiple": 1.2618568585657552,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 60852,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 30.9,
+          "peak_utilisation_p90_pct": 45.5,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.1723019042592595,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026584390441097318,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 9,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 60852,
+          "headroom_pct": 73.6,
+          "peak_utilisation_p50_pct": 55.0,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 98,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 21,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 1
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 134.863472,
+        "budget_reason": null,
+        "burn_multiple": 1.059428036586915,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 60852,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.141040330185185,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13497849316947763,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 13.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 134.863472,
+        "budget_reason": null,
+        "burn_multiple": 1.059428036586915,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 60852,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.141040330185185,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13497849316947763,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 13.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 134.863472,
+        "budget_reason": null,
+        "burn_multiple": 1.059428036586915,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 60852,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.141040330185185,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13497849316947763,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 13.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.06,
+      "claude:claude-sonnet-5-5": 0.02,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0.02,
+      "codex:gpt-6-sol": 0.44,
+      "hold": 0.02,
+      "local:deepseek-v4.1-flash": 0.44
+    },
+    "rendered_token_estimate": 1988,
+    "usage": {
+      "cost": 0.000231168,
+      "input_tokens": 5504,
+      "output_tokens": 147
+    }
+  },
+  "plan": "diiid-forward-onboarding",
+  "plan_impl_at_dispatch": 0.8,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3a1c0bd41711f2aec7002529db7897a199b5b3f5",
+  "resume_waiver": null,
+  "review": null,
+  "review_tier": "full",
+  "review_waiver": {
+    "reason": "the reviewed revision 4f92683f passed 114/120; the only change after it is 3a1c0bd4, which restores the strict banked-digest assertion that review finding asked for (8 lines removed, 1 restored, test file only), so the promoted tip is the reviewed code plus the review-requested revert"
+  },
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T015153719966-dfo-error-estimator",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§11",
+  "session": "s24-nova",
+  "session_harness": "codex",
+  "session_id": "01a11936-d41b-72d0-8516-a912ce0d7ca0",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 2,
+  "throughput": {
+    "cumulative_cached_input_tokens": 18511360,
+    "cumulative_input_tokens": 37205733,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 72853
+  },
+  "time_budget": "60m",
+  "tool_steps": 101.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2747,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T02:38:46Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T02:30:35Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T015153719966-dfo-error-estimator",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 450,
+    "worker_pid": 4119008
+  },
+  "worker_seconds": 2747,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

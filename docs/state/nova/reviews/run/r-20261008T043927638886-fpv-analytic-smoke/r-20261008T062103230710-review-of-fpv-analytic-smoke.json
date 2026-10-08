@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: its manifest records no baseline_suite and no after_suite field, so neither arm reads a log and no base-vs-head delta can be formed from them. The head arm is re-derived independently at the reviewed head in a scratch tree (review-head-gate.log: 5 passed, EXIT=0, no FAILED or ERROR id), so added failures are a subset of an empty head-failure set and the run provably added none. The 1 failure in review-negative-control.log and in the reviewed negative-control.log is the declared mutation (coil current x1.5), not a gate arm.",
+  "call_site_count": 2,
+  "call_sites": [
+    {
+      "file": "nova/imas/validator_case.py",
+      "line": 231,
+      "symbol": "resolve_validator_case"
+    },
+    {
+      "file": "tests/test_forward_profile_analytic_smoke.py",
+      "line": 51,
+      "symbol": "resolve_validator_case (caller)"
+    }
+  ],
+  "completed_at": "2026-10-08T06:42:22.458Z",
+  "dispatched_at": "2026-10-08T06:21:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-profile-validator-set/fpv-analytic-smoke.html",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment's measure paragraph quotes the gate's emitted statement, whose residual is the dimensionless ratio (9.418e-10), and then adds the absolute residual 1.042e-12 Wb from 'the same state'. The test (test_analytic_map_residual_is_reported) prints only the ratio, so the absolute figure has no test guard; a future regeneration could change the ratio without the caption's absolute value being checked. Impact: minor; the number is correct today (probe: absolute 1.041843e-12 Wb) but is reproducible only through a bespoke probe rather than from the gate's own output."
+    },
+    {
+      "file": "manifest.md",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite or after_suite arms, so the reviewed run's designed base-vs-head delta reads no log; added failures can only be inferred from the head arm. I closed this independently (scratch tree at the reviewed head, 5 passed EXIT=0, module.__file__ = scratch copy), but the reviewed run's own record does not carry the arm. The prior review raised this; the increment did not touch it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the module change point is nova/imas/validator_case.py:231 resolve_validator_case (extra_layers parameter removed); its only caller is tests/test_forward_profile_analytic_smoke.py:51 resolve_validator_case('analytic', store_root=tmp_path/'store'), which passes no extra_layers, so the signature reduction is safe.",
+    "diff": "read commit by commit against base 5ae3ec946; three commits, three files, 1409 insertions / 1733 deletions (20 lines in validator_case.py, 26 in the fragment, 3096 in the regenerated SVG).",
+    "done_when": "the increment's goal for the reviewed run was to close the prior review's findings: caption numbers corrected, figure redrawn through nova.media with the axis off, unused extra_layers/_layer_specs removed. All three hold at cc6796218 (verified against the tree and by reproduction: 5 passed EXIT=0; control EXIT=1 residual 0.438).",
+    "goal": "plan nova:forward-profile-validator-set s5 rung 1: this node is the follow-up review of run r-20261008T043927638886-fpv-analytic-smoke covering only the commits gained since the prior review (base 5ae3ec946, head cc6796218). The three gained commits fix the three follow-on findings the prior review raised. Delivered and verified here.",
+    "manifest": "read; the reviewed manifest reports status complete, head gate 5 passed (analytic-smoke-head.log, now carrying a revision/worktree/command/date header) and a declared negative control at EXIT=1; its baseline_suite and after_suite fields are absent, so no base-vs-head arm exists.",
+    "write_paths": "the three named paths: docs/evidence/fragments/forward-profile-validator-set/fpv-analytic-smoke.html, docs/figures/forward-profile-validator-set/fpv-analytic-smoke/analytic-vacuum-flux-map.svg, nova/imas/validator_case.py; all inside the reviewed run's grant and this review's FENCE SCOPE."
+  },
+  "justifications": {
+    "durability": "The increment removes a dead seam and re-routes the figure through the repository's own painters: extra_layers and _layer_specs are gone with their imports cleaned (TYPE_CHECKING now imports only Sequence), so there is one way to declare a case layer, and the figure now follows the binding poloidal plotting rules rather than relying on a hand-built axes. The gate itself and its 1.5x coil-current control are unchanged and both reproduce (5 passed EXIT=0; control EXIT=1 residual 0.438). Residual gap: the gate emits the ratio only, so the caption's absolute-residual figure (1.042e-12 Wb) has no test guard and could desync from a future regeneration.",
+    "evidence": "Independently reproduced in a scratch tree extracted from the reviewed head (git archive cc6796218 -> $TMPDIR/review-fpv-analytic, module.__file__ confirming the scratch copy; logs/review-head-gate.log): the gate as a fresh process gives 5 passed, EXIT=0, matching the reviewed manifest (analytic-smoke-head.log, 5 passed). The declared negative control reproduces exactly (logs/review-negative-control.log): NOVA_VALIDATOR_CONTROL_SCALE=1.5 turns test_analytic_vacuum_flux_matches_the_reference red at EXIT=1 with residual 0.438122068927738 > MAP_BOUND 1e-3. A direct probe (probe_residual.py) confirms the corrected caption: absolute residual 1.041843e-12 Wb = ratio 9.4175316412e-10 of peak 1.1062803180e-03 Wb over 4224 of 4225 nodes (1 singular excluded), so the caption's 1.042e-12 Wb and 9.4175e-10 are accurate. Gaps: (a) the reviewed manifest still carries no baseline_suite/after_suite arms, so its designed base-vs-head delta reads no log (fresh-process head arm reproduced independently); (b) the gate emits only the dimensionless ratio, so the caption's absolute-residual figure is reproducible only through a bespoke probe, not from the gate's own output.",
+    "fit": "The delivered figure now obeys the repository's binding plotting rule (axis off, despined, no ticks or grid) and routes through nova.media, closing the prior fit defect; the in-panel direct labels ('grey: reference', 'blue: vacuum coil flux', the residual) follow the data-ink direct-label rule; the module keeps its dataclass + error-hierarchy + typed __all__ idiom and TYPE_CHECKING guard, and no plan/sprint/version label appears in any name or comment touched by the increment.",
+    "goal_fidelity": "This review covers only the commits the run gained since it was reviewed (base 5ae3ec946 -> head cc6796218): f4ff7b6f0 (drop the unused validator layer-extension seam), b762ae17f (redraw the analytic flux panel through the nova.media painters) and cc6796218 (state the analytic map residual as both absolute and relative). Each addresses exactly one of the three follow-on findings the prior review raised against the reviewed head, and all three are discharged: nova/imas/validator_case.py no longer carries extra_layers or _layer_specs (grep across nova/ and tests/ at head finds neither, and the only caller test_forward_profile_analytic_smoke.py:51 passes only case_key and store_root); the delivered SVG is now built through layout.poloidal_view / poloidal.draw_flux_contours / draw_coils with set_axis_*: the SVG carries zero xtick_/ytick_ groups, no spine group (only patch_1, the figure facecolour rect), and no dasharray or grid; and the fragment caption now states the absolute residual 1.042e-12 Wb beside the ratio 9.4175e-10 of peak, matching an independent probe of the reviewed head.",
+    "reuse": "The redraw reuses the package painters (poloidal_view, draw_flux_contours, draw_coils) rather than a lower-level axes; the refactor removes new surface rather than adding it; the caption states the residual from the same shared-level state the gate scores. Nothing new is reimplemented.",
+    "scope_discipline": "The three commits touch exactly the three paths named in the goal and inside the prompt FENCE SCOPE: docs/evidence/fragments/forward-profile-validator-set/fpv-analytic-smoke.html, docs/figures/forward-profile-validator-set/fpv-analytic-smoke/analytic-vacuum-flux-map.svg, nova/imas/validator_case.py (diffstat 3 files, 1409 insertions / 1733 deletions, all inside the grant, the large line count being SVG regeneration). No plan file, test file or out-of-scope path is touched by the increment."
+  },
+  "project": "nova",
+  "raw_text": "Review of run r-20261008T043927638886-fpv-analytic-smoke covering only the commits gained since the prior review (base 5ae3ec946, head cc6796218).",
+  "review_run_id": "r-20261008T062103230710-review-of-fpv-analytic-smoke",
+  "reviewed_base_sha": "5ae3ec946bb2d161b45240526c7532764024a6fc",
+  "reviewed_head_sha": "cc67962188f3a2212359920a7decc9f0531a8d2e",
+  "reviewed_run_id": "r-20261008T043927638886-fpv-analytic-smoke",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:36:22+00:00",
+  "total": 117
+}

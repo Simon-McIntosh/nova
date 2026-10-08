@@ -61,6 +61,13 @@
       "finding": "duplicate_owner-1",
       "reason": "",
       "when": "2026-10-08T01:13:16.377243+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "s24-nova",
+      "finding": "interface_budget-1",
+      "reason": "",
+      "when": "2026-10-08T01:13:29.288188+00:00"
     }
   ],
   "responses": {
@@ -69,6 +76,12 @@
       "by": "s24-nova",
       "reason": "",
       "when": "2026-10-08T01:13:16.377243+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "s24-nova",
+      "reason": "",
+      "when": "2026-10-08T01:13:29.288188+00:00"
     },
     "reuse_search-1": {
       "action": "acted",

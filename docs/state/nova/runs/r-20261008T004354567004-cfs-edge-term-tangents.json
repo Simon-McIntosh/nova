@@ -1,0 +1,1515 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "72112421cb157599b3e3e97b31f3d5f6246735d4",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 17231104,
+      "cached_input_tokens_cumulative": 17231104,
+      "input_tokens": 17518595,
+      "input_tokens_cumulative": 17518595,
+      "output_tokens": 91969,
+      "output_tokens_cumulative": 91969,
+      "reasoning_output_tokens": 45079,
+      "reasoning_output_tokens_cumulative": 45079
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1427,
+    "files": 5,
+    "removed": 153
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "tangent",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 3304,
+        "name": "__init__",
+        "path": "nova/biot/polygonanalytic.py"
+      },
+      "window_line": 3326
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 199
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 200
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 301,
+        "name": "compile_arm",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 301
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_term_tangents.py"
+      },
+      "run_function": {
+        "line": 301,
+        "name": "compile_arm",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 301
+    },
+    {
+      "existing_function": {
+        "line": 112,
+        "name": "test_non_mast_imas_pulse_runs_generic_calibration_kernels",
+        "path": "tests/calibrate/test_portability.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 383
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 383
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "_dataset_row",
+        "path": "tests/imas/test_diiid_machine_description.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 372
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "test_variant_set_exhausts_convention_digits_and_required_axes",
+        "path": "tests/imas/test_diiid_root_convention_sweep.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 372
+    },
+    {
+      "existing_function": {
+        "line": 331,
+        "name": "test_conditioned_elliptic_combinations_match_a_high_precision_arbiter",
+        "path": "tests/test_biotgreens.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 371
+    },
+    {
+      "existing_function": {
+        "line": 466,
+        "name": "test_hexagonal_target_rule_convergence_against_the_double_integral_arbiter",
+        "path": "tests/test_biotsectionaverage.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 371
+    },
+    {
+      "existing_function": {
+        "line": 580,
+        "name": "test_smooth_merit_brackets_relative_sup_for_distributed_residuals",
+        "path": "tests/test_fixed_point.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 372
+    },
+    {
+      "existing_function": {
+        "line": 243,
+        "name": "test_registry_contains_all_census_source_gaps",
+        "path": "tests/test_mast_catalog_geometry.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 372
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_the_seeded_held_out_extension_is_pinned_across_campaigns_and_polarities",
+        "path": "tests/test_parity_tolerances.py"
+      },
+      "run_function": {
+        "line": 362,
+        "name": "_near_edge_reference_rows",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "window_line": 372
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "compile_arm",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 535,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_term_tangents.py"
+      },
+      "window_line": 535
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 535,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_term_tangents.py"
+      },
+      "window_line": 535
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "716d859f0b501797e28849ec8878f0243de80cb1",
+    "6d14132d2b32fc867871afb52feeed6832adeca4",
+    "95044c7f6c010870684b65a6d908a356167f949d",
+    "de0fe46b9a58c4d33a3702edf73bd9960120aaaa",
+    "2a86d3ea5d0f2e698e7bc92e61f81ab3f770757d",
+    "7efac47d91cb6e8678923ea19a33eef0f2b5d7fe",
+    "baec3a5cf7acf8bd9ae2ca50dd08654e202b6f84",
+    "7d5852510c01c6901648e07aa19646e9824ec56b",
+    "5e6acbd41c0ddc764825228ff8fd811ba6df4ac5",
+    "4b56476fc32caf49341159079bccbd5f96f74568",
+    "a854ea58685b8a381a92f86937af0b0347aaa4bb"
+  ],
+  "completed_at": "2026-10-08T01:24:03.950Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T00:44:21Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest reports",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "scripts/nova_lane/run.sh",
+    "scheduler/payload"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/after-suite.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T01:44:05.607615+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T00:44:05Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "lane document carries no numeric 'mean_context'",
+    "generating": 0,
+    "headroom": 16,
+    "mean_context": "unknown",
+    "observed_at": "2026-10-08T00:43:41Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 24,
+      "aggregate_tokens_per_second": 19.471,
+      "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": "2026-10-08T00:43:41Z",
+      "runs": 0.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T01:24:03.950Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-08T01:43:56Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "lead directive 2026-10-08: difficult work runs on the codex lane. The edge-term tangents are the hardest family left, and the local worker failed the node after writing one of seven tangents at 8.1e-13 against the locked 1e-13 bound. Jev had routed it locally at 0.68 with codex-astra at 0 because dispatch never passed the section's declared capability (reckon fix in flight as jev-sees-declared-difficulty)",
+        "session": "fresh",
+        "session_id": "05ba98fa-ddd0-4bfb-aafb-dca7ecc014c8",
+        "session_source": "stream",
+        "to_backend": "codex-astra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261008T004354567004-cfs-edge-term-tangents"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/manifest.md",
+  "member": "disposable-r-20261008T004354567004-cfs-edge-term-tangents",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[channel_split]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_construction]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_and_moment_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_line_moments]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[second_residual]"
+    ],
+    "baseline_failure_ids": [
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[channel_split]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_construction]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_integrands]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[edge_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_and_moment_terms]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[flux_line_moments]",
+      "tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp[second_residual]"
+    ],
+    "declaration": "each edge tangent with one recurrence or product-rule term dropped fails the identity against jax.jvp of the base in a test pytest reports as failed, maximum printed",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/negative-control-verified.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/negative-control-verified.log",
+    "test_paths": [
+      "tests/biot/test_edge_term_tangents.py",
+      "tests/biot/test_vertex_term_tangents.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-edge-term-tangents",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3762,
+          "cached_input_tokens": 564099,
+          "input_tokens": 567863,
+          "output_tokens": 1124,
+          "reasoning_output_tokens": 36,
+          "total_tokens": 568987,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Write the tangent of every polygonanalytic edge term the Biot point jet differentiates, and of Channel.split, under the locked decisions kernel-loop-representation = custom-derivative-rules and tangent-identity-tolerance = scan-tangents-1e-9 on converged-forward-solve. The elliptic, range-function, moment-channel, graded-residual and corner (vertex) tangents have landed, with one helper home in nova/biot/rangefunction.py and one shared identity, truncation and median-of-seven compile harness in tests/biot/tangent_identity.py; reuse all of them and never re-derive one. The corner node's fragment (docs/evidence/fragments/converged-forward-solve/cfs-vertex-term-tangents.html) records how identity is measured beside a corner, including the near-corner set judged against an mpmath reference, the normwise-per-series measure and the elementwise maxima printed beside it, and the H200 positive control; follow the same measurement so the two nodes read alike. Done when: (1) private tangents for the edge quantities: the _Edge construction, _second_residual, _Edge.terms, flux_line_moments, flux_and_moment_terms and _edge_terms, and for Channel.split with its seeds and families, each returning the same structure jax.jvp returns with respect to all floating inputs without calling jax.jvp, jax.grad or jax.jacfwd on the base; (2) identity on 10,000 random edge geometries and targets spanning the domain the jet forms, targets beside an edge and beside its end points included, no masking, within relative 1e-13 of jax.jvp of the base for exact forms and 1e-9 for scan forms, elementwise maxima and covered fraction printed, covered fraction 100 percent; where the hand tangent and the base jvp disagree beyond the bound, an mpmath reference at 50 digits (a one-sided derivative along the branch the program selects wherever the term has a kink) decides which is wrong, and the row judges the hand tangent against that reference on those samples, saying so; (3) negative control: each tangent with one recurrence or product-rule term dropped under NOVA_TANGENT_TRUNCATION=1 fails that identity in a test whose failure pytest reports by id, maximum printed, on the same device as the identity rows; (4) cold compile of each tangent at or below three times its primal on the shared harness measurement in two separate runs, equation counts recorded, any row above 2.7 named; (5) primal outputs bit-identical to the base, asserted; tests/biot passes by delta in per-module fresh processes run one after another from one driver pass that writes each module's log and exit status, both arms carrying the repository root conftest, baseline_suite and after_suite filled as single-line JSON whose log_path names one log file and whose command is literally runnable (wrap a loop in bash -c); (6) tests/biot/test_vertex_term_tangents.py is moved onto tests/biot/tangent_identity.py with every row's figures unchanged, and the corner helpers _vertex_quotient_tangent and _vertex_product_tangent in nova/biot/polygonanalytic.py are replaced by the quotient and product tangents homed in nova/biot/rangefunction.py, outputs bit-identical; if near an edge end the base derivative leaves the exact integral the way it does near a corner radius, record it exactly as the corner node did (a strict expected failure naming the mechanism and the measured maximum against the reference) and do not depart from the base derivative, because which derivative the custom rule returns there is a decision the lead has not yet taken; (7) a test module tests/biot/test_edge_term_tangents.py and an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html with plan-evidence-for converged-forward-solve, reckon audit-doc 0 errors, which ends with the list of every function in the packed_analytic_moments jaxpr census and whether each now has a private tangent, so the wrapping node can start from it. Rows whose base jax.jvp compiles too slowly on CPU run on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (those rows), one job sized to finish (--time 02:00:00 or two jobs, never one row per job), said so in the fragment. Other gates run in place on the fleet allocation (the shell has SLURM_JOB_ID) with TMPDIR=/tmp, JAX_PLATFORMS=cpu and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree (orientation_worktree in the manifest), never uv on a compute node. Any wait is declared exactly as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, never a string and never exit:0. Every login-node uv command carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. Base-revision code is loaded through the shared harness from git show at the run orientation_base_sha, never copied into the tree. Run filepath relativize over the fragment before committing. No public signature changes. Commit with conventional subjects and bodies at every step and write the manifest before every job wait; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Write the tangent of every polygonanalytic edge term the Biot point jet differentiates, identical to jax.jvp of the base within the locked tolerances",
+    "id": "cfs-edge-term-tangents",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T00:44:05Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "lane document carries no numeric 'mean_context'",
+      "generating": 0,
+      "headroom": 16,
+      "mean_context": "unknown",
+      "observed_at": "2026-10-08T00:43:41Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 24,
+        "aggregate_tokens_per_second": 19.471,
+        "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": "2026-10-08T00:43:41Z",
+        "runs": 0.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/manifest.md",
+    "negative_control": "each edge tangent with one recurrence or product-rule term dropped fails the identity against jax.jvp of the base in a test pytest reports as failed, maximum printed",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/polygonanalytic.py",
+      "nova/biot/momentchannel.py",
+      "tests/biot/test_edge_term_tangents.py",
+      "tests/biot/test_vertex_term_tangents.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html",
+      "docs/figures/converged-forward-solve/cfs-edge-term-tangents"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3023442.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cfs-edge-term-tangents",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T00:44:07.104643+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.63,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 529.631,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2416.931,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 147553.969357,
+        "budget_reason": null,
+        "burn_multiple": 1.2776219845353012,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 102597,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.2195360838310187,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026122686574098705,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 147553.969357,
+        "budget_reason": null,
+        "burn_multiple": 1.2776219845353012,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 102597,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.2195360838310187,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026122686574098705,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 147553.969357,
+        "budget_reason": null,
+        "burn_multiple": 1.2776219845353012,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 102597,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 30.9,
+          "peak_utilisation_p90_pct": 45.5,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.2195360838310187,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026122686574098705,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 102597,
+          "headroom_pct": 55.4,
+          "peak_utilisation_p50_pct": 55.0,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 98,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 21,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 91
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 7577.844357,
+        "budget_reason": null,
+        "burn_multiple": 0.9486000364042985,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 102597,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.188274509756945,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.12755639400843238,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 7577.844357,
+        "budget_reason": null,
+        "burn_multiple": 0.9486000364042985,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 102597,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.188274509756945,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.12755639400843238,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 7577.844357,
+        "budget_reason": null,
+        "burn_multiple": 0.9486000364042985,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 102597,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.188274509756945,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.12755639400843238,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.12,
+      "claude:claude-sonnet-5-5": 0.05,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0.01,
+      "codex:gpt-6-sol": 0.11,
+      "hold": 0.03,
+      "local:deepseek-v4.1-flash": 0.68
+    },
+    "rendered_token_estimate": 3079,
+    "usage": {
+      "cost": 0.000276696,
+      "input_tokens": 6588,
+      "output_tokens": 150
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "a854ea58685b8a381a92f86937af0b0347aaa4bb",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "716d859f0b501797e28849ec8878f0243de80cb1",
+    "reviewed_head_sha": "a854ea58685b8a381a92f86937af0b0347aaa4bb",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 111
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T004354567004-cfs-edge-term-tangents",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1192e-8494-7fc0-a551-721fb3acada8",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 17231104,
+    "cumulative_input_tokens": 34749699,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 137048
+  },
+  "time_budget": "60m",
+  "tool_steps": 90.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 2382,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": null,
+    "exited_at": "2026-10-08T04:07:04Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T03:56:29Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T004354567004-cfs-edge-term-tangents",
+    "signal": 9,
+    "signal_name": "SIGKILL",
+    "stream_records_seen": 16952,
+    "worker_pid": 660805
+  },
+  "worker_seconds": 2344,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import ClassVar
 
 import numpy as np
+from packaging.version import Version
 
 from nova.graphics.plot import Plot
 from nova.imas.database import Database
@@ -115,6 +116,8 @@ class Magnetics(Plot, Database):
     def __post_init__(self):
         """Load data from magnetics IDS and build overview."""
         super().__post_init__()
+        if self.ids is None:
+            raise ValueError("magnetics IDS is not available")
         self.build_frame()
         self.build_summary()
         self.build_flux_loops()
@@ -127,20 +130,33 @@ class Magnetics(Plot, Database):
         """Return item from data dict."""
         self.data[key] = item
 
+    @property
+    def schema_major(self) -> int:
+        """Return the opened schema, independent of producer version metadata."""
+        return Version(self.ids._dd_version).major
+
+    def sensor_identity(self, sensor) -> tuple[str, str]:
+        """Return display name and stable identity under the opened schema."""
+        name = str(sensor.name)
+        identifier = str(sensor.identifier) if self.schema_major < 4 else name
+        return name, identifier
+
     def build_frame(self):
-        """Extract magnetics data into a columnar table keyed by identifier."""
+        """Extract diagnostic collections directly from the supplied IDS."""
         identifier, name, diagnostic_name, diagnostic_type = [], [], [], []
-        for diagnostic in self.diagnostic:
-            for ids in self.get_ids(diagnostic):
-                name.append(ids.name)
-                identifier.append(ids.identifier)
-                diagnostic_name.append(diagnostic)
-                try:
-                    diagnostic_type.append(
-                        self.diagnostic[diagnostic][ids.type.index - 1]
-                    )
-                except AttributeError:
-                    diagnostic_type.append(diagnostic)
+        for diagnostic, labels in self.diagnostic.items():
+            collection = diagnostic
+            if self.schema_major >= 4 and diagnostic == "b_field_tor_probe":
+                collection = "b_field_phi_probe"
+            for sensor in getattr(self.ids, collection):
+                sensor_name, sensor_identifier = self.sensor_identity(sensor)
+                name.append(sensor_name)
+                identifier.append(sensor_identifier)
+                diagnostic_name.append(collection)
+                kind = int(sensor.type.index) if labels else 0
+                diagnostic_type.append(
+                    labels[kind - 1] if 1 <= kind <= len(labels) else collection
+                )
         self.data["frame"] = {
             "identifier": np.array(identifier, dtype=object),
             "name": np.array(name, dtype=object),
@@ -149,15 +165,19 @@ class Magnetics(Plot, Database):
         }
 
     def build_summary(self):
-        """Extract a per-sensor overview from the diagnostic table."""
+        """Summarize repeated sensor names, preserving named ITER groups."""
         frame = self["frame"]
         index, identifier, name, diagnostic_type, number = [], [], [], [], []
         for data_name in self._unique(frame["name"]):
             select = frame["name"] == data_name
             row_identifier = frame["identifier"][select]
-            index.append(data_name.split(" ")[0].split(".")[1])
-            identifier.append("-".join(row_identifier[0].split("-")[:-1]))
-            name.append(" ".join(data_name.split(" ")[1:]))
+            token, separator, description = data_name.partition(" ")
+            grouped = separator and "." in token
+            index.append(token.split(".")[1] if grouped else data_name)
+            identifier.append(
+                row_identifier[0].rsplit("-", 1)[0] if grouped else row_identifier[0]
+            )
+            name.append(description if grouped else data_name)
             type_array = self._unique(frame["diagnostic_type"][select])
             if len(type_array) != 1:
                 raise ValueError(
@@ -174,24 +194,36 @@ class Magnetics(Plot, Database):
         }
 
     def build_flux_loops(self):
-        """Build Partial Flux Loop diagnostic table."""
+        """Read loop identities and full cylindrical contours without flattening."""
         columns = ["name", "identifier", "group", "type", "r", "z", "phi", "indices"]
         columns += ["area", "gm9"]
         rows = {column: [] for column in columns}
-        for ids in self.get_ids("flux_loop"):
-            group = ids.identifier.split(".", 3)[1]
-            rows["name"].append(ids.name)
-            rows["identifier"].append(ids.identifier)
+        for sensor in self.ids.flux_loop:
+            name, identifier = self.sensor_identity(sensor)
+            kind = int(sensor.type.index)
+            parts = identifier.split(".", 3)
+            labels = self.diagnostic["flux_loop"]
+            group = (
+                parts[1]
+                if len(parts) > 1
+                else (labels[kind - 1] if 1 <= kind <= len(labels) else "flux_loop")
+            )
+            rows["name"].append(name)
+            rows["identifier"].append(identifier)
             rows["group"].append(group)
-            rows["type"].append(ids.type.index)
+            rows["type"].append(kind)
             for attr in ["r", "z", "phi"]:
                 rows[attr].append(
-                    np.array([getattr(position, attr) for position in ids.position])
+                    np.array([float(getattr(p, attr)) for p in sensor.position])
                 )
-            rows["indices"].append(ids.indices_differential)
-            rows["area"].append(ids.area)
-            rows["gm9"].append(ids.gm9)
-        flux_loop = {column: np.array(rows[column], dtype=object) for column in columns}
+            rows["indices"].append(np.asarray(sensor.indices_differential).copy())
+            rows["area"].append(float(sensor.area))
+            rows["gm9"].append(float(sensor.gm9))
+        flux_loop = {}
+        for column, values in rows.items():
+            array = np.empty(len(values), dtype=object)
+            array[:] = values
+            flux_loop[column] = array
         flux_loop["type"] = np.array(rows["type"], dtype=int)
         flux_loop["gm9"] = np.where(flux_loop["type"] < 3, 0, flux_loop["gm9"])
         self.data["flux_loop"] = flux_loop

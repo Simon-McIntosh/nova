@@ -1,0 +1,103 @@
+{
+  "served_training": [
+    25818,
+    25836
+  ],
+  "served_held_out": [
+    25828
+  ],
+  "refused": [
+    {
+      "shot": 15051,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15075,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15151,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15175,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15295,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15299,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15489,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15577,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15737,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15757,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15785,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15813,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15865,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15950,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15966,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15974,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16006,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16178,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16234,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16286,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16381,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16417,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16605,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    }
+  ]
+}

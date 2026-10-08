@@ -238,15 +238,7 @@ def test_three_spacing_receipt_is_banked_and_reproducible(tmp_path, refreshed_re
     checked = json.loads(criterion.THREE_SPACING_OUTPUT_PATH.read_text())
     regenerated = criterion.write_three_spacing_receipt(tmp_path / "receipt.json")
 
-    benchmark_source = str(criterion.BENCHMARK_SOURCE)
-    current = copy.deepcopy(refreshed_receipt)
-    checked["sources"].pop(benchmark_source)
-    regenerated["sources"].pop(benchmark_source)
-    current["sources"].pop(benchmark_source)
-    assert checked == regenerated == current
-    assert refreshed_receipt["sources"][benchmark_source] == criterion._sha256(
-        criterion.BENCHMARK_SOURCE
-    )
+    assert checked == regenerated == refreshed_receipt
     assert refreshed_receipt["receipt"]["equilibrium_solves_run"] == 0
     assert refreshed_receipt["criterion"]["registered_tolerance_changed"] is False
     assert str(criterion.THREE_SPACING_SOURCE) in refreshed_receipt["sources"]

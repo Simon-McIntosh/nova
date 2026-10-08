@@ -24,7 +24,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING, Sequence
 
 if TYPE_CHECKING:
     import imas
@@ -228,29 +228,13 @@ class ValidatorCase:
         return self.layer(role).entry()
 
 
-def _layer_specs(
-    record: Mapping[str, object],
-    extra_layers: Iterable[Mapping[str, object]],
-) -> list[dict]:
-    specs = [dict(layer) for layer in record["layers"]]
-    for extra in extra_layers:
-        specs.append(dict(extra))
-    return specs
-
-
 def resolve_validator_case(
     case_key: str,
     *,
     store_root: Path | str | None = None,
-    extra_layers: Iterable[Mapping[str, object]] = (),
     layer_fetch=fetch_layer,
 ) -> ValidatorCase:
     """Fetch, verify and convert every layer a pinned case names.
-
-    *extra_layers* supplies layers the pinned record omits — a case whose
-    reference equilibrium is published under a second file name, for instance —
-    each as a mapping with ``role``, ``name``, ``digest`` and optional
-    ``dd_version``.  They are fetched and verified the same way.
 
     *layer_fetch* is the seam a test substitutes to exercise the converter
     without a network round trip.
@@ -267,7 +251,7 @@ def resolve_validator_case(
         dd_version=str(record["dd_version"]),
         registry=str(record["registry"]),
     )
-    for spec in _layer_specs(record, extra_layers):
+    for spec in record["layers"]:
         role = str(spec["role"])
         name = str(spec["name"])
         digest = str(spec["digest"])

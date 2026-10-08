@@ -32,7 +32,24 @@
   "plan_slug": "diiid-forward-onboarding",
   "plan_version": 84,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "s24-nova",
+      "finding": "single_goal-1",
+      "reason": "dispatched as two nodes with separate verdicts (dfo-error-estimator, dfo-gate-pin); the residual one-node phrase is replaced when s11 collapses at landing, and editing it now would re-open a review for wording the dispatch already settles",
+      "when": "2026-10-08T01:48:40.827726+00:00"
+    }
+  ],
+  "responses": {
+    "single_goal-1": {
+      "action": "declined",
+      "by": "s24-nova",
+      "reason": "dispatched as two nodes with separate verdicts (dfo-error-estimator, dfo-gate-pin); the residual one-node phrase is replaced when s11 collapses at landing, and editing it now would re-open a review for wording the dispatch already settles",
+      "when": "2026-10-08T01:48:40.827726+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-forward-onboarding/r-20261008T013205082212-plan-review-of-diiid-forward-onboarding.json",
   "review_run_id": "r-20261008T013205082212-plan-review-of-diiid-forward-onboarding",
   "reviewed_blob_sha": "1d02b1c4bf0351383e8ec6a046f8f124cb8370fe",
   "rubric": "content",

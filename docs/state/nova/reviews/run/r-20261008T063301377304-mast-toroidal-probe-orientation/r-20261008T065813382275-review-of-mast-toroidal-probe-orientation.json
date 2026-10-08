@@ -1,0 +1,71 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T07:15:13.176Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-08T06:59:00Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_toroidal_probe_orientation.py",
+      "line": "91",
+      "severity": "follow-on",
+      "text": "follow-on: cohort_shots is a near byte-for-byte duplicate of benchmarks/mast_tf_average.py:109 (same ShotSurvey reconstruction, same calibration_experiments(TOROIDAL_FIELD_ONLY) filter, differing only in local spellings), and mast_tf_average.py was already present at the reviewed base commit. The two benchmarks now fork one capability the repository owns; consolidating the census-to-cohort adapter into one benchmark helper (or importing one from the other) would leave one owner."
+    },
+    {
+      "file": "tests/test_mast_toroidal_probe_orientation.py",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the added tests exercise only infer_orientation and score_observations. inventory(), cohort_shots() and the receipt they render are untested, so the node's actual delivered artifact - the receipt with its positive control - is unguarded: a regression that dropped the positive-control check or mislabelled the unresolved reason would leave all four tests green."
+    },
+    {
+      "file": "manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's baseline_suite field is empty, so the base arm is not readable from the record and the added-failure count is derived as unmeasured (null) rather than a measured zero; there is no pre-change arm because the focused test file is added by this node, so the base arm log on disk (revision 1d34f09) ran the new tests and is not a baseline."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 1d34f09cb6d4f14fdfbe6760f5a48ef3224b5903: 867869d adds the benchmark (268 lines) and test (58 lines), 3cd9ca5 refines control-channel matching in the benchmark (+11/-2), 5a0727c adds the receipt (366 lines); 701 insertions over three files, no product source or test-adjacent module changed.",
+    "done_when": "The receipt names the orientation and held-out agreement per probe, promotes only at the pre-registered 2% held-out relative tolerance, takes the toroidal-field-only cohort of nova/imas/mast_calibration_cohort.py as its shot source, and leaves mast_seed_parameters.py's magnetic probe parameters unchanged. I re-ran the named gate at reviewed head 5a0727c14e8858bb4f9c8b952d07cb897f1f1b05 in a scratch tree (4 passed, EXIT=0) and reproduced the declared negative control (comparator <= changed to >= gave 3 failed, EXIT=1). The data pass ran as one all_debug job (1282031, COMPLETED, exit 0:0), and I independently reproduced the headline: 577 TF-only shots, 0 of them with a level-2 zarr.",
+    "goal": "The node was dispatched to resolve the MAST toroidal-field probe orientation from coil-driven vacuum shots. It delivers benchmarks/mast_toroidal_probe_orientation.py, a signed-field inference gate plus an inventory, and docs/figures/mast-toroidal-probe-orientation/receipt.json reporting all 36 catalog toroidal probe positions resolved as `unresolved`, with a stated reason, because no toroidal-field-only vacuum shot carries a level-2 probe file and no independently sourced signed absolute TF reference exists. Faithful to the goal, which admits an unresolved verdict when held-out agreement is unavailable.",
+    "manifest": "Read; status complete, three commits, gate 4 passed EXIT=0, a negative_control_log that fires, after_suite completed=true failure_count=0 at revision 5a0727c14e8858bb4f9c8b952d07cb897f1f1b05. Its baseline_suite field is empty, so the base arm is not readable from the manifest's declared fields.",
+    "write_paths": "Read the reviewed manifest's declared paths; git diff 1d34f09cb6d4f14fdfbe6760f5a48ef3224b5903..5a0727c14e8858bb4f9c8b952d07cb897f1f1b05 is exactly three added files, all inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_mast_toroidal_probe_orientation.py adds four assertions on infer_orientation and score_observations and the declared comparator mutation reddens three of them, so the inference and the promotion gate are guarded; not higher because inventory, cohort_shots and the receipt it renders - including the positive-control requirement that makes the zero-of-577 absence meaningful - have no test, so a regression there would stay green.",
+    "evidence": "The named gate reproduces at the reviewed head (4 passed, EXIT=0) and the declared negative control fires with exactly the three added test ids, and the receipt's headline independently reproduces against the census and level-2 store (577 TF-only shots, 0 with level-2, control shot 30420 present outside the cohort); not 20 because the reviewed manifest's baseline_suite is empty so the base arm is unmeasured and the added-failure count is null.",
+    "fit": "The module follows the benchmarks/ idiom (module docstring, argparse, main) set by benchmarks/mast_tf_average.py, uses dataclasses.fields as the repo prefers, and the commits carry two-part conventional messages; a label scan over the added lines finds no phase, stage, sprint, ticket or version identifier and no worktree path.",
+    "goal_fidelity": "The landed instrument and its docs/figures/mast-toroidal-probe-orientation/receipt.json answer the goal with a documented unresolved verdict on all 36 positions (0 of 577 TF-only shots carry a level-2 probe file), which the done_when explicitly admits; not 20 because the question terminates in a negative that transfers the decisive inference to a follow-on needing new data.",
+    "reuse": "cohort_shots at benchmarks/mast_toroidal_probe_orientation.py:91 re-implements, with only identifier spelling changed, the existing cohort_shots at benchmarks/mast_tf_average.py:109, which was present at the reviewed base; the node's other definitions (infer_orientation, score_observations) have no prior owner, but one added definition duplicates repository code, which caps this dimension at 5.",
+    "scope_discipline": "git diff 1d34f09cb6d4f14fdfbe6760f5a48ef3224b5903 5a0727c14e8858bb4f9c8b952d07cb897f1f1b05 is exactly three added paths under the declared write paths; no product source, plan, sprint or index state touched, and no worktree path appears in any changed file."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T063301377304-mast-toroidal-probe-orientation (node mast-toroidal-probe-orientation, plan nova:mast-nonaxisymmetric-physics section 6; goal: resolve the MAST toroidal-field probe orientation from coil-driven vacuum shots).\n\nVERDICT goal: The node was dispatched to resolve the MAST toroidal-field probe orientation from coil-driven vacuum shots. It delivers benchmarks/mast_toroidal_probe_orientation.py, a signed-field inference gate plus an inventory, and docs/figures/mast-toroidal-probe-orientation/receipt.json reporting all 36 catalog toroidal probe positions resolved as `unresolved`, with a stated reason, because no toroidal-field-only vacuum shot carries a level-2 probe file and no independently sourced signed absolute TF reference exists. Faithful to the goal, which admits an unresolved verdict when held-out agreement is unavailable.\nVERDICT done_when: The receipt names the orientation and held-out agreement per probe, promotes only at the pre-registered 2% held-out relative tolerance, takes the toroidal-field-only cohort of nova/imas/mast_calibration_cohort.py as its shot source, and leaves mast_seed_parameters.py's magnetic probe parameters unchanged. I re-ran the named gate at reviewed head 5a0727c14e8858bb4f9c8b952d07cb897f1f1b05 in a scratch tree (4 passed, EXIT=0) and reproduced the declared negative control (comparator <= changed to >= gave 3 failed, EXIT=1). The data pass ran as one all_debug job (1282031, COMPLETED, exit 0:0), and I independently reproduced the headline: 577 TF-only shots, 0 of them with a level-2 zarr.\nVERDICT write_paths: Read the reviewed manifest's declared paths; git diff 1d34f09cb6d4f14fdfbe6760f5a48ef3224b5903..5a0727c14e8858bb4f9c8b952d07cb897f1f1b05 is exactly three added files, all inside them.\nVERDICT manifest: Read; status complete, three commits, gate 4 passed EXIT=0, a negative_control_log that fires, after_suite completed=true failure_count=0 at revision 5a0727c14e8858bb4f9c8b952d07cb897f1f1b05. Its baseline_suite field is empty, so the base arm is not readable from the manifest's declared fields.\nVERDICT diff: Read commit by commit against base 1d34f09cb6d4f14fdfbe6760f5a48ef3224b5903: 867869d adds the benchmark (268 lines) and test (58 lines), 3cd9ca5 refines control-channel matching in the benchmark (+11/-2), 5a0727c adds the receipt (366 lines); 701 insertions over three files, no product source or test-adjacent module changed.\nCALL_SITES: none\n\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The landed instrument and its docs/figures/mast-toroidal-probe-orientation/receipt.json answer the goal with a documented unresolved verdict on all 36 positions (0 of 577 TF-only shots carry a level-2 probe file), which the done_when explicitly admits; not 20 because the question terminates in a negative that transfers the decisive inference to a follow-on needing new data.\nSCORE evidence: 18\nJUSTIFICATION evidence: The named gate reproduces at the reviewed head (4 passed, EXIT=0) and the declared negative control fires with exactly the three added test ids, and the receipt's headline independently reproduces against the census and level-2 store (577 TF-only shots, 0 with level-2, control shot 30420 present outside the cohort); not 20 because the reviewed manifest's baseline_suite is empty so the base arm is unmeasured and the added-failure count is null.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 1d34f09cb6d4f14fdfbe6760f5a48ef3224b5903 5a0727c14e8858bb4f9c8b952d07cb897f1f1b05 is exactly three added paths under the declared write paths; no product source, plan, sprint or index state touched, and no worktree path appears in any changed file.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_mast_toroidal_probe_orientation.py adds four assertions on infer_orientation and score_observations and the declared comparator mutation reddens three of them, so the inference and the promotion gate are guarded; not higher because inventory, cohort_shots and the receipt it renders - including the positive-control requirement that makes the zero-of-577 absence meaningful - have no test, so a regression there would stay green.\nSCORE fit: 18\nJUSTIFICATION fit: The module follows the benchmarks/ idiom (module docstring, argparse, main) set by benchmarks/mast_tf_average.py, uses dataclasses.fields as the repo prefers, and the commits carry two-part conventional messages; a label scan over the added lines finds no phase, stage, sprint, ticket or version identifier and no worktree path.\nSCORE reuse: 5\nJUSTIFICATION reuse: cohort_shots at benchmarks/mast_toroidal_probe_orientation.py:91 re-implements, with only identifier spelling changed, the existing cohort_shots at benchmarks/mast_tf_average.py:109, which was present at the reviewed base; the node's other definitions (infer_orientation, score_observations) have no prior owner, but one added definition duplicates repository code, which caps this dimension at 5.\n\nFINDING benchmarks/mast_toroidal_probe_orientation.py:91 follow-on: follow-on: cohort_shots is a near byte-for-byte duplicate of benchmarks/mast_tf_average.py:109 (same ShotSurvey reconstruction, same calibration_experiments(TOROIDAL_FIELD_ONLY) filter, differing only in local spellings), and mast_tf_average.py was already present at the reviewed base commit. The two benchmarks now fork one capability the repository owns; consolidating the census-to-cohort adapter into one benchmark helper (or importing one from the other) would leave one owner.\nFINDING tests/test_mast_toroidal_probe_orientation.py:1 follow-on: follow-on: the added tests exercise only infer_orientation and score_observations. inventory(), cohort_shots() and the receipt they render are untested, so the node's actual delivered artifact - the receipt with its positive control - is unguarded: a regression that dropped the positive-control check or mislabelled the unresolved reason would leave all four tests green.\nFINDING manifest.md:1 follow-on: follow-on: the reviewed manifest's baseline_suite field is empty, so the base arm is not readable from the record and the added-failure count is derived as unmeasured (null) rather than a measured zero; there is no pre-change arm because the focused test file is added by this node, so the base arm log on disk (revision 1d34f09) ran the new tests and is not a baseline.\n",
+  "review_run_id": "r-20261008T065813382275-review-of-mast-toroidal-probe-orientation",
+  "reviewed_base_sha": "1d34f09cb6d4f14fdfbe6760f5a48ef3224b5903",
+  "reviewed_head_sha": "5a0727c14e8858bb4f9c8b952d07cb897f1f1b05",
+  "reviewed_run_id": "r-20261008T063301377304-mast-toroidal-probe-orientation",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:11:58.839526+00:00",
+  "total": 94
+}

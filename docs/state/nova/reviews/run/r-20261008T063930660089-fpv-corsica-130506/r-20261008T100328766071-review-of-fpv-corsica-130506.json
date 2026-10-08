@@ -1,0 +1,98 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 3,
+  "added_failure_ids": [
+    "tests/test_forward_profile_corsica.py::test_prescribed_profiles_match_axis_and_current[time-150]",
+    "tests/test_forward_profile_corsica.py::test_flux_map_and_absolute_lcfs_area[time-150]",
+    "tests/test_forward_profile_corsica.py::test_containment_and_solve_receipts[time-150]"
+  ],
+  "added_failures_note": "derived from the reviewed run's own arms: its manifest records baseline_suite null (no base arm) and after_suite = the head-150 arm with failure_count 3. Against an absent baseline the set difference is the head arm's three failing ids, which are exactly the axis/current, flux-map/area and containment/receipt checks at 150 s, all failing on NoQualifiedAxisError before band scoring. These are the failures of tests the delta itself introduces (the whole test module is new in 8a4c4aa54..3a53bbc08), so there is no pre-existing-suite failure to subtract; the count reconciles with the reviewed after_suite.failure_count. The other three head arms and the control carry the same three ids (control one id) and are recorded in tests.results and vacuum-receipt-review.json.",
+  "call_site_count": 3,
+  "call_sites": [
+    {
+      "file": "tests/test_forward_profile_corsica.py",
+      "line": 456,
+      "symbol": "ForwardProfile.solve (measurement entry)"
+    },
+    {
+      "file": "nova/equilibrium/forward.py",
+      "line": 2831,
+      "symbol": "ForwardProfile.solve (read-only under test)"
+    },
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": 222,
+      "symbol": "require_qualified_axis (raise frame)"
+    }
+  ],
+  "completed_at": "2026-10-08T10:18:54.882Z",
+  "dispatched_at": "2026-10-08T10:04:18Z",
+  "findings": [
+    {
+      "file": "tests/test_forward_profile_corsica.py",
+      "line": "590",
+      "severity": "follow-on",
+      "text": "follow-on: the \u00a74 non-contraction pin is not implemented. \u00a74 names four receipt gates Nova adds ('conservation residuals ..., the current ledger exactly zero ..., the normalisation record absolute, and the non-contraction pin (the NK route holds equilibria whose map eigenvalue exceeds one)'); test_containment_and_solve_receipts asserts the first three and the convergence/residual/finiteness/divergence receipts, but no assertion reads a map eigenvalue or any contraction measure (grep for eigen/contract across the module finds nothing). Impact: the exact failure mode this run observed \u2014 the reference-seeded solves returned their seed unchanged (terminal-minus-seed 0.0 Wb, residual 0.0328, converged false) \u2014 is a non-contracting / unchanged state that the missing pin is designed to catch, yet it is inferred here only from the run's own prose, not from a gate assertion."
+    },
+    {
+      "file": "manifest.md",
+      "line": "19",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control does not discriminate. The control is the 1.3x FF-prime scaling at 150 s; its arm (vacuum-seed/control-150-suite.json) fails the same single test id as the head arm and adds zero failing ids (actual_added_failure_ids []), because both arms raise NoQualifiedAxisError before any axis/current/Ip band is scored. The node records this honestly (negative_control_note, checkpoint, follow_ons) but the consequence is that the node carries no effective negative control for the bands it gates, so a green band would not be shown to be able to fire. The out-of-band map-comparator sign-reversal control (map-control.log, normalised map error 1.0) is a partial substitute but guards only the map comparator, not the axis/current/area bands."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest carries no baseline_suite arm, and after_suite records only the head-150 arm, so the reviewed run's own recorded delta is a single state rather than a base-vs-head suite delta; the other three head arms (200/230/231 s) and the control are recorded only in tests.results and vacuum-receipt-review.json. A reader must reconstruct the four-slice picture from those ancillary records rather than from the two canonical arms."
+    },
+    {
+      "file": "docs/evidence/fragments/forward-profile-validator-set/fpv-corsica-130506.html",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the panel caption for 200 s says 'The independent input-conductor-vacuum reruns at 200, 230 and 231 s each raised NoQualifiedAxisError before returning a terminal state; each suite completed with three failures and no timeout.' This is accurate for the recorded arms, but the 230 s suite's receipt also carries a reference-consistency finding (no closed axis-containing contour at its declared reference boundary flux), which the 200 s caption folds in only in its last sentence. Minor: a reader scanning the 200 s panel could miss that the 230 s reference itself is unsupported independent of the solve failure."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the module under test is read-only nova/equilibrium/forward.py (ForwardProfile.solve at tests/test_forward_profile_corsica.py:456 calls into nova/equilibrium/forward.py:2831 -> _solve_request), which reaches nova/equilibrium/forward_operator.py:3316 _support_partition -> nova/equilibrium/topology.py:222 require_qualified_axis, the frame that raised NoQualifiedAxisError for every independent slice. No production call site changes: the delta adds only a test module and evidence.",
+    "diff": "read commit by commit against base 8a4c4aa54: seven commits, four files, 9169 insertions / 0 deletions (776 lines in the test module, 8 lines in the fragment, 8385 lines of regenerated SVG panels).",
+    "done_when": "the reviewed run's instructed done-when was the coordinator's resume-2 ruling: read the terminal batch receipts, assemble per-slice verdicts (including failed gates or timeouts), preserve the 230 s reference-consistency finding, compare the control with its completed head and record actual added failure ids, copy available panels, update only the assigned fragment captions, commit each coherent delivery with a body, audit the manifest, and set status complete. Each of those holds at 3a53bbc08 (manifest status complete, checkpoint names the ruling, commits carry bodies, manifest audit ok:true, fragment captions updated, added_failure_ids recorded as empty and explained).",
+    "goal": "plan nova:forward-profile-validator-set \u00a74 for node fpv-corsica-130506: implement the \u00a74 gate architecture for the CORSICA 130506 pinned case and run it at the four slices plus a control, reporting per-slice verdicts whether or not the gates pass. The gate architecture is delivered and mostly faithful (bands, scale-aware relaxation, normalised map + area guard, reference-free containment, solve receipts); the measurement is delivered and honest; the non-contraction pin and the \u00a74 per-case figure types are not delivered.",
+    "manifest": "read; status complete; baseline_suite null and after_suite populated with the head-150 arm (3 failure ids, EXIT=1, completed true); declares negative_control_log control-150.log with a note recording that the control adds zero failing ids and is not discriminating; failure_attribution covers only run-owned scaffolding failures; artifacts name the batch receipt, the per-slice review and five arms.",
+    "write_paths": "the four paths named above, all inside the reviewed grant and this review's FENCE SCOPE; the solver (nova/equilibrium/forward.py) is untouched by the delta."
+  },
+  "justifications": {
+    "durability": "The delivered artifact is a slow-marked regression guard wired into the repository's own shared helpers and painters (reference.forward_operator / receipt_mesh / machine_cache_identity, vc.resolve_validator_case, ZarrStore, nova.media poloidal painters), so a future CORSICA run inherits the same bands and receipt gates rather than re-deriving them, and the bands are tuple constants fixed before scoring. The failure record is durable in the right sense: the fragment captions explicitly mark the panels 'Reference-seeded diagnostic only ... not independent validation' and state that map error 0 does not establish convergence, so a later reader cannot read the unchanged reference seed as a pass. Gaps: the gate is currently red (three added failing ids at the recorded head arm), the designed FF-prime control is non-discriminating so it guards nothing about the axis/current bands, and the missing non-contraction pin leaves the unchanged-seed termination unguarded. Durability of evidence is good: receipts, per-arm logs, suite JSONs and both panels are retained under the run directory and the committed figure path.",
+    "evidence": "Strong and independently checked. The reviewed run executed each slice and the control as its own bounded pytest process inside one allocation, persisting a per-slice JSON receipt as each landed (_write_receipt) and writing a gate log whose first line names revision/tree/command. There are four head arm logs plus a control log and the vacuum-receipt-review.json, each carrying failure_ids, passed_ids, exit_status, completed and timed_out. I reproduced the load-bearing claims: the four head arm summaries (3 failed each, EXIT=1) and the control summary (1 failed, EXIT=1) match the manifest; every failure is NoQualifiedAxisError raised from nova/equilibrium/topology.py:222 before a terminal receipt; the committed test module collects at head in a fresh process (12 tests, EXIT=0); the two fragment caption tick-lists trace to the retained reference-seeded log head-sampled-h200.log (axis_error_m 0.0005262634016, ip_error_a 249361.51014, residual 0.03282579945; and 0.00026126086, 252469.12873, 0.03385897073); and the 230 s reference-consistency finding is corroborated by the LCFS positive control (extracted_area 0.0 vs declared 20.714). The run honestly reports unavailable telemetry as unavailable, not zero, and records the control as non-discriminating. Gaps: the manifest carries no baseline_suite arm, so the run's own recorded delta is a single state rather than a suite delta (three of four head arms and the control live only in tests.results and vacuum-receipt-review.json); and the declared negative control does not discriminate (see findings).",
+    "fit": "The figures obey the binding nova plotting rules verified against the committed SVGs: zero xtick_/ytick_ groups, no spine group, no grid and no <line> furniture (17 <g> groups, all artist content), the wall is drawn, and both null sets are marked (draw_nulls called for the reference and the terminal state). The fragment uses project-absolute src (/nova/figures/forward-profile-validator-set-corsica/...), hyphenated figure names, and states its residual/axis/current numbers in the caption rather than a legend. Commit bodies are conventional and complete; no plan/sprint/version label appears in any filename, symbol or comment of the increment; exception chaining and modern typing are used. Gap: the two panels are reference-seeded diagnostics rather than the coil-geometry/overlay and p'/FF' panels \u00a74 specifies for a case (a natural consequence of no passing solve).",
+    "goal_fidelity": "The node was instructed (original dispatch plus the two coordinator resume rulings) to build the \u00a74 gate architecture for the CORSICA 130506 case, run it at the four pinned slices plus a control on the H200 lane, and report per-slice verdicts whether or not the gates pass. It delivered tests/test_forward_profile_corsica.py implementing the \u00a74 architecture: per-quantity absolute bands checked into the module (AXIS_BAND_M 0.20 m, FLUX_FLOOR_WB 5.0, NORMALISED_MAP_BAND 0.10, LCFS_AREA_BAND_M2 2.0), scale-aware relaxation for the extensive quantities (I_p at max(200 kA, 1.5% |I_p|); psi family at max(5 Wb, 5% flux depth)), the [0,1]-normalised 2D map beside an absolute LCFS-area guard, the reference-free containment gates (axis inside wall and inside its own LCFS, LCFS area >= half its bounding box, minor-radius floor), and the solve's own receipts as gates (converged flag, residual <= the request's own qualification tolerance, finiteness, grad-Shafranov band, divergence margins, the current ledger exactly zero outside declared support, and the normalisation record absolute with unit amplitude). It ran all four slices and the control and reported the honest outcome. Two gaps against \u00a74: the non-contraction pin \u00a74 names (the NK route holding equilibria whose map eigenvalue exceeds one) is not implemented anywhere (grep for eigen/contract in the module finds nothing), and the \u00a74 per-case figures (coil geometry + reference-boundary overlay, p'/FF' panel) are not delivered (the two committed panels are reference-seeded flux diagnostics instead). The underlying rung aim, a CORSICA case that passes the gates, is not achieved: no slice produced a qualified terminal state.",
+    "reuse": "The module builds on existing seams rather than new machinery: it reuses tests/test_equilibrium_forward_reference.py for the machine build/cache, the forward operator and the receipt mesh, nova.imas.validator_case for the pinned bundle, and the existing forward-source and request dataclasses (ForwardSource, ForwardSolveRequest, SampledFluxFunction). It reuses nova.media painters for the figure and the package dataclasses/idioms (frozen dataclass, typed helpers) throughout. Gap: it couples to several underscore-private helpers of the reference module (reference._conductor, reference._machine_cache_lock, reference._load_cached_machine, reference._machine_dataset, reference.assert_machine_arrays_bitwise_identical, reference._machine_cache_lock) and subclasses reference.Conductor with MaterialConductor, so a refactor of those privates silently breaks this node; a public seam in the reference module would be the durable form.",
+    "scope_discipline": "The delta touches exactly four paths, all inside the reviewed run's grant and inside this review's FENCE SCOPE: tests/test_forward_profile_corsica.py (new, 776 lines), docs/evidence/fragments/forward-profile-validator-set/fpv-corsica-130506.html, and the two committed SVGs under docs/figures/forward-profile-validator-set-corsica/. No solver file, plan file or out-of-scope path changes: the full diffstat against the reviewed base is 4 files, 9169 insertions, 0 deletions. The seven commits each carry a conventional subject and a body; none carries an AI attribution, a plan/sprint/ticket identifier, or a version label, and no worktree path is committed (checked against the filepath rule over each changed file). The pre-commit hook was present and configured (core.hooksPath=scripts/git-hooks) in the reviewed worktree."
+  },
+  "project": "nova",
+  "raw_text": "Review of run r-20261008T063930660089-fpv-corsica-130506 (node fpv-corsica-130506, plan nova:forward-profile-validator-set \u00a74), delta 8a4c4aa54 -> 3a53bbc08: the CORSICA 130506 independent input-conductor-vacuum gate and its honest non-convergence record.",
+  "review_run_id": "r-20261008T100328766071-review-of-fpv-corsica-130506",
+  "reviewed_base_sha": "8a4c4aa544494603058f1c621e7cf8a614c9325a",
+  "reviewed_head_sha": "3a53bbc08b51177c6e3cfc5024377a75dd5001fd",
+  "reviewed_run_id": "r-20261008T063930660089-fpv-corsica-130506",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T10:30:00+00:00",
+  "total": 108
+}

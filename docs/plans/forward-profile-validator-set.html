@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="forward-profile-validator-set">
   <meta name="plan-title" content="Forward Profile Validator Set">
   <meta name="plan-summary" content="Pin a digest-identified cross-section of independent IMAS equilibrium validators and build a banded reference lane for prescribed-source ForwardProfile.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -26,7 +26,7 @@
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-commits" content="aff62b24">
 <meta name="plan-impl" content="0.1">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -97,6 +97,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20261008-content-store-landed" data-who="reckon-build" data-when="2026-10-08T03:20:00Z">
     <div class="r-comment-body">gate test_content_store and the unchanged artifact tests passed; section open — the digest fetch with its pinned case records and the analytic smoke rung follow. Effort recalibrated from an uncalibrated 2 h to 10 h for rungs 1–4; rung 5 breadth waits on the cross-section-breadth decision. Evidence: content-store.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T013754529430-fpv-content-store" data-who="reckon-build" data-when="2026-10-08T02:33:07.396Z">
+    <div class="r-comment-body"><p>Lifted the machine-agnostic content-addressed cache primitives out of nova/imas/machine_artifact.py into nova/database/content_store.py — the per-file sha256 and size verification, the verified object root pinned through /proc/self/fd, and the no-clobber directory publication via renameat2. machine_artifact imports them and defines none of them, keeping its own error vocabulary (a ContentStoreError is re-raised as MachineArtifactError) and its monkeypatch seams (the HDF5 consistency locator and the private-directory constructor stay machine_artifact module globals). tests/test_content_store.py covers publish, verified read and refusal of a tampered object. Measure: 3/3 store tests green; the two named artifact test files pass unchanged (10 passed, 2 skipped — the skips are the unmounted shared MAST artifact, present at baseline); the declared negative control reproduced.</p></div>
 </div>
 </section>
 </main>

@@ -1,0 +1,1295 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "bcb8e1899fd197ba7fac718cd8a95fb34df2e2b9",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 17889841,
+      "input_tokens_cumulative": 17889841,
+      "output_tokens": 77462,
+      "output_tokens_cumulative": 77462,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 748,
+    "files": 4,
+    "removed": 540
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 602
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 609
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 598,
+        "name": "from_bytes",
+        "path": "nova/imas/machine_artifact.py"
+      },
+      "window_line": 603
+    },
+    {
+      "existing_function": {
+        "line": 108,
+        "name": "test_repeated_publication_keeps_the_first_object",
+        "path": "tests/test_content_store.py"
+      },
+      "run_function": {
+        "line": 51,
+        "name": "_publish",
+        "path": "tests/test_content_store.py"
+      },
+      "window_line": 64
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "_publish",
+        "path": "tests/test_content_store.py"
+      },
+      "run_function": {
+        "line": 108,
+        "name": "test_repeated_publication_keeps_the_first_object",
+        "path": "tests/test_content_store.py"
+      },
+      "window_line": 118
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "aff62b2463bad8ba7cf239f6994b904eccfe88ab"
+  ],
+  "completed_at": "2026-10-08T02:33:07.396Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T01:38:38Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_content_store.py tests/test_machine_artifact.py tests/test_machine_artifact_concurrency.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T013754529430-fpv-content-store/fpv-content-store-named-tests.log"
+  },
+  "impl_move": {
+    "at_complete": 0.1,
+    "at_dispatch": null,
+    "plan": "forward-profile-validator-set",
+    "reason": "no-impl-recorded-at-dispatch",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T02:38:04.777500+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T01:38:04Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 7,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 13,
+    "headroom": 3,
+    "mean_context": 130667,
+    "observed_at": "2026-10-08T01:37:57Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 7,
+      "aggregate_tokens_per_second": 481.544,
+      "detail": "",
+      "mean_tokens_per_second": 34.396,
+      "observed_at": "2026-10-08T01:37:57Z",
+      "runs": 14.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T02:33:07.396Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T013754529430-fpv-content-store/manifest.md",
+  "member": "disposable-r-20261008T013754529430-fpv-content-store",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_content_store.py::test_flipping_one_byte_makes_the_verified_read_refuse"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "baseline_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_content_store.py::test_flipping_one_byte_makes_the_verified_read_refuse"
+    ],
+    "declaration": "flipping one byte of a published object must make the verified read refuse it",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T013754529430-fpv-content-store/fpv-content-store-negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T013754529430-fpv-content-store/fpv-content-store-negative-control.log",
+    "test_paths": [
+      "tests/test_content_store.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "fpv-content-store",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 597,
+          "cached_input_tokens": 403559,
+          "input_tokens": 404158,
+          "output_tokens": 296,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 404454,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "nova/database/content_store.py holds the sha256 verification, the verified object root and the no-clobber directory publication; nova/imas/machine_artifact.py imports them and defines none of them; tests/test_machine_artifact.py and tests/test_machine_artifact_concurrency.py pass unchanged; a new tests/test_content_store.py covers publish, verified read and refusal of a tampered object; the public names imas-ambix imports (resolve_machine_artifact, materialize_machine_artifact, MachineArtifactError, IncompleteMachineArtifactError) still import from nova.imas.machine_artifact; logs in the manifest",
+    "estimated_hours": 1.0,
+    "goal": "Lift the machine-agnostic content-addressed cache primitives of nova/imas/machine_artifact.py into one store module, nova/database/content_store.py",
+    "id": "fpv-content-store",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T01:38:04Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 7,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 13,
+      "headroom": 3,
+      "mean_context": 130667,
+      "observed_at": "2026-10-08T01:37:57Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 7,
+        "aggregate_tokens_per_second": 481.544,
+        "detail": "",
+        "mean_tokens_per_second": 34.396,
+        "observed_at": "2026-10-08T01:37:57Z",
+        "runs": 14.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T013754529430-fpv-content-store/manifest.md",
+    "negative_control": "flipping one byte of a published object must make the verified read refuse it",
+    "plan": "forward-profile-validator-set",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/database/content_store.py",
+      "nova/imas/machine_artifact.py",
+      "tests/test_content_store.py",
+      "docs/evidence/fragments/forward-profile-validator-set/fpv-content-store.html",
+      "docs/figures/forward-profile-validator-set/fpv-content-store"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3523919.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "fpv-content-store",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T01:38:11.330886+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Behaviour-preserving refactor of a 1,400-line module with a concurrency-safe no-clobber publish (renameat2, pinned directory descriptors); imas-ambix imports its public names, so the risk is a silent break across repositories. Moderate difficulty, strict verification.",
+    "confidence": 0.46,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 478.893,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 585.357,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 150795.640032,
+        "budget_reason": null,
+        "burn_multiple": 1.2650672435435124,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65247,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.182016747314815,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026488108452162366,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 150795.640032,
+        "budget_reason": null,
+        "burn_multiple": 1.2650672435435124,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65247,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.182016747314815,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026488108452162366,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 150795.640032,
+        "budget_reason": null,
+        "burn_multiple": 1.2650672435435124,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65247,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 30.9,
+          "peak_utilisation_p90_pct": 45.5,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.182016747314815,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026488108452162366,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 16,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 65247,
+          "headroom_pct": 71.6,
+          "peak_utilisation_p50_pct": 55.0,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 98,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 21,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 3
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 2801.057032,
+        "budget_reason": null,
+        "burn_multiple": 0.906692573276504,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65247,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.15075517324074,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13345206916468255,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 2801.057032,
+        "budget_reason": null,
+        "burn_multiple": 0.906692573276504,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65247,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.15075517324074,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13345206916468255,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 2801.057032,
+        "budget_reason": null,
+        "burn_multiple": 0.906692573276504,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 65247,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.15075517324074,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.13345206916468255,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.16,
+      "claude:claude-sonnet-5-5": 0.06,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0.01,
+      "codex:gpt-6-sol": 0.21,
+      "hold": 0.03,
+      "local:deepseek-v4.1-flash": 0.53
+    },
+    "rendered_token_estimate": 1965,
+    "usage": {
+      "cost": 0.000231504,
+      "input_tokens": 5512,
+      "output_tokens": 150
+    }
+  },
+  "plan": "forward-profile-validator-set",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "aff62b2463bad8ba7cf239f6994b904eccfe88ab",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "bcb8e1899fd197ba7fac718cd8a95fb34df2e2b9",
+    "reviewed_head_sha": "aff62b2463bad8ba7cf239f6994b904eccfe88ab",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 116
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T013754529430-fpv-content-store",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s24-nova",
+  "session_harness": "claude",
+  "session_id": "21bac832-74d1-4441-8db7-2e81cef72cc7",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 3,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 18087983,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 3250.234,
+    "generated_tokens": 83849,
+    "generation_seconds": 2538.076,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.5,
+    "machine_seconds": 712.158,
+    "peak_input_tokens": 196842,
+    "tokens_per_second": 33.04,
+    "wall_tokens_per_second": 25.8
+  },
+  "time_budget": "60m",
+  "tool_steps": 127.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 3269,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T02:33:14Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-08T01:38:51Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T013754529430-fpv-content-store",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 19077,
+    "worker_pid": 3497111
+  },
+  "worker_seconds": 3199,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

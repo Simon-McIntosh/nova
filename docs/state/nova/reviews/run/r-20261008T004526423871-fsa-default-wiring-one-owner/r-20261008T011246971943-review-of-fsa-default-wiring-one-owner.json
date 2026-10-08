@@ -1,0 +1,96 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "commits_read": [
+    "72112421cb157599b3e3e97b31f3d5f6246735d4",
+    "7cd5574fd2215085c70f538b9390e5d4fdd4bf69"
+  ],
+  "completed_at": "2026-10-08T01:26:02.989Z",
+  "dispatched_at": "2026-10-08T01:13:25Z",
+  "findings": [
+    {
+      "file": "tests/test_default_wiring.py",
+      "line": "316",
+      "severity": "follow-on",
+      "text": "The moved seam-marker assertion reads the whole route source (`source = Path(source_path).read_text(...)`) and asserts each seam marker is present anywhere in the file, where the deleted tests/test_route_default_wiring.py scoped the equivalent assertion to the measure_fixture slice (`fixture_source = oracle_source.split(\"def measure_fixture\",1)[1].split(\"def _numeric_gate\",1)[0]`). Because `_solve_with_defaults(` also names the function definition (scripts/oracle_rebaseline/measure.py:208), the whole-file form is satisfied even if measure_fixture stopped crossing the seam, so this sub-assertion is weaker than the one it replaces. The private-kernel half is stricter (whole-file absence), so the guard is not lost; scoping the marker check back to the fixture would restore the deleted check's strength."
+    },
+    {
+      "file": "tests/test_default_wiring.py",
+      "line": "291",
+      "severity": "follow-on",
+      "text": "The prescribed-current test asserts target_current passthrough (`oracle_request.target_current == 1.0`) only for the solovev-oracle route; for the topology-visuals route (mast and diiid) it asserts `current` only. The deleted fixture asserted `solve_request.target_current == target_current` for all three routes it exercised, so the target_current passthrough coverage is narrower after the move. Non-blocking: the `current` (prescribed-current vector) passthrough, which the fixture also asserted and which is the defect-prone field, is retained for all three."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsa-default-wiring-one-owner /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -rA tests/test_default_wiring.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004526423871-fsa-default-wiring-one-owner/fsa-head-arm.log",
+      "revision": "7cd5574fd2215085c70f538b9390e5d4fdd4bf69"
+    },
+    "baseline_suite": {
+      "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/tmp/fsa-arm-base:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsa-default-wiring-one-owner /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -rA /tmp/fsa-arm-base/tests/test_default_wiring.py /tmp/fsa-arm-base/tests/test_route_default_wiring.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004526423871-fsa-default-wiring-one-owner/fsa-base-arm.log",
+      "revision": "72112421cb157599b3e3e97b31f3d5f6246735d4"
+    }
+  },
+  "gate_arms_note": "added_failure_count and added_failure_ids are derived from the reviewed run's own baseline_suite (fsa-base-arm.log, revision 72112421cb157599b3e3e97b31f3d5f6246735d4, 97 passed, EXIT=0) and after_suite (fsa-head-arm.log, revision 7cd5574fd2215085c70f538b9390e5d4fdd4bf69, 72 passed, EXIT=0) gate logs named in its manifest, using reckon.crew.review.added_failures_from_gate_logs: base FAILED/ERROR id set is empty, head is empty, so the head-minus-base set is empty and the count is a measured 0.",
+  "item_verdicts": {
+    "call_sites": "no production call site: the landed change is test-only (no file under nova/ or scripts/ is modified), so no runtime code can reach it.",
+    "diff": "Read 7cd5574f against base 72112421 commit by commit; one commit, three files (59 insertions, 121 deletions), the private-kernel and prescribed-current checks moved onto ProductionEntryPoint and the 120-line duplicate module removed.",
+    "done_when": "The done-when names tests/test_default_wiring.py; the manifest records the head arm (72 passed, EXIT=0), the base arm (97 passed across both files, EXIT=0) and the negative control (1 failed, EXIT=1), each with its log path and the test ids it collected.",
+    "goal": "The node's goal is to give the production default-wiring check one owner in tests/test_default_wiring.py; the moved private-solver-kernel check (lines 305-319) and the prescribed-current check (lines 283-297) now live over that module's existing ProductionEntryPoint table, and the duplicate module is deleted.",
+    "manifest": "Read; it states the moved assertions, the two arms with their logs and per-arm test ids, the declared negative control and its outcome, and the deleted module, and its account matches the code and logs I read.",
+    "write_paths": "Read the manifest's declared paths; the base..head diff touches exactly tests/test_default_wiring.py, tests/test_route_default_wiring.py and docs/evidence/fragments/forward-solve-api/fsa-default-wiring-one-owner.html."
+  },
+  "justifications": {
+    "durability": "The moved check is falsifiable: the recorded negative control (a scratch copy of scripts/oracle_rebaseline/measure.py with `_solve(operator.flux_map(), seed)` inserted into measure_fixture) reddens tests/test_default_wiring.py::test_production_routes_call_no_private_solver_kernel[solovev-oracle-and-rebaseline] at EXIT=1 while the head arm passes it, so the guard is shown to fire; held below 20 because one moved sub-assertion was weakened (finding at line 316).",
+    "evidence": "The done-when's four arms all have readable logs: base 72112421 gave 97 passed/EXIT=0 (fsa-base-arm.log), head 7cd5574f gave 72 passed/EXIT=0 (fsa-head-arm.log), both headers naming their revision and the imported module; the negative control gave 1 failed/EXIT=1 (fsa-negative-control.log); each arm's test ids are listed in the manifest; I re-ran the two moved tests at head and got 3 passed.",
+    "fit": "The change extends the existing ProductionEntryPoint dataclass with bare_defaults, seam_markers and private_solver_kernels rather than adding a parallel table, matches the module's existing fixture idiom, and carries no plan, sprint or ticket identifier in any symbol, filename or comment.",
+    "goal_fidelity": "The goal is one owner for the production default-wiring check; tests/test_default_wiring.py now carries the moved private-solver-kernel check (lines 305-319) and the prescribed-current check (283-297) over the existing ProductionEntryPoint table and RecordingProfile, and tests/test_route_default_wiring.py is deleted, though the moved seam-marker assertion is narrower than the one it replaces (finding at line 316).",
+    "reuse": "The change removes a duplicate owner rather than adding one: the deleted module's REQUIRED_DEFAULTS tuple and RecordingProfile class are not reproduced, and every moved assertion is expressed over tests/test_default_wiring.py's existing ProductionEntryPoint table and RecordingProfile; no new mechanism is introduced.",
+    "scope_discipline": "git diff --name-status 72112421 7cd5574f is exactly the three declared paths (A docs/evidence/fragments/forward-solve-api/fsa-default-wiring-one-owner.html, M tests/test_default_wiring.py, D tests/test_route_default_wiring.py), 59 insertions and 121 deletions, no production code and no concurrent node's path."
+  },
+  "notes": "The reviewed node gives the production default-wiring check one owner as the plan's forward-solve-api duplicate_owner item asks. It moves the deleted module's assertions onto the existing ProductionEntryPoint table in tests/test_default_wiring.py (a private-solver-kernel source check parametrised by route, a prescribed-current passthrough check, and bare-policy/empty-deviations equality on the shared fixture) and deletes the 120-line duplicate. It is test-only, so the diff is exactly its three declared paths with no production code. The gate is real: the recorded negative control reddens the moved check by test id at EXIT=1, the base arm collected 97 tests across both files and the head arm 72, and I re-ran the moved tests at head (3 passed). added_failure_count is 0 by a measured set identity over the two gate logs the manifest names. Two follow-on findings record that the moved seam-marker assertion and the target_current passthrough check are each narrower than the deleted versions; neither blocks the landing, because the moved private-kernel absence check is strictly stronger (whole-file, route-parametrised) and the falsifiable guard survives. Scores: goal_fidelity 18, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 20. Total 112, verdict pass.",
+  "plan": "nova:forward-solve-api",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to give the production default-wiring check one owner; tests/test_default_wiring.py now carries the moved private-solver-kernel check (lines 305-319) over its existing ProductionEntryPoint table and the duplicate tests/test_route_default_wiring.py is deleted.\nVERDICT done_when: the done-when names tests/test_default_wiring.py; the manifest records the head arm (72 passed), the base arm (97 passed across both files) and the negative control (1 failed, EXIT=1), each with a log path.\nVERDICT write_paths: read the manifest's declared paths; the base..head diff touches exactly tests/test_default_wiring.py, tests/test_route_default_wiring.py and docs/evidence/fragments/forward-solve-api/fsa-default-wiring-one-owner.html.\nVERDICT manifest: read; it records both arms and the negative control with log paths, per-arm test ids and the moved check, and matches the code and logs I read.\nVERDICT diff: read 7cd5574f against base 72112421; three files, 59 insertions and 121 deletions, no production code.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: tests/test_default_wiring.py lines 305-319 move the private-solver-kernel check onto the existing ProductionEntryPoint table and the duplicate module is deleted, though the moved seam-marker assertion is narrower than the one it replaces (line 316).\nSCORE evidence: 18\nJUSTIFICATION evidence: the done-when's arms all carry readable logs (base 97 passed/EXIT=0, head 72 passed/EXIT=0, negative control 1 failed/EXIT=1) with revision headers, and the manifest lists each arm's test ids.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status 72112421 7cd5574f is exactly the three declared paths with no production code touched.\nSCORE durability: 17\nJUSTIFICATION durability: the recorded negative control reddens tests/test_default_wiring.py::test_production_routes_call_no_private_solver_kernel[solovev-oracle-and-rebaseline] at EXIT=1, but one moved sub-assertion (line 316) was weakened from fixture-scoped to whole-file.\nSCORE fit: 19\nJUSTIFICATION fit: the change extends the ProductionEntryPoint dataclass in tests/test_default_wiring.py:79-85 rather than adding a parallel table, in the module's existing idiom, with no plan or ticket identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change removes a duplicate owner rather than adding one; the deleted module's REQUIRED_DEFAULTS and RecordingProfile are not reproduced and every moved assertion is expressed over tests/test_default_wiring.py's existing table and recording class.\nFINDING tests/test_default_wiring.py:316 follow-on: the moved seam-marker assertion reads the whole route source and is satisfied by the function definition at scripts/oracle_rebaseline/measure.py:208, where the deleted check scoped it to the measure_fixture slice, so it no longer proves the fixture crosses the seam; the private-kernel half is stricter and the guard is not lost.\nFINDING tests/test_default_wiring.py:291 follow-on: the prescribed-current test asserts target_current passthrough only for the solovev-oracle route, where the deleted fixture asserted it for all three routes it exercised; the current-vector passthrough is retained for all three.\n",
+  "review_run_id": "r-20261008T011246971943-review-of-fsa-default-wiring-one-owner",
+  "reviewed_base_sha": "72112421cb157599b3e3e97b31f3d5f6246735d4",
+  "reviewed_head_sha": "7cd5574fd2215085c70f538b9390e5d4fdd4bf69",
+  "reviewed_revision": "7cd5574fd2215085c70f538b9390e5d4fdd4bf69",
+  "reviewed_run_id": "r-20261008T004526423871-fsa-default-wiring-one-owner",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsa-default-wiring-one-owner",
+  "reviewer_node": "review-of-fsa-default-wiring-one-owner",
+  "reviewer_run_id": "r-20261008T011246971943-review-of-fsa-default-wiring-one-owner",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:24:56.450253+00:00",
+  "total": 112,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha 7cd5574fd2215085c70f538b9390e5d4fdd4bf69 resolves to a single commit whose parent is reviewed_base_sha 72112421cb157599b3e3e97b31f3d5f6246735d4 (git rev-parse 7cd5574f^ == 72112421).",
+    "the reviewed worktree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/fsa-default-wiring-one-owner is clean at head (git status --porcelain empty) and its HEAD is 7cd5574fd2215085c70f538b9390e5d4fdd4bf69.",
+    "git diff --name-status 72112421 7cd5574f is exactly three paths: A docs/evidence/fragments/forward-solve-api/fsa-default-wiring-one-owner.html, M tests/test_default_wiring.py, D tests/test_route_default_wiring.py (59 insertions, 121 deletions).",
+    "the two gate logs named by the manifest each carry a revision header: fsa-base-arm.log first line 'revision: 72112421cb157599b3e3e97b31f3d5f6246735d4' and last line '97 passed ... EXIT=0'; fsa-head-arm.log first line 'revision: 7cd5574fd2215085c70f538b9390e5d4fdd4bf69' and last line '72 passed ... EXIT=0'.",
+    "the added-failure set is empty by measurement: the base log reports no FAILED/ERROR node id and the head log reports none, so reckon.crew.review.added_failures_from_gate_logs returns (0, []).",
+    "the moved check exists and passes at head: I re-ran tests/test_default_wiring.py::test_production_routes_call_no_private_solver_kernel (both parametrisations) and ::test_production_routes_forward_the_prescribed_current against the reviewed worktree at head (TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=<worktree> /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest) and got 3 passed in 32.47s (log review-head-moved-check.log in my run directory).",
+    "the negative control reproduces the failure it claims: fsa-negative-control.log records the mutation `_solve(operator.flux_map(), seed)` inserted into measure_fixture of a scratch copy of scripts/oracle_rebaseline/measure.py and reports '1 failed, 71 passed ... EXIT=1', the failing id being tests/test_default_wiring.py::test_production_routes_call_no_private_solver_kernel[solovev-oracle-and-rebaseline] (which the head arm passes).",
+    "no second owner remains: tests/test_default_wiring.py declares REQUIRED_DEFAULTS once and RecordingProfile once, and the deleted module's copies are gone (git diff confirms the 120-line file tests/test_route_default_wiring.py is removed)."
+  ]
+}

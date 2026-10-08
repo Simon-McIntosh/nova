@@ -22,7 +22,7 @@
 <meta name="plan-blocks" content="batched-operator-boundary,imas-ambix:physics-carried-playable-plasma">
 <title>Forward solve API | nova</title>
 <meta name="plan-impl" content="0.985">
-<meta name="plan-version" content="151">
+<meta name="plan-version" content="152">
 <meta name="plan-modified" content="2026-10-08">
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -625,6 +625,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260909T1307-route-bodies-landed" data-who="reckon-ship s19-review" data-when="2026-09-09T13:07:00Z">
     <div class="r-comment-body">fsa-route-bodies-on-seam landed: commits 4871a26e, e4e685f4 merged; gate 78 passed (route harness plus default wiring) and the declared-current fixture aligned to the seam; measure: solve_portfolio calls 0 of 4 routes, 9 route-level receipt assertions green. One pre-existing failure stays visible: tests/test_forward_parity_constrained_arm.py::test_reference_native_grid_interpolates_the_stored_map references parity.REFERENCE_NATIVE_GRID_POINTS, which benchmarks/efit_forward_parity_slice.py no longer defines (removed with f51308d1, the current-constrained parity default), so that test needs its own repair node: either restore the constant on the parity module or retarget the test to the resolution the default route now declares. impl 0.55 to 0.7; remaining: the two contract details of section 1 (cold-portfolio seed_policy, observed compilation_cache_hit) once forward.py is released by the clipped-moment worktree, section 3 transport, and the section 5 rerun after the compiled-slice cache lands.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T011246971943-review-of-fsa-default-wiring-one-owner" data-who="reckon-build" data-when="2026-10-08T01:26:02.989Z">
+    <div class="r-comment-body"><p>review-of-fsa-default-wiring-one-owner pass, total 112 over six dimensions (goal_fidelity 18, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 20); the reviewed node&#x27;s single-owner move in tests/test_default_wiring.py is correct and its deleted duplicate is gone, added_failure_count 0, with two follow-on findings (a whole-file seam-marker assertion and a target_current passthrough check each narrower than the deleted versions) that do not block.</p></div>
 </div>
 </section>
 </main>

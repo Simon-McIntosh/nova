@@ -46,9 +46,22 @@
       "finding": "wiring-1",
       "reason": "plan relationship fields are not writable through edit_plan; the true gate is recorded as the foreign-owner pointer f-mdr-ambix-migration and in s3 and s4 prose, and s3 is declared deferred, so no deletion node can be dispatched on the producer dependency alone",
       "when": "2026-10-08T01:55:39.253890+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s24-nova",
+      "finding": "done_when-1",
+      "reason": "the dispatched s4 node carries both: a negative control that displaces one producer loop position by 1 mm and must fail the equality test, and a geometry bound written in the test before scoring; the section text takes them when s4 collapses at landing",
+      "when": "2026-10-08T01:55:55.023025+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "s24-nova",
+      "reason": "the dispatched s4 node carries both: a negative control that displaces one producer loop position by 1 mm and must fail the equality test, and a geometry bound written in the test before scoring; the section text takes them when s4 collapses at landing",
+      "when": "2026-10-08T01:55:55.023025+00:00"
+    },
     "reasoning-1": {
       "action": "declined",
       "by": "s24-nova",

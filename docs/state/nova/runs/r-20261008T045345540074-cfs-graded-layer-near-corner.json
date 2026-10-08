@@ -1,0 +1,834 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 6,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "646b68b8e9481178e41cc2059c8a9a534fa9b9b3",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 42499840,
+      "cached_input_tokens_cumulative": 42499840,
+      "input_tokens": 43001593,
+      "input_tokens_cumulative": 43001593,
+      "output_tokens": 124942,
+      "output_tokens_cumulative": 124942,
+      "reasoning_output_tokens": 58826,
+      "reasoning_output_tokens_cumulative": 58826
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3580,
+    "files": 7,
+    "removed": 174
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "tangent",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 3380,
+        "name": "__init__",
+        "path": "nova/biot/polygonanalytic.py"
+      },
+      "window_line": 3402
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "compile_arm",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 319,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 319
+    },
+    {
+      "existing_function": {
+        "line": 589,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_term_tangents.py"
+      },
+      "run_function": {
+        "line": 319,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 319
+    },
+    {
+      "existing_function": {
+        "line": 295,
+        "name": "_truncated",
+        "path": "tests/biot/test_elliptic_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 394,
+        "name": "_truncated",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 394
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_range_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 439,
+        "name": "test_truncated_tangent_fails_identity",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "window_line": 439
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "compile_arm",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 589,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_term_tangents.py"
+      },
+      "window_line": 589
+    },
+    {
+      "existing_function": {
+        "line": 319,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_edge_tangent_recurrences.py"
+      },
+      "run_function": {
+        "line": 589,
+        "name": "compile_arm",
+        "path": "tests/biot/test_vertex_term_tangents.py"
+      },
+      "window_line": 589
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "aef110c0a1bfa4c822da3ba426d85314aeb7d4b2",
+    "62d0980dcf65d933e7ff147cd9b859c095ec83bb",
+    "a6e7e1903641074fad7d5496541897ebc27b9169",
+    "ed7b82af18d70a9642428a0ad617f697805c8dd9",
+    "f313a297bbd9de308ab5a5c73a4335bc4cee907a",
+    "87b6b1ca9b89a40abfcb7f62ef972e047cc8fa29",
+    "4e88d56ea9a172cfad11483844a321844d9101e1",
+    "fdab5b2509f53a62ec0e6b374705415bfeba3f26",
+    "7c517367c4b98ff6d49807cee73c9a07dc47dbf8",
+    "db7f523152cd983aea373dd538bea7ab5ca41922",
+    "72c5718cd7ab7c12bc6afa21e6fa02ee39620430",
+    "09f5a96283a2332a417ad56b7347931305c2fab5",
+    "1db3893b9a3029892c9c0b079bf1fd69b8d93315",
+    "8bb3910cd6941e28766c155c4cc26ce5a25b5fac",
+    "6e9d4ce566557861cda51e3b86b82520d37b4339",
+    "c9145e7a3ffc97e59dad5a3aed193e00f75cb1aa",
+    "19091d2d12ff3ba04fb1226ffcbba7db714c3cbb",
+    "6cde21247305ffaf19956102f850229376d77c89"
+  ],
+  "completed_at": "2026-10-08T11:20:22Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T04:54:26Z",
+  "disposition": "still-working",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "nova/biot/polygonanalytic.py"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T045345540074-cfs-graded-layer-near-corner/combine-head-receipts.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T045345540074-cfs-graded-layer-near-corner/after-suite-complete.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 1.9179478747019654,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-10-11T08:09:44Z, which is after this node's 3600s horizon ending 2026-10-08T05:54:00.562417+00:00",
+    "horizon_ends_at": "2026-10-08T05:54:00.562417+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T04:53:59Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-11T08:09:44Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 519659,
+    "state": "quiet",
+    "utilisation_pct": 27.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T04:53:59Z",
+    "read_at": "2026-10-08T04:54:00Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 27.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T11:20:22Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 3,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-08T05:37:27Z",
+        "detail": "continued session '01a119dd-0012-7910-88fb-9a5bb6c96d62' on harness 'codex'",
+        "from_backend": "codex",
+        "from_harness": "codex",
+        "reason": "lead directive 2026-10-08: the hardest work runs on the strongest codex lane; two codex-sol attempts brought the near-corner derivative error from 1.07 to 7.9e-8 against a 1e-9 target but left in-band values less accurate than the base and moved the primal by 4e-12 outside the band",
+        "session": "continued",
+        "session_id": "01a119dd-0012-7910-88fb-9a5bb6c96d62",
+        "session_source": "stream",
+        "to_backend": "codex-astra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261008T045345540074-cfs-graded-layer-near-corner"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T045345540074-cfs-graded-layer-near-corner/manifest.md",
+  "member": "disposable-r-20261008T045345540074-cfs-graded-layer-near-corner",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_graded_layer_near_corner.py::test_near_corner_layer_value_and_derivative"
+    ],
+    "baseline_failure_ids": [
+      "tests/biot/test_vertex_term_tangents.py::test_near_corner_radial_tangent_meets_reference",
+      "tests/biot/test_vertex_term_tangents.py::test_near_corner_reference_is_the_exact_integral"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_graded_layer_near_corner.py::test_near_corner_layer_value_and_derivative"
+    ],
+    "declaration": "restoring the layer-width floor clip makes the near-corner derivative row fail by test id, maximum printed",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T045345540074-cfs-graded-layer-near-corner/head-floor-control-h200.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T045345540074-cfs-graded-layer-near-corner/head-floor-control-h200.log",
+    "test_paths": [
+      "tests/biot/test_graded_layer_near_corner.py",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py",
+      "tests/biot/test_vertex_term_tangents.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-graded-layer-near-corner",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1156,
+          "cached_input_tokens": 729406,
+          "input_tokens": 730564,
+          "output_tokens": 1140,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 731704,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Repair the graded quadrature near a corner radius, per the lead's locked decision near-corner-derivative = repair-the-quadrature on converged-forward-solve (2026-10-08). The corner-term node measured that within about 1e-6 m of a corner radius the graded residual in nova/biot/gradedresidual.py clips its layer width at LAYER_FLOOR (the clip near line 184), so the flux value still matches a 50-digit mpmath reference of the exact integral while the derivative of the program leaves the exact derivative by up to 1.07 (typical tangent about 3.7); jax.jvp of the base and the hand tangent both reproduce that wrong derivative, recorded as the strict expected failure tests/biot/test_vertex_term_tangents.py::test_near_corner_radial_tangent_meets_reference. Done when: (1) the graded quadrature resolves a boundary layer narrower than the present floor near a corner radius, by a mechanism stated in the module docstring in terms of what the layer is (for example an analytic treatment of the layer's end the way the module already treats a target level with an edge end, or a layer width that follows the target's offset), with no new public signature; (2) on the near-corner sample set the corner node used, and on targets at exactly the corner radius and at offsets of 1e-12 to 1e-3 m, both the value and the derivative of the repaired graded residual match a 50-digit mpmath reference (one-sided along the branch the program selects where the term has a kink) to relative 1e-9, maxima printed per decade of offset; (3) away from the band (offset above 1e-3 m) the repaired primal agrees with the base primal to relative 1e-13, and inside the band it moves by no more than the base's present error against the reference, both asserted; (4) _graded_residual_tangent and every tangent that reaches it are updated so the hand tangent stays identical to jax.jvp of the repaired base within the locked tolerances, and the strict expected failure test_near_corner_radial_tangent_meets_reference becomes a passing row, its marker removed; Because the repair changes the graded residual primal inside the band, every tangent identity row that reaches it (tests/biot/test_vertex_edge_tangent_recurrences.py and tests/biot/test_vertex_term_tangents.py) judges the hand tangent against jax.jvp of the repaired primal at the head revision, not of the old base, while the primal itself is compared against the old base only as clause (3) states; say so in each row. (5) negative control: restoring the floor clip makes the near-corner derivative row fail by test id, maximum printed; (6) cold compile of the repaired graded residual and its tangent stays within three times the base primal on the shared harness measurement; tests/biot passes by delta in per-module fresh processes run one after another from one driver pass, both arms carrying the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable; (7) an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-graded-layer-near-corner.html with plan-evidence-for converged-forward-solve, one figure of value and derivative error against offset (log-log, base and repaired, one SVG under docs/figures/graded-layer-near-corner/), reckon audit-doc 0 errors. Rows needing the H200 run through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (those rows), one job sized to finish. Other gates run in place on the fleet allocation (the shell has SLURM_JOB_ID) with TMPDIR=/tmp, JAX_PLATFORMS=cpu and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree, never uv on a compute node. Any wait is declared exactly as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists. Every login-node uv command carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. Run filepath relativize over the fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest before every job wait; the manifest commits line lists every commit.",
+    "estimated_hours": 6.0,
+    "goal": "Repair the graded quadrature near a corner radius so its value and derivative both match the exact integral",
+    "id": "cfs-graded-layer-near-corner",
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T04:53:59Z",
+      "read_at": "2026-10-08T04:54:00Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 27.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T045345540074-cfs-graded-layer-near-corner/manifest.md",
+    "negative_control": "restoring the layer-width floor clip makes the near-corner derivative row fail by test id, maximum printed",
+    "plan": "converged-forward-solve",
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/gradedresidual.py",
+      "tests/biot/test_graded_layer_near_corner.py",
+      "tests/biot/test_vertex_term_tangents.py",
+      "tests/biot/test_vertex_edge_tangent_recurrences.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-graded-layer-near-corner.html",
+      "docs/figures/graded-layer-near-corner",
+      "docs/figures/converged-forward-solve/cfs-graded-layer-near-corner"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.9178258005092457,
+      "derived": 0.15486286602314808,
+      "drain_hours": 168.0,
+      "effective_limit": 0.15486286602314808,
+      "elapsed_fraction": 0.14078442365740734,
+      "elapsed_hours": 23.651783174444432,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T04:54:05+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.73,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.27,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.17933400000000002,
+      "decided_by": "window",
+      "margin": 0.483166,
+      "name": "cfs-graded-layer-near-corner",
+      "score": 0.6625,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.27
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.419428,
+        "observed_at": "2026-10-08T04:54:05+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.27,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "member": "codex",
+    "node": "cfs-graded-layer-near-corner",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T04:54:05.419428+00:00",
+    "score": 0.6625,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "codex",
+    "comment": "difficult numerical-analysis node, critical risk: a boundary-layer quadrature must resolve layers below its present floor so value and derivative both match a 50-digit mpmath reference to 1e-9 from 1e-12 to 1e-3 m off a corner radius, while the primal elsewhere stays within 1e-13 of the base and every dependent hand tangent stays exact; a lead decision rides on it; the section declares deep reasoning, strict verification and critical risk",
+    "confidence": 0.26,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "codex",
+    "jev_latency_ms": 535.061,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2717.089,
+    "model": "gpt-6-sol",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 162544.674814,
+        "budget_reason": null,
+        "burn_multiple": 1.2215588416465066,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 66748,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.0460325484490745,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.027902855219017274,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 162544.674814,
+        "budget_reason": null,
+        "burn_multiple": 1.2215588416465066,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 66748,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.0460325484490745,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.027902855219017274,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 162544.674814,
+        "budget_reason": null,
+        "burn_multiple": 1.2215588416465066,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 66748,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 30.9,
+          "peak_utilisation_p90_pct": 45.5,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.0460325484490745,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.027902855219017274,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "congested",
+          "running": 15,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 66748,
+          "headroom_pct": 71.0,
+          "peak_utilisation_p50_pct": 56.3,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 102,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 5,
+          "passed": 25,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 0
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 18.034814,
+        "budget_reason": null,
+        "burn_multiple": 1.9183419037197025,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 66748,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.014770974375001,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.15482120232275134,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 27.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 18.034814,
+        "budget_reason": null,
+        "burn_multiple": 1.9183419037197025,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 66748,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.014770974375001,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.15482120232275134,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 27.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 18.034814,
+        "budget_reason": null,
+        "burn_multiple": 1.9183419037197025,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 66748,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.014770974375001,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": 0.15482120232275134,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 27.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.32,
+      "claude:claude-sonnet-5-5": 0.03,
+      "codex:gpt-6-astra": 0.11,
+      "codex:gpt-6-luna": 0.07,
+      "codex:gpt-6-sol": 0.35,
+      "hold": 0.08,
+      "local:deepseek-v4.1-flash": 0.04
+    },
+    "rendered_token_estimate": 2975,
+    "usage": {
+      "cost": 0.000272664,
+      "input_tokens": 6492,
+      "output_tokens": 147
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6cde21247305ffaf19956102f850229376d77c89",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "646b68b8e9481178e41cc2059c8a9a534fa9b9b3",
+    "reviewed_head_sha": "6cde21247305ffaf19956102f850229376d77c89",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 16,
+      "reuse": 17,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 104
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T045345540074-cfs-graded-layer-near-corner",
+  "scope_acceptances": [
+    {
+      "path": "nova/biot/polygonanalytic.py",
+      "reason": "coordinator grant for the composed corner remainder in _Vertex.arsinh_terms and its composition; _near_collinear_arsinh_difference left untouched"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a119dd-0012-7910-88fb-9a5bb6c96d62",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 42499840,
+    "cumulative_input_tokens": 85501433,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 183768
+  },
+  "time_budget": "60m",
+  "tool_steps": 157.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 23156,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 6,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T11:20:24Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T11:02:59Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T045345540074-cfs-graded-layer-near-corner",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1613,
+    "worker_pid": 1232977
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

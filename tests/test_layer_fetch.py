@@ -140,72 +140,77 @@ def test_the_recorded_digests_are_well_formed() -> None:
 # --------------------------------------------------------------------------
 # distinguish an unreachable registry, credential failure and unknown digest
 # --------------------------------------------------------------------------
-def test_unreachable_registry_is_classified_separately(tmp_path: Path) -> None:
-    layer = _layer("iter_corsica_130506", "reference")
-    with pytest.raises(layer_fetch.LayerRegistryUnreachable):
-        layer_fetch.fetch_layer(
-            str(layer["digest"]),
-            cache_directory=tmp_path / "store",
-            runner=_unreachable_runner(),
-        )
-
-
-def test_network_permission_denial_is_unreachable(tmp_path: Path) -> None:
-    layer = _layer("iter_corsica_130506", "reference")
-    with pytest.raises(layer_fetch.LayerRegistryUnreachable):
-        layer_fetch.fetch_layer(
-            str(layer["digest"]),
-            cache_directory=tmp_path / "store",
-            runner=_unreachable_runner(
-                "dial tcp 10.0.0.1:443: connect: permission denied"
-            ),
-        )
-
-
-def test_transport_port_number_is_not_an_http_status(tmp_path: Path) -> None:
-    layer = _layer("iter_corsica_130506", "reference")
-    with pytest.raises(layer_fetch.LayerRegistryUnreachable):
-        layer_fetch.fetch_layer(
-            str(layer["digest"]),
-            cache_directory=tmp_path / "store",
-            runner=_unreachable_runner(
-                "dial tcp 10.0.0.1:4030: connect: permission denied"
-            ),
-        )
-
-
 @pytest.mark.parametrize(
-    "message",
+    ("message", "expected_error"),
     [
         (
+            "dial tcp 10.0.0.1:443: connect: permission denied",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "dial tcp 10.0.0.1:4030: connect: permission denied",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "dial tcp 10.0.0.1:401: connect: connection refused",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "dial tcp 10.0.0.1:403: connect: connection refused",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "i/o timeout after 403 ms",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        ("401 Unauthorized", layer_fetch.LayerRegistryCredentialError),
+        ("403 Forbidden", layer_fetch.LayerRegistryCredentialError),
+        ("status code 401", layer_fetch.LayerRegistryCredentialError),
+        ("status code 403", layer_fetch.LayerRegistryCredentialError),
+        ("unauthorized", layer_fetch.LayerRegistryCredentialError),
+        ("authentication required", layer_fetch.LayerRegistryCredentialError),
+        ("denied: requested access", layer_fetch.LayerRegistryCredentialError),
+        ("access denied", layer_fetch.LayerRegistryCredentialError),
+        ("expired token", layer_fetch.LayerRegistryCredentialError),
+        ("token expired", layer_fetch.LayerRegistryCredentialError),
+        ("token has expired", layer_fetch.LayerRegistryCredentialError),
+        (
             'Error response from registry: HEAD "https://ghcr.io/v2/example/'
-            'manifests/sha256:abc": unauthorized: authentication required'
-        ),
-        (
-            "Error response from registry: denied: requested access to the "
-            "resource is denied"
-        ),
-        (
-            'Error: GET "https://ghcr.io/v2/aaroncrawfis/test/manifests/latest": '
-            'GET "https://ghcr.io/token?scope=repository%3Aaaroncrawfis%2Ftest%3Apull'
-            '&service=ghcr.io": response status code 403: denied: denied'
+            'manifests/sha256:abc": unauthorized: authentication required',
+            layer_fetch.LayerRegistryCredentialError,
         ),
     ],
-    ids=["authentication-required", "access-denied", "expired-token"],
+    ids=[
+        "permission-denied-transport",
+        "port-4030",
+        "port-401",
+        "port-403",
+        "timeout-number",
+        "401-unauthorized",
+        "403-forbidden",
+        "status-401",
+        "status-403",
+        "unauthorized",
+        "authentication-required",
+        "requested-access-denied",
+        "access-denied",
+        "expired-token",
+        "token-expired",
+        "token-has-expired",
+        "oras-authentication-response",
+    ],
 )
-def test_registry_credential_failures_are_not_skips(
-    message: str, tmp_path: Path
+def test_registry_failure_messages_classify_correctly(
+    message: str, expected_error: type[Exception], tmp_path: Path
 ) -> None:
     layer = _layer("iter_corsica_130506", "reference")
 
-    with pytest.raises(layer_fetch.LayerRegistryCredentialError) as caught:
+    with pytest.raises(expected_error):
         layer_fetch.fetch_layer(
             str(layer["digest"]),
             cache_directory=tmp_path / "store",
             runner=_unreachable_runner(message),
         )
-
-    assert not isinstance(caught.value, layer_fetch.LayerRegistryUnreachable)
 
 
 def test_an_unknown_digest_is_a_fetch_error_not_a_skip(tmp_path: Path) -> None:

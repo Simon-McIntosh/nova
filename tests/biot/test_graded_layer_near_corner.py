@@ -4,6 +4,8 @@ import jax
 import jax.numpy as jnp
 import mpmath as mp
 import numpy as np
+import os
+import pytest
 
 from nova.jax.config import configure_dtypes
 
@@ -16,6 +18,26 @@ from tangent_identity import load_base_module  # noqa: E402
 BASE_GRADED = load_base_module(
     "nova/biot/gradedresidual.py", "646b68b8e9481178e41cc2059c8a9a534fa9b9b3"
 )
+
+
+@pytest.fixture(autouse=True)
+def restore_floor_when_requested(monkeypatch):
+    """Restore the clipped layer for the declared negative control."""
+    if os.environ.get("NOVA_RESTORE_LAYER_FLOOR") != "1":
+        return
+
+    def clipped_width(offset, end, scale, xp):
+        reach = xp.where(offset > 0.0, offset, xp.abs(end))
+        return gradedresidual._fixed_nodes(
+            xp.where(
+                reach > 0.0,
+                xp.clip(reach / scale, gradedresidual.LAYER_FLOOR, 1.0),
+                1.0,
+            ),
+            xp,
+        )
+
+    monkeypatch.setattr(gradedresidual, "_grading_width", clipped_width)
 
 
 def _residual(radius, level, radial_offset, module=gradedresidual):
@@ -38,7 +60,7 @@ def _residual(radius, level, radial_offset, module=gradedresidual):
 def _reference(radius, level, radial_offset):
     """Integrate the exact integral and its radial-offset derivative at 50 digits."""
     with mp.workdps(50):
-        r, u, o = (mp.mpf(str(value)) for value in (radius, level, radial_offset))
+        r, u, o = (mp.mpf(value) for value in (radius, level, radial_offset))
         limit = mp.pi / 2
         near = [mp.mpf(10) ** exponent for exponent in range(-15, 0)]
         points = [mp.mpf(0), *near, limit / 2]
@@ -125,3 +147,38 @@ def test_near_corner_layer_value_and_derivative():
     )
     assert not less_accurate
     assert all(error <= 1e-13 for _, error in outside)
+
+
+def test_moving_panel_bounds_follow_endpoint_integrand():
+    radius, level, offset = 1.2, 1e-12, 1e-12
+
+    def integral(bounds):
+        def array(value):
+            return jnp.asarray([value])
+        panel = (
+            array(level),
+            array(offset + 2 * radius),
+            array(2 * radius),
+            bounds[:1],
+            bounds[1:],
+        )
+        return gradedresidual.graded_residual(
+            (panel,),
+            lambda x, y: (
+                offset + 2 * radius * y,
+                jnp.sqrt(level**2 + 4 * radius**2 * x * y),
+            ),
+            128,
+            jnp,
+        )[0]
+
+    bounds = jnp.asarray([0.1, 0.6])
+    direction = jnp.asarray([0.3, -0.7])
+    _, derivative = jax.jvp(integral, (bounds,), (direction,))
+    sine, cosine = np.sin(np.asarray(bounds)), np.cos(np.asarray(bounds))
+    integrand = np.arcsinh(
+        (offset + 2 * radius * cosine**2)
+        / np.sqrt(level**2 + 4 * radius**2 * sine**2 * cosine**2)
+    )
+    expected = integrand[1] * float(direction[1]) - integrand[0] * float(direction[0])
+    np.testing.assert_allclose(float(derivative), expected, rtol=1e-13, atol=0)

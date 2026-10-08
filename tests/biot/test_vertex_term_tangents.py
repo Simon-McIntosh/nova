@@ -15,6 +15,7 @@ themselves, which is the declared mutation those rows must fail against.
 """
 
 from contextlib import contextmanager
+from functools import lru_cache
 import json
 import subprocess
 import sys
@@ -22,6 +23,7 @@ import sys
 import jax
 import jax.numpy as jnp
 import numpy as np
+import mpmath as mp
 import pytest
 
 from nova.jax.config import configure_dtypes
@@ -34,6 +36,7 @@ from tangent_identity import (  # noqa: E402
     SAMPLES,
     compile_ratio,
     identity_row,
+    load_base_module,
     relative_error,
     truncation_active,
 )
@@ -45,6 +48,14 @@ NODES = 128
 # Targets nearer a corner than this fraction of its radius receive the
 # independent 50-digit exact-integral check as well as the primal JVP identity.
 NEAR_CORNER = 2e-6
+BASE = load_base_module(
+    "nova/biot/polygonanalytic.py", "646b68b8e9481178e41cc2059c8a9a534fa9b9b3"
+)
+BASE.graded_residual = load_base_module(
+    "nova/biot/gradedresidual.py",
+    "646b68b8e9481178e41cc2059c8a9a534fa9b9b3",
+    module_name="corner_base_graded",
+).graded_residual
 
 
 def _magnitude(rng, low, high, size=SAMPLES):
@@ -405,7 +416,7 @@ def radial(args):
     points = points + [mp.pi / 2 - p for p in reversed(points[1:-1])] + [mp.pi / 2]
     value = mp.quad(lambda a: parts(a, 0), points)
     slope = mp.quad(lambda a: parts(a, 1), points)
-    return float(4 * r * value), float(4 * dr * value + 4 * r * slope)
+    return mp.nstr(4 * r * value, 50), mp.nstr(4 * dr * value + 4 * r * slope, 50)
 with get_context("fork").Pool(8) as pool:
     print(json.dumps(pool.map(radial, json.load(sys.stdin))))
 """
@@ -432,6 +443,7 @@ def _radial_reference(primals, tangents, index):
     return values[:, 0], values[:, 1]
 
 
+@lru_cache(maxsize=1)
 def _near_corner_rows():
     got, expected = _identity("arsinh_terms")
     _, _, primals, tangents = CASES["arsinh_terms"]
@@ -443,17 +455,48 @@ def _near_corner_rows():
     hand = np.asarray(got[1][1])[index]
     primal_jvp = np.asarray(expected[1][1])[index]
     primal = np.asarray(expected[0][1])[index]
+    old = np.asarray(
+        jax.jit(
+            lambda p: BASE._Vertex(*p[:4], NODES, residual=True, xp=jnp).arsinh_terms()[
+                1
+            ]
+        )(primals)
+    )[index]
 
     def relative(a, b):
-        return np.abs(a - b) / np.where(b == 0.0, 1.0, np.abs(b))
+        with mp.workdps(50):
+            return np.asarray(
+                [
+                    float(
+                        abs(mp.mpf(float(left)) - mp.mpf(str(right)))
+                        / (abs(mp.mpf(str(right))) or 1)
+                    )
+                    for left, right in zip(a, b, strict=True)
+                ]
+            )
 
+    value_error = relative(primal, value)
+    old_error = relative(old, value)
+    tangent_error = relative(hand, reference)
     rows = {
         "samples": index.size,
-        "primal": relative(primal, value).max(),
-        "hand": relative(hand, reference).max(),
+        "primal": value_error.max(),
+        "base_primal": old_error.max(),
+        "less_accurate": int(np.sum(value_error > old_error)),
+        "hand": tangent_error.max(),
         "jvp": relative(primal_jvp, reference).max(),
         "hand_jvp": relative(hand, primal_jvp).max(),
     }
+    decades = np.floor(np.log10(np.abs(corner_r[index] - r[index]))).astype(int)
+    for decade in np.unique(decades):
+        selected = decades == decade
+        print(
+            f"CORNER_SAMPLES decade=1e{decade:+d} samples={int(selected.sum())} "
+            f"value_relative_max={value_error[selected].max():.3e} "
+            f"derivative_relative_max={tangent_error[selected].max():.3e} "
+            f"base_value_relative_max={old_error[selected].max():.3e} "
+            f"less_accurate={int(np.sum(value_error[selected] > old_error[selected]))}"
+        )
     print(f"NEAR_CORNER arsinh_terms radial samples={rows['samples']} "
           f"primal_vs_reference_max={rows['primal']:.3e} "
           f"hand_vs_reference_max={rows['hand']:.3e} "
@@ -467,6 +510,7 @@ def test_near_corner_reference_is_the_exact_integral():
     # the independent integral checks the repaired primal near the corner
     assert rows["samples"] > 0
     assert rows["primal"] <= 1e-10
+    assert rows["less_accurate"] == 0
 
 
 def test_near_corner_radial_tangent_meets_reference():

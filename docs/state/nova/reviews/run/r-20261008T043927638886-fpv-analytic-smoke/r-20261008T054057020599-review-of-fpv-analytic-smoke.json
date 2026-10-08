@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: its baseline_suite and after_suite fields are both null, so neither arm reads a log and no base-vs-head delta can be formed from them. The head arm (analytic-smoke-head.log, 5 passed EXIT=0) is re-derived independently at the reviewed head in a scratch tree (5 passed, EXIT=0, no FAILED or ERROR id), so added failures are a subset of an empty head-failure set and the run provably added none. The 1 failure in negative-control.log and in my reproduced control log is the declared mutation (coil current x1.5), not a gate arm.",
+  "call_site_count": 4,
+  "call_sites": [
+    {
+      "file": "tests/test_forward_profile_analytic_smoke.py",
+      "line": 56,
+      "symbol": "_vacuum_map_residual"
+    },
+    {
+      "file": "tests/test_forward_profile_analytic_smoke.py",
+      "line": 123,
+      "symbol": "test_analytic_vacuum_flux_matches_the_reference"
+    },
+    {
+      "file": "nova/imas/validator_case.py",
+      "line": 241,
+      "symbol": "resolve_validator_case"
+    },
+    {
+      "file": "nova/imas/validator_case.py",
+      "line": 136,
+      "symbol": "netcdf_to_hdf5"
+    }
+  ],
+  "completed_at": "2026-10-08T06:05:41.077Z",
+  "dispatched_at": "2026-10-08T05:41:30Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/forward-profile-validator-set/fpv-analytic-smoke.html",
+      "line": "48",
+      "severity": "follow-on",
+      "text": "follow-on: the figure caption misstates the achieved residual. It reads 'Maximum absolute residual 9.418e-10 Wb, i.e. 8.5e-7 of the reference peak'. A direct probe of the reviewed head (probe_residual.py) gives absolute residual 1.0418e-12 Wb and ratio 9.4175e-10 of peak 1.106280e-03 Wb. The caption takes the dimensionless RATIO (9.418e-10, the number the test prints as result['residual']) and relabels it as an absolute Wb value, then divides by the peak to get a second, spurious fraction (8.5e-7). The absolute residual is overstated by ~900x and the stated peak fraction is off by ~900x. The manifest and the test's emitted statement are internally consistent (ratio 9.418e-10); only the landed fragment caption is wrong. Impact: the evidence document a reader trusts states a residual ~three orders of magnitude worse than measured."
+    },
+    {
+      "file": "docs/figures/forward-profile-validator-set/fpv-analytic-smoke/analytic-vacuum-flux-map.svg",
+      "line": "41",
+      "severity": "follow-on",
+      "text": "follow-on: the panel is drawn with the axis ON, contrary to the repository's binding figure rules ('No axes, no gridlines on 2D plots ... a poloidal panel is drawn with the axis off'; despine every axis). The SVG carries xtick_1..xtick_5 and ytick_1..ytick_9 groups, each with a real tick-mark path (e.g. line2d_1, a 6-unit stroke path) and a text label, plus axes spines (patch_2 onward). The fragment caption says 'One poloidal panel, line contours only'. The panel was not routed through nova.media (imas-ink), so set_axis_off() never ran. The reference/coil contours themselves are line contours (QuadContourSet, shared levels), which is correct; the furniture is the defect. Rule violated: nova AGENTS.md 'Plotting rules' and the global data-ink despine rule."
+    },
+    {
+      "file": "nova/imas/validator_case.py",
+      "line": "245",
+      "severity": "follow-on",
+      "text": "follow-on: resolve_validator_case retains an extra_layers keyword and the _layer_specs helper (lines 231-238) though no caller passes them (grep across nova/ and tests/ at head finds only the definition and its own use) and the coordinator's resume ruling said to 'drop the extra_layers workaround'. The landing line and the evidence fragment both assert 'no extra_layers workaround remains', which is true of the test but not of the module, which still ships the dead seam. Impact: a declared-dropped workaround persists as unused public surface, and the evidence overstates its removal."
+    },
+    {
+      "file": "manifest.md",
+      "line": "23",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest cites tests/test_forward_profile_analytic_smoke.py's head log (analytic-smoke-head.log) as its gate, but that log's first line is pytest progress dots, not the revision/tree/command header the gate-log contract requires, so the log does not say what it measured; and its baseline_suite and after_suite fields are both null, so the designed base-vs-head delta reads no log and added failures can only be inferred from the head arm. I closed both gaps independently (scratch tree at the reviewed head, reproduced 5 passed EXIT=0 and the red control), but the reviewed run's own record does not carry them."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "the gate change point is tests/test_forward_profile_analytic_smoke.py:56 _vacuum_map_residual reached from test_analytic_vacuum_flux_matches_the_reference (line 123); the module change point is nova/imas/validator_case.py:241 resolve_validator_case and :136 netcdf_to_hdf5; no production caller of nova.imas.validator_case yet (only the test imports it).",
+    "diff": "read commit by commit against base a4b489cf7f56ad60b5c54741d15010d494004804; two commits, five files, 2598 insertions/0 deletions (298 in validator_case.py, 186 in the test, 7 in tests/data-manifest.json, 76 in the fragment, 2031 in the SVG), all inside scope.",
+    "done_when": "the reviewed node's done-when (as revised by resume-1) is: the vacuum psi of the input coil on the reference 65x65 grid compared to the reference map on a relative bound of 1e-3 of peak, COCOS stated not absorbed, one poloidal line-contour panel, negative control = coil current x1.5 fails the bound. Delivered: head gate 5 passed EXIT=0 and negative control EXIT=1 with residual 0.438 (both reproduced).",
+    "goal": "plan nova:forward-profile-validator-set s5 rung 1 asks for the analytic smoke rung (fetch shim + pinned manifest + the analytic case gated against its reference in a fresh process); the coordinator's resume ruling fixed the done-when to a vacuum-map gate at 1e-3 of peak with the coil-current control because the case carries no plasma current or axis. This node delivers resolve_validator_case/netcdf_to_hdf5 and the map gate, and pins the analytic reference layer.",
+    "manifest": "read; it reports status complete, commits c36ef55c8 and 5ae3ec946 with conventional subjects and bodies, head gate 5 passed (analytic-smoke-head.log) and a declared negative control at EXIT=1; its baseline_suite and after_suite fields are both null, so no base-vs-head arm exists.",
+    "write_paths": "read the reviewed manifest's declared write paths and the prompt FENCE SCOPE (validator_case.py, the test file, the figures dir, the fragment) plus the resume advice that added tests/data-manifest.json; every changed path is inside the effective grant."
+  },
+  "justifications": {
+    "durability": "The guard is genuine and I falsified it: the 1.5x coil-current mutation raises the residual from 9.4e-10 to 0.438 of peak and turns the gate red (EXIT=1, reproduced). The converter is idempotent and that is tested (test_netcdf_to_hdf5_round_trips_a_layer asserts master.h5 mtime unchanged on a second call). The gate is committed and runs without the registry skip path in this environment. Deficiencies: the bound (1e-3) sits six orders above the achieved residual (9.4e-10), so the gate is loose, but the control shows it still discriminates a real fault; a retained dead parameter (finding 3); and the figure/caption defects under evidence.",
+    "evidence": "Independently reproduced in a scratch tree extracted from the reviewed head (git archive 5ae3ec946 -> $TMPDIR scratch, module.__file__ confirming the scratch copy; log review-head-gate.log): the gate as a fresh process gives 5 passed, EXIT=0, matching the reviewed manifest's headline (analytic-smoke-head.log, 5 passed). The declared negative control reproduces exactly as an independent red arm (review-head-negative-control.log): NOVA_VALIDATOR_CONTROL_SCALE=1.5 turns test_analytic_vacuum_flux_matches_the_reference red at EXIT=1 with residual 0.438122068927738 > MAP_BOUND 1e-3, identical to the reviewed negative-control.log. Direct probe (probe_residual.py) confirms the head residual: absolute 1.0418e-12 Wb, ratio 9.4175e-10 of peak 1.106280e-03 Wb. Gaps: (a) the reviewed head log carries no revision/tree/command header (its first line is pytest progress dots), so a reader cannot tell what it measured; (b) the reviewed manifest's baseline_suite and after_suite are both null, so the designed base-vs-head delta reads no log; (c) the evidence fragment's figure caption misstates the residual (finding 1) and the figure draws axes/ticks contrary to the media rules (finding 2).",
+    "fit": "ValidatorCase/ValidatorLayer are dataclasses with a matching error hierarchy (ValidatorCaseError) and a typed __all__, imas is TYPE_CHECKING-guarded, and no plan/sprint/version label appears in any name or comment; the test keeps the suite's docstring-first idiom. One idiom deviation: the figure under docs/figures/forward-profile-validator-set/fpv-analytic-smoke does not route through nova.media (imas-ink) and is drawn with the axis on (xtick/ytick groups and spines present), contrary to the repository's binding rule that a poloidal panel is drawn with the axis off and despined (finding 2).",
+    "goal_fidelity": "The revised done-when (the coordinator's resume ruling superseded the original paragraph: the analytic case is vacuum, so no Ip/axis/area band has a referent) is answered: nova/imas/validator_case.py:241 resolve_validator_case fetches each pinned layer by sha256 digest through nova.database.layer_fetch.fetch_layer at the layer's own dd_version from tests/data-manifest.json, and netcdf_to_hdf5 (line 136) converts the NetCDF blob to the per-IDS HDF5 layout (master.h5) through imas.DBEntry alone; tests/test_forward_profile_analytic_smoke.py:123 test_analytic_vacuum_flux_matches_the_reference gates the input coil's vacuum flux (nova.biot.greens.greens_psi) against the 65x65 reference map on a relative bound of 1e-3 of peak (MAP_BOUND, line 36, written before scoring), with COCOS identity asserted by comparing absolute flux; the declared negative control (NOVA_VALIDATOR_CONTROL_SCALE=1.5) is red; one poloidal line-contour panel and the evidence fragment landed. Deviations from the plan text are exactly the ones the resume ruling permitted and the test says which route it took (\"A forward profile solve is not run: the case is vacuum with zero source current, so the Green function is the shipped route\"). One gap: the ruling said to drop the extra_layers workaround, but the parameter is retained (finding 3).",
+    "reuse": "The change reuses rather than reimplements: fetch and digest verification come from nova.database.layer_fetch.fetch_layer, the NetCDF->HDF5 conversion goes through imas.DBEntry for both read and write, and the flux kernel is the existing nova.biot.greens.greens_psi; tests/data-manifest.json extends the existing efitpp_validator_layers record with one reference layer rather than adding a new manifest. New public surface is small and named for what it does. The one reuse defect is the retained extra_layers parameter and _layer_specs helper (finding 3), a seam no caller uses.",
+    "scope_discipline": "The whole base..head diff is five paths: nova/imas/validator_case.py, tests/test_forward_profile_analytic_smoke.py, tests/data-manifest.json, docs/evidence/fragments/forward-profile-validator-set/fpv-analytic-smoke.html and docs/figures/forward-profile-validator-set/fpv-analytic-smoke/analytic-vacuum-flux-map.svg. The prompt's FENCE SCOPE named four of them; tests/data-manifest.json was not in the prompt grant but the coordinator's resume-1 advice explicitly widened the fence to include it (\"The fence now includes tests/data-manifest.json\"), so every changed path is inside the effective grant. No plan file and no out-of-scope path is touched."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T043927638886-fpv-analytic-smoke (node fpv-analytic-smoke, plan nova:forward-profile-validator-set s5 rung 1).\n\nVERDICT goal: the resume ruling fixed the analytic rung as a vacuum-map gate; this node delivers nova/imas/validator_case.py (resolve_validator_case, netcdf_to_hdf5) and tests/test_forward_profile_analytic_smoke.py, gating greens_psi of the input coil against the pinned 65x65 reference map at 1e-3 of peak with COCOS identity asserted.\nVERDICT done_when: head gate 5 passed EXIT=0 and the declared negative control (coil current x1.5) EXIT=1 with residual 0.438, both reproduced independently in a scratch tree at the reviewed head.\nVERDICT write_paths: five changed paths, all inside the effective grant (tests/data-manifest.json added by the resume advice); no plan edit.\nVERDICT manifest: read; status complete, commits c36ef55c8/5ae3ec946 with bodies, head gate 5 passed and a declared negative control at EXIT=1; baseline_suite and after_suite both null.\nVERDICT diff: read commit by commit against base a4b489cf; two commits, five files, 2598 insertions/0 deletions.\nCALL_SITES: test change point tests/test_forward_profile_analytic_smoke.py:56 _vacuum_map_residual <- (test_analytic_vacuum_flux_matches_the_reference); module change point nova/imas/validator_case.py:241 resolve_validator_case and :136 netcdf_to_hdf5.\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the revised done-when is answered: fetch by digest at the layer's own dd_version from tests/data-manifest.json, NetCDF->HDF5 with master.h5 through imas.DBEntry only, gate on the vacuum map at 1e-3 of peak with the COCOS identity asserted, the declared control red, and the panel and fragment landed. The plan-text deviations (no machine build, no solve, no Ip/axis band) are exactly the ones the coordinator's resume ruling permitted, and the test states which route it took. One gap: the ruling's instruction to drop the extra_layers workaround was only half followed (finding 3).\nSCORE evidence: 14\nJUSTIFICATION evidence: reproduced at the reviewed head in a scratch tree (5 passed, EXIT=0, module.__file__ = scratch copy) and the negative control (EXIT=1, residual 0.438122 > 1e-3) exactly as reviewed; a direct probe gives absolute residual 1.0418e-12 Wb and ratio 9.4175e-10. Gaps: the head log has no revision/tree/command header; the manifest records no baseline/after arm; the fragment caption misstates the residual (finding 1) and the figure has axes/ticks (finding 2).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: five paths, all inside the effective grant; tests/data-manifest.json was added to the fence by the coordinator's resume-1 advice. No plan file or out-of-scope path touched.\nSCORE durability: 17\nJUSTIFICATION durability: the guard is genuine and falsified (1.5x -> 0.438 > 1e-3, EXIT=1, reproduced); the converter is idempotent and tested. The 1e-3 bound sits six orders above the achieved 9.4e-10 residual (loose but discriminating per the control); a dead extra_layers seam remains.\nSCORE fit: 17\nJUSTIFICATION fit: dataclass + error-hierarchy + typed __all__ idiom, TYPE_CHECKING imas, no plan/version labels; but the delivered figure bypasses nova.media and draws axes/ticks/spines against the binding plotting rule.\nSCORE reuse: 18\nJUSTIFICATION reuse: reuses fetch_layer, imas.DBEntry and greens_psi, and extends the existing tests/data-manifest.json record; the retained extra_layers parameter (finding 3) is a declared-dropped seam no caller uses.\nFINDING docs/evidence/fragments/forward-profile-validator-set/fpv-analytic-smoke.html:48 follow-on: figure caption states 'absolute residual 9.418e-10 Wb, i.e. 8.5e-7 of peak'; actual is absolute 1.0418e-12 Wb and ratio 9.4175e-10 of peak. The caption mislabels the dimensionless ratio as an absolute value and inflates both numbers by ~900x.\nFINDING docs/figures/forward-profile-validator-set/fpv-analytic-smoke/analytic-vacuum-flux-map.svg:41 follow-on: axis is ON (xtick/ytick groups with tick marks, spines) contrary to the binding rule that a poloidal panel is drawn with the axis off; the panel did not route through nova.ink.\nFINDING nova/imas/validator_case.py:245 follow-on: extra_layers parameter and _layer_specs retained though unused and dropped by the resume ruling; the landing and fragment claim it is gone.\nFINDING manifest.md:23 follow-on: the cited head log lacks the revision/tree/command header and the manifest records null baseline_suite/after_suite arms; I reproduced both the head and the red control independently.\n",
+  "review_run_id": "r-20261008T054057020599-review-of-fpv-analytic-smoke",
+  "reviewed_base_sha": "a4b489cf7f56ad60b5c54741d15010d494004804",
+  "reviewed_head_sha": "5ae3ec946bb2d161b45240526c7532764024a6fc",
+  "reviewed_run_id": "r-20261008T043927638886-fpv-analytic-smoke",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 14,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T06:07:00+00:00",
+  "total": 105
+}

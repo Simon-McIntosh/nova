@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite (revision 646b68b8, command .../tests/test_mast_solve_inputs.py::test_the_toroidal_field_is_blocked_by_the_description_not_the_source, exit_status 0, completed true, failure_ids []) and after_suite (revision 1227e204, command .../tests/test_mast_tf_average.py, exit_status 0, completed true, failure_ids []). Added failures are the after arm's failing ids minus the baseline arm's: both empty, so the run added none. I reproduced the full head gate independently at d95f9296 in the reviewed worktree (18 passed, EXIT=0, review-head-gate.log) with no failing id. The 2 failures in review-mutation-tolerance.log are my own falsifying mutation of RELATIVE_TOLERANCE, not a gate arm.",
+  "added_failures_note_placeholder": null,
+  "call_site_count": 4,
+  "call_sites": [
+    {
+      "file": "benchmarks/mast_tf_average.py",
+      "line": 38,
+      "symbol": "RELATIVE_TOLERANCE"
+    },
+    {
+      "file": "benchmarks/mast_tf_average.py",
+      "line": 116,
+      "symbol": "cohort_shots"
+    },
+    {
+      "file": "benchmarks/mast_tf_average.py",
+      "line": 82,
+      "symbol": "aggregate_comparisons"
+    },
+    {
+      "file": "benchmarks/mast_tf_average.py",
+      "line": 216,
+      "symbol": "inspect_shot"
+    }
+  ],
+  "completed_at": "2026-10-08T06:09:38.027Z",
+  "dispatched_at": "2026-10-08T05:49:16Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_tf_average.py",
+      "line": "216",
+      "severity": "follow-on",
+      "text": "follow-on: in inspect_shot the level-1 store is opened with zarr.open_group(str(path), mode='r') outside the try/except that captures array_metadata errors into row['errors']; an unreadable or corrupt shot store therefore raises out of the ThreadPoolExecutor and aborts the whole cohort pass, and the summary's inventory_errors guard cannot see it because the exception never becomes a recorded error. Impact: one bad store among 577 destroys the run's evidence instead of being counted; the design already distinguishes absent/unreadable, so the open belongs inside the guarded block."
+    },
+    {
+      "file": "docs/figures/mast-tf-average/receipt.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the committed receipt embeds revision 1227e204 (the code commit) while reviewed_head_sha d95f9296 is a docs-only commit; the gate arm (after_suite, verification.log) also ran at 1227e204, not the head. The record is accurate for the code that produced it, but a reader reconciling reviewed_head_sha against the receipt must know the head changed no code. The 8.7 MB detail inventory cited by the receipt is under the run directory, not the GPFS evidence root nova AGENTS.md names for large receipts, so it is not durable past run cleanup."
+    },
+    {
+      "file": "manifest.md",
+      "line": "3",
+      "severity": "follow-on",
+      "text": "follow-on: the declared write paths name docs/figures/mast-nonaxisymmetric-physics/, which this average rung did not write; the landing cites no fragment under it. Non-blocking, but the declaration overstates the node's output surface."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 646b68b8; three commits spanning 4 paths, 635 insertions / 0 deletions; the first adds the module and its tests, the second recognises both store metadata encodings and persists the detail before the control, the third is docs-only (receipt + fragment).",
+    "done_when": "the reviewed node's own done-when is a stated-tolerance comparison with the average promoted, bounded or recorded unresolved: aggregate_comparisons returns verdict 'unresolved' with scored_shots 0, summary in the committed receipt and data-pass-inline.log; the head gate is 18 passed EXIT=0 and the declared negative control is red at EXIT=1.",
+    "goal": "plan s6's first layer: pin a tolerance before scoring and compare the axisymmetric TF average against the measured R*Bphi on vacuum shots; this node pins 2e-2 (benchmarks/mast_tf_average.py:38), reclassifies the pinned census to 577 TF-only shots, and records the average unresolved because no admissible independent absolute R*Bphi measurement exists in the searched stores.",
+    "manifest": "read; reports status complete, three commits (87d2472 feat, 1227e20 fix, d95f929 the docs commit) each with a body, head gate 18 passed EXIT=0, declared negative control EXIT=1, baseline_suite failure_ids [] and after_suite failure_ids []; both arms completed:true.",
+    "write_paths": "read the reviewed manifest's declared write paths; every path in the diff is inside them (benchmarks/mast_tf_average.py, tests/test_mast_tf_average.py, the evidence fragment, docs/figures/mast-tf-average/); one declared path (docs/figures/mast-nonaxisymmetric-physics/) is unused."
+  },
+  "justifications": {
+    "durability": "The refusal machinery is genuine and I falsified it in a scratch copy of the two files: widening RELATIVE_TOLERANCE to 1.0e9 turns test_scaled_current_fails_tolerance and test_upper_quantile_and_missing_shots_prevent_promotion red (2 failed, 16 passed, EXIT=1, review-mutation-tolerance.log), so the tolerance and coverage guards are live rather than vacuous. The named check is exercised in the positive direction too: data-pass.log records the control refusal actually firing under main() at EXIT=1. The detail receipt is written before the known-channel control is checked, so a refused measurement keeps its evidence. Gap: inspect_shot opens the level-1 store with zarr.open_group outside the try/except that feeds row['errors'], so an unreadable store aborts the whole cohort pass instead of being counted in inventory_errors; no production consumer imports the new module.",
+    "evidence": "Reproduced independently at the reviewed head in its own worktree (read-only, --basetemp /tmp/review-tf-head): tests/test_mast_tf_average.py is 18 passed, EXIT=0, module and cwd both under the reviewed tree (review-head-gate.log). The unresolved verdict is backed by a real cohort pass: data-pass-inline.log (job 1282011, revision 1227e204) inventories 577/577 shots with finite amc/tf_current, 564 finite efm/bvac_r*efm/bvac_val products, level2_present_shots 0, inventory_errors 0, scored_shots 0, verdict unresolved. The instrument is shown to see known-present data before the absence is reported: the control shot 30420 finds 24 level-1 toroidal paths via the same array_metadata reader, and the first data attempt (job 1282010, data-pass.log) failed the level-2 control at EXIT=1 and is retained. The census is pinned by sha256 in the receipt. Gaps: the receipt embeds revision 1227e204 (the code commit) while reviewed_head_sha d95f9296 is a docs-only commit (2 insertions); the 8.7 MB detail inventory is cited by path+sha but lives outside git under the run directory.",
+    "fit": "The node follows repository shape: a new benchmarks/ module beside its tests/ file, argparse entry point, numpy-only, typed signatures, mechanism-stating docstrings. No plan, sprint or version label and no author attribution appears in the new source or the fragment (grep-clean on the head blobs). The evidence fragment is a single project-absolute link to the committed receipt, matching the fragment convention, and the receipt is committed (163125 bytes, under the 300000-byte bound enforced in main).",
+    "goal_fidelity": "plan s6 asks that the toroidal field be validated in two layers never fitted together: first the axisymmetric average against the measured R*Bphi with a tolerance stated before scoring, then the ripple and n>=1 error-field against the n-resolving set, each promoted, bounded or recorded as unresolved. This node owns the first layer: benchmarks/mast_tf_average.py:38 pins RELATIVE_TOLERANCE = 2e-2 before any shot is read, cohort_shots (line 116) reclassifies the pinned census with the production owner calibration_experiments and selects ExperimentClass.TOROIDAL_FIELD_ONLY (577 shots). The measured R*Bphi is not produced: aggregate_comparisons (line 82) returns verdict 'unresolved' with scored_shots 0 because no admissible independent absolute measurement is established, and the receipt's observable.used is null. Recording the average as unresolved is an explicitly permitted s6 outcome, and 'Do not absorb plasma response or a passive mismatch into a TF geometry correction' is honoured (nominal.fitted_corrections is []). Gap: the second layer (ripple / n>=1 error-field vs the s5 n-resolving set on held-out vacuum shots) and the s6 ablation are not attempted by this node; s6 as written is not closed here.",
+    "reuse": "The change reuses the existing classification, error-field and cohort machinery rather than reimplementing it: cohort_shots calls nova.imas.mast_calibration_cohort.calibration_experiments with ShotSurvey (filtered to dataclass fields) and ExperimentClass.TOROIDAL_FIELD_ONLY; inspect_shot imports DRIVEN_CURRENT, ERROR_FIELD_CHANNELS and ERROR_FIELD_ALIASES from nova.imas.mast_error_field_screen and KILO, SHOT_STORE, ShotSurvey from nova.imas.mast_vacuum_cohort. No thresholds or cohort logic are duplicated, and MU_OVER_TWO_PI reuses the physical constant rather than a raw literal.",
+    "scope_discipline": "The whole diff between base 646b68b8 and head d95f9296 is four paths, all inside the reviewed manifest's declared write paths: benchmarks/mast_tf_average.py, tests/test_mast_tf_average.py, docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-tf-average.html and docs/figures/mast-tf-average/receipt.json; no out-of-scope file is touched. The declared write paths also name docs/figures/mast-nonaxisymmetric-physics/ (unused); nothing else in the declaration is over-reached."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T044638953254-mast-tf-average (node mast-tf-average, plan nova:mast-nonaxisymmetric-physics s6), rubric code.\n\nVERDICT goal: s6 first layer only - a 2% tolerance is pinned before scoring (benchmarks/mast_tf_average.py:38), the pinned census is reclassified to 577 TF-only shots via calibration_experiments, and the axisymmetric TF average is recorded unresolved because no admissible independent absolute R*Bphi is established; the ripple/n>=1 layer and the ablation are not attempted.\nVERDICT done_when: aggregate_comparisons returns unresolved with scored_shots 0, matching the committed receipt summary and data-pass-inline.log; head gate 18 passed EXIT=0; declared negative control red at EXIT=1.\nVERDICT write_paths: diff is 4 paths all inside the declared write paths; one declared path (docs/figures/mast-nonaxisymmetric-physics/) unused.\nVERDICT manifest: status complete, three commits with bodies, baseline_suite and after_suite both completed with empty failure_ids.\nVERDICT diff: 646b68b8..d95f9296, three commits, 4 files, 635 insertions.\nCALL_SITES: no production consumer; change point benchmarks/mast_tf_average.py:38 RELATIVE_TOLERANCE, :116 cohort_shots, :82 aggregate_comparisons, :216 inspect_shot zarr.open_group.\n\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: s6 first layer answered with a pre-registered 2e-2 tolerance and an inventory of all 577 TF-only shots; the average is honestly unresolved and no passive/plasma correction is fitted. The ripple/error-field layer and the ablation are out of this node's scope.\nSCORE evidence: 17\nJUSTIFICATION evidence: reproduced 18 passed EXIT=0 at head; the unresolved verdict rests on a real 577-shot pass (564 products, level2 0/577) whose reader is shown to see known-present level-1 toroidal paths on control shot 30420; the first attempt failed the control and was retained.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all diff paths inside the declared write paths; one declared path unused.\nSCORE durability: 18\nJUSTIFICATION durability: I falsified the tolerance guard (RELATIVE_TOLERANCE=1e9 -> 2 red, EXIT=1) and the control refusal is observed firing at EXIT=1; the detail receipt is persisted before the control check. Gap: zarr.open_group sits outside the guarded error capture.\nSCORE fit: 19\nJUSTIFICATION fit: benchmarks/ module with tests beside it, argparse, mechanism docstrings, no labels or attribution, committed receipt under the size bound.\nSCORE reuse: 19\nJUSTIFICATION reuse: reuses calibration_experiments/ShotSurvey/ExperimentClass, mast_error_field_screen constants and mast_vacuum_cohort KILO/SHOT_STORE; reuses MU_OVER_TWO_PI.\nFINDING benchmarks/mast_tf_average.py:216 follow-on: zarr.open_group outside the try/except aborts the cohort pass on an unreadable store and inventory_errors cannot see it.\nFINDING docs/figures/mast-tf-average/receipt.json:1 follow-on: receipt/gate revision is 1227e204 while reviewed_head_sha is the docs-only d95f9296; the 8.7 MB detail inventory is under the run directory, not the GPFS evidence root.\nFINDING manifest.md:3 follow-on: declared write path docs/figures/mast-nonaxisymmetric-physics/ was not written.\n",
+  "review_run_id": "r-20261008T054856430248-review-of-mast-tf-average",
+  "reviewed_base_sha": "646b68b8e9481178e41cc2059c8a9a534fa9b9b3",
+  "reviewed_head_sha": "d95f9296a500b9498421633b33f2cc9c2bbc398b",
+  "reviewed_run_id": "r-20261008T044638953254-mast-tf-average",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:58:00.000000+00:00",
+  "total": 109
+}

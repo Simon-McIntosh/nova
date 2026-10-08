@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="cfs-wrap-prerequisites"><meta name="plan-title" content="Point-jet wrapping prerequisites">
-<meta name="plan-summary" content="Near-collinear tangent, serialized read executable size and dead-helper removal measured; suite comparison in progress">
+<meta name="plan-summary" content="Near-collinear tangent, serialized read executable size and dead-helper removal measured; CPU suite comparison blocked in baseline XLA compilation">
 <meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="partial">
 <meta name="plan-recorded-at" content="2026-10-08">
 <title>Point-jet wrapping prerequisites | nova</title>
@@ -25,7 +25,7 @@
 <tr><td>Dead helper</td><td><code>_field_coefficients</code> was removed from <code>nova/equilibrium/topology.py</code>. Search across <code>nova/</code>, <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code> returned no references after the deletion.</td></tr>
 </tbody></table>
 <h2 id="cfs-wrap-prerequisites-suite">Suite comparison</h2>
-<p>The single serial driver is running the same test-file list in baseline and head arms, one fresh CPU process per module. Its completed JSON receipts and failure delta will be recorded when the run finishes.</p>
+<p>The single driver extracted the orientation base into a temporary tree and selected the same eight Biot test files and topology read file for baseline and head, with the repository root conftest. Each module had a fresh CPU process, run serially. The first baseline module, <code>test_edge_term_tangents.py</code>, reported the already recorded CPU-dependent <code>second_residual</code> identity failure at 1.720e-9 against its 1e-13 bound. Its next <code>edge_integrands</code> row remained in XLA compilation for more than 1,000 s after the declared per-test limit, at about 53 GB resident memory and no pytest summary. The run was stopped after the child had exceeded 18 min 21 s of elapsed time; the head arm was not reached. The baseline and after JSON records therefore remain <code>completed=false</code> and cannot support a suite delta. The per-module and driver logs are retained under the run directory. A bounded CPU suite strategy is needed before this clause can be asserted.</p>
 <h2 id="cfs-wrap-prerequisites-receipts">Receipts</h2>
 <p>Run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites</code>. Logs: <code>h200-prerequisites.log</code>, <code>h200-reference.log</code>, <code>negative-control.log</code>, <code>size-guard-control-qualified.log</code>, <code>baseline-suite.log</code> and <code>after-suite.log</code>. The first H200 job also records its 132-cell JSON receipt.</p>
 </main></body></html>

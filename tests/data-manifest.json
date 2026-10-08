@@ -7,5 +7,105 @@
     "machine": "MAST",
     "shot": 21978,
     "slice_index": 46
+  },
+  "efitpp_validator_layers": {
+    "registry": "ghcr.io/iterorganization/efitpp-test-data",
+    "registry_manifest_digest": "sha256:aac593a700f8f095b9a1200b2e7f3854439f742aee67f51c99ac11a955ad5e9a",
+    "cases": {
+      "analytic": {
+        "machine": "ANALYTIC",
+        "code": "analytic",
+        "scenario": "synthetic single-coil circle, one slice at 39.209 s",
+        "dd_version": "4.1.0",
+        "layers": [
+          {
+            "role": "input",
+            "name": "analytic.nc",
+            "digest": "sha256:f3959b1bfa47a603b4ebed761d8aa899861fd124c088918ff1fa88b464d72123",
+            "size": 84425,
+            "dd_version": "4.1.0"
+          },
+          {
+            "role": "machine_description",
+            "name": "analytic-dd4-1-0.nc",
+            "digest": "sha256:4a0ba375693bf5b3b25718b8adbc25962e490a10d921c845fab3b3924e3b96cf",
+            "size": 78457,
+            "dd_version": "4.1.0"
+          }
+        ]
+      },
+      "iter_corsica_130506": {
+        "machine": "ITER",
+        "code": "CORSICA",
+        "shot": 130506,
+        "scenario": "diverted, two X-points, flat-top, I_p -15 MA",
+        "reference_slices": 4,
+        "dd_version": "4.1.0",
+        "layers": [
+          {
+            "role": "input",
+            "name": "iter_corsica_130506_input.nc",
+            "digest": "sha256:0b9f02c2eb7132fed07b2dece3296f5177387981d6ebf82f8fd5bf38853071e5",
+            "size": 4398124,
+            "dd_version": "4.1.0"
+          },
+          {
+            "role": "reference",
+            "name": "iter_corsica_130506.nc",
+            "digest": "sha256:af798541e643a2c4d0b191f15db835954c4302e3ba58b63df84d502790828bb3",
+            "size": 827510,
+            "dd_version": "4.1.0"
+          }
+        ]
+      },
+      "iter_dina_105027": {
+        "machine": "ITER",
+        "code": "DINA",
+        "shot": 105027,
+        "scenario": "diverted lower-null, flat-top, I_p -5 MA",
+        "reference_slices": 4,
+        "dd_version": "4.1.0",
+        "layers": [
+          {
+            "role": "input",
+            "name": "iter_dina_105027_input.nc",
+            "digest": "sha256:883df0b39987eda92fdd10c1a5d1626ae8e8ffc33525cf1c3016337644e0fbcb",
+            "size": 6989024,
+            "dd_version": "4.1.0"
+          },
+          {
+            "role": "reference",
+            "name": "iter_dina_105027.nc",
+            "digest": "sha256:d891738bd7eb86207446671d5b725e4673c9f2735934035b5be920c8ffd79ae4",
+            "size": 529807,
+            "dd_version": "4.1.0"
+          }
+        ]
+      },
+      "iter_astra_131046": {
+        "machine": "ITER",
+        "code": "ASTRA",
+        "shot": 131046,
+        "scenario": "single slice t = 50.4 s, I_p -15 MA, psi_2D 256x257",
+        "reference_slices": 1,
+        "dd_version": "4.1.0",
+        "layers": [
+          {
+            "role": "input",
+            "name": "iter_astra_131046_input.nc",
+            "digest": "sha256:bb5910d774a9ff57e251fe04cfe76883ba4ed3dfbb9c46ac618b27a5ae6328cf",
+            "size": 2468373,
+            "dd_version": "4.1.0"
+          },
+          {
+            "role": "reference",
+            "name": "iter_astra_131046.nc",
+            "digest": "sha256:9ac80c94a3632c45f5cc1b95c15568b222368eb2fc8a17aa5f99984b5e6014ab",
+            "size": 1733537,
+            "dd_version": "4.1.0"
+          }
+        ]
+      }
+    }
   }
 }

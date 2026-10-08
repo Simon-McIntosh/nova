@@ -1,0 +1,45 @@
+<section id="mast-coil-case-resistivity-evidence">
+  <h3>MAST PF coil-case resistivity source check</h3>
+  <p>The <a href="/nova/figures/mast-coil-case-resistivity/receipt.json">claim-by-claim receipt</a>
+    records the 0.90 µΩ·m provisional bulk stainless ceiling from
+    <code>mast_seed_parameters.py</code>. Original MAST's five non-solenoid PF pairs
+    sit in stainless steel cans, but the paper names no alloy grade
+    (<a href="https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf">Edlington et al., p. 421</a>).
+  </p>
+  <p>A reference austenitic steel measures 0.811 µΩ·m at 300 K, 0.890 at
+    400 K and 0.923 at 450 K; interpolation crosses the seed ceiling near
+    415 K (142 °C). This is a reference specimen, not identified MAST stock
+    (<a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nbsspecialpublication260-46.pdf">NBS SRM 798, Table 4</a>).
+    MAST reported 200 °C designed and 140 °C achieved <em>bake-out</em>
+    temperatures, neither a measured case temperature during the fitted shots
+    (<a href="https://wp.lancs.ac.uk/laird-group/files/2025/07/2001-Akers-NuclearFusion.pdf">Akers et al., Table 1</a>).
+  </p>
+  <table id="mast-coil-case-resistivity-hypotheses">
+    <thead><tr><th>Explanation for the fit reaching the ceiling</th><th>Verdict from independent sources</th></tr></thead>
+    <tbody>
+      <tr><td>Higher-resistivity grade</td><td>Unsourced: the MAST can description says stainless steel without a grade
+        (<a href="https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf">Edlington et al., p. 421</a>).</td></tr>
+      <tr><td>Hotter steel during the fitted shots</td><td>Unsourced: the material threshold is physically possible for the reference alloy,
+        but the published MAST temperature is a bake-out value
+        (<a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nbsspecialpublication260-46.pdf">NBS Table 4</a>;
+        <a href="https://wp.lancs.ac.uk/laird-group/files/2025/07/2001-Akers-NuclearFusion.pdf">Akers Table 1</a>).</td></tr>
+      <tr><td>Toroidal insulating break or segmentation of the case</td><td>Unsourced:
+        published insulating breaks belong to diagnostic supports; separately measured case
+        currents establish conduction but do not resolve the case closure path
+        (<a href="https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf">Edlington et al., p. 422</a>;
+        <a href="https://scientific-publications.ukaea.uk/wp-content/uploads/UKAEA-CCFE-PR2179.PDF">Berkery et al., §3</a>).</td></tr>
+      <tr><td>Unmodelled parallel vessel path</td><td>Supported as topology: the cans connect
+        electrically through supports and feeder bellows to the vessel; a 3-D model
+        explicitly couples vessel and cases. Its bias in this fit is unmeasured
+        (<a href="https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf">Edlington et al., p. 421</a>;
+        <a href="https://scientific-publications.ukaea.uk/wp-content/uploads/UKAEA-CCFE-PR2179.PDF">Berkery et al., §3</a>).</td></tr>
+    </tbody>
+  </table>
+  <p id="mast-coil-case-resistivity-decision">No independent source establishes a
+    greater-than-0.90 µΩ·m <em>bulk</em> case value for the held-out shots or a
+    quantified segmentation multiplier. The seed stays unchanged; vessel-coupled
+    current paths are a sourced model-extension candidate, not a fitted parameter
+    (<a href="https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf">Edlington et al.</a>;
+    <a href="https://scientific-publications.ukaea.uk/wp-content/uploads/UKAEA-CCFE-PR2179.PDF">Berkery et al.</a>;
+    <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nbsspecialpublication260-46.pdf">NBS Table 4</a>).</p>
+</section>

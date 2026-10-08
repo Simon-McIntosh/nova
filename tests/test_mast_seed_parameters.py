@@ -10,7 +10,9 @@ unresolved, because a shrinking unresolved set is a claim that needs evidence.
 
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 
 import imas
 import pytest
@@ -106,6 +108,29 @@ def test_material_is_named_by_a_source_or_assigned_by_association() -> None:
     assert passive_material("vertw") is STAINLESS_STEEL
     with pytest.raises(KeyError, match="unknown passive family"):
         passive_material("not_a_family")
+
+
+def test_coil_case_receipt_claims_have_citations() -> None:
+    receipt = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "docs/figures/mast-coil-case-resistivity/receipt.json"
+        ).read_text()
+    )
+    sources = receipt["sources"]
+    assert receipt["claims"]
+    for claim in receipt["claims"]:
+        citations = claim.get("citations")
+        assert citations, f"{claim['id']} has no citation"
+        assert all(source in sources for source in citations), claim["id"]
+    assert {
+        claim["hypothesis"] for claim in receipt["claims"] if "hypothesis" in claim
+    } == {
+        "higher-resistivity grade",
+        "higher temperature during the fitted shots",
+        "toroidal insulating break or segmentation",
+        "unmodelled parallel vessel path",
+    }
 
 
 def test_an_ambiguous_conductor_family_gets_no_material(ledger) -> None:

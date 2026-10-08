@@ -1,0 +1,108 @@
+{
+  "machine": "original MAST",
+  "question": "Can the PF coil cans carry effective toroidal resistivity above the seeded 0.90 micro-ohm metre bulk stainless bound?",
+  "seed_bound_micro_ohm_m": 0.9,
+  "seed_path": "nova/imas/mast_seed_parameters.py",
+  "sources": {
+    "seed": {
+      "title": "Nova nominal MAST material seed",
+      "path": "nova/imas/mast_seed_parameters.py",
+      "locator": "STAINLESS_STEEL"
+    },
+    "edlington": {
+      "title": "Edlington, Martin and Pinfold, MAST magnetic diagnostics (2001)",
+      "url": "https://scientific-publications.ukaea.uk/wp-content/uploads/Published/RSIVOL72p421.pdf",
+      "locator": "p. 421, Introduction; p. 422, Experimental Arrangement"
+    },
+    "berkery": {
+      "title": "Berkery et al., MAST conducting structure reconstruction",
+      "url": "https://scientific-publications.ukaea.uk/wp-content/uploads/UKAEA-CCFE-PR2179.PDF",
+      "locator": "section 3, pp. 4–5 and Fig. 3"
+    },
+    "akers": {
+      "title": "Akers et al., First results from MAST (2001)",
+      "url": "https://wp.lancs.ac.uk/laird-group/files/2025/07/2001-Akers-NuclearFusion.pdf",
+      "locator": "Table 1, p. 1"
+    },
+    "nist": {
+      "title": "Hust and Giarratano, NBS SRM 798 austenitic stainless steel",
+      "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nbsspecialpublication260-46.pdf",
+      "locator": "Table 4, p. 18 (PDF p. 30); units micro-ohm cm"
+    }
+  },
+  "claims": [
+    {
+      "id": "seed",
+      "finding": "The current provisional bulk austenitic stainless interval ends at 0.90 micro-ohm metre; the coil-can grade is explicitly undocumented.",
+      "citations": ["seed"]
+    },
+    {
+      "id": "material",
+      "finding": "The five non-solenoid PF coil pairs of original MAST were inside stainless steel cans; no alloy grade is named in the inspected machine description.",
+      "citations": ["edlington"]
+    },
+    {
+      "id": "connections",
+      "finding": "The cans were electrically connected to the vacuum vessel through both mechanical supports and feeder-bar vacuum bellows; those are additional current paths, not electrically isolated cans.",
+      "citations": ["edlington"]
+    },
+    {
+      "id": "case_current",
+      "finding": "Case Rogowski measurements separated induced case current from feed current, and a later 3-D conducting-structure model compared a lower P4 case current with a MAST coil-test discharge.",
+      "citations": ["edlington", "berkery"]
+    },
+    {
+      "id": "insulating_break_scope",
+      "finding": "The described insulating breaks prevent currents in diagnostic support rails. The passage does not locate a break in the PF coil cans.",
+      "citations": ["edlington"]
+    },
+    {
+      "id": "reference_resistivity",
+      "finding": "An independently measured austenitic stainless reference sample has 0.811 micro-ohm metre at 300 K, 0.890 at 400 K and 0.923 at 450 K; it is not identified as MAST can stock.",
+      "citations": ["nist"]
+    },
+    {
+      "id": "temperature",
+      "finding": "A MAST report gives 200 C designed and 140 C achieved bake-out temperatures. These are vessel bake values, not coil-can temperatures during the held-out vacuum shots.",
+      "citations": ["akers"]
+    },
+    {
+      "id": "temperature_threshold",
+      "finding": "Linear interpolation of the reference sample between 400 and 450 K crosses 0.90 micro-ohm metre at about 415 K (142 C). This is an illustrative material threshold, not a measured MAST operating condition.",
+      "citations": ["nist", "akers"]
+    },
+    {
+      "id": "higher_grade",
+      "hypothesis": "higher-resistivity grade",
+      "verdict": "unsourced",
+      "finding": "The MAST source says stainless steel without a grade; no source reviewed identifies a higher-resistivity grade in these cans.",
+      "citations": ["edlington", "berkery"]
+    },
+    {
+      "id": "hotter_case",
+      "hypothesis": "higher temperature during the fitted shots",
+      "verdict": "unsourced",
+      "finding": "The reference alloy could exceed 0.90 micro-ohm metre near 142 C, but the MAST source gives only bake-out temperatures and no can temperature for the fitted shots.",
+      "citations": ["nist", "akers"]
+    },
+    {
+      "id": "toroidal_break",
+      "hypothesis": "toroidal insulating break or segmentation",
+      "verdict": "unsourced",
+      "finding": "No can seam or electrical segmentation is specified. The explicit insulating breaks belong to diagnostic rails; observed case currents do not establish whether each case is a closed ring or closes through the vessel.",
+      "citations": ["edlington", "berkery"]
+    },
+    {
+      "id": "parallel_path",
+      "hypothesis": "unmodelled parallel vessel path",
+      "verdict": "supported",
+      "finding": "The MAST cans have two documented electrical connections to the vessel, and a 3-D vessel-and-cases model is used to estimate effective reduced resistances. The sign and size of this path's bias in the current held-out fit remain unmeasured.",
+      "citations": ["edlington", "berkery"]
+    },
+    {
+      "id": "decision",
+      "finding": "The reviewed sources do not establish a coil-case bulk resistivity above 0.90 micro-ohm metre at the fitted shot temperature or a quantified segmentation multiplier. The provisional bound therefore stays unchanged; vessel-coupled topology is a supported model-extension candidate.",
+      "citations": ["seed", "edlington", "berkery", "akers", "nist"]
+    }
+  ]
+}

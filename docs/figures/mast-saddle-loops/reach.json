@@ -1,0 +1,1095 @@
+{
+ "cohort": {
+  "admitted_shots": 86,
+  "candidate_shots": 4000,
+  "criteria": {
+   "excitation_current_a": 1000.0,
+   "minimum_probes": 40,
+   "plasma_free_current_a": 5000.0
+  },
+  "frame": "level1 store enumeration, even-strided to the sample limit",
+  "sample_limit": 4000,
+  "shot_range": [
+   13725,
+   28575
+  ],
+  "shots": [
+   13725,
+   13777,
+   13858,
+   13886,
+   14066,
+   14070,
+   14074,
+   14078,
+   14082,
+   14086,
+   14098,
+   14106,
+   14110,
+   14118,
+   14126,
+   14130,
+   14134,
+   14138,
+   14190,
+   14274,
+   14378,
+   14935,
+   15051,
+   15075,
+   15151,
+   15175,
+   15295,
+   15299,
+   15489,
+   15577,
+   15737,
+   15757,
+   15785,
+   15813,
+   15865,
+   15950,
+   15966,
+   15974,
+   16006,
+   16178,
+   16234,
+   16286,
+   16381,
+   16417,
+   16605,
+   19220,
+   19225,
+   19235,
+   19250,
+   19254,
+   19258,
+   19350,
+   19560,
+   19572,
+   19747,
+   19777,
+   19837,
+   19859,
+   19924,
+   19995,
+   20098,
+   20266,
+   20293,
+   20559,
+   20789,
+   20830,
+   21077,
+   21813,
+   22350,
+   22541,
+   22569,
+   22771,
+   24939,
+   24947,
+   24979,
+   25530,
+   25534,
+   25538,
+   25542,
+   25547,
+   25555,
+   25818,
+   25828,
+   25836,
+   28566,
+   28575
+  ],
+  "shots_with_xmb": 26,
+  "shots_without_xmb": 60
+ },
+ "comparisons": [
+  {
+   "difference_mean": 0.10816352223482292,
+   "difference_rms": 0.10817459889429322,
+   "loop": "saddle_m_1",
+   "overlap_samples": 26190,
+   "prediction": {
+    "available": false,
+    "loop_position": {
+     "centre_r": 1.9989999532699585,
+     "centre_z": 0.014285714498588007,
+     "vertices": 28
+    },
+    "reason": "coil cross-sections for the response kernel are not present in the magnetics IDS; the catalog machine description that carries them is unavailable to this benchmark"
+   },
+   "published_mean": 0.1645320442260882,
+   "raw_key": "sad_out_m01",
+   "raw_mean": 0.27269556646091114,
+   "shot": 14811
+  },
+  {
+   "difference_mean": 0.1076877095165692,
+   "difference_rms": 0.1077005783198889,
+   "loop": "saddle_m_1",
+   "overlap_samples": 30160,
+   "prediction": {
+    "available": false,
+    "loop_position": {
+     "centre_r": 1.9989999532699585,
+     "centre_z": 0.014285714498588007,
+     "vertices": 28
+    },
+    "reason": "coil cross-sections for the response kernel are not present in the magnetics IDS; the catalog machine description that carries them is unavailable to this benchmark"
+   },
+   "published_mean": 0.15085365032327586,
+   "raw_key": "sad_out_m01",
+   "raw_mean": 0.25854135983984505,
+   "shot": 14912
+  },
+  {
+   "difference_mean": 0.11378626778771504,
+   "difference_rms": 0.1138027590263878,
+   "loop": "saddle_m_1",
+   "overlap_samples": 24360,
+   "prediction": {
+    "available": false,
+    "loop_position": {
+     "centre_r": 1.9989999532699585,
+     "centre_z": 0.014285714498588007,
+     "vertices": 28
+    },
+    "reason": "coil cross-sections for the response kernel are not present in the magnetics IDS; the catalog machine description that carries them is unavailable to this benchmark"
+   },
+   "published_mean": 0.11727699818478038,
+   "raw_key": "sad_out_m01",
+   "raw_mean": 0.2310632659724954,
+   "shot": 15000
+  },
+  {
+   "difference_mean": -0.014406294472934658,
+   "difference_rms": 0.014532206184787662,
+   "loop": "saddle_m_1",
+   "overlap_samples": 25061,
+   "prediction": {
+    "available": false,
+    "loop_position": {
+     "centre_r": 1.9989999532699585,
+     "centre_z": 0.014285714498588007,
+     "vertices": 28
+    },
+    "reason": "coil cross-sections for the response kernel are not present in the magnetics IDS; the catalog machine description that carries them is unavailable to this benchmark"
+   },
+   "published_mean": 0.0010743220136616655,
+   "raw_key": "sad_out_m01",
+   "raw_mean": -0.013331972459272992,
+   "shot": 15054
+  },
+  {
+   "difference_mean": 0.1145141112787045,
+   "difference_rms": 0.1145313248411419,
+   "loop": "saddle_m_1",
+   "overlap_samples": 24160,
+   "prediction": {
+    "available": false,
+    "loop_position": {
+     "centre_r": 1.9989999532699585,
+     "centre_z": 0.014285714498588007,
+     "vertices": 28
+    },
+    "reason": "coil cross-sections for the response kernel are not present in the magnetics IDS; the catalog machine description that carries them is unavailable to this benchmark"
+   },
+   "published_mean": 0.09585298449787873,
+   "raw_key": "sad_out_m01",
+   "raw_mean": 0.21036709577658322,
+   "shot": 15097
+  },
+  {
+   "difference_mean": 0.11280510055052718,
+   "difference_rms": 0.11282098988643076,
+   "loop": "saddle_m_1",
+   "overlap_samples": 27650,
+   "prediction": {
+    "available": false,
+    "loop_position": {
+     "centre_r": 1.9989999532699585,
+     "centre_z": 0.014285714498588007,
+     "vertices": 28
+    },
+    "reason": "coil cross-sections for the response kernel are not present in the magnetics IDS; the catalog machine description that carries them is unavailable to this benchmark"
+   },
+   "published_mean": 0.4464375777011754,
+   "raw_key": "sad_out_m01",
+   "raw_mean": 0.5592426782517026,
+   "shot": 15147
+  }
+ ],
+ "loops": [
+  {
+   "family": "l",
+   "loop": "saddle_l_1",
+   "number": 1,
+   "published_channel": "XMB_SAD/OUT/L01",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l01",
+    "sad_out_l001"
+   ],
+   "raw_key_resolved": "sad_out_l01",
+   "raw_key_spellings_seen": [
+    "sad_out_l01"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_2",
+   "number": 2,
+   "published_channel": "XMB_SAD/OUT/L02",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l02",
+    "sad_out_l002"
+   ],
+   "raw_key_resolved": "sad_out_l02",
+   "raw_key_spellings_seen": [
+    "sad_out_l02"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_3",
+   "number": 3,
+   "published_channel": "XMB_SAD/OUT/L03",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l03",
+    "sad_out_l003"
+   ],
+   "raw_key_resolved": "sad_out_l03",
+   "raw_key_spellings_seen": [
+    "sad_out_l03"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_4",
+   "number": 4,
+   "published_channel": "XMB_SAD/OUT/L04",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l04",
+    "sad_out_l004"
+   ],
+   "raw_key_resolved": "sad_out_l04",
+   "raw_key_spellings_seen": [
+    "sad_out_l04"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_5",
+   "number": 5,
+   "published_channel": "XMB_SAD/OUT/L05",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l05",
+    "sad_out_l005"
+   ],
+   "raw_key_resolved": "sad_out_l05",
+   "raw_key_spellings_seen": [
+    "sad_out_l05"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_6",
+   "number": 6,
+   "published_channel": "XMB_SAD/OUT/L06",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l06",
+    "sad_out_l006"
+   ],
+   "raw_key_resolved": "sad_out_l06",
+   "raw_key_spellings_seen": [
+    "sad_out_l06"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_7",
+   "number": 7,
+   "published_channel": "XMB_SAD/OUT/L07",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l07",
+    "sad_out_l007"
+   ],
+   "raw_key_resolved": "sad_out_l07",
+   "raw_key_spellings_seen": [
+    "sad_out_l07"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_8",
+   "number": 8,
+   "published_channel": "XMB_SAD/OUT/L08",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l08",
+    "sad_out_l008"
+   ],
+   "raw_key_resolved": "sad_out_l08",
+   "raw_key_spellings_seen": [
+    "sad_out_l08"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_9",
+   "number": 9,
+   "published_channel": "XMB_SAD/OUT/L09",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l09",
+    "sad_out_l009"
+   ],
+   "raw_key_resolved": "sad_out_l09",
+   "raw_key_spellings_seen": [
+    "sad_out_l09"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_10",
+   "number": 10,
+   "published_channel": "XMB_SAD/OUT/L10",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l10",
+    "sad_out_l010"
+   ],
+   "raw_key_resolved": "sad_out_l10",
+   "raw_key_spellings_seen": [
+    "sad_out_l10"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_11",
+   "number": 11,
+   "published_channel": "XMB_SAD/OUT/L11",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l11",
+    "sad_out_l011"
+   ],
+   "raw_key_resolved": "sad_out_l11",
+   "raw_key_spellings_seen": [
+    "sad_out_l11"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "l",
+   "loop": "saddle_l_12",
+   "number": 12,
+   "published_channel": "XMB_SAD/OUT/L12",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_l12",
+    "sad_out_l012"
+   ],
+   "raw_key_resolved": "sad_out_l12",
+   "raw_key_spellings_seen": [
+    "sad_out_l12"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_1",
+   "number": 1,
+   "published_channel": "XMB_SAD/OUT/M01",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m01",
+    "sad_out_m001"
+   ],
+   "raw_key_resolved": "sad_out_m01",
+   "raw_key_spellings_seen": [
+    "sad_out_m01"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_2",
+   "number": 2,
+   "published_channel": "XMB_SAD/OUT/M02",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m02",
+    "sad_out_m002"
+   ],
+   "raw_key_resolved": "sad_out_m02",
+   "raw_key_spellings_seen": [
+    "sad_out_m02"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_3",
+   "number": 3,
+   "published_channel": "XMB_SAD/OUT/M03",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m03",
+    "sad_out_m003"
+   ],
+   "raw_key_resolved": "sad_out_m03",
+   "raw_key_spellings_seen": [
+    "sad_out_m03"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_4",
+   "number": 4,
+   "published_channel": "XMB_SAD/OUT/M04",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m04",
+    "sad_out_m004"
+   ],
+   "raw_key_resolved": "sad_out_m04",
+   "raw_key_spellings_seen": [
+    "sad_out_m04"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_5",
+   "number": 5,
+   "published_channel": "XMB_SAD/OUT/M05",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m05",
+    "sad_out_m005"
+   ],
+   "raw_key_resolved": "sad_out_m05",
+   "raw_key_spellings_seen": [
+    "sad_out_m05"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_6",
+   "number": 6,
+   "published_channel": "XMB_SAD/OUT/M06",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m06",
+    "sad_out_m006"
+   ],
+   "raw_key_resolved": "sad_out_m06",
+   "raw_key_spellings_seen": [
+    "sad_out_m06"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_7",
+   "number": 7,
+   "published_channel": "XMB_SAD/OUT/M07",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m07",
+    "sad_out_m007"
+   ],
+   "raw_key_resolved": "sad_out_m07",
+   "raw_key_spellings_seen": [
+    "sad_out_m07"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_8",
+   "number": 8,
+   "published_channel": "XMB_SAD/OUT/M08",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m08",
+    "sad_out_m008"
+   ],
+   "raw_key_resolved": "sad_out_m08",
+   "raw_key_spellings_seen": [
+    "sad_out_m08"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_9",
+   "number": 9,
+   "published_channel": "XMB_SAD/OUT/M09",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m09",
+    "sad_out_m009"
+   ],
+   "raw_key_resolved": "sad_out_m09",
+   "raw_key_spellings_seen": [
+    "sad_out_m09"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_10",
+   "number": 10,
+   "published_channel": "XMB_SAD/OUT/M10",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m10",
+    "sad_out_m010"
+   ],
+   "raw_key_resolved": "sad_out_m010",
+   "raw_key_spellings_seen": [
+    "sad_out_m010"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_11",
+   "number": 11,
+   "published_channel": "XMB_SAD/OUT/M11",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m11",
+    "sad_out_m011"
+   ],
+   "raw_key_resolved": "sad_out_m011",
+   "raw_key_spellings_seen": [
+    "sad_out_m011"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "m",
+   "loop": "saddle_m_12",
+   "number": 12,
+   "published_channel": "XMB_SAD/OUT/M12",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_m12",
+    "sad_out_m012"
+   ],
+   "raw_key_resolved": "sad_out_m012",
+   "raw_key_spellings_seen": [
+    "sad_out_m012"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_1",
+   "number": 1,
+   "published_channel": "XMB_SAD/OUT/U01",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u01",
+    "sad_out_u001"
+   ],
+   "raw_key_resolved": "sad_out_u01",
+   "raw_key_spellings_seen": [
+    "sad_out_u01"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_2",
+   "number": 2,
+   "published_channel": "XMB_SAD/OUT/U02",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u02",
+    "sad_out_u002"
+   ],
+   "raw_key_resolved": "sad_out_u02",
+   "raw_key_spellings_seen": [
+    "sad_out_u02"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_3",
+   "number": 3,
+   "published_channel": "XMB_SAD/OUT/U03",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u03",
+    "sad_out_u003"
+   ],
+   "raw_key_resolved": "sad_out_u03",
+   "raw_key_spellings_seen": [
+    "sad_out_u03"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_4",
+   "number": 4,
+   "published_channel": "XMB_SAD/OUT/U04",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u04",
+    "sad_out_u004"
+   ],
+   "raw_key_resolved": "sad_out_u04",
+   "raw_key_spellings_seen": [
+    "sad_out_u04"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_5",
+   "number": 5,
+   "published_channel": "XMB_SAD/OUT/U05",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u05",
+    "sad_out_u005"
+   ],
+   "raw_key_resolved": "sad_out_u05",
+   "raw_key_spellings_seen": [
+    "sad_out_u05"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_6",
+   "number": 6,
+   "published_channel": "XMB_SAD/OUT/U06",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u06",
+    "sad_out_u006"
+   ],
+   "raw_key_resolved": "sad_out_u06",
+   "raw_key_spellings_seen": [
+    "sad_out_u06"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_7",
+   "number": 7,
+   "published_channel": "XMB_SAD/OUT/U07",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u07",
+    "sad_out_u007"
+   ],
+   "raw_key_resolved": "sad_out_u07",
+   "raw_key_spellings_seen": [
+    "sad_out_u07"
+   ],
+   "raw_shot_count": 26,
+   "raw_shot_range": [
+    15051,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_8",
+   "number": 8,
+   "published_channel": "XMB_SAD/OUT/U08",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u08",
+    "sad_out_u008"
+   ],
+   "raw_key_resolved": "sad_out_u08",
+   "raw_key_spellings_seen": [
+    "sad_out_u08"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_9",
+   "number": 9,
+   "published_channel": "XMB_SAD/OUT/U09",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u09",
+    "sad_out_u009"
+   ],
+   "raw_key_resolved": "sad_out_u09",
+   "raw_key_spellings_seen": [
+    "sad_out_u09"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_10",
+   "number": 10,
+   "published_channel": "XMB_SAD/OUT/U10",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u10",
+    "sad_out_u010"
+   ],
+   "raw_key_resolved": "sad_out_u10",
+   "raw_key_spellings_seen": [
+    "sad_out_u10"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_11",
+   "number": 11,
+   "published_channel": "XMB_SAD/OUT/U11",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u11",
+    "sad_out_u011"
+   ],
+   "raw_key_resolved": "sad_out_u11",
+   "raw_key_spellings_seen": [
+    "sad_out_u11"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  },
+  {
+   "family": "u",
+   "loop": "saddle_u_12",
+   "number": 12,
+   "published_channel": "XMB_SAD/OUT/U12",
+   "published_shot_count": 0,
+   "published_shot_range": null,
+   "published_source": "level2 magnetics/b_field_tor_probe_saddle_voltage",
+   "raw_key_candidates": [
+    "sad_out_u12",
+    "sad_out_u012"
+   ],
+   "raw_key_resolved": "sad_out_u12",
+   "raw_key_spellings_seen": [
+    "sad_out_u12"
+   ],
+   "raw_shot_count": 3,
+   "raw_shot_range": [
+    25818,
+    25836
+   ],
+   "raw_source": "level1 xmb/sad_out (XMB export, uncorrected)",
+   "uncorrected_reachable": true
+  }
+ ],
+ "negative_control": {
+  "channel": "sad_out_zz99",
+  "expected": "unreachable",
+  "reachable": false,
+  "shots_where_present": 0
+ }
+}

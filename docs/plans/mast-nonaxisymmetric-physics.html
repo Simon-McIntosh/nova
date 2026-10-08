@@ -27,9 +27,9 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-effort-hours" content="16.0">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
-<meta name="plan-commits" content="9eb100e5,c173d399">
-<meta name="plan-impl" content="0.06">
-<meta name="plan-version" content="14">
+<meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7">
+<meta name="plan-impl" content="0.12">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -170,7 +170,10 @@ Done when
     <div class="r-comment-body"><p>node mast-saddle-voltage-reach complete at c173d3991; verdict reachable — uncorrected saddle voltage reachable for 36/36 loops via level1 xmb/sad_out on the 26 xmb-bearing vacuum-cohort shots, no fit and no sign promoted.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T035623473263-review-of-mast-saddle-voltage-reach" data-who="reckon-build" data-when="2026-10-08T04:19:33.229Z">
-    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — stored a parsed six-dimension review of r-20261008T015056150935-mast-saddle-voltage-reach at head c173d3991 (base f2bac518e), total 87 verdict fail, all three prior-review findings repaired and verified, two follow-on findings (owner-duplication in the benchmark&#x27;s cohort reuse; no regression guard), no blocking.</p></div>
+    <div class="r-comment-body"><p>review-of-mast-saddle-voltage-reach complete — stored a parsed six-dimension review of r-20261008T015056150935-mast-saddle-voltage-reach at head c173d3991 (base f2bac518e), total 87 verdict fail, all three prior-review findings repaired and verified, two follow-on findings (owner-duplication in the benchmark's cohort reuse; no regression guard), no blocking.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261008-passive-spectrum-landed" data-who="reckon-build" data-when="2026-10-08T04:35:00Z">
+    <div class="r-comment-body">node 1 landed: 1 of 15 grouped passive directions identifiable above the floor with drive scales free (400/400 shots scored). Section open — the held-out fit of that one direction, with the drive-permutation control, is next; it must propagate through nova/circuit/propagate.py and read geometry without the retiring registry. Evidence: passive-spectrum.</div>
 </div>
 </section>
 </main>

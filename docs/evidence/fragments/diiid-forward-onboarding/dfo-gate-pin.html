@@ -1,0 +1,10 @@
+<section>
+<h2 id="dfo-gate-pin-gate-reads-registered-criterion">DIII-D gate reads its registered residual criterion</h2>
+<p><strong>Node</strong> dfo-gate-pin · <strong>plan</strong> diiid-forward-onboarding §11 · <strong>role</strong> implement</p>
+<p>The gate criterion <code>GATE_RESIDUAL_TOLERANCE</code> in <code>benchmarks/diiid_forward_gs_match.py</code>
+was a hard-coded literal <code>1.0e-6</code>, one decade tighter than the module's own registered
+criterion <code>REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5</code>. It now reads that registered constant in place,
+so the scored gate and the harness preregistration cannot disagree by a decade. Covered by
+<code>tests/test_diiid_forward_gs_match.py::test_gate_residual_tolerance_reads_the_registered_criterion</code>;
+the focused file is 9 passed in a fresh process.</p>
+</section>

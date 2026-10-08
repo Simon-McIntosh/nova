@@ -242,11 +242,25 @@ def test_source_registration_changes_fail_closed():
     receipts, consumers = family._load_inputs()
     changed = copy.deepcopy(consumers)
     changed[family.DIIID_CONSUMER] = changed[family.DIIID_CONSUMER].replace(
-        "GATE_RESIDUAL_TOLERANCE = 1.0e-6",
-        "GATE_RESIDUAL_TOLERANCE = 2.0e-6",
+        "REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5",
+        "REGISTERED_RESIDUAL_TOLERANCE = 2.0e-5",
     )
 
-    with pytest.raises(RuntimeError, match="hard-coded gate reading changed"):
+    with pytest.raises(RuntimeError, match="registered residual reading changed"):
+        family.build_receipt_from_data(receipts, changed)
+
+
+def test_gate_refuses_a_restored_unregistered_literal():
+    receipts, consumers = family._load_inputs()
+    changed = copy.deepcopy(consumers)
+    changed[family.DIIID_CONSUMER] = changed[family.DIIID_CONSUMER].replace(
+        "GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE",
+        "GATE_RESIDUAL_TOLERANCE = 1.0e-6",
+    )
+
+    with pytest.raises(
+        RuntimeError, match="gate must read the registered residual tolerance"
+    ):
         family.build_receipt_from_data(receipts, changed)
 
 

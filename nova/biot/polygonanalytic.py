@@ -168,6 +168,7 @@ from nova.biot.momentchannel import (
     POLE_CEILING,
     Channel,
     _across_tangent,
+    _channel_split_tangent,
     _factorise_tangent,
 )
 from nova.biot.pairedfloat import add as paired_add
@@ -181,10 +182,15 @@ from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     _across_the_range_tangent,
     _array_program,
+    _contract_tangent,
     _product_range_tangent,
+    _product_tangent,
+    _quotient_tangent,
     _scaled_tangent,
     _sine_squared_times_tangent,
     _total_tangent,
+    _tangent_sum,
+    _tangent_difference,
     across_the_range,
     paired_across_the_range,
     paired_product,
@@ -2602,22 +2608,6 @@ def packed_analytic_moments(
 # of the same structure.
 
 
-def _vertex_product_tangent(left, d_left, right, d_right):
-    """Return the tangent of ``left * right`` by the product rule."""
-    if d_left is None:
-        return None if d_right is None else left * d_right
-    if d_right is None:
-        return d_left * right
-    return d_left * right + left * d_right
-
-
-def _vertex_quotient_tangent(numerator, d_numerator, denominator, d_denominator):
-    """Return the tangent of ``numerator / denominator`` by the quotient rule."""
-    return d_numerator / denominator + (-d_denominator * numerator) * (
-        1.0 / (denominator * denominator)
-    )
-
-
 def _dense(value, tangent, xp):
     """Return a tangent as an array, a known zero as zeros of the value's shape."""
     return xp.zeros_like(xp.asarray(value)) if tangent is None else tangent
@@ -2664,18 +2654,18 @@ def _vertex_tangent(
     d_rp = d_offset + d_r
     d_radius_sum = d_r + d_rp
     a2 = u * u + radius_sum**2
-    d_a2 = _vertex_product_tangent(u, d_u, u, d_u) + 2.0 * radius_sum * d_radius_sum
+    d_a2 = _product_tangent(u, d_u, u, d_u) + 2.0 * radius_sum * d_radius_sum
     d_span = d_a2 * (0.5 / vertex.span)
     product_r = 4.0 * r
-    d_parameter = _vertex_quotient_tangent(
+    d_parameter = _quotient_tangent(
         product_r * rp,
-        _vertex_product_tangent(product_r, 4.0 * d_r, rp, d_rp),
+        _product_tangent(product_r, 4.0 * d_r, rp, d_rp),
         a2,
         d_a2,
     )
-    d_complement = _vertex_quotient_tangent(
+    d_complement = _quotient_tangent(
         u * u + offset**2,
-        _vertex_product_tangent(u, d_u, u, d_u) + 2.0 * offset * d_offset,
+        _product_tangent(u, d_u, u, d_u) + 2.0 * offset * d_offset,
         a2,
         d_a2,
     )
@@ -2691,9 +2681,9 @@ def _vertex_tangent(
     _, d_root_moments = _harmonic_root_moments_tangent(
         vertex.moments, d_moments, parameter, d_parameter, xp=xp
     )
-    d_u_squared = _vertex_product_tangent(u, d_u, u, d_u)
+    d_u_squared = _product_tangent(u, d_u, u, d_u)
     d_ring_squared = (
-        [_vertex_product_tangent(4.0 * r, 4.0 * d_r, r, d_r)],
+        [_product_tangent(4.0 * r, 4.0 * d_r, r, d_r)],
         d_u_squared,
         d_u_squared,
     )
@@ -2795,12 +2785,12 @@ def _first_residual_tangent(vertex: _Vertex, d_vertex: dict, nodes: int):
 
     def pieces_tangent(x, d_x, y, d_y):
         twice = 2.0 * r
-        d_numerator = d_o + _vertex_product_tangent(twice, 2.0 * d_r, y, d_y)
+        d_numerator = d_o + _product_tangent(twice, 2.0 * d_r, y, d_y)
         quadruple = 4.0 * r**2
         d_quadruple = 4.0 * (d_r * (2.0 * r))
         cross = quadruple * x
-        d_cross = _vertex_product_tangent(quadruple, d_quadruple, x, d_x)
-        d_cross = _vertex_product_tangent(cross, d_cross, y, d_y)
+        d_cross = _product_tangent(quadruple, d_quadruple, x, d_x)
+        d_cross = _product_tangent(cross, d_cross, y, d_y)
         cross = cross * y
         denominator = xp.sqrt(u**2 + cross)
         d_denominator = (d_u * (2.0 * u) + d_cross) * (0.5 / denominator)
@@ -2836,7 +2826,7 @@ def _vertex_against_root_tangent(vertex: _Vertex, d_vertex: dict, term, d_term):
     total_value = d_total = 0.0
     for order, coefficient in enumerate(series):
         total_value = total_value + coefficient * moments[order]
-        d_total = d_total + _vertex_product_tangent(
+        d_total = d_total + _product_tangent(
             coefficient, d_series[order], moments[order], d_moments[order]
         )
     return vertex.against_root(term), d_total
@@ -2867,7 +2857,7 @@ def _ring_core_tangent(vertex: _Vertex, d_vertex: dict):
 def _ring_ratio_tangent(vertex: _Vertex, d_vertex: dict, factor: float):
     """Return ``factor r / span`` and its tangent."""
     lever = factor * vertex.radius
-    return lever / vertex.span, _vertex_quotient_tangent(
+    return lever / vertex.span, _quotient_tangent(
         lever, factor * d_vertex["radius"], vertex.span, d_vertex["span"]
     )
 
@@ -2887,18 +2877,16 @@ def _arsinh_terms_tangent(vertex: _Vertex, d_vertex: dict):
     ratio, d_ratio = _ring_ratio_tangent(vertex, d_vertex, 0.5)
     residual, d_residual = vertex.ring_residual, d_vertex["ring_residual"]
     first = 0.5 * residual + ratio * across
-    d_first = 0.5 * d_residual + _vertex_product_tangent(
-        ratio, d_ratio, across, d_across
-    )
+    d_first = 0.5 * d_residual + _product_tangent(ratio, d_ratio, across, d_across)
     four_u = 4.0 * u
     d_four_u = 4.0 * d_u
     four_ur = four_u * r
-    d_four_ur = _vertex_product_tangent(four_u, d_four_u, r, d_r)
+    d_four_ur = _product_tangent(four_u, d_four_u, r, d_r)
     four_r = 4.0 * r
     return vertex.arsinh_terms(), (
-        _vertex_product_tangent(four_ur, d_four_ur, first, d_first),
-        _vertex_product_tangent(four_r, 4.0 * d_r, first, d_first),
-        _vertex_product_tangent(four_u, d_four_u, residual, d_residual),
+        _product_tangent(four_ur, d_four_ur, first, d_first),
+        _product_tangent(four_r, 4.0 * d_r, first, d_first),
+        _product_tangent(four_u, d_four_u, residual, d_residual),
     )
 
 
@@ -2918,9 +2906,9 @@ def _against_first_arsinh_tangent(vertex: _Vertex, d_vertex: dict, weight, d_wei
     core, d_core = _product_range_tangent(raised, d_raised, derivative, d_derivative)
     across, d_across = _vertex_across_tangent(vertex, d_vertex, core, d_core)
     ratio, d_ratio = _ring_ratio_tangent(vertex, d_vertex, 2.0)
-    return vertex.against_first_arsinh(weight), _vertex_product_tangent(
+    return vertex.against_first_arsinh(weight), _product_tangent(
         series[0], d_series[0], vertex.ring_residual, d_vertex["ring_residual"]
-    ) + _vertex_product_tangent(ratio, d_ratio, across, d_across)
+    ) + _product_tangent(ratio, d_ratio, across, d_across)
 
 
 def _flux_moment_residuals_tangent(
@@ -2935,7 +2923,7 @@ def _flux_moment_residuals_tangent(
     source_cosine, d_source_cosine = _scaled_tangent(cosine, d_cosine, r, d_r)
     minus_u = -u
     level_squared, d_level_squared = _constant_range(
-        minus_u * u, _vertex_product_tangent(minus_u, -d_u, u, d_u), one
+        minus_u * u, _product_tangent(minus_u, -d_u, u, d_u), one
     )
     sine_squared, d_sine_squared = _total_tangent(
         (ring_squared, level_squared), (d_ring_squared, d_level_squared)
@@ -2973,7 +2961,7 @@ def _flux_moment_residuals_tangent(
     return vertex.flux_moment_residuals(expansion_r, target_z_minus_expansion_z), (
         rows[0],
         rows[1]
-        + _vertex_product_tangent(
+        + _product_tangent(
             target_z_minus_expansion_z,
             d_target_z_minus_expansion_z,
             base_flux[0],
@@ -3003,9 +2991,7 @@ def _horizontal_flux_line_moments_tangent(
             vertex, d_vertex, arsinh_weight, d_arsinh_weight
         )
         return (
-            _vertex_product_tangent(
-                four_a, d_four_a, vertex.against_root(root_weight), d_root
-            )
+            _product_tangent(four_a, d_four_a, vertex.against_root(root_weight), d_root)
             + 4.0 * d_first
         )
 
@@ -3052,5 +3038,629 @@ def _horizontal_flux_line_moments_tangent(
     return primal, (
         d_base,
         d_radial,
-        _vertex_product_tangent(lever, d_lever, primal[0], d_base),
+        _product_tangent(lever, d_lever, primal[0], d_base),
+    )
+
+
+def _edge_tangent(r, z, edge, d_r, d_z, d_edge, nodes, *, xp=np):
+    """Return an :class:`_Edge` and the tangents of its floating quantities.
+
+    The tangent is a dict keyed by the ``_Edge`` attribute it differentiates:
+    the slope and its derived scalars, the plane offset and radius value, and the
+    four range functions the edge forms once for the pair.  Every term is a
+    product, quotient or sqrt of the inputs, written so the value matches the
+    primal construction exactly and the derivative carries each input's own
+    dependence.
+    """
+    part = _Edge(r, z, edge, nodes, xp=xp)
+    d_ra, d_za, d_rb, d_zb = d_edge
+    r = xp.asarray(r)
+    ra, za, rb, zb = (xp.asarray(value) for value in edge)
+    height = zb - za
+    d_height = d_zb - d_za
+    b1 = part.slope
+    d_b1 = _quotient_tangent(rb - ra, d_rb - d_ra, height, d_height)
+    d_b1_squared = _product_tangent(b1, d_b1, b1, d_b1)
+    a0 = part.axial_slope
+    d_a0 = d_b1_squared * (0.5 / a0)
+    first_value = (ra - r) * (zb - z)
+    d_first = _product_tangent(ra - r, d_ra - d_r, zb - z, d_zb - d_z)
+    second_value = (rb - r) * (za - z)
+    d_second = _product_tangent(rb - r, d_rb - d_r, za - z, d_za - d_z)
+    plane_offset = part.plane_offset
+    d_plane_offset = _quotient_tangent(
+        first_value - second_value, d_first - d_second, height, d_height
+    )
+    r1 = part.plane_radius_value
+    d_r1 = d_r + d_plane_offset
+    d_plane_radius = ([], d_plane_offset, d_r1 + d_r)
+    # Preserve the left-associated products: their tangents can nearly cancel.
+    four_b1_squared = 4.0 * b1 * b1
+    d_four_b1_squared = _product_tangent(4.0 * b1, 4.0 * d_b1, b1, d_b1)
+    four_b1_squared_r = four_b1_squared * r
+    d_four_b1_squared_r = _product_tangent(four_b1_squared, d_four_b1_squared, r, d_r)
+    d_four_b1_squared_rr = _product_tangent(
+        four_b1_squared_r, d_four_b1_squared_r, r, d_r
+    )
+    d_plane_squared = (
+        [d_four_b1_squared_rr],
+        d_plane_offset * (2.0 * plane_offset),
+        (d_r1 + d_r) * (2.0 * (r1 + r)),
+    )
+    d_radius_product = _product_tangent(-4.0 * r1, -4.0 * d_r1, r, d_r)
+    d_edge_slope = (
+        [],
+        d_radius_product - d_four_b1_squared_rr,
+        d_radius_product + d_four_b1_squared_rr,
+    )
+    d_edge_slope_over_radius = (
+        [],
+        -4.0 * d_r1 - d_four_b1_squared_r,
+        -4.0 * d_r1 + d_four_b1_squared_r,
+    )
+    return part, {
+        "radius": d_r,
+        "slope": d_b1,
+        "squared_slope": d_b1_squared,
+        "axial_slope": d_a0,
+        "plane_offset": d_plane_offset,
+        "plane_radius_value": d_r1,
+        "plane_radius": d_plane_radius,
+        "plane_squared": d_plane_squared,
+        "edge_slope": d_edge_slope,
+        "edge_slope_over_radius": d_edge_slope_over_radius,
+    }
+
+
+class _EdgeScalar:
+    """A value/tangent pair composing the shared scalar derivative algebra.
+
+    Only the explicit edge formulas below use this notation. Primal methods
+    receive ordinary arrays; no primal program is traced or transformed here.
+    ``None`` retains a structural zero through the shared range helpers.
+    """
+
+    def __init__(self, value, tangent=None):
+        self.value, self.tangent = value, tangent
+
+    @staticmethod
+    def lift(value):
+        return value if isinstance(value, _EdgeScalar) else _EdgeScalar(value)
+
+    def __add__(self, other):
+        other = self.lift(other)
+        return _EdgeScalar(
+            self.value + other.value, _tangent_sum(self.tangent, other.tangent)
+        )
+
+    __radd__ = __add__
+
+    def __neg__(self):
+        return _EdgeScalar(-self.value, None if self.tangent is None else -self.tangent)
+
+    def __sub__(self, other):
+        other = self.lift(other)
+        return _EdgeScalar(
+            self.value - other.value,
+            _tangent_difference(self.tangent, other.tangent),
+        )
+
+    def __rsub__(self, other):
+        return self.lift(other) - self
+
+    def __mul__(self, other):
+        other = self.lift(other)
+        return _EdgeScalar(
+            self.value * other.value,
+            _product_tangent(self.value, self.tangent, other.value, other.tangent),
+        )
+
+    def __rmul__(self, other):
+        return self.lift(other) * self
+
+    def __truediv__(self, other):
+        other = self.lift(other)
+        return _EdgeScalar(
+            self.value / other.value,
+            _quotient_tangent(self.value, self.tangent, other.value, other.tangent),
+        )
+
+    def __rtruediv__(self, other):
+        return self.lift(other) / self
+
+    def __pow__(self, exponent):
+        return _EdgeScalar(
+            self.value**exponent,
+            None
+            if self.tangent is None
+            else self.tangent * (exponent * self.value ** (exponent - 1)),
+        )
+
+    def column(self):
+        return _EdgeScalar(
+            self.value[..., None],
+            None if self.tangent is None else self.tangent[..., None],
+        )
+
+    def root(self, xp):
+        value = xp.sqrt(self.value)
+        return _EdgeScalar(
+            value, None if self.tangent is None else self.tangent * (0.5 / value)
+        )
+
+    def absolute(self, xp):
+        return _EdgeScalar(
+            xp.abs(self.value),
+            None
+            if self.tangent is None
+            else xp.where(self.value >= 0.0, self.tangent, -self.tangent),
+        )
+
+
+def _edge_select(condition, yes, no, xp):
+    yes, no = _EdgeScalar.lift(yes), _EdgeScalar.lift(no)
+    return _EdgeScalar(
+        xp.where(condition, yes.value, no.value),
+        xp.where(
+            condition,
+            _dense(yes.value, yes.tangent, xp),
+            _dense(no.value, no.tangent, xp),
+        ),
+    )
+
+
+def _edge_range(bulk, near, far):
+    """Pack explicit scalar derivatives in the range helper's pair convention."""
+    bulk = [_EdgeScalar.lift(value) for value in bulk]
+    near, far = _EdgeScalar.lift(near), _EdgeScalar.lift(far)
+    return (
+        range_function([v.value for v in bulk], near.value, far.value),
+        ([v.tangent for v in bulk], near.tangent, far.tangent),
+    )
+
+
+def _edge_product(left, right):
+    return _product_range_tangent(left[0], left[1], right[0], right[1])
+
+
+def _edge_total(*terms):
+    return _total_tangent(tuple(t[0] for t in terms), tuple(t[1] for t in terms))
+
+
+def _edge_scaled(term, factor):
+    factor = _EdgeScalar.lift(factor)
+    return _scaled_tangent(term[0], term[1], factor.value, factor.tangent)
+
+
+def _second_residual_tangent(
+    edge: _Edge, d_edge: dict, vertex: _Vertex, d_vertex: dict
+):
+    """Differentiate both graded panels, their curvature and moving nodes."""
+    xp = edge.xp
+    r = _EdgeScalar(edge.radius, d_edge["radius"])
+    u = _EdgeScalar(vertex.level, d_vertex["level"])
+    offset = _EdgeScalar(vertex.offset, d_vertex["offset"])
+    r1 = _EdgeScalar(edge.plane_radius_value, d_edge["plane_radius_value"])
+    plane_offset = _EdgeScalar(edge.plane_offset, d_edge["plane_offset"])
+    slope = _EdgeScalar(xp.asarray(edge.slope), xp.asarray(d_edge["slope"]))
+    squared = _EdgeScalar(
+        xp.asarray(edge.squared_slope), xp.asarray(d_edge["squared_slope"])
+    )
+    axial = _EdgeScalar(edge.axial_slope, d_edge["axial_slope"])
+    held = _edge_select(r.value > 0.0, r, 1.0, xp)
+
+    def curvature(coefficient):
+        return _edge_select(
+            coefficient.value > 0.0,
+            2.0 * (held * coefficient).absolute(xp).root(xp),
+            2.0 * axial * held,
+            xp,
+        )
+
+    panels = (
+        (
+            (r1 + r).absolute(xp),
+            u + slope * _EdgeScalar(vertex.radius_sum, d_vertex["radius_sum"]),
+            curvature(slope * slope * held - r1),
+        ),
+        (
+            plane_offset.absolute(xp),
+            u + slope * offset,
+            curvature(r1 + slope * slope * held),
+        ),
+    )
+    zero = xp.zeros_like(r.value)
+    values, tangents = [], []
+    for panel, bounds in zip(panels, vertex.panels, strict=True):
+        values.append(
+            tuple(v.value + zero for v in panel) + tuple(b + zero for b in bounds)
+        )
+        tangents.append(
+            tuple(_dense(v.value, v.tangent, xp) + zero for v in panel) + (zero, zero)
+        )
+
+    def pieces(x, d_x, y, d_y):
+        x, y = _EdgeScalar(x, d_x), _EdgeScalar(y, d_y)
+        radius, b1 = r.column(), slope.column()
+        numerator = u.column() + b1 * offset.column() + 2.0 * b1 * radius * y
+        denominator = (
+            (plane_offset.column() + 2.0 * radius * y) ** 2
+            + 4.0 * squared.column() * radius**2 * x * y
+        ).root(xp)
+        return (numerator.value, denominator.value), (
+            numerator.tangent,
+            denominator.tangent,
+        )
+
+    _, tangent = _graded_residual_tangent(
+        tuple(values), tuple(tangents), pieces, edge.nodes, xp
+    )
+    return edge._second_residual(vertex), tangent
+
+
+class _EdgeReductionTangent:
+    """Common differentiated contractions for the three explicit edge formulas."""
+
+    def __init__(self, edge, d_edge, vertex, d_vertex):
+        self.edge, self.vertex, self.d_vertex = edge, vertex, d_vertex
+        self.r = _EdgeScalar(edge.radius, d_edge["radius"])
+        self.u = _EdgeScalar(vertex.level, d_vertex["level"])
+        self.b = _EdgeScalar(edge.slope, d_edge["slope"])
+        self.a = _EdgeScalar(vertex.span, d_vertex["span"])
+        self.axial = _EdgeScalar(edge.axial_slope, d_edge["axial_slope"])
+        self.squared = _EdgeScalar(edge.squared_slope, d_edge["squared_slope"])
+        self.r1 = _EdgeScalar(edge.plane_radius_value, d_edge["plane_radius_value"])
+        self.offset = _EdgeScalar(edge.plane_offset, d_edge["plane_offset"])
+        self.cosine = vertex.cosine, d_vertex["cosine"]
+        self.plane_radius = edge.plane_radius, d_edge["plane_radius"]
+        self.plane_squared = edge.plane_squared, d_edge["plane_squared"]
+        self.gamma = _edge_range(
+            [],
+            self.u + self.b * _EdgeScalar(vertex.offset, d_vertex["offset"]),
+            self.u + self.b * _EdgeScalar(vertex.radius_sum, d_vertex["radius_sum"]),
+        )
+        self.plane = _channel_split_tangent(
+            vertex.channel,
+            edge.plane_squared,
+            _dense_range(edge.plane_squared, d_edge["plane_squared"], edge.xp),
+            vertex.moments,
+            d_vertex["moments"],
+            vertex.parameter,
+            d_vertex["parameter"],
+            vertex.parameter_complement,
+            d_vertex["parameter_complement"],
+            edge.xp,
+        )
+        self.residual = _EdgeScalar(
+            *_second_residual_tangent(edge, d_edge, vertex, d_vertex)
+        )
+        self.derivative = _edge_product(
+            self.gamma, (edge.edge_slope, d_edge["edge_slope"])
+        )
+        numerator = _edge_range(
+            [-4.0 * self.b * self.r * self.r],
+            self.u * self.offset,
+            self.u * (self.r1 + self.r),
+        )
+        self.arctan_slope = _edge_range(
+            [],
+            -2.0 * self.u + 4.0 * self.b * self.r,
+            -2.0 * self.u - 4.0 * self.b * self.r,
+        )
+        self.over_ring = _edge_product(
+            numerator, (_RING_SLOPE_OVER_RADIUS_SQUARED, ([], None, None))
+        )
+        self.over_plane = _edge_product(
+            numerator, (edge.edge_slope_over_radius, d_edge["edge_slope_over_radius"])
+        )
+
+    def constant(self, value):
+        value = _EdgeScalar.lift(value) * self.vertex.one
+        return _edge_range([], value, value)
+
+    def plain(self, term):
+        series, d_series = _across_the_range_tangent(*term)
+        return _EdgeScalar(
+            *_contract_tangent(
+                series, d_series, self.vertex.moments, self.d_vertex["moments"]
+            )
+        )
+
+    def root(self, term):
+        return _EdgeScalar(
+            *_vertex_against_root_tangent(self.vertex, self.d_vertex, *term)
+        )
+
+    def across(self, term, split):
+        factors, poles, _ = split[0]
+        d_factors, d_poles, _ = split[1]
+        return _EdgeScalar(
+            *_across_tangent(
+                term[0],
+                _dense_range(*term, self.edge.xp),
+                factors,
+                d_factors,
+                poles,
+                d_poles,
+                self.vertex.moments,
+                self.d_vertex["moments"],
+                xp=self.edge.xp,
+            )
+        )
+
+    def second(self, term, *, padded=False):
+        series, d_series = _across_the_range_tangent(*term)
+        if padded:
+            series = series + [0.0 * self.vertex.one] * 4
+            d_series = _series_list(series[: len(series) - 4], d_series) + [None] * 4
+            weight = [_EdgeScalar(v, d) for v, d in zip(series, d_series, strict=True)]
+            primitive = [
+                0.5 * weight[1] + weight[3] / 6.0,
+                0.5 * weight[2],
+                weight[3] / 3.0,
+            ]
+            core = _sine_squared_times_tangent(
+                [v.value for v in primitive], [v.tangent for v in primitive]
+            )
+        else:
+            primitive = _oscillatory_primitive(series)
+            d_primitive = _oscillatory_primitive(
+                [
+                    _dense(v, d, self.edge.xp)
+                    for v, d in zip(series, _series_list(series, d_series), strict=True)
+                ]
+            )
+            core = _sine_squared_times_tangent(primitive, d_primitive)
+        mean = _EdgeScalar(series[0], _series_list(series, d_series)[0])
+        return (
+            mean * self.residual
+            + (2.0 * self.b * self.r / (self.axial * self.a)) * self.plain(core)
+            + (0.5 / (self.axial * self.a))
+            * self.across(_edge_product(core, self.derivative), self.plane)
+        )
+
+    def arctan(self, weighting):
+        xp = self.edge.xp
+        at_zero = _EdgeScalar(
+            0.5 * np.pi * xp.sign((self.u * (self.r1 + self.r)).value)
+        )
+        at_half = _edge_select(
+            self.vertex.parameter_complement > 0.0,
+            0.5 * np.pi * xp.sign((self.u * self.offset).value),
+            _EdgeScalar(
+                -xp.arctan(self.b.value), -self.b.tangent / (1.0 + self.b.value**2)
+            )
+            * self.vertex.one,
+            xp,
+        )
+        primitive = [_EdgeScalar(0.0)] + [
+            _EdgeScalar.lift(value) / (order + 1.0)
+            for order, value in enumerate(weighting)
+        ]
+        upper = sum(primitive)
+        lower = sum(value * (-1.0) ** order for order, value in enumerate(primitive))
+        boundary = -0.5 * (lower * at_half - upper * at_zero)
+        weight = _edge_range([], 0.0, 0.0)
+        for coefficient in reversed(primitive):
+            weight = _edge_total(
+                _edge_product(weight, (_VARIABLE, ([], None, None))),
+                _edge_range([], coefficient, coefficient),
+            )
+        ring = self.vertex.ring, (*self.d_vertex["ring"], None)
+        return boundary + (0.25 / self.a) * (
+            2.0 * self.plain(_edge_product(weight, self.arctan_slope))
+            - self.r * self.across(_edge_product(weight, self.over_ring), ring)
+            - self.across(_edge_product(weight, self.over_plane), self.plane)
+        )
+
+
+def _edge_integrands_tangent(edge, d_edge, vertex, d_vertex):
+    """Return ``_Edge.terms`` and the derivative of each endpoint integrand."""
+    c = _EdgeReductionTangent(edge, d_edge, vertex, d_vertex)
+    p, s, t = _edge_product, _edge_scaled, _edge_total
+    r, b, a, a0, a02, r1 = c.r, c.b, c.a, c.axial, c.squared, c.r1
+    one, outer = vertex.one, c.cosine
+    flux = (
+        (2.0 * a / a02) * c.root(p(outer, c.gamma))
+        + 4.0
+        * c.second(
+            s(
+                p(
+                    outer,
+                    t(c.plane_squared, s(p(outer, c.plane_radius), 2.0 * a02 * r)),
+                ),
+                0.5 / (a02 * a0),
+            ),
+            padded=True,
+        )
+        - 4.0 * r * r * c.arctan([0.0 * one, 0.0 * one, one])
+    )
+    radial = (4.0 * a / a02) * c.root(outer) + 4.0 * c.second(
+        s(p(outer, t(c.constant(r1), s(outer, b * b * r))), -b / (a02 * a0)),
+        padded=True,
+    )
+    vertical = (
+        4.0
+        * c.second(
+            s(
+                t(c.constant(b * b * r1), s(outer, -(2.0 * a02 - 1.0) * r)),
+                1.0 / (a02 * a0),
+            ),
+            padded=True,
+        )
+        - 4.0 * r * c.arctan([one])
+        - (4.0 * b / a02)
+        * a
+        * _EdgeScalar(vertex.root_moments[0], d_vertex["root_moments"][0])
+    )
+    return edge.terms(vertex), tuple(
+        value.tangent for value in (flux, radial, vertical)
+    )
+
+
+def _edge_flux_line_moments_tangent(
+    edge,
+    d_edge,
+    vertex,
+    d_vertex,
+    expansion_r,
+    d_expansion_r,
+    target_z_minus_expansion_z,
+    d_target_z_minus_expansion_z,
+):
+    """Differentiate the flux line primitive and both moving expansion centres."""
+    c = _EdgeReductionTangent(edge, d_edge, vertex, d_vertex)
+    p, s, t = _edge_product, _edge_scaled, _edge_total
+    b, a, a0, a02, r1 = c.b, c.a, c.axial, c.squared, c.r1
+    centre = _EdgeScalar(expansion_r, d_expansion_r)
+    height = _EdgeScalar(target_z_minus_expansion_z, d_target_z_minus_expansion_z)
+    plane, squared = c.plane_radius, c.plane_squared
+    j2_root = s(t(s(c.gamma, 0.5), s(plane, -2.0 * b)), 1.0 / (a02 * a02))
+    j2_arsinh = s(t(s(p(plane, plane), b * b), s(squared, -0.5)), 1.0 / a0**5)
+    base_root = c.constant(b / a02)
+    base_arsinh = t(c.constant(r1 / a0), s(plane, -(b * b) / a0**3))
+    radial_root = t(c.constant(b * (2.0 * r1 - centre) / a02), s(j2_root, b * b))
+    radial_arsinh = t(
+        c.constant((r1 - centre) * r1 / a0),
+        s(plane, -(b * b) * (2.0 * r1 - centre) / a0**3),
+        s(j2_arsinh, b * b),
+    )
+    vertical_root = t(s(base_root, height), c.constant(r1 / a02), s(j2_root, b))
+    vertical_arsinh = t(
+        s(base_arsinh, height), s(plane, -r1 * b / a0**3), s(j2_arsinh, b)
+    )
+
+    def full_turn(root, arsinh):
+        return 4.0 * a * c.root(p(c.cosine, root)) + 4.0 * c.second(p(c.cosine, arsinh))
+
+    rows = (
+        full_turn(base_root, base_arsinh),
+        full_turn(radial_root, radial_arsinh),
+        full_turn(vertical_root, vertical_arsinh),
+    )
+    return edge.flux_line_moments(
+        vertex, expansion_r, target_z_minus_expansion_z
+    ), tuple(row.tangent for row in rows)
+
+
+def _edge_flux_and_moment_terms_tangent(
+    edge,
+    d_edge,
+    vertex,
+    d_vertex,
+    expansion_r,
+    d_expansion_r,
+    target_z_minus_expansion_z,
+    d_target_z_minus_expansion_z,
+):
+    """Differentiate the three flux endpoint integrals through shared contractions."""
+    c = _EdgeReductionTangent(edge, d_edge, vertex, d_vertex)
+    p, s, t = _edge_product, _edge_scaled, _edge_total
+    r, u, b, a, a0, a02 = c.r, c.u, c.b, c.a, c.axial, c.squared
+    outer, plane, squared, gamma = c.cosine, c.plane_radius, c.plane_squared, c.gamma
+    centre = _EdgeScalar(expansion_r, d_expansion_r)
+    height = _EdgeScalar(target_z_minus_expansion_z, d_target_z_minus_expansion_z)
+    source = s(outer, r)
+    base = (
+        (2.0 * a / a02) * c.root(p(outer, gamma))
+        + 4.0
+        * c.second(
+            s(p(outer, t(squared, s(p(outer, plane), 2.0 * a02 * r))), 0.5 / (a02 * a0))
+        )
+        - 4.0 * r * r * c.arctan([0.0 * vertex.one, 0.0 * vertex.one, vertex.one])
+    )
+    ring = vertex.ring_squared, d_vertex["ring_squared"]
+    edge_radius = vertex.edge_radius, d_vertex["edge_radius"]
+    sine_squared = t(ring, c.constant(-(u**2)))
+    distance_squared = t(ring, p(edge_radius, edge_radius))
+    vertical_root = t(
+        s(p(outer, distance_squared), 1.0 / (3.0 * a02)),
+        s(p(outer, p(plane, gamma)), -b / (2.0 * a02 * a02)),
+        s(p(outer, p(source, plane)), 1.0 / (2.0 * a02)),
+    )
+    vertical_arsinh = s(
+        p(
+            outer,
+            p(
+                squared,
+                t(s(plane, -b / (2.0 * a02 * a02 * a0)), s(source, -b / (2.0 * a0**3))),
+            ),
+        ),
+        1.0,
+    )
+    vertical = (
+        height * base
+        + 4.0 * a * c.root(vertical_root)
+        + 4.0 * c.second(vertical_arsinh)
+    )
+    radial_offset = t(s(plane, 0.5), s(source, 2.0), c.constant(-centre))
+    radial_root = t(
+        s(p(outer, p(radial_offset, gamma)), 1.0 / (2.0 * a02)),
+        s(p(outer, distance_squared), b / (6.0 * a02)),
+        s(p(outer, p(plane, gamma)), -(3.0 * b * b + 1.0) / (12.0 * a02 * a02)),
+        s(p(outer, p(plane, plane)), b / (3.0 * a02 * a02)),
+        s(p(outer, sine_squared), b / (6.0 * a02)),
+    )
+    radial_arsinh = t(
+        s(p(outer, p(radial_offset, squared)), 1.0 / (2.0 * a0**3)),
+        s(p(outer, p(plane, squared)), -(b * b) / (4.0 * a02 * a02 * a0)),
+        s(
+            p(
+                outer,
+                p(
+                    t(p(source, t(source, c.constant(-centre))), s(sine_squared, -0.5)),
+                    plane,
+                ),
+            ),
+            1.0 / a0,
+        ),
+        s(
+            p(outer, p(plane, t(s(p(plane, plane), b * b), s(squared, -0.5)))),
+            -1.0 / (6.0 * a02 * a02 * a0),
+        ),
+        s(
+            p(outer, p(plane, sine_squared)),
+            -(b * b) / (6.0 * a0**3) + 1.0 / (6.0 * a0),
+        ),
+    )
+    radial = (
+        4.0 * a * c.root(radial_root)
+        + 4.0 * c.second(radial_arsinh)
+        + 4.0
+        * c.arctan(
+            [
+                0.0 * vertex.one,
+                -(r**3) / 3.0,
+                r * r * centre,
+                4.0 * r**3 / 3.0,
+            ]
+        )
+    )
+    return edge.flux_and_moment_terms(
+        vertex, expansion_r, target_z_minus_expansion_z
+    ), tuple(row.tangent for row in (base, radial, vertical))
+
+
+def _edge_terms_tangent(r, z, edge, d_r, d_z, d_edge, which, nodes, *, xp=np):
+    """Return the whole endpoint value and tangent, including its corner term."""
+    corner_r, corner_z = edge[2:] if which else edge[:2]
+    d_corner_r, d_corner_z = d_edge[2:] if which else d_edge[:2]
+    vertex, d_vertex = _vertex_tangent(
+        r,
+        z,
+        corner_r,
+        corner_z,
+        d_r,
+        d_z,
+        d_corner_r,
+        d_corner_z,
+        nodes,
+        residual=True,
+        xp=xp,
+    )
+    part, d_part = _edge_tangent(r, z, edge, d_r, d_z, d_edge, nodes, xp=xp)
+    value, tangent = _edge_integrands_tangent(part, d_part, vertex, d_vertex)
+    corner, d_corner = _arsinh_terms_tangent(vertex, d_vertex)
+    return tuple(a + b for a, b in zip(value, corner, strict=True)), tuple(
+        a + b for a, b in zip(tangent, d_corner, strict=True)
     )

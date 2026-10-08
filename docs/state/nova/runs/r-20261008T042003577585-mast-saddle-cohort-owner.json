@@ -1,0 +1,592 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "e2cffb94c353041dbbb39e6d25daa348f52708ac",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 9388921,
+      "input_tokens_cumulative": 9388921,
+      "output_tokens": 39073,
+      "output_tokens_cumulative": 39073,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 312,
+    "files": 4,
+    "removed": 88
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_seeding_leaves_the_physical_configuration_identical",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 89,
+        "name": "test_each_family_resolves_at_its_own_key_width",
+        "path": "tests/test_mast_saddle_voltage_reach.py"
+      },
+      "window_line": 93
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "cbfb1ff2c465a673f464890c33ad6e79a10db987",
+    "191ef560420791fc94edc3d1e0b864ba64d56434"
+  ],
+  "completed_at": "2026-10-08T04:43:38.060Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T04:20:43Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "pre-existing-failure",
+  "follow_on_paths": [],
+  "gate": "failed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_mast_saddle_voltage_reach.py tests/test_mast_vacuum_refinement.py tests/test_mast_calibration_cohort.py tests/test_mast_block_scale_read_path.py tests/test_mast_channel_drive.py tests/test_mast_probe_calibration.py",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T042003577585-mast-saddle-cohort-owner/gate-head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.06,
+    "plan": "mast-nonaxisymmetric-physics",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T05:05:12.692528+00:00",
+    "horizon_seconds": 2700,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T04:20:12Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 22,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 9,
+    "headroom": 4,
+    "mean_context": 141818,
+    "observed_at": "2026-10-08T04:19:50Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 22,
+      "aggregate_tokens_per_second": 575.092,
+      "detail": "",
+      "mean_tokens_per_second": 52.281,
+      "observed_at": "2026-10-08T04:19:50Z",
+      "runs": 11.0,
+      "state": "measured"
+    },
+    "waiting": 2
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T04:43:38.060Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T042003577585-mast-saddle-cohort-owner/manifest.md",
+  "member": "disposable-r-20261008T042003577585-mast-saddle-cohort-owner",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/test_mast_saddle_voltage_reach.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "mast-saddle-cohort-owner",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1620,
+          "cached_input_tokens": 616613,
+          "input_tokens": 618235,
+          "output_tokens": 2542,
+          "reasoning_output_tokens": 1545,
+          "total_tokens": 620777,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "nova/imas/mast_vacuum_cohort.py exposes the light admission it needs (current-group peaks and field-group channel names, without reading every waveform) using its own EXCITATION, plasma-free and minimum-probe constants, and the benchmark declares none of those constants and no admission predicate of its own; the existing mast_vacuum_cohort tests pass unchanged; a new tests/test_mast_saddle_voltage_reach.py proves per-family raw-key resolution on a synthetic key set holding both sad_out_m010 and sad_out_l12, and that the light admission agrees with the full predicate on synthetic shots; the committed receipt docs/figures/mast-saddle-loops/reach.json is not regenerated; tests in fresh processes with logs in the manifest",
+    "estimated_hours": 0.75,
+    "goal": "Make benchmarks/mast_saddle_voltage_reach.py admit its vacuum cohort through nova/imas/mast_vacuum_cohort.py instead of re-declaring the admission constants and predicate",
+    "id": "mast-saddle-cohort-owner",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T04:20:12Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 22,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 9,
+      "headroom": 4,
+      "mean_context": 141818,
+      "observed_at": "2026-10-08T04:19:50Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 22,
+        "aggregate_tokens_per_second": 575.092,
+        "detail": "",
+        "mean_tokens_per_second": 52.281,
+        "observed_at": "2026-10-08T04:19:50Z",
+        "runs": 11.0,
+        "state": "measured"
+      },
+      "waiting": 2
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T042003577585-mast-saddle-cohort-owner/manifest.md",
+    "negative_control": "forcing a single two-digit key width must fail the key-resolution test on the m-family loops",
+    "plan": "mast-nonaxisymmetric-physics",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "guided",
+    "time_budget": "45m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/imas/mast_vacuum_cohort.py",
+      "benchmarks/mast_saddle_voltage_reach.py",
+      "tests/test_mast_saddle_voltage_reach.py",
+      "docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-cohort-owner.html",
+      "docs/figures/mast-nonaxisymmetric-physics/mast-saddle-cohort-owner"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3166197.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "mast-saddle-cohort-owner",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T04:20:21.917139+00:00",
+    "score": 0.7375,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Routine owner refactor from an independent review follow-on: one admission predicate, one set of constants. Moderate risk: the cohort module feeds the fitted parameters, so its existing behaviour must not move. Strict verification.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5001.121,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "mast-nonaxisymmetric-physics",
+  "plan_impl_at_dispatch": 0.06,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "191ef560420791fc94edc3d1e0b864ba64d56434",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "e2cffb94c353041dbbb39e6d25daa348f52708ac",
+    "reviewed_head_sha": "191ef560420791fc94edc3d1e0b864ba64d56434",
+    "scores": {
+      "durability": 16,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 16,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 107
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261008T042003577585-mast-saddle-cohort-owner",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "s24-nova",
+  "session_harness": "claude",
+  "session_id": "f3c3a926-b697-4849-a878-3c1ba6f8ef9c",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 5,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 9388921,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1351.248,
+    "generated_tokens": 39073,
+    "generation_seconds": 831.872,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 71.1,
+    "machine_seconds": 519.376,
+    "peak_input_tokens": 163525,
+    "tokens_per_second": 46.97,
+    "wall_tokens_per_second": 28.92
+  },
+  "time_budget": "45m",
+  "tool_steps": 77.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex-astra",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 541,
+        "exit_record": {
+          "attempt": 4,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T03:31:57Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T03:23:29Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T014948372249-mast-passive-spectrum",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 736,
+          "worker_pid": 469872
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T03:31:57Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 2905,
+        "log_fresh": false,
+        "manifest_commits": [
+          "3bd2bec7da2218068302c7f87f2085c8e918ecb7",
+          "85666bc51bdce3cbd7370f2620cfb9005a867766",
+          "57893849057caa1e51565f62eeae051e64fb2d40",
+          "98c3d01421cfbcbc8fb1276e3bd1273550343503",
+          "64a1622c771cd3bc93910e1821b21dc0a994a25f",
+          "0928eb68daa28a7fd305b09e715984ae4d7ae998",
+          "0d13bcc754d3df1bf3d2661094db4ff4cb63dc54",
+          "6bdfd7a7b96f5671e736e0849c5204640dfcf72f"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "decf382e0a27a35ba93b35a466edb06cf01eeee16faed2b880906900699b6c8a",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T014948372249-mast-passive-spectrum/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "astra",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan mast-nonaxisymmetric-physics --section '§4' --role review --spec-level exact --node review-of-mast-passive-spectrum --goal 'attach an independent review to run r-20261008T014948372249-mast-passive-spectrum' --done-when 'the review for r-20261008T014948372249-mast-passive-spectrum stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T014948372249-mast-passive-spectrum.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261008T014948372249-mast-passive-spectrum.at-6bdfd7a7b96f5671e736e0849c5204640dfcf72f.json --time-budget 60m --session s24-nova --allow-unreconciled-runs --local",
+        "node": "mast-passive-spectrum",
+        "phase": "complete",
+        "plan": "mast-nonaxisymmetric-physics",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T014948372249-mast-passive-spectrum",
+        "session": "s24-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 2921,
+        "terminal_at": "2026-10-08T03:31:37Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-passive-spectrum"
+      }
+    ]
+  },
+  "wall_seconds": 1375,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T04:43:43Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-08T04:21:00Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T042003577585-mast-saddle-cohort-owner",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 6454,
+    "worker_pid": 841185
+  },
+  "worker_seconds": 1288,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-08T04:43:38.060Z",
+    "session_id": "f3c3a926-b697-4849-a878-3c1ba6f8ef9c",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-cohort-owner"
+  }
+}

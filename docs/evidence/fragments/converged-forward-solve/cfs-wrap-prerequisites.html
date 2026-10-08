@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-wrap-prerequisites"><meta name="plan-title" content="Point-jet wrapping prerequisites">
+<meta name="plan-summary" content="Near-collinear tangent, serialized read executable size and dead-helper removal measured; suite comparison in progress">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="partial">
+<meta name="plan-recorded-at" content="2026-10-08">
+<title>Point-jet wrapping prerequisites | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-wrap-prerequisites">Point-jet wrapping prerequisites</h1>
+<h2 id="cfs-wrap-prerequisites-tangent">Near-collinear logarithm tangent</h2>
+<table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+<tr><td>Scope</td><td>All four floating inputs differentiated; the selected stable and direct branches return the existing primal. Ten thousand samples cover same-side positive and negative, straddling, inactive and zero-gap cases over 0.01–20 m edge lengths.</td></tr>
+<tr><td>H200 identity</td><td>Job 1282017: maximum relative error 4.574e-15 against <code>jax.jvp</code> of the orientation-base function, bound 1e-13; 100 percent finite and covered, primal bit-identical.</td></tr>
+<tr><td>Independent reference</td><td>Job 1282017: 16 selected cases differentiated at 50 digits with mpmath. Hand tangent and base JVP each have maximum relative error 1.079e-10; maximum primal absolute error 3.678e-16. The initial combined job reused a truncated compiled trace across tests; its reference failure was repaired by clearing the trace after restoring the helper.</td></tr>
+<tr><td>Declared mutation</td><td>Job 1282016, <code>NOVA_TANGENT_TRUNCATION=1</code>: <code>test_tangent_matches_base_jvp</code> failed by test id, maximum relative error 6.607e+02 and covered fraction 0.4236; log ends <code>EXIT=1</code>.</td></tr>
+<tr><td>Cold compile</td><td>Job 1282015: median of seven cache-disabled fresh processes per arm, primal 0.076 CPU s and tangent 0.112 CPU s, ratio 1.46, bound 3.0; no cache hits.</td></tr>
+</tbody></table>
+<h2 id="cfs-wrap-prerequisites-size">Serialized read executable</h2>
+<table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+<tr><td>132-cell read</td><td>Job 1282015: cold wall 625.652 s, generated code 14,062 bytes, serialized executable 36,892,631 bytes, persistent cache disabled with zero hits. The executable is about 2,624 times the generated-code figure. The strict compile-growth expected failure remains in place because the 60 s wall clause is exceeded.</td></tr>
+<tr><td>Size guard control</td><td>A synthetic executed receipt with a 1 s wall and 50,000,001 serialized bytes is refused against the 50,000,000-byte clause; the measured 36,892,631-byte receipt with the same wall is admitted. The generated-code field remains 14,062 bytes in both controls, proving the guard reads the serialized-size field.</td></tr>
+<tr><td>Dead helper</td><td><code>_field_coefficients</code> was removed from <code>nova/equilibrium/topology.py</code>. Search across <code>nova/</code>, <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code> returned no references after the deletion.</td></tr>
+</tbody></table>
+<h2 id="cfs-wrap-prerequisites-suite">Suite comparison</h2>
+<p>The single serial driver is running the same test-file list in baseline and head arms, one fresh CPU process per module. Its completed JSON receipts and failure delta will be recorded when the run finishes.</p>
+<h2 id="cfs-wrap-prerequisites-receipts">Receipts</h2>
+<p>Run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites</code>. Logs: <code>h200-prerequisites.log</code>, <code>h200-reference.log</code>, <code>negative-control.log</code>, <code>size-guard-control-qualified.log</code>, <code>baseline-suite.log</code> and <code>after-suite.log</code>. The first H200 job also records its 132-cell JSON receipt.</p>
+</main></body></html>

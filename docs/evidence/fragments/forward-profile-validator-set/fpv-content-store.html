@@ -1,0 +1,12 @@
+<section data-reckon="evidence-fragment" id="fpv-content-store-landing">
+  <h2 id="fpv-content-store-landing-title">Content store lift</h2>
+  <p id="fpv-content-store-landing-summary">
+    Lifted the machine-agnostic content-addressed cache primitives of
+    <code>nova/imas/machine_artifact.py</code> into
+    <code>nova/database/content_store.py</code>. The store now owns the sha256
+    per-file verification, the verified object root, and the no-clobber
+    directory publication; <code>machine_artifact.py</code> imports them and
+    defines none of them. <code>tests/test_content_store.py</code> covers
+    publication, a verified read, and the refusal of a tampered object.
+  </p>
+</section>

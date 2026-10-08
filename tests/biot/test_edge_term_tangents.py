@@ -215,15 +215,13 @@ def _truncated_product(left, d_left, right, d_right):
 
 @contextmanager
 def _truncated():
-    originals = polygonanalytic._product_tangent, momentchannel._product_tangent
-    polygonanalytic._product_tangent = momentchannel._product_tangent = (
-        _truncated_product
-    )
+    original = polygonanalytic._product_tangent
+    polygonanalytic._product_tangent = _truncated_product
     jax.clear_caches()
     try:
         yield
     finally:
-        polygonanalytic._product_tangent, momentchannel._product_tangent = originals
+        polygonanalytic._product_tangent = original
         jax.clear_caches()
 
 

@@ -29,7 +29,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;deferred&quot;,&quot;s6&quot;:&quot;deferred&quot;,&quot;s7&quot;:&quot;deferred&quot;}">
 <meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f,87d24724,1227e204,d95f9296,2806d665,641a8b33,47c46cb8,07260595,c3cc4e04,ee164d5b,87d034b6,609b5fb0,9424ff40,867869dc,3cd9ca55,5a0727c1,75b9344e,de19c025,55df62b0,e934bb9b">
 <meta name="plan-impl" content="0.4">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -228,6 +228,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-coil-case-temperature-landed" data-who="reckon-build" data-when="2026-10-08T07:30:00Z">
     <div class="r-comment-body">can-temperature audit landed: no sourced can temperature for any of the 168 fitted shots. The remaining §4 hypothesis, a can-to-vessel electrical path, is being tested for whether discrete connections can change the n = 0 circuit at all (mast-coil-case-vessel-path). Evidence: coil-case-temperature.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T065147393477-mast-coil-case-temperature" data-who="reckon-build" data-when="2026-10-08T07:15:53Z">
+    <div class="r-comment-body"><p>The [shot-level can-temperature receipt](/nova/figures/mast-coil-case-temperature/receipt.json) found 0/131 training and 0/37 held-out shots with sourced PF-can temperature; all 168 remain unknown. The cited reference steel reaches 0.900 µΩ·m at 415.15 K (414.39–415.91 K from tabulation rounding only); no case resistivity or fit parameter is promoted.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261008-tf-average-landed" data-who="reckon-build" data-when="2026-10-08T06:15:00Z">
     <div class="r-comment-body">node 1 landed as a negative result: no independent R*Bphi measurement exists in the store (577 shots with feed current, 564 reconstruction-only products, 0 independent comparisons at 2 %). Section open — the next §6 node needs an independent observable: toroidal-probe orientation resolved from coil pulses, or a sourced turn count. Evidence: tf-average.</div>

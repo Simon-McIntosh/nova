@@ -22,11 +22,11 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S24">
 <meta name="plan-informs" content="gs-absolute-accuracy-gates">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-effort-hours" content="10.0">
-<meta name="plan-commits" content="aff62b24,646d21fb,28a8247b,c36ef55c,5ae3ec94,f4ff7b6f,b762ae17,cc679621">
-<meta name="plan-impl" content="0.3">
-<meta name="plan-version" content="25">
+<meta name="plan-commits" content="aff62b24,646d21fb,28a8247b,c36ef55c,5ae3ec94,f4ff7b6f,b762ae17,cc679621,9692e2b8,7c7fe7e0,228517df,d5961848,1dd08655,b736d9b8">
+<meta name="plan-impl" content="0.4">
+<meta name="plan-version" content="26">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -45,8 +45,11 @@
     </tbody></table>
     <p>Each input bundle carries <code>pf_active</code> (14 coils, element geometry, turns, per-coil currents, circuits), <code>pf_passive</code> (103–210 loops), the 57-point limiter, and synthesized magnetics; each reference carries ψ₂D, p′ and FF′, boundary outline, and the global scalars (I_p, ψ_axis as <code>psi_magnetic_axis</code> — the DDv4 name; <code>psi_axis</code> reads the −9e40 empty sentinel). The analytic pair (<code>analytic.nc</code>/<code>analytic-dd4-1-0.nc</code>, 0.15&nbsp;MB) joins as the sub-second smoke rung. Optional breadth, behind the open decision: the TCV DINA pair (~12&nbsp;MB, DD 3.39.0 — a 0.3&nbsp;m² machine that flushes ITER-scale assumptions) and dina3420 (460 ramp-up slices, 41&nbsp;MB, DD 3.42.0, no pf_passive). <strong>Reconstruction outputs are not excluded.</strong> The owner's recorded rationale on <code>cross-section-breadth</code> puts the NICE, LIUQE, EPM/EPQ, EQH and EFIT/HL-3 references (16 of the 23 records) in scope as forward targets: the validator checks <code>ForwardProfile</code> against what the reconstruction code returned, not the reconstruction against measurements, which needs no inference. The same rationale widens the set to every supported machine and code at a mid-ramp-up and a flat-top slice, and makes the validators verify the DDv3 load path as they run. They enter at rung 5 once that decision is locked. <strong>Excluded with reasons</strong>: JT-60SA Selene (no ψ₂D, no p′/FF′, no ψ scalars, quarantine-flagged — too thin to validate a forward solve); 135013 as shipped (its input bundle covers 74.9–85.9&nbsp;s while its reference covers 430.9–529.9&nbsp;s — usable only via the <code>_raw</code>/full-pulse bundles with interpolated currents, which forfeits the time-alignment property).</p>
 
-    <h2 id="s3">§3 — Fetch, pinning, and storage</h2>
-    <p><strong>The fetch extends nova's existing content-addressed cache; it is not a parallel shim.</strong> <code>nova/imas/machine_artifact.py</code> already owns a digest-addressed local cache with per-file sha256 verification and no-clobber publication (<code>_verified_object_root</code>, <code>_verify_directory_files</code>, <code>_publish_directory_no_replace</code>, behind <code>materialize_machine_artifact</code> and <code>resolve_machine_artifact</code>). Those primitives are machine-agnostic, but the module holding them is retired by <code>machine-description-retirement</code>. So rung 1 lifts them into one machine-agnostic store under <code>nova/database/</code>, and <code>machine_artifact.py</code> imports them back with its behaviour and its tests unchanged. The validator fetch is the store's second consumer: one function that fetches an OCI layer by digest (<code>oras blob fetch</code>), verifies it and publishes it into the store. The retirement then deletes only the machine-description parts and leaves the store in nova. The pinned case record extends <code>tests/data-manifest.json</code>, which already carries per-case <code>dd_version</code>, <code>cocos</code>, machine and shot for the transport-geometry lane, with each case's layer digests, rather than adding a second manifest format. The net new public surface is the store module and the fetch function. The availability gate reuses the skip pattern in <code>tests/test_equilibrium_forward_reference.py</code> and adds nothing public.</p><p>Each fetched case is converted NC→HDF5 the way imas-efit's <code>nc2hdf5</code> does: a per-case directory with <code>master.h5</code>, read through <code>imas.DBEntry("imas:hdf5?path=…", "r", dd_version=…)</code> at the per-dataset DD version from the pinned record. Validator modules skip cleanly when the store is unreachable, and the mutable tag never appears in code. The <code>store-strategy</code> decision is locked to republishing under a nova-owned content-addressed store. Pinning by blob digest is unchanged by that, because an unchanged blob keeps its digest. The push itself is an owner action with the owner's GHCR credentials; no worker publishes.</p>
+    <section class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-10-08</span>
+    <h2 id="s3">§3 — Fetch, pinning, and storage</h2></header>
+  <p class="landed-summary">Validator layers are fetched by sha256 digest, never by tag, into one machine-agnostic content store (<code>nova/database/content_store.py</code>, a single composed <code>publish_files</code> entry shared with the machine-artifact materialiser), from case records pinned in <code>tests/data-manifest.json</code> with digests re-derived from the registry. A credential fault fails while an unreachable registry skips, and all eight pinned layers verify by digest and size. <a href="/nova/evidence/archive/forward-profile-validator-set-landed.html#content-store">full record</a></p>
+</section>
 
     <h2 id="s4">§4 — The gate architecture</h2>
     <p>Adapt the imas-efit comparator's structure, not its code: per-quantity absolute bands in physics units checked into the test module (its LOOSE band is the cross-code floor — axis 0.20&nbsp;m, I_p 200&nbsp;kA, ψ scalars 5&nbsp;Wb, q95 2.0), with <strong>scale-aware relaxation</strong> for extensive quantities (I_p at 1.5% of |I_p|, ψ family at 5% of the gauge-invariant flux depth — an absolute 200&nbsp;kA floor is tighter than legitimate cross-code agreement on ITER while correct on TCV). The ψ₂D map compares [0,1]-normalised over the domain (absorbing gauge and 2π but deliberately not sign) with an <em>absolute cross-section area guard</em> beside it, because normalisation absorbs gross contraction — imas-efit's area check is what caught two of its own rails 17–43% low. Three imas-efit lessons carry over verbatim: q_axis/β_p/l_i are extracted and reported but not gated (cross-code they differ by 0.4–0.55 on good equilibria); reference-free containment gates run even when the comparison does (axis inside wall, axis inside its own LCFS, LCFS area ≥ half its bounding box, minor radius floor); and bands only ever tighten. Nova adds what imas-efit cannot: the solve's own receipts as gates — conservation residuals within registered tolerances, the current ledger exactly zero outside declared support, the normalisation record absolute, and the non-contraction pin (the NK route holds equilibria whose map eigenvalue exceeds one). Per-case figures land with the first passing run: the coil geometry + reference-boundary overlay and a p′/FF′ panel per case (both one matplotlib pass over data already fetched).</p>
@@ -84,10 +87,11 @@
     <pre class="r-fu-prompt">/reckon-build forward-profile-validator-set §5</pre>
     <p class="r-fu-outcome">Split along §5's rung boundaries in answer to the 2026-10-08 content review, which found it bundled two rungs with no negative control. Rung 1 is carried by f-fpv-currency-2026-10-01, whose done-when names the negative control (an altered manifest digest must fail), and is delivered as three nodes: the content-store lift, the digest fetch with its pinned case records, and the analytic smoke rung. Rung 2, CORSICA 130506 at four slices, becomes its own node with its own control once rung 1 lands.</p>
     </article>
-<article class="r-fu" data-id="f-fpv-currency-2026-10-01" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build forward-profile-validator-set" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fpv-currency-2026-10-01" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="s21-nova coordinator" data-written-at="2026-10-01" data-recommends-skill="/reckon-build forward-profile-validator-set" data-resolved-at="2026-10-08T07:11:21+00:00" data-resolved-by="s24-nova coordinator">
     <h4 class="r-fu-title">Rung 1: the digest-pinned fetch shim, the manifest and the analytic smoke rung</h4>
     <div class="r-fu-body">Currency audit 2026-10-01 (plan-currency-and-depth-a.md, forward-profile-validator-set row): draft with no implementation agrees with the code; this is the only source of an independent cross-code validator set, so it stays. Sharpens f-fpv-001. Done when: a fetch module and a pinned manifest exist, a test refuses a fetched file whose digest disagrees with the manifest (negative control: altering one manifest digest fails it), and the analytic smoke rung passes in a fresh process, with logs committed.</div>
     <pre class="r-fu-prompt">/reckon-build forward-profile-validator-set</pre>
+    <p class="r-fu-outcome">Rung 1 landed: the digest-pinned fetch into a content store, the pinned case records, and the analytic smoke rung (vacuum flux map to 9.4e-10 of peak). Altering one manifest digest fails the fetch. Evidence anchors content-store, layer-fetch, credential-faults and analytic-smoke.</p>
     </article>
 </section>
 
@@ -141,9 +145,12 @@
     <div class="r-comment-body"><p>review complete - the review of run r-20261008T043927638886-fpv-analytic-smoke stores a parsed record
 (117/120 across 6 dimensions: goal 20 evidence 18 scope 20 durability 19 fit 20 reuse 20; base
 5ae3ec946 head cc6796218; added_failure_count 0). Verdict: the three commits gained since the prior
-review fully discharge the three findings it raised; two low-severity follow-ons remain (the caption&#x27;s
+review fully discharge the three findings it raised; two low-severity follow-ons remain (the caption's
 absolute residual is not emitted by the gate, and the reviewed manifest still carries no
 baseline/after arms).</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20261008-rung1-closed" data-who="reckon-build" data-when="2026-10-08T07:20:00Z">
+    <div class="r-comment-body">rung 1 complete: §3 collapsed (store, fetch, pinned records, credential faults) and the analytic smoke rung landed. Rung 2, CORSICA 130506 at four slices on the H200 lane, is in flight.</div>
 </div>
 </section>
 </main>

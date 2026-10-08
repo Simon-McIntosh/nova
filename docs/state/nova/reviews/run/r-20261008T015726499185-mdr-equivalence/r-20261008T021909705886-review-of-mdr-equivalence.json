@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "7334ffa6a574a0f1bc590b85958821dbc0079af6",
+    "d63bca2353afb712bf05dea5fb9084f932dd24fb"
+  ],
+  "completed_at": "2026-10-08T02:50:49.070Z",
+  "dispatched_at": "2026-10-08T02:19:56Z",
+  "findings": [
+    {
+      "file": "docs/figures/machine-description-retirement/mdr-equivalence.json",
+      "line": "490",
+      "severity": "follow-on",
+      "text": "follow-on: the committed receipt's own sources.producer_revision is 6b7a4cd9ed4b1ace6740e6529dcef99201517004, but the reviewed manifest's evidence_inputs names producer revision d5ced0387d33bce792b5353c76059468025c57b7; both are real imas-ambix commits nine minutes apart, so a reader cannot tell which producer revision yielded the committed numbers, and the manifest's quoted revision is the stale one."
+    },
+    {
+      "file": "benchmarks/mast_description_equivalence.py",
+      "line": "227",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt is committed at nova head d63bca23 but the benchmark log that generated it, measurement.log, is stamped revision=7334ffa6, the base, because the harness ran before the commit; nothing in the receipt names a nova revision, so the measurement cannot be tied to the promoted commit from its own artifacts."
+    },
+    {
+      "file": "tests/test_mast_description_equivalence.py",
+      "line": "31",
+      "severity": "follow-on",
+      "text": "follow-on: the two pin tests assert the registry's expected figures (44 unique positions and 43/46 joins) and therefore fail at the committed head (I re-ran the file: 2 failed, 3 passed, EXIT=1), which the commit message states is deliberate so the missing placements remain visible; the red is the node's chosen signal rather than a regression, but the node's own named gate is red and a reader must be told so."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mdr-equivalence /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mdr-equivalence/tests/test_mast_description_equivalence.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/test_mast_description_equivalence.py::test_registry_and_producer_have_forty_four_unique_loop_positions",
+        "tests/test_mast_description_equivalence.py::test_registry_and_producer_join_forty_three_reconstruction_loops"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015726499185-mdr-equivalence/head-tests.log",
+      "revision": "d63bca2353afb712bf05dea5fb9084f932dd24fb"
+    },
+    "baseline_suite": null
+  },
+  "gate_arms_note": "added_failure_count and added_failure_ids are derived with reckon.crew.review.added_failures_from_gate_logs from the reviewed run's own gate logs. Its manifest declares an after_suite (head-tests.log, revision d63bca23, 2 failed/3 passed, EXIT=1) but no baseline_suite, so the base arm is absent and the tool returns (None, []) \u2014 unmeasured, not a measured zero. I independently re-ran the same test file against the reviewed worktree at head d63bca23 and reproduced 2 failed, 3 passed, EXIT=1.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against the base 7334ffa6; one commit d63bca23 adds three files and 829 insertions with no deletions, the benchmark harness, its receipt and the pinning tests.",
+    "done_when": "the done-when names benchmarks/mast_description_equivalence.py and tests/test_mast_description_equivalence.py; the manifest records the benchmark at EXIT=1 with the EQUIVALENCE summary and the focused tests at 2 failed/3 passed (head-tests.log), and I re-ran the same test file at the reviewed head d63bca23 (2 failed, 3 passed, EXIT=1, review-rerun-head-tests.log), matching the manifest.",
+    "goal": "the node's goal is to demonstrate numerically whether the imas-ambix MAST map producer yields the description nova's registry serves; benchmarks/mast_description_equivalence.py:139 compare_descriptions drives the producer in its own environment (benchmarks/mast_description_equivalence.py:58) and compares unique loop positions, the 46-loop reconstruction join and each named coil outline against nova's registry, so the goal's numeric question is answered.",
+    "manifest": "read; it reports the mismatch, the commit d63bca23, the receipt path and three logs, but its evidence_inputs names producer revision d5ced0387d33bce792b5353c76059468025c57b7 while the committed receipt's own sources.producer_revision (docs/figures/machine-description-retirement/mdr-equivalence.json:490) is 6b7a4cd9ed4b1ace6740e6529dcef99201517004.",
+    "write_paths": "read the manifest's declared paths; git diff --name-status 7334ffa6 d63bca23 adds exactly benchmarks/mast_description_equivalence.py, tests/test_mast_description_equivalence.py and docs/figures/machine-description-retirement/mdr-equivalence.json, every one inside the declared scope."
+  },
+  "justifications": {
+    "durability": "tests/test_mast_description_equivalence.py:60 fails if the producer geometry is displaced outside the bound (the negative control reddens it at 0.000999993 m) and tests/test_mast_description_equivalence.py:69 self-tests the difference instrument, but the two headline assertions at lines 31 and 44 pin the target equivalence and are therefore red at the committed head.",
+    "evidence": "the receipt records the counts, the join, the predeclared bounds and per-coil deltas and the negative control reddens on a 1 mm displacement, but the manifest evidence_inputs (d5ced038) contradicts the receipt's own sources.producer_revision (6b7a4cd9) and the benchmark log that generated the receipt is stamped revision=7334ffa6, the base, so the receipt's provenance is not consistently readable.",
+    "fit": "benchmarks/mast_description_equivalence.py:238 follows the repository benchmark idiom (argparse main, receipt under docs/figures, printed summary, SystemExit on failure) and imports active_component_geometry (nova/catalog/mast_geometry.py:636), join_accounting (nova/imas/mast_flux_loop_adjudication.py:277) and reconstruction_loop_positions (nova/imas/mast_solve_inputs.py:338) rather than restating them.",
+    "goal_fidelity": "benchmarks/mast_description_equivalence.py:167 computes an explicit equivalent verdict and the receipt records the registry's 44 unique positions and 43/46 join beside the producer's 42 and 41/46, so the node answers its goal's whether-question numerically and reports the mismatch as the plan directs.",
+    "reuse": "the comparison reuses the three existing owners of its inputs and adds only producer_snapshot (driving a foreign repository, no owner) and _coil_differences (benchmarks/mast_description_equivalence.py:115) whose capability I searched for in nova/ and found no existing owner.",
+    "scope_discipline": "git diff --name-status 7334ffa6 d63bca23 is exactly the three declared paths and no other file is touched; the manifest's evidence_inputs carries no plan, sprint or ticket identifier."
+  },
+  "notes": "Independent review of r-20261008T015726499185-mdr-equivalence at head d63bca23 (base 7334ffa6). The node drives the imas-ambix MAST map producer in its own environment and compares against the nova registry, answering its goal's numeric whether-question: the producer yields 42 unique loop positions and a 41/46 reconstruction join against the registry's 44 and 43/46, while all 13 coil outlines agree exactly within a bound declared before scoring. The mismatch is reported as the plan directs. Three follow-on findings: the manifest's producer revision disagrees with the receipt's own provenance, the receipt's generating log names the base revision, and the two pin tests fail by design so the node's named gate is red. Scores: goal_fidelity 18, evidence 15, scope_discipline 19, durability 16, fit 18, reuse 18. Total 104, verdict pass.",
+  "plan": "nova:machine-description-retirement",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to demonstrate numerically whether the imas-ambix MAST map producer yields the description nova's registry serves; benchmarks/mast_description_equivalence.py:139 compare_descriptions drives the producer in its own environment (benchmarks/mast_description_equivalence.py:58) and compares unique loop positions, the 46-loop reconstruction join and each named coil outline against nova's registry, so the goal's numeric question is answered.\nVERDICT done_when: the done-when names benchmarks/mast_description_equivalence.py and tests/test_mast_description_equivalence.py; the manifest records the benchmark at EXIT=1 with the EQUIVALENCE summary and the focused tests at 2 failed/3 passed (head-tests.log), and I re-ran the same test file at the reviewed head d63bca23 (2 failed, 3 passed, EXIT=1, review-rerun-head-tests.log), matching the manifest.\nVERDICT write_paths: read the manifest's declared paths; git diff --name-status 7334ffa6 d63bca23 adds exactly benchmarks/mast_description_equivalence.py, tests/test_mast_description_equivalence.py and docs/figures/machine-description-retirement/mdr-equivalence.json, every one inside the declared scope.\nVERDICT manifest: read; it reports the mismatch, the commit d63bca23, the receipt path and three logs, but its evidence_inputs names producer revision d5ced0387d33bce792b5353c76059468025c57b7 while the committed receipt's own sources.producer_revision (docs/figures/machine-description-retirement/mdr-equivalence.json:490) is 6b7a4cd9ed4b1ace6740e6529dcef99201517004.\nVERDICT diff: read commit by commit against the base 7334ffa6; one commit d63bca23 adds three files and 829 insertions with no deletions, the benchmark harness, its receipt and the pinning tests.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: benchmarks/mast_description_equivalence.py:167 computes an explicit equivalent verdict and the receipt records the registry's 44 unique positions and 43/46 join beside the producer's 42 and 41/46, so the node answers its goal's whether-question numerically and reports the mismatch as the plan directs.\nSCORE evidence: 15\nJUSTIFICATION evidence: the receipt records the counts, the join, the predeclared bounds and per-coil deltas and the negative control reddens on a 1 mm displacement, but the manifest evidence_inputs (d5ced038) contradicts the receipt's own sources.producer_revision (6b7a4cd9) and the benchmark log that generated the receipt is stamped revision=7334ffa6, the base, so the receipt's provenance is not consistently readable.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status 7334ffa6 d63bca23 is exactly the three declared paths and no other file is touched; the manifest's evidence_inputs carries no plan, sprint or ticket identifier.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_mast_description_equivalence.py:60 fails if the producer geometry is displaced outside the bound (the negative control reddens it at 0.000999993 m) and tests/test_mast_description_equivalence.py:69 self-tests the difference instrument, but the two headline assertions at lines 31 and 44 pin the target equivalence and are therefore red at the committed head.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/mast_description_equivalence.py:238 follows the repository benchmark idiom (argparse main, receipt under docs/figures, printed summary, SystemExit on failure) and imports active_component_geometry (nova/catalog/mast_geometry.py:636), join_accounting (nova/imas/mast_flux_loop_adjudication.py:277) and reconstruction_loop_positions (nova/imas/mast_solve_inputs.py:338) rather than restating them.\nSCORE reuse: 18\nJUSTIFICATION reuse: the comparison reuses the three existing owners of its inputs and adds only producer_snapshot (driving a foreign repository, no owner) and _coil_differences (benchmarks/mast_description_equivalence.py:115) whose capability I searched for in nova/ and found no existing owner.\nFINDING docs/figures/machine-description-retirement/mdr-equivalence.json:490 follow-on: the committed receipt's own sources.producer_revision is 6b7a4cd9ed4b1ace6740e6529dcef99201517004, but the reviewed manifest's evidence_inputs names producer revision d5ced0387d33bce792b5353c76059468025c57b7; both are real imas-ambix commits nine minutes apart, so a reader cannot tell which producer revision yielded the committed numbers, and the manifest's quoted revision is the stale one.\nFINDING benchmarks/mast_description_equivalence.py:227 follow-on: the receipt is committed at nova head d63bca23 but the benchmark log that generated it, measurement.log, is stamped revision=7334ffa6, the base, because the harness ran before the commit; nothing in the receipt names a nova revision, so the measurement cannot be tied to the promoted commit from its own artifacts.\nFINDING tests/test_mast_description_equivalence.py:31 follow-on: the two pin tests assert the registry's expected figures (44 unique positions and 43/46 joins) and therefore fail at the committed head (I re-ran the file: 2 failed, 3 passed, EXIT=1), which the commit message states is deliberate so the missing placements remain visible; the red is the node's chosen signal rather than a regression, but the node's own named gate is red and a reader must be told so.",
+  "review_run_id": "r-20261008T021909705886-review-of-mdr-equivalence",
+  "reviewed_base_sha": "7334ffa6a574a0f1bc590b85958821dbc0079af6",
+  "reviewed_head_sha": "d63bca2353afb712bf05dea5fb9084f932dd24fb",
+  "reviewed_revision": "d63bca2353afb712bf05dea5fb9084f932dd24fb",
+  "reviewed_run_id": "r-20261008T015726499185-mdr-equivalence",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mdr-equivalence",
+  "reviewer_node": "review-of-mdr-equivalence",
+  "reviewer_run_id": "r-20261008T021909705886-review-of-mdr-equivalence",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T02:46:29.020592+00:00",
+  "total": 104,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha d63bca2353afb712bf05dea5fb9084f932dd24fb is the reviewed worktree's HEAD and its status --porcelain is empty.",
+    "git diff --name-status 7334ffa6 d63bca23 adds exactly benchmarks/mast_description_equivalence.py, tests/test_mast_description_equivalence.py and docs/figures/machine-description-retirement/mdr-equivalence.json.",
+    "I re-ran tests/test_mast_description_equivalence.py against the reviewed worktree at head d63bca23 (TMPDIR=/tmp PYTHONPATH=<worktree> /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q) and got 2 failed, 3 passed, EXIT=1 (review-rerun-head-tests.log).",
+    "the committed receipt's sources.producer_revision is 6b7a4cd9ed4b1ace6740e6529dcef99201517004 while the manifest's evidence_inputs names d5ced0387d33bce792b5353c76059468025c57b7."
+  ]
+}

@@ -29,7 +29,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;,&quot;s5&quot;:&quot;deferred&quot;,&quot;s6&quot;:&quot;deferred&quot;,&quot;s7&quot;:&quot;deferred&quot;}">
 <meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f,87d24724,1227e204,d95f9296,2806d665,641a8b33,47c46cb8,07260595,c3cc4e04,ee164d5b,87d034b6,609b5fb0,9424ff40,867869dc,3cd9ca55,5a0727c1,75b9344e,de19c025,55df62b0,e934bb9b,3079d546,912d8961">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -237,6 +237,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-passive-deferred" data-who="reckon-build" data-when="2026-10-08T07:55:00Z">
     <div class="r-comment-body">§4 deferred: the identifiable passive direction (1 of 15) gives an attributable 22.5 % held-out gain but saturates the sourced coil-case resistivity ceiling, and every explanation is either unsourced (grade, can temperature on 0 of 168 shots) or outside the axisymmetric model (vessel connections carry only n != 0 current). Reopen triggers: a can-temperature or grade record, or a 3-D passive current model. Landed under §4: the driven grouped Jacobian, the spectrum, the held-out fit, the propagation reuse, and the three cause checks. Evidence: passive-spectrum, passive-held-out, coil-case-resistivity, coil-case-temperature, vessel-path.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T071820178182-mast-coil-case-vessel-path" data-who="reckon-build" data-when="2026-10-08T07:36:55Z">
+    <div class="r-comment-body"><p>[Discrete ring network evidence](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-coil-case-vessel-path.html#mast-coil-case-vessel-path-evidence): 12 uniform-forcing networks preserve ring currents to 2.22e-16 A; angular controls carry 0.280705/0.363050 A peak transfer but zero toroidal mean within 4.44e-16 A; 67 tests pass, false-loading mutation fails 14. Connections cannot explain axisymmetric resistivity saturation under uniform closed-ring assumptions; real effects need a 3-D current model. No cohort pass, product change or promotion.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20261008-tf-average-landed" data-who="reckon-build" data-when="2026-10-08T06:15:00Z">
     <div class="r-comment-body">node 1 landed as a negative result: no independent R*Bphi measurement exists in the store (577 shots with feed current, 564 reconstruction-only products, 0 independent comparisons at 2 %). Section open — the next §6 node needs an independent observable: toroidal-probe orientation resolved from coil pulses, or a sourced turn count. Evidence: tf-average.</div>

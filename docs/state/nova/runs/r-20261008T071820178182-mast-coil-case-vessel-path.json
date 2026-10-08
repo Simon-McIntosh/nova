@@ -1,0 +1,430 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "36b0753f33745495524c8fab08b57d730061b531",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4251008,
+      "cached_input_tokens_cumulative": 4251008,
+      "input_tokens": 4407215,
+      "input_tokens_cumulative": 4407215,
+      "output_tokens": 20835,
+      "output_tokens_cumulative": 20835,
+      "reasoning_output_tokens": 3778,
+      "reasoning_output_tokens_cumulative": 3778
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1756,
+    "files": 4,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "3079d5466cb889e1ec395b601996f740c7ecf0aa",
+    "912d8961564ec8697578a5ed520efeb19b0471b6"
+  ],
+  "completed_at": "2026-10-08T07:36:55Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T07:18:54Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_mast_passive_decay_modes.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.4,
+    "plan": "mast-nonaxisymmetric-physics",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-astra",
+    "burn_multiple": 2.836803223640027,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-astra' is projected to exhaust at 2026-10-10T09:20:34Z, which is after this node's 3600s horizon ending 2026-10-08T08:18:26.502585+00:00",
+    "horizon_ends_at": "2026-10-08T08:18:26.502585+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T07:18:25Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-10T09:20:34Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 510993,
+    "state": "quiet",
+    "utilisation_pct": 44.0
+  },
+  "lane_declaration": {
+    "backend": "codex-astra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T07:18:25Z",
+    "read_at": "2026-10-08T07:18:26Z",
+    "resolved_backend": "codex-astra",
+    "utilisation_pct": 44.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T07:36:55Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/manifest.md",
+  "member": "disposable-r-20261008T071820178182-mast-coil-case-vessel-path",
+  "negative_control": {
+    "added_failure_ids": [
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-opposite]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-single]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-unequal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-opposite]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-single]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-unequal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-opposite]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-single]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-unequal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_nonaxisymmetric_transfer_has_no_mean_ring_current[eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_nonaxisymmetric_transfer_has_no_mean_ring_current[unequal]"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-opposite]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-single]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[0.05-unequal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-opposite]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-single]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[1.0-unequal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-opposite]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-single]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_connections_preserve_axisymmetric_ring_currents[20.0-unequal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_nonaxisymmetric_transfer_has_no_mean_ring_current[eight_equal]",
+      "../../../../../../../../tmp/mast-vessel-mutation-pwx3yp3a/test_mast_passive_decay_modes.py::test_nonaxisymmetric_transfer_has_no_mean_ring_current[unequal]"
+    ],
+    "declaration": "a synthetic case with no true coupling must not prefer the coupled path, and its coupled-path resistance must sit at the no-coupling bound",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/mutation.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/mutation.log",
+    "test_paths": [
+      "tests/test_mast_passive_decay_modes.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "mast-coil-case-vessel-path",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 388,
+          "cached_input_tokens": 825407,
+          "input_tokens": 825797,
+          "output_tokens": 1937,
+          "reasoning_output_tokens": 629,
+          "total_tokens": 827734,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "Using the cited can-to-vessel electrical connections in docs/figures/mast-coil-case-resistivity/receipt.json, the passive circuit model in nova/imas/mast_passive_inductance.py and nova/imas/mast_passive_decay_modes.py gains an optional coupled path between each coil-case circuit and the vessel circuit it connects to, with a resistance bounded by a stated interval; benchmarks/mast_passive_held_out.py re-runs the identifiable-direction fit on the same pre-registered split (docs/figures/mast-passive-held-out/split.json) with and without the coupled path and reports, for each, the fitted coil-case resistivity against its sourced interval [0.69, 0.90] micro-ohm metre, the held-out squared-residual gain, and the drive-permuted control gain, compared as gains rather than by sign; the hypothesis is supported only if the coupled fit returns the coil-case resistivity strictly inside its interval while keeping the held-out gain and a permuted control below a tenth of it; passivity is checked; receipt and figure under docs/figures/mast-passive-vessel-path; tests/test_mast_passive_decay_modes.py pins the coupled-path assembly on a synthetic two-circuit case; the cohort pass runs on all_debug as one job with its log in the manifest; nothing is promoted into mast_fitted_parameters.py",
+    "estimated_hours": 1.0,
+    "goal": "Test whether a sourced electrical connection between the MAST coil-case cans and the vessel removes the coil-case resistivity saturation in the passive held-out fit",
+    "id": "mast-coil-case-vessel-path",
+    "lane_declaration": {
+      "backend": "codex-astra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T07:18:25Z",
+      "read_at": "2026-10-08T07:18:26Z",
+      "resolved_backend": "codex-astra",
+      "utilisation_pct": 44.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T071820178182-mast-coil-case-vessel-path/manifest.md",
+    "negative_control": "a synthetic case with no true coupling must not prefer the coupled path, and its coupled-path resistance must sit at the no-coupling bound",
+    "plan": "mast-nonaxisymmetric-physics",
+    "requested_backend": "codex-astra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/imas/mast_passive_inductance.py",
+      "nova/imas/mast_passive_decay_modes.py",
+      "tests/test_mast_passive_decay_modes.py",
+      "benchmarks/mast_passive_held_out.py",
+      "docs/figures/mast-passive-vessel-path",
+      "docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-coil-case-vessel-path.html",
+      "docs/figures/mast-nonaxisymmetric-physics/mast-coil-case-vessel-path"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 2.83658761579677,
+      "derived": 0.17062755167675264,
+      "drain_hours": 168.0,
+      "effective_limit": 0.17062755167675264,
+      "elapsed_fraction": 0.15511595606977513,
+      "elapsed_hours": 26.059480619722223,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T07:18:33+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.56,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.44,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.410432,
+      "decided_by": "window",
+      "margin": 0.327068,
+      "name": "mast-coil-case-vessel-path",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.44
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.130231,
+        "observed_at": "2026-10-08T07:18:33+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.44,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-astra",
+    "member": "codex",
+    "node": "mast-coil-case-vessel-path",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T07:18:33.130231+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Named lane: hard passive-circuit modelling node, lead directive sends hard work to codex, local lane congested. The passive fit saturates the coil-case resistivity ceiling, and temperature and grade are unsourced; the cited can-to-vessel connection is the remaining physical hypothesis. Failure mode: an added path that improves the fit only by adding freedom, which the no-coupling synthetic and the permuted control must catch. Deep reasoning, elevated risk.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.741,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "mast-nonaxisymmetric-physics",
+  "plan_impl_at_dispatch": 0.4,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "912d8961564ec8697578a5ed520efeb19b0471b6",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "36b0753f33745495524c8fab08b57d730061b531",
+    "reviewed_head_sha": "912d8961564ec8697578a5ed520efeb19b0471b6",
+    "scores": {
+      "durability": 16,
+      "evidence": 19,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 112
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T071820178182-mast-coil-case-vessel-path",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s24-nova",
+  "session_harness": "codex",
+  "session_id": "01a11a61-456b-7493-b01a-91d836011700",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 13,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4251008,
+    "cumulative_input_tokens": 8658223,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 24613
+  },
+  "time_budget": "60m",
+  "tool_steps": 28.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 1081,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T07:36:57Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T07:26:33Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T071820178182-mast-coil-case-vessel-path",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 169,
+    "worker_pid": 2941226
+  },
+  "worker_seconds": 1081,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

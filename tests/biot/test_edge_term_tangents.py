@@ -12,6 +12,10 @@ themselves, which is the declared mutation those rows must fail against.
 """
 
 from contextlib import contextmanager
+from functools import lru_cache
+import json
+import subprocess
+import sys
 
 import jax
 import jax.numpy as jnp
@@ -240,7 +244,11 @@ def test_tangent_matches_base_jvp(name):
             got, expected, primal_error = _identity(name)
     else:
         got, expected, primal_error = _identity(name)
-    bound = EXACT_TOLERANCE if name == "edge_construction" else SCAN_TOLERANCE
+    bound = (
+        EXACT_TOLERANCE
+        if name in {"edge_construction", "second_residual"}
+        else SCAN_TOLERANCE
+    )
     errors = _normwise(got[1], expected[1])
     covered = float(np.mean(errors <= bound))
     finite = finite_fraction(expected[1])
@@ -288,3 +296,130 @@ def compile_arm(name, arm):
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_bound(name):
     assert compile_ratio("test_edge_term_tangents", name) <= 3.0
+
+
+_EDGE_REFERENCE_PROBE = r"""
+import json, sys
+import mpmath as mp
+mp.mp.dps = 50
+
+def reference(record):
+    values, directions = [[mp.mpf(v) for v in row] for row in record]
+    def geometry(e):
+        r,z,ra,za,rb,zb = [a + e*b for a,b in zip(values,directions)]
+        b = (rb-ra)/(zb-za)
+        w = ((ra-r)*(zb-z)-(rb-r)*(za-z))/(zb-za)
+        return r,za-z,ra-r,b,w
+    r,u,o,b,w = geometry(mp.mpf(0))
+    dr,du,do,db,dw = [mp.diff(lambda e: geometry(e)[k],0) for k in range(5)]
+    def integrand(a, derivative, geometry_value=None):
+        rr,uu,oo,bb,ww = geometry_value or (r,u,o,b,w)
+        y = mp.sin(a)**2
+        x = 1-y
+        n = uu+bb*oo+2*bb*rr*y
+        q = ww+2*rr*y
+        ws = q*q+4*(1+bb*bb)*rr*rr*x*y
+        if not derivative:
+            return mp.asinh(n/mp.sqrt(ws))
+        dn = du+db*o+b*do+2*(db*r+b*dr)*y
+        dq = dw+2*dr*y
+        dws = 2*q*dq+4*(2*b*db*r*r+(1+b*b)*2*r*dr)*x*y
+        return (dn-n*dws/(2*ws))/mp.sqrt(ws+n*n)
+    width = abs(w)/(2*mp.sqrt(1+b*b)*r)
+    split = sorted(set([mp.mpf(0),mp.pi/2,mp.pi/4,mp.mpf('.01'),mp.mpf('.1'),
+        *[min(mp.pi/4,width*factor) for factor in
+          [mp.mpf('.01'),mp.mpf('.1'),mp.mpf(1),mp.mpf(10),mp.mpf(100),mp.mpf(1000)]]]))
+    value = mp.quad(lambda a:integrand(a,False),split)
+    derivative = mp.quad(lambda a:integrand(a,True),split)
+    # A one-sided difference stays on the geometry's selected smooth branch.
+    step = mp.mpf('1e-25')
+    displaced = mp.quad(lambda a:integrand(a,False,geometry(step)),split)
+    difference = (displaced-value)/step
+    error = abs(difference-derivative)/max(abs(derivative),mp.mpf('1e-100'))
+    return float(value),float(derivative),float(error)
+print(json.dumps([reference(row) for row in json.load(sys.stdin)]))
+"""
+
+
+@lru_cache(maxsize=1)
+def _near_edge_reference_rows():
+    """Audit smooth controls and both ends against the 50-digit exact integral.
+
+    The fixed audit includes the CPU identity's largest discrepancy as well as
+    targets near both endpoints and the extended line. Every full-domain sample
+    remains in the base-JVP identity row; this independent reference measures
+    where reproducing the program's derivative differs from the integral.
+    """
+    indices = np.asarray(
+        [
+            0,
+            1,
+            2,
+            6000,
+            6001,
+            6100,
+            6204,
+            6500,
+            6999,
+            7000,
+            7001,
+            7500,
+            7999,
+            8000,
+            8500,
+            8999,
+        ]
+    )
+    got, expected, _ = _identity("second_residual")
+    primals, tangents = CASES["second_residual"][-2:]
+    records = []
+    for index in indices:
+        records.append(
+            [
+                [
+                    float(tree[0][index]),
+                    float(tree[1][index]),
+                    *[float(v[index]) for v in tree[2]],
+                ]
+                for tree in (primals, tangents)
+            ]
+        )
+    result = subprocess.run(
+        [sys.executable, "-I", "-c", _EDGE_REFERENCE_PROBE],
+        input=json.dumps(records),
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    reference = np.asarray(json.loads(result.stdout))
+    value, tangent = reference[:, 0], reference[:, 1]
+    primal = np.abs((np.asarray(expected[0])[indices] - value) / value)
+    hand = np.abs((np.asarray(got[1])[indices] - tangent) / tangent)
+    base = np.abs((np.asarray(expected[1])[indices] - tangent) / tangent)
+    print(
+        f"NEAR_EDGE second_residual samples={indices.size} "
+        f"base_primal_vs_reference_max={primal.max():.3e} "
+        f"hand_vs_reference_max={hand.max():.3e} "
+        f"base_jvp_vs_reference_max={base.max():.3e} "
+        f"smooth_control_tangent_max={hand[:3].max():.3e} "
+        f"reference_one_sided_difference_max={reference[:, 2].max():.3e}"
+    )
+    return primal, hand, base, reference[:, 2]
+
+
+def test_near_edge_reference_is_the_exact_integral():
+    primal, hand, _, difference = _near_edge_reference_rows()
+    assert primal.max() <= 1e-10
+    assert hand[:3].max() <= EXACT_TOLERANCE
+    assert difference.max() <= 1e-15
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="the differentiated graded edge quadrature near endpoints leaves "
+    "the exact integral's tangent (measured maximum 5.160e-7 relative); the "
+    "hand rule preserves the base program's derivative",
+)
+def test_near_edge_tangent_meets_reference():
+    _, hand, _, _ = _near_edge_reference_rows()
+    assert hand.max() <= SCAN_TOLERANCE

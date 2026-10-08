@@ -25,7 +25,15 @@ level, or from the edge's line, and ``h`` the local curvature of the denominator
 The range is halved and each panel stretched by ``b = width sinh(s)`` from its own
 end.  That map is EXACT for the model's quadratic --
 ``w^2 + h^2 width^2 sinh^2 s = w^2 cosh^2 s`` -- so it carries what is left of the
-boundary layer after the logarithm has gone.
+boundary layer after the logarithm has gone. Below the denominator layer's
+resolution floor, the remainder turns over where its square root resolves both
+end quantities: its width is ``hypot(offset, end) / scale``. Following only
+the denominator offset overgrades a smooth remainder when the numerator's end
+value is larger. The width follows this joint scale without a lower clip;
+when both end quantities vanish the regularised integrand needs no grading.
+The model integral carries its end-layer derivative analytically. The grading
+width is held fixed while differentiating the remainder, with moving integration
+bounds retaining their map and Jacobian derivatives.
 
 What the ARC adds is that a panel no longer has to reach the end it is graded
 from.  Its two boundary layers still sit at ``a = 0`` and ``a = pi/2``, because
@@ -62,13 +70,6 @@ __all__ = ["QUARTER", "graded_residual"]
 # One end of the quarter range to the other, which is as far as either panel can
 # reach: the two layers sit at the ends of that range whatever the amplitude.
 QUARTER = 0.25 * np.pi
-
-# Narrowest boundary layer the graded panels chase before giving up on it.  It is
-# a guard rather than a trade-off: the configurations that used to collapse a
-# layer onto the range end -- a target level with an edge end, or on an edge's
-# extended line, or on a vertex -- are the ones whose logarithm is removed
-# analytically, and their width comes out of the OTHER end quantity instead of out
-# of this floor.  What is left for it to catch is a layer that is merely narrow.
 LAYER_FLOOR = 1e-8
 
 
@@ -152,6 +153,28 @@ def _regularised(numerator, denominator, model, sign, xp):
     )
 
 
+def _fixed_nodes(value, xp):
+    """Keep a quadrature-map value fixed while differentiating its integrand."""
+    if xp is np:
+        return value
+    from jax import lax
+
+    return lax.stop_gradient(value)
+
+
+def _grading_width(offset, end, scale, xp):
+    """Resolve the remainder's joint end scale below the denominator floor."""
+    denominator_reach = xp.where(offset > 0.0, offset, xp.abs(end))
+    reach = xp.where(
+        denominator_reach < LAYER_FLOOR * scale,
+        xp.hypot(offset, end),
+        denominator_reach,
+    )
+    return _fixed_nodes(
+        xp.where(reach > 0.0, xp.clip(reach / scale, 0.0, 1.0), 1.0), xp
+    )
+
+
 def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
     """Return ``integral arsinh(N/W) da`` over two graded panels, log removed.
 
@@ -171,17 +194,10 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
     node, weight = _rule(nodes)
     total = None if paired else 0.0
     for panel, (offset, end, scale, lower, upper) in enumerate(panels):
-        # The denominator turns over at its own end value over the ring span, and
-        # the arsinh saturates where the numerator overtakes it -- never nearer the
-        # end than that, so grading on the denominator's scale reaches both.  What
-        # is new here is what happens when that scale VANISHES: with the logarithm
-        # gone the model is then exact to the order that matters, nothing is left at
-        # the denominator's own scale, and the remaining feature is the numerator's.
-        # A target on a section vertex sends both to zero and needs no grading at
-        # all -- which is the whole gain, because a floor set low enough for that
-        # case is what used to thin the nodes everywhere else.
-        reach = xp.where(offset > 0.0, offset, xp.abs(end))
-        width = xp.where(reach > 0.0, xp.clip(reach / scale, LAYER_FLOOR, 1.0), 1.0)
+        # The logarithmic model resolves the denominator's singular end.
+        # Its bounded remainder follows the joint numerator/denominator scale
+        # when that end is too narrow for the denominator grading.
+        width = _grading_width(offset, end, scale, xp)
         held = width[:, None]
         start = xp.arcsinh(lower / width)[:, None]
         span = xp.arcsinh(upper / width)[:, None] - start
@@ -223,15 +239,6 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
 def _held_tangent(condition, value, d_value, fill, xp):
     """Return ``where(condition, value, fill)`` and its tangent."""
     return xp.where(condition, value, fill), xp.where(condition, d_value, 0.0)
-
-
-def _reciprocal_root(value, xp):
-    """Return ``1/sqrt(value)``, by the fused reciprocal root on a traced array."""
-    if xp is np:
-        return 1.0 / np.sqrt(value)
-    from jax import lax
-
-    return lax.rsqrt(value)
 
 
 def _model_integral_tangent(
@@ -319,55 +326,33 @@ def _regularised_tangent(
     )
 
 
-def _clip_tangent(value, d_value, lower, upper, xp):
-    """Return ``clip(value, lower, upper)`` and its tangent, halved at a tie."""
-    inside = (value > lower) & (value < upper)
-    tie = (value == lower) | (value == upper)
-    return (
-        xp.clip(value, lower, upper),
-        xp.where(inside, d_value, xp.where(tie, 0.5 * d_value, 0.0)),
-    )
-
-
 def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
     """Return :func:`graded_residual` and its tangent over the same nodes.
 
     ``d_panels`` carries one tangent per panel quantity, and ``pieces_tangent``
     maps ``(x, d_x, y, d_y)`` to the numerator and denominator with their
-    tangents, so the quadrature's tangent is the quadrature of the integrand's
-    tangent plus the moving nodes' and the moving jacobian's contributions.
+    tangents. The grading width is fixed in the tangent; integration-bound
+    motion still contributes through the nodes and their Jacobian.
     """
     node, weight = _rule(nodes)
     total = d_total = 0.0
     for panel, (values, tangents) in enumerate(zip(panels, d_panels, strict=True)):
         offset, end, scale, lower, upper = values
-        d_offset, d_end, d_scale, d_lower, d_upper = tangents
-        reach = xp.where(offset > 0.0, offset, xp.abs(end))
-        d_reach = xp.where(offset > 0.0, d_offset, xp.where(end >= 0.0, d_end, -d_end))
-        ratio = reach / scale
-        d_ratio = _quotient_tangent(reach, d_reach, scale, d_scale)
-        clipped, d_clipped = _clip_tangent(ratio, d_ratio, LAYER_FLOOR, 1.0, xp)
-        width, d_width = _held_tangent(reach > 0.0, clipped, d_clipped, 1.0, xp)
-        held, d_held = width[:, None], d_width[:, None]
-
-        def arsinh(bound, d_bound):
-            argument = bound / width
-            d_argument = _quotient_tangent(bound, d_bound, width, d_width)
-            return (
-                xp.arcsinh(argument)[:, None],
-                (d_argument * _reciprocal_root(argument**2 + 1.0, xp))[:, None],
-            )
-
-        start, d_start = arsinh(lower, d_lower)
-        high, d_high = arsinh(upper, d_upper)
-        span, d_span = high - start, d_high - d_start
+        d_offset, _, d_scale, d_lower, d_upper = tangents
+        width = _grading_width(offset, end, scale, xp)
+        held = width[:, None]
+        start = xp.arcsinh(lower / width)[:, None]
+        span = xp.arcsinh(upper / width)[:, None] - start
+        d_start = ((d_lower / width) / xp.sqrt(1.0 + (lower / width) ** 2))[:, None]
+        d_high = ((d_upper / width) / xp.sqrt(1.0 + (upper / width) ** 2))[:, None]
+        d_span = d_high - d_start
         half_span = 0.5 * span
         stretch = start + half_span * (node + 1.0)[None, :]
-        d_stretch = d_start + (0.5 * d_span) * (node + 1.0)[None, :]
+        d_stretch = d_start + 0.5 * d_span * (node + 1.0)[None, :]
         stretched = xp.sinh(stretch)
         d_stretched = d_stretch * xp.cosh(stretch)
         panel_offset = held * stretched
-        d_panel_offset = _product_tangent(held, d_held, stretched, d_stretched)
+        d_panel_offset = held * d_stretched
         sine = xp.sin(panel_offset)
         near = sine**2
         d_near = (d_panel_offset * xp.cos(panel_offset)) * (2.0 * sine)
@@ -388,15 +373,12 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
             d_offset[:, None] * (2.0 * offset[:, None])
             + _product_tangent(scaled, d_scaled, scaled, d_scaled)
         ) * (0.5 / model)
-        lever = half_span * held
-        d_lever = _product_tangent(half_span, 0.5 * d_span, held, d_held)
-        growth = 1.0 + stretched * stretched
-        cosine = xp.sqrt(growth)
-        d_cosine = _product_tangent(stretched, d_stretched, stretched, d_stretched) * (
-            0.5 / cosine
+        cosine = xp.sqrt(1.0 + stretched * stretched)
+        d_cosine = (2.0 * stretched * d_stretched) * (0.5 / cosine)
+        jacobian = half_span * held * cosine
+        d_jacobian = _product_tangent(
+            half_span * held, 0.5 * d_span * held, cosine, d_cosine
         )
-        jacobian = lever * cosine
-        d_jacobian = _product_tangent(lever, d_lever, cosine, d_cosine)
         bounded, d_bounded = _regularised_tangent(
             numerator, d_numerator, denominator, d_denominator, model, d_model,
             sign, xp,

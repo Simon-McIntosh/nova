@@ -2,11 +2,11 @@
 
 Each private tangent in :mod:`nova.biot.momentchannel` and
 :mod:`nova.biot.gradedresidual` is checked three ways: against ``jax.jvp`` of
-the base-revision function on ten thousand inputs spanning the jet's domain,
-with no sample masked; with its recurrence or product rule truncated by one
-term, which must fail that bound; and by a cold compile in a fresh,
-cache-disabled process against the primal.  The primal half each tangent
-returns is asserted bit-identical to the base revision's primal.
+its primal on ten thousand inputs spanning the jet's domain, with no sample
+masked; with its recurrence or product rule truncated by one term, which must
+fail that bound; and by a cold compile in a fresh, cache-disabled process
+against the primal. The graded residual uses the repaired primal; its
+comparison with the earlier primal is in the corner-layer oracle.
 
 ``NOVA_TANGENT_TRUNCATION=1`` applies the truncation to the identity rows
 themselves, which is the declared mutation those rows must fail against.
@@ -187,7 +187,7 @@ def _graded_tangent(primals, tangents):
 
 
 def _graded_primal(radius, level, offset, lower, upper):
-    return BASE_GRADED.graded_residual(
+    return gradedresidual.graded_residual(
         _vertex_panels(radius, level, offset, lower, upper),
         _vertex_pieces(radius, level, offset),
         NODES,
@@ -198,9 +198,8 @@ def _graded_primal(radius, level, offset, lower, upper):
 def _cases():
     """Return ``name -> (tangent, primal, primals, tangents)``.
 
-    ``primal`` is the base revision's function of the ``primals`` tuple, so
-    ``jax.jvp(primal, primals, tangents)`` is the reference and its first half
-    the primal the tangent's own first half must reproduce bit for bit.
+    The graded-residual primal is the repaired function at this revision. Other
+    primals remain their unchanged base functions.
     """
     rng = np.random.default_rng(0)
     cases = {}
@@ -417,19 +416,21 @@ def _identity(name):
 
 
 @pytest.mark.parametrize("name", list(CASES))
-def test_tangent_matches_base_jvp(name):
+def test_tangent_matches_primal_jvp(name):
     if truncation_active():
         with _truncated(name):
             got, expected = _identity(name)
     else:
         got, expected = _identity(name)
+    reference = "repaired_primal" if name == "graded_residual" else "base_primal"
     identity_row(
         name,
         worst(got[0], expected[0]),
         worst(got[1], expected[1]),
         EXACT_TOLERANCE,
         extra=f"covered_fraction=1.000 masked_samples=0 "
-        f"base_jvp_finite_fraction={finite_fraction(expected[1]):.4f}",
+        f"primal_jvp_finite_fraction={finite_fraction(expected[1]):.4f} "
+        f"reference={reference}",
     )
     assert finite_fraction(expected[1]) == 1.0
 
@@ -460,18 +461,6 @@ def test_primal_bit_identical_to_base():
         ):
             np.testing.assert_array_equal(np.asarray(left), np.asarray(right))
         print(f"PRIMAL {name} bit_identical=True")
-    radius, level, offset, lower, upper = CASES["graded_residual"][2]
-    current = gradedresidual.graded_residual(
-        _vertex_panels(radius, level, offset, lower, upper),
-        _vertex_pieces(radius, level, offset),
-        NODES,
-        jnp,
-    )
-    np.testing.assert_array_equal(
-        np.asarray(current),
-        np.asarray(_graded_primal(radius, level, offset, lower, upper)),
-    )
-    print("PRIMAL graded_residual bit_identical=True")
 
 
 @pytest.mark.slow

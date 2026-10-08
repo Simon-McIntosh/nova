@@ -4,17 +4,18 @@ Each private tangent of :class:`nova.biot.polygonanalytic._Vertex` -- its
 construction with the first residual integral, :meth:`arsinh_terms`,
 :meth:`against_first_arsinh`, :meth:`flux_moment_residuals` and
 :meth:`horizontal_flux_line_moments` -- is checked three ways: against
-``jax.jvp`` of the base-revision function on ten thousand corner geometries and
-targets spanning the jet's domain, with no sample masked; with one product-rule
-term dropped, which must fail that bound; and by a cold compile in a fresh,
-cache-disabled process against the primal.  The primal half each tangent
-returns is asserted bit-identical to the base revision's primal.
+``jax.jvp`` of the current primal on ten thousand corner geometries and targets
+spanning the jet's domain, with no sample masked; with one product-rule term
+dropped, which must fail that bound; and by a cold compile in a fresh,
+cache-disabled process against the primal. The graded residual's value is
+compared with the earlier primal only by the corner-layer oracle.
 
 ``NOVA_TANGENT_TRUNCATION=1`` applies the truncation to the identity rows
 themselves, which is the declared mutation those rows must fail against.
 """
 
 from contextlib import contextmanager
+from functools import lru_cache
 import json
 import os
 from pathlib import Path
@@ -24,6 +25,7 @@ import sys
 import jax
 import jax.numpy as jnp
 import numpy as np
+import mpmath as mp
 import pytest
 
 from nova.jax.config import configure_dtypes
@@ -41,23 +43,21 @@ from tangent_identity import (  # noqa: E402
     truncation_active,
 )
 
-BASE_REVISION = os.environ.get(
-    "NOVA_VERTEX_TERM_BASE_REVISION", "fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb"
-)
-ROOT = Path(__file__).resolve().parents[2]
 # Every corner tangent runs through the harmonic moment stack's scanned
 # recurrences, so every row is a scan form and is held to the scan bound.
 SCAN_TOLERANCE = 1e-9
 NODES = 128
-# Targets nearer a corner than this fraction of its radius are where the base
-# program's own derivative leaves the exact integral's: the graded quadrature's
-# layer width is clipped at its floor there, so jax.jvp of the base is not a
-# judge of the corner's radial tangent, and those samples are judged against a
-# 50-digit reference of the exact integral instead.
+# Targets nearer a corner than this fraction of its radius receive the
+# independent 50-digit exact-integral check as well as the primal JVP identity.
 NEAR_CORNER = 2e-6
-
-
-BASE = load_base_module("nova/biot/polygonanalytic.py", BASE_REVISION)
+BASE = load_base_module(
+    "nova/biot/polygonanalytic.py", "646b68b8e9481178e41cc2059c8a9a534fa9b9b3"
+)
+BASE.graded_residual = load_base_module(
+    "nova/biot/gradedresidual.py",
+    "646b68b8e9481178e41cc2059c8a9a534fa9b9b3",
+    module_name="corner_base_graded",
+).graded_residual
 
 
 def _magnitude(rng, low, high, size=SAMPLES):
@@ -136,8 +136,10 @@ def _attributes(vertex, tangent=None):
     return out
 
 
-def _base_vertex(r, z, corner_r, corner_z):
-    return BASE._Vertex(r, z, corner_r, corner_z, NODES, residual=True, xp=jnp)
+def _primal_vertex(r, z, corner_r, corner_z):
+    return polygonanalytic._Vertex(
+        r, z, corner_r, corner_z, NODES, residual=True, xp=jnp
+    )
 
 
 def _current_vertex(p, t):
@@ -147,9 +149,8 @@ def _current_vertex(p, t):
 def _cases():
     """Return ``name -> (tangent, primal, primals, tangents)``.
 
-    ``primal`` is the base revision's function of the ``primals`` tuple, so
-    ``jax.jvp(primal, primals, tangents)`` is the reference and its first half
-    the primal the tangent's own first half must reproduce bit for bit.
+    ``primal`` is the current function of the ``primals`` tuple, so
+    ``jax.jvp(primal, primals, tangents)`` judges the tangent at this revision.
     """
     rng = np.random.default_rng(0)
     primals = _domain(rng)
@@ -162,7 +163,7 @@ def _cases():
 
     cases["vertex"] = (
         vertex_tangent,
-        lambda r, z, cr, cz, e, h: _attributes(_base_vertex(r, z, cr, cz)),
+        lambda r, z, cr, cz, e, h: _attributes(_primal_vertex(r, z, cr, cz)),
         primals,
         tangents,
     )
@@ -172,7 +173,7 @@ def _cases():
 
     cases["arsinh_terms"] = (
         arsinh_tangent,
-        lambda r, z, cr, cz, e, h: _base_vertex(r, z, cr, cz).arsinh_terms(),
+        lambda r, z, cr, cz, e, h: _primal_vertex(r, z, cr, cz).arsinh_terms(),
         primals,
         tangents,
     )
@@ -188,7 +189,7 @@ def _cases():
 
     cases["against_first_arsinh"] = (
         against_tangent,
-        lambda r, z, cr, cz, e, h, w: _base_vertex(r, z, cr, cz).against_first_arsinh(
+        lambda r, z, cr, cz, e, h, w: _primal_vertex(r, z, cr, cz).against_first_arsinh(
             w
         ),
         weight_primals,
@@ -202,7 +203,7 @@ def _cases():
 
     cases["flux_moment_residuals"] = (
         flux_tangent,
-        lambda r, z, cr, cz, e, h: _base_vertex(r, z, cr, cz).flux_moment_residuals(
+        lambda r, z, cr, cz, e, h: _primal_vertex(r, z, cr, cz).flux_moment_residuals(
             e, h
         ),
         primals,
@@ -216,7 +217,7 @@ def _cases():
 
     cases["horizontal_flux_line_moments"] = (
         line_tangent,
-        lambda r, z, cr, cz, e, h: _base_vertex(
+        lambda r, z, cr, cz, e, h: _primal_vertex(
             r, z, cr, cz
         ).horizontal_flux_line_moments(e, h),
         primals,
@@ -340,13 +341,6 @@ def _near_corner(primals):
     return np.hypot(corner_z - z, corner_r - r) < NEAR_CORNER * r
 
 
-def _judged(name, tree):
-    """Return the samples judged against jax.jvp of the base."""
-    if name != "arsinh_terms":
-        return np.ones(SAMPLES, bool)
-    return ~_near_corner(CASES[name][2])
-
-
 def _elementwise_only(got, reference, passing):
     """Count elements beyond the bound elementwise on normwise-passing samples."""
     count = 0
@@ -360,7 +354,7 @@ def _elementwise_only(got, reference, passing):
 
 
 @pytest.mark.parametrize("name", list(CASES))
-def test_tangent_matches_base_jvp(name):
+def test_tangent_matches_primal_jvp(name):
     if truncation_active():
         with _truncated():
             got, expected = _identity(name)
@@ -373,7 +367,7 @@ def test_tangent_matches_base_jvp(name):
     )
     primal = _worst(own, alone)
     context = _worst(got[0], expected[0])
-    judged = _judged(name, got)
+    judged = np.ones(SAMPLES, bool)
     error = _normwise(got[1], expected[1])[judged]
     covered = float(np.mean(error <= SCAN_TOLERANCE))
     finite = _finite_fraction(expected[1])
@@ -392,7 +386,7 @@ def test_tangent_matches_base_jvp(name):
           f"tangent_max_elementwise_relative={_worst(got[1], expected[1]):.3e} "
           f"elementwise_fail_normwise_pass={elementwise_only} "
           f"bound={SCAN_TOLERANCE:.0e} covered_fraction={covered:.4f} "
-          f"judged_by_base_jvp={int(judged.sum())} "
+          f"judged_by_current_jvp={int(judged.sum())} "
           f"judged_by_reference={reference_count} "
           f"base_jvp_finite_fraction={finite:.4f} "
           f"base_tangent_median_abs={magnitude:.3e}")  # fmt: skip
@@ -424,7 +418,7 @@ def radial(args):
     points = points + [mp.pi / 2 - p for p in reversed(points[1:-1])] + [mp.pi / 2]
     value = mp.quad(lambda a: parts(a, 0), points)
     slope = mp.quad(lambda a: parts(a, 1), points)
-    return float(4 * r * value), float(4 * dr * value + 4 * r * slope)
+    return mp.nstr(4 * r * value, 50), mp.nstr(4 * dr * value + 4 * r * slope, 50)
 with get_context("fork").Pool(8) as pool:
     print(json.dumps(pool.map(radial, json.load(sys.stdin))))
 """
@@ -443,15 +437,35 @@ def _radial_reference(primals, tangents, index):
         + [float(np.asarray(tangents[k])[i]) for k in range(4)]
         for i in index
     ]
+    cache_path = os.environ.get("NOVA_CORNER_REFERENCE_CACHE")
+    cache = Path(cache_path) if cache_path else None
+    if cache is not None and cache.exists():
+        saved = json.loads(cache.read_text())
+        assert saved["inputs"] == rows and saved["digits"] == 50
+        values = np.asarray(saved["reference"])
+        return values[:, 0], values[:, 1]
     result = subprocess.run(
         [sys.executable, "-I", "-c", _REFERENCE_PROBE],
         input=json.dumps(rows), capture_output=True, text=True, check=True,
     )  # fmt: skip
     values = np.asarray(json.loads(result.stdout))
+    if cache is not None:
+        cache.write_text(
+            json.dumps(
+                {
+                    "inputs": rows,
+                    "digits": 50,
+                    "reference": values.tolist(),
+                }
+            )
+        )
     return values[:, 0], values[:, 1]
 
 
+@lru_cache(maxsize=1)
 def _near_corner_rows():
+    from test_graded_layer_near_corner import _decade_floor, _program_floor
+
     got, expected = _identity("arsinh_terms")
     _, _, primals, tangents = CASES["arsinh_terms"]
     r, z, corner_r, corner_z = (np.asarray(value) for value in primals[:4])
@@ -460,43 +474,107 @@ def _near_corner_rows():
     index = np.flatnonzero(_near_corner(primals) & (corner_z != z) & (corner_r != r))
     value, reference = _radial_reference(primals, tangents, index)
     hand = np.asarray(got[1][1])[index]
-    base = np.asarray(expected[1][1])[index]
+    primal_jvp = np.asarray(expected[1][1])[index]
     primal = np.asarray(expected[0][1])[index]
+    old, _, program_difference = _program_floor(
+        lambda *p: BASE._Vertex(*p[:4], NODES, residual=True, xp=jnp).arsinh_terms()[1],
+        primals,
+        tangents,
+        select=lambda value: value[index],
+    )
+    decades, program_floor = _decade_floor(
+        corner_r[index] - r[index], program_difference
+    )
 
     def relative(a, b):
-        return np.abs(a - b) / np.where(b == 0.0, 1.0, np.abs(b))
+        with mp.workdps(50):
+            return np.asarray(
+                [
+                    float(
+                        abs(mp.mpf(float(left)) - mp.mpf(str(right)))
+                        / (abs(mp.mpf(str(right))) or 1)
+                    )
+                    for left, right in zip(a, b, strict=True)
+                ]
+            )
 
+    value_error = relative(primal, value)
+    old_error = relative(old, value)
+    tangent_error = relative(hand, reference)
+    strict_degraded = value_error > old_error
+    program_degraded = value_error > old_error + program_floor
+    degraded = value_error > old_error + 1e-13
     rows = {
         "samples": index.size,
-        "primal": relative(primal, value).max(),
-        "hand": relative(hand, reference).max(),
-        "base": relative(base, reference).max(),
-        "hand_base": relative(hand, base).max(),
+        "primal": value_error.max(),
+        "base_primal": old_error.max(),
+        "strict_less_accurate": int(strict_degraded.sum()),
+        "program_floor_less_accurate": int(program_degraded.sum()),
+        "less_accurate": int(degraded.sum()),
+        "hand": tangent_error.max(),
+        "jvp": relative(primal_jvp, reference).max(),
+        "hand_jvp": relative(hand, primal_jvp).max(),
     }
+    receipt_path = os.environ.get("NOVA_CORNER_MEASUREMENT")
+    if receipt_path:
+        Path(receipt_path).write_text(
+            json.dumps(
+                {
+                    "indices": index.tolist(),
+                    "primals": [np.asarray(p)[index].tolist() for p in primals[:4]],
+                    "tangents": [np.asarray(t)[index].tolist() for t in tangents[:4]],
+                    "primal": primal.tolist(),
+                    "base_primal": old.tolist(),
+                    "hand": hand.tolist(),
+                    "jvp": primal_jvp.tolist(),
+                    "reference_value": value.tolist(),
+                    "reference_tangent": reference.tolist(),
+                    "value_error": value_error.tolist(),
+                    "base_error": old_error.tolist(),
+                    "program_floor": program_floor.tolist(),
+                    "tangent_error": tangent_error.tolist(),
+                }
+            )
+        )
+    worst = int(np.argmax(tangent_error))
+    print(
+        f"CORNER_WORST sample={int(index[worst])} "
+        f"primals={[float(np.asarray(p)[index[worst]]) for p in primals[:4]]} "
+        f"tangents={[float(np.asarray(t)[index[worst]]) for t in tangents[:4]]}"
+    )
+    for decade in np.unique(decades):
+        selected = decades == decade
+        print(
+            f"CORNER_SAMPLES decade=1e{decade:+d} samples={int(selected.sum())} "
+            f"value_relative_max={value_error[selected].max():.3e} "
+            f"derivative_relative_max={tangent_error[selected].max():.3e} "
+            f"base_value_relative_max={old_error[selected].max():.3e} "
+            f"program_floor={program_floor[selected].max():.3e} "
+            f"strict_less_accurate={int(strict_degraded[selected].sum())} "
+            f"program_floor_less_accurate={int(program_degraded[selected].sum())} "
+            f"less_accurate={int(degraded[selected].sum())}"
+        )
     print(f"NEAR_CORNER arsinh_terms radial samples={rows['samples']} "
-          f"base_primal_vs_reference_max={rows['primal']:.3e} "
+          f"primal_vs_reference_max={rows['primal']:.3e} "
           f"hand_vs_reference_max={rows['hand']:.3e} "
-          f"base_jvp_vs_reference_max={rows['base']:.3e} "
-          f"hand_vs_base_jvp_max={rows['hand_base']:.3e}")  # fmt: skip
+          f"primal_jvp_vs_reference_max={rows['jvp']:.3e} "
+          f"hand_vs_primal_jvp_max={rows['hand_jvp']:.3e}")  # fmt: skip
     return rows
 
 
 def test_near_corner_reference_is_the_exact_integral():
     rows = _near_corner_rows()
-    # the reference integral is the base program's own primal near the corner
+    # the independent integral checks the repaired primal near the corner
     assert rows["samples"] > 0
     assert rows["primal"] <= 1e-10
+    assert rows["less_accurate"] == 0
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="the base program's derivative near a corner is that of its "
-    "128-node graded quadrature with the layer width clipped at its floor, and "
-    "the hand tangent reproduces it; neither meets the exact integral's",
-)
 def test_near_corner_radial_tangent_meets_reference():
     rows = _near_corner_rows()
     assert rows["hand"] <= SCAN_TOLERANCE
+    assert rows["jvp"] <= SCAN_TOLERANCE
+    assert rows["hand_jvp"] <= SCAN_TOLERANCE
 
 
 @pytest.mark.parametrize("name", list(CASES))
@@ -506,30 +584,6 @@ def test_truncated_tangent_fails_identity(name):
     tangent = float(_normwise(got[1], expected[1]).max())
     print(f"TRUNCATED {name} tangent_max_normwise_relative={tangent:.3e}")
     assert tangent > SCAN_TOLERANCE
-
-
-def test_primal_bit_identical_to_base():
-    _, _, primals, _ = CASES["vertex"]
-    for name in ("vertex", "arsinh_terms", "flux_moment_residuals"):
-        _, primal, primals, _ = CASES[name]
-        current = {
-            "vertex": lambda *p: _attributes(
-                polygonanalytic._Vertex(*p[:4], NODES, residual=True, xp=jnp)
-            ),
-            "arsinh_terms": lambda *p: polygonanalytic._Vertex(
-                *p[:4], NODES, residual=True, xp=jnp
-            ).arsinh_terms(),
-            "flux_moment_residuals": lambda *p: polygonanalytic._Vertex(
-                *p[:4], NODES, residual=True, xp=jnp
-            ).flux_moment_residuals(p[4], p[5]),
-        }[name]
-        for left, right in zip(
-            jax.tree.leaves(jax.jit(current)(*primals)),
-            jax.tree.leaves(jax.jit(primal)(*primals)),
-            strict=True,
-        ):
-            np.testing.assert_array_equal(np.asarray(left), np.asarray(right))
-        print(f"PRIMAL {name} bit_identical=True")
 
 
 def compile_arm(name, arm):
@@ -545,3 +599,49 @@ def compile_arm(name, arm):
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
     assert compile_ratio("test_vertex_term_tangents", name) <= 3.0
+
+
+def test_composed_corner_signed_offsets(monkeypatch):
+    """Check the repaired primal and its own hand/JVP tangents through the band."""
+    offsets = np.asarray([0.0] + [s * 10.0**e for e in range(-12, -1) for s in (-1, 1)])
+    r = jnp.full(offsets.size, 1.2)
+    z = jnp.zeros_like(r)
+    p = (r, z, r + jnp.asarray(offsets), jnp.full_like(r, 1e-12))
+    t = (z, z, jnp.ones_like(r), z)
+    cache = os.environ.get("NOVA_CORNER_OFFSET_REFERENCE_CACHE")
+    if cache:
+        monkeypatch.setenv("NOVA_CORNER_REFERENCE_CACHE", cache)
+    else:
+        monkeypatch.delenv("NOVA_CORNER_REFERENCE_CACHE", raising=False)
+    reference, derivative = _radial_reference(p, t, np.arange(offsets.size))
+    reference, derivative = np.asarray(reference, float), np.asarray(derivative, float)
+    def primal(*args):
+        return _primal_vertex(*args).arsinh_terms()[1]
+    value, jvp = jax.jit(lambda p, t: jax.jvp(primal, p, t))(p, t)
+    _, hand = jax.jit(
+        lambda p, t: polygonanalytic._arsinh_terms_tangent(
+            *polygonanalytic._vertex_tangent(*p, *t, NODES, residual=True, xp=jnp)
+        )
+    )(p, t)
+    base = np.asarray(
+        jax.jit(
+            lambda *p: BASE._Vertex(*p, NODES, residual=True, xp=jnp).arsinh_terms()[1]
+        )(*p)
+    )
+    value_error = relative_error(value, reference)
+    derivative_error = relative_error(hand[1], derivative)
+    base_error = relative_error(base, reference)
+    for decade in [0.0, *[10.0**e for e in range(-12, -1)]]:
+        selected = np.abs(offsets) == decade
+        print(
+            f"COMPOSED_OFFSET offset={decade:.0e} "
+            f"value_max={value_error[selected].max():.3e} "
+            f"derivative_max={derivative_error[selected].max():.3e} "
+            f"degraded={np.sum(value_error[selected] > base_error[selected] + 1e-13)}"
+        )
+    assert value_error.max() <= 1e-9
+    assert derivative_error.max() <= 1e-9
+    assert relative_error(hand[1], jvp).max() <= 1e-9
+    inside = np.abs(offsets) <= 1e-3
+    assert np.all(value_error[inside] <= base_error[inside] + 1e-13)
+    assert relative_error(np.asarray(value)[~inside], base[~inside]).max() <= 1e-13

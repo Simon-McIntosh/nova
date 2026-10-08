@@ -27,9 +27,9 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-effort-hours" content="16.0">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
-<meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560">
-<meta name="plan-impl" content="0.15">
-<meta name="plan-version" content="20">
+<meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f">
+<meta name="plan-impl" content="0.22">
+<meta name="plan-version" content="21">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -179,7 +179,7 @@ Done when
     <div class="r-comment-body"><p>Moved the saddle reach benchmark's vacuum-cohort admission into nova/imas/mast_vacuum_cohort.py as light_census()/LightCensus on the module's own EXCITATION_CURRENT, PLASMA_FREE_CURRENT and a single MINIMUM_PROBES constant; the benchmark now declares none of those and no predicate, and tests/test_mast_saddle_voltage_reach.py adds 5 tests — head 121 passed/2 failed against base 116 passed/2 failed, the same two pre-existing failures, so zero failures added.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T044457167062-review-of-mast-saddle-cohort-owner" data-who="reckon-build" data-when="2026-10-08T05:04:59.835Z">
-    <div class="r-comment-body"><p>review of r-20261008T042003577585-mast-saddle-cohort-owner stored (base e2cffb94c353041dbbb39e6d25daa348f52708ac, head 191ef560420791fc94edc3d1e0b864ba64d56434), parsed and scored on all 6 dimensions total 107 verdict pass with zero added failures; the prior reuse finding is repaired — the benchmark&#x27;s vacuum-cohort admission now runs through nova/imas/mast_vacuum_cohort.light_census extending the owner, and no constant or predicate is re-declared.</p></div>
+    <div class="r-comment-body"><p>review of r-20261008T042003577585-mast-saddle-cohort-owner stored (base e2cffb94c353041dbbb39e6d25daa348f52708ac, head 191ef560420791fc94edc3d1e0b864ba64d56434), parsed and scored on all 6 dimensions total 107 verdict pass with zero added failures; the prior reuse finding is repaired — the benchmark's vacuum-cohort admission now runs through nova/imas/mast_vacuum_cohort.light_census extending the owner, and no constant or predicate is re-declared.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-passive-spectrum-landed" data-who="reckon-build" data-when="2026-10-08T04:35:00Z">
     <div class="r-comment-body">node 1 landed: 1 of 15 grouped passive directions identifiable above the floor with drive scales free (400/400 shots scored). Section open — the held-out fit of that one direction, with the drive-permutation control, is next; it must propagate through nova/circuit/propagate.py and read geometry without the retiring registry. Evidence: passive-spectrum.</div>
@@ -189,6 +189,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T034225526608-review-of-mast-passive-spectrum" data-who="reckon-build" data-when="2026-10-08T04:30:41.491Z">
     <div class="r-comment-body"><p>Independent review of r-20261008T014948372249-mast-passive-spectrum, verdict total 94/120 (goal_fidelity 17, evidence 16, scope_discipline 20, durability 18, fit 18, reuse 5). The run's count stands: 1 of 15 grouped passive families identifiable above the 3.8698e-4 T floor with all drive scales free. The plan's named permutation-spectrum companion deliverable is absent, the run's own recorded after_suite predates its head, its baseline_suite is empty so the read-time added-failure derivation reads unmeasured, and driven_field duplicates the exact-ZOH propagation owned by nova/circuit/propagate.py. All six findings are follow-on; none blocks the run's landing.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20261008-passive-held-out-landed" data-who="reckon-build" data-when="2026-10-08T05:45:00Z">
+    <div class="r-comment-body">gate test_mast_passive_decay_modes passed (53); held-out gain 22.5 % against 0.29 % for the permuted control, adjudicated as attributable; fit saturates the coil-case resistivity upper bound 0.900 µΩ·m, so nothing is promoted. Section open — the remaining §4 question is why the identifiable direction wants coil-case resistivity above its sourced interval (an independent resistivity source, or a model extension). Evidence: passive-held-out.</div>
 </div>
 </section>
 </main>

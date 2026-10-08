@@ -1,0 +1,17 @@
+<section id="fsa-default-wiring-one-owner" data-node="fsa-default-wiring-one-owner">
+  <p>One default-wiring owner: <code>tests/test_route_default_wiring.py</code> is
+  deleted and its distinct check moved into <code>tests/test_default_wiring.py</code>
+  over the shared <code>ProductionEntryPoint</code> table and
+  <code>RecordingProfile</code>, with no second <code>REQUIRED_DEFAULTS</code>.
+  The public-seam assertion is scoped to each route's calling function bodies
+  (<code>measure_fixture</code> in <code>scripts/oracle_rebaseline/measure.py</code>;
+  <code>_mast_states</code> and <code>_diiid_state</code> in the topology
+  producer), so a route that stops calling <code>_solve_with_defaults</code>
+  fails even while the definition remains at module scope; the whole-file
+  private-kernel absence is kept, and <code>target_current</code> is asserted on
+  the topology routes. Head arm (commit <code>c487d8e7</code>): 72 passed.
+  Negative controls: the private-kernel mutation and the seam-removal mutation
+  each fail by test id
+  <code>test_production_routes_call_no_private_solver_kernel[solovev-oracle-and-rebaseline]</code>
+  (EXIT=1).</p>
+</section>

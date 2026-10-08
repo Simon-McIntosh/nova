@@ -1062,3 +1062,125 @@ def test_completed_factor_is_reused_without_rescoring(
         module, "shot_jacobian", lambda *args: pytest.fail("rescored completed shot")
     )
     assert module.score_task((5, False)) == (5, "", "admitted", "reused")
+
+
+def test_uniform_driven_field_uses_shared_propagator(monkeypatch):
+    from nova.circuit import propagate
+    from nova.imas.mast_passive_decay_modes import driven_field
+
+    calls = []
+    original = propagate.zoh_mode_response
+
+    def record(*args, **kwargs):
+        calls.append(args)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(propagate, "zoh_mode_response", record)
+    driven_field(
+        np.eye(1),
+        np.ones(1),
+        np.ones((1, 1)),
+        np.ones((1, 1)),
+        np.zeros((1, 1)),
+        np.linspace(0, 1, 21),
+        np.linspace(0, 1, 21)[:, None],
+    )
+    assert len(calls) == 1
+
+
+@pytest.fixture
+def held_out_measurement():
+    import importlib.util
+    from pathlib import Path
+    import sys
+
+    path = Path(__file__).parents[1] / "benchmarks" / "mast_passive_held_out.py"
+    spec = importlib.util.spec_from_file_location("passive_held_out_measurement", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_passive_direction_respects_every_nominal_interval(held_out_measurement):
+    module = held_out_measurement
+    bounds = {"case": (0.5, 2.0), "vessel": (0.8, 1.2)}
+    names = list(bounds)
+    slope, limits = module.direction_parameters(names, bounds, [0.8, -0.6])
+    for coordinate in (*limits, 0.0):
+        for name, value in zip(names, np.exp(coordinate * slope), strict=True):
+            assert bounds[name][0] - 1e-14 <= value <= bounds[name][1] + 1e-14
+
+
+def test_control_guard_refuses_improvement_with_permuted_drives(held_out_measurement):
+    guard = held_out_measurement.control_removes_improvement
+    assert guard(0.1, -0.1)
+    assert not guard(0.1, 0.1)
+    assert not guard(0.1, 0.001)
+    assert not guard(-0.1, -0.2)
+    assert not guard(0.1, float("nan"))
+
+
+def test_drive_permuted_control_cannot_reproduce_real_improvement(held_out_measurement):
+    from types import SimpleNamespace
+    from nova.imas.mast_passive_decay_modes import driven_field
+
+    module = held_out_measurement
+    time = np.linspace(0, 2, 81)
+    current = np.maximum(0, np.minimum(time - 0.2, 0.4))
+    current *= np.maximum(0, np.minimum(1, (1.3 - time) / 0.2))
+    model = SimpleNamespace(response=np.array([[0.2]]))
+    prepared = (
+        model,
+        np.eye(1),
+        np.array([2.0]),
+        np.ones((1, 1)),
+        np.ones((1, 1)),
+        ("case",),
+        {"case": (0.5, 2.0)},
+        np.ones(1),
+        np.array([[0.9, 1.1]]),
+        {},
+    )
+    rows = []
+    for shot, amplitude in enumerate((1.0, -1.5, 0.7, -0.9, 1.2, -1.4)):
+        currents = (current * amplitude)[:, None]
+        signal = driven_field(
+            prepared[1],
+            np.array([3.0]),
+            prepared[3],
+            prepared[4],
+            model.response,
+            time,
+            currents,
+        )
+        rows.append(
+            module.Transient(
+                shot,
+                time,
+                currents,
+                np.array([0]),
+                (time < 0.2)[:, None],
+                (time >= 0.2)[:, None],
+                signal,
+            )
+        )
+    arguments = (
+        rows[:4],
+        rows[4:],
+        prepared,
+        np.array([np.log(2)]),
+        ["case"],
+        (-1.0, 1.0),
+        1e-3,
+    )
+    real = module.run_arm(*arguments, permuted=False)
+    control = module.run_arm(*arguments, permuted=True)
+    real_gain = real["held_out"]["squared_residual_improvement"]
+    control_gain = control["held_out"]["squared_residual_improvement"]
+    assert real_gain > 0.99
+    assert control_gain < real_gain - 0.1
+    assert real["minimum_decay_rate_per_second"] > 0
+    assert 0.9 <= real["fit"]["drive_multipliers"][0] <= 1.1
+    assert sorted(control["held_out_drive_sources"]) == [4, 5]
+    assert control["held_out_drive_sources"] != [4, 5]

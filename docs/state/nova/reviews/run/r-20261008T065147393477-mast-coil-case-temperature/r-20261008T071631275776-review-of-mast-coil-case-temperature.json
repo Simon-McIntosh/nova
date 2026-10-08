@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T07:27:38.423Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-08T07:17:24Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_coil_case_temperature.py",
+      "line": "26",
+      "severity": "follow-on",
+      "text": "follow-on: FIT_CEILING = 0.900 restates the coil-case stainless upper bound owned by nova/imas/mast_seed_parameters.py STAINLESS_STEEL.resistivity_upper (9.0e-7 ohm.m), which the plan seeds and bounds the section from; the two constants can drift, and importing the owner would tie the audit's threshold to the fit's bound."
+    },
+    {
+      "file": "benchmarks/mast_coil_case_temperature.py",
+      "line": "134",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt's store scan inlines the .zmetadata read that benchmarks/mast_tf_average.py:134 array_metadata already owns, including its zarr.json fallback; a second reader of the same store contract forks a capability the repository owns and will not pick up a future change to how shot metadata is opened."
+    },
+    {
+      "file": "tests/test_mast_coil_case_temperature.py",
+      "line": "79",
+      "severity": "follow-on",
+      "text": "follow-on: test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence skips when the receipt is absent, so the node's delivered artifact is unguarded against a regression that stops producing or mis-renders it, and build_receipt - including the cohort-integrity checks at benchmarks/mast_coil_case_temperature.py:125-128 and the positive control at line 137 - is exercised by no test."
+    },
+    {
+      "file": "manifest.md",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's baseline_suite field is empty, so the base arm is not readable and the added-failure count is derived as unmeasured (null) rather than a measured zero; there is no pre-change arm because the focused test file is added by this node."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 68b03759d4f68145ccbfc121863a0325f6966c29: 75b9344 adds the benchmark (240 lines) and test (110 lines), de19c025 distinguishes reconstruction attempts from temperatures, 55df62b0 makes receipt provenance repository-relative, e934bb9b publishes the receipt (2252 lines); 2602 insertions over three files, no product source, plan, sprint or index state touched.",
+    "done_when": "The named gate is tests/test_mast_coil_case_temperature.py; I re-ran it at reviewed head e934bb9bd132f719bf74592ec5b1b63ceccd5c99 (7 passed, EXIT=0) and reproduced the declared +100 K mutation (cooler_can_k 350->450 gives 0.923 >= 0.900, 1 failed, EXIT=1). The committed receipt records per-shot can/vessel evidence with its source and sha256, converts through the cited NIST points (0.811/0.890/0.923 micro-ohm metre), states the rounding interval before scoring, counts all 168 as unknown behind a coil-current positive control present on all 168, and the data pass ran as one all_debug job (1282056, EXIT=0).",
+    "goal": "The node was dispatched to estimate the MAST coil-case can temperature on the 131 training and 37 held-out shots of the passive fit and the stainless resistivity it implies. It delivers benchmarks/mast_coil_case_temperature.py and docs/figures/mast-coil-case-temperature/receipt.json auditing all 168 shots for coil-can, vessel or bake temperature evidence and reporting every one unknown, with no source-specific sensor-to-can mapping found, so no temperature is estimated for any shot and the resistivity implication is reported indeterminate.",
+    "manifest": "Read; status complete, four commits, gate 7 passed EXIT=0, a negative_control_log that fires at the head revision, after_suite completed=true failure_count=0 at e934bb9bd132f719bf74592ec5b1b63ceccd5c99. Its baseline_suite field is empty, so the base arm is not readable and the added-failure count derives unmeasured (null).",
+    "write_paths": "Read the reviewed manifest's declared paths; git diff 68b03759d4f68145ccbfc121863a0325f6966c29 e934bb9bd132f719bf74592ec5b1b63ceccd5c99 is exactly three added files (benchmarks/mast_coil_case_temperature.py, docs/figures/mast-coil-case-temperature/receipt.json, tests/test_mast_coil_case_temperature.py), all inside them; the declared fragment path is correctly unused because the node is small and its done-when names the receipt, not the fragment."
+  },
+  "justifications": {
+    "durability": "tests/test_mast_coil_case_temperature.py:19-40 pins reference_resistivity at the cited points and refuses extrapolation, and the declared mutation reddens the ceiling test, but tests/test_mast_coil_case_temperature.py:79 skips via pytest.skip when the receipt is absent and build_receipt's cohort-integrity and positive-control guards (benchmarks/mast_coil_case_temperature.py:125-140) have no test, so a regression that stopped rendering the receipt or dropped the positive control would leave all seven tests green.",
+    "evidence": "the named gate reproduces at head e934bb9bd132f719bf74592ec5b1b63ceccd5c99 (7 passed, EXIT=0) and the declared +100 K control fires (0.923 >= 0.900, EXIT=1), and the zero-of-168 claim carries its instrument check (benchmarks/mast_coil_case_temperature.py:137 asserts the amc/p4l_feed_current positive control on every shot before the absence is recorded); not 20 because the reviewed manifest's baseline_suite is empty so the added-failure count is unmeasured (null).",
+    "fit": "benchmarks/mast_coil_case_temperature.py follows the benchmarks/ idiom set by benchmarks/mast_tf_average.py (module docstring, argparse, main, f-strings), and a label scan over the added lines finds no phase, stage, sprint, ticket or version identifier and no worktree path.",
+    "goal_fidelity": "benchmarks/mast_coil_case_temperature.py:114 build_receipt audits every fitted shot and docs/figures/mast-coil-case-temperature/receipt.json reports all 168 unknown, faithfully executing the done-when's \"counted as unknown, never assumed\"; not 20 because the goal's substantive deliverable - an estimate of the can temperature and its implied resistivity - is unfulfilled for every shot, transferring the answer to a follow-on that needs new data.",
+    "reuse": "reference_resistivity and crossing_temperature at benchmarks/mast_coil_case_temperature.py:42-63 are first owners (no prior conversion exists in nova/ or benchmarks/, and the cited points live only as prose in the resistivity receipt), but FIT_CEILING at line 26 restates the stainless bound owned by nova/imas/mast_seed_parameters.py STAINLESS_STEEL.resistivity_upper and the inline .zmetadata read at lines 134-135 duplicates benchmarks/mast_tf_average.py:134 array_metadata, so two added lines restate capabilities the repository owns.",
+    "scope_discipline": "git diff 68b03759d4f68145ccbfc121863a0325f6966c29 e934bb9bd132f719bf74592ec5b1b63ceccd5c99 is exactly three added paths, all under the declared write paths of benchmarks/mast_coil_case_temperature.py, tests/test_mast_coil_case_temperature.py and docs/figures/mast-coil-case-temperature/; mast_seed_parameters.py and the fit are untouched and no plan, sprint or index state is modified."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T065147393477-mast-coil-case-temperature (node mast-coil-case-temperature, plan nova:mast-nonaxisymmetric-physics section 4; goal: estimate the MAST coil-case can temperature on the passive held-out fit's vacuum shots and the stainless resistivity it implies).\n\nVERDICT goal: The node was dispatched to estimate the MAST coil-case can temperature on the 131 training and 37 held-out shots of the passive fit and the stainless resistivity it implies. It delivers benchmarks/mast_coil_case_temperature.py and docs/figures/mast-coil-case-temperature/receipt.json auditing all 168 shots for coil-can, vessel or bake temperature evidence and reporting every one unknown, with no source-specific sensor-to-can mapping found, so no temperature is estimated for any shot and the resistivity implication is reported indeterminate.\nVERDICT done_when: The named gate is tests/test_mast_coil_case_temperature.py; I re-ran it at reviewed head e934bb9bd132f719bf74592ec5b1b63ceccd5c99 (7 passed, EXIT=0) and reproduced the declared +100 K mutation (cooler_can_k 350->450 gives 0.923 >= 0.900, 1 failed, EXIT=1). The committed receipt records per-shot can/vessel evidence with its source and sha256, converts through the cited NIST points (0.811/0.890/0.923 micro-ohm metre), states the rounding interval before scoring, counts all 168 as unknown behind a coil-current positive control present on all 168, and the data pass ran as one all_debug job (1282056, EXIT=0).\nVERDICT write_paths: Read the reviewed manifest's declared paths; git diff 68b03759d4f68145ccbfc121863a0325f6966c29 e934bb9bd132f719bf74592ec5b1b63ceccd5c99 is exactly three added files (benchmarks/mast_coil_case_temperature.py, docs/figures/mast-coil-case-temperature/receipt.json, tests/test_mast_coil_case_temperature.py), all inside them; the declared fragment path is correctly unused because the node is small and its done-when names the receipt, not the fragment.\nVERDICT manifest: Read; status complete, four commits, gate 7 passed EXIT=0, a negative_control_log that fires at the head revision, after_suite completed=true failure_count=0 at e934bb9bd132f719bf74592ec5b1b63ceccd5c99. Its baseline_suite field is empty, so the base arm is not readable and the added-failure count derives unmeasured (null).\nVERDICT diff: Read commit by commit against base 68b03759d4f68145ccbfc121863a0325f6966c29: 75b9344 adds the benchmark (240 lines) and test (110 lines), de19c025 distinguishes reconstruction attempts from temperatures, 55df62b0 makes receipt provenance repository-relative, e934bb9b publishes the receipt (2252 lines); 2602 insertions over three files, no product source, plan, sprint or index state touched.\nCALL_SITES: none\n\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: benchmarks/mast_coil_case_temperature.py:114 build_receipt audits every fitted shot and docs/figures/mast-coil-case-temperature/receipt.json reports all 168 unknown, faithfully executing the done-when's \"counted as unknown, never assumed\"; not 20 because the goal's substantive deliverable - an estimate of the can temperature and its implied resistivity - is unfulfilled for every shot, transferring the answer to a follow-on that needs new data.\nSCORE evidence: 17\nJUSTIFICATION evidence: the named gate reproduces at head e934bb9bd132f719bf74592ec5b1b63ceccd5c99 (7 passed, EXIT=0) and the declared +100 K control fires (0.923 >= 0.900, EXIT=1), and the zero-of-168 claim carries its instrument check (benchmarks/mast_coil_case_temperature.py:137 asserts the amc/p4l_feed_current positive control on every shot before the absence is recorded); not 20 because the reviewed manifest's baseline_suite is empty so the added-failure count is unmeasured (null).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 68b03759d4f68145ccbfc121863a0325f6966c29 e934bb9bd132f719bf74592ec5b1b63ceccd5c99 is exactly three added paths, all under the declared write paths of benchmarks/mast_coil_case_temperature.py, tests/test_mast_coil_case_temperature.py and docs/figures/mast-coil-case-temperature/; mast_seed_parameters.py and the fit are untouched and no plan, sprint or index state is modified.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_mast_coil_case_temperature.py:19-40 pins reference_resistivity at the cited points and refuses extrapolation, and the declared mutation reddens the ceiling test, but tests/test_mast_coil_case_temperature.py:79 skips via pytest.skip when the receipt is absent and build_receipt's cohort-integrity and positive-control guards (benchmarks/mast_coil_case_temperature.py:125-140) have no test, so a regression that stopped rendering the receipt or dropped the positive control would leave all seven tests green.\nSCORE fit: 18\nJUSTIFICATION fit: benchmarks/mast_coil_case_temperature.py follows the benchmarks/ idiom set by benchmarks/mast_tf_average.py (module docstring, argparse, main, f-strings), and a label scan over the added lines finds no phase, stage, sprint, ticket or version identifier and no worktree path.\nSCORE reuse: 15\nJUSTIFICATION reuse: reference_resistivity and crossing_temperature at benchmarks/mast_coil_case_temperature.py:42-63 are first owners (no prior conversion exists in nova/ or benchmarks/, and the cited points live only as prose in the resistivity receipt), but FIT_CEILING at line 26 restates the stainless bound owned by nova/imas/mast_seed_parameters.py STAINLESS_STEEL.resistivity_upper and the inline .zmetadata read at lines 134-135 duplicates benchmarks/mast_tf_average.py:123 array_metadata, so two added lines restate capabilities the repository owns.\n\nFINDING benchmarks/mast_coil_case_temperature.py:26 follow-on: FIT_CEILING = 0.900 restates the coil-case stainless upper bound owned by nova/imas/mast_seed_parameters.py STAINLESS_STEEL.resistivity_upper (9.0e-7 ohm.m), which the plan seeds and bounds the section from; the two constants can drift, and importing the owner would tie the audit's threshold to the fit's bound.\nFINDING benchmarks/mast_coil_case_temperature.py:134 follow-on: the receipt's store scan inlines the .zmetadata read that benchmarks/mast_tf_average.py:123 array_metadata already owns, including its zarr.json fallback; a second reader of the same store contract forks a capability the repository owns and will not pick up a future change to how shot metadata is opened.\nFINDING tests/test_mast_coil_case_temperature.py:79 follow-on: test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence skips when the receipt is absent, so the node's delivered artifact is unguarded against a regression that stops producing or mis-renders it, and build_receipt - including the cohort-integrity checks at benchmarks/mast_coil_case_temperature.py:125-128 and the positive control at line 137 - is exercised by no test.\nFINDING manifest.md:1 follow-on: the reviewed manifest's baseline_suite field is empty, so the base arm is not readable and the added-failure count is derived as unmeasured (null) rather than a measured zero; there is no pre-change arm because the focused test file is added by this node.\n",
+  "review_run_id": "r-20261008T071631275776-review-of-mast-coil-case-temperature",
+  "reviewed_base_sha": "68b03759d4f68145ccbfc121863a0325f6966c29",
+  "reviewed_head_sha": "e934bb9bd132f719bf74592ec5b1b63ceccd5c99",
+  "reviewed_run_id": "r-20261008T065147393477-mast-coil-case-temperature",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 16,
+    "reuse": 15,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:25:38.913026+00:00",
+  "total": 101
+}

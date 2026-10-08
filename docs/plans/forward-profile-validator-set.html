@@ -20,11 +20,14 @@
   <title>Forward Profile Validator Set | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
-<meta name="plan-modified" content="2026-10-08">
 <meta name="plan-sprint" content="S24">
 <meta name="plan-informs" content="gs-absolute-accuracy-gates">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+<meta name="plan-effort-hours" content="10.0">
+<meta name="plan-commits" content="aff62b24">
+<meta name="plan-impl" content="0.1">
+<meta name="plan-version" content="11">
+<meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
   <main class="plan-doc">
@@ -91,6 +94,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-20261008-s24-classification" data-who="s24-nova coordinator" data-when="2026-10-08T01:25:00Z">
     <div class="r-comment-body">S24 build classification: §1 and §2 are context and the case specification; §3–§5 carry the executable rungs. §3 now names the reuse the 2026-10-06 design review asked for: the machine-agnostic cache primitives of nova/imas/machine_artifact.py lift into one store under nova/database/, and the pinned case record extends tests/data-manifest.json. Rung 1 (f-fpv-currency-2026-10-01) is the first node. The cross-section-breadth decision stays deferred; its recorded rationale widens the set beyond the ITER trio and is the owner's to lock before rung 3.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20261008-content-store-landed" data-who="reckon-build" data-when="2026-10-08T03:20:00Z">
+    <div class="r-comment-body">gate test_content_store and the unchanged artifact tests passed; section open — the digest fetch with its pinned case records and the analytic smoke rung follow. Effort recalibrated from an uncalibrated 2 h to 10 h for rungs 1–4; rung 5 breadth waits on the cross-section-breadth decision. Evidence: content-store.</div>
 </div>
 </section>
 </main>

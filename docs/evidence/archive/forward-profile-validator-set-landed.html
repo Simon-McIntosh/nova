@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="forward-profile-validator-set-landed">
+  <meta name="plan-title" content="Forward Profile Validator Set — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Forward Profile Validator Set: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="forward-profile-validator-set">
+  <meta name="plan-verdict" content="qualified">
+  <title>Forward Profile Validator Set — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Forward Profile Validator Set — landed record</h1>
+  <p>Closure synthesis for Forward Profile Validator Set: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="content-store">
+    <h2>§3 — one machine-agnostic content-addressed store</h2>
+    <p>The sha256 and size verification, the verified object root pinned through <code>/proc/self/fd</code>, and the no-clobber directory publication through <code>renameat2</code> now live in <code>nova/database/content_store.py</code>. <code>nova/imas/machine_artifact.py</code> imports them and defines none of them, keeping its own error vocabulary (a <code>ContentStoreError</code> is re-raised as <code>MachineArtifactError</code>) and its monkeypatch seams. Every name imas-ambix imports and asserts the module of (<code>MachineArtifactError</code>, <code>MachineArtifactManifest</code>, <code>resolve_machine_artifact</code>, <code>materialize_machine_artifact</code>) is still defined there.</p><p>Gates: <code>tests/test_content_store.py</code> 3 passed (publish, verified read, refusal of a tampered object); <code>tests/test_machine_artifact.py</code> and <code>tests/test_machine_artifact_concurrency.py</code> unchanged at 10 passed and 2 skipped (the skips are the unmounted shared MAST artifact, present at base); the reviewer also ran <code>tests/test_mast_artifact.py</code>, which exercises the relocated seam, at 61 passed. Flipping one byte of a published object makes the verified read refuse it. Review 116/120, zero added failures.</p><p><strong>Carried into the fetch node:</strong> the lift exposes about 25 formerly private helpers as public functions. The fetch consumes a narrow entry point rather than the helpers, so the public surface does not grow further.</p>
+  </section>
+
+</main>
+</body>
+</html>

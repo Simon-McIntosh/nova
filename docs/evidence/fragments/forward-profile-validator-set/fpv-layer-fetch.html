@@ -1,0 +1,29 @@
+<section data-reckon="evidence-fragment" id="fpv-layer-fetch-landing">
+  <h2 id="fpv-layer-fetch-landing-title">Digest-pinned validator layer fetch</h2>
+  <p id="fpv-layer-fetch-landing-summary">
+    One fetch entry point, <code>nova/database/layer_fetch.py</code>, runs
+    <code>oras blob fetch</code> against
+    <code>ghcr.io/iterorganization/efitpp-test-data@&lt;layer digest&gt;</code>,
+    refuses bytes whose sha256 disagrees with the pinned digest, and publishes
+    the blob through the <code>nova/database/content_store.py</code> public
+    publish and verified-read functions. The layer is addressed by digest only,
+    so no mutable tag appears in code. <code>tests/data-manifest.json</code>
+    gains <code>efitpp_validator_layers</code>: the analytic pair and the
+    CORSICA 130506, DINA 105027 and ASTRA 131046 input and reference layers,
+    each with its full layer digest re-derived from the registry manifest
+    (pinned at <code>sha256:aac593a7…</code>), its per-dataset
+    <code>dd_version</code> (4.1.0 throughout) and its case metadata.
+    <code>tests/test_layer_fetch.py</code> proves a correct fetch of the
+    analytic layer (published, then reused without contacting the registry),
+    refusal when one manifest digest is altered, a clean skip when the registry
+    is unreachable, and that a decisive unknown digest is a fetch error rather
+    than a skip.
+  </p>
+  <p id="fpv-layer-fetch-landing-measure">
+    Head arm <code>6 passed, 1 skipped</code> (the skip is the declared
+    unreachable-registry arm and is expected). Negative control: altering one
+    digest in <code>tests/data-manifest.json</code> fails
+    <code>test_fetched_analytic_layer_is_published_and_verified</code> with a
+    decisive “not found”, <code>EXIT=1</code>.
+  </p>
+</section>

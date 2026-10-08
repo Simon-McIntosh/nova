@@ -39,9 +39,22 @@
       "finding": "single_goal-1",
       "reason": "dispatched as two nodes with separate verdicts (dfo-error-estimator, dfo-gate-pin); the residual one-node phrase is replaced when s11 collapses at landing, and editing it now would re-open a review for wording the dispatch already settles",
       "when": "2026-10-08T01:48:40.827726+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s24-nova",
+      "finding": "reasoning-1",
+      "reason": "the anchor values are unchanged and correct, so no node computes differently; the mechanism label is corrected when s5 and s11 are next landed, not in a wording-only edit that re-opens review",
+      "when": "2026-10-08T01:48:55.953317+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "s24-nova",
+      "reason": "the anchor values are unchanged and correct, so no node computes differently; the mechanism label is corrected when s5 and s11 are next landed, not in a wording-only edit that re-opens review",
+      "when": "2026-10-08T01:48:55.953317+00:00"
+    },
     "single_goal-1": {
       "action": "declined",
       "by": "s24-nova",

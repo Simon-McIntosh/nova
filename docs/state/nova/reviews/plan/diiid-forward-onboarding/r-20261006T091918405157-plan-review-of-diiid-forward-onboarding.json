@@ -24,7 +24,24 @@
   "plan_slug": "diiid-forward-onboarding",
   "plan_version": 82,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "s24-nova",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-08T01:08:47.458432+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s24-nova",
+      "reason": "",
+      "when": "2026-10-08T01:08:47.458432+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-forward-onboarding/r-20261006T091918405157-plan-review-of-diiid-forward-onboarding.json",
   "review_run_id": "r-20261006T091918405157-plan-review-of-diiid-forward-onboarding",
   "reviewed_blob_sha": "2024fa310e87451fdec5ecbe17c42bc54aeb1ef0",
   "rubric": "design",

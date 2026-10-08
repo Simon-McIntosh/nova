@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms (baseline.log: 71 passed, 2 skipped; fpv-content-store-named-tests.log: 10 passed, 2 skipped): neither arm reports a FAILED or ERROR id, so the run added none",
+  "call_site_count": 5,
+  "call_sites": [
+    "nova/imas/mast_geometry.py:32",
+    "nova/imas/mast_solve_input_ids.py:39",
+    "nova/scripts/mast_machine_artifact.py:31",
+    "nova/scripts/diiid_machine_artifact.py:25",
+    "imas-ambix imas_ambix/gs/artifact_geometry.py:767"
+  ],
+  "completed_at": "2026-10-08T03:19:47.213Z",
+  "dispatched_at": "2026-10-08T02:55:53Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "follow-on: the baseline_suite and after_suite fields carry prose rather than the structured {revision, command, exit_status, log_path, completed, failure_count, failure_ids} JSON the review store reads, so annotate_review_of_run resolves no gate log from them and the designed added-failure derivation reads unmeasured; the arms themselves pass with 0 failures, so this review derived the count (0, no ids) directly from the run's own baseline.log and fpv-content-store-named-tests.log."
+    },
+    {
+      "file": "tests/test_mast_artifact.py",
+      "line": "302",
+      "severity": "follow-on",
+      "text": "follow-on: the gate ran tests/test_machine_artifact.py and tests/test_machine_artifact_concurrency.py but not tests/test_mast_artifact.py, the one file that monkeypatches the relocated seam machine_artifact._create_private_directory (tests/test_mast_artifact.py:311) and so would redden if the import alias had been dropped; I ran it at the reviewed head (61 passed in 6.01s), so the non-regression claim holds and this is non-blocking."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against base bcb8e1899fd197ba7fac718cd8a95fb34df2e2b9; one commit, four files, 748 insertions / 540 deletions, all inside the declared scope.",
+    "done_when": "the done_when requires the store's own tests green and the named artifact tests unchanged; the manifest records tests/test_content_store.py 3 passed and the two named artifact files at 10 passed, 2 skipped, and the declared negative control EXIT=1.",
+    "goal": "the goal is to lift the machine-agnostic content-addressed cache primitives out of nova/imas/machine_artifact.py into one store under nova/database/; the diff adds nova/database/content_store.py holding exactly those primitives (per-file sha256 and size verification, the verified object root pinned through /proc/self/fd, and no-clobber publication via renameat2), and nova/imas/machine_artifact.py defines none of them and imports them back.",
+    "manifest": "read; it reports the store tests green, the two named artifact files unchanged at 10 passed 2 skipped (skips = unmounted shared MAST artifact), and one commit aff62b2463bad8ba7cf239f6994b904eccfe88ab with a body.",
+    "write_paths": "read the manifest's declared paths; every path in the diff (nova/database/content_store.py, nova/imas/machine_artifact.py, tests/test_content_store.py, the evidence fragment) is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_content_store.py::test_flipping_one_byte_makes_the_verified_read_refuse fails with DID NOT RAISE when the sha256 comparison is disabled (recorded negative control), and test_repeated_publication_keeps_the_first_object fails if the no-clobber publication overwrites.",
+    "evidence": "tests/test_content_store.py (3 passed) measures the store, the two named artifact files pass unchanged at 10 passed 2 skipped, and the declared negative control (fpv-content-store-negative-control.log, EXIT=1) is a genuine tamper-refusal guard; the manifest's baseline_suite/after_suite are prose (see finding), so the store's own derivation reads unmeasured though the arms carry 0 failures.",
+    "fit": "nova/database/content_store.py follows the surrounding module idiom and carries no forbidden plan, sprint or version label, and its error base ContentStoreError is re-raised as MachineArtifactError via the _lifted decorator at nova/imas/machine_artifact.py:79 so the artifact vocabulary is unchanged.",
+    "goal_fidelity": "nova/database/content_store.py:1 holds the lifted primitives and nova/imas/machine_artifact.py:28 imports them, defining none, exactly as s3 prescribes.",
+    "reuse": "content_store.py extends the capability owner (nova/imas/machine_artifact.py) by relocation rather than re-implementing it, and a search over nova/database and nova/imas found no other content-addressed or no-clobber object store.",
+    "scope_discipline": "the whole diff is four paths, each inside the manifest's declared write paths; no figure was written and none is required for a refactor."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T013754529430-fpv-content-store (node fpv-content-store, plan nova:forward-profile-validator-set s3).\n\nVERDICT goal: the goal is to lift the machine-agnostic content-addressed cache primitives out of nova/imas/machine_artifact.py into one store under nova/database/; the diff adds nova/database/content_store.py holding exactly those primitives (per-file sha256 and size verification, the verified object root pinned through /proc/self/fd, and no-clobber publication via renameat2), and nova/imas/machine_artifact.py defines none of them and imports them back.\nVERDICT done_when: the done_when requires the store's own tests green and the named artifact tests unchanged; the manifest records tests/test_content_store.py 3 passed and the two named artifact files at 10 passed, 2 skipped, and the declared negative control EXIT=1.\nVERDICT write_paths: read the manifest's declared paths; every path in the diff (nova/database/content_store.py, nova/imas/machine_artifact.py, tests/test_content_store.py, the evidence fragment) is inside them.\nVERDICT manifest: read; it reports the store tests green, the two named artifact files unchanged at 10 passed 2 skipped (skips = unmounted shared MAST artifact), and one commit aff62b2463bad8ba7cf239f6994b904eccfe88ab with a body.\nVERDICT diff: read commit by commit against base bcb8e1899fd197ba7fac718cd8a95fb34df2e2b9; one commit, four files, 748 insertions / 540 deletions, all inside the declared scope.\nCALL_SITES: nova/imas/mast_geometry.py:32, nova/imas/mast_solve_input_ids.py:39, nova/scripts/mast_machine_artifact.py:31, nova/scripts/diiid_machine_artifact.py:25, imas-ambix imas_ambix/gs/artifact_geometry.py:767\n\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/database/content_store.py:1 holds the lifted primitives and nova/imas/machine_artifact.py:28 imports them, defining none, exactly as s3 prescribes.\nSCORE evidence: 18\nJUSTIFICATION evidence: tests/test_content_store.py (3 passed) measures the store, the two named artifact files pass unchanged at 10 passed 2 skipped, and the declared negative control (fpv-content-store-negative-control.log, EXIT=1) is a genuine tamper-refusal guard; the manifest's baseline_suite/after_suite are prose (see finding), so the store's own derivation reads unmeasured though the arms carry 0 failures.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the whole diff is four paths, each inside the manifest's declared write paths; no figure was written and none is required for a refactor.\nSCORE durability: 19\nJUSTIFICATION durability: tests/test_content_store.py::test_flipping_one_byte_makes_the_verified_read_refuse fails with DID NOT RAISE when the sha256 comparison is disabled (recorded negative control), and test_repeated_publication_keeps_the_first_object fails if the no-clobber publication overwrites.\nSCORE fit: 19\nJUSTIFICATION fit: nova/database/content_store.py follows the surrounding module idiom and carries no forbidden plan, sprint or version label, and its error base ContentStoreError is re-raised as MachineArtifactError via the _lifted decorator at nova/imas/machine_artifact.py:79 so the artifact vocabulary is unchanged.\nSCORE reuse: 20\nJUSTIFICATION reuse: content_store.py extends the capability owner (nova/imas/machine_artifact.py) by relocation rather than re-implementing it, and a search over nova/database and nova/imas found no other content-addressed or no-clobber object store.\nFINDING manifest.md:18 follow-on: the baseline_suite and after_suite fields carry prose rather than the structured {revision, command, exit_status, log_path, completed, failure_count, failure_ids} JSON the review store reads, so annotate_review_of_run resolves no gate log from them and the designed added-failure derivation reads unmeasured; the arms themselves pass with 0 failures, so this review derived the count (0, no ids) directly from the run's own baseline.log and fpv-content-store-named-tests.log.\nFINDING tests/test_mast_artifact.py:302 follow-on: the gate ran tests/test_machine_artifact.py and tests/test_machine_artifact_concurrency.py but not tests/test_mast_artifact.py, the one file that monkeypatches the relocated seam machine_artifact._create_private_directory (tests/test_mast_artifact.py:311) and so would redden if the import alias had been dropped; I ran it at the reviewed head (61 passed in 6.01s), so the non-regression claim holds and this is non-blocking.",
+  "review_run_id": "r-20261008T025500431345-review-of-fpv-content-store",
+  "reviewed_base_sha": "bcb8e1899fd197ba7fac718cd8a95fb34df2e2b9",
+  "reviewed_head_sha": "aff62b2463bad8ba7cf239f6994b904eccfe88ab",
+  "reviewed_run_id": "r-20261008T013754529430-fpv-content-store",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T03:15:10.184216+00:00",
+  "total": 116
+}

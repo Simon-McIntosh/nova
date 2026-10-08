@@ -599,3 +599,49 @@ def compile_arm(name, arm):
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
     assert compile_ratio("test_vertex_term_tangents", name) <= 3.0
+
+
+def test_composed_corner_signed_offsets(monkeypatch):
+    """Check the repaired primal and its own hand/JVP tangents through the band."""
+    offsets = np.asarray([0.0] + [s * 10.0**e for e in range(-12, -1) for s in (-1, 1)])
+    r = jnp.full(offsets.size, 1.2)
+    z = jnp.zeros_like(r)
+    p = (r, z, r + jnp.asarray(offsets), jnp.full_like(r, 1e-12))
+    t = (z, z, jnp.ones_like(r), z)
+    cache = os.environ.get("NOVA_CORNER_OFFSET_REFERENCE_CACHE")
+    if cache:
+        monkeypatch.setenv("NOVA_CORNER_REFERENCE_CACHE", cache)
+    else:
+        monkeypatch.delenv("NOVA_CORNER_REFERENCE_CACHE", raising=False)
+    reference, derivative = _radial_reference(p, t, np.arange(offsets.size))
+    reference, derivative = np.asarray(reference, float), np.asarray(derivative, float)
+    def primal(*args):
+        return _primal_vertex(*args).arsinh_terms()[1]
+    value, jvp = jax.jit(lambda p, t: jax.jvp(primal, p, t))(p, t)
+    _, hand = jax.jit(
+        lambda p, t: polygonanalytic._arsinh_terms_tangent(
+            *polygonanalytic._vertex_tangent(*p, *t, NODES, residual=True, xp=jnp)
+        )
+    )(p, t)
+    base = np.asarray(
+        jax.jit(
+            lambda *p: BASE._Vertex(*p, NODES, residual=True, xp=jnp).arsinh_terms()[1]
+        )(*p)
+    )
+    value_error = relative_error(value, reference)
+    derivative_error = relative_error(hand[1], derivative)
+    base_error = relative_error(base, reference)
+    for decade in [0.0, *[10.0**e for e in range(-12, -1)]]:
+        selected = np.abs(offsets) == decade
+        print(
+            f"COMPOSED_OFFSET offset={decade:.0e} "
+            f"value_max={value_error[selected].max():.3e} "
+            f"derivative_max={derivative_error[selected].max():.3e} "
+            f"degraded={np.sum(value_error[selected] > base_error[selected] + 1e-13)}"
+        )
+    assert value_error.max() <= 1e-9
+    assert derivative_error.max() <= 1e-9
+    assert relative_error(hand[1], jvp).max() <= 1e-9
+    inside = np.abs(offsets) <= 1e-3
+    assert np.all(value_error[inside] <= base_error[inside] + 1e-13)
+    assert relative_error(np.asarray(value)[~inside], base[~inside]).max() <= 1e-13

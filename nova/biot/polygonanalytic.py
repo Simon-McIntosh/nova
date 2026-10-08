@@ -163,7 +163,12 @@ from nova.biot.elliptic import (
     sn_pole_moment,
     sn_pole_moment_paired,
 )
-from nova.biot.gradedresidual import QUARTER, _graded_residual_tangent, graded_residual
+from nova.biot.gradedresidual import (
+    QUARTER,
+    _graded_residual_tangent,
+    _rule,
+    graded_residual,
+)
 from nova.biot.momentchannel import (
     POLE_CEILING,
     Channel,
@@ -275,6 +280,66 @@ def _oscillatory_primitive(weight: list) -> list:
     ]
 
 
+@lru_cache(maxsize=None)
+def _corner_remainder_rule(nodes):
+    """Grade the quadratic endpoint zeros of the weighted arsinh remainder."""
+    node, weight = _rule(nodes)
+    width = 1e-4
+    stretch = 0.5 * np.arcsinh(QUARTER / width) * (node + 1.0)
+    angle = width * np.sinh(stretch)
+    jacobian = 0.5 * np.arcsinh(QUARTER / width) * width * np.cosh(stretch)
+    return np.sin(angle) ** 2, jacobian * weight
+
+
+def _corner_remainder_band(radius, level, offset, xp):
+    """Select the joint corner layer while preserving the distant contraction."""
+    return (xp.abs(offset) <= 1e-3) & (xp.hypot(level, offset) < 2e-6 * radius)
+
+
+def _corner_arsinh_remainder(radius, level, offset, nodes, xp):
+    """Integrate sin²(a) cos²(a) asinh(N/W), whose endpoint weight vanishes.
+
+    The quadratic zeros suppress the logarithmic endpoint and its sharper
+    derivative layer. A fixed sinh grid resolves this smooth remainder without
+    subtracting the large pole moments of its integration-by-parts contraction.
+    The unweighted logarithm and its exact model integral remain in the graded
+    residual. Fixed nodes introduce no target-dependent node-motion derivative.
+    """
+    near, weight = _corner_remainder_rule(nodes)
+    r, u, o = radius[:, None], level[:, None], offset[:, None]
+    result = 0.0
+    for x, y in ((near, 1.0 - near), (1.0 - near, near)):
+        numerator = o + 2.0 * r * y
+        denominator = xp.sqrt(u**2 + 4.0 * r**2 * x * y)
+        result = result + (x * y * xp.arcsinh(numerator / denominator)) @ weight
+    return result
+
+
+def _corner_arsinh_remainder_tangent(vertex, tangent):
+    """Differentiate the weighted remainder at its fixed quadrature nodes."""
+    xp = vertex.xp
+    near, weight = _corner_remainder_rule(vertex.nodes)
+    r, u, o = (value[:, None] for value in (vertex.radius, vertex.level, vertex.offset))
+    dr, du, do = (tangent[key][:, None] for key in ("radius", "level", "offset"))
+    result = 0.0
+    for x, y in ((near, 1.0 - near), (1.0 - near, near)):
+        numerator = o + 2.0 * r * y
+        d_numerator = do + 2.0 * dr * y
+        denominator = xp.sqrt(u**2 + 4.0 * r**2 * x * y)
+        d_denominator = (du * (2.0 * u) + 4.0 * (dr * (2.0 * r)) * x * y) * (
+            0.5 / denominator
+        )
+        quotient = numerator / denominator
+        d_quotient = _quotient_tangent(
+            numerator, d_numerator, denominator, d_denominator
+        )
+        result = (
+            result
+            + (x * y * d_quotient * (1.0 / xp.sqrt(1.0 + quotient * quotient))) @ weight
+        )
+    return result
+
+
 class _Vertex:
     """The reduction against one target set at one polygon CORNER.
 
@@ -299,6 +364,7 @@ class _Vertex:
         self, r, z, corner_r, corner_z, nodes, *, residual: bool, paired=False, xp=np
     ):
         self.xp = xp
+        self.nodes = nodes
         r = xp.asarray(r)
         z = xp.asarray(z)
         # r' - r is an end value a pole weight is formed from, so it comes from the
@@ -514,6 +580,11 @@ class _Vertex:
         first = 0.5 * self.ring_residual + (0.5 * r / self.span) * self.across(
             sine_squared_times(across_the_range(core)), self.ring
         )
+        # cos²(2a) = 1 - 4 sin²(a) cos²(a) avoids the pole contraction
+        # where its differentiated large terms lose the corner remainder.
+        near = _corner_remainder_band(r, u, self.offset, self.xp)
+        remainder = _corner_arsinh_remainder(r, u, self.offset, self.nodes, self.xp)
+        first = self.xp.where(near, self.ring_residual - 4.0 * remainder, first)
         return 4.0 * u * r * first, 4.0 * r * first, 4.0 * u * self.ring_residual
 
     def against_first_arsinh(self, weight: tuple):
@@ -2878,6 +2949,11 @@ def _arsinh_terms_tangent(vertex: _Vertex, d_vertex: dict):
     residual, d_residual = vertex.ring_residual, d_vertex["ring_residual"]
     first = 0.5 * residual + ratio * across
     d_first = 0.5 * d_residual + _product_tangent(ratio, d_ratio, across, d_across)
+    near = _corner_remainder_band(r, u, vertex.offset, vertex.xp)
+    remainder = _corner_arsinh_remainder(r, u, vertex.offset, vertex.nodes, vertex.xp)
+    d_remainder = _corner_arsinh_remainder_tangent(vertex, d_vertex)
+    first = vertex.xp.where(near, residual - 4.0 * remainder, first)
+    d_first = vertex.xp.where(near, d_residual - 4.0 * d_remainder, d_first)
     four_u = 4.0 * u
     d_four_u = 4.0 * d_u
     four_ur = four_u * r

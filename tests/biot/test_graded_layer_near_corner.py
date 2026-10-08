@@ -187,10 +187,18 @@ def test_moving_panel_bounds_follow_endpoint_integrand():
 
 def _program_floor(function, primals, tangents, select=lambda value: value):
     """Measure base roundoff between standalone and primal-plus-JVP programs."""
+    from hashlib import sha256
+
     standalone = jax.jit(function).lower(*primals).compile()
     differentiated = (
         jax.jit(lambda p, t: jax.jvp(function, p, t)).lower(primals, tangents).compile()
     )
+    signatures = [
+        sha256(program.as_text().encode()).hexdigest()
+        for program in (standalone, differentiated)
+    ]
+    assert signatures[0] != signatures[1]
+    print(f"PROGRAM_FLOOR executable_sha256={signatures}")
     alone = np.asarray(select(standalone(*primals)))
     together = np.asarray(select(differentiated(primals, tangents)[0]))
     assert np.isfinite(alone).all() and np.isfinite(together).all()
@@ -276,7 +284,13 @@ def test_base_program_roundoff_floor():
         decades, floor = _decade_floor(offsets, difference)
         strict = errors > base_errors
         degraded = errors > base_errors + floor
-        assert int(strict.sum()) == (169 if name == "isolated" else 177)
+        injected = base_errors + floor + 1e-8
+        assert np.all(injected > base_errors + floor)
+        print(
+            f"ROUNDING_CONTROL arm={name} "
+            f"injected_relative_error=1e-8 refused={index.size}"
+        )
+        assert int(strict.sum()) == (169 if name == "isolated" else 184)
         summary = []
         for decade in np.unique(decades):
             selected = decades == decade

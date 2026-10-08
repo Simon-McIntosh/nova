@@ -464,6 +464,8 @@ def _radial_reference(primals, tangents, index):
 
 @lru_cache(maxsize=1)
 def _near_corner_rows():
+    from test_graded_layer_near_corner import _decade_floor, _program_floor
+
     got, expected = _identity("arsinh_terms")
     _, _, primals, tangents = CASES["arsinh_terms"]
     r, z, corner_r, corner_z = (np.asarray(value) for value in primals[:4])
@@ -474,13 +476,15 @@ def _near_corner_rows():
     hand = np.asarray(got[1][1])[index]
     primal_jvp = np.asarray(expected[1][1])[index]
     primal = np.asarray(expected[0][1])[index]
-    old = np.asarray(
-        jax.jit(
-            lambda p: BASE._Vertex(*p[:4], NODES, residual=True, xp=jnp).arsinh_terms()[
-                1
-            ]
-        )(primals)
-    )[index]
+    old, _, program_difference = _program_floor(
+        lambda *p: BASE._Vertex(*p[:4], NODES, residual=True, xp=jnp).arsinh_terms()[1],
+        primals,
+        tangents,
+        select=lambda value: value[index],
+    )
+    decades, program_floor = _decade_floor(
+        corner_r[index] - r[index], program_difference
+    )
 
     def relative(a, b):
         with mp.workdps(50):
@@ -497,11 +501,14 @@ def _near_corner_rows():
     value_error = relative(primal, value)
     old_error = relative(old, value)
     tangent_error = relative(hand, reference)
+    strict_degraded = value_error > old_error
+    degraded = value_error > old_error + program_floor
     rows = {
         "samples": index.size,
         "primal": value_error.max(),
         "base_primal": old_error.max(),
-        "less_accurate": int(np.sum(value_error > old_error)),
+        "strict_less_accurate": int(strict_degraded.sum()),
+        "less_accurate": int(degraded.sum()),
         "hand": tangent_error.max(),
         "jvp": relative(primal_jvp, reference).max(),
         "hand_jvp": relative(hand, primal_jvp).max(),
@@ -522,6 +529,7 @@ def _near_corner_rows():
                     "reference_tangent": reference.tolist(),
                     "value_error": value_error.tolist(),
                     "base_error": old_error.tolist(),
+                    "program_floor": program_floor.tolist(),
                     "tangent_error": tangent_error.tolist(),
                 }
             )
@@ -532,7 +540,6 @@ def _near_corner_rows():
         f"primals={[float(np.asarray(p)[index[worst]]) for p in primals[:4]]} "
         f"tangents={[float(np.asarray(t)[index[worst]]) for t in tangents[:4]]}"
     )
-    decades = np.floor(np.log10(np.abs(corner_r[index] - r[index]))).astype(int)
     for decade in np.unique(decades):
         selected = decades == decade
         print(
@@ -540,7 +547,9 @@ def _near_corner_rows():
             f"value_relative_max={value_error[selected].max():.3e} "
             f"derivative_relative_max={tangent_error[selected].max():.3e} "
             f"base_value_relative_max={old_error[selected].max():.3e} "
-            f"less_accurate={int(np.sum(value_error[selected] > old_error[selected]))}"
+            f"program_floor={program_floor[selected].max():.3e} "
+            f"strict_less_accurate={int(strict_degraded[selected].sum())} "
+            f"less_accurate={int(degraded[selected].sum())}"
         )
     print(f"NEAR_CORNER arsinh_terms radial samples={rows['samples']} "
           f"primal_vs_reference_max={rows['primal']:.3e} "

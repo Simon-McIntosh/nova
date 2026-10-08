@@ -2,17 +2,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
-import secrets
 import shutil
-from ctypes import CDLL, c_char_p, c_int, get_errno
 from dataclasses import dataclass
-from errno import EEXIST, EINVAL, ENOSYS, ENOTEMPTY, EOPNOTSUPP, EPERM
-from pathlib import Path, PurePosixPath
-from stat import S_ISDIR, S_ISLNK, S_ISREG
+from functools import wraps
+from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from imas_data_dictionaries import dd_xml_versions, parse_dd_version
@@ -29,12 +25,37 @@ from nova.imas.machine_evidence import (
     require_int,
     require_string,
 )
+from nova.database.content_store import (
+    MANIFEST_FILENAME,
+    ContentStoreError,
+    copy_file_at as _copy_file_at,
+    create_private_directory as _create_private_directory,
+    destination_exists_at as _destination_exists_at,
+    digest_hex as _digest_hex,
+    entry_metadata as _entry_metadata,
+    file_content_identity as _file_identity,
+    hdf5_consistency_field as _hdf5_consistency_field,
+    inventory_files as _inventory_files,
+    linux_rename_no_replace as _linux_rename_no_replace,
+    open_pinned_object_root as _open_pinned_object_root,
+    pinned_root_path as _pinned_root_path,
+    publish_directory_no_replace as _publish_directory_no_replace,
+    read_regular_bytes as _read_regular_bytes,
+    require_contained as _require_contained,
+    safe_relative_name as _safe_relative_name,
+    sha256_bytes as _sha256_bytes,
+    validate_hex as _validate_hex,
+    validate_portable_name_set as _validate_portable_name_set,
+    verified_destination as _verified_destination,
+    verified_object_root as _verified_object_root,
+    verify_directory_files as _verify_directory_files,
+    visible_root_matches_descriptor as _visible_root_matches_descriptor,
+    write_bytes_at as _write_bytes_at,
+)
 
-MANIFEST_FILENAME = "manifest.json"
 OCI_MANIFEST_MEDIA_TYPE = "application/vnd.oci.image.manifest.v1+json"
 
 _DD_VERSION_PATTERN = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+")
-_HEX_PATTERN = re.compile(r"[0-9a-f]+")
 _MACHINE_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 _MANIFEST_SCHEMA_PATTERN = re.compile(
     r"nova-(?P<machine>[a-z0-9]+(?:-[a-z0-9]+)*)-machine-artifact"
@@ -43,23 +64,8 @@ _OCI_REPOSITORY_PATTERN = re.compile(
     r"[a-z0-9]+(?:[.-][a-z0-9]+)*(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)+"
 )
 _OCI_TAG_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]{0,127}")
-_PORTABLE_COMPONENT_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]*")
 _SHOT_RANGE_EVIDENCE_STATES = frozenset({"observed", "inherited", "missing"})
-_HDF5_SIGNATURE = b"\x89HDF\r\n\x1a\n"
-_HDF5_CONSISTENCY_FIELDS = {
-    0: (20, 4),
-    1: (20, 4),
-    2: (11, 1),
-    3: (11, 1),
-}
 _PUBLICATION_DD_MAJOR = 4
-_WINDOWS_DEVICE_NAMES = frozenset(
-    {"CON", "PRN", "AUX", "NUL"}
-    | {f"COM{index}" for index in range(1, 10)}
-    | {f"LPT{index}" for index in range(1, 10)}
-)
-_RENAME_NO_REPLACE = 1
-_RENAME_UNSUPPORTED_ERRORS = frozenset({EINVAL, ENOSYS, EOPNOTSUPP, EPERM})
 
 
 class MachineArtifactError(MachineDescriptionError):
@@ -68,6 +74,24 @@ class MachineArtifactError(MachineDescriptionError):
 
 class IncompleteMachineArtifactError(MachineArtifactError):
     """Raised when operator-ready semantics are requested from incomplete data."""
+
+
+def _lifted(function: Any) -> Any:
+    """Re-raise a content-store refusal as the artifact error callers catch.
+
+    The store is machine-agnostic and raises its own exception base; artifact
+    callers keep catching the artifact error, so the two vocabularies meet here
+    rather than leaking a store type through the artifact API.
+    """
+
+    @wraps(function)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return function(*args, **kwargs)
+        except ContentStoreError as error:
+            raise MachineArtifactError(str(error)) from error
+
+    return wrapper
 
 
 def machine_name(machine: str) -> str:
@@ -142,92 +166,6 @@ def publication_dd_version(dd_version: str | None = None) -> str:
     return selected
 
 
-def _sha256_bytes(data: bytes) -> str:
-    return hashlib.sha256(data).hexdigest()
-
-
-def _hdf5_consistency_field(
-    descriptor: int,
-    size: int,
-    path: Path,
-) -> tuple[int, int] | None:
-    """Locate the transient file-consistency field in an HDF5 superblock.
-
-    HDF5 permits a user block before the superblock, but only at byte zero or
-    at powers of two starting at 512.  Superblock versions zero and one carry
-    a four-byte consistency field; versions two and three carry a one-byte
-    field.  No user-block byte or other superblock byte is excluded.
-    """
-
-    offset = 0
-    while offset + len(_HDF5_SIGNATURE) <= size:
-        signature = os.pread(descriptor, len(_HDF5_SIGNATURE), offset)
-        if signature == _HDF5_SIGNATURE:
-            version_bytes = os.pread(descriptor, 1, offset + len(_HDF5_SIGNATURE))
-            if len(version_bytes) != 1:
-                raise MachineArtifactError(f"truncated HDF5 superblock in {path}")
-            version = version_bytes[0]
-            try:
-                relative_offset, width = _HDF5_CONSISTENCY_FIELDS[version]
-            except KeyError as error:
-                raise MachineArtifactError(
-                    f"unsupported HDF5 superblock version {version} in {path}"
-                ) from error
-            field_offset = offset + relative_offset
-            if field_offset + width > size:
-                raise MachineArtifactError(f"truncated HDF5 superblock in {path}")
-            return field_offset, width
-        offset = 512 if offset == 0 else offset * 2
-    return None
-
-
-def _file_identity(path: Path) -> tuple[str, int]:
-    """Return content identity with only HDF5 open-state flags canonicalized."""
-
-    digest = hashlib.sha256()
-    size = 0
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        descriptor = os.open(path, flags)
-    except OSError as error:
-        raise MachineArtifactError(f"cannot open artifact file {path}") from error
-    metadata = os.fstat(descriptor)
-    if not S_ISREG(metadata.st_mode):
-        os.close(descriptor)
-        raise MachineArtifactError(f"artifact path is not a regular file: {path}")
-    consistency_field = _hdf5_consistency_field(descriptor, metadata.st_size, path)
-    with os.fdopen(descriptor, "rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            if consistency_field is not None:
-                field_offset, field_width = consistency_field
-                block_stop = size + len(block)
-                overlap_start = max(size, field_offset)
-                overlap_stop = min(block_stop, field_offset + field_width)
-                if overlap_start < overlap_stop:
-                    canonical = bytearray(block)
-                    canonical[overlap_start - size : overlap_stop - size] = b"\x00" * (
-                        overlap_stop - overlap_start
-                    )
-                    block = canonical
-            digest.update(block)
-            size += len(block)
-    return digest.hexdigest(), size
-
-
-def _read_regular_bytes(path: Path) -> bytes:
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        descriptor = os.open(path, flags)
-    except OSError as error:
-        raise MachineArtifactError(f"cannot open artifact file {path}") from error
-    metadata = os.fstat(descriptor)
-    if not S_ISREG(metadata.st_mode):
-        os.close(descriptor)
-        raise MachineArtifactError(f"artifact path is not a regular file: {path}")
-    with os.fdopen(descriptor, "rb") as stream:
-        return stream.read()
-
-
 def _require_exact_keys(
     row: Mapping[str, Any],
     expected: set[str],
@@ -242,68 +180,6 @@ def _require_string(value: Any, context: str) -> str:
 
 def _require_int(value: Any, context: str) -> int:
     return require_int(value, context, MachineArtifactError)
-
-
-def _validate_hex(value: str, lengths: tuple[int, ...], context: str) -> None:
-    if (
-        not isinstance(value, str)
-        or len(value) not in lengths
-        or _HEX_PATTERN.fullmatch(value) is None
-    ):
-        allowed = " or ".join(str(length) for length in lengths)
-        raise MachineArtifactError(
-            f"{context} must be lowercase hexadecimal with length {allowed}"
-        )
-
-
-def _safe_relative_name(value: str) -> str:
-    if (
-        not isinstance(value, str)
-        or not value
-        or value == "."
-        or "\\" in value
-        or ":" in value
-        or any(ord(character) < 32 for character in value)
-    ):
-        raise MachineArtifactError(f"unsafe artifact file name {value!r}")
-    components = value.split("/")
-    if any(
-        not component
-        or component in {".", ".."}
-        or _PORTABLE_COMPONENT_PATTERN.fullmatch(component) is None
-        or component.endswith((".", " "))
-        or component.split(".", 1)[0].upper() in _WINDOWS_DEVICE_NAMES
-        for component in components
-    ):
-        raise MachineArtifactError(f"unsafe artifact file name {value!r}")
-    path = PurePosixPath(value)
-    if path.is_absolute():
-        raise MachineArtifactError(f"unsafe artifact file name {value!r}")
-    normalized = path.as_posix()
-    if normalized != value:
-        raise MachineArtifactError(f"non-canonical artifact file name {value!r}")
-    if normalized.casefold() == MANIFEST_FILENAME.casefold():
-        raise MachineArtifactError(
-            f"unsafe artifact file name {value!r}: {MANIFEST_FILENAME!r} is reserved"
-        )
-    return normalized
-
-
-def _validate_portable_name_set(names: Iterable[str]) -> None:
-    seen: dict[str, str] = {}
-    for name in names:
-        safe = _safe_relative_name(name)
-        parts = PurePosixPath(safe).parts
-        for length in range(1, len(parts) + 1):
-            prefix = "/".join(parts[:length])
-            folded = prefix.casefold()
-            previous = seen.get(folded)
-            if previous is not None and previous != prefix:
-                raise MachineArtifactError(
-                    f"case-insensitive artifact path collision: "
-                    f"{previous!r} and {prefix!r}"
-                )
-            seen[folded] = prefix
 
 
 def _decode_json(data: bytes) -> Mapping[str, Any]:
@@ -332,6 +208,7 @@ class ArtifactFile:
     sha256: str
     size: int
 
+    @_lifted
     def validate(self) -> None:
         """Reject unsafe paths and malformed file identities."""
 
@@ -375,6 +252,7 @@ class ArtifactShotRange:
     physical_digest: str
     evidence: str
 
+    @_lifted
     def validate(self) -> None:
         """Reject empty intervals, malformed identities, and unknown evidence."""
 
@@ -550,6 +428,7 @@ class MachineArtifactManifest:
 
         return self.evidence.forward_model_blockers()
 
+    @_lifted
     def validate(self) -> None:
         """Reject ambiguous, incomplete, or non-canonical manifest state."""
 
@@ -790,6 +669,7 @@ class VerifiedMachineArtifact:
     digest: str
 
 
+@_lifted
 def oci_artifact_tag(dd_version: str, physical_digest: str) -> str:
     """Format the deterministic OCI tag for one physical configuration."""
 
@@ -820,135 +700,7 @@ def oci_artifact_reference(
     return f"{repository}:{manifest.oci.tag}"
 
 
-def _entry_metadata(path: Path) -> os.stat_result | None:
-    try:
-        return path.lstat()
-    except FileNotFoundError:
-        return None
-    except OSError as error:
-        raise MachineArtifactError(f"cannot inspect artifact path {path}") from error
-
-
-def _require_contained(path: Path, root: Path, context: str) -> Path:
-    try:
-        resolved = path.resolve(strict=True)
-    except (OSError, RuntimeError) as error:
-        raise MachineArtifactError(f"cannot resolve {context}: {path}") from error
-    if not resolved.is_relative_to(root):
-        raise MachineArtifactError(
-            f"{context} escapes canonical cache root {root}: {resolved}"
-        )
-    return resolved
-
-
-def _canonical_cache_root(cache_directory: Path | str, *, create: bool) -> Path:
-    requested = Path(cache_directory)
-    if create:
-        try:
-            requested.mkdir(parents=True, exist_ok=True)
-        except OSError as error:
-            raise MachineArtifactError(
-                f"cannot create cache root {requested}"
-            ) from error
-    try:
-        root = requested.resolve(strict=True)
-    except (OSError, RuntimeError) as error:
-        raise MachineArtifactError(f"cannot resolve cache root {requested}") from error
-    if not root.is_dir():
-        raise MachineArtifactError(f"cache root is not a directory: {root}")
-    return root
-
-
-def _verified_object_root(cache_directory: Path | str, *, create: bool) -> Path:
-    cache_root = _canonical_cache_root(cache_directory, create=create)
-    object_root = cache_root / "sha256"
-    metadata = _entry_metadata(object_root)
-    if metadata is None and create:
-        try:
-            object_root.mkdir()
-        except FileExistsError:
-            pass
-        except OSError as error:
-            raise MachineArtifactError(
-                f"cannot create cache object root {object_root}"
-            ) from error
-        metadata = _entry_metadata(object_root)
-    if metadata is None:
-        raise MachineArtifactError(f"cache object root is missing: {object_root}")
-    if object_root.is_symlink():
-        raise MachineArtifactError(
-            f"cache object root must not be a symlink: {object_root}"
-        )
-    if not object_root.is_dir():
-        raise MachineArtifactError(
-            f"cache object root is not a directory: {object_root}"
-        )
-    resolved = _require_contained(object_root, cache_root, "cache object root")
-    if resolved != object_root:
-        raise MachineArtifactError(f"cache object root is not canonical: {object_root}")
-    return object_root
-
-
-def _verified_destination(object_root: Path, digest_hex: str) -> Path | None:
-    destination = object_root / digest_hex
-    metadata = _entry_metadata(destination)
-    if metadata is None:
-        return None
-    if destination.is_symlink():
-        raise MachineArtifactError(
-            f"cache digest destination must not be a symlink: {destination}"
-        )
-    if not destination.is_dir():
-        raise MachineArtifactError(
-            f"cache digest destination is not a directory: {destination}"
-        )
-    resolved = _require_contained(destination, object_root.parent, "cache object")
-    if resolved != destination:
-        raise MachineArtifactError(
-            f"cache digest destination is not canonical: {destination}"
-        )
-    return destination
-
-
-def _inventory_files(
-    directory: Path,
-    *,
-    allow_manifest: bool,
-    containment_root: Path | None = None,
-) -> dict[str, Path]:
-    if not directory.is_dir():
-        raise MachineArtifactError(f"artifact directory does not exist: {directory}")
-    if directory.is_symlink():
-        raise MachineArtifactError(
-            f"artifact directory must not be a symlink: {directory}"
-        )
-    if containment_root is not None:
-        resolved = _require_contained(directory, containment_root, "artifact directory")
-        if resolved != directory:
-            raise MachineArtifactError(
-                f"artifact directory is not canonical: {directory}"
-            )
-    inventory: dict[str, Path] = {}
-    for path in sorted(directory.rglob("*")):
-        relative = path.relative_to(directory).as_posix()
-        if path.is_symlink():
-            raise MachineArtifactError(f"artifact contains symlink {relative!r}")
-        if containment_root is not None:
-            _require_contained(path, containment_root, f"artifact path {relative!r}")
-        if path.is_dir():
-            continue
-        if not path.is_file():
-            raise MachineArtifactError(f"artifact contains non-file {relative!r}")
-        if relative == MANIFEST_FILENAME and allow_manifest:
-            continue
-        safe = _safe_relative_name(relative)
-        if safe in inventory:
-            raise MachineArtifactError(f"duplicate artifact file {safe!r}")
-        inventory[safe] = path
-    _validate_portable_name_set(inventory)
-    return inventory
-
-
+@_lifted
 def create_machine_artifact_manifest(
     source_directory: Path | str,
     *,
@@ -971,7 +723,9 @@ def create_machine_artifact_manifest(
         sorted(
             ArtifactFile(name=name, sha256=digest, size=size)
             for name, path in inventory.items()
-            for digest, size in [_file_identity(path)]
+            for digest, size in [
+                _file_identity(path, consistency_field_locator=_hdf5_consistency_field)
+            ]
         )
     )
     manifest = MachineArtifactManifest(
@@ -991,242 +745,7 @@ def create_machine_artifact_manifest(
     return manifest
 
 
-def _verify_directory_files(
-    directory: Path,
-    manifest: MachineArtifactManifest,
-    *,
-    allow_manifest: bool,
-    containment_root: Path | None = None,
-) -> None:
-    inventory = _inventory_files(
-        directory,
-        allow_manifest=allow_manifest,
-        containment_root=containment_root,
-    )
-    expected_names = {artifact_file.name for artifact_file in manifest.files}
-    actual_names = set(inventory)
-    if actual_names != expected_names:
-        missing = sorted(expected_names - actual_names)
-        unexpected = sorted(actual_names - expected_names)
-        raise MachineArtifactError(
-            f"artifact files differ: missing={missing}, unexpected={unexpected}"
-        )
-    for artifact_file in manifest.files:
-        digest, size = _file_identity(inventory[artifact_file.name])
-        if size != artifact_file.size:
-            raise MachineArtifactError(
-                f"size mismatch for {artifact_file.name!r}: "
-                f"expected {artifact_file.size}, got {size}"
-            )
-        if digest != artifact_file.sha256:
-            raise MachineArtifactError(
-                f"checksum mismatch for {artifact_file.name!r}: "
-                f"expected {artifact_file.sha256}, got {digest}"
-            )
-
-
-def _digest_hex(digest: str) -> str:
-    if not isinstance(digest, str) or not digest.startswith("sha256:"):
-        raise MachineArtifactError("artifact digest must use the sha256 algorithm")
-    value = digest.removeprefix("sha256:")
-    _validate_hex(value, (64,), "artifact digest")
-    return value
-
-
-def _linux_rename_no_replace() -> Any:
-    required_flags = ("O_DIRECTORY", "O_NOFOLLOW")
-    if any(not hasattr(os, name) for name in required_flags):
-        raise MachineArtifactError(
-            "descriptor-relative artifact publication requires Linux open flags"
-        )
-    required_dir_fd = (os.mkdir, os.open, os.stat)
-    if any(function not in os.supports_dir_fd for function in required_dir_fd):
-        raise MachineArtifactError(
-            "descriptor-relative artifact publication is unavailable"
-        )
-    if not Path("/proc/self/fd").is_dir():
-        raise MachineArtifactError(
-            "descriptor-relative artifact paths require the Linux proc filesystem"
-        )
-    library = CDLL(None, use_errno=True)
-    try:
-        rename_no_replace = library.renameat2
-    except AttributeError as error:
-        raise MachineArtifactError(
-            "atomic no-clobber directory publication is unavailable"
-        ) from error
-    rename_no_replace.argtypes = (c_int, c_char_p, c_int, c_char_p, c_int)
-    rename_no_replace.restype = c_int
-    return rename_no_replace
-
-
-def _open_pinned_object_root(object_root: Path) -> int:
-    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-    try:
-        descriptor = os.open(object_root, flags)
-    except OSError as error:
-        raise MachineArtifactError(
-            f"cannot pin cache object root {object_root}"
-        ) from error
-    opened = os.fstat(descriptor)
-    visible = _entry_metadata(object_root)
-    if (
-        visible is None
-        or S_ISLNK(visible.st_mode)
-        or not S_ISDIR(visible.st_mode)
-        or (visible.st_dev, visible.st_ino) != (opened.st_dev, opened.st_ino)
-    ):
-        os.close(descriptor)
-        raise MachineArtifactError(
-            f"cache object root changed while being pinned: {object_root}"
-        )
-    return descriptor
-
-
-def _pinned_root_path(descriptor: int, cache_root: Path) -> Path:
-    proc_path = Path("/proc/self/fd") / str(descriptor)
-    resolved = _require_contained(proc_path, cache_root, "pinned cache object root")
-    opened = os.fstat(descriptor)
-    current = resolved.stat()
-    if (current.st_dev, current.st_ino) != (opened.st_dev, opened.st_ino):
-        raise MachineArtifactError("pinned cache object root identity changed")
-    return resolved
-
-
-def _visible_root_matches_descriptor(object_root: Path, descriptor: int) -> bool:
-    visible = _entry_metadata(object_root)
-    if visible is None or S_ISLNK(visible.st_mode) or not S_ISDIR(visible.st_mode):
-        return False
-    opened = os.fstat(descriptor)
-    return (visible.st_dev, visible.st_ino) == (opened.st_dev, opened.st_ino)
-
-
-def _destination_exists_at(descriptor: int, digest_hex: str) -> bool:
-    try:
-        metadata = os.stat(digest_hex, dir_fd=descriptor, follow_symlinks=False)
-    except FileNotFoundError:
-        return False
-    except OSError as error:
-        raise MachineArtifactError(
-            f"cannot inspect cache object {digest_hex}"
-        ) from error
-    if S_ISLNK(metadata.st_mode):
-        raise MachineArtifactError(
-            f"cache digest destination must not be a symlink: {digest_hex}"
-        )
-    if not S_ISDIR(metadata.st_mode):
-        raise MachineArtifactError(
-            f"cache digest destination is not a directory: {digest_hex}"
-        )
-    return True
-
-
-def _create_private_directory(descriptor: int, digest_hex: str) -> tuple[str, int]:
-    for _ in range(32):
-        name = f".{digest_hex}.{secrets.token_hex(12)}"
-        try:
-            os.mkdir(name, mode=0o700, dir_fd=descriptor)
-        except FileExistsError:
-            continue
-        except OSError as error:
-            raise MachineArtifactError(
-                "cannot create private cache directory"
-            ) from error
-        flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-        try:
-            temporary_descriptor = os.open(name, flags, dir_fd=descriptor)
-        except OSError as error:
-            raise MachineArtifactError("cannot pin private cache directory") from error
-        return name, temporary_descriptor
-    raise MachineArtifactError("cannot allocate a unique private cache directory")
-
-
-def _copy_file_at(source: Path, directory_descriptor: int, name: str) -> None:
-    parts = PurePosixPath(name).parts
-    current = os.dup(directory_descriptor)
-    try:
-        for component in parts[:-1]:
-            try:
-                os.mkdir(component, mode=0o700, dir_fd=current)
-            except FileExistsError:
-                pass
-            flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-            child = os.open(component, flags, dir_fd=current)
-            os.close(current)
-            current = child
-        source_flags = os.O_RDONLY | os.O_NOFOLLOW
-        source_descriptor = os.open(source, source_flags)
-        source_metadata = os.fstat(source_descriptor)
-        if not S_ISREG(source_metadata.st_mode):
-            os.close(source_descriptor)
-            raise MachineArtifactError(
-                f"artifact source is not a regular file: {source}"
-            )
-        target_flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
-        try:
-            target_descriptor = os.open(
-                parts[-1],
-                target_flags,
-                0o600,
-                dir_fd=current,
-            )
-        except OSError:
-            os.close(source_descriptor)
-            raise
-        with (
-            os.fdopen(source_descriptor, "rb") as source_stream,
-            os.fdopen(target_descriptor, "wb") as target_stream,
-        ):
-            shutil.copyfileobj(source_stream, target_stream)
-    except OSError as error:
-        raise MachineArtifactError(f"cannot copy artifact file {name!r}") from error
-    finally:
-        os.close(current)
-
-
-def _write_bytes_at(directory_descriptor: int, name: str, data: bytes) -> None:
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
-    try:
-        descriptor = os.open(name, flags, 0o600, dir_fd=directory_descriptor)
-    except OSError as error:
-        raise MachineArtifactError(f"cannot write artifact file {name!r}") from error
-    with os.fdopen(descriptor, "wb") as stream:
-        stream.write(data)
-
-
-def _publish_directory_no_replace(
-    rename_no_replace: Any,
-    object_descriptor: int,
-    source_name: str,
-    destination_name: str,
-) -> bool:
-    """Atomically publish within a pinned directory and report a winner."""
-
-    result = rename_no_replace(
-        object_descriptor,
-        os.fsencode(source_name),
-        object_descriptor,
-        os.fsencode(destination_name),
-        _RENAME_NO_REPLACE,
-    )
-    if result == 0:
-        return True
-    error_number = get_errno()
-    if error_number in {EEXIST, ENOTEMPTY}:
-        return False
-    error = OSError(error_number, os.strerror(error_number), destination_name)
-    if error_number in _RENAME_UNSUPPORTED_ERRORS:
-        raise MachineArtifactError(
-            "the cache filesystem does not support atomic no-clobber directory "
-            "rename, so an artifact cannot be published there without risking a "
-            "half-visible object; several parallel filesystems reject the "
-            "operation outright"
-        ) from error
-    raise MachineArtifactError(
-        f"cannot publish cache object {destination_name}"
-    ) from error
-
-
+@_lifted
 def materialize_machine_artifact(
     source_directory: Path | str,
     cache_directory: Path | str,
@@ -1236,7 +755,7 @@ def materialize_machine_artifact(
 
     manifest.validate()
     source = Path(source_directory)
-    _verify_directory_files(source, manifest, allow_manifest=False)
+    _verify_directory_files(source, manifest.files, allow_manifest=False)
     digest_hex = _digest_hex(manifest.digest)
     rename_no_replace = _linux_rename_no_replace()
     object_root = _verified_object_root(cache_directory, create=True)
@@ -1279,7 +798,7 @@ def materialize_machine_artifact(
         )
         _verify_directory_files(
             temporary_path,
-            manifest,
+            manifest.files,
             allow_manifest=True,
         )
         os.close(temporary_descriptor)
@@ -1313,6 +832,7 @@ def materialize_machine_artifact(
         os.close(object_descriptor)
 
 
+@_lifted
 def resolve_machine_artifact(
     cache_directory: Path | str,
     digest: str,
@@ -1358,7 +878,7 @@ def resolve_machine_artifact(
             )
     _verify_directory_files(
         directory,
-        manifest,
+        manifest.files,
         allow_manifest=True,
         containment_root=object_root.parent,
     )

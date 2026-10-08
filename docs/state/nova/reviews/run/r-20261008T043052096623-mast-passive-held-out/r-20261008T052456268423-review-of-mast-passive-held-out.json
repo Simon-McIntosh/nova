@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite gate logs: baseline_suite reports revision 5ade61b2 with completed=true failure_count=0 failure_ids=[], and after_suite reports completed=true failure_count=0 failure_ids=[], so added_failure_count is 0 and added_failure_ids is empty; the after_suite header also names revision 5ade61b2 so I independently re-ran tests/test_mast_passive_decay_modes.py at the reviewed head 7c6f085f (53 passed, EXIT=0) to confirm the head arm is green",
+  "call_site_count": 2,
+  "call_sites": [
+    "nova/imas/mast_passive_decay_modes.py:1506",
+    "benchmarks/mast_passive_held_out.py:191"
+  ],
+  "completed_at": "2026-10-08T05:39:47.651Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-08T05:25:21Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's after_suite log header records revision 5ade61b2ce08419c11eea2ddd1c7ff464e0637ee, identical to its baseline_suite revision, so the recorded head arm cannot be distinguished from the base arm by revision alone even though it ran the changed tree (53 passed versus 49). I closed the gap independently by re-running tests/test_mast_passive_decay_modes.py at the reviewed head 7c6f085f (53 passed, EXIT=0), which is why the added-failure count is 0; recording the post-commit revision in the gate header would remove the ambiguity."
+    },
+    {
+      "file": "benchmarks/mast_passive_held_out.py",
+      "line": "289",
+      "severity": "follow-on",
+      "text": "follow-on: control_removes_improvement requires the permuted arm to show no improvement at all (control <= 0), which a single bounded coordinate can almost always evade by moving to an interval edge, so the permuted arm's positive 0.2911 percent at coordinate 1.016 (near the interval limit) is a boundary artefact the criterion cannot distinguish from leakage. The threshold makes the control pass only under a degenerate no-fit outcome, so it neither attributes the real 22.4989 percent gain nor clears it; the coordinator should decide whether the control should compare the real and permuted gains rather than require a non-positive permuted gain."
+    },
+    {
+      "file": "docs/figures/mast-passive-held-out/receipt.json",
+      "line": "1",
+      "severity": "follow-on",
+      "text": "follow-on: the promoted-direction fit saturates its nominal resistance interval, coil-case resistivity 0.900 uOhm m equal to the interval upper bound [0.690, 0.900] versus seed 0.740, so the held-out improvement is produced by a coordinate clamped at the interval edge rather than an interior optimum. The run discloses this, but it means the fitted resistance is an interval artefact and any future promotion must widen the seed interval or widen the model before the value can be treated as physical; the receipt carries the boundary coordinate for the coordinator to act on."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read commit by commit against base 5ade61b2ce08419c11eea2ddd1c7ff464e0637ee: 2643be6f adds the bounded held-out fit driver plus the driven_field delegation and four tests; 61912a61 pins the training/held-out split; 7c6f085f adds the evidence fragment, figure and receipt under docs/. All seven paths are inside the declared scope and the substantive additions are the driver, the shared-propagator delegation and the tests.",
+    "done_when": "The node's measure is the held-out residual improvement under real versus permuted drives. The manifest records the measurement job (1282009, all_debug, 15 min, EXIT=0, control_passed=false) and the artifact audit (VERIFIED); I independently re-ran tests/test_mast_passive_decay_modes.py at the reviewed head 7c6f085f (53 passed, EXIT=0) and confirmed the gate measures the added behaviour. The run's own recorded after_suite names the base revision, so its recorded arm alone does not prove coverage of the head (see finding).",
+    "goal": "The goal is the held-out evaluation of the one grouped passive direction identifiable above the sensor floor with all drive scales free, plus the drive-permutation control. The diff adds benchmarks/mast_passive_held_out.py (bounded single-coordinate fit over the pinned split, bounded nuisance drive scales, held-out scoring, passivity and interval controls, permutation arm) and re-points driven_field at the shared propagator; the receipt reports the real and permuted held-out improvements and the run's own negative verdict, so the goal is delivered and its scientific acceptance is honestly reported as unmet.",
+    "manifest": "Read; reports status complete, the three commits, the gate at 53 passed, a negative_control_log, baseline_suite and after_suite both completed=true failure_count=0, and the passivity/interval/drive-bound verification. Its after_suite revision field equals its baseline revision (5ade61b2), and receipt.json records revision 61912a61 rather than the head 7c6f085f; both are disclosed minima rather than false claims.",
+    "write_paths": "Read the reviewed manifest's declared paths; the diff against base 5ade61b2ce08419c11eea2ddd1c7ff464e0637ee is exactly the seven paths declared, none outside them."
+  },
+  "justifications": {
+    "durability": "Four tests were added and pin the substantive behaviour: test_uniform_driven_field_uses_shared_propagator monkeypatches nova.circuit.propagate.zoh_mode_response and asserts driven_field calls it exactly once (the reuse contract is guarded, not merely used); test_passive_direction_respects_every_nominal_interval asserts the interval-scaled coordinate keeps every group inside its bounds; test_control_guard_refuses_improvement_with_permuted_drives exercises control_removes_improvement on positive, zero and NaN inputs; test_drive_permuted_control_cannot_reproduce_real_improvement runs both arms and asserts the permuted gain falls short. The negative control is genuine: substituting identity for the cross-shot derangement turned both gains to 0.9999996974 and reddened the permuted-control test (negative-control.log header revision 2643be6f, EXIT=1). Not 20 because the same control_removes_improvement criterion is near-unfalsifiable for a single bounded coordinate (see finding), so the guard passes or fails on a threshold rather than on demonstrated signal leakage.",
+    "evidence": "The receipt reproduces: artifact-validation.log VERIFIED with EXIT=0 (intervals=50/50, positive_rates=50/50, drive_bounds=13/13, original_tests_unchanged=true, shared_propagator_marker=true); measurement.log SUMMARY and the receipt agree on real 6.4014->5.6355 mT and permuted 32.1174->32.0706 mT; the split was pinned before scoring and carries the spectrum sha256; the measurement ran as one all_debug job (1282009), not an array. I independently re-ran the gate at the reviewed head 7c6f085f (53 passed, 1 warning, EXIT=0). Not higher because the run's own recorded after_suite log header names revision 5ade61b2 (identical to its baseline), so the recorded head arm is indistinguishable from the base arm by revision even though it in fact ran the changed tree. See finding.",
+    "fit": "nova/imas/mast_passive_decay_modes.py keeps the module's existing eigen idiom (eigh(np.diag(resistance), inductance)) and now delegates propagation to the owner; benchmarks/mast_passive_held_out.py is a module-level driver reading the vacuum cohort through nova.imas.mast_vacuum_cohort and driven_field/projected_spectrum from the module under test. A label scan over the changed source and benchmark finds no plan, phase, sprint, ticket or version label and no worktree path; the receipt stores revision/source_sha256 provenance instead of any plan identifier.",
+    "goal_fidelity": "The plan section 4 next step after the spectrum node was the held-out fit of the single identifiable grouped-resistance direction with the drive-permutation control, propagating through nova/circuit/propagate.py and reading geometry without the retiring registry. benchmarks/mast_passive_held_out.py delivers exactly that: one bounded interval-scaled grouped-resistance coordinate fitted on 131 training shots, all 13 coil drive scales profiled as bounded nuisance on training only, frozen for 37 excluded shots, with the passivity (minimum decay rate), interval-containment and drive-derivation controls and the cross-shot drive permutation. The run reports its own negative verdict (real 22.4989 percent squared-residual improvement, permuted 0.2911 percent, control_passed=false, no parameter promoted), which the plan anticipates for a not-identifiable group. The coordinator's two constraints are met: driven_field now delegates to nova.circuit.propagate, and the driver asserts and records geometry_registry_imported=false. Not 20 because the plan's own acceptance condition (the control must remove the held-out improvement) is unmet, faithfully and explicitly reported rather than claimed.",
+    "reuse": "The prior review of the spectrum node scored reuse 5 because driven_field re-implemented the exact-ZOH mode recurrence that nova/circuit/propagate.py:86 zoh_mode_response and integrate_eddy_ode already own. This run repairs that defect: driven_field now imports both and calls zoh_mode_response(1.0/rates, steps[0], linked_flux) for uniform cadence and integrate_eddy_ode(1.0/rates, time, linked_flux) for nonuniform, and a new test pins the call site. The algebra is preserved (swing = -dPsi, the same coefficient/decay recurrence), and the head gate is green. Not 20 only because the six added lines remove a duplication that a coordinator follow-on had already named rather than opening a new capability.",
+    "scope_discipline": "git diff 5ade61b2ce08419c11eea2ddd1c7ff464e0637ee 7c6f085f6fcbdeec969214d4cad4ab5c53d0836d is exactly seven paths, all inside the reviewed manifest's declared write paths: nova/imas/mast_passive_decay_modes.py, tests/test_mast_passive_decay_modes.py, benchmarks/mast_passive_held_out.py, docs/figures/mast-passive-held-out/split.json, docs/figures/mast-passive-held-out/receipt.json, docs/figures/mast-passive-held-out/held-out-residuals.svg, docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-passive-held-out.html. Three commits, no out-of-scope source touched, no plan or index state mutated."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T043052096623-mast-passive-held-out (node mast-passive-held-out, plan nova:mast-nonaxisymmetric-physics section 4; goal: fit the one grouped passive resistance direction identifiable above the sensor floor against held-out coil-driven transients with every drive scale free, and show a drive-permutation control removes the held-out improvement).\n\nVERDICT goal: benchmarks/mast_passive_held_out.py performs the bounded single-coordinate held-out fit on the pinned split with all 13 drive scales bounded nuisance on training only, and driven_field now propagates through nova/circuit/propagate.py; the run reports real 22.4989 percent versus permuted 0.2911 percent and its own negative verdict control_passed=false, so the measurement is delivered and the acceptance criterion is honestly reported unmet.\nVERDICT done_when: the measure is the held-out residual improvement; the manifest records job 1282009 on all_debug at EXIT=0 and I re-ran the gate at the reviewed head 7c6f085f (53 passed, EXIT=0).\nVERDICT write_paths: the diff against base 5ade61b2ce08419c11eea2ddd1c7ff464e0637ee is exactly seven paths, all declared.\nVERDICT manifest: status complete, three commits, gate 53 passed, negative_control_log present; its after_suite revision equals its baseline revision and the receipt names 61912a61 rather than the head 7c6f085f.\nVERDICT diff: three commits over the seven declared paths; 2643be6f adds the driver, the shared-propagator delegation and four tests, 61912a61 pins the split, 7c6f085f adds the fragment, figure and receipt.\nCALL_SITES: nova/imas/mast_passive_decay_modes.py:1506, benchmarks/mast_passive_held_out.py:191\n\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the plan section 4 held-out fit and drive-permutation control are delivered; no promotion, verdict recorded as a negative result; branch that keeps the propagating owner shared and geometry registry absent is met.\nSCORE evidence: 16\nJUSTIFICATION evidence: receipt reproduced (artifact-validation VERIFIED, EXIT=0) and I re-ran the head gate 53 passed, but the recorded after_suite revision equals the base revision so the run's own arm did not itself cover the head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff is exactly the seven declared paths, three commits, no plan or index state touched.\nSCORE durability: 17\nJUSTIFICATION durability: four added tests guard the shared-propagator call site, the interval containment, the control guard and the permuted arm, and the identity-substitution mutation reddens the permuted-control test; the control criterion is nonetheless near-unfalsifiable.\nSCORE fit: 18\nJUSTIFICATION fit: the module keeps its eigen idiom, the driver reads the vacuum cohort through the owning module, and no forbidden label or worktree path appears in the changed source.\nSCORE reuse: 19\nJUSTIFICATION reuse: driven_field now delegates to nova.circuit.propagate.zoh_mode_response and integrate_eddy_ode, repairing the duplication the prior review flagged, with a test pinning the call site.\n\nFINDING manifest.md:22 follow-on: after_suite revision equals baseline revision 5ade61b2, so the recorded head arm is indistinguishable from the base arm by revision; I re-ran the gate at head 7c6f085f (53 passed) to close it.\nFINDING benchmarks/mast_passive_*_held_out.py:289 follow-on: control_removes_improvement requires a non-positive permuted gain, which a bounded single coordinate evades at an interval edge, so the 0.2911 percent permuted gain is a boundary artefact the criterion cannot read as leakage or as signal.\nFINDING docs/figures/mast_passive-held-out/receipt.json follow-on: the fitted resistance saturates its interval upper bound (0.900 uOhm m of [0.690, 0.900]), so the improvement is edge-driven and any promotion must widen the interval or the model first.\n",
+  "review_run_id": "r-20261008T052456268423-review-of-mast-passive-held-out",
+  "reviewed_base_sha": "5ade61b2ce08419c11eea2ddd1c7ff464e0637ee",
+  "reviewed_head_sha": "7c6f085f6fcbdeec969214d4cad4ab5c53d0836d",
+  "reviewed_run_id": "r-20261008T043052096623-mast-passive-held-out",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:40:00Z",
+  "total": 108
+}

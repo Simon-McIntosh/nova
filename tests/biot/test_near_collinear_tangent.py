@@ -2,6 +2,7 @@
 
 import jax
 import jax.numpy as jnp
+import mpmath as mp
 import numpy as np
 import pytest
 
@@ -104,6 +105,75 @@ def test_truncated_tangent_fails_identity(monkeypatch):
     jax.clear_caches()
     got, expected = _identity()
     assert worst(got[1], expected[1]) > EXACT_TOLERANCE
+
+
+def test_tangent_against_extended_precision():
+    """Check smooth and selected branch boundaries against a 50-digit derivative."""
+    hand, base = _identity()
+    indices = (
+        0,
+        100,
+        1000,
+        2999,
+        3000,
+        4000,
+        5999,
+        6000,
+        7000,
+        7999,
+        8000,
+        8500,
+        8999,
+        9000,
+        9500,
+        9999,
+    )
+    hand_errors = []
+    base_errors = []
+    value_errors = []
+    with mp.workdps(50):
+        for index in indices:
+            values = [mp.mpf(float(value[index])) for value in PRIMALS]
+            directions = [mp.mpf(float(value[index])) for value in TANGENTS]
+            a, b, gap, length = values
+            active = bool(ACTIVE[index])
+            near = (
+                active
+                and gap > 0
+                and a * b > 0
+                and gap
+                <= (
+                    mp.mpf(float(polygonanalytic._ARCSINH_DIFFERENCE_SWITCH))
+                    * min(abs(a), abs(b))
+                )
+            )
+
+            def branch(t):
+                aa, bb, gg, ll = [
+                    value + t * direction
+                    for value, direction in zip(values, directions, strict=True)
+                ]
+                if not active or gap <= 0:
+                    return mp.mpf(0)
+                if near:
+                    divisor = bb * mp.hypot(aa, gg) + aa * mp.hypot(bb, gg)
+                    return mp.asinh(ll * (aa + bb) / divisor)
+                return mp.asinh(bb / gg) - mp.asinh(aa / gg)
+
+            reference_value = float(branch(mp.mpf(0)))
+            reference_tangent = float(mp.diff(branch, mp.mpf(0)))
+            scale = max(abs(reference_tangent), 1e-14)
+            hand_errors.append(abs(float(hand[1][index]) - reference_tangent) / scale)
+            base_errors.append(abs(float(base[1][index]) - reference_tangent) / scale)
+            value_errors.append(abs(float(base[0][index]) - reference_value))
+    print(
+        "REFERENCE near_collinear samples=16 digits=50 "
+        f"primal_absolute_max={max(value_errors):.3e} "
+        f"hand_relative_max={max(hand_errors):.3e} "
+        f"base_jvp_relative_max={max(base_errors):.3e}"
+    )
+    assert max(hand_errors) <= 1e-9
+    assert max(base_errors) <= 1e-9
 
 
 def compile_arm(name, arm):

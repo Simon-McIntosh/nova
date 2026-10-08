@@ -353,6 +353,10 @@ def test_package_functions_equal_base_functions():
 
 
 @pytest.mark.slow
+# A compile row spawns 21 fresh processes; the repository's 300 s hang guard is
+# for ordinary tests and cuts this one off before it asserts, so it gets its own
+# bound.  Every other test keeps the default.
+@pytest.mark.timeout(1800)
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
     ratio = compile_ratio("test_range_tangent_recurrences", name)

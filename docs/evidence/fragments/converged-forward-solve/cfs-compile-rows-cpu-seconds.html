@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-cfs-compile-rows-cpu-seconds">
+<meta name="plan-title" content="Tangent compile rows measured by child CPU seconds">
+<meta name="plan-summary" content="The shared tangent harness measures each fresh compile process by the CPU seconds it spends inside lowered.compile(), asserts the tangent-over-primal ratio on the median CPU seconds, and prints the wall beside it. Ten rows ran twice sequentially and twice under eight spinning processes: eight pass, and finite_part and graded_residual exceed the 3.0 bound in all four passes.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="79a6f515e 28c2e5e86 b1466efce 3a3039c8a c8d645037 c545974aa b2900e4d1 e9e29794f 44702f030 d63a5ab9e da50d8aba">
+<meta name="plan-recorded-at" content="2026-10-08">
+<meta name="plan-rows" content="converged-forward-solve-cfs-compile-rows-cpu-seconds">
+<title>Tangent compile rows measured by child CPU seconds | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-compile-rows-heading">Tangent compile rows measured by child CPU seconds</h1>
+
+<p id="cfs-compile-rows-mechanism">The compile rows timed each fresh process by wall, which moves with unrelated load. The shared harness <code>tests/biot/tangent_identity.py</code> now measures each fresh compile process by the CPU seconds it spends inside <code>lowered.compile()</code>, taken with <code>time.process_time()</code> around exactly that call and reported by the child. <code>compile_ratio</code> asserts the 3.0 bound on the median of seven CPU medians, with no absolute floor. The wall and the whole child's CPU, from <code>getrusage(RUSAGE_CHILDREN)</code> deltas around the spawn, are printed beside every arm. The whole-child CPU is recorded but deliberately not the asserted measure: a fresh child spends four to six CPU seconds importing the interpreter and the module before compiling anything, a constant that would collapse the two arms toward one another and let the row measure the interpreter rather than the program.</p>
+
+<h2 id="cfs-compile-rows-passes">Four passes over ten rows</h2>
+<p id="cfs-compile-rows-gate-note">Two 59-minute <code>all_debug</code> jobs ran the same ten cases: job A two sequential passes, job B two passes with eight CPU-bound spinner processes on the same allocation, each spinner started and stopped by its own pid. Each arm is the median of seven fresh, cache-disabled processes; <em>eq</em> is the expanded equation count of the primal and of the tangent; the cpu and wall columns are the first sequential pass; <em>ratio</em> is the tangent median CPU over the primal median CPU, the asserted quantity, given for the sequential passes (1, 2) then the loaded passes (1, 2). Each pass ran ten rows in 13 to 14 minutes: 8 passed, 2 failed, 93 deselected. The bound is 3.0 and is unchanged, as is the median of seven.</p>
+
+<table id="cfs-compile-rows-table">
+<caption>Compile CPU and wall medians over seven fresh cache-disabled processes each, for the primal and the tangent arm. Sequential passes A1 and A2 carry no added load; loaded passes B1 and B2 run with eight spinning processes on the same allocation.</caption>
+<thead><tr><th>case</th><th>module</th><th>eq<br>primal / tangent</th><th>cpu primal [s]</th><th>cpu tangent [s]</th><th>wall tangent [s]</th><th>ratio<br>A1 / A2 / B1 / B2</th><th>outcome</th></tr></thead>
+<tbody>
+<tr><td>complete_pole</td><td>elliptic</td><td>259 / 1035</td><td>0.640</td><td>1.263</td><td>0.509</td><td>1.97 / 1.98 / 2.15 / 2.14</td><td>passed</td></tr>
+<tr><td>finite_part</td><td>elliptic</td><td>69 / 243</td><td>0.044</td><td>0.202</td><td>0.099</td><td>4.59 / 4.67 / 3.14 / 3.22</td><td>exceeds the bound</td></tr>
+<tr><td>sn_pole_moment</td><td>elliptic</td><td>272 / 1336</td><td>0.675</td><td>1.305</td><td>0.516</td><td>1.93 / 2.00 / 2.12 / 2.06</td><td>passed</td></tr>
+<tr><td>product</td><td>range</td><td>405 / 862</td><td>0.315</td><td>0.688</td><td>0.287</td><td>2.18 / 2.26 / 2.09 / 2.17</td><td>passed</td></tr>
+<tr><td>deflate</td><td>range</td><td>49 / 125</td><td>0.125</td><td>0.191</td><td>0.085</td><td>1.52 / 1.53 / 1.72 / 1.71</td><td>passed</td></tr>
+<tr><td>contract</td><td>range</td><td>80 / 210</td><td>0.143</td><td>0.409</td><td>0.282</td><td>2.87 / 2.78 / 2.89 / 2.82</td><td>passed</td></tr>
+<tr><td>factorise</td><td>vertex_edge</td><td>88 / 184</td><td>0.210</td><td>0.501</td><td>0.178</td><td>2.38 / 2.31 / 2.26 / 2.18</td><td>passed</td></tr>
+<tr><td>pole_contraction</td><td>vertex_edge</td><td>372 / 1120</td><td>0.089</td><td>0.236</td><td>0.182</td><td>2.64 / 2.64 / 2.52 / 2.54</td><td>passed</td></tr>
+<tr><td>pole_contraction_mirrored</td><td>vertex_edge</td><td>372 / 1120</td><td>0.089</td><td>0.238</td><td>0.183</td><td>2.69 / 2.66 / 2.63 / 2.56</td><td>passed</td></tr>
+<tr><td>graded_residual</td><td>vertex_edge</td><td>372 / 954</td><td>0.321</td><td>1.435</td><td>0.531</td><td>4.47 / 4.37 / 3.48 / 3.48</td><td>exceeds the bound</td></tr>
+</tbody></table>
+
+<p id="cfs-compile-rows-load">The CPU measure is stable under load and the wall measure is not. Every row moves by at most 0.2 in ratio between a sequential pass and a loaded pass, while the wall seconds of the same rows rise by about a third under the spinners: complete_pole tangent wall 0.509 s sequential against 0.712 s loaded, product 0.287 against 0.355, graded_residual 0.531 against 0.589. The whole-child CPU stays between 2.7 s and 6.4 s in every row, the import cost the asserted measure excludes.</p>
+
+<p id="cfs-compile-rows-red">Two rows exceed the 3.0 bound by CPU seconds in all four passes and are left red, not loosened. finite_part (test_elliptic_tangent_recurrences.py) grows from 69 to 243 expanded equations and its median compile CPU from 0.044 s to 0.202 s, 4.59 sequential and 3.14 loaded; its primal arm is the smallest compile in the set and the measure's own resolution is a large fraction of that 0.044 s. graded_residual (test_vertex_edge_tangent_recurrences.py) grows from 372 to 954 equations and from 0.321 s to 1.435 s, 4.47 sequential and 3.48 loaded. pytest reports both as failing test ids, test_tangent_compiles_within_three_primals[finite_part] and test_tangent_compiles_within_three_primals[graded_residual], in all four pass logs.</p>
+
+<p id="cfs-compile-rows-before">Until this change the bound was asserted on wall seconds, and the pass logs carry both measures for the same seven-process medians, so the two can be compared on identical runs. By wall, graded_residual already exceeded the bound: 0.140 s primal against 0.531 s tangent, a ratio of 3.79. By wall, finite_part was under it: 0.043 s against 0.099 s, a ratio of 2.30, and by CPU it is over at 4.59. finite_part is therefore the one row whose verdict this change moves, and graded_residual was red before it. Both figures are medians of seven in the unloaded first sequential pass.</p>
+
+<p id="cfs-compile-rows-timeout">A compile row spawns twenty-one fresh processes, so the repository's 300 s per-test hang guard cut the row off before it reached its assertion on a busy allocation. test_tangent_compiles_within_three_primals in each of the three tangent modules now carries its own @pytest.mark.timeout(1800); every other test keeps the default timeout, and the tangent-over-primal bound stays 3.0. With that bound the four passes complete.</p>
+
+<p id="cfs-compile-rows-control">The declared mutation NOVA_TANGENT_COMPILE_HEAVY=1 compiles the tagged tangent program twice and sums it, so it is the only difference from a gate pass. Under the mutation the tangent program of graded_residual grows from 954 to 1910 expanded equations, its median compile CPU rises to 2.478 s against a 0.615 s primal, a ratio of 4.03, and pytest fails test_tangent_compiles_within_three_primals[graded_residual] (EXIT=1, negative-control-graded-residual.log). The control bites, but that row already exceeds the bound without the mutation on this allocation, so the doubling form does not discriminate. It is superseded by a control strong enough to turn a passing row red: NOVA_TANGENT_COMPILE_HEAVY=1 compiles four independent copies of the tagged tangent program and sums them, each copy over arguments scaled by a different factor, so no two copies share a subexpression and the compiler cannot eliminate the duplication — four identical copies are common-subexpression-eliminated and barely move the ratio. On complete_pole and contract, the two rows that pass all four passes, the switch fails both by test id: complete_pole 259 primal equations against 4164 tangent, median compile CPU 0.862 s against 5.108 s, ratio 5.93, and contract 80 against 1264, 0.176 s against 0.884 s, ratio 5.01, against the unchanged bound of 3.0 (negative-control-passing-rows.log, EXIT=1). With the switch unset the same two rows pass at 2.11 and 2.86 (negative-control-passing-rows-off.log), so the failure is the switch and nothing else.</p>
+
+<p id="cfs-compile-rows-delta">The tests/biot delta against the orientation revision 72112421c ran as one <code>all_debug</code> job per arm, each running every test module under <code>tests/biot</code> one after another with the same selection, <code>-m 'not slow'</code>, which excludes the compile rows because the four passes above are their evidence. <code>timeout</code> bounded each module to 300 s of wall as well as each test to 150 s. The two arms agree exactly: five modules green in both, and <code>tests/biot/test_vertex_term_tangents.py</code> cut by its own bound with EXIT=124 in the base tree and in the worktree alike, so no module under tests/biot is moved by this change. That module's first listed test, <code>test_tangent_matches_base_jvp[vertex]</code>, sits inside JAX <code>backend.compile_and_load</code>, which is why a signal-method timeout cannot interrupt it; the wall is pre-existing and identical on both revisions. The literal command and the two single-line JSON receipts are in the manifest under <code>baseline_suite</code> and <code>after_suite</code>.</p>
+</main></body></html>

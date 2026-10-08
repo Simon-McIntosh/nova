@@ -1,0 +1,76 @@
+<section data-reckon="evidence-fragment" id="fpv-analytic-smoke-landing">
+  <h2 id="fpv-analytic-smoke-landing-title">Analytic vacuum rung: the coil flux reproduces the reference map</h2>
+  <p id="fpv-analytic-smoke-landing-premise">
+    The pinned <code>analytic</code> case is a vacuum test. Its reference
+    equilibrium carries only a 65×65 two-dimensional flux map —
+    <code>global_quantities.ip</code> is <code>0.0</code>,
+    <code>psi_magnetic_axis</code> holds the <code>-9e40</code> empty sentinel,
+    and <code>profiles_1d</code> and the boundary outline are empty — so no
+    plasma current and no magnetic axis exist to band. The input bundle carries
+    a single filamentary coil at <code>(R, Z) = (103, 101) m</code> at 1 A and
+    no plasma. The rung therefore validates the free-boundary flux assembly
+    itself; the ITER trio rungs of the plan carry the Ip, axis and area bands.
+  </p>
+  <p id="fpv-analytic-smoke-landing-gate">
+    <code>tests/test_forward_profile_analytic_smoke.py</code> computes the
+    vacuum poloidal flux of the input coil on the reference grid through the
+    package's own coil Green function
+    (<code>nova.biot.greens.greens_psi</code>, the kernel the forward operator
+    carries) and asserts the maximum absolute difference against the reference
+    peak <code>|psi|</code>, on a relative bound of <code>1e-3</code> written in
+    the test before scoring. A forward profile solve is not run: the case is
+    vacuum with zero source current, so the Green function is the shipped
+    route, and there is no converged-state receipt to assert. The state is 1-D
+    only, so the case is not a battery rung.
+  </p>
+  <p id="fpv-analytic-smoke-landing-cocos">
+    <strong>COCOS transform: IDENTITY.</strong> The reference <code>psi</code>
+    is total poloidal flux in Wb, in the package's internal COCOS 17
+    convention, and matches <code>greens_psi</code> with neither a factor of
+    <code>2*pi</code> nor a sign between them (median per-node ratio
+    <code>1.0000000009</code>). This is asserted by comparing absolute flux, not
+    absorbed into a fitted scale, so a sign flip or a 2π scale would fail the
+    rung.
+  </p>
+  <figure id="fpv-analytic-smoke-landing-figure">
+    <img
+      src="/nova/figures/forward-profile-validator-set/fpv-analytic-smoke/analytic-vacuum-flux-map.svg"
+      alt="Poloidal line contours of the analytic vacuum flux map: the reference (dashed grey) and the coil's vacuum flux (blue) on shared levels, with the filamentary coil at R=103, Z=101."
+    />
+    <figcaption id="fpv-analytic-smoke-landing-caption">
+      One poloidal panel, line contours only. Dashed grey: the analytic
+      reference <code>psi</code>. Blue: the input coil's vacuum flux
+      <code>greens_psi(R, Z, 103, 101) * 1 A</code>. Both are drawn on one shared
+      physical level array (13 levels, <code>0</code> to the reference peak
+      <code>1.10628e-3 Wb</code>), so a mismatch cannot hide behind independent
+      colour scales. The filamentary coil is the orange dot; there is no wall in
+      the analytic case (empty limiter units). Maximum absolute residual
+      <code>9.418e-10 Wb</code>, i.e. <code>8.5e-7</code> of the reference peak,
+      over 4224 of 4225 grid nodes — the single excluded node is the coil's own
+      position <code>(103, 101)</code>, where the Green function is singular.
+      No null markers are drawn: a vacuum field from one coil admits no
+      stationary point inside the domain, so there is no axis or X-point to mark.
+    </figcaption>
+  </figure>
+  <p id="fpv-analytic-smoke-landing-measure">
+    Head arm <code>5 passed</code>, <code>EXIT=0</code>, with the emitted
+    statement <em>“COCOS identity: reference psi is total poloidal flux (Wb),
+    COCOS 17, matches greens_psi with no 2*pi and no sign; coil=(103.0, 101.0)
+    I=1.0 A; map residual=9.418e-10 of peak 1.106280e-03 Wb over 4224 nodes (1
+    singular excluded)”</em>. Negative control: scaling the input coil current
+    by 1.5 (<code>NOVA_VALIDATOR_CONTROL_SCALE=1.5</code>) raises the residual to
+    <code>0.438</code> of the peak and fails the <code>1e-3</code> bound,
+    <code>EXIT=1</code>.
+  </p>
+  <p id="fpv-analytic-smoke-landing-manifest">
+    <code>tests/data-manifest.json</code> now pins the analytic reference layer
+    (<code>analytic_baseline_circle.nc</code>,
+    <code>sha256:90a1b599…bdb24e</code>, 195575 B, DD 4.1.0) as role
+    <code>reference</code>, re-derived from the registry manifest at
+    <code>sha256:aac593a7…</code>, so no <code>extra_layers</code> workaround
+    remains. <code>nova/imas/validator_case.py</code> is the fetch-and-open seam:
+    it fetches each pinned layer by digest, converts the NetCDF blob to the
+    per-IDS HDF5 layout through imas-python alone, and hands back an opened
+    <code>DBEntry</code> per role at the layer's own <code>dd_version</code>.
+  </p>
+</section>

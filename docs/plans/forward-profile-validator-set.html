@@ -26,7 +26,7 @@
 <meta name="plan-effort-hours" content="10.0">
 <meta name="plan-commits" content="aff62b24,646d21fb,28a8247b,c36ef55c,5ae3ec94,f4ff7b6f,b762ae17,cc679621,9692e2b8,7c7fe7e0,228517df,d5961848,1dd08655,b736d9b8">
 <meta name="plan-impl" content="0.4">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -131,6 +131,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261008T054926396251-review-of-fpv-fetch-credential-faults" data-who="reckon-build" data-when="2026-10-08T06:12:07.095Z">
     <div class="r-comment-body"><p>review-of-fpv-fetch-credential-faults: stored the independent review for run r-20261008T051612236087-fpv-fetch-credential-faults covering only the delta 7c7fe7e0..d5961848f5; scores goal_fidelity 20, evidence 18, scope_discipline 20, durability 18, fit 19, reuse 19 (total 114); head gate reproduced 12 passed 0 skipped EXIT=0, own negative control EXIT=1, one non-blocking durability follow-on.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261008T051612236087-fpv-fetch-credential-faults" data-who="reckon-build" data-when="2026-10-08T06:17:41Z">
+    <div class="r-comment-body"><p>fpv-fetch-credential-faults: credential failures are classified only by registry authentication phrases; transport messages with permission denied, ports 401/403/4030, or 403 ms remain unreachable. All 8 pinned layers verified; final gate 23 passed, 0 skipped.</p></div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T054057020599-review-of-fpv-analytic-smoke" data-who="reckon-build" data-when="2026-10-08T06:05:41.077Z">
     <div class="r-comment-body"><p>review of r-20261008T043927638886-fpv-analytic-smoke (fpv-analytic-smoke) stored, scores goal_fidelity 19 / evidence 14 / scope_discipline 20 / durability 17 / fit 17 / reuse 18, total 105, added_failure_count 0 (reviewed base a4b489cf7f56ad60b5c54741d15010d494004804, head 5ae3ec946bb2d161b45240526c7532764024a6fc); head gate reproduced 5 passed EXIT=0, declared control reproduced red EXIT=1 (residual 0.438122 &gt; 1e-3); 4 follow-on findings (fragment caption misstates the residual by ~900x, figure drawn with axes/ticks contrary to the media rules, unused extra_layers seam retained against the resume ruling, head log lacks the gate-log header and the manifest records no baseline/after arms).</p></div>

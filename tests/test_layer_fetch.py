@@ -53,27 +53,30 @@ def _unreachable_runner(reason: str = "dial tcp: connection refused"):
 
 
 # --------------------------------------------------------------------------
-# a correct fetch of the analytic layer, published and re-verified
+# fetch every pinned layer, then verify its size and digest
 # --------------------------------------------------------------------------
-def test_fetched_analytic_layer_is_published_and_verified(tmp_path: Path) -> None:
-    layer = _layer("analytic", "input")
-    expected_hex = str(layer["digest"]).removeprefix("sha256:")
+def test_every_pinned_layer_is_fetched_and_verified(tmp_path: Path) -> None:
     cache = tmp_path / "store"
-    try:
-        directory = layer_fetch.fetch_layer(
-            str(layer["digest"]),
-            cache_directory=cache,
-            name=str(layer["name"]),
-            registry=_REGISTRY,
-        )
-    except layer_fetch.LayerRegistryUnreachable as error:
-        pytest.skip(f"registry unreachable, analytic layer left unknown: {error}")
+    for case in _RECORD["cases"].values():
+        for layer in case["layers"]:
+            digest = str(layer["digest"])
+            try:
+                directory = layer_fetch.fetch_layer(
+                    digest,
+                    cache_directory=cache,
+                    name=str(layer["name"]),
+                    registry=_REGISTRY,
+                )
+            except layer_fetch.LayerRegistryUnreachable as error:
+                pytest.skip(f"registry unreachable, pinned layer left unknown: {error}")
 
-    blob = directory / str(layer["name"])
-    payload = blob.read_bytes()
-    assert len(payload) == int(layer["size"])
-    assert hashlib.sha256(payload).hexdigest() == expected_hex
-    assert (directory / "manifest.json").is_file()
+            blob = directory / str(layer["name"])
+            payload = blob.read_bytes()
+            assert len(payload) == int(layer["size"]), layer["name"]
+            assert hashlib.sha256(payload).hexdigest() == digest.removeprefix(
+                "sha256:"
+            ), layer["name"]
+            assert (directory / "manifest.json").is_file()
 
 
 def test_a_published_layer_is_reused_without_contacting_the_registry(
@@ -135,19 +138,79 @@ def test_the_recorded_digests_are_well_formed() -> None:
 
 
 # --------------------------------------------------------------------------
-# a clean skip when the registry is unreachable, and a decisive 404 is not one
+# distinguish an unreachable registry, credential failure and unknown digest
 # --------------------------------------------------------------------------
-def test_unreachable_registry_yields_a_clean_skip(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    ("message", "expected_error"),
+    [
+        (
+            "dial tcp 10.0.0.1:443: connect: permission denied",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "dial tcp 10.0.0.1:4030: connect: permission denied",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "dial tcp 10.0.0.1:401: connect: connection refused",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "dial tcp 10.0.0.1:403: connect: connection refused",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        (
+            "i/o timeout after 403 ms",
+            layer_fetch.LayerRegistryUnreachable,
+        ),
+        ("401 Unauthorized", layer_fetch.LayerRegistryCredentialError),
+        ("403 Forbidden", layer_fetch.LayerRegistryCredentialError),
+        ("status code 401", layer_fetch.LayerRegistryCredentialError),
+        ("status code 403", layer_fetch.LayerRegistryCredentialError),
+        ("unauthorized", layer_fetch.LayerRegistryCredentialError),
+        ("authentication required", layer_fetch.LayerRegistryCredentialError),
+        ("denied: requested access", layer_fetch.LayerRegistryCredentialError),
+        ("access denied", layer_fetch.LayerRegistryCredentialError),
+        ("expired token", layer_fetch.LayerRegistryCredentialError),
+        ("token expired", layer_fetch.LayerRegistryCredentialError),
+        ("token has expired", layer_fetch.LayerRegistryCredentialError),
+        (
+            'Error response from registry: HEAD "https://ghcr.io/v2/example/'
+            'manifests/sha256:abc": unauthorized: authentication required',
+            layer_fetch.LayerRegistryCredentialError,
+        ),
+    ],
+    ids=[
+        "permission-denied-transport",
+        "port-4030",
+        "port-401",
+        "port-403",
+        "timeout-number",
+        "401-unauthorized",
+        "403-forbidden",
+        "status-401",
+        "status-403",
+        "unauthorized",
+        "authentication-required",
+        "requested-access-denied",
+        "access-denied",
+        "expired-token",
+        "token-expired",
+        "token-has-expired",
+        "oras-authentication-response",
+    ],
+)
+def test_registry_failure_messages_classify_correctly(
+    message: str, expected_error: type[Exception], tmp_path: Path
+) -> None:
     layer = _layer("iter_corsica_130506", "reference")
-    try:
+
+    with pytest.raises(expected_error):
         layer_fetch.fetch_layer(
             str(layer["digest"]),
             cache_directory=tmp_path / "store",
-            runner=_unreachable_runner(),
+            runner=_unreachable_runner(message),
         )
-    except layer_fetch.LayerRegistryUnreachable as error:
-        pytest.skip(f"registry unreachable, layer left unknown: {error}")
-    pytest.fail("an unreachable registry must not report a published layer")
 
 
 def test_an_unknown_digest_is_a_fetch_error_not_a_skip(tmp_path: Path) -> None:

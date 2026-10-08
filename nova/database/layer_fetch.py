@@ -38,6 +38,10 @@ _UNREACHABLE_MARKERS = (
     "tls handshake timeout",
 )
 _CREDENTIAL_MARKERS = (
+    "401 unauthorized",
+    "403 forbidden",
+    "status code 401",
+    "status code 403",
     "unauthorized",
     "authentication required",
     "denied: requested access",

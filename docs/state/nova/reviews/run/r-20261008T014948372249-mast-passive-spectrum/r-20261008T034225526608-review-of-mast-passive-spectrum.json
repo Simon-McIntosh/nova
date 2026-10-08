@@ -1,0 +1,99 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: its baseline_suite field is empty (no base log), and its after_suite log (factor-head-tests.log, revision 0928eb68daa28a7fd305b09e715984ae4d7ae998) reports 0 failures; I re-ran the gate at the head 6bdfd7a7 (49 passed, EXIT=0) and at base f2bac518 (37 passed, EXIT=0), head-minus-base FAILED/ERROR is empty, so the run added none",
+  "call_site_count": 2,
+  "call_sites": [
+    "docs/figures/mast-passive-identifiability/measure.py:24",
+    "nova/scripts/mast_passive_calibration.py:36"
+  ],
+  "completed_at": "2026-10-08T04:30:41.491Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "mast-passive-held-out",
+      "recorded_at": "2026-10-08T04:32:17.725179+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-08T03:43:07Z",
+  "findings": [
+    {
+      "file": "nova/imas/mast_passive_decay_modes.py",
+      "line": "1449",
+      "severity": "follow-on",
+      "text": "follow-on: driven_field duplicates the exact zero-order-hold mode propagation owned by nova/circuit/propagate.py (zoh_mode_response, and integrate_eddy_ode for nonuniform clocks); it is the same decay/coefficient recurrence and scipy.signal.lfilter kernel, reached without importing the owner, so the repository now carries two implementations of one capability (duplicates, not extends or wraps)."
+    },
+    {
+      "file": "docs/figures/mast-passive-identifiability/measure.py",
+      "line": "511",
+      "severity": "follow-on",
+      "text": "follow-on: the goal's named companion deliverable, the same spectrum with drive columns permuted across shots reported beside the real one, is absent; the run's own note concedes it (synthetic collinearity and nuisance alignment replace the invalid permutation-spectrum control), so the plan section 4 permuted-spectrum comparison is unmet while the count itself is delivered."
+    },
+    {
+      "file": "manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest's baseline_suite field is empty, so the read-time added-failure derivation finds no base gate log and returns the count unmeasured rather than zero; I supplied the missing base arm myself (37 passed at base f2bac518e47057cec01dd505c6dbbba7c8892b3c, EXIT=0), head-minus-base FAILED/ERROR empty, which is why the added count is 0."
+    },
+    {
+      "file": "manifest.md",
+      "line": "22",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's after_suite records revision 0928eb68daa28a7fd305b09e715984ae4d7ae998, an ancestor of but not equal to the head 6bdfd7a7b96f5671e736e0849c5204640dfcf72f, because the measure.py driver was rewritten again at 0d13bcc754d3df1bf3d2661094db4ff4cb63dc54 afterward, so the run's own recorded gate did not cover the revision it landed; I re-ran the gate at the head (49 passed) to close it."
+    },
+    {
+      "file": "manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the negative_control_note and the recorded negative-control.log apply a nuisance-projection bypass, while the run's own declared negative control names a drive-permutation spectrum, so the red log demonstrates a genuine guard but not the named control."
+    },
+    {
+      "file": "docs/figures/mast-passive-identifiability/measure.py",
+      "line": "17",
+      "severity": "follow-on",
+      "text": "follow-on: the driver imports nova.catalog.mast_geometry.MachineGeometryRegistry, which plan section 5 (machine-description retirement) deletes; the dependency is real and idiomatic today, so this is a sequencing note for the coordinator rather than a defect in this node."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base f2bac518e47057cec01dd505c6dbbba7c8892b3c; eight commits over six paths, all inside the declared scope, the substantive additions being projected_spectrum/DrivenSpectrum (rank by whitened nuisance projection), driven_field (exact-ZOH driven propagation), grouped_driven_jacobian (interval-scaled passive and drive derivatives), the measure.py driver, and tests covering each.",
+    "done_when": "the done_when is the identifiable-group count above the recorded sensor floor; the manifest records the single arm (49 passed, EXIT=0) and the receipt asserts it, I re-ran tests/test_mast_passive_decay_modes.py at the reviewed head (49 passed) and independently re-assembled the receipt from the persisted factors reproducing SUMMARY identifiable=1 nuisance_rank=13 observations=6650343 with 0 numeric diffs against the committed spectrum.json, so the gate does measure the done_when; the run's own recorded after_suite sits at an earlier revision (see finding).",
+    "goal": "the goal asks how many grouped MAST passive families the coil-driven vacuum transients identify above the sensor floor with all drive scales free; the diff adds projected_spectrum/DrivenSpectrum and driven_field to nova/imas/mast_passive_decay_modes.py plus the driver docs/figures/mast-passive-identifiability/measure.py, and the receipt reports 1 of 15 families above the 3.8698e-4 T floor, so the count is delivered; the plan's own companion deliverable, the same spectrum with drive columns permuted across shots reported beside it, is absent (see finding).",
+    "manifest": "read; it reports status complete, the receipt/figure/fragment committed at 6bdfd7a7b96f5671e736e0849c5204640dfcf72f, the gate at 49 passed, and a negative_control_log; its after_suite field names revision 0928eb68 rather than the head, and its negative_control_note describes a nuisance-projection bypass while the named control is a drive-permutation spectrum (see findings).",
+    "write_paths": "read the reviewed manifest's declared paths; the diff against base f2bac518e47057cec01dd505c6dbbba7c8892b3c is exactly six paths, nova/imas/mast_passive_decay_modes.py, tests/test_mast_passive_decay_modes.py, docs/figures/mast-passive-identifiability/measure.py, docs/figures/mast-passive-identifiability/spectrum.json, docs/figures/mast-passive-identifiability/spectrum.svg, docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-passive-spectrum.html, each inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_mast_passive_decay_modes.py::test_drive_aligned_passive_direction_is_removed asserts identifiable_count == 1 and singular_values[-1] < 1e-9, and I reproduced a nuisance-projection-bypass mutation that reddens it with 2 == 1, so the guard fails if the projection regresses.",
+    "evidence": "docs/figures/mast-passive-identifiability/spectrum.json is reproduced exactly from the persisted factors and the gate at nova/imas/mast_passive_decay_modes.py passes at head, but the reviewed manifest's own after_suite log sits at revision 0928eb68daa28a7fd305b09e715984ae4d7ae998, before the largest measure.py rewrite, so the run's recorded arm did not cover its head.",
+    "fit": "nova/imas/mast_passive_decay_modes.py follows the module's existing eigen-idiom (mode_set) and carries no forbidden plan, sprint or version label.",
+    "goal_fidelity": "nova/imas/mast_passive_decay_modes.py:1404 and docs/figures/mast-passive-identifiability/measure.py deliver the count (1 of 15 above floor), but the plan section 4 companion deliverable, the drive-columns-permuted spectrum reported beside the real one, is absent from the receipt and the driver.",
+    "reuse": "nova/imas/mast_passive_decay_modes.py:1449 driven_field re-implements the exact-ZOH mode recurrence that nova/circuit/propagate.py:86 zoh_mode_response already owns, decay = exp(-dt*rate), coefficient = -expm1(-dt*rate)/(dt*rate), scipy lfilter over flux increments, without importing or extending the owner.",
+    "scope_discipline": "the diff against f2bac518e47057cec01dd505c6dbbba7c8892b3c is the six paths the manifest declares and nothing else."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T014948372249-mast-passive-spectrum (node mast-passive-spectrum, plan nova:mast-nonaxisymmetric-physics section 4; goal: report how many grouped MAST passive resistances the coil-driven vacuum transients identify above the sensor floor with every drive scale free).\n\nVERDICT goal: the goal asks how many grouped MAST passive families the coil-driven vacuum transients identify above the sensor floor with all drive scales free; the diff adds projected_spectrum/DrivenSpectrum and driven_field to nova/imas/mast_passive_decay_modes.py plus the driver docs/figures/mast-passive-identifiability/measure.py, and the receipt reports 1 of 15 families above the 3.8698e-4 T floor, so the count is delivered; the plan's own companion deliverable, the same spectrum with drive columns permuted across shots reported beside it, is absent (see finding).\nVERDICT done_when: the done_when is the identifiable-group count above the recorded sensor floor; the manifest records the single arm (49 passed, EXIT=0) and the receipt asserts it, I re-ran tests/test_mast_passive_decay_modes.py at the reviewed head (49 passed) and independently re-assembled the receipt from the persisted factors reproducing SUMMARY identifiable=1 nuisance_rank=13 observations=6650343 with 0 numeric diffs against the committed spectrum.json, so the gate does measure the done_when; the run's own recorded after_suite sits at an earlier revision (see finding).\nVERDICT write_paths: read the reviewed manifest's declared paths; the diff against base f2bac518e47057cec01dd505c6dbbba7c8892b3c is exactly six paths, nova/imas/mast_passive_decay_modes.py, tests/test_mast_passive_decay_modes.py, docs/figures/mast-passive-identifiability/measure.py, docs/figures/mast-passive-identifiability/spectrum.json, docs/figures/mast-passive-identifiability/spectrum.svg, docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-passive-spectrum.html, each inside them.\nVERDICT manifest: read; it reports status complete, the receipt/figure/fragment committed at 6bdfd7a7b96f5671e736e0849c5204640dfcf72f, the gate at 49 passed, and a negative_control_log; its after_suite field names revision 0928eb68 rather than the head, and its negative_control_note describes a nuisance-projection bypass while the named control is a drive-permutation spectrum (see findings).\nVERDICT diff: read commit by commit against base f2bac518e47057cec01dd505c6dbbba7c8892b3c; eight commits over six paths, all inside the declared scope, the substantive additions being projected_spectrum/DrivenSpectrum (rank by whitened nuisance projection), driven_field (exact-ZOH driven propagation), grouped_driven_jacobian (interval-scaled passive and drive derivatives), the measure.py driver, and tests covering each.\nCALL_SITES: docs/figures/mast-passive-identifiability/measure.py:24, nova/scripts/mast_passive_calibration.py:36\n\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/imas/mast_passive_decay_modes.py:1404 and docs/figures/mast-passive-identifiability/measure.py deliver the count (1 of 15 above floor), but the plan section 4 companion deliverable, the drive-columns-permuted spectrum reported beside the real one, is absent from the receipt and the driver.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/figures/mast-passive-identifiability/spectrum.json is reproduced exactly from the persisted factors and the gate at nova/imas/mast_passive_decay_modes.py passes at head, but the reviewed manifest's own after_suite log sits at revision 0928eb68daa28a7fd305b09e715984ae4d7ae998, before the largest measure.py rewrite, so the run's recorded arm did not cover its head.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff against f2bac518e47057cec01dd505c6dbbba7c8892b3c is the six paths the manifest declares and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_mast_passive_decay_modes.py::test_drive_aligned_passive_direction_is_removed asserts identifiable_count == 1 and singular_values[-1] < 1e-9, and I reproduced a nuisance-projection-bypass mutation that reddens it with 2 == 1, so the guard fails if the projection regresses.\nSCORE fit: 18\nJUSTIFICATION fit: nova/imas/mast_passive_decay_modes.py follows the module's existing eigen-idiom (mode_set) and carries no forbidden plan, sprint or version label.\nSCORE reuse: 5\nJUSTIFICATION reuse: nova/imas/mast_passive_decay_modes.py:1449 driven_field re-implements the exact-ZOH mode recurrence that nova/circuit/propagate.py:86 zoh_mode_response already owns, decay = exp(-dt*rate), coefficient = -expm1(-dt*rate)/(dt*rate), scipy lfilter over flux increments, without importing or extending the owner.\n\nFINDING nova/imas/mast_passive_decay_modes.py:1449 follow-on: driven_field duplicates the exact zero-order-hold mode propagation owned by nova/circuit/propagate.py (zoh_mode_response, and integrate_eddy_ode for nonuniform clocks); it is the same decay/coefficient recurrence and scipy.signal.lfilter kernel, reached without importing the owner, so the repository now carries two implementations of one capability (duplicates, not extends or wraps).\nFINDING docs/figures/mast-passive-identifiability/measure.py:511 follow-on: the goal's named companion deliverable, the same spectrum with drive columns permuted across shots reported beside the real one, is absent; the run's own note concedes it (synthetic collinearity and nuisance alignment replace the invalid permutation-spectrum control), so the plan section 4 permuted-spectrum comparison is unmet while the count itself is delivered.\nFINDING manifest.md:21 follow-on: the reviewed manifest's baseline_suite field is empty, so the read-time added-failure derivation finds no base gate log and returns the count unmeasured rather than zero; I supplied the missing base arm myself (37 passed at base f2bac518e47057cec01dd505c6dbbba7c8892b3c, EXIT=0), head-minus-base FAILED/ERROR empty, which is why the added count is 0.\nFINDING manifest.md:22 follow-on: the reviewed run's after_suite records revision 0928eb68daa28a7fd305b09e715984ae4d7ae998, an ancestor of but not equal to the head 6bdfd7a7b96f5671e736e0849c5204640dfcf72f, because the measure.py driver was rewritten again at 0d13bcc754d3df1bf3d2661094db4ff4cb63dc54 afterward, so the run's own recorded gate did not cover the revision it landed; I re-ran the gate at the head (49 passed) to close it.\nFINDING manifest.md:20 follow-on: the negative_control_note and the recorded negative-control.log apply a nuisance-projection bypass, while the run's own declared negative control names a drive-permutation spectrum, so the red log demonstrates a genuine guard but not the named control.\nFINDING docs/figures/mast-passive-identifiability/measure.py:17 follow-on: the driver imports nova.catalog.mast_geometry.MachineGeometryRegistry, which plan section 5 (machine-description retirement) deletes; the dependency is real and idiomatic today, so this is a sequencing note for the coordinator rather than a defect in this node.\n",
+  "review_run_id": "r-20261008T034225526608-review-of-mast-passive-spectrum",
+  "reviewed_base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "reviewed_head_sha": "6bdfd7a7b96f5671e736e0849c5204640dfcf72f",
+  "reviewed_run_id": "r-20261008T014948372249-mast-passive-spectrum",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T04:29:05.560864+00:00",
+  "total": 94
+}

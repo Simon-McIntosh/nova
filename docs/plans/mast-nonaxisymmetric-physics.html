@@ -29,7 +29,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7">
 <meta name="plan-impl" content="0.12">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -177,6 +177,9 @@ Done when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T014948372249-mast-passive-spectrum" data-who="reckon-build" data-when="2026-10-08T03:31:54Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-passive-spectrum.html records 1/15 passive directions above the 386.98 microtesla RMS floor with all 13 drive scales free (leading singular value 1.169217650893187); 400 selected/scored, 168 admitted, 232 refused, 0 missing; rodgr excluded; no parameter promoted.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T034225526608-review-of-mast-passive-spectrum" data-who="reckon-build" data-when="2026-10-08T04:30:41.491Z">
+    <div class="r-comment-body"><p>Independent review of r-20261008T014948372249-mast-passive-spectrum, verdict total 94/120 (goal_fidelity 17, evidence 16, scope_discipline 20, durability 18, fit 18, reuse 5). The run&#x27;s count stands: 1 of 15 grouped passive families identifiable above the 3.8698e-4 T floor with all drive scales free. The plan&#x27;s named permutation-spectrum companion deliverable is absent, the run&#x27;s own recorded after_suite predates its head, its baseline_suite is empty so the read-time added-failure derivation reads unmeasured, and driven_field duplicates the exact-ZOH propagation owned by nova/circuit/propagate.py. All six findings are follow-on; none blocks the run&#x27;s landing.</p></div>
 </div>
 </section>
 </main>

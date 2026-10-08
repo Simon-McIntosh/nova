@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:45:05.851Z",
+  "dispatched_at": "2026-10-08T01:32:38Z",
+  "findings": [
+    {
+      "anchor": "plan.html:376",
+      "id": "single_goal-1",
+      "reason": "the builder cannot tell whether \u00a711 dispatches one node or two, and a single combined verdict cannot separate \"estimator correct\" from \"pin restored to the registered 1e-5\", so the gate proves neither half.",
+      "text": "\u00a711 says to repair the gate pin \"in the same node\" as the estimator, then states the estimator and the pin repair \"are two nodes with separate verdicts\", and bundles both into one section done-when; the S24 build comment (plan.html:780) has already read it as one node (\"\u00a711 is the one node buildable now\"), so the ambiguity is live.",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:163,376",
+      "id": "reasoning-1",
+      "reason": "the two numbers are unchanged and remain the correct anchor; only their mechanism label is wrong, so an estimator anchored on them computes the same value \u2014 but a builder reading \"post-conditioning\" may attribute the floor to a mechanism its own source disowns.",
+      "text": "the plan calls 7.3220e-5 / 2.1073e-4 the \"post-conditioning numbers\", but the cited forward-operator-refinement record says the conditioning recorded ZERO interventions on all seven DIII-D carriers and that the reference-native mover is the raised-order operator, not conditioning (\"floors cite trees, never mechanisms\").",
+      "type": "reasoning",
+      "would_change": false
+    },
+    {
+      "anchor": "plan.html:173,375",
+      "id": "wiring-1",
+      "reason": "the dependency is recorded (prose in \u00a75, `data-links` in \u00a711, the S24 comment), so a scheduler reading the plan can recover it; making it a declared edge would harden scheduling but the plan does not currently send a node the wrong way.",
+      "text": "\u00a75's done-when fixes its tolerance from \"the \u00a711 estimator's post-cutover run\", which gates on `single-grid-solver-cutover`, yet \u00a75 declares no link to that plan and `plan-depends-on` names only `flux-function-forward-equilibrium`; the cutover dependency survives only in \u00a711's node link and a comment.",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_fingerprint": "4c5bd7f1f7401a4f4b2d1b800b53acfc14f5da282a3b0aff9e7646b10cb38889",
+  "plan_slug": "diiid-forward-onboarding",
+  "plan_version": 84,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T013205082212-plan-review-of-diiid-forward-onboarding",
+  "reviewed_blob_sha": "1d02b1c4bf0351383e8ec6a046f8f124cb8370fe",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a711's cited module and functions resolve (`benchmarks/derived_convergence_criterion.py` `_fit_held_out_ladder`/`_fit_qualification`/`_three_spacing_levels`; `benchmarks/efit_operator_consistency_order.py` `_fit_power_order`; `benchmarks/efit_parity_criterion_provenance.py` `richardson_fine_error`), the pin claim is true at the file (`GATE_RESIDUAL_TOLERANCE = 1.0e-6`, line 189, beside `REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5`, line 188), and the post-conditioning anchors (7.3220e-5/2.1073e-4) resolve in `docs/plans/forward-operator-refinement.html`.",
+    "done_when": "pass \u2014 \u00a711's done-when names a measurable negative control (\"a deliberately under-resolved ladder, is refused rather than reported\"); \u00a75's kill-gate done-when is measurable against the ceiling-relative bar.",
+    "evidence_paths": "pass \u2014 gate receipts and log paths named by the s5 and s11 material sit under `docs/figures/...` (in-git) and the GPFS evidence root, no scratchpad or node-local path.",
+    "naming": "pass \u2014 the estimator and pin-repair text carries no plan labels, ticket numbers or version tags into any symbol; the plan-internal ids (f-dfo-004, f-dfo-013) stay in plan prose.",
+    "reasoning": "a finding \u2014 \u00a75 and \u00a711 label 7.3220e-5 / 2.1073e-4 the \"post-conditioning numbers\", a mechanism attribution the cited source explicitly retracts.",
+    "single_goal": "a finding \u2014 \u00a711 tells the builder to repair the pin \"in the same node\" and, one sentence later, that the estimator and the pin repair \"are two nodes with separate verdicts\"; the section carries one combined done-when.",
+    "wiring": "pass \u2014 `plan-depends-on` names `flux-function-forward-equilibrium` and `plan-blocks` names the two imas-ambix plans; \u00a711's `data-links=\"single-grid-solver-cutover\"` resolves to an existing plan (`docs/plans/single-grid-solver-cutover.html`), and every commit anchor cited by the s5 gate-state note (d015ac9b, 2e5a7ba6, 862e712a) resolves to a real object."
+  },
+  "section_digests": {
+    "_document": "1262a3a9c501256f0151a11f2d946238498381d08828d61d3ed7907162905b7a",
+    "s1": "93422ba9d21f9babc9db8404d0b5d3baacc2dfcad92746920eafe6ff42ba6c3f",
+    "s10": "5ee1fe9cb9dcf861dfbad8f85760cfa4b0dbefb3578041932893626d3f7be4e9",
+    "s10-scope": "99a32da276a358e2ea6ef26ddfb2cd3cb65fca803e8c6598885c297bdb4cb503",
+    "s11": "ca5f107c86b2af06838815ab10f78e4e7b46066af5e5f71294491db46c7c4c5f",
+    "s2": "121346f83e2a39c1ff21f0e1692b07069feb4a456e758f09f238cec0853815ce",
+    "s3": "05a034ec04d583fb2d43ad261a6397912db06afde06e4ce7dc238a482622059a",
+    "s4": "21de21a78d530e113d622d30e73d0d09f5f8ce8286c9770e28e0eff423269639",
+    "s5": "7788cf04fc8d10652a767c4683fcbe7401298cec6cab3a51052ed88947c39608",
+    "s6": "f4c6afb6fed9ae0e7c47256df88c024b9b3b34a1093536c06ad255caabde0b19",
+    "s7": "2393ec96f7265159170a4c5c3f5556a8a420197555e6257edd1507b4f11be511",
+    "s8": "9749656a81898fed5a467452b690521b29cec261ec10fe7b3d1eff63b1f79de3",
+    "s9": "92e83ce527c957fba282edd3688125dde1c3cd41bd6b886ef404db91c6b617ef"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:46:15.735840+00:00"
+}

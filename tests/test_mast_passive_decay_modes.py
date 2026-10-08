@@ -742,3 +742,120 @@ class TestTransientReading:
         assert payload["excitation_family"] == "p4"
         assert payload["window_span"] > 0.0
         assert math.isfinite(payload["signal_to_noise"])
+
+
+class TestDrivenSensitivity:
+    """Driven sensitivities separate decay shape from uncertain drive amplitude."""
+
+    @staticmethod
+    def jacobian(*, collinear=False, step=1e-4):
+        from nova.imas.mast_passive_decay_modes import grouped_driven_jacobian
+
+        time = np.linspace(0.0, 3.0, 301)
+        currents = np.minimum(time, 0.5)[:, None]
+        rates = np.array([2.0, 2.0 if collinear else 5.0])
+        return grouped_driven_jacobian(
+            np.eye(2),
+            rates,
+            np.ones((1, 2)),
+            np.ones((2, 1)),
+            np.array([[0.2]]),
+            time,
+            currents,
+            ("case", "vessel"),
+            {"case": (0.5, 2.0), "vessel": (0.5, 2.0)},
+            np.ones(1),
+            np.array([[0.5, 1.5]]),
+            difference_step=step,
+        )
+
+    def test_two_groups_have_two_directions_and_collinear_groups_have_one(self):
+        from nova.imas.mast_passive_decay_modes import projected_spectrum
+
+        counts = []
+        for collinear in (False, True):
+            names, passive, nuisance = self.jacobian(collinear=collinear)
+            assert names == ("case", "vessel")
+            result = projected_spectrum(
+                passive.reshape(-1, 2) / 1e-4,
+                nuisance.reshape(-1, 1) / 1e-4,
+            )
+            counts.append(result.identifiable_count)
+            assert result.nuisance_rank == 1
+        assert counts == [2, 1]
+
+    def test_drive_aligned_passive_direction_is_removed(self):
+        from nova.imas.mast_passive_decay_modes import projected_spectrum
+
+        time = np.linspace(0.0, 1.0, 101)
+        drive_response = np.exp(-time)
+        passive = np.column_stack([drive_response, time * drive_response]) / 1e-3
+        for width in (1e-12, 1.0, 1e12):
+            result = projected_spectrum(passive, passive[:, :1] * width)
+            assert np.count_nonzero(result.fixed_drive_singular_values > 1.0) == 2
+            assert result.identifiable_count == 1
+            assert result.singular_values[-1] < 1e-9
+
+    def test_piecewise_linear_drive_matches_analytic_current(self):
+        from nova.imas.mast_passive_decay_modes import driven_field
+
+        for time in (np.linspace(0.0, 1.0, 101), np.array([0.0, 0.01, 0.2, 1.0])):
+            result = driven_field(
+                np.array([[2.0]]),
+                np.array([4.0]),
+                np.array([[3.0]]),
+                np.array([[0.5]]),
+                np.array([[0.2]]),
+                time,
+                time[:, None],
+            )
+            expected = -3.0 * 0.5 / 4.0 * (1.0 - np.exp(-2.0 * time)) + 0.2 * time
+            np.testing.assert_allclose(result[:, 0], expected, rtol=1e-12, atol=1e-14)
+
+    def test_derivative_converges_and_drive_column_contains_induced_response(self):
+        from nova.imas.mast_passive_decay_modes import driven_field
+
+        _, passive, nuisance = self.jacobian()
+        _, refined, _ = self.jacobian(step=5e-5)
+        np.testing.assert_allclose(passive, refined, rtol=2e-7, atol=1e-10)
+        time = np.linspace(0.0, 3.0, 301)
+        current = np.minimum(time, 0.5)[:, None]
+        field = driven_field(
+            np.eye(2),
+            np.array([2.0, 5.0]),
+            np.ones((1, 2)),
+            np.ones((2, 1)),
+            np.array([[0.2]]),
+            time,
+            current,
+        )
+        np.testing.assert_allclose(nuisance[:, :, 0], 0.5 * field, atol=1e-14)
+        assert np.max(np.abs(nuisance[:, 0, 0] - 0.1 * current[:, 0])) > 0.1
+
+    def test_compressed_rows_preserve_rms_spectrum(self):
+        from nova.imas.mast_passive_decay_modes import projected_spectrum
+
+        _, passive, nuisance = self.jacobian()
+        passive, nuisance = passive[:, 0], nuisance[:, 0]
+        original = projected_spectrum(passive, nuisance)
+        compact = np.linalg.qr(np.column_stack([passive, nuisance]), mode="r")
+        result = projected_spectrum(
+            compact[:, :2], compact[:, 2:], observation_count=301
+        )
+        np.testing.assert_allclose(
+            result.singular_values, original.singular_values, rtol=1e-12
+        )
+
+    def test_nonpassive_circuit_is_refused(self):
+        from nova.imas.mast_passive_decay_modes import driven_field
+
+        with pytest.raises(DecayModeError, match="invalid driven"):
+            driven_field(
+                np.eye(1),
+                np.array([-1.0]),
+                np.ones((1, 1)),
+                np.ones((1, 1)),
+                np.ones((1, 1)),
+                np.array([0.0, 1.0]),
+                np.zeros((2, 1)),
+            )

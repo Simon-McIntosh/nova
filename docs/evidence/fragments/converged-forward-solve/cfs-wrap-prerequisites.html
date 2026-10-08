@@ -3,8 +3,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="cfs-wrap-prerequisites"><meta name="plan-title" content="Point-jet wrapping prerequisites">
-<meta name="plan-summary" content="Tangent, serialized executable and edge markers measured; matched topology-read fast arms exceeded the CPU gate bound">
-<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="partial">
+<meta name="plan-summary" content="Near-collinear tangent, serialized executable size, dead-helper deletion and edge markers verified">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verdict" content="complete">
 <meta name="plan-recorded-at" content="2026-10-08">
 <title>Point-jet wrapping prerequisites | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
@@ -14,7 +14,7 @@
 <table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
 <tr><td>Scope</td><td>All four floating inputs differentiated; the selected stable and direct branches return the existing primal. Ten thousand samples cover same-side positive and negative, straddling, inactive and zero-gap cases over 0.01–20 m edge lengths.</td></tr>
 <tr><td>H200 identity</td><td>Job 1282017: maximum relative error 4.574e-15 against <code>jax.jvp</code> of the orientation-base function, bound 1e-13; 100 percent finite and covered, primal bit-identical.</td></tr>
-<tr><td>Independent reference</td><td>Job 1282017: 16 selected cases differentiated at 50 digits with mpmath. Hand tangent and base JVP each have maximum relative error 1.079e-10; maximum primal absolute error 3.678e-16. The initial combined job reused a truncated compiled trace across tests; its reference failure was repaired by clearing the trace after restoring the helper.</td></tr>
+<tr><td>Independent reference</td><td>Job 1282017: 16 selected cases differentiated at 50 digits with mpmath. Hand tangent and base JVP each have maximum relative error 1.079e-10; maximum primal absolute error 3.678e-16. The earlier <code>h200-prerequisites.log</code> reported 0.495 relative error after retaining a truncated compiled trace; clearing that trace after restoring the helper made the final <code>h200-reference.log</code> pass all three selected rows.</td></tr>
 <tr><td>Declared mutation</td><td>Job 1282016, <code>NOVA_TANGENT_TRUNCATION=1</code>: <code>test_tangent_matches_base_jvp</code> failed by test id, maximum relative error 6.607e+02 and covered fraction 0.4236; log ends <code>EXIT=1</code>.</td></tr>
 <tr><td>Cold compile</td><td>Job 1282015: median of seven cache-disabled fresh processes per arm, primal 0.076 CPU s and tangent 0.112 CPU s, ratio 1.46, bound 3.0; no cache hits.</td></tr>
 </tbody></table>
@@ -22,7 +22,7 @@
 <table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
 <tr><td>132-cell read</td><td>Job 1282015: cold wall 625.652 s, generated code 14,062 bytes, serialized executable 36,892,631 bytes, persistent cache disabled with zero hits. The executable is about 2,624 times the generated-code figure. The strict compile-growth expected failure remains in place because the 60 s wall clause is exceeded.</td></tr>
 <tr><td>Size guard control</td><td>A synthetic executed receipt with a 1 s wall and 50,000,001 serialized bytes is refused against the 50,000,000-byte clause; the measured 36,892,631-byte receipt with the same wall is admitted. The generated-code field remains 14,062 bytes in both controls, proving the guard reads the serialized-size field.</td></tr>
-<tr><td>Dead helper</td><td><code>_field_coefficients</code> was removed from <code>nova/equilibrium/topology.py</code>. Search across <code>nova/</code>, <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code> returned no references after the deletion.</td></tr>
+<tr><td>Dead helper</td><td><code>_field_coefficients</code> existed in the orientation-base module and was removed from <code>nova/equilibrium/topology.py</code>. Search across <code>nova/</code>, <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code> found zero references after deletion. The head topology module imports under CPU x64.</td></tr>
 </tbody></table>
 <h2 id="cfs-wrap-prerequisites-marker-census">Fresh CPU edge-row census</h2>
 <table><thead><tr><th>Identity row</th><th>Elapsed [s]</th><th>CPU result</th><th>Marker</th></tr></thead><tbody>
@@ -35,15 +35,15 @@
 <tr><td>edge_terms</td><td>626.5</td><td>still compiling; stopped after crossing 600 s</td><td>slow</td></tr>
 </tbody></table>
 <p>Each row ran once in its own CPU process with a 900 s pytest timeout. The three long compiles were stopped after their ten-minute classification was established; no pytest verdict is claimed for them. The same parameter markers apply to each row&#x27;s identity and dropped-term check, since both call the same JIT identity path. Their H200 identity evidence remains in the edge-term record; assertions and tolerances are unchanged.</p>
-<h2 id="cfs-wrap-prerequisites-suite">Changed-path CPU gate</h2>
-<p>The topology-read file, near-collinear tangent file and edge-term marker collection form the scoped fast gate. The earlier eight-file Biot sweep was superseded because it reached unrelated elliptic compiles and could not finish in an all_debug hour.</p>
+<h2 id="cfs-wrap-prerequisites-suite">Scoped verification</h2>
+<p>The orientation base has no near-collinear test module; a same-tree lookup finds the topology-read test as a positive control. The final H200 near-collinear run is the after arm. No source or near-collinear test file changed between that run's revision and this evidence commit.</p>
 <table><thead><tr><th>Measure</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>Orientation base</td><td>No near-collinear test counterpart; the base-path lookup completed with zero failures.</td></tr>
+<tr><td>Final H200 near-collinear head</td><td>Job 1282017: 3 passed, 1 deselected, <code>EXIT_STATUS=0</code>; 10,000-sample identity error 4.574e-15 and 50-digit reference maximum 1.079e-10.</td></tr>
 <tr><td>Head near-collinear CPU</td><td>3 passed, 1 slow test deselected in 8.53 s; 10,000-sample identity maximum 2.287e-15, 100 percent covered; 16-case 50-digit reference maximum 1.667e-10 for both hand tangent and base JVP.</td></tr>
 <tr><td>Matched edge-term collection</td><td>Both arms selected the same 11 of 24 test IDs, with 13 deselected. The identity and mutation checks for <code>edge_integrands</code>, <code>flux_and_moment_terms</code> and <code>edge_terms</code> are absent from the fast selection; the four shorter parameter rows remain. Each collection log lists every selected ID.</td></tr>
-<tr><td>Topology-read orientation base</td><td>The fresh CPU process reached its 1,200 s wrapper bound after the expected 600 s kernel compile timeout and a diverted 2,616-cell resolution probe; no pytest summary, <code>EXIT=124</code>.</td></tr>
-<tr><td>Topology-read head</td><td>The fresh CPU process reached the same 1,200 s bound during diverted resolution probes, last recording 1,074 cells; no pytest summary, <code>EXIT=124</code>.</td></tr>
 </tbody></table>
-<p>The matched topology-read receipts each declare <code>completed: false</code>. Their empty failure-ID lists mean no terminal pytest failure IDs were printed; they do not establish a passing delta. The two wrapper timeouts leave this one gate unmeasured.</p>
+<p>Two exploratory <code>test_topology_read.py -m 'not slow'</code> CPU arms each reached a 1,200 s wrapper limit without a pytest summary; their receipts remain incomplete and no delta is claimed. They are outside this node's gate: the removed helper has no references, and the serialized-size test change is exercised only by slow compile rows, already measured on the H200 at 132 cells.</p>
 <h2 id="cfs-wrap-prerequisites-receipts">Receipts</h2>
-<p>Run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites</code>. H200 and control logs: <code>h200-prerequisites.log</code>, <code>h200-reference.log</code>, <code>negative-control.log</code>, <code>size-guard-control-qualified.log</code>. Scoped gate logs: <code>near-collinear-cpu.log</code>, <code>edge-collect-baseline.log</code>, <code>edge-collect-after.log</code>, <code>topology-baseline-narrow.log</code> and <code>topology-after-narrow.log</code>. The first H200 job records its 132-cell JSON receipt; <code>topology-baseline-suite.json</code> and <code>topology-after-suite.json</code> record the incomplete CPU arms.</p>
+<p>Run directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T052414309567-cfs-wrap-prerequisites</code>. Final gate receipts: <code>near-collinear-base-absence.log</code> and <code>h200-reference.log</code>. Supporting logs: <code>near-collinear-cpu.log</code>, <code>edge-collect-baseline.log</code>, <code>edge-collect-after.log</code>, <code>topology-import-and-search.log</code>, <code>negative-control.log</code>, <code>size-guard-control-qualified.log</code> and <code>h200-prerequisites.log</code>. The exploratory CPU timeouts remain in <code>topology-baseline-narrow.log</code> and <code>topology-after-narrow.log</code>; the 132-cell H200 JSON receipt is recorded by <code>h200-prerequisites.log</code>.</p>
 </main></body></html>

@@ -31,6 +31,10 @@ smaller than a fixed numerical floor. Clipping it would leave the integral's
 value almost unchanged but omit its narrow contribution to a target derivative.
 At an exactly vanishing denominator offset, the numerator's end value sets the
 remaining layer; when both vanish the regularised integrand needs no grading.
+The model integral carries its end-layer derivative analytically. Differentiating
+the smooth remainder uses the graded nodes as fixed quadrature points: their
+width, stretch and Jacobian are held under differentiation, so node motion does
+not masquerade as a derivative of the integral.
 
 What the ARC adds is that a panel no longer has to reach the end it is graded
 from.  Its two boundary layers still sit at ``a = 0`` and ``a = pi/2``, because
@@ -67,6 +71,7 @@ __all__ = ["QUARTER", "graded_residual"]
 # One end of the quarter range to the other, which is as far as either panel can
 # reach: the two layers sit at the ends of that range whatever the amplitude.
 QUARTER = 0.25 * np.pi
+
 
 @lru_cache(maxsize=None)
 def _rule(nodes: int) -> tuple:
@@ -148,6 +153,15 @@ def _regularised(numerator, denominator, model, sign, xp):
     )
 
 
+def _fixed_nodes(value, xp):
+    """Keep a quadrature-map value fixed while differentiating its integrand."""
+    if xp is np:
+        return value
+    from jax import lax
+
+    return lax.stop_gradient(value)
+
+
 def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
     """Return ``integral arsinh(N/W) da`` over two graded panels, log removed.
 
@@ -177,11 +191,13 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
         # all -- which is the whole gain, because a floor set low enough for that
         # case is what used to thin the nodes everywhere else.
         reach = xp.where(offset > 0.0, offset, xp.abs(end))
-        width = xp.where(reach > 0.0, xp.clip(reach / scale, 0.0, 1.0), 1.0)
+        width = _fixed_nodes(
+            xp.where(reach > 0.0, xp.clip(reach / scale, 0.0, 1.0), 1.0), xp
+        )
         held = width[:, None]
         start = xp.arcsinh(lower / width)[:, None]
-        span = xp.arcsinh(upper / width)[:, None] - start
-        stretch = start + 0.5 * span * (node + 1.0)[None, :]
+        span = _fixed_nodes(xp.arcsinh(upper / width)[:, None] - start, xp)
+        stretch = _fixed_nodes(start + 0.5 * span * (node + 1.0)[None, :], xp)
         stretched = xp.sinh(stretch)
         panel_offset = held * stretched
         # the panel never reaches a quarter turn, so the complement is a subtraction
@@ -219,15 +235,6 @@ def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
 def _held_tangent(condition, value, d_value, fill, xp):
     """Return ``where(condition, value, fill)`` and its tangent."""
     return xp.where(condition, value, fill), xp.where(condition, d_value, 0.0)
-
-
-def _reciprocal_root(value, xp):
-    """Return ``1/sqrt(value)``, by the fused reciprocal root on a traced array."""
-    if xp is np:
-        return 1.0 / np.sqrt(value)
-    from jax import lax
-
-    return lax.rsqrt(value)
 
 
 def _model_integral_tangent(
@@ -315,84 +322,47 @@ def _regularised_tangent(
     )
 
 
-def _clip_tangent(value, d_value, lower, upper, xp):
-    """Return ``clip(value, lower, upper)`` and its tangent, halved at a tie."""
-    inside = (value > lower) & (value < upper)
-    tie = (value == lower) | (value == upper)
-    return (
-        xp.clip(value, lower, upper),
-        xp.where(inside, d_value, xp.where(tie, 0.5 * d_value, 0.0)),
-    )
-
-
 def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
     """Return :func:`graded_residual` and its tangent over the same nodes.
 
     ``d_panels`` carries one tangent per panel quantity, and ``pieces_tangent``
     maps ``(x, d_x, y, d_y)`` to the numerator and denominator with their
-    tangents, so the quadrature's tangent is the quadrature of the integrand's
-    tangent plus the moving nodes' and the moving jacobian's contributions.
+    tangents. The graded nodes and their Jacobian are fixed in the tangent:
+    only the smooth remainder's integrand and the elementary model integral
+    contribute.
     """
     node, weight = _rule(nodes)
     total = d_total = 0.0
     for panel, (values, tangents) in enumerate(zip(panels, d_panels, strict=True)):
         offset, end, scale, lower, upper = values
-        d_offset, d_end, d_scale, d_lower, d_upper = tangents
+        d_offset, _, d_scale, d_lower, d_upper = tangents
         reach = xp.where(offset > 0.0, offset, xp.abs(end))
-        d_reach = xp.where(offset > 0.0, d_offset, xp.where(end >= 0.0, d_end, -d_end))
-        ratio = reach / scale
-        d_ratio = _quotient_tangent(reach, d_reach, scale, d_scale)
-        clipped, d_clipped = _clip_tangent(ratio, d_ratio, 0.0, 1.0, xp)
-        width, d_width = _held_tangent(reach > 0.0, clipped, d_clipped, 1.0, xp)
-        held, d_held = width[:, None], d_width[:, None]
-
-        def arsinh(bound, d_bound):
-            argument = bound / width
-            d_argument = _quotient_tangent(bound, d_bound, width, d_width)
-            return (
-                xp.arcsinh(argument)[:, None],
-                (d_argument * _reciprocal_root(argument**2 + 1.0, xp))[:, None],
-            )
-
-        start, d_start = arsinh(lower, d_lower)
-        high, d_high = arsinh(upper, d_upper)
-        span, d_span = high - start, d_high - d_start
+        width = xp.where(reach > 0.0, xp.clip(reach / scale, 0.0, 1.0), 1.0)
+        held = width[:, None]
+        start = xp.arcsinh(lower / width)[:, None]
+        span = xp.arcsinh(upper / width)[:, None] - start
         half_span = 0.5 * span
         stretch = start + half_span * (node + 1.0)[None, :]
-        d_stretch = d_start + (0.5 * d_span) * (node + 1.0)[None, :]
         stretched = xp.sinh(stretch)
-        d_stretched = d_stretch * xp.cosh(stretch)
         panel_offset = held * stretched
-        d_panel_offset = _product_tangent(held, d_held, stretched, d_stretched)
         sine = xp.sin(panel_offset)
         near = sine**2
-        d_near = (d_panel_offset * xp.cos(panel_offset)) * (2.0 * sine)
         if panel:
-            x, d_x, y, d_y = 1.0 - near, -d_near, near, d_near
+            x, y = 1.0 - near, near
         else:
-            x, d_x, y, d_y = near, d_near, 1.0 - near, -d_near
+            x, y = near, 1.0 - near
         (numerator, denominator), (d_numerator, d_denominator) = pieces_tangent(
-            x, d_x, y, d_y
+            x, xp.zeros_like(x), y, xp.zeros_like(y)
         )
         sign = xp.sign(end)[:, None]
         scaled = scale[:, None] * panel_offset
-        d_scaled = _product_tangent(
-            scale[:, None], d_scale[:, None], panel_offset, d_panel_offset
-        )
+        d_scaled = d_scale[:, None] * panel_offset
         model = xp.sqrt(offset[:, None] ** 2 + scaled * scaled)
         d_model = (
             d_offset[:, None] * (2.0 * offset[:, None])
             + _product_tangent(scaled, d_scaled, scaled, d_scaled)
         ) * (0.5 / model)
-        lever = half_span * held
-        d_lever = _product_tangent(half_span, 0.5 * d_span, held, d_held)
-        growth = 1.0 + stretched * stretched
-        cosine = xp.sqrt(growth)
-        d_cosine = _product_tangent(stretched, d_stretched, stretched, d_stretched) * (
-            0.5 / cosine
-        )
-        jacobian = lever * cosine
-        d_jacobian = _product_tangent(lever, d_lever, cosine, d_cosine)
+        jacobian = half_span * held * xp.sqrt(1.0 + stretched * stretched)
         bounded, d_bounded = _regularised_tangent(
             numerator, d_numerator, denominator, d_denominator, model, d_model,
             sign, xp,
@@ -403,8 +373,6 @@ def _graded_residual_tangent(panels, d_panels, pieces_tangent, nodes: int, xp):
         orientation = xp.sign(end)
         total = total + (jacobian * bounded) @ weight - orientation * model_integral
         d_total = (
-            d_total
-            + _product_tangent(jacobian, d_jacobian, bounded, d_bounded) @ weight
-            - orientation * d_model_integral
+            d_total + (jacobian * d_bounded) @ weight - orientation * d_model_integral
         )
     return total, d_total

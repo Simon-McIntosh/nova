@@ -35,17 +35,23 @@
   <figure id="fpv-analytic-smoke-landing-figure">
     <img
       src="/nova/figures/forward-profile-validator-set/fpv-analytic-smoke/analytic-vacuum-flux-map.svg"
-      alt="Poloidal line contours of the analytic vacuum flux map: the reference (dashed grey) and the coil's vacuum flux (blue) on shared levels, with the filamentary coil at R=103, Z=101."
+      alt="Poloidal line contours of the analytic vacuum flux map: the reference (thin grey) and the coil's vacuum flux (thick blue) on shared levels, with the filamentary coil at R=103, Z=101."
     />
     <figcaption id="fpv-analytic-smoke-landing-caption">
-      One poloidal panel, line contours only. Dashed grey: the analytic
-      reference <code>psi</code>. Blue: the input coil's vacuum flux
+      One poloidal panel, line contours only, drawn through the
+      <code>nova.media</code> painters (<code>poloidal_view</code>,
+      <code>draw_flux_contours</code>, <code>draw_coils</code>) so the axis is
+      off and no spines or ticks are drawn. Thin grey: the analytic reference
+      <code>psi</code>. Thick blue: the input coil's vacuum flux
       <code>greens_psi(R, Z, 103, 101) * 1 A</code>. Both are drawn on one shared
       physical level array (13 levels, <code>0</code> to the reference peak
-      <code>1.10628e-3 Wb</code>), so a mismatch cannot hide behind independent
-      colour scales. The filamentary coil is the orange dot; there is no wall in
-      the analytic case (empty limiter units). Maximum absolute residual
-      <code>9.418e-10 Wb</code>, i.e. <code>8.5e-7</code> of the reference peak,
+      <code>1.106280e-3 Wb</code>), so a mismatch cannot hide behind independent
+      colour scales. The filamentary coil (a 1 cm square at R = 103 m,
+      Z = 101 m, 1 A) is drawn as an unfilled outline. There is no wall in the
+      analytic case: its wall IDS carries zero <code>description_2d</code>
+      entries, so no limiter or vessel is drawn.
+      Maximum absolute residual <code>1.042e-12 Wb</code>, i.e.
+      <code>9.4175e-10</code> of the reference peak <code>1.106280e-3 Wb</code>,
       over 4224 of 4225 grid nodes — the single excluded node is the coil's own
       position <code>(103, 101)</code>, where the Green function is singular.
       No null markers are drawn: a vacuum field from one coil admits no
@@ -57,8 +63,10 @@
     statement <em>“COCOS identity: reference psi is total poloidal flux (Wb),
     COCOS 17, matches greens_psi with no 2*pi and no sign; coil=(103.0, 101.0)
     I=1.0 A; map residual=9.418e-10 of peak 1.106280e-03 Wb over 4224 nodes (1
-    singular excluded)”</em>. Negative control: scaling the input coil current
-    by 1.5 (<code>NOVA_VALIDATOR_CONTROL_SCALE=1.5</code>) raises the residual to
+    singular excluded)”</em>. The same state reports an absolute maximum residual
+    of <code>1.042e-12 Wb</code> against the peak <code>1.106280e-3 Wb</code>.
+    Negative control: scaling the input coil current by 1.5
+    (<code>NOVA_VALIDATOR_CONTROL_SCALE=1.5</code>) raises the ratio to
     <code>0.438</code> of the peak and fails the <code>1e-3</code> bound,
     <code>EXIT=1</code>.
   </p>

@@ -2596,9 +2596,10 @@ def _measure_kernel_compile_growth(count, tmp_path):
         )
         receipt["persistent_cache_hits"] = hits
         receipt["cold_verified"] = not hits
-        receipt["executable_bytes"] = (
+        receipt["generated_code_bytes"] = (
             executable.memory_analysis().generated_code_size_in_bytes
         )
+        receipt["executable_bytes"] = len(executable.runtime_executable().serialize())
         checkpoint("compiled")
         assert not hits, "persistent cache hit: refusing to call this wall cold"
         result = executable(*operands)

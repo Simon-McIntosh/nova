@@ -209,6 +209,15 @@ def _cases():
 
 
 CASES = _cases()
+SLOW_IDENTITY_ROWS = frozenset(
+    {"edge_integrands", "flux_and_moment_terms", "edge_terms"}
+)
+
+
+def _identity_parameter(name):
+    if name in SLOW_IDENTITY_ROWS:
+        return pytest.param(name, marks=pytest.mark.slow)
+    return name
 
 
 def test_channel_split_refuses_paired_data():
@@ -252,7 +261,7 @@ def _identity(name):
     return got, expected, worst(own, base)
 
 
-@pytest.mark.parametrize("name", list(CASES))
+@pytest.mark.parametrize("name", [_identity_parameter(name) for name in CASES])
 def test_tangent_matches_base_jvp(name):
     if truncation_active():
         with _truncated():
@@ -287,7 +296,7 @@ def test_tangent_matches_base_jvp(name):
     assert covered == 1.0
 
 
-@pytest.mark.parametrize("name", list(CASES))
+@pytest.mark.parametrize("name", [_identity_parameter(name) for name in CASES])
 def test_truncated_tangent_fails_identity(name):
     if truncation_active():
         pytest.skip("the declared control is applied to the identity rows")

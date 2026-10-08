@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="100">
+<meta name="plan-version" content="101">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -339,6 +339,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261006T065225635115-cfs-vertex-term-tangents" data-who="reckon-build" data-when="2026-10-06T10:22:02.257Z">
     <div class="r-comment-body"><p>Hand-written tangents of the polygon-analytic corner terms landed in nova/biot/polygonanalytic.py; on the H200 every one (construction, arsinh_terms, against_first_arsinh, flux_moment_residuals, horizontal_flux_line_moments) agrees with jax.jvp of the base element for element (0.000e+00 on 10000 samples) while the truncated tangents fail by up to 3.77e10, compile stays within 2.37 primals, and tests/biot adds no failure; within about 1e-6 m of a corner radius the base derivative, which the hand tangent reproduces, leaves the exact integral by up to 1.07, recorded as the strict expected failure test_near_corner_radial_tangent_meets_reference.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T003427828196-review-of-cfs-vertex-term-tangents" data-who="reckon-build" data-when="2026-10-08T00:40:33.755Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261006T065225635115-cfs-vertex-term-tangents recorded at base fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb and head 584a2fc130f4fd53ecd1147b0e7cd361b8f4f9f1: total 100 across goal_fidelity 18, evidence 15, scope_discipline 20, durability 17, fit 18, reuse 12, with two follow-on findings and no blocking finding; added_failure_count 0 and added_failure_ids [] derived from the reviewed run&#x27;s own baseline_suite and after_suite gate logs.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

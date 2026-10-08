@@ -1,0 +1,59 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T00:40:33.755Z",
+  "dispatched_at": "2026-10-08T00:34:47Z",
+  "findings": [
+    {
+      "file": "tests/biot/test_vertex_term_tangents.py",
+      "line": "406",
+      "severity": "follow-on",
+      "text": "follow-on: elementwise_fail_normwise_pass is computed and printed but never asserted, so the identity row at :420 binds a normwise per-series error while the done_when states a per-value relative bound; on CPU 31299 elements pass the row and fail elementwise, which the H200 measurement shows is a CPU compilation effect, so the count belongs in the record but does not hold the node."
+    },
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "2614",
+      "severity": "follow-on",
+      "text": "follow-on: _vertex_quotient_tangent duplicates the quotient rule already owned at nova/biot/momentchannel.py:529 and nova/biot/gradedresidual.py:229 and _vertex_product_tangent at :2605 duplicates the None-aware product rule of nova/biot/rangefunction.py:568, both modules the file already imports tangents from, so the two helpers duplicate a capability the repository owns rather than extending its owner."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read one revision at a time against fd44f630b; eleven revisions, 1178 insertions over three files, the tangent module appended to polygonanalytic.py without changing packed_analytic_moments, and the evidence fragment added under its plan.",
+    "done_when": "the done_when's identity is asserted in tests/biot/test_vertex_term_tangents.py:420 against jax.jvp of the base revision loaded from git show, its coverage at :421, its negative control at :531 and its compile ratio at :637; the manifest and the evidence fragment record each result and its log, so the gate the worker ran asserts the measure and records it.",
+    "goal": "the node's goal is to write the tangent of every polygonanalytic vertex term the point jet differentiates; the diff adds _vertex_tangent, _first_residual_tangent, _arsinh_terms_tangent, _against_first_arsinh_tangent, _flux_moment_residuals_tangent and _horizontal_flux_line_moments_tangent in nova/biot/polygonanalytic.py:2645-3057 beside the jaxpr census that enumerates every term reached, so the goal is met.",
+    "manifest": "read; it reports the H200 identity rows at 0.000e+00, the CPU near-corner reference at 1.072e+00, the negative control at 3.765e10 and the sequential tests/biot delta at one failure in both arms (graded_residual), and names each log path.",
+    "write_paths": "the manifest declares nova/biot/polygonanalytic.py, tests/biot/test_vertex_term_tangents.py and docs/evidence/fragments/converged-forward-solve/cfs-vertex-term-tangents.html; the diff against fd44f630b touches exactly those three and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_vertex_term_tangents.py:388 compares the tangent against jax.jvp of the base revision loaded from git show at :62, an independent reference, and :529 reddens the identity when the product rule's right term is dropped.",
+    "evidence": "tests/biot/test_vertex_term_tangents.py:420 asserts a per-series normwise bound while the done_when states a per-value relative bound, so the 31299 elementwise failures the row prints at :406 are recorded but not asserted, and the fragment concedes the metric is provisional.",
+    "fit": "polygonanalytic.py:2605-2660 follows the sibling modules' _<quantity>_tangent idiom and imports their owners rather than restating them, introducing no name outside the repository's conventions.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:2645-3057 defines all six named corner tangents and the census records every staged call with its tangent, the one gap being the near-corner radial branch recorded as a base-program defect at tests/biot/test_vertex_term_tangents.py:517.",
+    "reuse": "nova/biot/polygonanalytic.py:2614 re-implements the quotient rule already owned at nova/biot/momentchannel.py:529 and nova/biot/gradedresidual.py:229, though the rest of the change extends owners imported from elliptic, rangefunction, momentchannel and gradedresidual.",
+    "scope_discipline": "git diff fd44f630b..584a2fc13 touches only the three declared write paths and leaves packed_analytic_moments unmodified."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to write the tangent of every polygonanalytic vertex term the point jet differentiates; the diff adds _vertex_tangent, _first_residual_tangent, _arsinh_terms_tangent, _against_first_arsinh_tangent, _flux_moment_residuals_tangent and _horizontal_flux_line_moments_tangent in nova/biot/polygonanalytic.py:2645-3057 beside the jaxpr census that enumerates every term reached, so the goal is met.\nVERDICT done_when: the done_when's identity is asserted in tests/biot/test_vertex_term_tangents.py:420 against jax.jvp of the base revision loaded from git show, its coverage at :421, its negative control at :531 and its compile ratio at :637; the manifest and the evidence fragment record each result and its log, so the gate the worker ran asserts the measure and records it.\nVERDICT write_paths: the manifest declares nova/biot/polygonanalytic.py, tests/biot/test_vertex_term_tangents.py and docs/evidence/fragments/converged-forward-solve/cfs-vertex-term-tangents.html; the diff against fd44f630b touches exactly those three and nothing else.\nVERDICT manifest: read; it reports the H200 identity rows at 0.000e+00, the CPU near-corner reference at 1.072e+00, the negative control at 3.765e10 and the sequential tests/biot delta at one failure in both arms (graded_residual), and names each log path.\nVERDICT diff: read one revision at a time against fd44f630b; eleven revisions, 1178 insertions over three files, the tangent module appended to polygonanalytic.py without changing packed_analytic_moments, and the evidence fragment added under its plan.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:2645-3057 defines all six named corner tangents and the census records every staged call with its tangent, the one gap being the near-corner radial branch recorded as a base-program defect at tests/biot/test_vertex_term_tangents.py:517.\nSCORE evidence: 15\nJUSTIFICATION evidence: tests/biot/test_vertex_term_tangents.py:420 asserts a per-series normwise bound while the done_when states a per-value relative bound, so the 31299 elementwise failures the row prints at :406 are recorded but not asserted, and the fragment concedes the metric is provisional.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff fd44f630b..584a2fc13 touches only the three declared write paths and leaves packed_analytic_moments unmodified.\nSCORE durability: 17\nJUSTIFICATION durability: tests/biot/test_vertex_term_tangents.py:388 compares the tangent against jax.jvp of the base revision loaded from git show at :62, an independent reference, and :529 reddens the identity when the product rule's right term is dropped.\nSCORE fit: 18\nJUSTIFICATION fit: polygonanalytic.py:2605-2660 follows the sibling modules' _<quantity>_tangent idiom and imports their owners rather than restating them, introducing no name outside the repository's conventions.\nSCORE reuse: 12\nJUSTIFICATION reuse: nova/biot/polygonanalytic.py:2614 re-implements the quotient rule already owned at nova/biot/momentchannel.py:529 and nova/biot/gradedresidual.py:229, though the rest of the change extends owners imported from elliptic, rangefunction, momentchannel and gradedresidual.\nFINDING tests/biot/test_vertex_term_tangents.py:406 follow-on: elementwise_fail_normwise_pass is computed and printed but never asserted, so the identity row at :420 binds a normwise per-series error while the done_when states a per-value relative bound; on CPU 31299 elements pass the row and fail elementwise, which the H200 measurement shows is a CPU compilation effect, so the count belongs in the record but does not hold the node.\nFINDING nova/biot/polygonanalytic.py:2614 follow-on: _vertex_quotient_tangent duplicates the quotient rule already owned at nova/biot/momentchannel.py:529 and nova/biot/gradedresidual.py:229 and _vertex_product_tangent at :2605 duplicates the None-aware product rule of nova/biot/rangefunction.py:568, both modules the file already imports tangents from, so the two helpers duplicate a capability the repository owns rather than extending its owner.",
+  "review_run_id": "r-20261008T003427828196-review-of-cfs-vertex-term-tangents",
+  "reviewed_base_sha": "fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb",
+  "reviewed_head_sha": "584a2fc130f4fd53ecd1147b0e7cd361b8f4f9f1",
+  "reviewed_run_id": "r-20261006T065225635115-cfs-vertex-term-tangents",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T00:39:22.623074+00:00",
+  "total": 100
+}

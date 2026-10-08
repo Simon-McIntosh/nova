@@ -311,6 +311,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "9ab276c6c6cfbef217b96f572df2704272ca54e1",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 0,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261008T030413470150-dfo-remeasure-tolerance-keys",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261008T030413470150-dfo-remeasure-tolerance-keys"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "dirty",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            " M benchmarks/derived_criterion_family.py"
+          ],
+          "head": "9ab276c6c6cfbef217b96f572df2704272ca54e1",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-remeasure-tolerance-keys",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-08T03:35:48Z",
+            "session_id": "01a11979-0f95-7e40-9850-e4259f53367d",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-remeasure-tolerance-keys"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:515351146c053221d12b9ee8e1cf4d2acb277746446fafa9f0d2dbc62037bfa5",
+          "status_entries": [
+            {
+              "code": " M",
+              "path": "benchmarks/derived_criterion_family.py"
+            }
+          ],
+          "withheld": "this worktree is the working directory of recoverable session 01a11979-0f95-7e40-9850-e4259f53367d"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

@@ -15,13 +15,11 @@ themselves, which is the declared mutation those rows must fail against.
 """
 
 from contextlib import contextmanager
-import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
-import tempfile
 
 import jax
 import jax.numpy as jnp
@@ -34,6 +32,14 @@ configure_dtypes()
 assert jax.config.jax_enable_x64 is True
 
 import nova.biot.polygonanalytic as polygonanalytic  # noqa: E402
+from tangent_identity import (  # noqa: E402
+    SAMPLES,
+    compile_ratio,
+    identity_row,
+    load_base_module,
+    relative_error,
+    truncation_active,
+)
 
 BASE_REVISION = os.environ.get(
     "NOVA_VERTEX_TERM_BASE_REVISION", "fd44f630be3007c4ffe46a2d26b6f9fbcfe754fb"
@@ -42,9 +48,7 @@ ROOT = Path(__file__).resolve().parents[2]
 # Every corner tangent runs through the harmonic moment stack's scanned
 # recurrences, so every row is a scan form and is held to the scan bound.
 SCAN_TOLERANCE = 1e-9
-SAMPLES = 10_000
 NODES = 128
-COMPILE_REPEATS = 3
 # Targets nearer a corner than this fraction of its radius are where the base
 # program's own derivative leaves the exact integral's: the graded quadrature's
 # layer width is clipped at its floor there, so jax.jvp of the base is not a
@@ -53,29 +57,7 @@ COMPILE_REPEATS = 3
 NEAR_CORNER = 2e-6
 
 
-def _base_module():
-    """Load the base revision's polygon-analytic module under its own name."""
-    directory = Path(tempfile.mkdtemp(prefix="vertex-term-base-"))
-    path = directory / "polygonanalytic.py"
-    path.write_bytes(
-        subprocess.check_output(
-            [
-                "git",
-                "-C",
-                str(ROOT),
-                "show",
-                f"{BASE_REVISION}:nova/biot/polygonanalytic.py",
-            ]
-        )
-    )
-    spec = importlib.util.spec_from_file_location("base_polygonanalytic", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    print(f"BASE_MODULE polygonanalytic={module.__file__}", flush=True)
-    return module
-
-
-BASE = _base_module()
+BASE = load_base_module("nova/biot/polygonanalytic.py", BASE_REVISION)
 
 
 def _magnitude(rng, low, high, size=SAMPLES):
@@ -247,11 +229,7 @@ CASES = _cases()
 
 
 def _relative(got, reference):
-    got, reference = np.asarray(got), np.asarray(reference)
-    agree = (np.isnan(got) & np.isnan(reference)) | (got == reference)
-    scale = np.where(reference == 0.0, 1.0, np.abs(reference))
-    error = np.where(agree, 0.0, np.abs(got - reference) / scale)
-    return float(np.max(np.nan_to_num(error, nan=np.inf)))
+    return float(np.max(relative_error(got, reference)))
 
 
 def _worst(got, reference):
@@ -380,7 +358,7 @@ def _elementwise_only(got, reference, passing):
 
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_matches_base_jvp(name):
-    if os.environ.get("NOVA_TANGENT_TRUNCATION") == "1":
+    if truncation_active():
         with _truncated():
             got, expected = _identity(name)
     else:
@@ -415,9 +393,8 @@ def test_tangent_matches_base_jvp(name):
           f"judged_by_reference={reference_count} "
           f"base_jvp_finite_fraction={finite:.4f} "
           f"base_tangent_median_abs={magnitude:.3e}")  # fmt: skip
-    assert primal == 0.0
+    identity_row(name, primal, float(error.max()), SCAN_TOLERANCE)
     assert finite == 1.0
-    assert error.max() <= SCAN_TOLERANCE
     assert covered == 1.0
 
 
@@ -552,80 +529,16 @@ def test_primal_bit_identical_to_base():
         print(f"PRIMAL {name} bit_identical=True")
 
 
-_COMPILE_PROBE = r"""
-import json, sys, time
-import jax
-jax.config.update("jax_enable_compilation_cache", False)
-from nova.jax.config import configure_dtypes
-configure_dtypes()
-assert jax.config.jax_enable_x64 is True
-hits = []
-jax.monitoring.register_event_listener(
-    lambda event, **kw: hits.append(event) if "cache_hit" in event else None
-)
-sys.argv = sys.argv[1:]
-sys.path.insert(0, sys.argv[1])
-import test_vertex_term_tangents as t
-name, arm = sys.argv[2], sys.argv[3]
-tangent, primal, primals, tangents = t.CASES[name]
-arguments = (primals, tangents)
-if arm == "primal":
-    function = lambda p, t: primal(*p)
-elif arm == "tangent":
-    function = lambda p, t: tangent(p, t)
-else:
-    function = lambda p, t: jax.jvp(primal, p, t)
-def count(jaxpr):
-    total = 0
-    for equation in jaxpr.eqns:
-        total += 1
-        for value in equation.params.values():
-            for sub in value if isinstance(value, (list, tuple)) else [value]:
-                inner = getattr(sub, "jaxpr", sub)
-                if hasattr(inner, "eqns"):
-                    total += count(inner)
-    return total
-equations = count(jax.make_jaxpr(function)(*arguments).jaxpr)
-lowered = jax.jit(function).lower(*arguments)
-start = time.perf_counter()
-lowered.compile()
-wall = time.perf_counter() - start
-print(json.dumps({"name": name, "arm": arm, "compile_seconds": wall,
-                  "equations": equations, "cache_hits": len(hits),
-                  "cache_enabled": jax.config.jax_enable_compilation_cache}))
-"""
-
-
-def _cold_compile(name, arm):
-    environment = dict(os.environ, JAX_ENABLE_COMPILATION_CACHE="false")
-    environment.pop("NOVA_TANGENT_TRUNCATION", None)
-    result = subprocess.run(
-        [sys.executable, "-c", _COMPILE_PROBE, "probe", str(Path(__file__).parent),
-         name, arm],
-        capture_output=True, text=True, env=environment, check=True,
-    )  # fmt: skip
-    row = json.loads(result.stdout.strip().splitlines()[-1])
-    assert row["cache_hits"] == 0 and row["cache_enabled"] is False
-    return row
+def compile_arm(name, arm):
+    tangent, primal, _, _ = CASES[name]
+    if arm == "primal":
+        return lambda p, t: primal(*p)
+    if arm == "tangent":
+        return lambda p, t: tangent(p, t)
+    return lambda p, t: jax.jvp(primal, p, t)
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize("name", list(CASES))
 def test_tangent_compiles_within_three_primals(name):
-    rows = {
-        arm: [_cold_compile(name, arm) for _ in range(COMPILE_REPEATS)]
-        for arm in ("primal", "tangent")
-    }
-    fastest = {}
-    for arm, runs in rows.items():
-        walls = sorted(row["compile_seconds"] for row in runs)
-        equations = {row["equations"] for row in runs}
-        assert len(equations) == 1
-        fastest[arm] = walls[0]
-        print(f"COMPILE {name} {arm} fastest_seconds={fastest[arm]:.3f} "
-              f"equations={equations.pop()} "
-              f"walls={','.join(f'{wall:.3f}' for wall in walls)} "
-              f"hits={sum(row['cache_hits'] for row in runs)}")  # fmt: skip
-    ratio = fastest["tangent"] / fastest["primal"]
-    print(f"COMPILE {name} fastest_tangent_over_primal={ratio:.2f}")
-    assert ratio <= 3.0
+    assert compile_ratio("test_vertex_term_tangents", name) <= 3.0

@@ -808,13 +808,11 @@ def _channel_poles_tangent(
         xp=xp,
     )
     poles = channel.poles(factors)
-    families = []
     tangents = []
     for capped, d_capped, seed, d_seed, mirrored, family in (
         (capped_y, d_capped_y, seed_y, d_seed_y, False, poles[2]),
         (capped_x, d_capped_x, seed_x, d_seed_x, True, poles[3]),
     ):
-        families.append(family)
         if family is None:
             tangents.append(None)
             continue
@@ -844,13 +842,15 @@ def _channel_split_tangent(
     d_parameter_complement,
     xp,
 ):
-    """Return ``(factors, poles)`` for one denominator and its tangent.
+    """Return the unpaired channel split and its structurally identical tangent.
 
     ``d_denominator`` is the denominator's range-function tangent and
     ``d_moments`` the moment stack's; both are the tangents of the primal the
     channel reads, so the split the tangent returns is the split the primal
     forms.
     """
+    if channel.paired_moments is not None:
+        raise ValueError("the point-jet tangent requires an unpaired channel")
     factors, d_factors = _factorise_tangent(denominator, d_denominator, xp)
     poles, d_poles = _channel_poles_tangent(
         channel,
@@ -864,4 +864,4 @@ def _channel_split_tangent(
         d_parameter_complement,
         xp,
     )
-    return (factors, poles), (d_factors, d_poles)
+    return (factors, poles, None), (d_factors, d_poles, None)

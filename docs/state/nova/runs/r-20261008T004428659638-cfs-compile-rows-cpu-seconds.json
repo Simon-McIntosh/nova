@@ -1,0 +1,717 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 7,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "72112421cb157599b3e3e97b31f3d5f6246735d4",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5467277,
+      "input_tokens_cumulative": 5467277,
+      "output_tokens": 18487,
+      "output_tokens_cumulative": 18487,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 156,
+    "files": 5,
+    "removed": 13
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "79a6f515e6fd3bb68bf99c971231588af0f94ae7",
+    "28c2e5e86ebe6f84e63a5b848b26c6ea404f40cf",
+    "b1466efce80fb7adeab63d2bec02b294e9d6a00d",
+    "3a3039c8ae61630fed8d88f0f814a712bb3d37e5",
+    "c8d6450379f382199e2882a44876e6f01f6f1d08",
+    "c545974aafcd1910ed9bedf2acc13a28a8af797b",
+    "b2900e4d1ca84869acae2ed4049683b8c0e9cbbc",
+    "e9e29794f89b2037010a7b7736f3197065f48b7f",
+    "44702f0303d4749b5df8eac39abdbe8b33f763b3",
+    "d63a5ab9e9f0b7107c81e28fa7da757e36fa069a",
+    "da50d8abaeb7c0af6bbde3abaf4c04b20428782b",
+    "61203268c26e078060a7ac2f6b64a4f8f21956df"
+  ],
+  "completed_at": "2026-10-08T04:59:03.052Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-08T00:45:00Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest as",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "0.044",
+    "0.202",
+    "4.59",
+    "4.67",
+    "3.14",
+    "0.321",
+    "1.435",
+    "4.47",
+    "4.37",
+    "3.48",
+    "3.0",
+    "3.79",
+    "2.30"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-compile-rows-cpu-seconds timeout 600 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-compile-rows-cpu-seconds/tests/biot/test_elliptic_tangent_recurrences.py /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-compile-rows-cpu-seconds/tests/biot/test_range_tangent_recurrences.py -k 'test_tangent_compiles_within_three_primals and (complete_pole or contract)' -m 'slow or not slow' -o addopts= -p no:cacheprovider -v -s",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/negative-control-passing-rows-off.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T01:44:41.635934+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T00:44:41Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 0,
+    "binding_observed": "unknown",
+    "detail": "lane document carries no numeric 'mean_context'",
+    "generating": 0,
+    "headroom": 16,
+    "mean_context": "unknown",
+    "observed_at": "2026-10-08T00:44:41Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 0,
+      "aggregate_tokens_per_second": 59.237,
+      "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": "2026-10-08T00:44:41Z",
+      "runs": 0.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T04:59:03.052Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/manifest.md",
+  "member": "disposable-r-20261008T004428659638-cfs-compile-rows-cpu-seconds",
+  "negative_control": {
+    "added_failure_ids": [],
+    "comparison_arm": "none",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_compiles_within_three_primals[complete_pole]",
+      "tests/biot/test_range_tangent_recurrences.py::test_tangent_compiles_within_three_primals[contract]"
+    ],
+    "declaration": "a tangent made deliberately heavier, its program evaluated twice and summed, fails its compile row under the CPU measurement",
+    "log": "negative-control-passing-rows.log",
+    "reason": "neither suite arm completed, so reckon has no comparison arm; the comparison is in negative-control-passing-rows-off.log: with the four-copy switch unset, the same head revision passes test_tangent_compiles_within_three_primals[complete_pole] and [contract] (2 passed, EXIT=0, CPU ratios 2.11 and 2.86), while negative-control-passing-rows.log fails both by test id with the switch on (EXIT=1, ratios 5.93 and 5.01)",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/negative-control-passing-rows.log",
+    "test_paths": [
+      "tests/biot/tangent_identity.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "cfs-compile-rows-cpu-seconds",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 3762,
+          "cached_input_tokens": 564099,
+          "input_tokens": 567863,
+          "output_tokens": 1124,
+          "reasoning_output_tokens": 36,
+          "total_tokens": 568987,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Make the cold-compile ratio rows of the hand-written tangents insensitive to machine load. The shared harness tests/biot/tangent_identity.py judges tangent over primal compile on the median of seven fresh cache-disabled processes by wall time. Runs with modules in parallel saw tests/biot/test_elliptic_tangent_recurrences.py::test_tangent_compiles_within_three_primals[complete_pole], tests/biot/test_range_tangent_recurrences.py::test_tangent_compiles_within_three_primals[product] and the factorise row cross 3.0 only under concurrent load, and tests/biot/test_vertex_edge_tangent_recurrences.py::test_tangent_compiles_within_three_primals[graded_residual] fails in both arms even run sequentially: wall time measures the load as well as the compile. Done when: (1) the harness measures each fresh compile process by the child's CPU seconds (user plus system, from os.wait4 around exactly that child or resource.getrusage(RUSAGE_CHILDREN) deltas) beside its wall, asserts the ratio on the median CPU seconds, and records both with the expanded equation counts; the 3.0 bound and the median of seven are unchanged and no absolute floor is added; (2) every compile row of the tangent modules (test_elliptic_tangent_recurrences.py, test_range_tangent_recurrences.py, test_vertex_edge_tangent_recurrences.py) passes twice sequentially and twice while eight concurrent CPU-bound processes run on the same allocation, all four runs logged in the run directory with each row's CPU and wall medians; graded_residual is diagnosed by name: if its tangent genuinely compiles above 3.0 times its primal by CPU seconds, say so with the equation counts and leave it red rather than loosening anything; (3) negative control: a tangent made deliberately heavier (its program evaluated twice and summed) fails its compile row under the CPU measurement, reported by pytest as a failing test id, ratio printed; (4) the identity, truncation and coverage rows are untouched and pass; tests/biot passes by delta against the run orientation_base_sha with modules run one after another from one driver pass, both arms carrying the repository root conftest, and baseline_suite and after_suite are single-line JSON whose log_path names one log file and whose command is literally runnable (wrap a loop in bash -c); (5) an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-compile-rows-cpu-seconds.html with plan-evidence-for converged-forward-solve, a table of every row's CPU and wall medians under both loads, reckon audit-doc 0 errors. Gates run in place on the fleet allocation (the shell has SLURM_JOB_ID) with TMPDIR=/tmp, JAX_PLATFORMS=cpu and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python run directly with PYTHONPATH set to the run worktree (orientation_worktree in the manifest), never uv on a compute node; the concurrent load is eight python processes spinning in a loop, started and stopped by the driver by their own pids, never by pattern. Every login-node uv command carries --no-sync and nothing runs uv sync. Run filepath relativize over the fragment before committing. No public signature changes. Commit with conventional subjects and bodies at every step; the manifest commits line lists every commit.",
+    "estimated_hours": null,
+    "goal": "Make the tangent compile-ratio rows measure child CPU seconds so machine load cannot fail them",
+    "id": "cfs-compile-rows-cpu-seconds",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T00:44:41Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 0,
+      "binding_observed": "unknown",
+      "detail": "lane document carries no numeric 'mean_context'",
+      "generating": 0,
+      "headroom": 16,
+      "mean_context": "unknown",
+      "observed_at": "2026-10-08T00:44:41Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 0,
+        "aggregate_tokens_per_second": 59.237,
+        "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": "2026-10-08T00:44:41Z",
+        "runs": 0.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004428659638-cfs-compile-rows-cpu-seconds/manifest.md",
+    "negative_control": "a tangent made deliberately heavier, its program evaluated twice and summed, fails its compile row under the CPU measurement",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/biot/tangent_identity.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-compile-rows-cpu-seconds.html",
+      "docs/figures/converged-forward-solve/cfs-compile-rows-cpu-seconds"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1339211.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cfs-compile-rows-cpu-seconds",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T00:44:44.093455+00:00",
+    "score": 0.6625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "",
+    "confidence": 0.58,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 1368.608,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1427.838,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 147589.074461,
+        "budget_reason": null,
+        "burn_multiple": 1.2774846368369215,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 52493,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.2191297747569445,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026126591366103288,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 147589.074461,
+        "budget_reason": null,
+        "burn_multiple": 1.2774846368369215,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 52493,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.2191297747569445,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026126591366103288,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 147589.074461,
+        "budget_reason": null,
+        "burn_multiple": 1.2774846368369215,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 52493,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 30.9,
+          "peak_utilisation_p90_pct": 45.5,
+          "peak_utilisation_runs": 5,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.2191297747569445,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 5,
+          "unknown": 0
+        },
+        "pace_allowance": 0.026126591366103288,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 52493,
+          "headroom_pct": 77.2,
+          "peak_utilisation_p50_pct": 55.0,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 98,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 4,
+          "passed": 21,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 93
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 7612.949461,
+        "budget_reason": null,
+        "burn_multiple": 0.9481252824465216,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 52493,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.187868200682869,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.127620265211971,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 7612.949461,
+        "budget_reason": null,
+        "burn_multiple": 0.9481252824465216,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 52493,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.187868200682869,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.127620265211971,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 7612.949461,
+        "budget_reason": null,
+        "burn_multiple": 0.9481252824465216,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 52493,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.187868200682869,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.127620265211971,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 11.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.1,
+      "claude:claude-sonnet-5-5": 0.04,
+      "codex:gpt-6-astra": 0,
+      "codex:gpt-6-luna": 0.01,
+      "codex:gpt-6-sol": 0.15,
+      "hold": 0.07,
+      "local:deepseek-v4.1-flash": 0.63
+    },
+    "rendered_token_estimate": 2545,
+    "usage": {
+      "cost": 0.000253428,
+      "input_tokens": 6034,
+      "output_tokens": 150
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "61203268c26e078060a7ac2f6b64a4f8f21956df",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "72112421cb157599b3e3e97b31f3d5f6246735d4",
+    "reviewed_head_sha": "61203268c26e078060a7ac2f6b64a4f8f21956df",
+    "scores": {
+      "durability": 19,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 111
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T004428659638-cfs-compile-rows-cpu-seconds",
+  "scope_acceptances": [
+    {
+      "path": "tests/biot/test_elliptic_tangent_recurrences.py",
+      "reason": "the coordinator ruling gave the compile rows their own per-test timeout of 1800 s at their definitions; only the timeout marker changed in this module"
+    },
+    {
+      "path": "tests/biot/test_range_tangent_recurrences.py",
+      "reason": "the coordinator ruling gave the compile rows their own per-test timeout of 1800 s at their definitions; only the timeout marker changed in this module"
+    },
+    {
+      "already_integrated": true,
+      "path": "tests/biot/test_vertex_edge_tangent_recurrences.py",
+      "peer_claims": [
+        {
+          "claim": "tests/biot/test_vertex_edge_tangent_recurrences.py",
+          "run_id": "r-20261008T045345540074-cfs-graded-layer-near-corner"
+        }
+      ],
+      "reason": "the coordinator ruling gave the compile rows their own per-test timeout of 1800 s at their definitions; only the timeout marker changed in this module"
+    }
+  ],
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "00ba9ff6-0d9b-4cdc-92c9-16ad2a255d38",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 38777981,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 2230.616,
+    "generated_tokens": 211105,
+    "generation_seconds": 572.761,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.9,
+    "machine_seconds": 1657.855,
+    "peak_input_tokens": 179250,
+    "tokens_per_second": 368.57,
+    "wall_tokens_per_second": 94.64
+  },
+  "time_budget": "60m",
+  "tool_steps": 63.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 15243,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 7,
+    "ended_during": "working",
+    "exit_code": null,
+    "exited_at": "2026-10-08T04:59:07Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-08T04:21:48Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T004428659638-cfs-compile-rows-cpu-seconds",
+    "signal": 15,
+    "signal_name": "SIGTERM",
+    "stream_records_seen": 44286,
+    "worker_pid": 1008220
+  },
+  "worker_seconds": 15202,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

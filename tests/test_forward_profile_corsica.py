@@ -351,7 +351,9 @@ def solved(cases, machine):
             boundary_pressure=float(case.pressure[-1]),
             boundary_field_function=float(case.field_function[-1]),
         )
-        operator = reference.forward_operator(case, active_carrier).with_source(source)
+        operator = replace(
+            reference.forward_operator(case, active_carrier), source=source
+        )
         profile = ForwardProfile(
             operator=operator, lattice=reference.receipt_mesh(active_carrier)
         )

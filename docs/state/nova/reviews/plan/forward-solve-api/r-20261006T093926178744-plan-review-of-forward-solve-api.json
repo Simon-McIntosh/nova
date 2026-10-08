@@ -24,7 +24,24 @@
   "plan_slug": "forward-solve-api",
   "plan_version": 150,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-08T00:39:03.034135+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "reason": "",
+      "when": "2026-10-08T00:39:03.034135+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/forward-solve-api/r-20261006T093926178744-plan-review-of-forward-solve-api.json",
   "review_run_id": "r-20261006T093926178744-plan-review-of-forward-solve-api",
   "reviewed_blob_sha": "afe76010684a471ce7212c98c719575b675d82e4",
   "rubric": "design",

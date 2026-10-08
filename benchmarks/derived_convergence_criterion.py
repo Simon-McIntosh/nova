@@ -297,6 +297,88 @@ def circular_richardson_collapse(
     }
 
 
+def estimate_observable_discretisation_error(
+    spacings_m: list[float], observables: list[float]
+) -> dict[str, float | int]:
+    """Estimate the finest observable's error from an independently fitted order.
+
+    Coarser differences fit the order. The finest difference is held out for
+    asymptotic qualification and the final Richardson estimate. Spacing ratios
+    may vary; the observable must have the same definition at every rung.
+    """
+    spacing = np.asarray(spacings_m, dtype=float)
+    observable = np.asarray(observables, dtype=float)
+    if (
+        spacing.ndim != 1
+        or observable.ndim != 1
+        or spacing.size != observable.size
+        or spacing.size < 5
+        or not np.all(np.isfinite(spacing))
+        or not np.all(np.isfinite(observable))
+        or not np.all(spacing > 0)
+        or not np.all(np.diff(spacing) < 0)
+    ):
+        raise ValueError(
+            "at least five finite, strictly decreasing spacings are required"
+        )
+
+    signed_differences = np.diff(observable)
+    if not (np.all(signed_differences > 0) or np.all(signed_differences < 0)):
+        raise ValueError("observable ladder must converge monotonically")
+
+    coarse_spacing = spacing[:-2]
+    coarse_differences = np.abs(signed_differences[:-1])
+    coarse_ratios = spacing[1:-1] / coarse_spacing
+    order = float(
+        _fit_power_order(coarse_spacing, coarse_differences)["observed_order"]
+    )
+    for _ in range(100):
+        if not math.isfinite(order) or order <= 0:
+            raise ValueError(
+                "observable differences have no positive convergence order"
+            )
+        pair_factors = -np.expm1(order * np.log(coarse_ratios))
+        fit = _fit_power_order(coarse_spacing, coarse_differences / pair_factors)
+        updated_order = float(fit["observed_order"])
+        if abs(updated_order - order) < 1.0e-12:
+            order = updated_order
+            break
+        order = updated_order
+    else:
+        raise ValueError("observable order fit did not converge")
+
+    coefficient = float(fit["coefficient"])
+    predicted_finest_difference = coefficient * (
+        spacing[-2] ** order - spacing[-1] ** order
+    )
+    finest_difference = abs(float(signed_differences[-1]))
+    holdout_ratio = finest_difference / predicted_finest_difference
+    if (
+        float(fit["log_residual_rms"]) > math.log(1.15)
+        or not 1 / 1.25 <= holdout_ratio <= 1.25
+    ):
+        raise ValueError("observable ladder is outside the qualified asymptotic range")
+
+    mesh_ratio = float(spacing[-2] / spacing[-1])
+    # Rebase the signed observable pair to positive values; Richardson uses
+    # only their difference, so this preserves its error for any observable.
+    absolute_error = richardson_fine_error(
+        2 * finest_difference, finest_difference, order, mesh_ratio
+    )
+    signed_error = math.copysign(absolute_error, -float(signed_differences[-1]))
+    return {
+        "observed_order": order,
+        "estimated_absolute_error": absolute_error,
+        "extrapolated_observable": float(observable[-1] - signed_error),
+        "fine_observable": float(observable[-1]),
+        "fine_spacing_m": float(spacing[-1]),
+        "fit_difference_count": coarse_differences.size,
+        "held_out_difference_count": 1,
+        "coarse_fit_log_rms": float(fit["log_residual_rms"]),
+        "held_out_difference_ratio": holdout_ratio,
+    }
+
+
 def build_receipt_from_data(
     mesh: dict[str, Any],
     topology: dict[str, Any],

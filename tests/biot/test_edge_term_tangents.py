@@ -234,6 +234,10 @@ def _identity(name):
     got = jax.jit(lambda p, t: tangent(p, t))(primals, tangents)
     expected = jax.jit(lambda p, t: jax.jvp(primal, p, t))(primals, tangents)
     own, base = jax.jit(lambda p, t: (tangent(p, t)[0], primal(*p)))(primals, tangents)
+    for left, right in zip(jax.tree.leaves(own), jax.tree.leaves(base), strict=True):
+        left, right = np.asarray(left), np.asarray(right)
+        assert left.dtype == right.dtype and left.shape == right.shape
+        assert left.tobytes() == right.tobytes(), f"{name}: primal bits differ"
     return got, expected, worst(own, base)
 
 

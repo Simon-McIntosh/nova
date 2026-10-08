@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-edge-term-tangents"><meta name="plan-title" content="Polygon edge tangents">
+<meta name="plan-summary" content="Seven private edge tangent families, base identities, exact-integral audit and outstanding acceptance measurements">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-verifies" content="converged-forward-solve#s2">
+<meta name="plan-recorded-at" content="2026-10-08"><meta name="plan-verdict" content="incomplete">
+<meta name="plan-environment" content="H200 identity; CPU x64 reference; shared project interpreter">
+<title>Polygon edge tangents | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-edge-term-tangents">Polygon edge tangents</h1>
+<h2 id="cfs-edge-term-tangents-record">Record</h2>
+<table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+<tr><td>Observed</td><td>2026-10-08T02:19:16.163740+00:00</td></tr>
+<tr><td>Base revision</td><td>716d859f0b501797e28849ec8878f0243de80cb1 (inherited draft); its original base was 72112421cb157599b3e3e97b31f3d5f6246735d4</td></tr>
+<tr><td>Measured source head</td><td>7efac47d91cb6e8678923ea19a33eef0f2b5d7fe</td></tr>
+<tr><td>Commits</td><td>7efac47d9 test(biot): audit edge-end derivatives against the exact integral; 2a86d3ea5 test(biot): truncate the product rule used by edge geometry; de0fe46b9 test(biot): handle absent paired data in tangent metrics; 95044c7f6 feat(biot): differentiate polygon edge reductions explicitly; 6d14132d2 fix(biot): preserve edge tangent arithmetic order</td></tr>
+<tr><td>Acceptance state</td><td>Incomplete until both cold compile passes, repaired suite delta and verified mutation log complete. The worker does not close the plan section.</td></tr>
+<tr><td>Run receipts</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents</td></tr>
+<tr><td>Primal route</td><td>No public signature or primal arithmetic changed. Every hand tangent returns the primal method result beside its tangent; identity rows assert byte equality within a shared compiled program.</td></tr>
+<tr><td>Shared algebra</td><td>Scalar product/quotient, range products, sums, scales, contractions, elliptic recurrences and graded quadrature tangents are reused from their established modules. _EdgeScalar only packages this algebra for explicit formulas; it does not trace or differentiate a primal program.</td></tr>
+<tr><td>Corner tests</td><td>Base loading, identity assertions and median-of-seven cold compile now use tests/biot/tangent_identity.py. Corner geometry samples, near-corner reference, normwise scaling and elementwise maxima remain unchanged. Structural None is ignored only after requiring the reference also be None.</td></tr>
+<tr><td>Paired channel</td><td>Private Channel.split tangent is for the unpaired point-jet route; paired data is explicitly refused, not silently discarded.</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-identity">10,000 geometries on H200</h2>
+<table><thead><tr><th>Primal</th><th>Private tangent</th><th>Bound</th><th>Primal max</th><th>Normwise max</th><th>Elementwise max</th><th>Covered fraction</th><th>Median |base tangent|</th></tr></thead><tbody>
+<tr><td>_Edge</td><td>_edge_tangent</td><td>1e-13</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td><td>1.0000</td><td>1.155e+00</td></tr>
+<tr><td>_Edge._second_residual</td><td>_second_residual_tangent</td><td>1e-13</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td><td>1.0000</td><td>7.003e-01</td></tr>
+<tr><td>Channel.split</td><td>_channel_split_tangent</td><td>1e-9</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td><td>1.0000</td><td>8.355e-03</td></tr>
+<tr><td>_Edge.terms</td><td>_edge_integrands_tangent</td><td>1e-9</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td><td>1.0000</td><td>2.961e+00</td></tr>
+<tr><td>_Edge.flux_line_moments</td><td>_edge_flux_line_moments_tangent</td><td>1e-9</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td><td>1.0000</td><td>4.130e+00</td></tr>
+<tr><td>_Edge.flux_and_moment_terms</td><td>_edge_flux_and_moment_terms_tangent</td><td>1e-9</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td><td>1.0000</td><td>2.090e+01</td></tr>
+<tr><td>_edge_terms</td><td>_edge_terms_tangent</td><td>1e-9</td><td>0.000e+00</td><td>0.000e+00</td><td>0.000e+00</td><td>1.0000</td><td>1.405e+00</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-domain">Identity instrument</h2>
+<table><thead><tr><th>Item</th><th>Measure</th></tr></thead><tbody>
+<tr><td>Domain</td><td>Radii 0.01 to about 20 m; heights -20 to 20 m; 500 vertical edges; 1,000 targets beside each endpoint and 1,000 beside the edge interior, offsets 1e-12 to 1e-5 m. All floating target and endpoint coordinates carry independent random directions; moment expansions carry their own directions.</td></tr>
+<tr><td>Coverage</td><td>All 10,000 samples retained; 100 percent finite base tangents in every H200 row. No masking. Nonzero base medians are the positive control for zero identity errors.</td></tr>
+<tr><td>Measurement source</td><td>after-test_edge_term_tangents.py.log from H200 job 1281976; its seven positive identity rows pass. That module run subsequently failed in the mutation fixture, which is excluded as control evidence and was repaired.</td></tr>
+<tr><td>Separate first H200 job</td><td>1281972: six identity rows pass; channel output reached the metric but its structural None caused TypeError. The repaired channel row in job 1281976 passes exactly.</td></tr>
+<tr><td>Construction reproduction</td><td>resume-reproduction.log: 8.134e-13 &gt; 1e-13. Preserving the left-associated products and square-root tangent order gives 0 on the same wide domain; construction-near-edge.log additionally covers the endpoint and interior blocks.</td></tr>
+<tr><td>CPU context</td><td>cpu-exact-rows.log: second residual maximum 1.720e-9, 99.99 percent covered at 1e-9; the 1e-13 exact bound is exceeded on 603 samples in edge-reference.log. H200 identity is exact. CPU and H200 figures are not substituted for one another.</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-reference">Independent exact-integral audit</h2>
+<table><thead><tr><th>Quantity</th><th>Measure</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>50-digit reference</td><td>16 points: three smooth positive controls, both endpoints, the extended line and the CPU identity maximum at index 6204. The audit is a subset; the separate base-JVP identity covers all 10,000 points.</td><td>edge-reference.json</td></tr>
+<tr><td>Primal against exact integral</td><td>max relative 2.193e-12</td><td>reference-tests.log</td></tr>
+<tr><td>Hand tangent against exact integral</td><td>max relative 5.160e-7</td><td>reference-tests.log</td></tr>
+<tr><td>Base JVP against exact integral</td><td>max relative 5.143e-7</td><td>reference-tests.log</td></tr>
+<tr><td>Smooth tangent controls</td><td>max relative 7.526e-15</td><td>reference-tests.log</td></tr>
+<tr><td>Reference one-sided difference</td><td>max relative 2.526e-17; step 1e-25 stays on each selected smooth branch</td><td>reference-tests.log</td></tr>
+<tr><td>Known derivative gap</td><td>test_near_edge_tangent_meets_reference is a strict expected failure. The differentiated graded edge quadrature near endpoints leaves the exact integral derivative; this tangent preserves the base program. The audit does not isolate the quadrature floor as the sole cause.</td><td>1 passed, 1 xfailed; EXIT=0</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-negative">Declared product-rule truncation on H200</h2>
+<table><thead><tr><th>Row</th><th>Maximum relative error</th><th>Pytest refusal</th></tr></thead><tbody>
+<tr><td>edge_construction</td><td>pending</td><td>pending</td></tr>
+<tr><td>second_residual</td><td>pending</td><td>pending</td></tr>
+<tr><td>channel_split</td><td>pending</td><td>pending</td></tr>
+<tr><td>edge_integrands</td><td>pending</td><td>pending</td></tr>
+<tr><td>flux_line_moments</td><td>pending</td><td>pending</td></tr>
+<tr><td>flux_and_moment_terms</td><td>pending</td><td>pending</td></tr>
+<tr><td>edge_terms</td><td>pending</td><td>pending</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-negative-record">Mutation receipt</h2>
+<table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+<tr><td>Mutation</td><td>NOVA_TANGENT_TRUNCATION=1 drops the right-factor contribution in the product rule used by edge and corner geometry, which supplies the split, residual and moment rows.</td></tr>
+<tr><td>Accepted log</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/negative-control-verified.log</td></tr>
+<tr><td>Earlier invalid control</td><td>negative-control.log only reached a fixture AttributeError, so it is not mutation evidence. The corrected fixture patches the product helper actually imported by polygonanalytic.</td></tr>
+<tr><td>Positive return</td><td>after-edge-controls.log reruns the intact module after the declared control, including raw primal bytes and the exact-integral audit.</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-compile">Cold compilation: seven fresh processes per arm per run</h2>
+<table><thead><tr><th>Run</th><th>Row</th><th>Primal s/equations</th><th>Tangent s/equations</th><th>Base JVP s/equations</th><th>Tangent/primal</th><th>Report flag</th></tr></thead><tbody>
+<tr><td>cold-compile-one</td><td>edge_construction</td><td>0.140/65</td><td>0.109/143</td><td>0.102/170</td><td>0.78</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>second_residual</td><td>0.214/5325</td><td>0.595/15529</td><td>0.521/13059</td><td>2.78</td><td>above 2.7</td></tr>
+<tr><td>cold-compile-one</td><td>channel_split</td><td>6.750/6367</td><td>7.244/19810</td><td>17.119/16062</td><td>1.07</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>edge_integrands</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>flux_line_moments</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>flux_and_moment_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>edge_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>edge_construction</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>second_residual</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>channel_split</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>edge_integrands</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>flux_line_moments</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>flux_and_moment_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-two</td><td>edge_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-compile-method">Compile method</h2>
+<table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+<tr><td>Harness</td><td>tests/biot/tangent_identity.py::compile_ratio; median of seven, cache disabled before compilation, zero cache hits required, expanded equation counts printed. Two separate pytest processes, one H200 allocation, log per pass.</td></tr>
+<tr><td>Qualification</td><td>All seven ratios must be at most 3 in both passes. A pending cell is an unmet measure. Ratios above 2.7 are named even if they pass.</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-suite">Repaired suite delta: one driver pass, sequential module processes</h2>
+<table><thead><tr><th>Arm</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>baseline</td><td>{&quot;completed&quot;: false}</td></tr>
+<tr><td>after</td><td>{&quot;completed&quot;: false}</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-suite-context">Suite provenance and remaining gates</h2>
+<table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+<tr><td>Driver</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py; baseline source loaded with the shared git-show harness and canonical module names. Both arms carry their root conftest. Every module has its own log and EXIT status; aggregate logs are the single-line JSON receipt targets.</td></tr>
+<tr><td>Initial baseline bootstrap defect</td><td>Loading source as base_* changed __module__, defeating the kernel census reference rewriter. Its 40,412-equation positive-control refusal is scaffolding, not a product regression. The repaired pass uses canonical nova.biot module names.</td></tr>
+<tr><td>Initial head fixture defect</td><td>Seven mutation-control tests stopped at a nonexistent momentchannel._product_tangent patch target. This was repaired and the earlier red log retained.</td></tr>
+<tr><td>Fence</td><td>No source outside the four assigned Python paths changed. The graded-quadrature repair and final point-jet custom-JVP wrapping remain separately owned work.</td></tr>
+</tbody></table>
+<h2 id="cfs-edge-term-tangents-census">Every staged function in packed_analytic_moments</h2>
+<table><thead><tr><th>Function</th><th>Polygon calls</th><th>Rectangle calls</th><th>Private tangent status</th></tr></thead><tbody>
+<tr><td>_accumulate</td><td>10</td><td>10</td><td>completeelliptic._accumulate_tangent</td></tr>
+<tr><td>_complete_kind</td><td>1</td><td>1</td><td>elliptic._complete_kind_tangent</td></tr>
+<tr><td>_descent</td><td>9</td><td>9</td><td>completeelliptic._descent_tangent</td></tr>
+<tr><td>_finite_part</td><td>8</td><td>8</td><td>completeelliptic._finite_part_tangent</td></tr>
+<tr><td>_harmonic_pair_step</td><td>2795</td><td>2795</td><td>rangefunction._harmonic_pair_step_tangent</td></tr>
+<tr><td>_harmonic_ratio_step</td><td>139</td><td>139</td><td>elliptic._harmonic_ratio_step_tangent</td></tr>
+<tr><td>_harmonic_rising_step</td><td>41</td><td>41</td><td>elliptic._harmonic_rising_step_tangent</td></tr>
+<tr><td>_model_integral</td><td>8</td><td>8</td><td>gradedresidual._model_integral_tangent</td></tr>
+<tr><td>_near_collinear_arsinh_difference</td><td>5</td><td>4</td><td>NO private tangent; outstanding for wrapping</td></tr>
+<tr><td>_oscillatory_primitive</td><td>10</td><td>10</td><td>linear: same primitive applied to coefficient tangents</td></tr>
+<tr><td>_pole_backward_step</td><td>328</td><td>328</td><td>elliptic._pole_backward_step_tangent</td></tr>
+<tr><td>_pole_contraction</td><td>46</td><td>46</td><td>momentchannel._pole_contraction_tangent</td></tr>
+<tr><td>_pole_forward_step</td><td>328</td><td>328</td><td>elliptic._pole_forward_step_tangent</td></tr>
+<tr><td>_product_sum_step</td><td>1205</td><td>1205</td><td>rangefunction._product_sum_step_tangent</td></tr>
+<tr><td>_regularised</td><td>8</td><td>8</td><td>gradedresidual._regularised_tangent</td></tr>
+<tr><td>_roll_static</td><td>2</td><td>2</td><td>NO private tangent; JAX primitive</td></tr>
+<tr><td>_where</td><td>588</td><td>548</td><td>NO private tangent; JAX primitive</td></tr>
+<tr><td>across_the_range</td><td>107</td><td>107</td><td>rangefunction._across_the_range_tangent</td></tr>
+<tr><td>clip</td><td>8</td><td>8</td><td>gradedresidual._clip_tangent</td></tr>
+<tr><td>cn_pole_moment</td><td>4</td><td>4</td><td>elliptic._cn_pole_moment_tangent</td></tr>
+<tr><td>complete_kind</td><td>1</td><td>1</td><td>elliptic._complete_kind_tangent</td></tr>
+<tr><td>complete_pole</td><td>8</td><td>8</td><td>elliptic._complete_pole_tangent</td></tr>
+<tr><td>contract</td><td>184</td><td>184</td><td>rangefunction._contract_tangent</td></tr>
+<tr><td>deflate</td><td>46</td><td>46</td><td>rangefunction._deflate_tangent</td></tr>
+<tr><td>harmonic_add</td><td>245</td><td>245</td><td>rangefunction._harmonic_sum_tangent</td></tr>
+<tr><td>harmonic_moments</td><td>1</td><td>1</td><td>elliptic._harmonic_moments_tangent</td></tr>
+<tr><td>harmonic_multiply</td><td>443</td><td>443</td><td>rangefunction._harmonic_multiply_tangent</td></tr>
+<tr><td>harmonic_pole_moments</td><td>8</td><td>8</td><td>elliptic._harmonic_pole_moments_tangent</td></tr>
+<tr><td>harmonic_root_moments</td><td>1</td><td>1</td><td>elliptic._harmonic_root_moments_tangent</td></tr>
+<tr><td>harmonic_scale</td><td>76</td><td>76</td><td>rangefunction._harmonic_scale_tangent</td></tr>
+<tr><td>hypot</td><td>30</td><td>24</td><td>NO private tangent; JAX primitive</td></tr>
+<tr><td>paired_range_function</td><td>4</td><td>4</td><td>rangefunction._paired_range_function_tangent</td></tr>
+<tr><td>product</td><td>101</td><td>101</td><td>rangefunction._product_range_tangent</td></tr>
+<tr><td>range_function</td><td>40</td><td>40</td><td>rangefunction._range_function_tangent</td></tr>
+<tr><td>scaled</td><td>61</td><td>61</td><td>rangefunction._scaled_tangent</td></tr>
+<tr><td>signbit</td><td>1</td><td>1</td><td>NO private tangent; JAX primitive</td></tr>
+<tr><td>sine_squared_times</td><td>15</td><td>15</td><td>rangefunction._sine_squared_times_tangent</td></tr>
+<tr><td>sn_pole_moment</td><td>4</td><td>4</td><td>elliptic._sn_pole_moment_tangent</td></tr>
+<tr><td>take_along_axis</td><td>1</td><td>1</td><td>NO private tangent; JAX primitive</td></tr>
+<tr><td>total</td><td>49</td><td>49</td><td>rangefunction._total_tangent</td></tr>
+</tbody></table>
+</main></body></html>

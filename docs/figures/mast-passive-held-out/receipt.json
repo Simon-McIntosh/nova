@@ -1,0 +1,2229 @@
+{
+  "revision": "61912a61287af630bbfb693085d8791179bcbd4a",
+  "source_sha256": "d852af58706a1896d5481d36294d90144e39c7573a9033d6cd936c428b7bd8e5",
+  "split": {
+    "spectrum_sha256": "597c346b0e4a39bbfde8cfeb9f7c43569e28873e371c4280a3272301fdb4459f",
+    "rule": "Reuse the spectrum cohort split before reading probe amplitudes.",
+    "training": [
+      11884,
+      11885,
+      11887,
+      14061,
+      14065,
+      14066,
+      14067,
+      14068,
+      14069,
+      14070,
+      14071,
+      14072,
+      14073,
+      14074,
+      14076,
+      14078,
+      14080,
+      14081,
+      14082,
+      14083,
+      14084,
+      14086,
+      14087,
+      14088,
+      14089,
+      14092,
+      14095,
+      14098,
+      14099,
+      14100,
+      14101,
+      14103,
+      14104,
+      14105,
+      14106,
+      14107,
+      14108,
+      14109,
+      14110,
+      14112,
+      14113,
+      14115,
+      14117,
+      14118,
+      14121,
+      14123,
+      14127,
+      14130,
+      14131,
+      14132,
+      14133,
+      14135,
+      14136,
+      14137,
+      14138,
+      14143,
+      14167,
+      14378,
+      14456,
+      14916,
+      14930,
+      14934,
+      14935,
+      14936,
+      15295,
+      15296,
+      16178,
+      19218,
+      19219,
+      19222,
+      19223,
+      19225,
+      19227,
+      19228,
+      19229,
+      19231,
+      19232,
+      19235,
+      19238,
+      19248,
+      19250,
+      19258,
+      19349,
+      19754,
+      19858,
+      19859,
+      19995,
+      20420,
+      20586,
+      21001,
+      21146,
+      21150,
+      24654,
+      24784,
+      24938,
+      24939,
+      24940,
+      24941,
+      24965,
+      24966,
+      25527,
+      25528,
+      25529,
+      25530,
+      25531,
+      25532,
+      25533,
+      25534,
+      25535,
+      25536,
+      25537,
+      25538,
+      25539,
+      25540,
+      25541,
+      25542,
+      25543,
+      25544,
+      25546,
+      25547,
+      25548,
+      25549,
+      25550,
+      25552,
+      25553,
+      25826,
+      25827,
+      25828,
+      25829,
+      25834,
+      25836
+    ],
+    "held_out": [
+      14116,
+      14126,
+      14128,
+      14134,
+      14937,
+      15299,
+      15943,
+      16177,
+      19246,
+      19251,
+      19252,
+      19253,
+      19254,
+      19255,
+      19257,
+      19996,
+      21093,
+      22165,
+      25554,
+      25555,
+      25556,
+      25557,
+      25558,
+      25722,
+      25835,
+      25837,
+      25881,
+      25882,
+      28479,
+      28489,
+      28490,
+      28566,
+      28567,
+      28573,
+      28574,
+      28575,
+      28701
+    ],
+    "permutation_seed": 73129,
+    "score": "pooled squared residual, all supported transient observations",
+    "control": "derange drive histories within each split; refit training only"
+  },
+  "spectrum_path": "docs/figures/mast-passive-identifiability/spectrum.json",
+  "spectrum_sha256": "597c346b0e4a39bbfde8cfeb9f7c43569e28873e371c4280a3272301fdb4459f",
+  "geometry_sha256": "fa04b9d07de5f6b66a41c6b1ab3db98bedb595d27eb556c71610f75ab4c9babe",
+  "verified_factor_count": 400,
+  "sensor_floor_tesla": 0.00038698,
+  "parameter_groups": [
+    "botcol",
+    "coil_cases",
+    "endcrown_l",
+    "endcrown_u",
+    "incon",
+    "lhorw",
+    "mid",
+    "p2larm",
+    "p2ldivpl",
+    "p2uarm",
+    "p2udivpl",
+    "ring",
+    "topcol",
+    "uhorw",
+    "vertw"
+  ],
+  "direction_log_slopes": [
+    -4.041781910265024e-05,
+    -0.06885288545957707,
+    -3.6884810576263492e-06,
+    -2.4296158461234446e-06,
+    1.9922626969952724e-05,
+    -0.0013957499670131034,
+    -0.0004936036785379434,
+    -0.0015670152436901665,
+    -0.0008367654065357492,
+    -0.0009958364589798794,
+    -0.000534221850732821,
+    -0.00033899487604907737,
+    -2.318974021326148e-05,
+    -0.0010479281826403172,
+    -0.012068320658596402
+  ],
+  "coordinate_interval": [
+    -2.842939345526997,
+    1.0160589224395329
+  ],
+  "geometry_registry_imported": false,
+  "scheduler_job": "1282009",
+  "scheduler_partition": "all_debug",
+  "promoted_parameters": [],
+  "limitations": [
+    "rodgr circuits excluded; result conditional on the reduced circuit model",
+    "vertical drive scales use an explicitly assumed decade interval",
+    "uniform linear current interpolation; three declared refinement shots",
+    "each probe uses finite supported baseline and transient samples",
+    "pooled sensor floor treated as a non-averaging RMS threshold",
+    "zero initial passive current; no unmeasured prior history inferred"
+  ],
+  "real": {
+    "fit": {
+      "coordinate": -2.842939345526997,
+      "drive_multipliers": [
+        1.0099999999999998,
+        1.0019771935090158,
+        1.0075456910189085,
+        0.9985572432617769,
+        0.9869052500000001,
+        0.9900000000000001,
+        1.0101915217391302,
+        1.0099999999999998,
+        1.0359413693634325,
+        1.0099999999999998,
+        0.13654255124838557,
+        0.10000000000000002,
+        1.033901019700582
+      ],
+      "training_loss": 1980463256.4324677,
+      "nominal_drive_multipliers": [
+        1.0099999999999993,
+        1.0026724539877738,
+        1.0099999999923268,
+        0.9990129081266481,
+        0.9869052500000001,
+        0.9900000000000001,
+        1.0101915217391302,
+        1.0099999999999998,
+        1.0498394601209728,
+        1.0099999999999998,
+        0.10000000000000002,
+        0.10000000000000002,
+        1.033901019700582
+      ],
+      "nominal_training_loss": 2627352369.6561275,
+      "profile": [
+        {
+          "coordinate": -2.842939345526997,
+          "loss": 1980463256.4324677
+        },
+        {
+          "coordinate": -2.841858696418807,
+          "loss": 1980673052.1149201
+        },
+        {
+          "coordinate": -2.8411908185400327,
+          "loss": 1980802725.57175
+        },
+        {
+          "coordinate": -2.840110169431842,
+          "loss": 1981012562.0205293
+        },
+        {
+          "coordinate": -2.838361642444877,
+          "loss": 1981352137.8950295
+        },
+        {
+          "coordinate": -2.835532466349722,
+          "loss": 1981901722.9548018
+        },
+        {
+          "coordinate": -2.8309547632676026,
+          "loss": 1982791336.2354128
+        },
+        {
+          "coordinate": -2.8235478840903276,
+          "loss": 1984231719.3205094
+        },
+        {
+          "coordinate": -2.8115633018309327,
+          "loss": 1986564819.4442973
+        },
+        {
+          "coordinate": -2.7921718403942632,
+          "loss": 1990346437.1146386
+        },
+        {
+          "coordinate": -2.7607957966981993,
+          "loss": 1996482488.1942487
+        },
+        {
+          "coordinate": -2.7100282915654654,
+          "loss": 2006456165.1662488
+        },
+        {
+          "coordinate": -2.6278847427366676,
+          "loss": 2022713191.1331754
+        },
+        {
+          "coordinate": -2.4949736887751364,
+          "loss": 2049332359.8184366
+        },
+        {
+          "coordinate": -2.2799190859848073,
+          "loss": 2093237658.165783
+        },
+        {
+          "coordinate": -1.931953429232947,
+          "loss": 2166508127.167618
+        },
+        {
+          "coordinate": -1.3689331696907574,
+          "loss": 2291106167.555682
+        },
+        {
+          "coordinate": -0.45794725339670717,
+          "loss": 2509395705.3192186
+        },
+        {
+          "coordinate": 0.0,
+          "loss": 2627352369.6561275
+        },
+        {
+          "coordinate": 1.0160589224395329,
+          "loss": 2910041375.942628
+        }
+      ]
+    },
+    "held_out": {
+      "shots": [
+        {
+          "shot": 14116,
+          "observations": 12283,
+          "nominal_squared_floor_residual": 5880578.637928893,
+          "fitted_squared_floor_residual": 5128878.375214111,
+          "nominal_rms_tesla": 0.008467326867376411,
+          "fitted_rms_tesla": 0.007907651015909328
+        },
+        {
+          "shot": 14126,
+          "observations": 20361,
+          "nominal_squared_floor_residual": 154847.1478466355,
+          "fitted_squared_floor_residual": 108112.0635168809,
+          "nominal_rms_tesla": 0.0010671871162730023,
+          "fitted_rms_tesla": 0.0008917149476316627
+        },
+        {
+          "shot": 14128,
+          "observations": 43807,
+          "nominal_squared_floor_residual": 10465239.932253221,
+          "fitted_squared_floor_residual": 8208373.558643465,
+          "nominal_rms_tesla": 0.0059812417864940634,
+          "fitted_rms_tesla": 0.00529718719152083
+        },
+        {
+          "shot": 14134,
+          "observations": 36240,
+          "nominal_squared_floor_residual": 26080188.375333343,
+          "fitted_squared_floor_residual": 17219831.807224236,
+          "nominal_rms_tesla": 0.010381253297670265,
+          "fitted_rms_tesla": 0.00843546209765569
+        },
+        {
+          "shot": 14937,
+          "observations": 25850,
+          "nominal_squared_floor_residual": 19867343.321368385,
+          "fitted_squared_floor_residual": 14542267.701591847,
+          "nominal_rms_tesla": 0.010728231710908996,
+          "fitted_rms_tesla": 0.009178554988635417
+        },
+        {
+          "shot": 15299,
+          "observations": 13156,
+          "nominal_squared_floor_residual": 1377459.741560618,
+          "fitted_squared_floor_residual": 970623.3215682027,
+          "nominal_rms_tesla": 0.003959734297397729,
+          "fitted_rms_tesla": 0.0033239306099168767
+        },
+        {
+          "shot": 15943,
+          "observations": 22806,
+          "nominal_squared_floor_residual": 77083344.19467923,
+          "fitted_squared_floor_residual": 55975196.566915974,
+          "nominal_rms_tesla": 0.022498016669734534,
+          "fitted_rms_tesla": 0.01917175074235859
+        },
+        {
+          "shot": 16177,
+          "observations": 56910,
+          "nominal_squared_floor_residual": 12332106.975423394,
+          "fitted_squared_floor_residual": 9875220.012846543,
+          "nominal_rms_tesla": 0.0056965625334252715,
+          "fitted_rms_tesla": 0.0050976218725031
+        },
+        {
+          "shot": 19246,
+          "observations": 44367,
+          "nominal_squared_floor_residual": 259209.92039217384,
+          "fitted_squared_floor_residual": 203868.44158512968,
+          "nominal_rms_tesla": 0.000935371854538144,
+          "fitted_rms_tesla": 0.000829532660845845
+        },
+        {
+          "shot": 19251,
+          "observations": 45298,
+          "nominal_squared_floor_residual": 15240710.130655754,
+          "fitted_squared_floor_residual": 10507557.248505397,
+          "nominal_rms_tesla": 0.007098255181425758,
+          "fitted_rms_tesla": 0.005893860995856534
+        },
+        {
+          "shot": 19252,
+          "observations": 48369,
+          "nominal_squared_floor_residual": 1187212.8551172726,
+          "fitted_squared_floor_residual": 885718.4911514439,
+          "nominal_rms_tesla": 0.0019172081264977503,
+          "fitted_rms_tesla": 0.0016559713611486988
+        },
+        {
+          "shot": 19253,
+          "observations": 44544,
+          "nominal_squared_floor_residual": 15231431.410103124,
+          "fitted_squared_floor_residual": 10507298.507394694,
+          "nominal_rms_tesla": 0.007155900167116286,
+          "fitted_rms_tesla": 0.005943461430622673
+        },
+        {
+          "shot": 19254,
+          "observations": 48507,
+          "nominal_squared_floor_residual": 1467280.6728956453,
+          "fitted_squared_floor_residual": 1186392.317968098,
+          "nominal_rms_tesla": 0.0021283493293466904,
+          "fitted_rms_tesla": 0.001913817296834866
+        },
+        {
+          "shot": 19255,
+          "observations": 44312,
+          "nominal_squared_floor_residual": 15218711.53729086,
+          "fitted_squared_floor_residual": 10504165.780287066,
+          "nominal_rms_tesla": 0.007171612026712361,
+          "fitted_rms_tesla": 0.005958111521048917
+        },
+        {
+          "shot": 19257,
+          "observations": 44254,
+          "nominal_squared_floor_residual": 15450638.04510054,
+          "fitted_squared_floor_residual": 10659407.188354313,
+          "nominal_rms_tesla": 0.007230785256616708,
+          "fitted_rms_tesla": 0.006005909459046898
+        },
+        {
+          "shot": 19996,
+          "observations": 19107,
+          "nominal_squared_floor_residual": 931471.7734253984,
+          "fitted_squared_floor_residual": 850894.3865668919,
+          "nominal_rms_tesla": 0.0027019488170656808,
+          "fitted_rms_tesla": 0.0025824391543704506
+        },
+        {
+          "shot": 21093,
+          "observations": 8468,
+          "nominal_squared_floor_residual": 1468277.8187793526,
+          "fitted_squared_floor_residual": 1503227.0413912605,
+          "nominal_rms_tesla": 0.005095680790334737,
+          "fitted_rms_tesla": 0.005155970043673966
+        },
+        {
+          "shot": 22165,
+          "observations": 19107,
+          "nominal_squared_floor_residual": 118288.04215761561,
+          "fitted_squared_floor_residual": 91366.28258099161,
+          "nominal_rms_tesla": 0.0009628589913852327,
+          "fitted_rms_tesla": 0.0008462238202029819
+        },
+        {
+          "shot": 25554,
+          "observations": 165063,
+          "nominal_squared_floor_residual": 2138352.8594459575,
+          "fitted_squared_floor_residual": 2103035.2051520245,
+          "nominal_rms_tesla": 0.0013928467625843556,
+          "fitted_rms_tesla": 0.0013812965423349406
+        },
+        {
+          "shot": 25555,
+          "observations": 109327,
+          "nominal_squared_floor_residual": 4286411.514313564,
+          "fitted_squared_floor_residual": 4154467.1471137735,
+          "nominal_rms_tesla": 0.0024231022241693627,
+          "fitted_rms_tesla": 0.0023855167443420536
+        },
+        {
+          "shot": 25556,
+          "observations": 108197,
+          "nominal_squared_floor_residual": 4810795.101296343,
+          "fitted_squared_floor_residual": 4660207.561964671,
+          "nominal_rms_tesla": 0.002580413710305077,
+          "fitted_rms_tesla": 0.0025397065604858323
+        },
+        {
+          "shot": 25557,
+          "observations": 109892,
+          "nominal_squared_floor_residual": 4606585.189640957,
+          "fitted_squared_floor_residual": 4463345.403272072,
+          "nominal_rms_tesla": 0.0025055036227524586,
+          "fitted_rms_tesla": 0.0024662422294591904
+        },
+        {
+          "shot": 25558,
+          "observations": 108322,
+          "nominal_squared_floor_residual": 4689580.746788145,
+          "fitted_squared_floor_residual": 4540187.320238575,
+          "nominal_rms_tesla": 0.00254622744129849,
+          "fitted_rms_tesla": 0.002505342299723548
+        },
+        {
+          "shot": 25722,
+          "observations": 32114,
+          "nominal_squared_floor_residual": 4849108.619305459,
+          "fitted_squared_floor_residual": 4212120.522393579,
+          "nominal_rms_tesla": 0.004755238182334798,
+          "fitted_rms_tesla": 0.004431917969163402
+        },
+        {
+          "shot": 25835,
+          "observations": 42146,
+          "nominal_squared_floor_residual": 35062646.859879956,
+          "fitted_squared_floor_residual": 25329071.737063363,
+          "nominal_rms_tesla": 0.011161760195473188,
+          "fitted_rms_tesla": 0.009486805045097267
+        },
+        {
+          "shot": 25837,
+          "observations": 33110,
+          "nominal_squared_floor_residual": 11493283.418213494,
+          "fitted_squared_floor_residual": 8728139.395042662,
+          "nominal_rms_tesla": 0.007209929000724085,
+          "fitted_rms_tesla": 0.006283039162857763
+        },
+        {
+          "shot": 25881,
+          "observations": 6926,
+          "nominal_squared_floor_residual": 1750086.0083209616,
+          "fitted_squared_floor_residual": 1447596.9177077843,
+          "nominal_rms_tesla": 0.006151442559273518,
+          "fitted_rms_tesla": 0.0055946265439415395
+        },
+        {
+          "shot": 25882,
+          "observations": 6888,
+          "nominal_squared_floor_residual": 1758717.6073832798,
+          "fitted_squared_floor_residual": 1455112.376165721,
+          "nominal_rms_tesla": 0.006183580327303491,
+          "fitted_rms_tesla": 0.005624581555069859
+        },
+        {
+          "shot": 28479,
+          "observations": 3315,
+          "nominal_squared_floor_residual": 326090.8386407021,
+          "fitted_squared_floor_residual": 293833.9491426525,
+          "nominal_rms_tesla": 0.003838097939586255,
+          "fitted_rms_tesla": 0.0036433235410101394
+        },
+        {
+          "shot": 28489,
+          "observations": 3408,
+          "nominal_squared_floor_residual": 25998.9652394163,
+          "fitted_squared_floor_residual": 25478.982233695897,
+          "nominal_rms_tesla": 0.0010688499934497823,
+          "fitted_rms_tesla": 0.0010581074329680214
+        },
+        {
+          "shot": 28490,
+          "observations": 5736,
+          "nominal_squared_floor_residual": 38536.21974390032,
+          "fitted_squared_floor_residual": 37732.99034876982,
+          "nominal_rms_tesla": 0.0010030405804997097,
+          "fitted_rms_tesla": 0.0009925320995363802
+        },
+        {
+          "shot": 28566,
+          "observations": 13632,
+          "nominal_squared_floor_residual": 559401.262071257,
+          "fitted_squared_floor_residual": 538514.0479944111,
+          "nominal_rms_tesla": 0.002478965327633958,
+          "fitted_rms_tesla": 0.0024322446125026654
+        },
+        {
+          "shot": 28567,
+          "observations": 22884,
+          "nominal_squared_floor_residual": 1135899.3112302793,
+          "fitted_squared_floor_residual": 1092282.4995515696,
+          "nominal_rms_tesla": 0.0027264181788938767,
+          "fitted_rms_tesla": 0.0026735606371417215
+        },
+        {
+          "shot": 28573,
+          "observations": 5658,
+          "nominal_squared_floor_residual": 275798.26810861926,
+          "fitted_squared_floor_residual": 245460.49837848288,
+          "nominal_rms_tesla": 0.002701797627935962,
+          "fitted_rms_tesla": 0.0025488709909023935
+        },
+        {
+          "shot": 28574,
+          "observations": 8132,
+          "nominal_squared_floor_residual": 411380.56357338425,
+          "fitted_squared_floor_residual": 360866.0832938239,
+          "nominal_rms_tesla": 0.0027524010807301346,
+          "fitted_rms_tesla": 0.0025778810158729685
+        },
+        {
+          "shot": 28575,
+          "observations": 16020,
+          "nominal_squared_floor_residual": 590663.7856425986,
+          "fitted_squared_floor_residual": 537804.2267574575,
+          "nominal_rms_tesla": 0.0023497812641948574,
+          "fitted_rms_tesla": 0.0022421742981320754
+        },
+        {
+          "shot": 28701,
+          "observations": 18495,
+          "nominal_squared_floor_residual": 89121505.9816263,
+          "fitted_squared_floor_residual": 77353276.62460338,
+          "nominal_rms_tesla": 0.026862882395855842,
+          "fitted_rms_tesla": 0.02502653416316423
+        }
+      ],
+      "observations": 1417011,
+      "nominal_rms_tesla": 0.006401402210138003,
+      "fitted_rms_tesla": 0.005635457218709917,
+      "squared_residual_improvement": 0.22498861300923967
+    },
+    "minimum_decay_rate_per_second": 16.013491577736964,
+    "decay_rates_per_second": [
+      16.013491577736964,
+      29.672484571674136,
+      42.39081043376363,
+      44.87291957963624,
+      58.41663535420544,
+      62.0329823678025,
+      63.25603887480706,
+      70.39117793893476,
+      130.17424933369892,
+      173.7319121257225,
+      174.75721223523456,
+      207.2526118106678,
+      207.48664675616905,
+      244.73087322976417,
+      246.11736955191017,
+      260.96326770771003,
+      261.1422265448089,
+      653.6516677122196,
+      666.9692345421241,
+      680.2950341635282,
+      680.629120890681,
+      828.9191079849702,
+      832.7141104705563,
+      867.7814530200183,
+      1034.9625421474868,
+      1286.3260840371886,
+      1289.2972753390002,
+      1549.1258064392362,
+      1557.5177338826952,
+      1597.2358618902117,
+      1646.7488866494386,
+      1656.919865528461,
+      1711.709745888932,
+      1999.4014441550178,
+      2474.7899805876004,
+      3180.208433821357,
+      7501.250949253578,
+      7503.998835688111,
+      7585.323910308144,
+      7585.829876456813,
+      16240.469253631036,
+      16240.653474706549,
+      17486.90290965864,
+      17486.93144709394,
+      26010.41585972428,
+      26010.41984858655,
+      26787.24803612746,
+      26787.249480776394,
+      30680.737649683444,
+      30680.745769217898
+    ],
+    "resistances_ohm": [
+      7.738644775170638e-05,
+      7.459080554018796e-05,
+      7.459080554018796e-05,
+      0.023594342576164464,
+      0.054182790048592944,
+      0.06075442882012776,
+      0.031234094674265408,
+      0.031234094674265408,
+      0.06261455715135597,
+      0.05892380024514699,
+      0.02624506137763095,
+      0.023594342576164464,
+      0.054182790048592944,
+      0.06075442882012776,
+      0.031234094674265408,
+      0.031234094674265408,
+      0.06261455715135597,
+      0.05892380024514699,
+      0.02624506137763095,
+      0.0002349557984492544,
+      0.0002349557984492544,
+      0.00025740688567677086,
+      0.00025740688567677086,
+      0.0007736168928826666,
+      0.0007736168928826666,
+      3.850482640110308e-05,
+      3.850468859729511e-05,
+      4.402798330975538e-05,
+      0.00012538628492768193,
+      0.0013881863144330348,
+      0.0013881863144330335,
+      0.0028836909230376437,
+      0.002883690923037645,
+      0.0001404965950457351,
+      0.0002884322900485517,
+      0.0001402686380632171,
+      0.00028866364740794874,
+      0.0002731965915071593,
+      0.0002731965915071593,
+      0.0010444550797891086,
+      0.0010444550797891086,
+      0.001624892176273351,
+      0.001624892176273351,
+      0.0008565214582906741,
+      0.0008565214582906668,
+      0.0008565214582906668,
+      0.0008565214582906741,
+      7.823153234977052e-05,
+      0.0001252623597066174,
+      0.00011624375283957444
+    ],
+    "training_drive_sources": [
+      11884,
+      11885,
+      11887,
+      14061,
+      14065,
+      14066,
+      14067,
+      14068,
+      14069,
+      14070,
+      14071,
+      14072,
+      14073,
+      14074,
+      14076,
+      14078,
+      14080,
+      14081,
+      14082,
+      14083,
+      14084,
+      14086,
+      14087,
+      14088,
+      14089,
+      14092,
+      14095,
+      14098,
+      14099,
+      14100,
+      14101,
+      14103,
+      14104,
+      14105,
+      14106,
+      14107,
+      14108,
+      14109,
+      14110,
+      14112,
+      14113,
+      14115,
+      14117,
+      14118,
+      14121,
+      14123,
+      14127,
+      14130,
+      14131,
+      14132,
+      14133,
+      14135,
+      14136,
+      14137,
+      14138,
+      14143,
+      14167,
+      14378,
+      14456,
+      14916,
+      14930,
+      14934,
+      14935,
+      14936,
+      15295,
+      15296,
+      16178,
+      19218,
+      19219,
+      19222,
+      19223,
+      19225,
+      19227,
+      19228,
+      19229,
+      19231,
+      19232,
+      19235,
+      19238,
+      19248,
+      19250,
+      19258,
+      19349,
+      19754,
+      19858,
+      19859,
+      19995,
+      20420,
+      20586,
+      21001,
+      21146,
+      21150,
+      24654,
+      24784,
+      24938,
+      24939,
+      24940,
+      24941,
+      24965,
+      24966,
+      25527,
+      25528,
+      25529,
+      25530,
+      25531,
+      25532,
+      25533,
+      25534,
+      25535,
+      25536,
+      25537,
+      25538,
+      25539,
+      25540,
+      25541,
+      25542,
+      25543,
+      25544,
+      25546,
+      25547,
+      25548,
+      25549,
+      25550,
+      25552,
+      25553,
+      25826,
+      25827,
+      25828,
+      25829,
+      25834,
+      25836
+    ],
+    "held_out_drive_sources": [
+      14116,
+      14126,
+      14128,
+      14134,
+      14937,
+      15299,
+      15943,
+      16177,
+      19246,
+      19251,
+      19252,
+      19253,
+      19254,
+      19255,
+      19257,
+      19996,
+      21093,
+      22165,
+      25554,
+      25555,
+      25556,
+      25557,
+      25558,
+      25722,
+      25835,
+      25837,
+      25881,
+      25882,
+      28479,
+      28489,
+      28490,
+      28566,
+      28567,
+      28573,
+      28574,
+      28575,
+      28701
+    ]
+  },
+  "permuted": {
+    "fit": {
+      "coordinate": 1.0160589224395329,
+      "drive_multipliers": [
+        0.9900000000000002,
+        0.9900000000000002,
+        0.9900000000000001,
+        0.9900000000000001,
+        0.9869052500000001,
+        0.9900000000000001,
+        0.9898084782608697,
+        0.9900000000000001,
+        0.9446357391304349,
+        0.9900000000000001,
+        5.611018904149437,
+        0.10000000000000002,
+        0.9660989802994179
+      ],
+      "training_loss": 97413829474.02211,
+      "nominal_drive_multipliers": [
+        0.9900000000000002,
+        0.9900000000000002,
+        0.9900000000000001,
+        0.9900000000000001,
+        0.9869052500000001,
+        0.9900000000000001,
+        0.9898084782608697,
+        0.9900000000000001,
+        0.9446357391304349,
+        0.9900000000000001,
+        5.5783992336339745,
+        0.10000000000000002,
+        0.9660989802994179
+      ],
+      "nominal_training_loss": 97754435000.27345,
+      "profile": [
+        {
+          "coordinate": -2.842939345526997,
+          "loss": 98596375484.29129
+        },
+        {
+          "coordinate": -1.3689331696907574,
+          "loss": 98179608960.74408
+        },
+        {
+          "coordinate": -0.45794725339670717,
+          "loss": 97900893932.43567
+        },
+        {
+          "coordinate": 0.0,
+          "loss": 97754435000.27345
+        },
+        {
+          "coordinate": 0.10507300614548243,
+          "loss": 97720219775.89005
+        },
+        {
+          "coordinate": 0.453038662897343,
+          "loss": 97605262925.6041
+        },
+        {
+          "coordinate": 0.6680932656876721,
+          "loss": 97532939437.9642
+        },
+        {
+          "coordinate": 0.8010043196492036,
+          "loss": 97487749403.4989
+        },
+        {
+          "coordinate": 0.8831478684780014,
+          "loss": 97459631653.76068
+        },
+        {
+          "coordinate": 0.9339153736107351,
+          "loss": 97442181595.69135
+        },
+        {
+          "coordinate": 0.9652914173067992,
+          "loss": 97431369184.27588
+        },
+        {
+          "coordinate": 0.9846828787434687,
+          "loss": 97424676160.15018
+        },
+        {
+          "coordinate": 0.9966674610028633,
+          "loss": 97420535597.14346
+        },
+        {
+          "coordinate": 1.0040743401801382,
+          "loss": 97417975042.10373
+        },
+        {
+          "coordinate": 1.0086520432622579,
+          "loss": 97416391941.23012
+        },
+        {
+          "coordinate": 1.011481219357413,
+          "loss": 97415413305.3738
+        },
+        {
+          "coordinate": 1.0132297463443776,
+          "loss": 97414808388.92303
+        },
+        {
+          "coordinate": 1.0143103954525683,
+          "loss": 97414434497.06265
+        },
+        {
+          "coordinate": 1.0149782733313424,
+          "loss": 97414203406.59937
+        },
+        {
+          "coordinate": 1.0160589224395329,
+          "loss": 97413829474.02211
+        }
+      ]
+    },
+    "held_out": {
+      "shots": [
+        {
+          "shot": 14116,
+          "observations": 12283,
+          "nominal_squared_floor_residual": 71064111.47406703,
+          "fitted_squared_floor_residual": 68220858.92556474,
+          "nominal_rms_tesla": 0.029434825095181222,
+          "fitted_rms_tesla": 0.02883997541792601
+        },
+        {
+          "shot": 14126,
+          "observations": 20361,
+          "nominal_squared_floor_residual": 440067.4489020769,
+          "fitted_squared_floor_residual": 441054.9908288843,
+          "nominal_rms_tesla": 0.001799072193562853,
+          "fitted_rms_tesla": 0.0018010896838419623
+        },
+        {
+          "shot": 14128,
+          "observations": 43807,
+          "nominal_squared_floor_residual": 1437316136.0479867,
+          "fitted_squared_floor_residual": 1426273933.3355925,
+          "nominal_rms_tesla": 0.07009594813804863,
+          "fitted_rms_tesla": 0.06982617241506822
+        },
+        {
+          "shot": 14134,
+          "observations": 36240,
+          "nominal_squared_floor_residual": 968181327.3417051,
+          "fitted_squared_floor_residual": 966478509.2175765,
+          "nominal_rms_tesla": 0.06325178368183712,
+          "fitted_rms_tesla": 0.06319613621157255
+        },
+        {
+          "shot": 14937,
+          "observations": 25850,
+          "nominal_squared_floor_residual": 409037963.809919,
+          "fitted_squared_floor_residual": 410870573.6480534,
+          "nominal_rms_tesla": 0.04867882149158701,
+          "fitted_rms_tesla": 0.04878774730940785
+        },
+        {
+          "shot": 15299,
+          "observations": 13156,
+          "nominal_squared_floor_residual": 12976780.03813903,
+          "fitted_squared_floor_residual": 12974862.569634566,
+          "nominal_rms_tesla": 0.012153743303909994,
+          "fitted_rms_tesla": 0.01215284534305739
+        },
+        {
+          "shot": 15943,
+          "observations": 22806,
+          "nominal_squared_floor_residual": 569404783.9728649,
+          "fitted_squared_floor_residual": 568860398.4957926,
+          "nominal_rms_tesla": 0.06114691011718257,
+          "fitted_rms_tesla": 0.061117673051747985
+        },
+        {
+          "shot": 16177,
+          "observations": 56910,
+          "nominal_squared_floor_residual": 440258708.0336617,
+          "fitted_squared_floor_residual": 440275917.9936938,
+          "nominal_rms_tesla": 0.03403675941241296,
+          "fitted_rms_tesla": 0.034037424663927576
+        },
+        {
+          "shot": 19246,
+          "observations": 44367,
+          "nominal_squared_floor_residual": 23364688.75223482,
+          "fitted_squared_floor_residual": 23677044.132853426,
+          "nominal_rms_tesla": 0.0088805218766173,
+          "fitted_rms_tesla": 0.008939685289662633
+        },
+        {
+          "shot": 19251,
+          "observations": 45298,
+          "nominal_squared_floor_residual": 40490432.375587,
+          "fitted_squared_floor_residual": 41489746.20425896,
+          "nominal_rms_tesla": 0.011569783006583331,
+          "fitted_rms_tesla": 0.011711685341926126
+        },
+        {
+          "shot": 19252,
+          "observations": 48369,
+          "nominal_squared_floor_residual": 928342962.717474,
+          "fitted_squared_floor_residual": 921006721.9310062,
+          "nominal_rms_tesla": 0.05361165210633014,
+          "fitted_rms_tesla": 0.05339939859639757
+        },
+        {
+          "shot": 19253,
+          "observations": 44544,
+          "nominal_squared_floor_residual": 384147439.52214575,
+          "fitted_squared_floor_residual": 382428602.0525606,
+          "nominal_rms_tesla": 0.035937088147654846,
+          "fitted_rms_tesla": 0.03585659917574474
+        },
+        {
+          "shot": 19254,
+          "observations": 48507,
+          "nominal_squared_floor_residual": 63228697.51763104,
+          "fitted_squared_floor_residual": 63444701.2769824,
+          "nominal_rms_tesla": 0.013971512711640884,
+          "fitted_rms_tesla": 0.01399535731323638
+        },
+        {
+          "shot": 19255,
+          "observations": 44312,
+          "nominal_squared_floor_residual": 20165727.310040273,
+          "fitted_squared_floor_residual": 22566064.919468176,
+          "nominal_rms_tesla": 0.00825533666794971,
+          "fitted_rms_tesla": 0.008732845179353084
+        },
+        {
+          "shot": 19257,
+          "observations": 44254,
+          "nominal_squared_floor_residual": 406154352.8672025,
+          "fitted_squared_floor_residual": 406347282.9512751,
+          "nominal_rms_tesla": 0.037073006774866704,
+          "fitted_rms_tesla": 0.03708181087739094
+        },
+        {
+          "shot": 19996,
+          "observations": 19107,
+          "nominal_squared_floor_residual": 1080832.0937976365,
+          "fitted_squared_floor_residual": 1093310.2871615828,
+          "nominal_rms_tesla": 0.002910525338083821,
+          "fitted_rms_tesla": 0.002927278113989721
+        },
+        {
+          "shot": 21093,
+          "observations": 8468,
+          "nominal_squared_floor_residual": 19967457.341311827,
+          "fitted_squared_floor_residual": 19805340.333559997,
+          "nominal_rms_tesla": 0.01879141475716,
+          "fitted_rms_tesla": 0.01871497496307518
+        },
+        {
+          "shot": 22165,
+          "observations": 19107,
+          "nominal_squared_floor_residual": 328275.4664174022,
+          "fitted_squared_floor_residual": 331501.2905455701,
+          "nominal_rms_tesla": 0.001604026289665096,
+          "fitted_rms_tesla": 0.0016118880671640015
+        },
+        {
+          "shot": 25554,
+          "observations": 165063,
+          "nominal_squared_floor_residual": 1184154725.972458,
+          "fitted_squared_floor_residual": 1181398973.0742586,
+          "nominal_rms_tesla": 0.03277690025701988,
+          "fitted_rms_tesla": 0.03273873900663149
+        },
+        {
+          "shot": 25555,
+          "observations": 109327,
+          "nominal_squared_floor_residual": 52359613.7480736,
+          "fitted_squared_floor_residual": 52160232.50133254,
+          "nominal_rms_tesla": 0.008468822332020672,
+          "fitted_rms_tesla": 0.008452682651612075
+        },
+        {
+          "shot": 25556,
+          "observations": 108197,
+          "nominal_squared_floor_residual": 591522560.0592377,
+          "fitted_squared_floor_residual": 590623009.1857802,
+          "nominal_rms_tesla": 0.028613209000683818,
+          "fitted_rms_tesla": 0.02859144412482048
+        },
+        {
+          "shot": 25557,
+          "observations": 109892,
+          "nominal_squared_floor_residual": 40213922.06043752,
+          "fitted_squared_floor_residual": 40022910.11879871,
+          "nominal_rms_tesla": 0.0074027604745596325,
+          "fitted_rms_tesla": 0.007385158377006896
+        },
+        {
+          "shot": 25558,
+          "observations": 108322,
+          "nominal_squared_floor_residual": 7674811.512985434,
+          "fitted_squared_floor_residual": 7647342.690273494,
+          "nominal_rms_tesla": 0.0032573471405100596,
+          "fitted_rms_tesla": 0.003251512750003531
+        },
+        {
+          "shot": 25722,
+          "observations": 32114,
+          "nominal_squared_floor_residual": 50313932.4379174,
+          "fitted_squared_floor_residual": 50391791.28603487,
+          "nominal_rms_tesla": 0.015317413973024592,
+          "fitted_rms_tesla": 0.01532926094197453
+        },
+        {
+          "shot": 25835,
+          "observations": 42146,
+          "nominal_squared_floor_residual": 801785414.8489372,
+          "fitted_squared_floor_residual": 802550816.454762,
+          "nominal_rms_tesla": 0.05337518763730294,
+          "fitted_rms_tesla": 0.05340065811127686
+        },
+        {
+          "shot": 25837,
+          "observations": 33110,
+          "nominal_squared_floor_residual": 273758613.9528869,
+          "fitted_squared_floor_residual": 273584165.83173436,
+          "nominal_rms_tesla": 0.03518785766524365,
+          "fitted_rms_tesla": 0.03517664444022889
+        },
+        {
+          "shot": 25881,
+          "observations": 6926,
+          "nominal_squared_floor_residual": 9666300.58882614,
+          "fitted_squared_floor_residual": 9626204.863840837,
+          "nominal_rms_tesla": 0.014456974823737785,
+          "fitted_rms_tesla": 0.014426959967468574
+        },
+        {
+          "shot": 25882,
+          "observations": 6888,
+          "nominal_squared_floor_residual": 1910956.3869269833,
+          "fitted_squared_floor_residual": 2027157.3378753285,
+          "nominal_rms_tesla": 0.006445659190291082,
+          "fitted_rms_tesla": 0.006638740301158475
+        },
+        {
+          "shot": 28479,
+          "observations": 3315,
+          "nominal_squared_floor_residual": 785869.7143091937,
+          "fitted_squared_floor_residual": 752611.3687345418,
+          "nominal_rms_tesla": 0.005958295389604901,
+          "fitted_rms_tesla": 0.005830853649929482
+        },
+        {
+          "shot": 28489,
+          "observations": 3408,
+          "nominal_squared_floor_residual": 34911.49183211754,
+          "fitted_squared_floor_residual": 34996.340468657174,
+          "nominal_rms_tesla": 0.0012385767715789393,
+          "fitted_rms_tesla": 0.001240080972185212
+        },
+        {
+          "shot": 28490,
+          "observations": 5736,
+          "nominal_squared_floor_residual": 35321782.180068,
+          "fitted_squared_floor_residual": 35071067.5217525,
+          "nominal_rms_tesla": 0.030367235186133178,
+          "fitted_rms_tesla": 0.030259269663235354
+        },
+        {
+          "shot": 28566,
+          "observations": 13632,
+          "nominal_squared_floor_residual": 339473641.6258024,
+          "fitted_squared_floor_residual": 332783293.8112767,
+          "nominal_rms_tesla": 0.06106772780639561,
+          "fitted_rms_tesla": 0.06046297184063818
+        },
+        {
+          "shot": 28567,
+          "observations": 22884,
+          "nominal_squared_floor_residual": 9291411.675089795,
+          "fitted_squared_floor_residual": 9296732.985746834,
+          "nominal_rms_tesla": 0.007797643972511168,
+          "fitted_rms_tesla": 0.007799876558265119
+        },
+        {
+          "shot": 28573,
+          "observations": 5658,
+          "nominal_squared_floor_residual": 40216566.056558736,
+          "fitted_squared_floor_residual": 38415036.12416584,
+          "nominal_rms_tesla": 0.032625677673413775,
+          "fitted_rms_tesla": 0.03188656019521222
+        },
+        {
+          "shot": 28574,
+          "observations": 8132,
+          "nominal_squared_floor_residual": 13814892.352973467,
+          "fitted_squared_floor_residual": 13634948.586660707,
+          "nominal_rms_tesla": 0.0159501065249116,
+          "fitted_rms_tesla": 0.015845888206730087
+        },
+        {
+          "shot": 28575,
+          "observations": 16020,
+          "nominal_squared_floor_residual": 89503892.83529752,
+          "fitted_squared_floor_residual": 88537479.40895279,
+          "nominal_rms_tesla": 0.02892532363112688,
+          "fitted_rms_tesla": 0.028768740001961307
+        },
+        {
+          "shot": 28701,
+          "observations": 18495,
+          "nominal_squared_floor_residual": 422865173.46160436,
+          "fitted_squared_floor_residual": 427065648.9831023,
+          "nominal_rms_tesla": 0.05851434013218235,
+          "fitted_rms_tesla": 0.05880424422668533
+        }
+      ],
+      "observations": 1417011,
+      "nominal_rms_tesla": 0.03211741668555545,
+      "fitted_rms_tesla": 0.03207064275138136,
+      "squared_residual_improvement": 0.0029105625284617798
+    },
+    "minimum_decay_rate_per_second": 13.225086520907354,
+    "decay_rates_per_second": [
+      13.225086520907354,
+      23.763648086151168,
+      36.090509726746156,
+      37.513981025831626,
+      46.97491751147136,
+      52.289497459178314,
+      55.396210010813014,
+      62.863322828581126,
+      121.77715347855711,
+      173.2220590498216,
+      174.0896663973332,
+      194.4524959745494,
+      194.54654925076903,
+      200.26894432629848,
+      200.3074117077723,
+      236.49787398751323,
+      238.23054382757886,
+      651.9572417446766,
+      665.1347135826416,
+      677.3735281451663,
+      677.7700854964264,
+      827.8095017596029,
+      831.6397938876936,
+      866.0607639354555,
+      1032.12602965518,
+      1217.1320178042442,
+      1223.2017199095592,
+      1286.3132692956651,
+      1289.2317737381577,
+      1591.139006136919,
+      1605.9806115786648,
+      1617.4329751468624,
+      1707.8481199653852,
+      1997.2791170939931,
+      2471.422436650723,
+      3176.9301391406216,
+      5751.111342264622,
+      5753.181232191938,
+      5815.534111307795,
+      5815.845891016548,
+      12451.028899119194,
+      12451.170015618758,
+      13406.62706218459,
+      13406.648127231005,
+      19941.31886632238,
+      19941.321898726746,
+      20536.890213821,
+      20536.891286368897,
+      23521.89890338255,
+      23521.905094773756
+    ],
+    "resistances_ohm": [
+      7.737437855118775e-05,
+      5.718628424747742e-05,
+      5.718628424747742e-05,
+      0.01808899597505942,
+      0.041540139037254585,
+      0.04657839542876461,
+      0.023946139250270143,
+      0.023946139250270143,
+      0.04800449381603957,
+      0.04517491352127935,
+      0.020121213722850393,
+      0.01808899597505942,
+      0.041540139037254585,
+      0.04657839542876461,
+      0.023946139250270143,
+      0.023946139250270143,
+      0.04800449381603957,
+      0.04517491352127935,
+      0.020121213722850393,
+      0.00018013277881109504,
+      0.00018013277881109504,
+      0.00019734527901885764,
+      0.00019734527901885764,
+      0.0005931062845433777,
+      0.0005931062845433777,
+      3.850427833338792e-05,
+      3.8504327583519124e-05,
+      4.4031368372124104e-05,
+      0.0001247127452698119,
+      0.0013855445920864064,
+      0.0013855445920864051,
+      0.00287820325133756,
+      0.002878203251337561,
+      0.00013964956044222674,
+      0.0002875024223046185,
+      0.00013973062976831434,
+      0.00028806916262748424,
+      0.00027283943467912444,
+      0.00027283943467912444,
+      0.0010430896371923896,
+      0.0010430896371923896,
+      0.0016227679135496663,
+      0.0016227679135496663,
+      0.0008554017060803731,
+      0.0008554017060803657,
+      0.0008554017060803657,
+      0.0008554017060803731,
+      7.822453178832445e-05,
+      0.0001247568274693152,
+      0.00011095421907730668
+    ],
+    "training_drive_sources": [
+      19223,
+      25530,
+      14076,
+      24784,
+      19995,
+      20420,
+      14378,
+      25826,
+      25538,
+      14121,
+      25529,
+      14106,
+      25542,
+      14084,
+      14167,
+      14934,
+      14123,
+      14136,
+      19218,
+      25528,
+      14078,
+      25532,
+      25827,
+      14135,
+      14100,
+      19231,
+      25534,
+      14065,
+      14113,
+      25553,
+      19238,
+      14101,
+      14107,
+      14086,
+      14074,
+      14127,
+      25834,
+      24654,
+      14080,
+      14083,
+      25543,
+      19754,
+      14092,
+      14130,
+      25550,
+      24938,
+      21146,
+      25541,
+      25548,
+      19859,
+      14081,
+      19232,
+      11887,
+      24940,
+      14099,
+      15296,
+      14071,
+      14118,
+      14082,
+      14095,
+      19349,
+      14109,
+      21001,
+      14088,
+      14067,
+      14132,
+      20586,
+      14935,
+      11885,
+      25547,
+      25536,
+      15295,
+      14103,
+      14104,
+      14108,
+      14068,
+      14069,
+      14115,
+      14143,
+      25546,
+      24939,
+      25537,
+      19225,
+      14117,
+      19219,
+      19228,
+      14112,
+      14456,
+      19235,
+      25533,
+      19229,
+      25535,
+      24941,
+      14089,
+      25829,
+      25544,
+      14072,
+      19222,
+      11884,
+      14110,
+      14137,
+      25539,
+      25828,
+      25540,
+      16178,
+      19858,
+      25531,
+      14133,
+      25836,
+      14930,
+      14066,
+      19258,
+      19227,
+      14916,
+      14138,
+      14098,
+      25549,
+      24966,
+      21150,
+      14070,
+      24965,
+      14087,
+      14131,
+      14936,
+      25527,
+      19250,
+      25552,
+      19248,
+      14073,
+      14105,
+      14061
+    ],
+    "held_out_drive_sources": [
+      15943,
+      14116,
+      19255,
+      28567,
+      14126,
+      25554,
+      28479,
+      21093,
+      19996,
+      25837,
+      19257,
+      25882,
+      19246,
+      19251,
+      28489,
+      22165,
+      28701,
+      28490,
+      14134,
+      19254,
+      14128,
+      19252,
+      28574,
+      25555,
+      25722,
+      25557,
+      28573,
+      25881,
+      25558,
+      28575,
+      15299,
+      25835,
+      25556,
+      14937,
+      28566,
+      16177,
+      19253
+    ]
+  },
+  "group_resistivities": {
+    "botcol": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.400850348874493e-07
+    },
+    "coil_cases": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 24,
+      "fitted_ohm_m": 9.000000000000001e-07
+    },
+    "endcrown_l": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.400077597753486e-07
+    },
+    "endcrown_u": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.400051113830105e-07
+    },
+    "incon": {
+      "nominal_ohm_m": 1.15e-06,
+      "interval_ohm_m": [
+        1e-06,
+        1.35e-06
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 1.1499348672014487e-06
+    },
+    "lhorw": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.429421775158756e-07
+    },
+    "mid": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 4,
+      "fitted_ohm_m": 7.410391600844394e-07
+    },
+    "p2larm": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.433040017583129e-07
+    },
+    "p2ldivpl": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.417624617453787e-07
+    },
+    "p2uarm": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.420979843649439e-07
+    },
+    "p2udivpl": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.411247365222328e-07
+    },
+    "ring": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 10,
+      "fitted_ohm_m": 7.407135127504092e-07
+    },
+    "topcol": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.400487876065932e-07
+    },
+    "uhorw": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.422078924731375e-07
+    },
+    "vertw": {
+      "nominal_ohm_m": 7.4e-07,
+      "interval_ohm_m": [
+        6.9e-07,
+        9e-07
+      ],
+      "circuit_count": 1,
+      "fitted_ohm_m": 7.658295993468299e-07
+    }
+  },
+  "circuits": [
+    {
+      "name": "botcol",
+      "nominal_ohm": 7.737755614119615e-05,
+      "interval_ohm": [
+        7.214934288841263e-05,
+        9.410783855010343e-05
+      ],
+      "fitted_ohm": 7.738644775170638e-05
+    },
+    {
+      "name": "coil_cases_p2_lower",
+      "nominal_ohm": 6.133021788859898e-05,
+      "interval_ohm": [
+        5.718628424747742e-05,
+        7.459080554018796e-05
+      ],
+      "fitted_ohm": 7.459080554018796e-05
+    },
+    {
+      "name": "coil_cases_p2_upper",
+      "nominal_ohm": 6.133021788859898e-05,
+      "interval_ohm": [
+        5.718628424747742e-05,
+        7.459080554018796e-05
+      ],
+      "fitted_ohm": 7.459080554018796e-05
+    },
+    {
+      "name": "coil_cases_p3_lower_00",
+      "nominal_ohm": 0.019399792784846336,
+      "interval_ohm": [
+        0.01808899597505942,
+        0.023594342576164464
+      ],
+      "fitted_ohm": 0.023594342576164464
+    },
+    {
+      "name": "coil_cases_p3_lower_01",
+      "nominal_ohm": 0.0445502940399542,
+      "interval_ohm": [
+        0.041540139037254585,
+        0.054182790048592944
+      ],
+      "fitted_ohm": 0.054182790048592944
+    },
+    {
+      "name": "coil_cases_p3_lower_02",
+      "nominal_ohm": 0.049953641474327265,
+      "interval_ohm": [
+        0.04657839542876461,
+        0.06075442882012776
+      ],
+      "fitted_ohm": 0.06075442882012776
+    },
+    {
+      "name": "coil_cases_p3_lower_03",
+      "nominal_ohm": 0.02568136673217378,
+      "interval_ohm": [
+        0.023946139250270143,
+        0.031234094674265408
+      ],
+      "fitted_ohm": 0.031234094674265408
+    },
+    {
+      "name": "coil_cases_p3_lower_04",
+      "nominal_ohm": 0.02568136673217378,
+      "interval_ohm": [
+        0.023946139250270143,
+        0.031234094674265408
+      ],
+      "fitted_ohm": 0.031234094674265408
+    },
+    {
+      "name": "coil_cases_p3_lower_05",
+      "nominal_ohm": 0.05148308032444824,
+      "interval_ohm": [
+        0.04800449381603957,
+        0.06261455715135597
+      ],
+      "fitted_ohm": 0.06261455715135597
+    },
+    {
+      "name": "coil_cases_p3_lower_06",
+      "nominal_ohm": 0.04844845797934308,
+      "interval_ohm": [
+        0.04517491352127935,
+        0.05892380024514699
+      ],
+      "fitted_ohm": 0.05892380024514699
+    },
+    {
+      "name": "coil_cases_p3_lower_07",
+      "nominal_ohm": 0.021579272688274337,
+      "interval_ohm": [
+        0.020121213722850393,
+        0.02624506137763095
+      ],
+      "fitted_ohm": 0.02624506137763095
+    },
+    {
+      "name": "coil_cases_p3_upper_00",
+      "nominal_ohm": 0.019399792784846336,
+      "interval_ohm": [
+        0.01808899597505942,
+        0.023594342576164464
+      ],
+      "fitted_ohm": 0.023594342576164464
+    },
+    {
+      "name": "coil_cases_p3_upper_01",
+      "nominal_ohm": 0.0445502940399542,
+      "interval_ohm": [
+        0.041540139037254585,
+        0.054182790048592944
+      ],
+      "fitted_ohm": 0.054182790048592944
+    },
+    {
+      "name": "coil_cases_p3_upper_02",
+      "nominal_ohm": 0.049953641474327265,
+      "interval_ohm": [
+        0.04657839542876461,
+        0.06075442882012776
+      ],
+      "fitted_ohm": 0.06075442882012776
+    },
+    {
+      "name": "coil_cases_p3_upper_03",
+      "nominal_ohm": 0.02568136673217378,
+      "interval_ohm": [
+        0.023946139250270143,
+        0.031234094674265408
+      ],
+      "fitted_ohm": 0.031234094674265408
+    },
+    {
+      "name": "coil_cases_p3_upper_04",
+      "nominal_ohm": 0.02568136673217378,
+      "interval_ohm": [
+        0.023946139250270143,
+        0.031234094674265408
+      ],
+      "fitted_ohm": 0.031234094674265408
+    },
+    {
+      "name": "coil_cases_p3_upper_05",
+      "nominal_ohm": 0.05148308032444824,
+      "interval_ohm": [
+        0.04800449381603957,
+        0.06261455715135597
+      ],
+      "fitted_ohm": 0.06261455715135597
+    },
+    {
+      "name": "coil_cases_p3_upper_06",
+      "nominal_ohm": 0.04844845797934308,
+      "interval_ohm": [
+        0.04517491352127935,
+        0.05892380024514699
+      ],
+      "fitted_ohm": 0.05892380024514699
+    },
+    {
+      "name": "coil_cases_p3_upper_07",
+      "nominal_ohm": 0.021579272688274337,
+      "interval_ohm": [
+        0.020121213722850393,
+        0.02624506137763095
+      ],
+      "fitted_ohm": 0.02624506137763095
+    },
+    {
+      "name": "coil_cases_p4_lower",
+      "nominal_ohm": 0.00019318587872494252,
+      "interval_ohm": [
+        0.00018013277881109504,
+        0.0002349557984492544
+      ],
+      "fitted_ohm": 0.0002349557984492544
+    },
+    {
+      "name": "coil_cases_p4_upper",
+      "nominal_ohm": 0.00019318587872494252,
+      "interval_ohm": [
+        0.00018013277881109504,
+        0.0002349557984492544
+      ],
+      "fitted_ohm": 0.0002349557984492544
+    },
+    {
+      "name": "coil_cases_p5_lower",
+      "nominal_ohm": 0.00021164566155645604,
+      "interval_ohm": [
+        0.00019734527901885764,
+        0.00025740688567677086
+      ],
+      "fitted_ohm": 0.00025740688567677086
+    },
+    {
+      "name": "coil_cases_p5_upper",
+      "nominal_ohm": 0.00021164566155645604,
+      "interval_ohm": [
+        0.00019734527901885764,
+        0.00025740688567677086
+      ],
+      "fitted_ohm": 0.00025740688567677086
+    },
+    {
+      "name": "coil_cases_p6_lower",
+      "nominal_ohm": 0.000636085000814637,
+      "interval_ohm": [
+        0.0005931062845433777,
+        0.0007736168928826666
+      ],
+      "fitted_ohm": 0.0007736168928826666
+    },
+    {
+      "name": "coil_cases_p6_upper",
+      "nominal_ohm": 0.000636085000814637,
+      "interval_ohm": [
+        0.0005931062845433777,
+        0.0007736168928826666
+      ],
+      "fitted_ohm": 0.0007736168928826666
+    },
+    {
+      "name": "endcrown_l",
+      "nominal_ohm": 3.850442263668472e-05,
+      "interval_ohm": [
+        3.5902772458530344e-05,
+        4.682970320677871e-05
+      ],
+      "fitted_ohm": 3.850482640110308e-05
+    },
+    {
+      "name": "endcrown_u",
+      "nominal_ohm": 3.850442263668472e-05,
+      "interval_ohm": [
+        3.5902772458530344e-05,
+        4.682970320677871e-05
+      ],
+      "fitted_ohm": 3.850468859729511e-05
+    },
+    {
+      "name": "incon",
+      "nominal_ohm": 4.4030477073401756e-05,
+      "interval_ohm": [
+        3.8287371368175436e-05,
+        5.168795134703684e-05
+      ],
+      "fitted_ohm": 4.402798330975538e-05
+    },
+    {
+      "name": "lhorw",
+      "nominal_ohm": 0.00012488973389117072,
+      "interval_ohm": [
+        0.0001164512383579835,
+        0.0001518929195973698
+      ],
+      "fitted_ohm": 0.00012538628492768193
+    },
+    {
+      "name": "mid_00",
+      "nominal_ohm": 0.0013862396591340631,
+      "interval_ohm": [
+        0.0012925748173006804,
+        0.0016859671530008876
+      ],
+      "fitted_ohm": 0.0013881863144330348
+    },
+    {
+      "name": "mid_01",
+      "nominal_ohm": 0.0013862396591340618,
+      "interval_ohm": [
+        0.001292574817300679,
+        0.001685967153000886
+      ],
+      "fitted_ohm": 0.0013881863144330335
+    },
+    {
+      "name": "mid_02",
+      "nominal_ohm": 0.0028796471198697525,
+      "interval_ohm": [
+        0.0026850763685272016,
+        0.0035022735241659153
+      ],
+      "fitted_ohm": 0.0028836909230376437
+    },
+    {
+      "name": "mid_03",
+      "nominal_ohm": 0.002879647119869754,
+      "interval_ohm": [
+        0.0026850763685272025,
+        0.003502273524165917
+      ],
+      "fitted_ohm": 0.002883690923037645
+    },
+    {
+      "name": "p2larm",
+      "nominal_ohm": 0.0001398720847565802,
+      "interval_ohm": [
+        0.00013042126821897343,
+        0.00017011469767692187
+      ],
+      "fitted_ohm": 0.0001404965950457351
+    },
+    {
+      "name": "p2ldivpl",
+      "nominal_ohm": 0.0002877469616536011,
+      "interval_ohm": [
+        0.00026830459937970914,
+        0.00034996252093005543
+      ],
+      "fitted_ohm": 0.0002884322900485517
+    },
+    {
+      "name": "p2uarm",
+      "nominal_ohm": 0.00013987208475658007,
+      "interval_ohm": [
+        0.0001304212682189733,
+        0.0001701146976769217
+      ],
+      "fitted_ohm": 0.0001402686380632171
+    },
+    {
+      "name": "p2udivpl",
+      "nominal_ohm": 0.00028822556926687336,
+      "interval_ohm": [
+        0.00026875086864073324,
+        0.00035054461127052166
+      ],
+      "fitted_ohm": 0.00028866364740794874
+    },
+    {
+      "name": "ring_00",
+      "nominal_ohm": 0.0002729334273444253,
+      "interval_ohm": [
+        0.00025449197955088303,
+        0.0003319460602837605
+      ],
+      "fitted_ohm": 0.0002731965915071593
+    },
+    {
+      "name": "ring_01",
+      "nominal_ohm": 0.0002729334273444253,
+      "interval_ohm": [
+        0.00025449197955088303,
+        0.0003319460602837605
+      ],
+      "fitted_ohm": 0.0002731965915071593
+    },
+    {
+      "name": "ring_02",
+      "nominal_ohm": 0.0010434489795846018,
+      "interval_ohm": [
+        0.0009729456701532096,
+        0.0012690595697650562
+      ],
+      "fitted_ohm": 0.0010444550797891086
+    },
+    {
+      "name": "ring_03",
+      "nominal_ohm": 0.0010434489795846018,
+      "interval_ohm": [
+        0.0009729456701532096,
+        0.0012690595697650562
+      ],
+      "fitted_ohm": 0.0010444550797891086
+    },
+    {
+      "name": "ring_04",
+      "nominal_ohm": 0.001623326954003399,
+      "interval_ohm": [
+        0.0015136427003545206,
+        0.0019743165656798097
+      ],
+      "fitted_ohm": 0.001624892176273351
+    },
+    {
+      "name": "ring_05",
+      "nominal_ohm": 0.001623326954003399,
+      "interval_ohm": [
+        0.0015136427003545206,
+        0.0019743165656798097
+      ],
+      "fitted_ohm": 0.001624892176273351
+    },
+    {
+      "name": "ring_06",
+      "nominal_ohm": 0.0008556963903379913,
+      "interval_ohm": [
+        0.0007978790666665054,
+        0.0010407118260867463
+      ],
+      "fitted_ohm": 0.0008565214582906741
+    },
+    {
+      "name": "ring_07",
+      "nominal_ohm": 0.0008556963903379839,
+      "interval_ohm": [
+        0.0007978790666664984,
+        0.0010407118260867371
+      ],
+      "fitted_ohm": 0.0008565214582906668
+    },
+    {
+      "name": "ring_08",
+      "nominal_ohm": 0.0008556963903379839,
+      "interval_ohm": [
+        0.0007978790666664984,
+        0.0010407118260867371
+      ],
+      "fitted_ohm": 0.0008565214582906668
+    },
+    {
+      "name": "ring_09",
+      "nominal_ohm": 0.0008556963903379913,
+      "interval_ohm": [
+        0.0007978790666665054,
+        0.0010407118260867463
+      ],
+      "fitted_ohm": 0.0008565214582906741
+    },
+    {
+      "name": "topcol",
+      "nominal_ohm": 7.822637494760005e-05,
+      "interval_ohm": [
+        7.29408090727622e-05,
+        9.514018574708114e-05
+      ],
+      "fitted_ohm": 7.823153234977052e-05
+    },
+    {
+      "name": "uhorw",
+      "nominal_ohm": 0.00012488973389117083,
+      "interval_ohm": [
+        0.0001164512383579836,
+        0.00015189291959736992
+      ],
+      "fitted_ohm": 0.0001252623597066174
+    },
+    {
+      "name": "vertw",
+      "nominal_ohm": 0.0001123231292896634,
+      "interval_ohm": [
+        0.00010473372866198343,
+        0.00013660921129823926
+      ],
+      "fitted_ohm": 0.00011624375283957444
+    }
+  ],
+  "control_passed": false,
+  "verdict": "not validated; retain nominal seeds"
+}

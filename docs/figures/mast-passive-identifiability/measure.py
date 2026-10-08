@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import fields
+from collections import Counter
 import hashlib
 import json
 from pathlib import Path
@@ -327,8 +328,30 @@ def main():
         "error_field_screen_path": str(args.screen),
         "store": str(SHOT_STORE),
         "registry_digest": registry.registry_digest,
-        "cohort": cohort.as_dict(),
-        "admitted_shots": records,
+        "cohort": {
+            "selected_count": len(cohort.shots),
+            "training": list(cohort.training),
+            "held_out": list(cohort.held_out),
+            "held_out_families": list(cohort.held_out_families),
+            "exclusion_reason_counts": dict(
+                Counter(
+                    row.reason.split(" reaches")[0].split(" A")[0]
+                    if not row.reason.startswith("plasma current")
+                    else "plasma current exceeds vacuum threshold"
+                    for row in cohort.exclusions
+                )
+            ),
+        },
+        "admitted_shots": [
+            {
+                key: value
+                for key, value in row.items()
+                if key not in ("channels", "source_identities")
+            }
+            for row in records
+        ],
+        "shot_detail_path": str(args.progress),
+        "shot_detail_sha256": digest(args.progress),
         "refused_shots": refused,
         "geometries": {key: value[-1] for key, value in cache.items()},
         "sensor_floor_tesla": SENSOR_FLOOR,
@@ -357,7 +380,10 @@ def main():
         ],
     }
     args.output.mkdir(parents=True, exist_ok=True)
-    (args.output / "spectrum.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    encoded = json.dumps(receipt, indent=2) + "\n"
+    if len(encoded.encode()) > 300_000:
+        raise ValueError("compact receipt exceeds repository data-file ceiling")
+    (args.output / "spectrum.json").write_text(encoded)
     import matplotlib
 
     matplotlib.use("Agg")

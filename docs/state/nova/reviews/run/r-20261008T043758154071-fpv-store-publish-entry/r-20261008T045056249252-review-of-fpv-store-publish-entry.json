@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: its baseline_suite field is empty, so the base side reads no log, and its after_suite (test_content_store, EXIT=0) reports no FAILED or ERROR id; added failures are a subset of head failures, so the run provably added none. I reproduced the full five-file head arm at the reviewed head (82 passed, 3 skipped, all EXIT=0) and it likewise shows no failure id. The 1 failure in negative-control.log is the declared control, not a gate arm.",
+  "call_site_count": 2,
+  "call_sites": [
+    {
+      "file": "nova/imas/machine_artifact.py",
+      "line": 751,
+      "symbol": "materialize_machine_artifact"
+    },
+    {
+      "file": "nova/database/layer_fetch.py",
+      "line": 133,
+      "symbol": "_publish_layer"
+    }
+  ],
+  "completed_at": "2026-10-08T05:17:15.055Z",
+  "dispatched_at": "2026-10-08T04:51:21Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's baseline_suite field is empty; its after_suite records only test_content_store (5 passed) while the run's own gate exercised five files, so the designed base-vs-head delta is not measurable from this manifest. The full five-file head arm I reproduced reports no FAILED or ERROR id (82 passed, 3 skipped), so added failures are provably zero, but the base side reads no log."
+    },
+    {
+      "file": "nova/imas/machine_artifact.py",
+      "line": "29",
+      "severity": "follow-on",
+      "text": "follow-on: the store's factory primitives are re-imported with a self-alias (_create_private_directory as _create_private_directory, and likewise _linux_rename_no_replace at line 35); the alias is redundant and reads as if the names differ. Non-blocking."
+    },
+    {
+      "file": "tests/test_content_store.py",
+      "line": "141",
+      "severity": "follow-on",
+      "text": "follow-on: the concurrent-publication gate drives content_store._create_private_directory directly, coupling the test to a now-private internal of the store it is testing; a public rendezvous seam would keep the race testable without reaching past the module's surface. The race it sets up is genuine (both writers pass the existence check before either renames) and the gate passes."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production call sites: nova/imas/machine_artifact.py:751 materialize_machine_artifact and nova/database/layer_fetch.py:133 _publish_layer, both calling content_store.publish_files.",
+    "diff": "read commit by commit against base 33b293e5f9319791296a39d57e43a3b9db558f42; one commit, four files, 190 insertions / 171 deletions, all inside the declared scope.",
+    "done_when": "the reviewed node is the composed store publish entry that s3's landing comment names as next after the digest-pinned fetch; its done-when is that the composed entry point exists, both consumers call it and define no sequence of their own, and the verification and concurrent-publication contracts are tested \u2014 tests/test_content_store.py adds test_publish_files_rejects_changed_source_before_visibility and test_publish_files_concurrent_writers_leave_one_verified_object, test_machine_artifact.py and test_mast_artifact.py pass unchanged, and the declared negative control reproduces at EXIT=1.",
+    "goal": "plan s3 asks that the machine-agnostic cache primitives live in one nova/database store and that the store gain one composed publish entry; this node adds exactly that entry point, nova/database/content_store.py publish_files, and routes both the machine-artifact and layer-fetch consumers through it, adding no new public API beyond the store module's own surface.",
+    "manifest": "read; it reports status complete, one commit 28a8247b4edd547f85431e32302a9224c3f0cb72 with a body, head gate 82 passed 3 skipped and a declared negative control at EXIT=1; its baseline_suite field is empty and its after_suite records only test_content_store.",
+    "write_paths": "read the reviewed manifest's declared write paths (nova/database/content_store.py, nova/imas/machine_artifact.py, nova/database/layer_fetch.py, tests/test_content_store.py, an evidence fragment and a figures directory); every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "The prepublication verification is a genuine guard that I falsified: removing verify_directory_files(temporary_path, ...) lets bytes disagreeing with their declared digest become visible (the post-write check still raises, so the test's 'destination is None' assertion fails) \u2014 reproduced as the declared control at EXIT=1. The root-swap defence survives the seam: test_object_root_path_swap_cannot_redirect_materialization passes private_directory_factory and is now routed through publish_files, and the temp directory is always removed in the finally block on success, loss and exception alike.",
+    "evidence": "Reproduced independently in a scratch tree extracted from the reviewed head: the five-file gate (test_content_store, test_machine_artifact, test_machine_artifact_concurrency, test_mast_artifact, test_layer_fetch) run as fresh processes gives 5+8+2+61+6 = 82 passed, 3 skipped, all EXIT=0, matching the reviewed manifest's headline; the declared negative control reproduces at EXIT=1 with one failing id. Gaps: the reviewed manifest records no baseline_suite arm and its after_suite covers only test_content_store, so the designed base-vs-head delta reads no base log.",
+    "fit": "publish_files follows the module idiom (keyword-only factory seams, a Protocol-typed ContentFile) and carries no plan, sprint or version label; error vocabulary is unchanged (ContentStoreError lifted to MachineArtifactError by _lifted). Deduction: machine_artifact.py imports the two factory primitives with a redundant self-alias.",
+    "goal_fidelity": "nova/database/content_store.py:553 publish_files(...) composes exactly the sequence s3 names: it pins the verified object root, allocates a private directory, writes the declared sources plus manifest, verifies the temporary directory, renames it into place with no-clobber (linux renameat2 RENAME_NOREPLACE via _publish_directory_no_replace), then re-verifies the visible root and the published manifest. Both consumers now call it: nova/imas/machine_artifact.py:751 (_publish_files) and nova/database/layer_fetch.py:133 (publish_files), and neither module assembles the pinned-root write and no-replace sequence directly (grep for _publish_directory_no_replace/_create_private_directory in layer_fetch returns nothing).",
+    "reuse": "This is the reuse improvement the layer-fetch review flagged as a follow-on, deliberately retired: layer_fetch._publish_layer collapses from ~40 lines of publication orchestration to one publish_files call, and machine_artifact.materialize_machine_artifact drops ~80 inline lines to a single _publish_files call. Hashing, temporary-directory allocation, no-replace rename and verification all live in one place.",
+    "scope_discipline": "The whole diff is four paths, each inside the reviewed manifest's declared write paths; no out-of-scope file is touched. The declared write paths also name an evidence fragment and a figures directory that this refactor rung did not need, and none was written."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T043758154071-fpv-store-publish-entry (node fpv-store-publish-entry, plan nova:forward-profile-validator-set s3).\n\nVERDICT goal: plan s3 asks that the machine-agnostic cache primitives live in one nova/database store and that the store gain one composed publish entry; this node adds exactly that entry point, nova/database/content_store.py publish_files, and routes both the machine-artifact and layer-fetch consumers through it, adding no new public API beyond the store module's own surface.\nVERDICT done_when: the reviewed node is the composed store publish entry that s3's landing comment names as next after the digest-pinned fetch; its done-when is that the composed entry point exists, both consumers call it and define no sequence of their own, and the verification and concurrent-publication contracts are tested \u2014 tests/test_content_store.py adds test_publish_files_rejects_changed_source_before_visibility and test_publish_files_concurrent_writers_leave_one_verified_object, test_machine_artifact.py and test_mast_artifact.py pass unchanged, and the declared negative control reproduces at EXIT=1.\nVERDICT write_paths: read the reviewed manifest's declared write paths (nova/database/content_store.py, nova/imas/machine_artifact.py, nova/database/layer_fetch.py, tests/test_content_store.py, an evidence fragment and a figures directory); every path in the diff is inside them.\nVERDICT manifest: read; it reports status complete, one commit 28a8247b4edd547f85431e32302a9224c3f0cb72 with a body, head gate 82 passed 3 skipped and a declared negative control at EXIT=1; its baseline_suite field is empty and its after_suite records only test_content_store.\nVERDICT diff: read commit by commit against base 33b293e5f9319791296a39d57e43a3b9db558f42; one commit, four files, 190 insertions / 171 deletions, all inside the declared scope.\nCALL_SITES: nova/imas/machine_artifact.py:751 materialize_machine_artifact -> content_store.publish_files; nova/database/layer_fetch.py:133 _publish_layer -> content_store.publish_files\n\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/database/content_store.py:553 publish_files(...) composes exactly the sequence s3 names: it pins the verified object root, allocates a private directory, writes the declared sources plus manifest, verifies the temporary directory, renames it into place with no-clobber (linux renameat2 RENAME_NOREPLACE via _publish_directory_no_replace), then re-verifies the visible root and the published manifest. Both consumers now call it: nova/imas/machine_artifact.py:751 (_publish_files) and nova/database/layer_fetch.py:133 (publish_files), and neither module assembles the pinned-root write and no-replace sequence directly (grep for _publish_directory_no_replace/_create_private_directory in layer_fetch returns nothing).\nSCORE evidence: 18\nJUSTIFICATION evidence: Reproduced independently in a scratch tree extracted from the reviewed head: the five-file gate (test_content_store, test_machine_artifact, test_machine_artifact_concurrency, test_mast_artifact, test_layer_fetch) run as fresh processes gives 5+8+2+61+6 = 82 passed, 3 skipped, all EXIT=0, matching the reviewed manifest's headline; the declared negative control reproduces at EXIT=1 with one failing id. Gaps: the reviewed manifest records no baseline_suite arm and its after_suite covers only test_content_store, so the designed base-vs-head delta reads no base log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: The whole diff is four paths, each inside the reviewed manifest's declared write paths; no out-of-scope file is touched. The declared write paths also name an evidence fragment and a figures directory that this refactor rung did not need, and none was written.\nSCORE durability: 19\nJUSTIFICATION durability: The prepublication verification is a genuine guard that I falsified: removing verify_directory_files(temporary_path, ...) lets bytes disagreeing with their declared digest become visible (the post-write check still raises, so the test's 'destination is None' assertion fails) \u2014 reproduced as the declared control at EXIT=1. The root-swap defence survives the seam: test_object_root_path_swap_cannot_redirect_materialization passes private_directory_factory and is now routed through publish_files, and the temp directory is always removed in the finally block on success, loss and exception alike.\nSCORE fit: 19\nJUSTIFICATION fit: publish_files follows the module idiom (keyword-only factory seams, a Protocol-typed ContentFile) and carries no plan, sprint or version label; error vocabulary is unchanged (ContentStoreError lifted to MachineArtifactError by _lifted). Deduction: machine_artifact.py imports the two factory primitives with a redundant self-alias.\nSCORE reuse: 20\nJUSTIFICATION reuse: This is the reuse improvement the layer-fetch review flagged as a follow-on, deliberately retired: layer_fetch._publish_layer collapses from ~40 lines of publication orchestration to one publish_files call, and machine_artifact.materialize_machine_artifact drops ~80 inline lines to a single _publish_files call. Hashing, temporary-directory allocation, no-replace rename and verification all live in one place.\nFINDING manifest.md:20 follow-on: the reviewed run's baseline_suite field is empty; its after_suite records only test_content_store (5 passed) while the run's own gate exercised five files, so the designed base-vs-head delta is not measurable from this manifest. The full five-file head arm I reproduced reports no FAILED or ERROR id (82 passed, 3 skipped), so added failures are provably zero, but the base side reads no log.\nFINDING nova/imas/machine_artifact.py:29 follow-on: the store's factory primitives are re-imported with a self-alias (_create_private_directory as _create_private_directory, and likewise _linux_rename_no_replace at line 35); the alias is redundant and reads as if the names differ. Non-blocking.\nFINDING tests/test_content_store.py:141 follow-on: the concurrent-publication gate drives content_store._create_private_directory directly, coupling the test to a now-private internal of the store it is testing; a public rendezvous seam would keep the race testable without reaching past the module's surface. The race it sets up is genuine (both writers pass the existence check before either renames) and the gate passes.\n",
+  "review_run_id": "r-20261008T045056249252-review-of-fpv-store-publish-entry",
+  "reviewed_base_sha": "33b293e5f9319791296a39d57e43a3b9db558f42",
+  "reviewed_head_sha": "28a8247b4edd547f85431e32302a9224c3f0cb72",
+  "reviewed_run_id": "r-20261008T043758154071-fpv-store-publish-entry",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:13:58.122738+00:00",
+  "total": 116
+}

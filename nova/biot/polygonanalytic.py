@@ -168,6 +168,7 @@ from nova.biot.momentchannel import (
     POLE_CEILING,
     Channel,
     _across_tangent,
+    _channel_split_tangent,
     _factorise_tangent,
 )
 from nova.biot.pairedfloat import add as paired_add
@@ -181,12 +182,15 @@ from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     _across_the_range_tangent,
     _array_program,
+    _contract_tangent,
     _product_range_tangent,
     _product_tangent,
     _quotient_tangent,
     _scaled_tangent,
     _sine_squared_times_tangent,
     _total_tangent,
+    _tangent_sum,
+    _tangent_difference,
     across_the_range,
     paired_across_the_range,
     paired_product,
@@ -3058,7 +3062,7 @@ def _edge_tangent(r, z, edge, d_r, d_z, d_edge, nodes, *, xp=np):
     d_b1 = _quotient_tangent(rb - ra, d_rb - d_ra, height, d_height)
     d_b1_squared = _product_tangent(b1, d_b1, b1, d_b1)
     a0 = part.axial_slope
-    d_a0 = d_b1_squared / (2.0 * a0)
+    d_a0 = d_b1_squared * (0.5 / a0)
     first_value = (ra - r) * (zb - z)
     d_first = _product_tangent(ra - r, d_ra - d_r, zb - z, d_zb - d_z)
     second_value = (rb - r) * (za - z)
@@ -3070,28 +3074,32 @@ def _edge_tangent(r, z, edge, d_r, d_z, d_edge, nodes, *, xp=np):
     r1 = part.plane_radius_value
     d_r1 = d_r + d_plane_offset
     d_plane_radius = ([], d_plane_offset, d_r1 + d_r)
-    r_squared = r * r
-    d_r_squared = _product_tangent(r, d_r, r, d_r)
-    b1_squared = b1 * b1
-    d_b1sq_rsq = _product_tangent(b1_squared, d_b1_squared, r_squared, d_r_squared)
-    d_plane_squared = (
-        [4.0 * d_b1sq_rsq],
-        _product_tangent(plane_offset, d_plane_offset, plane_offset, d_plane_offset),
-        _product_tangent(r1 + r, d_r1 + d_r, r1 + r, d_r1 + d_r),
+    # Preserve the left-associated products: their tangents can nearly cancel.
+    four_b1_squared = 4.0 * b1 * b1
+    d_four_b1_squared = _product_tangent(4.0 * b1, 4.0 * d_b1, b1, d_b1)
+    four_b1_squared_r = four_b1_squared * r
+    d_four_b1_squared_r = _product_tangent(four_b1_squared, d_four_b1_squared, r, d_r)
+    d_four_b1_squared_rr = _product_tangent(
+        four_b1_squared_r, d_four_b1_squared_r, r, d_r
     )
-    d_radius_product = _product_tangent(r1, d_r1, r, d_r)
+    d_plane_squared = (
+        [d_four_b1_squared_rr],
+        d_plane_offset * (2.0 * plane_offset),
+        (d_r1 + d_r) * (2.0 * (r1 + r)),
+    )
+    d_radius_product = _product_tangent(-4.0 * r1, -4.0 * d_r1, r, d_r)
     d_edge_slope = (
         [],
-        -4.0 * d_radius_product - 4.0 * d_b1sq_rsq,
-        -4.0 * d_radius_product + 4.0 * d_b1sq_rsq,
+        d_radius_product - d_four_b1_squared_rr,
+        d_radius_product + d_four_b1_squared_rr,
     )
-    d_b1sq_r = _product_tangent(b1_squared, d_b1_squared, r, d_r)
     d_edge_slope_over_radius = (
         [],
-        -4.0 * d_r1 - 4.0 * d_b1sq_r,
-        -4.0 * d_r1 + 4.0 * d_b1sq_r,
+        -4.0 * d_r1 - d_four_b1_squared_r,
+        -4.0 * d_r1 + d_four_b1_squared_r,
     )
     return part, {
+        "radius": d_r,
         "slope": d_b1,
         "squared_slope": d_b1_squared,
         "axial_slope": d_a0,

@@ -34,10 +34,11 @@ from tangent_identity import (  # noqa: E402
     worst,
 )
 
-BASE_REVISION = "72112421cb157599b3e3e97b31f3d5f6246735d4"
+BASE_REVISION = "716d859f0b501797e28849ec8878f0243de80cb1"
 BASE = load_base_module("nova/biot/polygonanalytic.py", BASE_REVISION)
 
 CONSTRUCTION_KEYS = (
+    "radius",
     "slope",
     "squared_slope",
     "axial_slope",
@@ -78,7 +79,7 @@ def _construction_domain(rng):
     over a forty metre span; the endpoints span the same radius band over that
     height, so the slope is finite and the extended line's offset stays bounded.
     A block of vertical edges is included -- the slope vanishes there -- and a
-    block of targets sitting on an endpoint, where the offset vanishes.
+    blocks beside each endpoint and the edge interior, down to picometres.
     """
     radius = 10.0 ** rng.uniform(-2.0, 1.3, SAMPLES)
     height = rng.uniform(-20.0, 20.0, SAMPLES)
@@ -87,6 +88,18 @@ def _construction_domain(rng):
     vertical = slice(5000, 5500)
     edge_r[1, vertical] = edge_r[0, vertical]
     edge_z[1, vertical] = edge_z[0, vertical] + 1.0
+    for start, fraction in ((6000, 0.0), (7000, 1.0), (8000, 0.5)):
+        selected = slice(start, start + 1000)
+        radius[selected] = (
+            (1.0 - fraction) * edge_r[0, selected]
+            + fraction * edge_r[1, selected]
+            + 10.0 ** rng.uniform(-12.0, -5.0, 1000)
+        )
+        height[selected] = (
+            (1.0 - fraction) * edge_z[0, selected]
+            + fraction * edge_z[1, selected]
+            + 10.0 ** rng.uniform(-12.0, -5.0, 1000)
+        )
     return radius, height, (edge_r[0], edge_z[0], edge_r[1], edge_z[1])
 
 
@@ -142,7 +155,11 @@ def _identity(name, tangent, primal, primals, tangents):
 
 
 def _primal_identity(primal, primals):
-    got = jax.jit(primal)(*primals)
+    got = jax.jit(
+        lambda r, z, edge: _pack(
+            polygonanalytic._Edge(r, z, edge, None, xp=jnp), CONSTRUCTION_KEYS
+        )
+    )(*primals)
     expected = jax.jit(_base_primal)(*primals)
     leaves_got = jax.tree.leaves(got)
     leaves_expected = jax.tree.leaves(expected)

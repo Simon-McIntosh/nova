@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own baseline_suite and after_suite gate logs: baseline_suite reports revision 36b0753f33745495524c8fab08b57d730061b531 with completed=true, exit_status 0, failure_count 0 and failure_ids empty (53 passed, 1 warning in 45.88s); after_suite reports revision 3079d5466cb889e1ec395b601996f740c7ecf0aa with completed=true, exit_status 0, failure_count 0 and failure_ids empty (67 passed, 1 warning in 37.87s). added_failure_count is therefore 0 and added_failure_ids is empty. I confirmed the head arm independently by re-running tests/test_mast_passive_decay_modes.py at the reviewed head 912d89615 (67 passed, EXIT=0).",
+  "call_site_count": 1,
+  "call_sites": [
+    "tests/test_mast_passive_decay_modes.py:1247"
+  ],
+  "completed_at": "2026-10-08T07:54:52.999Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-08T07:38:16Z",
+  "findings": [
+    {
+      "file": "tests/test_mast_passive_decay_modes.py",
+      "line": "1247",
+      "severity": "follow-on",
+      "text": "follow-on: the false-loading control adds 25% series resistance to both rings, which also moves the expected isolated current E/R that the tests recompute from the unmutated loop constants, so the guard fires on that resistance mismatch. The control proves the tests are live, but it does not falsify the specific symmetry claim the node draws; a sharper mutation would perturb only the coupling (asymmetric bridge resistances, or a net bridge EMF) at unchanged isolated currents, so the guard would have to catch a spurious transfer rather than a changed mean."
+    },
+    {
+      "file": "docs/figures/mast-passive-vessel-path/receipt.json",
+      "line": "421",
+      "severity": "follow-on",
+      "text": "follow-on: the receipt stores ephemeral absolute run-dir paths (negative_control.log_path, validation.head.log_path, validation.reproduction_script) pointing into ~/.config/reckon/crew/runs/, which will not resolve for a later reader the way a digest or a repo-relative pointer would; the reviewed run's head.log is also named as the head arm, and that arm ran at 3079d5466 rather than the reviewed head 912d89615 (which only added evidence), so the receipt's revision field is one revision behind its declared final state."
+    },
+    {
+      "file": "docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-coil-case-vessel-path.html",
+      "line": "61",
+      "severity": "follow-on",
+      "text": "follow-on: the 24 modeled case rings and the checkpoint digest fa04b9d0 are cited from the prior spectrum receipt rather than re-derived in this node (the fragment says so). The count is what converts the synthetic two-ring result into a statement about the MAST can set, so a node that would use this conclusion should confirm the geometry digest still resolves and the per-can ring counts still hold, rather than inherit them."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read 912d89615 against base 36b0753f: 1756 insertions over four declared paths - 106 test lines, a 439-line receipt, a 1129-line SVG and an 82-line evidence fragment - with no product source changed.",
+    "done_when": "Synthetic symmetry test delivered: 12 uniform-EMF networks with zero transfer, 2 angular positive controls with zero toroidal mean, conservation and dissipation checks, 67 tests passing at head and a firing false-loading control. I reproduced the gate (67 passed, EXIT=0), the 14 added tests (14 passed, EXIT=0), the negative control (14 failed, EXIT=1) and every headline number under an independent formulation.",
+    "goal": "Under the ruling that replaced the cohort fit with a symmetry test: establish whether discrete vessel-to-can connections can produce the axisymmetric (n = 0) resistivity saturation. The network result answers by elimination - uniform closed rings under uniform angular driving carry identical ring currents regardless of connection count, spacing or bridge resistance - and names the 3-D model needed to test a real effect. Faithful to the dispatched done-when.",
+    "manifest": "Read; reports status complete, two commits (3079d5466, 912d89615), tests 67 passed EXIT=0, a negative_control_log that fires (14 failed, EXIT=1), baseline_suite completed=true failure_count=0 at 36b0753f and after_suite completed=true failure_count=0 at 3079d5466. The final commit 912d89615 adds only evidence, so the reviewed head is 912d89615 while the after_suite arm ran at 3079d5466.",
+    "write_paths": "Read the reviewed manifest's declared paths; the diff against base 36b0753f33745495524c8fab08b57d730061b531 is exactly the four paths declared, none outside them."
+  },
+  "justifications": {
+    "durability": "Fourteen tests are added (test_connections_preserve_axisymmetric_ring_currents and test_nonaxisymmetric_transfer_has_no_mean_ring_current), guarding the node's substantive claim - that uniform driving preserves both ring currents and generates no bridge transfer, and that the angular control carries nonzero transfer with zero toroidal mean - and the negative control shows they fire (14 failed, EXIT=1) when false resistance is introduced. Not higher because the mutation is blunt: it adds series resistance to both rings, which shifts the expected isolated current E/R that the tests recompute from the unmutated loop constants, so the guard fires on a resistance mismatch rather than isolating a broken connection symmetry. It proves the tests are live, which is the required control, but it does not falsify the specific symmetry claim (e.g. asymmetric bridges or a net bridge EMF at unchanged isolated currents would).",
+    "evidence": "Every load-bearing number reproduces independently. I re-ran the reviewed gate at the reviewed head (67 passed, EXIT=0) and the 14 added tests alone (14 passed, EXIT=0), reproduced the negative control (14 failed, EXIT=1) from the run's own mutation.log, and then re-derived the headline results with my own nodal conductance-matrix solve, a different formulation from the tests' incidence Laplacian: uniform EMF unequal spacing gives max ring-current deviation 2.22e-16 A and max transfer 2.10e-16 A (receipt 2.220446049250313e-16). The unequal angles give nonzero transfer (0.363050 A for 5 connections, 0.280705 A for 8 equal) with zero toroidal mean, and the unweighted unequal-arc mean errs by 0.105854 A - all matching the receipt and fragment to the last digit. The analytic identity in the fragment (telescoping KVL around a closed ring gives R_loop * sum(f_s I_s) = E_loop, and global ring KCL gives sum(bridge currents) = 0) is correct. Not 20 because the 24-ring geometry count and the checkpoint digest are inherited from the prior spectrum receipt rather than re-verified here, and the receipt stores ephemeral absolute run-dir log paths.",
+    "fit": "The additions follow the file's and the repository's conventions: the two test functions and the toroidal_ring_network helper keep the file's numpy-plus-pytest idiom, the receipt lives under the established docs/figures/<node>/ directory beside the sibling mast-coil-case-resistivity receipt, the fragment uses node-prefixed element ids and project-absolute src, and the figure is a hyphenated SVG that the Figures index lists. Both commits carry a two-part message with a body. A label scan over the added lines finds no phase, stage, sprint, ticket or version identifier - the SVG hex colours and clip-path ids are the only regex hits - and no worktree path.",
+    "goal_fidelity": "The node was dispatched under a coordinator ruling that replaced the finite cohort fit with a discrete-network symmetry test, to establish whether discretely connected vessel rings can explain the axisymmetric (n = 0) resistivity saturation. It delivers exactly that: a two-ring Kirchhoff/Ohm network whose 12 uniform-EMF cases (1, 2 and 8 equally spaced connections plus 5 unequal angles, three bridge resistances each) preserve both ring currents to 2.22e-16 A with zero transfer, angular-EMF positive controls that carry 0.280705 A and 0.363050 A peak transfer while the angle-weighted mean stays 1.5 and -0.8 A, and an explicit conservation/dissipation check. The conclusion - connections cannot supply a net n = 0 current under uniform closed-ring assumptions, and a real effect needs a 3-D model - is the honest answer and is carried into the evidence fragment with the assumptions and limitations stated. Not 20 because the section-4 question is answered by elimination and the decisive physics (a sourced 3-D current model) transfers wholly to a follow-on the node names rather than resolves.",
+    "reuse": "No product source and no new machinery enter the tree: the network solver is local to the test file and the receipt cites the sibling spectral receipt, the prior resistivity receipt and the two literature sources rather than duplicating them. The check pattern (one test file reading one docs/figures receipt's claims) matches the established tests that guard a single receipt. Not 20 because the loop parameters (loop_emf_volt, loop_resistance_ohm, bridge interval) are hardcoded independently in the test file and the run-side reproduction script, so the numbers the fragment quotes are pinned in two unlinked places.",
+    "scope_discipline": "git diff 36b0753f33745495524c8fab08b57d730061b531..912d8961564ec8697578a5ed520efeb19b0471b6 is exactly the four paths the run declared: tests/test_mast_passive_decay_modes.py, docs/figures/mast-passive-vessel-path/receipt.json, docs/figures/mast-passive-vessel-path/network-current-modes.svg and docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-coil-case-vessel-path.html. Two commits (3079d5466 test, 912d89615 docs), no product module touched, no plan, sprint or index state mutated, and no reckon-worktree path in any added line (the only absolute paths are crew run-dir paths, which the filepath guard does not cover)."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T071820178182-mast-coil-case-vessel-path (node mast-coil-case-vessel-path, plan nova:mast-nonaxisymmetric-physics section 4; goal: under a ruling that replaced the cohort fit with a synthetic symmetry test, establish whether discretely connected vessel rings can produce the axisymmetric n = 0 resistivity saturation).\n\nVERDICT goal: the two-ring Kirchhoff/Ohm network delivers the dispatched symmetry test - 12 uniform-EMF networks preserve both ring currents to 2.22e-16 A with zero transfer; angular-EMF positive controls carry 0.28/0.36 A peak transfer at zero toroidal mean; conservation and dissipation checked; conclusion is that connections cannot explain n = 0 saturation under uniform closed-ring assumptions and a 3-D model is needed. No product change, no promotion.\nVERDICT done_when: I re-ran the focused gate at the reviewed head 912d89615 (67 passed, EXIT=0), the 14 added tests (14 passed, EXIT=0), reproduced the negative control (14 failed, EXIT=1), and independently reproduced every headline number with my own nodal conductance-matrix solve: 2.22e-16 ring deviation, 2.10e-16 transfer, 0.280705 and 0.363050 peak transfer, 0.105854 unweighted-mean error - all matching the receipt.\nVERDICT write_paths: the diff against base 36b0753f is exactly the four declared paths.\nVERDICT manifest: status complete, two commits, gate 67 passed, negative_control_log fires; baseline_suite and after_suite both completed=true failure_count=0; the after_suite arm ran at 3079d5466, one revision behind the reviewed head 912d89615.\nVERDICT diff: 1756 insertions over four paths (test 106, receipt 439, SVG 1129, fragment 82); no product source changed.\nCALL_SITES: tests/test_mast_passive_decay_modes.py:1247\n\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the synthetic symmetry test is delivered exactly and the result is an honest elimination with assumptions stated; not 20 because the decisive physics transfers to a named follow-on.\nSCORE evidence: 19\nJUSTIFICATION evidence: gate, added tests, negative control and every headline number reproduce, the last under an independent formulation; not 20 because the geometry count and digest are inherited and the receipt stores ephemeral run-dir paths.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: exactly four declared paths in two commits; no plan, sprint or index state touched; no worktree path.\nSCORE durability: 16\nJUSTIFICATION durability: fourteen added tests guard the symmetry claim and the control fires, but the mutation is blunt and shifts the expected isolated current, so it proves liveness rather than falsifying the specific claim.\nSCORE fit: 19\nJUSTIFICATION fit: file idiom, receipt convention, node-prefixed fragment ids, project-absolute src and a hyphenated SVG all respected; bodies present; no forbidden label.\nSCORE reuse: 19\nJUSTIFICATION reuse: no product source added and cited receipts/sources reused; not 20 because the loop parameters are pinned independently in the test file and the run-side reproduction script.\n\nFINDING tests/test_mast_passive_decay_modes.py:1247 follow-on: the false-loading control moves the expected isolated current as well as the network, so it proves the tests are live but does not falsify the symmetry claim; a coupling-only mutation would.\nFINDING docs/figures/mast-passive-vessel-path/receipt.json:421 follow-on: ephemeral absolute run-dir log paths, and the head-arm revision named is 3079d5466 rather than the reviewed head 912d89615.\nFINDING docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-coil-case-vessel-path.html:61 follow-on: the 24-ring count and checkpoint digest are inherited from the prior spectrum receipt rather than re-verified here.\n",
+  "review_run_id": "r-20261008T073745534805-review-of-mast-coil-case-vessel-path",
+  "reviewed_base_sha": "36b0753f33745495524c8fab08b57d730061b531",
+  "reviewed_head_sha": "912d8961564ec8697578a5ed520efeb19b0471b6",
+  "reviewed_run_id": "r-20261008T071820178182-mast-coil-case-vessel-path",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T07:57:00Z",
+  "total": 112
+}

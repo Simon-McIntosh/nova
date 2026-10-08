@@ -209,7 +209,7 @@ def _cases():
 
 
 CASES = _cases()
-SLOW_IDENTITY_ROWS = frozenset({"edge_integrands"})
+SLOW_IDENTITY_ROWS = frozenset({"edge_integrands", "flux_and_moment_terms"})
 
 
 def _identity_parameter(name):

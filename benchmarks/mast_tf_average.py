@@ -122,6 +122,14 @@ def cohort_shots(census: dict) -> list[int]:
 
 def array_metadata(path: Path) -> dict[str, dict]:
     """Read the store's consolidated array inventory, including acquisition labels."""
+    if not (path / ".zmetadata").exists():
+        document = json.loads((path / "zarr.json").read_text())
+        metadata = document["consolidated_metadata"]["metadata"]
+        return {
+            key: value.get("attributes", {}) | {"stored_shape": value["shape"]}
+            for key, value in metadata.items()
+            if value.get("node_type") == "array"
+        }
     document = json.loads((path / ".zmetadata").read_text())["metadata"]
     return {
         key.removesuffix("/.zarray"): document.get(
@@ -302,8 +310,6 @@ def main() -> None:
         for item in control["candidates"]
         if item["level"] == "level2" and "b_field_tor_probe" in item["path"]
     ]
-    if not control_paths:
-        raise ValueError("level-2 inventory failed to see the known toroidal channels")
     detail = {
         "rows": rows,
         "inventory_control_outside_scoring": control,
@@ -314,6 +320,8 @@ def main() -> None:
     detail_bytes = (json.dumps(detail, sort_keys=True, allow_nan=False) + "\n").encode()
     args.detail.parent.mkdir(parents=True, exist_ok=True)
     args.detail.write_bytes(detail_bytes)
+    if not control_paths:
+        raise ValueError("level-2 inventory failed to see the known toroidal channels")
     counts = Counter()
     catalog = {}
     for row in rows:

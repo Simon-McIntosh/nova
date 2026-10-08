@@ -138,3 +138,29 @@ def test_store_audit_refuses_derived_product_and_ignores_supply_monitor(
     assert row["relative_difference"] is None
     assert all(not item["accepted"] for item in row["candidates"])
     assert len(row["paths_tried"]) == 2
+
+
+def test_inventory_reads_inline_metadata_and_requires_consolidation(tmp_path):
+    import json
+
+    metadata = {
+        "consolidated_metadata": {
+            "metadata": {
+                "magnetics": {"node_type": "group"},
+                "magnetics/b_field_tor_probe_cc_field": {
+                    "node_type": "array",
+                    "shape": [3, 200],
+                    "attributes": {"units": "T", "label": "Tesla/sec"},
+                },
+            }
+        }
+    }
+    path = tmp_path / "zarr.json"
+    path.write_text(json.dumps(metadata))
+    arrays = array_metadata(tmp_path)
+    assert len(arrays) == 1
+    assert arrays["magnetics/b_field_tor_probe_cc_field"]["label"] == "Tesla/sec"
+    assert arrays["magnetics/b_field_tor_probe_cc_field"]["stored_shape"] == [3, 200]
+    path.write_text(json.dumps({"node_type": "group"}))
+    with pytest.raises(KeyError):
+        array_metadata(tmp_path)

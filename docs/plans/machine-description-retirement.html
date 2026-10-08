@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="machine-description-retirement">
   <meta name="plan-title" content="Retire the Bespoke Machine-Description Layer">
   <meta name="plan-summary" content="Retire Nova registry, cache and machine-specific IDS wrappers once the Ambix map producer proves equivalent; preserve validated geometry unchanged.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="in-progress">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -24,7 +24,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="d63bca23">
 <meta name="plan-impl" content="0.08">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -191,6 +191,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-producer-equivalence" data-who="reckon-build" data-when="2026-10-08T02:55:00Z">
     <div class="r-comment-body">gate test_mast_description_equivalence measured: not equivalent (2 deliberate red pins, 3 green including the 1 mm control); section open — the re-measure waits on f-mdr-ambix-map-reconcile. Correction to f-mdr-ambix-migration: the content review that found that gate unowned ran on 2026-10-08, not 2026-10-06. Evidence: producer-equivalence.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261008T015726499185-mdr-equivalence" data-who="reckon-build" data-when="2026-10-08T02:15:07Z">
+    <div class="r-comment-body"><p>MAST producer equivalence measured for shot 11766: registry 44 unique loop positions and 43/46 reconstruction joins; producer 42 and 41/46; all 13 active coil outlines have 0 m maximum absolute vertex-coordinate difference against the predeclared 1e-5 m bound. Receipt committed; no deletion.</p></div>
 </div>
 </section>
 </main>

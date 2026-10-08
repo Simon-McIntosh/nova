@@ -923,3 +923,142 @@ def test_driven_cohort_keeps_partial_probe_coverage(monkeypatch):
     assert row["observation_count"] == sum(row["channel_sample_counts"])
     assert compact.shape == (2, 2)
     assert np.isfinite(compact).all()
+
+
+@pytest.fixture
+def spectrum_measurement():
+    """Load the executable measurement driver without invoking its entry point."""
+    import importlib.util
+    from pathlib import Path
+
+    path = (
+        Path(__file__).parents[1]
+        / "docs/figures/mast-passive-identifiability/measure.py"
+    )
+    spec = importlib.util.spec_from_file_location("passive_factor_measurement", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_persisted_factors_reproduce_joint_spectrum_and_keep_missing_shots(
+    spectrum_measurement,
+    tmp_path,
+):
+    """A restart needs only durable factors, not the interrupted process's arrays."""
+    module = spectrum_measurement
+    generator = np.random.default_rng(93)
+    matrices = [generator.normal(size=(20, 3)), generator.normal(size=(17, 3))]
+    for shot, matrix in enumerate(matrices, start=1):
+        module.write_factor(
+            tmp_path / f"{shot}.npz",
+            np.linalg.qr(matrix, mode="r"),
+            {
+                "shot": shot,
+                "contract": "matching",
+                "status": "admitted",
+                "observation_count": len(matrix),
+            },
+        )
+    module.write_factor(
+        tmp_path / "3.npz",
+        np.empty((0, 3)),
+        {
+            "shot": 3,
+            "contract": "matching",
+            "status": "refused",
+            "observation_count": 0,
+            "reason": "no quiet prefix",
+        },
+    )
+    (tmp_path / "4.npz.interrupted.tmp").write_bytes(b"incomplete writer")
+    compact, records, refused, missing, observations = module.assemble_factors(
+        [1, 2, 3, 4],
+        tmp_path,
+        "matching",
+        3,
+    )
+    assert len(records) == 2
+    assert [row["shot"] for row in refused] == [3]
+    assert missing == [4]
+    assert observations == 37
+    joined = np.vstack(matrices)
+    expected = module.projected_spectrum(joined[:, :2], joined[:, 2:])
+    result = module.projected_spectrum(
+        compact[:, :2],
+        compact[:, 2:],
+        observation_count=observations,
+    )
+    np.testing.assert_allclose(
+        result.singular_values, expected.singular_values, rtol=1e-12
+    )
+
+
+@pytest.mark.parametrize("identity,shot", [("foreign", 5), ("matching", 6)])
+def test_factor_with_wrong_identity_is_refused(
+    spectrum_measurement, tmp_path, identity, shot
+):
+    module = spectrum_measurement
+    path = tmp_path / "5.npz"
+    module.write_factor(
+        path,
+        np.eye(3),
+        {
+            "shot": 5,
+            "contract": "matching",
+            "status": "admitted",
+            "observation_count": 10,
+        },
+    )
+    with pytest.raises(ValueError, match="identity mismatch"):
+        module.read_factor(path, identity, 3, shot)
+
+
+def test_nonfinite_factor_is_refused(spectrum_measurement, tmp_path):
+    module = spectrum_measurement
+    path = tmp_path / "5.npz"
+    matrix = np.eye(3)
+    matrix[0, 0] = np.nan
+    module.write_factor(
+        path,
+        matrix,
+        {
+            "shot": 5,
+            "contract": "matching",
+            "status": "admitted",
+            "observation_count": 10,
+        },
+    )
+    with pytest.raises(ValueError, match="invalid QR factor"):
+        module.read_factor(path, "matching", 3, 5)
+
+
+def test_completed_factor_is_reused_without_rescoring(
+    spectrum_measurement, tmp_path, monkeypatch
+):
+    module = spectrum_measurement
+    module.write_factor(
+        tmp_path / "5.npz",
+        np.eye(3),
+        {
+            "shot": 5,
+            "contract": "matching",
+            "status": "admitted",
+            "observation_count": 10,
+        },
+    )
+    monkeypatch.setattr(module, "_DIRECTORY", tmp_path, raising=False)
+    monkeypatch.setattr(
+        module,
+        "_CONTRACT",
+        {
+            "identity": "matching",
+            "groups": ["case", "vessel"],
+            "drives": ["coil"],
+        },
+        raising=False,
+    )
+    monkeypatch.setattr(
+        module, "shot_jacobian", lambda *args: pytest.fail("rescored completed shot")
+    )
+    assert module.score_task((5, False)) == (5, "", "admitted", "reused")

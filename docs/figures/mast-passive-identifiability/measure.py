@@ -4,16 +4,15 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import fields
-from collections import Counter
 import hashlib
 import json
 import multiprocessing
+import os
 import pickle
 from pathlib import Path
 import subprocess
 
 import numpy as np
-from scipy.linalg import eigh
 
 from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.mast_error_field_screen import read_error_field_drive
@@ -21,136 +20,22 @@ from nova.scripts.mast_passive_calibration import load_screen
 from nova.imas.mast_fitted_parameters import (
     MIS_SCALED_SHOTS,
     SENSOR_FLOOR,
-    fitted_turns,
 )
 from nova.imas.mast_passive_decay_modes import (
     grouped_driven_jacobian,
     projected_spectrum,
 )
-from nova.imas.mast_passive_inductance import (
-    coil_coupling,
-    linkage_matrix,
-    nominal_resistance,
-    passive_turns,
-    probe_coupling,
-)
-from nova.imas.mast_seed_parameters import passive_material
 from nova.imas.mast_vacuum_cohort import (
-    COIL_DRIVES,
     EXCITATION_CURRENT,
     SHOT_STORE,
     ShotSurvey,
-    probe_channels,
     read_shot_waveforms,
     select_vacuum_cohort,
 )
-from nova.imas.mast_vacuum_response import ResponseModel, coil_sections
 
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def prepare(configuration):
-    geometry = configuration.geometry
-    families = tuple(sorted(drive.family for drive in COIL_DRIVES))
-    probes = geometry["magnetics"]["poloidal_probes"]
-    model = ResponseModel.build(
-        geometry, probes, probe_channels(probes), families=families
-    )
-    all_turns = passive_turns(geometry)
-    turns = tuple(
-        turn for turn in all_turns if passive_material(turn.family) is not None
-    )
-    linkage = linkage_matrix(turns)
-    resistance = nominal_resistance(turns)
-    coupling = probe_coupling(turns, model.targets)
-    # Match the direct-field owner's area-weighted ampere-turn convention.
-    import shapely
-
-    mutual = np.zeros((len(turns), len(families)))
-    for column, family in enumerate(families):
-        parts = coil_sections(geometry)[family]
-        areas = np.array([shapely.Polygon(part).area for part in parts])
-        for part, weight in zip(parts, areas / areas.sum(), strict=True):
-            _, single = coil_coupling({family: [part]}, turns)
-            mutual[:, column] += weight * single[:, 0]
-    groups = tuple(turn.family for turn in turns)
-    bounds = {}
-    materials = {}
-    for name in sorted(set(groups)):
-        material = passive_material(name)
-        bounds[name] = (
-            material.resistivity_lower / material.resistivity,
-            material.resistivity_upper / material.resistivity,
-        )
-        materials[name] = {
-            "nominal_ohm_m": material.resistivity,
-            "interval_ohm_m": [material.resistivity_lower, material.resistivity_upper],
-            "circuit_count": groups.count(name),
-        }
-    scales, intervals, drive_records = [], [], {}
-    for family in families:
-        row = fitted_turns(family)
-        if row.identified:
-            ratio = row.turns_per_multiplier
-            centre = row.turns / ratio
-            lower, upper = row.interval.lower / ratio, row.interval.upper / ratio
-            # An exact corroborating integer does not fix an uncertain drive.
-            radius = max(centre - lower, upper - centre, abs(centre) * 0.01)
-            lower, upper = centre - radius, centre + radius
-            source = (
-                "fitted_turns.interval in channel-current units; "
-                "minimum 1 percent uncertainty"
-            )
-        else:
-            centre, lower, upper = 1.0, 0.1, 10.0
-            source = (
-                "declared decade bracket around published ampere-turn "
-                "interpretation; unsourced sensitivity assumption"
-            )
-        scales.append(centre)
-        intervals.append((lower, upper))
-        drive_records[family] = {
-            "seed": centre,
-            "interval": [lower, upper],
-            "basis": source,
-        }
-    metadata = {
-        "physical_digest": configuration.physical_digest,
-        "circuits": [turn.name for turn in turns],
-        "groups": materials,
-        "rodgr": {
-            "treatment": "excluded from circuit system and parameter count",
-            "reason": (
-                "seed owner assigns no material; copper versus vessel steel unresolved"
-            ),
-            "excluded_circuits": [
-                turn.name for turn in all_turns if passive_material(turn.family) is None
-            ],
-        },
-        "drive_scales_ampere_turn_per_channel_ampere": drive_records,
-        "reciprocity_residual": linkage.reciprocity_residual,
-        "minimum_decay_rate_per_second": float(
-            eigh(np.diag(resistance), linkage.matrix, eigvals_only=True).min()
-        ),
-        "minimum_resistance_ohm": float(resistance.min()),
-        "coil_linkage_convention": (
-            "area-weighted winding-pack current, matching coil_response_matrix"
-        ),
-    }
-    return (
-        model,
-        linkage.matrix,
-        resistance,
-        coupling,
-        mutual,
-        groups,
-        bounds,
-        np.array(scales),
-        np.array(intervals),
-        metadata,
-    )
 
 
 def shot_jacobian(shot, prepared, step, screen):
@@ -274,17 +159,141 @@ def shot_jacobian(shot, prepared, step, screen):
     return names, compact, row
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--census", type=Path, required=True)
-    parser.add_argument("--screen", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--progress", type=Path, required=True)
-    parser.add_argument("--step", type=float, default=0.001)
-    parser.add_argument("--processes", type=int, default=4)
-    args = parser.parse_args()
-    if args.step <= 0:
-        parser.error("step must be positive")
+def atomic_json(path, value):
+    """Publish a complete record without exposing a partially written file."""
+    path = Path(path)
+    temporary = path.with_name(path.name + f".{os.getpid()}.tmp")
+    with temporary.open("w") as stream:
+        json.dump(value, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    temporary.replace(path)
+
+
+def write_factor(path, block, row):
+    """Atomically persist one shot's QR factor and its observation provenance."""
+    path = Path(path)
+    temporary = path.with_name(path.name + f".{os.getpid()}.tmp")
+    with temporary.open("wb") as stream:
+        np.savez_compressed(
+            stream,
+            factor=block,
+            record=np.asarray(json.dumps(row, allow_nan=False)),
+        )
+        stream.flush()
+        os.fsync(stream.fileno())
+    temporary.replace(path)
+
+
+def read_factor(path, identity, columns, shot):
+    """Refuse foreign, corrupt or mislabelled factors before they enter a spectrum."""
+    with np.load(path, allow_pickle=False) as saved:
+        block = saved["factor"]
+        row = json.loads(str(saved["record"]))
+    if row.get("contract") != identity or row.get("shot") != shot:
+        raise ValueError(f"factor identity mismatch: {path}")
+    if (
+        block.ndim != 2
+        or block.shape[1] != columns
+        or block.shape[0] > columns
+        or not np.isfinite(block).all()
+    ):
+        raise ValueError(f"invalid QR factor: {path}")
+    if row.get("status") == "admitted":
+        if block.shape[0] == 0 or row.get("observation_count", 0) < block.shape[0]:
+            raise ValueError(f"factor has no supporting observations: {path}")
+    elif row.get("status") == "refused":
+        if block.shape[0] or row.get("observation_count") != 0 or not row.get("reason"):
+            raise ValueError(f"invalid refusal record: {path}")
+    else:
+        raise ValueError(f"unrecognised factor status: {path}")
+    return block, row
+
+
+def assemble_factors(shots, directory, identity, columns):
+    """Reduce only persisted factors, keeping missing selected shots explicit."""
+    compact, records, refused, missing = None, [], [], []
+    observations = 0
+    for shot in shots:
+        path = Path(directory) / f"{shot}.npz"
+        if not path.exists():
+            missing.append(shot)
+            continue
+        block, row = read_factor(path, identity, columns, shot)
+        row["factor_sha256"] = digest(path)
+        if row["status"] == "refused":
+            refused.append(row)
+            continue
+        compact = (
+            block
+            if compact is None
+            else np.linalg.qr(np.vstack([compact, block]), mode="r")
+        )
+        records.append(row)
+        observations += row["observation_count"]
+    return compact, records, refused, missing, observations
+
+
+def load_geometry(path):
+    """Read the trusted geometry checkpoint supplied by the measurement run."""
+    prepared = pickle.loads(Path(path).read_bytes())
+    model, inductance, resistance, coupling, mutual, groups, _, scales, _, meta = (
+        prepared
+    )
+    circuits = len(resistance)
+    if (
+        inductance.shape != (circuits, circuits)
+        or coupling.shape != (len(model.targets), circuits)
+        or mutual.shape != (circuits, len(scales))
+        or len(groups) != circuits
+        or set(groups) != set(meta["groups"])
+        or not np.isfinite(inductance).all()
+        or not np.isfinite(resistance).all()
+        or np.any(resistance <= 0.0)
+    ):
+        raise ValueError("geometry checkpoint dimensions or resistance are invalid")
+    np.linalg.cholesky(inductance)
+    return prepared
+
+
+def initialise_scoring(checkpoint, screen, directory, contract):
+    """Load shared read-only inputs once per process inside the allocation."""
+    global _PREPARED, _SCREEN, _DIRECTORY, _CONTRACT
+    _PREPARED = load_geometry(checkpoint)
+    _SCREEN = load_screen(screen)
+    _DIRECTORY = Path(directory)
+    _CONTRACT = contract
+
+
+def score_task(task):
+    """Persist the result before acknowledging completion to the parent process."""
+    shot, refined = task
+    suffix = "-fine" if refined else ""
+    path = _DIRECTORY / f"{shot}{suffix}.npz"
+    columns = len(_CONTRACT["groups"]) + len(_CONTRACT["drives"])
+    identity = _CONTRACT["identity"]
+    if path.exists():
+        _, row = read_factor(path, identity, columns, shot)
+        return shot, suffix, row["status"], "reused"
+    row = {"shot": shot, "contract": identity, "observation_count": 0}
+    step = _CONTRACT["step_seconds"] / (2.0 if refined else 1.0)
+    try:
+        if shot in MIS_SCALED_SHOTS:
+            raise ValueError("acquisition amplitude refusal")
+        names, block, detail = shot_jacobian(shot, _PREPARED, step, _SCREEN)
+        if list(names) != _CONTRACT["groups"]:
+            raise RuntimeError("parameter ordering differs from the factor contract")
+        row.update(detail, status="admitted")
+    except (ValueError, KeyError, FileNotFoundError) as error:
+        block = np.empty((0, columns))
+        row.update(status="refused", reason=str(error))
+    write_factor(path, block, row)
+    return shot, suffix, row["status"], "written"
+
+
+def measurement_context(args):
+    """Pin the unchanged 400-shot selection and every input to persisted factors."""
     payload = json.loads(args.census.read_text())
     keys = {field.name for field in fields(ShotSurvey)}
     surveys = [
@@ -292,149 +301,170 @@ def main():
         for row in payload["surveys"]
     ]
     cohort = select_vacuum_cohort(surveys, held_out_families=("P1+P2+P3+P4+P5+P6",))
-    screen = load_screen(args.screen)
+    prepared = load_geometry(args.geometry_checkpoint)
     registry = MachineGeometryRegistry.default()
-    cache, records, refused = {}, [], []
-    refinements = []
-    compact, names, observations = None, None, 0
-    args.progress.parent.mkdir(parents=True, exist_ok=True)
-    args.progress.write_text("")
-    print(f"COHORT selected={len(cohort.shots)}", flush=True)
     for shot in cohort.shots:
-        if shot in MIS_SCALED_SHOTS:
-            refused.append({"shot": shot, "reason": "acquisition amplitude refusal"})
-            continue
-        configuration = registry.select(shot).configuration
-        key = configuration.physical_digest
-        if key not in cache:
-            print(f"GEOMETRY building={key}", flush=True)
-            import nova.imas.mast_passive_inductance as owner
-            from nova.biot.polygon import polygon_greens
+        if (
+            registry.select(shot).configuration.physical_digest
+            != prepared[-1]["physical_digest"]
+        ):
+            raise ValueError(f"shot {shot} needs a different geometry checkpoint")
+    contract = {
+        "selected_shots": list(cohort.shots),
+        "refinement_shots": list(cohort.shots[:3]),
+        "groups": sorted(set(prepared[5])),
+        "drives": list(prepared[0].families),
+        "step_seconds": args.step,
+        "sensor_floor_tesla": SENSOR_FLOOR,
+        "geometry_sha256": digest(args.geometry_checkpoint),
+        "census_sha256": digest(args.census),
+        "screen_sha256": digest(args.screen),
+        "source_sha256": digest("nova/imas/mast_passive_decay_modes.py"),
+        "driver_sha256": digest(__file__),
+        "registry_digest": registry.registry_digest,
+    }
+    contract["identity"] = hashlib.sha256(
+        json.dumps(contract, sort_keys=True).encode()
+    ).hexdigest()
+    contract["revision"] = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], text=True
+    ).strip()
+    path = args.factors / "contract.json"
+    if path.exists():
+        previous = json.loads(path.read_text())
+        if previous["identity"] != contract["identity"]:
+            raise ValueError("factor directory belongs to different measurement inputs")
+        contract = previous
+    elif args.mode == "assemble":
+        raise ValueError("no persisted scoring contract to assemble")
+    else:
+        args.factors.mkdir(parents=True, exist_ok=True)
+        atomic_json(path, contract)
+    return cohort, prepared, contract
 
-            with multiprocessing.get_context("fork").Pool(args.processes) as pool:
 
-                def blocked_greens(radius, height, vertices):
-                    if radius.size < 1024:
-                        return polygon_greens(radius, height, vertices)
-                    blocks = pool.starmap(
-                        polygon_greens,
-                        [
-                            (r, z, vertices)
-                            for r, z in zip(
-                                np.array_split(radius, args.processes),
-                                np.array_split(height, args.processes),
-                                strict=True,
-                            )
-                        ],
-                    )
-                    return tuple(
-                        np.concatenate([block[i] for block in blocks]) for i in range(3)
-                    )
-
-                owner.polygon_greens = blocked_greens
-                try:
-                    cache[key] = prepare(configuration)
-                finally:
-                    owner.polygon_greens = polygon_greens
-            cache_path = args.progress.parent / ("geometry-" + key + ".pickle")
-            cache_path.write_bytes(pickle.dumps(cache[key]))
-            print(f"GEOMETRY ready={key} cache={cache_path}", flush=True)
-        try:
-            group_names, block, row = shot_jacobian(shot, cache[key], args.step, screen)
-        except (ValueError, KeyError, FileNotFoundError) as error:
-            refused.append({"shot": shot, "reason": str(error)})
-            print(f"REFUSED shot={shot} reason={error}", flush=True)
-            continue
-        if names is not None and names != group_names:
-            raise ValueError("component families differ across geometry epochs")
-        if len(refinements) < 3:
-            _, fine_block, fine_row = shot_jacobian(
-                shot, cache[key], args.step / 2.0, screen
+def score_cohort(args, cohort, contract):
+    """Score independent shots in one allocation and leave assembly for a resume."""
+    tasks = [(shot, False) for shot in cohort.shots]
+    tasks += [(shot, True) for shot in contract["refinement_shots"]]
+    print(
+        f"SCORING selected={len(cohort.shots)} processes={args.processes}", flush=True
+    )
+    with multiprocessing.get_context("spawn").Pool(
+        args.processes,
+        initializer=initialise_scoring,
+        initargs=(args.geometry_checkpoint, args.screen, args.factors, contract),
+    ) as pool:
+        for shot, suffix, status, disposition in pool.imap_unordered(
+            score_task, tasks, chunksize=1
+        ):
+            print(
+                f"SHOT {shot}{suffix} status={status} factor={disposition}", flush=True
             )
-            coarse_spectrum = projected_spectrum(
-                block[:, : len(group_names)],
-                block[:, len(group_names) :],
-                observation_count=row["observation_count"],
-            ).singular_values
-            fine_spectrum = projected_spectrum(
-                fine_block[:, : len(group_names)],
-                fine_block[:, len(group_names) :],
-                observation_count=fine_row["observation_count"],
-            ).singular_values
-            refinements.append(
-                {
-                    "shot": shot,
-                    "coarse_step_seconds": args.step,
-                    "fine_step_seconds": args.step / 2.0,
-                    "coarse_spectrum": coarse_spectrum.tolist(),
-                    "fine_spectrum": fine_spectrum.tolist(),
-                    "relative_spectrum_norm_change": float(
-                        np.linalg.norm(fine_spectrum - coarse_spectrum)
-                        / max(np.linalg.norm(fine_spectrum), np.finfo(float).tiny)
-                    ),
-                }
-            )
-        names = group_names
-        compact = (
-            block
-            if compact is None
-            else np.linalg.qr(np.vstack([compact, block]), mode="r")
-        )
-        observations += row["observation_count"]
-        records.append(row)
-        with args.progress.open("a") as stream:
-            stream.write(json.dumps(row) + "\n")
-        print(
-            f"SHOT {shot} probes={len(row['channels'])} samples={row['sample_count']}",
-            flush=True,
-        )
-    if not records:
-        raise ValueError(
-            "no shots admitted; no absence or spectrum conclusion is licensed"
-        )
+    _, admitted, refused, missing, observations = assemble_factors(
+        cohort.shots,
+        args.factors,
+        contract["identity"],
+        len(contract["groups"]) + len(contract["drives"]),
+    )
+    summary = {
+        "selected_count": len(cohort.shots),
+        "scored_count": len(admitted) + len(refused),
+        "admitted_count": len(admitted),
+        "refused_count": len(refused),
+        "missing_shots": missing,
+        "observation_count": observations,
+    }
+    atomic_json(args.factors / "scoring-summary.json", summary)
+    print("SCORING_COMPLETE " + json.dumps(summary), flush=True)
+
+
+def assemble_receipt(args, cohort, prepared, contract):
+    """Assemble an auditable full or explicitly partial spectrum from disk."""
+    names = contract["groups"]
+    columns = len(names) + len(contract["drives"])
+    compact, records, refused, missing, observations = assemble_factors(
+        cohort.shots,
+        args.factors,
+        contract["identity"],
+        columns,
+    )
+    if compact is None:
+        raise ValueError("no admitted factors; no spectrum conclusion is licensed")
     spectrum = projected_spectrum(
         compact[:, : len(names)],
         compact[:, len(names) :],
         observation_count=observations,
     )
+    refinements = []
+    for shot in contract["refinement_shots"]:
+        paths = [args.factors / f"{shot}{suffix}.npz" for suffix in ("", "-fine")]
+        if not all(path.exists() for path in paths):
+            continue
+        arms = [
+            read_factor(path, contract["identity"], columns, shot) for path in paths
+        ]
+        if any(row["status"] != "admitted" for _, row in arms):
+            continue
+        values = [
+            projected_spectrum(
+                block[:, : len(names)],
+                block[:, len(names) :],
+                observation_count=row["observation_count"],
+            ).singular_values
+            for block, row in arms
+        ]
+        refinements.append(
+            {
+                "shot": shot,
+                "coarse_step_seconds": args.step,
+                "fine_step_seconds": args.step / 2,
+                "coarse_spectrum": values[0].tolist(),
+                "fine_spectrum": values[1].tolist(),
+                "relative_spectrum_norm_change": float(
+                    np.linalg.norm(values[1] - values[0])
+                    / max(np.linalg.norm(values[1]), np.finfo(float).tiny)
+                ),
+            }
+        )
+    detail_path = args.factors / "shot-records.json"
+    atomic_json(detail_path, {"admitted": records, "refused": refused})
     receipt = {
-        "revision": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], text=True
-        ).strip(),
+        "revision": contract["revision"],
+        "factor_contract": contract,
         "source": "nova/imas/mast_passive_decay_modes.py",
-        "source_sha256": digest("nova/imas/mast_passive_decay_modes.py"),
+        "source_sha256": contract["source_sha256"],
         "census_path": str(args.census),
-        "census_sha256": digest(args.census),
-        "error_field_screen_sha256": digest(args.screen),
+        "census_sha256": contract["census_sha256"],
         "error_field_screen_path": str(args.screen),
+        "error_field_screen_sha256": contract["screen_sha256"],
+        "geometry_checkpoint_path": str(args.geometry_checkpoint),
+        "geometry_checkpoint_sha256": contract["geometry_sha256"],
         "store": str(SHOT_STORE),
-        "registry_digest": registry.registry_digest,
+        "registry_digest": contract["registry_digest"],
         "cohort": {
             "selected_count": len(cohort.shots),
+            "scored_count": len(records) + len(refused),
+            "complete": not missing,
+            "missing_shots": missing,
             "training": list(cohort.training),
             "held_out": list(cohort.held_out),
             "held_out_families": list(cohort.held_out_families),
-            "exclusion_reason_counts": dict(
-                Counter(
-                    row.reason.split(" reaches")[0].split(" A")[0]
-                    if not row.reason.startswith("plasma current")
-                    else "plasma current exceeds vacuum threshold"
-                    for row in cohort.exclusions
-                )
-            ),
+            "excluded_count": len(cohort.exclusions),
         },
         "admitted_shots": [
             {
-                key: value
-                for key, value in row.items()
-                if key not in ("channels", "source_identities", "channel_sample_counts")
+                k: v
+                for k, v in row.items()
+                if k not in ("channels", "source_identities", "channel_sample_counts")
             }
             for row in records
         ],
-        "shot_detail_path": str(args.progress),
-        "shot_detail_sha256": digest(args.progress),
         "refused_shots": refused,
-        "geometries": {key: value[-1] for key, value in cache.items()},
+        "shot_detail_path": str(detail_path),
+        "shot_detail_sha256": digest(detail_path),
+        "factor_directory": str(args.factors),
+        "geometries": {prepared[-1]["physical_digest"]: prepared[-1]},
         "sensor_floor_tesla": SENSOR_FLOOR,
         "observation_count": observations,
         "parameter_groups": names,
@@ -448,25 +478,37 @@ def main():
         "promoted_parameters": [],
         "integration_refinement": refinements,
         "interpretation": (
-            "Local interval-scaled RMS sensitivity at nominal seeds "
-            "with every coil scale projected out without penalty. Directions are "
-            "group combinations, not individually promoted groups. "
+            "Local interval-scaled RMS sensitivity at nominal seeds with every coil "
+            "scale projected out without penalty. Directions are group combinations, "
+            "not individually promoted groups. "
             "No held-out fit or global interval certification."
         ),
         "limitations": [
-            "rodgr circuits excluded; result conditional on that reduced circuit model",
+            "rodgr circuits excluded; result conditional on the reduced circuit model",
             "vertical drive scales use an explicitly assumed decade interval",
-            "uniform linear current interpolation; refinement recorded separately",
-            "each probe is scored only on finite interpolation-supported samples",
-            "admitted channels use the recorded pooled systematic sensor floor",
+            "uniform linear current interpolation; three declared refinement shots",
+            "each probe uses finite supported baseline and transient samples",
+            "pooled sensor floor treated as a non-averaging RMS threshold",
             "zero initial passive current; no unmeasured prior history inferred",
         ],
     }
-    args.output.mkdir(parents=True, exist_ok=True)
-    encoded = json.dumps(receipt, indent=2) + "\n"
-    if len(encoded.encode()) > 300_000:
+    if len(json.dumps(receipt, indent=2).encode()) > 300_000:
         raise ValueError("compact receipt exceeds repository data-file ceiling")
-    (args.output / "spectrum.json").write_text(encoded)
+    args.output.mkdir(parents=True, exist_ok=True)
+    atomic_json(args.output / "spectrum.json", receipt)
+    write_figure(spectrum, names, args.output)
+    print(
+        f"SUMMARY selected={len(cohort.shots)} scored={len(records) + len(refused)} "
+        f"admitted={len(records)} refused={len(refused)} missing={len(missing)} "
+        f"groups={len(names)} identifiable={spectrum.identifiable_count} "
+        f"nuisance_rank={spectrum.nuisance_rank} observations={observations}",
+        flush=True,
+    )
+    print("SPECTRUM " + json.dumps(spectrum.singular_values.tolist()), flush=True)
+
+
+def write_figure(spectrum, names, output):
+    """Render the real cohort spectrum, without a permutation control."""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -500,16 +542,28 @@ def main():
     )
     ax.set_xticks(order)
     fig.tight_layout()
-    fig.savefig(args.output / "spectrum.svg")
+    fig.savefig(output / "spectrum.svg")
     plt.close(fig)
-    print(
-        f"SUMMARY selected={len(cohort.shots)} admitted={len(records)} "
-        f"refused={len(refused)} groups={len(names)} "
-        f"identifiable={spectrum.identifiable_count} "
-        f"nuisance_rank={spectrum.nuisance_rank} observations={observations}",
-        flush=True,
-    )
-    print("SPECTRUM " + json.dumps(spectrum.singular_values.tolist()), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("score", "assemble"), required=True)
+    parser.add_argument("--census", type=Path, required=True)
+    parser.add_argument("--screen", type=Path, required=True)
+    parser.add_argument("--geometry-checkpoint", type=Path, required=True)
+    parser.add_argument("--factors", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--step", type=float, default=0.001)
+    parser.add_argument("--processes", type=int, default=8)
+    args = parser.parse_args()
+    if not np.isfinite(args.step) or args.step <= 0 or args.processes < 1:
+        parser.error("step and processes must be positive and finite")
+    cohort, prepared, contract = measurement_context(args)
+    if args.mode == "score":
+        score_cohort(args, cohort, contract)
+    else:
+        assemble_receipt(args, cohort, prepared, contract)
 
 
 if __name__ == "__main__":

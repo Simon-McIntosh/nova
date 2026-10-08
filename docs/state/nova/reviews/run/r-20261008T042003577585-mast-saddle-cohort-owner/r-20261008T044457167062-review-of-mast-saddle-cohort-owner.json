@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: after_suite failure_ids equal baseline_suite failure_ids, so the set difference over pytest node ids is empty",
+  "base_log_revision": "e2cffb94c353041dbbb39e6d25daa348f52708ac",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T05:04:59.835Z",
+  "dispatched_at": "2026-10-08T04:45:33Z",
+  "findings": [
+    {
+      "file": "tests/test_mast_saddle_voltage_reach.py",
+      "line": "20",
+      "severity": "follow-on",
+      "text": "follow-on: the test binds to the benchmark's private _resolve_raw and loop_identities symbols, so a rename of that internal rather than a contract change would break the test, a coupling worth naming though not blocking."
+    }
+  ],
+  "head_log_revision": "cbfb1ff2c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read both commits against base e2cffb94c; cbfb1ff2c moves the light admission into the cohort module and points the benchmark at it, 191ef5604 adds the evidence fragment; no receipt regeneration.",
+    "done_when": "the done_when names a module-owned light admission, no benchmark-declared constant or predicate, unchanged existing tests, a new test proving per-family raw-key resolution and light-versus-full admission agreement, an unregenerated receipt and fresh-process logs; the manifest names gate-head.log at cbfb1ff2c and gate-base.log at e2cffb94c.",
+    "goal": "the node's goal is to make benchmarks/mast_saddle_voltage_reach.py admit its vacuum cohort through nova/imas/mast_vacuum_cohort.py rather than re-declaring the admission constants; the diff imports EXCITATION_CURRENT, PLASMA_FREE_CURRENT and MINIMUM_PROBES from nova/imas/mast_vacuum_cohort.py:263,274,283 and admits through the added light_census()/LightCensus, deleting the benchmark's own census_shot, admits, probe regex and drive-channel tuple.",
+    "manifest": "read; it names the module change, the benchmark change, the five new tests, the two gate logs and the negative control, and its 121-over-2 and 116-over-2 account reconciles with gate-head.log and gate-base.log.",
+    "write_paths": "the manifest's declared roots are nova/imas/mast_vacuum_cohort.py, benchmarks/mast_saddle_voltage_reach.py, tests/test_mast_saddle_voltage_reach.py and docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-cohort-owner.html; git diff --name-status e2cffb94c 191ef5604 is exactly those four paths, M M A A."
+  },
+  "justifications": {
+    "durability": "tests/test_mast_saddle_voltage_reach.py:100 asserts _resolve_raw resolves saddle_m_10 to sad_out_m010 from the store key set, and the declared negative control forcing a single two-digit width reddens it, so the key-width regression is guarded.",
+    "evidence": "gate-head.log records 121 passed / 2 failed at cbfb1ff2c and gate-base.log records 116 passed / 2 failed at e2cffb94c as the reviewed manifest states, and the five new tests reproduce green on an independent re-run.",
+    "fit": "the added LightCensus frozen dataclass and its as_dict follow the surrounding frozen-dataclass idiom of nova/imas/mast_vacuum_cohort.py and no plan, sprint or ticket identifier appears in the added names.",
+    "goal_fidelity": "benchmarks/mast_saddle_voltage_reach.py:47 now imports the cohort module's constants and admits through light_census, so the benchmark declares no threshold or predicate of its own as the goal required.",
+    "reuse": "the benchmark's former census_shot and admits are deleted and admission now runs through the owner nova/imas/mast_vacuum_cohort.light_census, extending the owner rather than forking it as the prior review's reuse finding required.",
+    "scope_discipline": "git diff --name-status e2cffb94c 191ef5604 lists only the four declared write paths and nothing else under nova or benchmarks."
+  },
+  "notes": "Independent review of r-20261008T042003577585-mast-saddle-cohort-owner at head 191ef560420791fc94edc3d1e0b864ba64d56434 against base e2cffb94c353041dbbb39e6d25daa348f52708ac. The node repairs the prior review's reuse finding by moving the vacuum-cohort light admission predicate into the owner module as light_census()/LightCensus and pointing the benchmark at it, so the benchmark declares no threshold and restates no predicate. Existing cohort tests pass unchanged and five new tests guard raw-key resolution and light-versus-full admission agreement; the committed receipt is untouched. No blocking finding; one follow-on records the test's coupling to a private benchmark helper.",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: e2cffb94c353041dbbb39e6d25daa348f52708ac\nreviewed_head_sha: 191ef560420791fc94edc3d1e0b864ba64d56434\nVERDICT goal: the node's goal is to make benchmarks/mast_saddle_voltage_reach.py admit its vacuum cohort through nova/imas/mast_vacuum_cohort.py rather than re-declaring the admission constants; the diff imports EXCITATION_CURRENT, PLASMA_FREE_CURRENT and MINIMUM_PROBES from nova/imas/mast_vacuum_cohort.py:263,274,283 and admits through the added light_census()/LightCensus, deleting the benchmark's own census_shot, admits, probe regex and drive-channel tuple.\nVERDICT done_when: the done_when names a module-owned light admission, no benchmark-declared constant or predicate, unchanged existing tests, a new test proving per-family raw-key resolution and light-versus-full admission agreement, an unregenerated receipt and fresh-process logs; the manifest names gate-head.log at cbfb1ff2c and gate-base.log at e2cffb94c.\nVERDICT write_paths: the manifest's declared roots are nova/imas/mast_vacuum_cohort.py, benchmarks/mast_saddle_voltage_reach.py, tests/test_mast_saddle_voltage_reach.py and docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-cohort-owner.html; git diff --name-status e2cffb94c 191ef5604 is exactly those four paths, M M A A.\nVERDICT manifest: read; it names the module change, the benchmark change, the five new tests, the two gate logs and the negative control, and its 121-over-2 and 116-over-2 account reconciles with gate-head.log and gate-base.log.\nVERDICT diff: read both commits against base e2cffb94c; cbfb1ff2c moves the light admission into the cohort module and points the benchmark at it, 191ef5604 adds the evidence fragment; no receipt regeneration.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/mast_saddle_voltage_reach.py:47 now imports the cohort module's constants and admits through light_census, so the benchmark declares no threshold or predicate of its own as the goal required.\nSCORE evidence: 18\nJUSTIFICATION evidence: gate-head.log records 121 passed / 2 failed at cbfb1ff2c and gate-base.log records 116 passed / 2 failed at e2cffb94c as the reviewed manifest states, and the five new tests reproduce green on an independent re-run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status e2cffb94c 191ef5604 lists only the four declared write paths and nothing else under nova or benchmarks.\nSCORE durability: 16\nJUSTIFICATION durability: tests/test_mast_saddle_voltage_reach.py:100 asserts _resolve_raw resolves saddle_m_10 to sad_out_m010 from the store key set, and the declared negative control forcing a single two-digit width reddens it, so the key-width regression is guarded.\nSCORE fit: 18\nJUSTIFICATION fit: the added LightCensus frozen dataclass and its as_dict follow the surrounding frozen-dataclass idiom of nova/imas/mast_vacuum_cohort.py and no plan, sprint or ticket identifier appears in the added names.\nSCORE reuse: 16\nJUSTIFICATION reuse: the benchmark's former census_shot and admits are deleted and admission now runs through the owner nova/imas/mast_vacuum_cohort.light_census, extending the owner rather than forking it as the prior review's reuse finding required.\nFINDING tests/test_mast_saddle_voltage_reach.py:20 follow-on: the test binds to the benchmark's private _resolve_raw and loop_identities symbols, so a rename of that internal rather than a contract change would break the test, a coupling worth naming though not blocking.\n",
+  "review_method": "Read-only inspection of the reviewed run's manifest, both gate logs and the negative-control log; read the diff of both commits against base e2cffb94c; grep for the removed constants and predicate; independently re-ran the new test file in the shared environment (5 passed). No code under test was modified.",
+  "review_run_id": "r-20261008T044457167062-review-of-mast-saddle-cohort-owner",
+  "reviewed_base_sha": "e2cffb94c353041dbbb39e6d25daa348f52708ac",
+  "reviewed_head_sha": "191ef560420791fc94edc3d1e0b864ba64d56434",
+  "reviewed_run_id": "r-20261008T042003577585-mast-saddle-cohort-owner",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-cohort-owner",
+  "reviewer_node": "review-of-mast-saddle-cohort-owner",
+  "reviewer_run_id": "r-20261008T044457167062-review-of-mast-saddle-cohort-owner",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T05:06:28.694085+00:00",
+  "total": 107,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha 191ef560420791fc94edc3d1e0b864ba64d56434 is the reviewed worktree HEAD and git status --porcelain is empty.",
+    "git diff --name-status is exactly four paths: benchmarks/mast_saddle_voltage_reach.py (M), docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-cohort-owner.html (A), nova/imas/mast_vacuum_cohort.py (M), tests/test_mast_saddle_voltage_reach.py (A).",
+    "grep over benchmarks finds MINIMUM_PROBES, EXCITATION_CURRENT, PLASMA_FREE_CURRENT and light_census only as imports and receipt-metadata uses in benchmarks/mast_saddle_voltage_reach.py:47-50,460-462; the benchmark declares none of these after the diff.",
+    "the committed receipt docs/figures/mast-saddle-loops/reach.json is not in the diff and was last touched at c173d3991, so it was not regenerated.",
+    "the two gate failures at base reproduce identically at head, so the added-failure set difference is empty.",
+    "an independent re-run of the reviewed head's new file returned 5 passed, matching the 121-116=5 head-minus-base delta."
+  ]
+}

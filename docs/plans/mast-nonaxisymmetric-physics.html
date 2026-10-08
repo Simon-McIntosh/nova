@@ -29,7 +29,7 @@
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
 <meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560">
 <meta name="plan-impl" content="0.15">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -176,7 +176,10 @@ Done when
     <div class="r-comment-body">review follow-ons from node (a) landed (mast-saddle-cohort-owner): the light vacuum-cohort census now lives in nova/imas/mast_vacuum_cohort.py on its own constants, and tests/test_mast_saddle_voltage_reach.py guards per-family raw-key resolution (5 tests, zero added failures; review 107). Section open — node (b), admission into the harmonic constraint set with the saddle-removed and geometry-permuted controls, is next.</div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261008T042003577585-mast-saddle-cohort-owner" data-who="reckon-build" data-when="2026-10-08T04:43:38.060Z">
-    <div class="r-comment-body"><p>Moved the saddle reach benchmark&#x27;s vacuum-cohort admission into nova/imas/mast_vacuum_cohort.py as light_census()/LightCensus on the module&#x27;s own EXCITATION_CURRENT, PLASMA_FREE_CURRENT and a single MINIMUM_PROBES constant; the benchmark now declares none of those and no predicate, and tests/test_mast_saddle_voltage_reach.py adds 5 tests — head 121 passed/2 failed against base 116 passed/2 failed, the same two pre-existing failures, so zero failures added.</p></div>
+    <div class="r-comment-body"><p>Moved the saddle reach benchmark's vacuum-cohort admission into nova/imas/mast_vacuum_cohort.py as light_census()/LightCensus on the module's own EXCITATION_CURRENT, PLASMA_FREE_CURRENT and a single MINIMUM_PROBES constant; the benchmark now declares none of those and no predicate, and tests/test_mast_saddle_voltage_reach.py adds 5 tests — head 121 passed/2 failed against base 116 passed/2 failed, the same two pre-existing failures, so zero failures added.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261008T044457167062-review-of-mast-saddle-cohort-owner" data-who="reckon-build" data-when="2026-10-08T05:04:59.835Z">
+    <div class="r-comment-body"><p>review of r-20261008T042003577585-mast-saddle-cohort-owner stored (base e2cffb94c353041dbbb39e6d25daa348f52708ac, head 191ef560420791fc94edc3d1e0b864ba64d56434), parsed and scored on all 6 dimensions total 107 verdict pass with zero added failures; the prior reuse finding is repaired — the benchmark&#x27;s vacuum-cohort admission now runs through nova/imas/mast_vacuum_cohort.light_census extending the owner, and no constant or predicate is re-declared.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261008-passive-spectrum-landed" data-who="reckon-build" data-when="2026-10-08T04:35:00Z">
     <div class="r-comment-body">node 1 landed: 1 of 15 grouped passive directions identifiable above the floor with drive scales free (400/400 shots scored). Section open — the held-out fit of that one direction, with the drive-permutation control, is next; it must propagate through nova/circuit/propagate.py and read geometry without the retiring registry. Evidence: passive-spectrum.</div>

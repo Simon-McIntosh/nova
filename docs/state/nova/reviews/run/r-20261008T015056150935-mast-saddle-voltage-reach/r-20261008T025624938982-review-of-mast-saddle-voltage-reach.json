@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's manifest declares baseline_suite null and after_suite null -- its evidence was a data benchmark emitting a JSON receipt, not a pytest suite -- so no gate log exists from which to take an added-failure count; the schema records this as unmeasured, never as zero.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "9eb100e5e9e4028d4514538ba159d773f14c8f1e"
+  ],
+  "completed_at": "2026-10-08T03:32:42.302Z",
+  "dispatched_at": "2026-10-08T02:57:02Z",
+  "findings": [
+    {
+      "file": "benchmarks/mast_saddle_voltage_reach.py",
+      "line": "77",
+      "severity": "blocking",
+      "text": "the m-family loops 10-12 are reported unreachable through a zero-padding mismatch, not through an absence on the machine: loop_identities() builds the raw channel as f\"sad_out_{family}{number:02d}\" (tag line 71, raw_channel line 77), giving sad_out_m10/m11/m12, while the level-1 store spells those three loops three-digit as sad_out_m010/m011/m012. Verified over the receipt's own 86-shot cohort: sad_out_m010, sad_out_m011 and sad_out_m012 are present at the same 26 shots (range 15051-25836) as sad_out_m09, and sad_out_m10/m11/m12 at none; the l and u families are two-digit and unaffected. The receipt records raw_shot_count 0 for saddle_m_10..m_12 against 26 for m_1..m_9, so the node's headline \"33 of 36 reconciled, m_10..m_12 unreachable\" and its follow-on \"confirm whether m_10..m_12 exist under a distinct channel name\" are both wrong; the true count is 36/36. Repair by resolving each loop's raw key from the store's own key set, or by probing the m-family three-digit spelling, rather than assuming one fixed width across families."
+    },
+    {
+      "file": "docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html",
+      "line": "19",
+      "severity": "blocking",
+      "text": "the paragraph contradicts the receipt it cites: it states that every l and u loop and m_1-m_9 are present at the same 26 cohort shots, but docs/figures/mast-saddle-loops/reach.json records 3-shot reachability (range 25818-25836) for l_3..l_12 (10 loops) and u_2..u_6,u_8..u_12 (10 loops), with only l_1, l_2, u_1 and u_7 at 26; the same sentence then names l_3/l_4 at 3 shots, so it is also self-contradictory. It further omits that 60 of the 86 cohort shots carry no xmb group at all, so a loop's absence over the frame is partly a statement about the shot's era, not about the loop."
+    },
+    {
+      "file": "benchmarks/mast_saddle_voltage_reach.py",
+      "line": "325",
+      "severity": "follow-on",
+      "text": "predict_pickup imports MachineGeometryRegistry from nova.catalog.mast_geometry (line 325, used line 331), the registry the owning plan names for retirement: nova:mast-nonaxisymmetric-physics section 5 says the saddle geometry must be read from the magnetics IDS through nova/imas/io_magnetics.py, \"never through nova.catalog.mast_geometry, because machine-description-retirement deletes that registry\", and to extend the owners rather than add a parallel path. The path is dead in this run (0 comparisons ran), so it is a latent break for that retirement, not a failure here, and it is outside this node's declared write paths."
+    }
+  ],
+  "gate_arms_note": "the reviewed run declared no baseline_suite and no after_suite -- its evidence is a data benchmark over the level-1 store, not a pytest suite -- so added_failure_count is unmeasured (null) and added_failure_ids is empty. The review's own reproduction is the store check recorded in the run's review-evidence.log: sad_out_m010/m011/m012 present at the same 26 cohort shots as sad_out_m09 while sad_out_m10/m11/m12 are absent.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites; the node adds a benchmark, an evidence fragment and a receipt and wires no production seam.",
+    "diff": "one commit, three added files, 1205 insertions, no deletions.",
+    "done_when": "the reviewed node's done_when is answered by the receipt and the two exit-0 passes, but the receipt's reachability is wrong for m_10..m_12, so the evidence does not support the verdict.",
+    "goal": "the node's goal is to record whether an uncorrected saddle-loop voltage is reachable for the vacuum cohort; it probes the level-1 xmb/sad_out channel per loop and writes a receipt, which is the goal, but the receipt's m-family count is a false negative.",
+    "manifest": "the manifest's account matches the receipt and the log, and its own headline carries the same false negative.",
+    "write_paths": "all three added paths lie inside the source node's declared write roots; no file under nova/ or tests/ changes."
+  },
+  "notes": "Independent review of r-20261008T015056150935-mast-saddle-voltage-reach at head 9eb100e5e9e4028d4514538ba159d773f14c8f1e against base f2bac518e47057cec01dd505c6dbbba7c8892b3c. The node answers section 5's first deliverable by probing the level-1 XMB group for each of the 36 saddle loops and writing a per-loop reachability receipt over an 86-shot vacuum cohort. The method and the access path are right, and the node honestly reports no fit, no sign promoted and a level-2 published path that did not resolve. The headline verdict is however wrong on three loops: sad_out_m010, sad_out_m011 and sad_out_m012 -- the store's three-digit spelling of the m-family loops 10-12 -- are present at the same 26 cohort shots as sad_out_m09, so the true count is 36/36, not 33/36, and the m triple is not absent from the machine. The evidence fragment additionally mis-states its own receipt. Two blocking findings and one follow-on. Scores: goal_fidelity 12, evidence 12, scope_discipline 20, durability 11, fit 13, reuse 13. Total 81, verdict fail.",
+  "project": "nova",
+  "raw_text": "reviewed_base_sha: f2bac518e47057cec01dd505c6dbbba7c8892b3c\nreviewed_head_sha: 9eb100e5e9e4028d4514538ba159d773f14c8f1e\nVERDICT goal: the node answers section 5's first deliverable -- whether an uncorrected saddle loop voltage, poloidal-field pickup retained, is reachable for the vacuum cohort -- by probing the level-1 XMB group and writing a per-loop reachability receipt; the method is right and the access path it names (level1 xmb/sad_out) is correct, but the headline count is wrong, reporting 33 of 36 reachable and m_10..m_12 unreachable when the store carries the m triple as sad_out_m010/m011/m012 at every one of the same 26 cohort shots as m_1..m_9, so the true answer is 36/36.\nVERDICT done_when: the node's evidence is a data benchmark, not a pytest suite; it wrote docs/figures/mast-saddle-loops/reach.json (36 loop rows, a negative-control row, an 86-of-4000-even-strided cohort) and ran it to completion in two passes at exit 0 (saddle-reach-all_debug.log), but the receipt's own reachability is false for m_10..m_12 and the evidence fragment mis-describes the receipt, so the done-when is met in form and not in substance.\nVERDICT write_paths: the three added paths -- benchmarks/mast_saddle_voltage_reach.py, docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html and docs/figures/mast-saddle-loops/reach.json -- all lie inside the source node's declared write roots; no file under nova/ or tests/ is touched.\nVERDICT manifest: read; it names the benchmark, the receipt, the evidence fragment, two job logs at exit 0 and a misspelled-channel negative control, and its account of the run matches the receipt and the log, except that its headline (m_10..m_12 unreachable) is the false negative the receipt carries.\nVERDICT diff: read the single commit 9eb100e5e against base f2bac518e; three files added, 1205 insertions, no deletions -- benchmarks/mast_saddle_voltage_reach.py (463 lines), the evidence fragment (25) and the receipt (717).\nCALL_SITES: none\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: the reachability method and the level-1 xmb/sad_out path at benchmarks/mast_saddle_voltage_reach.py:77 are correct, but the answer understates the reachable set and the \"absent from the machine\" clause at docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html:19 is false, a material error in the section's first deliverable, though the node correctly performs no fit and promotes no sign.\nSCORE evidence: 12\nJUSTIFICATION evidence: docs/figures/mast-saddle-loops/reach.json is a real, traceable receipt over a real store and the level-2 gap is reported honestly, but its reachability is wrong for 3 loops, the misspelled-channel control at benchmarks/mast_saddle_voltage_reach.py:46 cannot falsify a name mismatch, and the fragment mis-states the receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff f2bac518e 9eb100e5e --name-status is exactly the three declared added paths, no concurrent node's path and no production source.\nSCORE durability: 11\nJUSTIFICATION durability: there is no test and no guard; the sole control (benchmarks/mast_saddle_voltage_reach.py:46, a random misspelling no shot carries) reports unreachable whether or not a correctly-spelled loop resolves, so it cannot catch the zero-padding defect the receipt shows passed it.\nSCORE fit: 13\nJUSTIFICATION fit: the benchmark reuses the owners' cohort constants and COIL_DRIVES, but it imports the registry at benchmarks/mast_saddle_voltage_reach.py:325 that the owning plan forbids and slated for deletion, and re-implements the cohort admission predicate outside nova/imas/mast_vacuum_cohort.py.\nSCORE reuse: 13\nJUSTIFICATION reuse: it reuses nova.imas.mast_vacuum_cohort COIL_DRIVES and the four criteria constants rather than inventing them, but it owns a private channel-name enumeration for a concept the store already names, which is what let the m-family spelling escape.\nFINDING benchmarks/mast_saddle_voltage_reach.py:77 blocking: the m-family loops 10-12 are reported unreachable through a zero-padding mismatch, not through an absence on the machine: loop_identities() builds the raw channel as f\"sad_out_{family}{number:02d}\" (tag line 71, raw_channel line 77), giving sad_out_m10/m11/m12, while the level-1 store spells those three loops three-digit as sad_out_m010/m011/m012. Verified over the receipt's own 86-shot cohort: sad_out_m010, sad_out_m011 and sad_out_m012 are present at the same 26 shots (range 15051-25836) as sad_out_m09, and sad_out_m10/m11/m12 at none; the l and u families are two-digit and unaffected. The receipt records raw_shot_count 0 for saddle_m_10..m_12 against 26 for m_1..m_9, so the node's headline \"33 of 36 reconciled, m_10..m_12 unreachable\" and its follow-on \"confirm whether m_10..m_12 exist under a distinct channel name\" are both wrong; the true count is 36/36. Repair by resolving each loop's raw key from the store's own key set, or by probing the m-family three-digit spelling, rather than assuming one fixed width across families.\nFINDING docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html:19 blocking: the paragraph contradicts the receipt it cites: it states that every l and u loop and m_1-m_9 are present at the same 26 cohort shots, but docs/figures/mast-saddle-loops/reach.json records 3-shot reachability (range 25818-25836) for l_3..l_12 (10 loops) and u_2..u_6,u_8..u_12 (10 loops), with only l_1, l_2, u_1 and u_7 at 26; the same sentence then names l_3/l_4 at 3 shots, so it is also self-contradictory. It further omits that 60 of the 86 cohort shots carry no xmb group at all, so a loop's absence over the frame is partly a statement about the shot's era, not about the loop.\nFINDING benchmarks/mast_saddle_voltage_reach.py:325 follow-on: predict_pickup imports MachineGeometryRegistry from nova.catalog.mast_geometry (line 325, used line 331), the registry the owning plan names for retirement: nova:mast-nonaxisymmetric-physics section 5 says the saddle geometry must be read from the magnetics IDS through nova/imas/io_magnetics.py, \"never through nova.catalog.mast_geometry, because machine-description-retirement deletes that registry\", and to extend the owners rather than add a parallel path. The path is dead in this run (0 comparisons ran), so it is a latent break for that retirement, not a failure here, and it is outside this node's declared write paths.\n",
+  "review_method": "Read-only source, receipt, fragment and commit inspection; direct zarr reads of the level-1 store over the receipt's own 86-shot cohort to re-test the reachability claim; the node's own benchmark re-run at a bounded frame. No fit, no sign promotion, no production source changed.",
+  "review_run_id": "r-20261008T025624938982-review-of-mast-saddle-voltage-reach",
+  "reviewed_base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "reviewed_commit": "9eb100e5e9e4028d4514538ba159d773f14c8f1e",
+  "reviewed_head_sha": "9eb100e5e9e4028d4514538ba159d773f14c8f1e",
+  "reviewed_run_id": "r-20261008T015056150935-mast-saddle-voltage-reach",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/mast-saddle-voltage-reach",
+  "reviewer_node": "review-of-mast-saddle-voltage-reach",
+  "reviewer_run_id": "r-20261008T025624938982-review-of-mast-saddle-voltage-reach",
+  "scores": {
+    "durability": 11,
+    "evidence": 12,
+    "fit": 13,
+    "goal_fidelity": 12,
+    "reuse": 13,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T03:34:23.068336+00:00",
+  "total": 81,
+  "verdict": "fail",
+  "verified_independently": [
+    "reviewed_head_sha 9eb100e5e9e4028d4514538ba159d773f14c8f1e is the reviewed worktree's HEAD and git status --porcelain is empty; reviewed_base_sha f2bac518e47057cec01dd505c6dbbba7c8892b3c is HEAD^.",
+    "git -C /home/ITER/mcintos/Code/nova diff --name-status f2bac518e47057cec01dd505c6dbbba7c8892b3c 9eb100e5e9e4028d4514538ba159d773f14c8f1e is exactly three added paths: benchmarks/mast_saddle_voltage_reach.py, docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-saddle-voltage-reach.html and docs/figures/mast-saddle-loops/reach.json.",
+    "the store's m-family loops 10-12 are spelled three-digit: for shots 15051 and 25818 the xmb keys include sad_out_m010, sad_out_m011 and sad_out_m012 and no sad_out_m10/m11/m12.",
+    "over the receipt's own 86-shot cohort: sad_out_m09 present at 26 shots range [15051, 25836]; sad_out_m010, sad_out_m011 and sad_out_m012 each present at the same 26 shots; sad_out_m10/m11/m12 at 0.",
+    "the padding is family-specific: at shot 25818 sad_out_l10 and sad_out_u10 are present and sad_out_l010/sad_out_u010 absent, so only the m triple is affected.",
+    "the node's own benchmark reproduces at a bounded frame: benchmarks/mast_saddle_voltage_reach.py --limit 200 --processes 8 --compare 0 -> 'cohort 5 shots from 200 candidates; uncorrected reachable for 0/36 loops' EXIT=0 (its five admitted shots carry no xmb sad_out keys, so that frame is uninformative there).",
+    "the evidence fragment at line 19 claims every l and u loop is present at 26 shots, while reach.json records l_3..l_12 and u_2..u_6,u_8..u_12 at 3 shots (range 25818-25836) and only l_1, l_2, u_1, u_7 at 26.",
+    "the benchmark imports MachineGeometryRegistry from nova.catalog.mast_geometry at line 325 (used line 331), which plan section 5 forbids; the path is dead in this run (0 comparisons).",
+    "no test file references the benchmark: grep -rn mast_saddle_voltage_reach /home/ITER/mcintos/Code/nova/tests -> no matches."
+  ]
+}

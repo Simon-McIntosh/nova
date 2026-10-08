@@ -31,6 +31,13 @@
             "digest": "sha256:4a0ba375693bf5b3b25718b8adbc25962e490a10d921c845fab3b3924e3b96cf",
             "size": 78457,
             "dd_version": "4.1.0"
+          },
+          {
+            "role": "reference",
+            "name": "analytic_baseline_circle.nc",
+            "digest": "sha256:90a1b5999027b873c4f79677dd6e37ad6bc44012e6386d0b9e2a969d8dbdb24e",
+            "size": 195575,
+            "dd_version": "4.1.0"
           }
         ]
       },

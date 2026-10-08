@@ -46,6 +46,13 @@
       "finding": "reasoning-1",
       "reason": "the anchor values are unchanged and correct, so no node computes differently; the mechanism label is corrected when s5 and s11 are next landed, not in a wording-only edit that re-opens review",
       "when": "2026-10-08T01:48:55.953317+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s24-nova",
+      "finding": "wiring-1",
+      "reason": "the cutover edge is recorded in s11 data-links and s5 prose; plan-after is not writable through edit_plan, and a hard plan-depends-on would block s11, which is built before the cutover by decision",
+      "when": "2026-10-08T01:49:12.822520+00:00"
     }
   ],
   "responses": {
@@ -60,6 +67,12 @@
       "by": "s24-nova",
       "reason": "dispatched as two nodes with separate verdicts (dfo-error-estimator, dfo-gate-pin); the residual one-node phrase is replaced when s11 collapses at landing, and editing it now would re-open a review for wording the dispatch already settles",
       "when": "2026-10-08T01:48:40.827726+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "s24-nova",
+      "reason": "the cutover edge is recorded in s11 data-links and s5 prose; plan-after is not writable through edit_plan, and a hard plan-depends-on would block s11, which is built before the cutover by decision",
+      "when": "2026-10-08T01:49:12.822520+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/diiid-forward-onboarding/r-20261008T013205082212-plan-review-of-diiid-forward-onboarding.json",

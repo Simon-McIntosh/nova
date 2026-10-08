@@ -13,16 +13,16 @@
 <h1 id="cfs-edge-term-tangents">Polygon edge tangents</h1>
 <h2 id="cfs-edge-term-tangents-record">Record</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
-<tr><td>Observed</td><td>2026-10-08T02:19:16.163740+00:00</td></tr>
+<tr><td>Observed</td><td>2026-10-08T02:40:36.844255+00:00</td></tr>
 <tr><td>Base revision</td><td>716d859f0b501797e28849ec8878f0243de80cb1 (inherited draft); its original base was 72112421cb157599b3e3e97b31f3d5f6246735d4</td></tr>
-<tr><td>Measured source head</td><td>7efac47d91cb6e8678923ea19a33eef0f2b5d7fe</td></tr>
-<tr><td>Commits</td><td>7efac47d9 test(biot): audit edge-end derivatives against the exact integral; 2a86d3ea5 test(biot): truncate the product rule used by edge geometry; de0fe46b9 test(biot): handle absent paired data in tangent metrics; 95044c7f6 feat(biot): differentiate polygon edge reductions explicitly; 6d14132d2 fix(biot): preserve edge tangent arithmetic order</td></tr>
+<tr><td>Measured source head</td><td>5e6acbd41c0ddc764825228ff8fd811ba6df4ac5</td></tr>
+<tr><td>Commits</td><td>5e6acbd41 test(biot): adjudicate every exact edge identity disagreement; 7d5852510 test(biot): prove paired channel tangent refusal; baec3a5cf test(biot): assert primal bytes and record tangent qualification; 7efac47d9 test(biot): audit edge-end derivatives against the exact integral; 2a86d3ea5 test(biot): truncate the product rule used by edge geometry; de0fe46b9 test(biot): handle absent paired data in tangent metrics; 95044c7f6 feat(biot): differentiate polygon edge reductions explicitly; 6d14132d2 fix(biot): preserve edge tangent arithmetic order</td></tr>
 <tr><td>Acceptance state</td><td>Incomplete until both cold compile passes, repaired suite delta and verified mutation log complete. The worker does not close the plan section.</td></tr>
 <tr><td>Run receipts</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents</td></tr>
 <tr><td>Primal route</td><td>No public signature or primal arithmetic changed. Every hand tangent returns the primal method result beside its tangent; identity rows assert byte equality within a shared compiled program.</td></tr>
 <tr><td>Shared algebra</td><td>Scalar product/quotient, range products, sums, scales, contractions, elliptic recurrences and graded quadrature tangents are reused from their established modules. _EdgeScalar only packages this algebra for explicit formulas; it does not trace or differentiate a primal program.</td></tr>
 <tr><td>Corner tests</td><td>Base loading, identity assertions and median-of-seven cold compile now use tests/biot/tangent_identity.py. Corner geometry samples, near-corner reference, normwise scaling and elementwise maxima remain unchanged. Structural None is ignored only after requiring the reference also be None.</td></tr>
-<tr><td>Paired channel</td><td>Private Channel.split tangent is for the unpaired point-jet route; paired data is explicitly refused, not silently discarded.</td></tr>
+<tr><td>Paired channel</td><td>Private Channel.split tangent is for the unpaired point-jet route; paired-refusal.log proves the paired-data refusal, 1 passed, EXIT=0.</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-identity">10,000 geometries on H200</h2>
 <table><thead><tr><th>Primal</th><th>Private tangent</th><th>Bound</th><th>Primal max</th><th>Normwise max</th><th>Elementwise max</th><th>Covered fraction</th><th>Median |base tangent|</th></tr></thead><tbody>
@@ -38,7 +38,7 @@
 <table><thead><tr><th>Item</th><th>Measure</th></tr></thead><tbody>
 <tr><td>Domain</td><td>Radii 0.01 to about 20 m; heights -20 to 20 m; 500 vertical edges; 1,000 targets beside each endpoint and 1,000 beside the edge interior, offsets 1e-12 to 1e-5 m. All floating target and endpoint coordinates carry independent random directions; moment expansions carry their own directions.</td></tr>
 <tr><td>Coverage</td><td>All 10,000 samples retained; 100 percent finite base tangents in every H200 row. No masking. Nonzero base medians are the positive control for zero identity errors.</td></tr>
-<tr><td>Measurement source</td><td>after-test_edge_term_tangents.py.log from H200 job 1281976; its seven positive identity rows pass. That module run subsequently failed in the mutation fixture, which is excluded as control evidence and was repaired.</td></tr>
+<tr><td>Measurement source</td><td>after-edge-controls.log from H200 job 1281982: 16 passed, 7 deselected, 1 xfailed, EXIT=0; seven identities, seven controls, paired refusal and exact-integral audit.</td></tr>
 <tr><td>Separate first H200 job</td><td>1281972: six identity rows pass; channel output reached the metric but its structural None caused TypeError. The repaired channel row in job 1281976 passes exactly.</td></tr>
 <tr><td>Construction reproduction</td><td>resume-reproduction.log: 8.134e-13 &gt; 1e-13. Preserving the left-associated products and square-root tangent order gives 0 on the same wide domain; construction-near-edge.log additionally covers the endpoint and interior blocks.</td></tr>
 <tr><td>CPU context</td><td>cpu-exact-rows.log: second residual maximum 1.720e-9, 99.99 percent covered at 1e-9; the 1e-13 exact bound is exceeded on 603 samples in edge-reference.log. H200 identity is exact. CPU and H200 figures are not substituted for one another.</td></tr>
@@ -53,15 +53,22 @@
 <tr><td>Reference one-sided difference</td><td>max relative 2.526e-17; step 1e-25 stays on each selected smooth branch</td><td>reference-tests.log</td></tr>
 <tr><td>Known derivative gap</td><td>test_near_edge_tangent_meets_reference is a strict expected failure. The differentiated graded edge quadrature near endpoints leaves the exact integral derivative; this tangent preserves the base program. The audit does not isolate the quadrature floor as the sole cause.</td><td>1 passed, 1 xfailed; EXIT=0</td></tr>
 </tbody></table>
+<h2 id="cfs-edge-term-tangents-adjudication">Every CPU disagreement against the exact bound</h2>
+<table><thead><tr><th>Item</th><th>Measure</th></tr></thead><tbody>
+<tr><td>Coverage</td><td>615 points: all 603 CPU second-residual disagreements beyond 1e-13, plus fixed smooth and near-end controls; none of those disagreements is masked.</td></tr>
+<tr><td>Reference result</td><td>Running; the earlier full audit measured primal relative maximum 1.963e-9 and unchanged tangent maximum 5.160e-7.</td></tr>
+<tr><td>Value control</td><td>The exact integral crosses zero. Its independent primal control accepts 1e-10 relative or 1e-13 absolute and prints both maxima; tangent tolerances are unchanged. The initial relative-only value control failed on the enlarged audit and its log is retained.</td></tr>
+<tr><td>Receipts</td><td>reference-adjudication.log (initial value-control failure); reference-adjudication-value-scale.log (explicit value scale).</td></tr>
+</tbody></table>
 <h2 id="cfs-edge-term-tangents-negative">Declared product-rule truncation on H200</h2>
 <table><thead><tr><th>Row</th><th>Maximum relative error</th><th>Pytest refusal</th></tr></thead><tbody>
-<tr><td>edge_construction</td><td>pending</td><td>pending</td></tr>
-<tr><td>second_residual</td><td>pending</td><td>pending</td></tr>
-<tr><td>channel_split</td><td>pending</td><td>pending</td></tr>
-<tr><td>edge_integrands</td><td>pending</td><td>pending</td></tr>
-<tr><td>flux_line_moments</td><td>pending</td><td>pending</td></tr>
-<tr><td>flux_and_moment_terms</td><td>pending</td><td>pending</td></tr>
-<tr><td>edge_terms</td><td>pending</td><td>pending</td></tr>
+<tr><td>edge_construction</td><td>3.335e+04</td><td>FAILED</td></tr>
+<tr><td>second_residual</td><td>1.415e+09</td><td>FAILED</td></tr>
+<tr><td>channel_split</td><td>6.221e+05</td><td>FAILED</td></tr>
+<tr><td>edge_integrands</td><td>3.504e+02</td><td>FAILED</td></tr>
+<tr><td>flux_line_moments</td><td>1.000e+00</td><td>FAILED</td></tr>
+<tr><td>flux_and_moment_terms</td><td>4.958e+02</td><td>FAILED</td></tr>
+<tr><td>edge_terms</td><td>3.438e+05</td><td>FAILED</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-negative-record">Mutation receipt</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
@@ -75,8 +82,8 @@
 <tr><td>cold-compile-one</td><td>edge_construction</td><td>0.140/65</td><td>0.109/143</td><td>0.102/170</td><td>0.78</td><td></td></tr>
 <tr><td>cold-compile-one</td><td>second_residual</td><td>0.214/5325</td><td>0.595/15529</td><td>0.521/13059</td><td>2.78</td><td>above 2.7</td></tr>
 <tr><td>cold-compile-one</td><td>channel_split</td><td>6.750/6367</td><td>7.244/19810</td><td>17.119/16062</td><td>1.07</td><td></td></tr>
-<tr><td>cold-compile-one</td><td>edge_integrands</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
-<tr><td>cold-compile-one</td><td>flux_line_moments</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>edge_integrands</td><td>12.494/14898</td><td>22.444/52842</td><td>38.755/30432</td><td>1.80</td><td></td></tr>
+<tr><td>cold-compile-one</td><td>flux_line_moments</td><td>9.657/10888</td><td>17.116/38466</td><td>26.583/24075</td><td>1.77</td><td></td></tr>
 <tr><td>cold-compile-one</td><td>flux_and_moment_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
 <tr><td>cold-compile-one</td><td>edge_terms</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
 <tr><td>cold-compile-two</td><td>edge_construction</td><td>pending</td><td>pending</td><td>pending</td><td>pending</td><td></td></tr>
@@ -90,17 +97,17 @@
 <h2 id="cfs-edge-term-tangents-compile-method">Compile method</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
 <tr><td>Harness</td><td>tests/biot/tangent_identity.py::compile_ratio; median of seven, cache disabled before compilation, zero cache hits required, expanded equation counts printed. Two separate pytest processes, one H200 allocation, log per pass.</td></tr>
-<tr><td>Qualification</td><td>All seven ratios must be at most 3 in both passes. A pending cell is an unmet measure. Ratios above 2.7 are named even if they pass.</td></tr>
+<tr><td>Qualification</td><td>All seven ratios must be at most 3 in both passes. A pending cell is an unmet measure. Ratios above 2.7 are named even if they pass. Job 1281977 carries both passes; job 1281982 carries the corrected control and suite delta.</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-suite">Repaired suite delta: one driver pass, sequential module processes</h2>
 <table><thead><tr><th>Arm</th><th>Receipt</th></tr></thead><tbody>
-<tr><td>baseline</td><td>{&quot;completed&quot;: false}</td></tr>
-<tr><td>after</td><td>{&quot;completed&quot;: false}</td></tr>
+<tr><td>baseline</td><td>{&quot;command&quot;: &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py&quot;, &quot;completed&quot;: false, &quot;exit_status&quot;: 1, &quot;failure_count&quot;: 1, &quot;failure_ids&quot;: [&quot;tests/biot/test_edge_term_tangents.py::test_tangent_matches_base_jvp&quot;], &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/baseline-suite.log&quot;, &quot;revision&quot;: &quot;716d859f0b501797e28849ec8878f0243de80cb1&quot;}</td></tr>
+<tr><td>after</td><td>{&quot;command&quot;: &quot;/home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py&quot;, &quot;completed&quot;: false, &quot;exit_status&quot;: 0, &quot;failure_count&quot;: 0, &quot;failure_ids&quot;: [], &quot;log_path&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired-delta/after-suite.log&quot;, &quot;revision&quot;: &quot;7d5852510c01c6901648e07aa19646e9824ec56b&quot;}</td></tr>
 </tbody></table>
 <h2 id="cfs-edge-term-tangents-suite-context">Suite provenance and remaining gates</h2>
 <table><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
 <tr><td>Driver</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T004354567004-cfs-edge-term-tangents/repaired_suite_driver.py; baseline source loaded with the shared git-show harness and canonical module names. Both arms carry their root conftest. Every module has its own log and EXIT status; aggregate logs are the single-line JSON receipt targets.</td></tr>
-<tr><td>Initial baseline bootstrap defect</td><td>Loading source as base_* changed __module__, defeating the kernel census reference rewriter. Its 40,412-equation positive-control refusal is scaffolding, not a product regression. The repaired pass uses canonical nova.biot module names.</td></tr>
+<tr><td>Initial baseline bootstrap defect</td><td>Loading source as base_* changed __module__, defeating the kernel census reference rewriter. Its 40,412-equation refusal is scaffolding. Superseded job 1281976 was cancelled, peer jobs spared; the repaired pass uses canonical nova.biot names. Job 1281978 refused a stale queued revision; replacement 1281982 started at the committed head.</td></tr>
 <tr><td>Initial head fixture defect</td><td>Seven mutation-control tests stopped at a nonexistent momentchannel._product_tangent patch target. This was repaired and the earlier red log retained.</td></tr>
 <tr><td>Fence</td><td>No source outside the four assigned Python paths changed. The graded-quadrature repair and final point-jet custom-JVP wrapping remain separately owned work.</td></tr>
 </tbody></table>

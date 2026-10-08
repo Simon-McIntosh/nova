@@ -412,23 +412,27 @@ def _near_edge_reference_rows():
     )
     reference = np.asarray(json.loads(result.stdout))
     value, tangent = reference[:, 0], reference[:, 1]
-    primal = np.abs((np.asarray(expected[0])[indices] - value) / value)
+    absolute = np.abs(np.asarray(expected[0])[indices] - value)
+    primal = absolute / np.abs(value)
     hand = np.abs((np.asarray(got[1])[indices] - tangent) / tangent)
     base = np.abs((np.asarray(expected[1])[indices] - tangent) / tangent)
     print(
         f"NEAR_EDGE second_residual samples={indices.size} "
         f"base_primal_vs_reference_max={primal.max():.3e} "
+        f"base_primal_vs_reference_abs_max={absolute.max():.3e} "
         f"hand_vs_reference_max={hand.max():.3e} "
         f"base_jvp_vs_reference_max={base.max():.3e} "
         f"smooth_control_tangent_max={hand[:3].max():.3e} "
         f"reference_one_sided_difference_max={reference[:, 2].max():.3e}"
     )
-    return primal, hand, base, reference[:, 2]
+    return primal, hand, base, reference[:, 2], absolute
 
 
 def test_near_edge_reference_is_the_exact_integral():
-    primal, hand, _, difference = _near_edge_reference_rows()
-    assert primal.max() <= 1e-10
+    primal, hand, _, difference, absolute = _near_edge_reference_rows()
+    # The integral crosses zero; its value check retains an absolute roundoff
+    # bound there. Tangent identity and the reference derivative stay relative.
+    assert np.all((primal <= 1e-10) | (absolute <= 1e-13))
     assert hand[:3].max() <= EXACT_TOLERANCE
     assert difference.max() <= 1e-15
 
@@ -440,5 +444,5 @@ def test_near_edge_reference_is_the_exact_integral():
     "hand rule preserves the base program's derivative",
 )
 def test_near_edge_tangent_meets_reference():
-    _, hand, _, _ = _near_edge_reference_rows()
+    _, hand, _, _, _ = _near_edge_reference_rows()
     assert hand.max() <= SCAN_TOLERANCE

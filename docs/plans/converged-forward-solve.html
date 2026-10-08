@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="108">
+<meta name="plan-version" content="109">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -363,6 +363,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261008T004428659638-cfs-compile-rows-cpu-seconds" data-who="reckon-build" data-when="2026-10-08T04:59:03.052Z">
     <div class="r-comment-body"><p>the compile rows assert the 3.0 bound on the median CPU seconds each fresh child spends in lowered.compile(); ten rows ran twice sequentially and twice under eight spin processes; eight pass in all four, finite_part and graded_residual exceed the bound in all four and stay red</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T050020334017-review-of-cfs-compile-rows-cpu-seconds" data-who="reckon-build" data-when="2026-10-08T05:23:00.020Z">
+    <div class="r-comment-body"><p>independent re-review of run r-20261008T004428659638-cfs-compile-rows-cpu-seconds at base 72112421c head 61203268c: scores goal_fidelity 19 / evidence 16 / scope_discipline 20 / durability 19 / fit 19 / reuse 18 = 111, verdict pass, four follow-on findings (control on-log names a revision that does not carry the four-copy mutation it exercised; both delta arms incomplete and excluding the changed slow row; finite_part flips pass-by-wall to fail-by-CPU, a red id added_failure_ids cannot see; reviewed manifest gate-arm command fields carry a &lt;module&gt; placeholder) and no blocking finding</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

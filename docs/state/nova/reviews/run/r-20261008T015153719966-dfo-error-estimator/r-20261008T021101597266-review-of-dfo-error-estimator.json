@@ -1,0 +1,91 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_log_revision": "3a1c0bd41711f2aec7002529db7897a199b5b3f5",
+  "baseline_log_revision": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+    "013fcc42730b8efa27bdacccd72a839ddaede9b1",
+    "4f92683f697e506ce9ed3190f92da41d017b2b55"
+  ],
+  "completed_at": "2026-10-08T02:48:05.156Z",
+  "dispatched_at": "2026-10-08T02:11:54Z",
+  "findings": [
+    {
+      "file": "tests/test_derived_convergence_criterion.py",
+      "line": "243",
+      "severity": "blocking",
+      "text": "blocking: the reproducibility test pops the benchmarks/efit_forward_parity_slice.py entry from sources before comparing the banked three-spacing receipt to a regenerated one, so the banked artifact's benchmark revision is no longer checked, and the staleness it hid is real (banked 84ba8502 versus current c080447a in both base and head); the coordinator resumed this run and ruled the banked digest comparison must remain strict, so the assertion must be restored before the node lands."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-error-estimator/tests/test_derived_convergence_criterion.py -q --basetemp /tmp/dfo-after-nnmvy72t/pytest-temp",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_derived_convergence_criterion.py::test_three_spacing_receipt_is_banked_and_reproducible"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015153719966-dfo-error-estimator/after-suite.log",
+      "revision": "3a1c0bd41711f2aec7002529db7897a199b5b3f5"
+    },
+    "baseline_suite": {
+      "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python /tmp/dfo-baseline-k3fry4g_/baseline_runner.py /tmp/dfo-baseline-k3fry4g_/benchmarks/derived_convergence_criterion.py /tmp/dfo-baseline-k3fry4g_/tests/test_derived_convergence_criterion.py",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/test_derived_convergence_criterion.py::test_three_spacing_receipt_is_banked_and_reproducible"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T015153719966-dfo-error-estimator/baseline-suite.log",
+      "revision": "f2bac518e47057cec01dd505c6dbbba7c8892b3c"
+    }
+  },
+  "gate_arms_note": "added_failure_count and added_failure_ids are derived with reckon.crew.review.added_failures_from_gate_logs from the reviewed run's own declared baseline_suite log (baseline-suite.log, revision f2bac518e470 / EXIT=1) and after_suite log (after-suite.log, revision 3a1c0bd41711 / EXIT=1). Each arm fails only the pre-existing banked-receipt test (test_three_spacing_receipt_is_banked_and_reproducible), so after FAILED minus base FAILED is empty and added_failure_count is a measured 0. The reviewed revision pair recorded here is base f2bac518e470 / head 4f92683f697e (the revision this review read); the run's declared after arm was later advanced to 3a1c0bd41711 when the coordinator restored the strict comparison, and that same pre-existing failure is the only one on both arms.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read f2bac518e470 against 4f92683f697e commit by commit (013fcc427 adds estimate_observable_discretisation_error and its two tests, 4f92683f adds the figure and fragment); 1360 insertions and 1 deletion, of which 1216 lines are the generated SVG.",
+    "done_when": "the estimator clause names an analytic fixture's known error order and magnitude within a stated factor; tests/test_derived_convergence_criterion.py:271-286 asserts observed_order within 0.1 of the closed-form 2.0 and the estimated-over-true error ratio within a factor of 2, and the refusal clause is asserted at :292-296.",
+    "goal": "the node's goal is a non-circular, spacing-independent discretisation-error estimate of one observable across a resolution ladder; benchmarks/derived_convergence_criterion.py:300-381 adds estimate_observable_discretisation_error, which fits the order from the coarse differences only and holds out the finest pair for the qualification ratio and the Richardson estimate.",
+    "manifest": "read; it names both commits, the changed paths, the fragment and its own gate log, and its account matches the code and the logs.",
+    "write_paths": "the run declares benchmarks/derived_convergence_criterion.py, tests/test_derived_convergence_criterion.py, docs/figures/discretisation-error-estimator, docs/evidence/fragments/diiid-forward-onboarding/dfo-error-estimator.html and docs/figures/diiid-forward-onboarding/dfo-error-estimator; every path in the diff is inside them."
+  },
+  "justifications": {
+    "durability": "the new assertions are falsifiable and the recorded negative control reddens the order guard, but tests/test_derived_convergence_criterion.py:243-246 narrows the pre-existing banked-receipt reproducibility check by dropping the benchmarks/efit_forward_parity_slice.py source pin, removing a guard that was catching real staleness.",
+    "evidence": "the manifest's committed-gate.log records 16 passed at EXIT=0 for revision 4f92683f697e and negative-control-committed.log records the analytic assertion reddening at EXIT=1 with an independent failing id; the reviewed run declares no baseline_suite or after_suite arm, so the added-failure count is unmeasured, and part of the green came from narrowing a pre-existing check.",
+    "fit": "the function follows the module idiom (numpy arrays, a dict[str, float | int] return, a sentence ValueError) matching circular_richardson_collapse at benchmarks/derived_convergence_criterion.py:279, and carries no plan or sprint identifier in any name or comment.",
+    "goal_fidelity": "benchmarks/derived_convergence_criterion.py:300 builds the order from coarse_spacing and coarse_differences at :331-341 and uses the held-out finest pair only at :352-378, so it is non-circular, and tests/test_derived_convergence_criterion.py:288-291 shows the order and the estimate are invariant under a x1000 spacing rescale.",
+    "reuse": "benchmarks/derived_convergence_criterion.py:22-23 imports _fit_power_order and richardson_fine_error and reuses both at :333 and :365; a search of benchmarks/ found no other discretisation-error estimator owner, so the change extends the existing owner rather than forking a mechanism.",
+    "scope_discipline": "git diff --name-status f2bac518e470 4f92683f697e is exactly the four declared paths (M benchmarks/derived_convergence_criterion.py, M tests/test_derived_convergence_criterion.py, A docs/evidence/fragments/diiid-forward-onboarding/dfo-error-estimator.html, A docs/figures/discretisation-error-estimator/analytic-observable-error.svg), with nothing under nova/ touched."
+  },
+  "plan": "nova:diiid-forward-onboarding",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is a non-circular, spacing-independent discretisation-error estimate of one observable across a resolution ladder; benchmarks/derived_convergence_criterion.py:300-381 adds estimate_observable_discretisation_error, which fits the order from the coarse differences only and holds out the finest pair for the qualification ratio and the Richardson estimate.\nVERDICT done_when: the estimator clause names an analytic fixture's known error order and magnitude within a stated factor; tests/test_derived_convergence_criterion.py:271-286 asserts observed_order within 0.1 of the closed-form 2.0 and the estimated-over-true error ratio within a factor of 2, and the refusal clause is asserted at :292-296.\nVERDICT write_paths: the run declares benchmarks/derived_convergence_criterion.py, tests/test_derived_convergence_criterion.py, docs/figures/discretisation-error-estimator, docs/evidence/fragments/diiid-forward-onboarding/dfo-error-estimator.html and docs/figures/diiid-forward-onboarding/dfo-error-estimator; every path in the diff is inside them.\nVERDICT manifest: read; it names both commits, the changed paths, the fragment and its own gate log, and its account matches the code and the logs.\nVERDICT diff: read f2bac518e470 against 4f92683f697e commit by commit (013fcc427 adds estimate_observable_discretisation_error and its two tests, 4f92683f adds the figure and fragment); 1360 insertions and 1 deletion, of which 1216 lines are the generated SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/derived_convergence_criterion.py:300 builds the order from coarse_spacing and coarse_differences at :331-341 and uses the held-out finest pair only at :352-378, so it is non-circular, and tests/test_derived_convergence_criterion.py:288-291 shows the order and the estimate are invariant under a x1000 spacing rescale.\nSCORE evidence: 16\nJUSTIFICATION evidence: the manifest's committed-gate.log records 16 passed at EXIT=0 for revision 4f92683f697e and negative-control-committed.log records the analytic assertion reddening at EXIT=1 with an independent failing id; the reviewed run declares no baseline_suite or after_suite arm, so the added-failure count is unmeasured, and part of the green came from narrowing a pre-existing check.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status f2bac518e470 4f92683f697e is exactly the four declared paths (M benchmarks/derived_convergence_criterion.py, M tests/test_derived_convergence_criterion.py, A docs/evidence/fragments/diiid-forward-onboarding/dfo-error-estimator.html, A docs/figures/discretisation-error-estimator/analytic-observable-error.svg), with nothing under nova/ touched.\nSCORE durability: 15\nJUSTIFICATION durability: the new assertions are falsifiable and the recorded negative control reddens the order guard, but tests/test_derived_convergence_criterion.py:243-246 narrows the pre-existing banked-receipt reproducibility check by dropping the benchmarks/efit_forward_parity_slice.py source pin, removing a guard that was catching real staleness.\nSCORE fit: 19\nJUSTIFICATION fit: the function follows the module idiom (numpy arrays, a dict[str, float | int] return, a sentence ValueError) matching circular_richardson_collapse at benchmarks/derived_convergence_criterion.py:279, and carries no plan or sprint identifier in any name or comment.\nSCORE reuse: 20\nJUSTIFICATION reuse: benchmarks/derived_convergence_criterion.py:22-23 imports _fit_power_order and richardson_fine_error and reuses both at :333 and :365; a search of benchmarks/ found no other discretisation-error estimator owner, so the change extends the existing owner rather than forking a mechanism.\nFINDING tests/test_derived_convergence_criterion.py:243 blocking: the reproducibility test pops the benchmarks/efit_forward_parity_slice.py entry from sources before comparing the banked three-spacing receipt to a regenerated one, so the banked artifact's benchmark revision is no longer checked, and the staleness it hid is real (banked 84ba8502 versus current c080447a in both base and head); the coordinator resumed this run and ruled the banked digest comparison must remain strict, so the assertion must be restored before the node lands.\nREVIEWED_BASE_SHA: f2bac518e47057cec01dd505c6dbbba7c8892b3c\nREVIEWED_HEAD_SHA: 4f92683f697e506ce9ed3190f92da41d017b2b55\n",
+  "review_run_id": "r-20261008T021101597266-review-of-dfo-error-estimator",
+  "reviewed_base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "reviewed_head_sha": "4f92683f697e506ce9ed3190f92da41d017b2b55",
+  "reviewed_revision": "4f92683f697e506ce9ed3190f92da41d017b2b55",
+  "reviewed_run_id": "r-20261008T015153719966-dfo-error-estimator",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-error-estimator",
+  "reviewer_node": "review-of-dfo-error-estimator",
+  "reviewer_run_id": "r-20261008T021101597266-review-of-dfo-error-estimator",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T02:45:24.555295+00:00",
+  "total": 108,
+  "verdict": "changes-required"
+}

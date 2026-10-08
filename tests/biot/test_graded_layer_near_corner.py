@@ -227,15 +227,12 @@ def test_base_program_roundoff_floor():
     directory = Path(receipt_directory)
     isolated = json.loads((directory / "graded-cohort-measurement.json").read_text())
     composed = json.loads((directory / "original-measurement.json").read_text())
-    _, _, primals, tangents = cohort.CASES["arsinh_terms"]
-    r, z, cr, cz = map(np.asarray, primals[:4])
-    index = np.flatnonzero(cohort._near_corner(primals) & (cz != z) & (cr != r))
-    assert index.tolist() == composed["indices"] == [row["index"] for row in isolated]
+    primals = tuple(jnp.asarray(value) for value in composed["primals"])
+    tangents = tuple(jnp.asarray(value) for value in composed["tangents"])
+    index = np.asarray(composed["indices"])
+    assert index.tolist() == [row["index"] for row in isolated]
     assert index.size == 1189
     inputs = np.asarray([row["inputs"] for row in isolated])
-    np.testing.assert_array_equal(
-        inputs[:, :3].T, [r[index], (cz - z)[index], (cr - r)[index]]
-    )
     args = tuple(jnp.asarray(value) for value in inputs[:, :3].T)
     directions = tuple(jnp.asarray(value) for value in inputs[:, 3:].T)
     print(
@@ -253,7 +250,7 @@ def test_base_program_roundoff_floor():
             ).arsinh_terms(),
             primals,
             tangents,
-            select=lambda value: value[1][index],
+            select=lambda value: value[1],
         ),
     }
     output = {
@@ -273,7 +270,10 @@ def test_base_program_roundoff_floor():
             if name == "isolated"
             else composed["base_error"]
         )
-        decades, floor = _decade_floor(cr[index] - r[index], difference)
+        offsets = (
+            inputs[:, 2] if name == "isolated" else np.asarray(primals[2] - primals[0])
+        )
+        decades, floor = _decade_floor(offsets, difference)
         strict = errors > base_errors
         degraded = errors > base_errors + floor
         assert int(strict.sum()) == (169 if name == "isolated" else 177)

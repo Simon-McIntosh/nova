@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="machine-description-retirement-landed">
+  <meta name="plan-title" content="Retire the Bespoke Machine-Description Layer — landed record">
+  <meta name="plan-summary" content="Closure synthesis for Retire the Bespoke Machine-Description Layer: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).">
+  <meta name="plan-evidence-for" content="machine-description-retirement">
+  <meta name="plan-verdict" content="qualified">
+  <title>Retire the Bespoke Machine-Description Layer — landed record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+ <main class="plan-doc">
+  <h1>Retire the Bespoke Machine-Description Layer — landed record</h1>
+  <p>Closure synthesis for Retire the Bespoke Machine-Description Layer: 0 committed run(s), 0 section-anchored comment(s), and 0 landed commit(s).</p>
+
+
+   <section id="producer-equivalence">
+    <h2>§4 — the producer is not yet equivalent to the registry</h2>
+    <p><code>benchmarks/mast_description_equivalence.py</code> drove the imas-ambix MAST map producer (imas-ambix <code>6b7a4cd9</code>, run from its own environment without syncing it) and compared it with the nova registry (digest <code>2a26cc0a</code>) for shot 11766. Receipt: <code>docs/figures/machine-description-retirement/mdr-equivalence.json</code>.</p><table><thead><tr><th>Quantity</th><th>Registry</th><th>Producer</th></tr></thead><tbody><tr><td>Unique described loop positions</td><td>44</td><td>42</td></tr><tr><td>Solve-input join against 46 reconstruction loops</td><td>43</td><td>41</td></tr><tr><td>Maximum coil-outline vertex difference, 13 coils (bound 1e-5 m)</td><td colspan="2">0 m</td></tr></tbody></table><p>The two joins the producer loses are <code>fl_p4l_2</code> and <code>fl_p4l_3</code>, the restored P4-lower loops that lifted the registry join from 39 to 43. Registry-only positions are (1.40050, −1.15943), (1.54580, −0.54724), (1.59840, −1.06943) and (1.74930, −0.44224) m; producer-only positions are (1.54950, −0.54724) and (1.74630, −0.44224) m, two P5-lower loops displaced radially by 3.7 mm and 3.0 mm. Displacing one producer loop by 1 mm is detected, so the comparison fires. Two pin tests in <code>tests/test_mast_description_equivalence.py</code> assert the registry figures and stay red on purpose until the map is reconciled. The receipt names no nova revision; it was measured from the node's base <code>7334ffa6</code> and committed at <code>d63bca23</code>.</p><p><strong>Consequence:</strong> the clean-deletion precondition fails. No §3 surface may be deleted until the imas-ambix MAST map carries the restored P4-lower loops and the two P5-lower positions agree, and this measurement re-runs equal.</p>
+  </section>
+
+</main>
+</body>
+</html>

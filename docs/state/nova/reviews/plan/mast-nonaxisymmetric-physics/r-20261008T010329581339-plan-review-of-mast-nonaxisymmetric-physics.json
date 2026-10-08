@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:09:21.031Z",
+  "dispatched_at": "2026-10-08T01:03:59Z",
+  "findings": [
+    {
+      "anchor": "nova/imas/mast_fitted_parameters.py:1553",
+      "id": "reuse_search-1",
+      "reason": "pointing \u00a77 at `fitted_evidence`/`EvidenceLedger` and \u00a75 at `mast_misfit_harmonics` converts two \"new API\" clauses into extension clauses and avoids a second publication path.",
+      "text": "\u00a77 proposes \"one versioned Nova API with an uncertainty interval on every parameter\" for the passive, diagnostic and TF blocks, but `fitted_evidence()` (mast_fitted_parameters.py:1553) and `refined_evidence()` (:1605) already publish exactly that: fitted turn, diagnostic, passive and sensor-adjudication records, each an `EvidenceRecord` whose `Uncertainty(lower, upper, unit)` is mandatory for `GENERATED`/`FITTED` fields (machine_evidence.py:199\u2013308). \u00a77 cites no such mechanism; `nova/imas/mast_misfit_harmonics.py` (ConstraintSet/assemble/bank_shots, :141/:282/:273) already assembles mixed probe+flux-loop constraint sets and owns the P4/P5 harmonic fit that \u00a75 proposes to re-measure, yet \u00a75 does not cite it either.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/mast_fitted_parameters.py:1553",
+      "id": "thin_wrapper-1",
+      "reason": "an unjustified wrapper beside the owner is the honest case for extending `fitted_evidence` instead, and the section should say so or delete the wrapper.",
+      "text": "\u00a77's \"one versioned Nova API\" forwards the already-published, already-interval-carrying parameter set and adds no behaviour the ledger lacks, and \u00a77 offers no reason the existing `fitted_evidence`/`refined_evidence` seam cannot be extended in place (the ledger already validates canonical order, rejects two evidence states for one field, and requires an interval on every fitted field).",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/mast_fitted_parameters.py:1194",
+      "id": "duplicate_owner-1",
+      "reason": "naming mast_fitted_parameters.py and mast_vacuum_response.py as owners tells the author to extend the promotion seam (and confront the published-signal blocker) instead of adding a parallel sign-adjudication path that may fit a quantity the published data cannot support.",
+      "text": "the plan re-owns two shared mechanisms rather than extending their owners. (1) Versioned uncertainty-carrying parameter publication: \u00a77 would add a second API where `nova/imas/mast_fitted_parameters.py:fitted_evidence/refined_evidence` over `nova/imas/machine_evidence.py:EvidenceLedger/EvidenceRecord/Uncertainty` is already the owner. (2) Saddle traversal-sign adjudication: \u00a75 proposes to admit the 36 saddle loops and \"promote traversal sign on decisive held-out evidence\", but `mast_fitted_parameters.py:1194` already carries `magnetics/flux_loop(saddle)/traversal_sign` as `FieldEvidence.UNRESOLVED` and states the blocker is not geometry but that the store's published saddle signals have had the poloidal-field pickup removed \u2014 the sign is measurable only from an uncorrected saddle voltage; the sign/promotion machinery itself already exists as `sensor_adjudication_records` (mast_fitted_parameters.py:1292) and `TurnDisposition`/`aggregate_turns` (mast_vacuum_response.py:1052/1160). \u00a75 does not cite the existing record or its stated blocker.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "mast-nonaxisymmetric-physics#s7",
+      "id": "interface_budget-1",
+      "reason": "the section must account for the surface it adds (or the seed records it retires) in its own text before the first implementation node is released.",
+      "text": "\u00a77 adds a public parameter API (public_definitions) without naming in its own text what it retires or merges, and this week's figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0. \u00a77 could instead route the new parameters through the existing `fitted_evidence` records, in which case the added definition is `SUPERSEDED_SEED_PATHS` (mast_fitted_parameters.py:1570), which retires seed records \u2014 but \u00a77 does not say this.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "a0557f8b04369eec388922b777efea79e9ccee4ba186601fe7c7f57f65720c5b",
+  "plan_slug": "mast-nonaxisymmetric-physics",
+  "plan_version": 8,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T010329581339-plan-review-of-mast-nonaxisymmetric-physics",
+  "reviewed_blob_sha": "e26b05d95db99d00bb26edb18ffc15074a4cce27",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a74\u2013\u00a77 extend existing single-purpose modules (the mode fit, the signed-response fit, the error-field screen, the evidence ledger) rather than adding a spread of new wrappers, so no new module is proposed that hides less than it exposes.",
+    "duplicate_owner": "a finding \u2014 the plan re-owns two shared mechanisms: versioned uncertainty-carrying parameter publication (owned by mast_fitted_parameters.py over machine_evidence.py) and saddle-flux-loop sign/harmonic adjudication (owned by mast_vacuum_response.py and mast_misfit_harmonics.py).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a77 adds a public parameter API without naming, in its own text, what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan searches well for \u00a74\u2013\u00a76 (it cites mast_passive_decay_modes.py, mast_passive_inductance.py, mast_vacuum_response.py, mast_error_field_screen.py and opens them as extensions) but \u00a75 and \u00a77 do not cite the modules that already own the mechanism they propose, so those two sections read as new builds over owned ground.",
+    "thin_wrapper": "a finding \u2014 \u00a77's \"one versioned Nova API with an uncertainty interval on every parameter\" is a thin layer over machinery that already carries exactly that, and the section does not say why that machinery cannot be extended."
+  },
+  "section_digests": {
+    "_document": "39b24fc80be04896efa69f23e299e45ba90ea06bc09f70c1fd7e007b4aeec137",
+    "s1": "f4b8eb5def5568e59998ae548c63c33bccab1accde8469ae275e5c52200e6506",
+    "s2": "75b6ff86311477ed15da86c822cd295e2319afe6692e1c92dea6331fedd375ba",
+    "s3": "aa0ed83b4bd3bc1db5933706559b763d2ead68582e9f41eb88c537d79cb022ce",
+    "s4": "1bdd0a944af26d4388edaaa569ebd67450b273d26bf9038b342ec3096cddc96f",
+    "s5": "b8f0c00eeb47966a316586fe4d122272dde4dbe4103692eb44570a0cf3da87c7",
+    "s6": "3abd28e7b69d9fea9b9a4fc78afb5715bd4c4f05a7e8938ca32911fa18141144",
+    "s7": "17897bec758a6ff419995bfc01aca9cda27c7a903672516a0936f04674325594"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:11:54.982734+00:00"
+}

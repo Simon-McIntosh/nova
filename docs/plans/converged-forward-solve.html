@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="109">
+<meta name="plan-version" content="110">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -501,6 +501,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s21-gs-apply-ambix-scout" data-who="s21-nova" data-when="2026-10-06T06:35:00Z">
     <div class="r-comment-body"><p><strong>Prior-art search of the coupled repository for gs.apply.</strong> imas-ambix holds one forward Grad-Shafranov operator, <code>imas_ambix/gs/operator.py</code>, with <code>residual.py</code> and <code>grounding.py</code> beside it. It is not reused, because it is a different object: a geometry-only linear map from known coil currents and an inferred current basis on a limiter-masked grid to sensor readings, prediction = G_pf I_pf + G_plasma c_plasma + G_passive c_passive. It is built from SciPy filament Green's functions in NumPy, imports nothing from nova, and its own docstring leaves solving to its caller. gs.apply is the nonlinear map psi = psi_ext + G J(psi) on the hex carrier with the booked current, traced in JAX, so no column, kernel or signature of the ambix map serves it. The dependency runs the other way: ambix consumes nova's forwards and conditions their inputs. This closes design review reuse_search-1 on plan version 93.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s21-corsica-130506-evidence" data-who="s21-nova" data-when="2026-10-08T08:25:00Z">
+    <div class="r-comment-body"><p><strong>Real-machine evidence from the S24 validator set: the shipped solve does not solve ITER CORSICA 130506.</strong> Run <code>r-20261008T063930660089-fpv-corsica-130506</code> (H200 jobs 1282053 and 1282093, solve code read-only, inputs from <code>nova/imas/validator_case.py</code> with the layers pinned in <code>tests/data-manifest.json</code>, DD 4.1.0, 20 active and 210 passive elements, prescribed p' and FF'). Seeded from the reference flux at 150 s and 200 s the terminal state equals the seed (terminal minus seed 0 Wb), converged false, residual 0.0328 and 0.0339, plasma current error 249 and 252 kA against a 225 kA band: the solve does not move. Seeded from the input conductors' vacuum field at 150, 200, 230 and 231 s, all four raise NoQualifiedAxisError in the topology read before any terminal receipt. Separately, the 230 s reference has no closed axis-containing contour at its own declared boundary flux. This is the failure this plan retires, measured on an ITER case rather than an analytic one. <code>tests/test_forward_profile_corsica.py</code> is ready to rerun, which makes CORSICA 130506 a candidate real-machine acceptance row for section 6 beside the DIII-D frames; adding it to the acceptance table is the lead's decision and is not made here. The S24 session defers its remaining validator rungs (DINA 105027, ASTRA 131046) until the single-grid cutover lands.</p></div>
 </div>
 </section>
 </main>

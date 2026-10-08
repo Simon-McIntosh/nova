@@ -145,6 +145,7 @@ from contextlib import contextmanager
 from functools import lru_cache
 from multiprocessing import get_context
 import os
+from jax import lax
 from typing import Iterator
 
 import numpy as np
@@ -1512,6 +1513,58 @@ def _near_collinear_arsinh_difference(xp, along_a, along_b, gap, length, active)
     held_denominator = xp.where(near_collinear, denominator, 1.0)
     stable = xp.arcsinh(length * (along_a + along_b) / held_denominator)
     return xp.where(has_logarithm, xp.where(near_collinear, stable, direct), 0.0)
+
+
+def _near_collinear_arsinh_difference_tangent(
+    xp, along_a, along_b, gap, length, active, d_along_a, d_along_b, d_gap, d_length
+):
+    """Differentiate the selected stable or direct logarithm branch."""
+    primal = _near_collinear_arsinh_difference(
+        xp, along_a, along_b, gap, length, active
+    )
+    has_logarithm = active & (gap > 0.0)
+    same_side = ((along_a > 0.0) & (along_b > 0.0)) | (
+        (along_a < 0.0) & (along_b < 0.0)
+    )
+    near_collinear = (
+        has_logarithm
+        & same_side
+        & (
+            gap
+            <= _ARCSINH_DIFFERENCE_SWITCH * xp.minimum(xp.abs(along_a), xp.abs(along_b))
+        )
+    )
+    direct_gap = xp.where(near_collinear, 1.0, xp.where(has_logarithm, gap, 1.0))
+    d_direct_gap = xp.where(near_collinear | ~has_logarithm, 0.0, d_gap)
+    direct_b = along_b / direct_gap
+    direct_a = along_a / direct_gap
+    d_direct_b = _quotient_tangent(along_b, d_along_b, direct_gap, d_direct_gap)
+    d_direct_a = _quotient_tangent(along_a, d_along_a, direct_gap, d_direct_gap)
+    d_direct = d_direct_b * lax.rsqrt(
+        direct_b * direct_b + 1.0
+    ) - d_direct_a * lax.rsqrt(direct_a * direct_a + 1.0)
+
+    norm_a = xp.hypot(along_a, gap)
+    norm_b = xp.hypot(along_b, gap)
+    d_norm_a = d_along_a * (along_a / norm_a) + d_gap * (gap / norm_a)
+    d_norm_b = d_along_b * (along_b / norm_b) + d_gap * (gap / norm_b)
+    denominator = along_b * norm_a + along_a * norm_b
+    d_denominator = _product_tangent(
+        along_b, d_along_b, norm_a, d_norm_a
+    ) + _product_tangent(along_a, d_along_a, norm_b, d_norm_b)
+    held_denominator = xp.where(near_collinear, denominator, 1.0)
+    d_held_denominator = xp.where(near_collinear, d_denominator, 0.0)
+    sum_along = along_a + along_b
+    numerator = length * sum_along
+    d_numerator = _product_tangent(length, d_length, sum_along, d_along_a + d_along_b)
+    stable_argument = numerator / held_denominator
+    d_stable_argument = _quotient_tangent(
+        numerator, d_numerator, held_denominator, d_held_denominator
+    )
+    d_stable = d_stable_argument * lax.rsqrt(stable_argument * stable_argument + 1.0)
+    return primal, xp.where(
+        has_logarithm, xp.where(near_collinear, d_stable, d_direct), 0.0
+    )
 
 
 def _axis_vertical_field(

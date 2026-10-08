@@ -280,6 +280,15 @@ and two orders below the four hundred kiloamperes of an ordinary MAST pulse, so
 no plasma shot is admitted by it and no vacuum shot is rejected by its noise.
 """
 
+MINIMUM_PROBES = 40
+"""Field probes a shot must carry for the cohort's over-determined fit.
+
+The vacuum response fit recovers several coil amplitudes from the probe readings
+at once, so a shot has to carry markedly more probes than amplitudes for the
+system to be over-determined.  A shot below this count cannot constrain the fit
+and is refused whatever its excitation.
+"""
+
 
 @dataclass(frozen=True)
 class SignalProvenance:
@@ -649,6 +658,109 @@ def survey_store(
 
 
 @dataclass(frozen=True)
+class LightCensus:
+    """The admission inputs a shot yields without reading every field waveform.
+
+    The full survey builds the probe waveform the fit consumes; admission needs
+    none of that.  It needs the current-group peaks, which decide plasma-freeness
+    and deliberate excitation, and the field-group channel names, which count the
+    over-determining probes.  So a census over a whole store -- the expensive part
+    of taking a cohort -- is done here at the cost of the current channels alone.
+
+    The probe count is the number of field channels whose names match the probe
+    families; the full survey drops a channel whose sample shape does not join
+    the field clock, and this census does not read samples, so on a store where
+    such a channel exists the two counts can differ by that channel.
+    """
+
+    shot: int
+    plasma_current_peak: float
+    excited_families: tuple[str, ...]
+    probe_count: int
+    absent_groups: tuple[str, ...]
+
+    def admitted(self, *, minimum_probes: int = MINIMUM_PROBES) -> bool:
+        """Return whether the row satisfies the vacuum cohort's criteria."""
+
+        return (
+            not self.absent_groups
+            and self.plasma_current_peak < PLASMA_FREE_CURRENT
+            and bool(self.excited_families)
+            and self.probe_count >= minimum_probes
+        )
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the canonical JSON representation."""
+
+        return {
+            "absent_groups": list(self.absent_groups),
+            "excited_families": list(self.excited_families),
+            "plasma_current_peak": float(self.plasma_current_peak),
+            "probe_count": self.probe_count,
+            "shot": self.shot,
+        }
+
+
+def light_census(shot: int, store: Path | str = SHOT_STORE) -> LightCensus | None:
+    """Read a shot's admission inputs without loading its field waveforms.
+
+    Every read is guarded as in :func:`survey_shot`: a shot lacking its current
+    group, or readable at all, is refused rather than admitted on a missing
+    channel.  The current-group peaks are read with the module's own thresholds
+    and the probe count with the module's own channel pattern, so this census and
+    the full survey judge a shot by the same rules.
+    """
+
+    import zarr
+
+    root = Path(store)
+    try:
+        group = zarr.open_group(f"{root}/{shot}.zarr", mode="r")
+    except Exception:  # noqa: BLE001 - a shot may be absent or corrupt
+        return None
+
+    absent_groups: list[str] = []
+    plasma_peak = 0.0
+    coil_peaks: dict[str, float] = {}
+    try:
+        currents = group[CURRENT_GROUP]
+    except Exception:  # noqa: BLE001 - group absence is data, not failure
+        absent_groups.append(CURRENT_GROUP)
+    else:
+        keys = set(currents.keys())
+        if "plasma_current" in keys:
+            plasma_peak = _peak(currents["plasma_current"][...]) * KILO
+        for drive in COIL_DRIVES:
+            if drive.channel in keys:
+                coil_peaks[drive.family] = _peak(currents[drive.channel][...]) * KILO
+
+    probe_count = 0
+    try:
+        fields = group[FIELD_GROUP]
+    except Exception:  # noqa: BLE001 - group absence is data, not failure
+        absent_groups.append(FIELD_GROUP)
+    else:
+        probe_count = sum(
+            1 for name in fields.keys() if _CHANNEL_PATTERN.match(str(name))
+        )
+
+    excited = tuple(
+        sorted(
+            family
+            for family, peak in coil_peaks.items()
+            if peak >= EXCITATION_CURRENT
+        )
+    )
+    return LightCensus(
+        shot=shot,
+        plasma_current_peak=plasma_peak,
+        excited_families=excited,
+        probe_count=probe_count,
+        absent_groups=tuple(absent_groups),
+    )
+
+
+@dataclass(frozen=True)
 class ShotExclusion:
     """One shot kept out of the cohort, and the reason it was kept out."""
 
@@ -720,7 +832,7 @@ def select_vacuum_cohort(
     *,
     held_out_families: Sequence[str] = (),
     held_out_fraction: float = 0.25,
-    minimum_probes: int = 40,
+    minimum_probes: int = MINIMUM_PROBES,
 ) -> VacuumCohort:
     """Admit the plasma-free, excited, readable shots and split them.
 

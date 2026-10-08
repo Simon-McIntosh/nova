@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:26:53.440Z",
+  "dispatched_at": "2026-10-08T01:15:44Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/machine-description-retirement.html:116",
+      "id": "wiring-1",
+      "reason": "a coordinator reading the existing relationship would dispatch the deletion once the producer plan is satisfied, while the true gate (the ambix consumer migration) is unowned.",
+      "text": "the deletion is made conditional on \"imas-ambix has migrated off nova.imas.machine_artifact before any file is deleted\" (\u00a73:104, f-mdr-currency, \u00a74:124), but `plan-depends-on` points at `imas-ambix:machine-map-transform-engine`, a different plan whose scope is the producer, and the ambix plan that owns that migration boundary (`docs/nova-physics-consumer-integration.html`, whose `plan-informs` lists `nova-scoping-review,hybrid-generative-state-estimation,nova:mast-nonaxisymmetric-physics` and not this plan) states at line 89 that \"what is missing is the Ambix-side boundary\" \u2014 so the hard prerequisite has no owning node and the declared dependency is not the one the deletion actually waits on",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/machine-description-retirement.html:132",
+      "id": "done_when-1",
+      "reason": "a node dispatched against \u00a74 cannot reach its done-when, so its gate is unreachable by construction and its completion cannot be judged.",
+      "text": "\u00a74 is declared `implementable` in `plan-section-declarations` and the S24 classification comment calls its equivalence demonstration \"the one node buildable now; nothing is deleted under it\", yet \u00a74's own done-when requires \"every surface in the \u00a73 inventory removed or re-homed per its disposition\" while \u00a73 is declared `deferred`",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/machine-description-retirement.html:132",
+      "id": "single_goal-1",
+      "reason": "seven-plus independent deliverables under one gate means no node can be closed on one verdict and the gate proves none of them individually.",
+      "text": "one done-when carries the numeric equivalence demonstration, the removal of the registry schema and digests, the re-home of the OCI publication capability and the DDv4 floor, the geometry migration into the MAST map, the deletion of the IDS builder, the rewiring of ~12 kLOC of consumers, the calibration decoupling, and the coordination of the ambix identity migration",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/machine-description-retirement.html:35",
+      "id": "reasoning-1",
+      "reason": "the section that states why the layer is retired asserts the publication path is dead and generically replaced, so a node reading \u00a71 would delete a live publication path the plan elsewhere treats as an owner-directed capability to preserve.",
+      "text": "\u00a71 states the retiring layer is \"a content-addressed artifact cache with an OCI reference helper that nothing publishes through\" and that \"the map-driven producer in imas-ambix replaces all three generically\" (line 37), but \u00a72 corrects exactly this (\"the old \u00a72 argument that 'nothing publishes through the helper' is therefore false today\", line 57, against `nova/scripts/diiid_machine_artifact.py`, 513 LOC) and \u00a73's disposition requires the publication capability and DDv4 floor to be RE-HOMED because the producer does not carry them",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "43ce4055753f775b71d705d72936682c9eb2762c4a66988e08590435639662d8",
+  "plan_slug": "machine-description-retirement",
+  "plan_version": 8,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T011519019711-plan-review-of-machine-description-retirement",
+  "reviewed_blob_sha": "82b0e8c0b0deb3620aa317144e3b4e456ac38395",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited file:line resolves to the named symbol (`nova/media/sources/mast_efit.py:29`, `scripts/mast_reference_evidence/contours.py:110`, `nova/imas/mast_solve_inputs.py:74-75`, `nova/io/sourcemap.py:44`, `imas_ambix/gs/machine_identity.py:152`, `imas_ambix/gs/artifact_geometry.py:767`, `imas_ambix/gs/artifact_resolution.py:315-316,171,268`), commits `0dfda59a`/`1df19c16` resolve, and `782e9e08` resolves as the DIII-D conductor-table digest prefix in `docs/plans/diiid-forward-onboarding.html:481` (not a commit, and correctly cited as a digest); the \u00a73 LOC figure for `nova/imas/mast_geometry.py` is stale (647 claimed, 662 lines at head) but is a size claim only.",
+    "done_when": "a finding \u2014 \u00a74 is declared `implementable` while its own done-when requires every \u00a73 surface removed, and \u00a73 is declared `deferred`, so the buildable node is measured against a done-when it is forbidden to satisfy.",
+    "evidence_paths": "pass \u2014 the plan names no scratchpad; its gate outcome is \"a committed receipt\" and \"demonstrated numerically\", which is durable, so no session-local or node-local path is relied on.",
+    "naming": "pass \u2014 the sprint/followup identifiers (S10/S15/S16/S22/S24, f-mdr-001) live in the plan document, not in any symbol the plan creates, and the symbols it will create are named by mechanism (`latest_publication_dd_version`, `publication_dd_version`, `default_registry`).",
+    "reasoning": "a finding \u2014 \u00a71's stated root cause (\"nothing publishes through the helper\"; \"the producer replaces all three generically\") is contradicted by the plan's own \u00a72 and \u00a73.",
+    "single_goal": "a finding \u2014 \u00a74's one done-when bundles the equivalence demonstration, six independent removals/re-homes, the calibration decoupling, and a cross-repo migration, so no single node can be closed on one verdict.",
+    "wiring": "a finding \u2014 the plan's deletion gates on imas-ambix migrating off `nova.imas.machine_artifact`, but `plan-depends-on` names only the producer plan (`imas-ambix:machine-map-transform-engine`) and no relationship wires the migration that actually gates the deletion."
+  },
+  "section_digests": {
+    "_document": "23f356db5402f93b10a327ce301ba4ad792baef75bb687ebf42c7cbb9e0952c8",
+    "s1": "cff5efbc8357dbaddfd36c70143784dff4ac65003b0c03149e902291c06869a2",
+    "s2": "9a5109dba8d2acbab10879fd1a119f7aa731d0dba05a944a115c6ef75f19dec8",
+    "s3": "c6bed506cfe8d502d4164fa5027390bc41e0b1896d4a2a6dda73b87a17dbb94e",
+    "s4": "78097a2ec6192c8992aa908e257b24de5148bb6d5d7a4856c66dbcc072297a9e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:31:31.068212+00:00"
+}

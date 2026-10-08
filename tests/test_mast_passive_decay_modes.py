@@ -1184,3 +1184,109 @@ def test_drive_permuted_control_cannot_reproduce_real_improvement(held_out_measu
     assert 0.9 <= real["fit"]["drive_multipliers"][0] <= 1.1
     assert sorted(control["held_out_drive_sources"]) == [4, 5]
     assert control["held_out_drive_sources"] != [4, 5]
+
+
+def toroidal_ring_network(angles, connection_resistance, *, asymmetric_emf=0.0):
+    """Solve two uniform closed rings with resistive bridges at given angles.
+
+    Each branch satisfies ``R I = emf - incidence.T @ potential``. Segment
+    resistance and axisymmetric loop emf both scale with angular extent. The
+    optional zero-integral angular emf excites local transfer without changing
+    either ring's total linked-flux derivative. Bridge currents point from the
+    first ring to the second. One connection leaves a self-loop on each ring;
+    two leave oppositely directed parallel edges, both retained in the graph.
+    """
+    angles = np.asarray(angles, dtype=float)
+    count = len(angles)
+    ends = np.r_[angles[1:], angles[0] + 2 * np.pi]
+    fractions = (ends - angles) / (2 * np.pi)
+    assert np.all(fractions > 0)
+    loop_resistance = np.array([2.0, 5.0])
+    loop_emf = np.array([3.0, -4.0])
+    incidence = np.zeros((2 * count, 3 * count))
+    resistance = np.r_[
+        (loop_resistance[:, None] * fractions).ravel(),
+        np.full(count, connection_resistance),
+    ]
+    emf = np.r_[(loop_emf[:, None] * fractions).ravel(), np.zeros(count)]
+    emf[:count] += asymmetric_emf * (np.sin(ends) - np.sin(angles))
+    for ring in range(2):
+        for segment in range(count):
+            edge = ring * count + segment
+            incidence[ring * count + segment, edge] -= 1
+            incidence[ring * count + (segment + 1) % count, edge] += 1
+    for connection in range(count):
+        incidence[connection, 2 * count + connection] -= 1
+        incidence[count + connection, 2 * count + connection] += 1
+    conductance = 1 / resistance
+    laplacian = (incidence * conductance) @ incidence.T
+    forcing = incidence @ (conductance * emf)
+    potential = np.zeros(2 * count)
+    potential[1:] = np.linalg.solve(laplacian[1:, 1:], forcing[1:])
+    current = conductance * (emf - incidence.T @ potential)
+    return {
+        "angles": angles,
+        "fractions": fractions,
+        "ring_current": current[: 2 * count].reshape(2, count),
+        "transfer_current": current[2 * count :],
+        "isolated_current": loop_emf / loop_resistance,
+        "kirchhoff_residual": incidence @ current,
+        "dissipation": float(np.dot(resistance, current**2)),
+        "source_power": float(emf @ current),
+    }
+
+
+TOROIDAL_CONNECTION_ANGLES = {
+    "single": np.array([0.0]),
+    "opposite": np.arange(2) * np.pi,
+    "eight_equal": np.arange(8) * np.pi / 4,
+    "unequal": np.array([0.0, 0.31, 1.4, 3.8, 5.9]),
+}
+
+
+@pytest.mark.parametrize(
+    "angles", TOROIDAL_CONNECTION_ANGLES.values(), ids=TOROIDAL_CONNECTION_ANGLES
+)
+@pytest.mark.parametrize("connection_resistance", [0.05, 1.0, 20.0])
+def test_connections_preserve_axisymmetric_ring_currents(angles, connection_resistance):
+    """Different uniform loop fluxes drive circulation, not bridge transfer."""
+    network = toroidal_ring_network(angles, connection_resistance)
+    np.testing.assert_allclose(
+        network["ring_current"],
+        np.broadcast_to(network["isolated_current"][:, None], (2, len(angles))),
+        rtol=0,
+        atol=2e-13,
+    )
+    np.testing.assert_allclose(network["transfer_current"], 0.0, rtol=0, atol=2e-13)
+    np.testing.assert_allclose(network["kirchhoff_residual"], 0.0, rtol=0, atol=2e-13)
+    assert network["dissipation"] > 0
+    assert network["source_power"] == pytest.approx(network["dissipation"], abs=2e-13)
+
+
+@pytest.mark.parametrize("spacing", ["eight_equal", "unequal"])
+def test_nonaxisymmetric_transfer_has_no_mean_ring_current(spacing):
+    """A nonzero transfer control has zero toroidal Fourier coefficient at zero.
+
+    Ring currents are piecewise constant on arcs, so their toroidal mean is
+    weighted by arc length. Transfer currents are localized at connections;
+    their zeroth Fourier coefficient is the sum, without arc-length weights.
+    """
+    network = toroidal_ring_network(
+        TOROIDAL_CONNECTION_ANGLES[spacing], 1.0, asymmetric_emf=0.7
+    )
+    transfer = network["transfer_current"]
+    assert np.max(np.abs(transfer)) > 0.05
+    np.testing.assert_allclose(transfer.sum(), 0.0, rtol=0, atol=2e-13)
+    first_harmonic = transfer @ np.exp(-1j * network["angles"])
+    assert abs(first_harmonic) > 0.1
+    mean_current = network["ring_current"] @ network["fractions"]
+    np.testing.assert_allclose(
+        mean_current, network["isolated_current"], rtol=0, atol=2e-13
+    )
+    np.testing.assert_allclose(network["kirchhoff_residual"], 0.0, rtol=0, atol=2e-13)
+    assert network["dissipation"] > 0
+    assert network["source_power"] == pytest.approx(network["dissipation"], abs=2e-13)
+    if spacing == "unequal":
+        assert (
+            np.max(np.abs(network["ring_current"].mean(axis=1) - mean_current)) > 1e-3
+        )

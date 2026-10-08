@@ -27,9 +27,9 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-effort-hours" content="16.0">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
-<meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f">
-<meta name="plan-impl" content="0.22">
-<meta name="plan-version" content="23">
+<meta name="plan-commits" content="9eb100e5,c173d399,3bd2bec7,85666bc5,57893849,98c3d014,64a1622c,0928eb68,0d13bcc7,6bdfd7a7,cbfb1ff2,191ef560,2643be6f,61912a61,7c6f085f,87d24724,1227e204,d95f9296">
+<meta name="plan-impl" content="0.27">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-10-08">
 </head>
 <body>
@@ -197,7 +197,10 @@ Done when
     <div class="r-comment-body"><p>Measurement completed: 131 training/37 held-out shots; real-drive RMS 6.4014 to 5.6355 mT (22.4989% squared-residual improvement), permuted-drive RMS 32.1174 to 32.0706 mT (0.2911% improvement), so strict control fails and nominal seeds remain. All 50 decay rates positive (minimum 16.0135/s); resistance fit reaches its nominal bound. [Held-out residual figure and receipt](/nova/evidence/fragments/mast-nonaxisymmetric-physics/mast-passive-held-out.html#mast-passive-held-out-residuals). Shared circuit propagation landed; no parameters promoted; section remains open for coordinator adjudication.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261008T052456268423-review-of-mast-passive-held-out" data-who="reckon-build" data-when="2026-10-08T05:39:47.651Z">
-    <div class="r-comment-body"><p>Independent review of r-20261008T043052096623-mast-passive-held-out stored at the two granted paths; verdict total 108/120 (goal_fidelity 18, evidence 16, scope_discipline 20, durability 17, fit 18, reuse 19), base 5ade61b2, head 7c6f085f, added_failure_count 0. Three follow-on findings: the run&#x27;s after_suite log names the base revision so its own arm does not cover the head; the drive-permutation control requires a non-positive permuted gain, which a bounded single coordinate evades at an interval edge, so it neither attributes nor clears the real gain; the fitted resistance saturates its interval upper bound. No promotion of any parameter is supported; the run&#x27;s own negative verdict stands.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261008T043052096623-mast-passive-held-out stored at the two granted paths; verdict total 108/120 (goal_fidelity 18, evidence 16, scope_discipline 20, durability 17, fit 18, reuse 19), base 5ade61b2, head 7c6f085f, added_failure_count 0. Three follow-on findings: the run's after_suite log names the base revision so its own arm does not cover the head; the drive-permutation control requires a non-positive permuted gain, which a bounded single coordinate evades at an interval edge, so it neither attributes nor clears the real gain; the fitted resistance saturates its interval upper bound. No promotion of any parameter is supported; the run's own negative verdict stands.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20261008-tf-average-landed" data-who="reckon-build" data-when="2026-10-08T06:15:00Z">
+    <div class="r-comment-body">node 1 landed as a negative result: no independent R*Bphi measurement exists in the store (577 shots with feed current, 564 reconstruction-only products, 0 independent comparisons at 2 %). Section open — the next §6 node needs an independent observable: toroidal-probe orientation resolved from coil pulses, or a sourced turn count. Evidence: tf-average.</div>
 </div>
 </section>
 </main>

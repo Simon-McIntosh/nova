@@ -17,6 +17,8 @@ themselves, which is the declared mutation those rows must fail against.
 from contextlib import contextmanager
 from functools import lru_cache
 import json
+import os
+from pathlib import Path
 import subprocess
 import sys
 
@@ -435,11 +437,28 @@ def _radial_reference(primals, tangents, index):
         + [float(np.asarray(tangents[k])[i]) for k in range(4)]
         for i in index
     ]
+    cache_path = os.environ.get("NOVA_CORNER_REFERENCE_CACHE")
+    cache = Path(cache_path) if cache_path else None
+    if cache is not None and cache.exists():
+        saved = json.loads(cache.read_text())
+        assert saved["inputs"] == rows and saved["digits"] == 50
+        values = np.asarray(saved["reference"])
+        return values[:, 0], values[:, 1]
     result = subprocess.run(
         [sys.executable, "-I", "-c", _REFERENCE_PROBE],
         input=json.dumps(rows), capture_output=True, text=True, check=True,
     )  # fmt: skip
     values = np.asarray(json.loads(result.stdout))
+    if cache is not None:
+        cache.write_text(
+            json.dumps(
+                {
+                    "inputs": rows,
+                    "digits": 50,
+                    "reference": values.tolist(),
+                }
+            )
+        )
     return values[:, 0], values[:, 1]
 
 
@@ -487,6 +506,32 @@ def _near_corner_rows():
         "jvp": relative(primal_jvp, reference).max(),
         "hand_jvp": relative(hand, primal_jvp).max(),
     }
+    receipt_path = os.environ.get("NOVA_CORNER_MEASUREMENT")
+    if receipt_path:
+        Path(receipt_path).write_text(
+            json.dumps(
+                {
+                    "indices": index.tolist(),
+                    "primals": [np.asarray(p)[index].tolist() for p in primals[:4]],
+                    "tangents": [np.asarray(t)[index].tolist() for t in tangents[:4]],
+                    "primal": primal.tolist(),
+                    "base_primal": old.tolist(),
+                    "hand": hand.tolist(),
+                    "jvp": primal_jvp.tolist(),
+                    "reference_value": value.tolist(),
+                    "reference_tangent": reference.tolist(),
+                    "value_error": value_error.tolist(),
+                    "base_error": old_error.tolist(),
+                    "tangent_error": tangent_error.tolist(),
+                }
+            )
+        )
+    worst = int(np.argmax(tangent_error))
+    print(
+        f"CORNER_WORST sample={int(index[worst])} "
+        f"primals={[float(np.asarray(p)[index[worst]]) for p in primals[:4]]} "
+        f"tangents={[float(np.asarray(t)[index[worst]]) for t in tangents[:4]]}"
+    )
     decades = np.floor(np.log10(np.abs(corner_r[index] - r[index]))).astype(int)
     for decade in np.unique(decades):
         selected = decades == decade

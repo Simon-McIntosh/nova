@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-graded-layer-near-corner"><meta name="plan-title" content="Graded corner layer: value and derivative">
+<meta name="plan-summary" content="Per-decade exact-integral measurements of clipped, fixed-node and joint-scale graded quadrature.">
+<meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-recorded-at" content="2026-10-08">
+<meta name="plan-verdict" content="partial"><meta name="plan-tags" content="biot,tangents,custom-derivative-rules">
+<title>Graded corner layer: value and derivative | nova</title>
+</head><body><main class="plan-doc">
+<h1 id="cfs-graded-layer-near-corner">Graded corner layer: value and derivative</h1>
+<section id="cfs-graded-layer-near-corner-decade"><h2>Signed offset decades</h2>
+<p>50-digit integration at the exact binary inputs: radius 1.2 m, height offset 1e-12 m, radial offset zero and both signs of every decade from 1e-12 to 1e-2 m. All columns are maximum relative errors within each decade. The corrected value clause compares each repaired error with its own base error; it does not bound the movement of the value.</p>
+<table><thead><tr><th>Radial offset [m]</th><th>Base value</th><th>Base derivative</th><th>Fixed-node value</th><th>Fixed-node derivative</th><th>Joint-scale value</th><th>Joint-scale derivative</th></tr></thead><tbody>
+<tr><th>exact radius</th><td>8.174e-15</td><td>1.415e-01</td><td>1.326e-14</td><td>4.187e-16</td><td>4.053e-15</td><td>9.167e-18</td></tr>
+<tr><th>1e-12</th><td>1.435e-11</td><td>1.314e-01</td><td>1.595e-14</td><td>3.182e-16</td><td>7.223e-15</td><td>2.966e-17</td></tr>
+<tr><th>1e-11</th><td>8.972e-12</td><td>6.984e-02</td><td>1.607e-14</td><td>8.696e-13</td><td>6.369e-15</td><td>1.112e-16</td></tr>
+<tr><th>1e-10</th><td>1.980e-12</td><td>1.313e-03</td><td>1.595e-14</td><td>3.146e-10</td><td>5.161e-15</td><td>1.239e-16</td></tr>
+<tr><th>1e-09</th><td>1.477e-14</td><td>7.616e-06</td><td>1.598e-14</td><td>8.661e-09</td><td>5.556e-15</td><td>2.515e-16</td></tr>
+<tr><th>1e-08</th><td>1.020e-14</td><td>2.502e-14</td><td>1.578e-14</td><td>2.892e-08</td><td>5.961e-15</td><td>2.326e-16</td></tr>
+<tr><th>1e-07</th><td>1.023e-14</td><td>5.376e-16</td><td>1.471e-14</td><td>5.641e-08</td><td>4.652e-15</td><td>7.374e-17</td></tr>
+<tr><th>1e-06</th><td>1.005e-14</td><td>7.605e-13</td><td>5.029e-14</td><td>4.273e-08</td><td>4.842e-15</td><td>9.942e-17</td></tr>
+<tr><th>1e-05</th><td>1.015e-14</td><td>1.254e-12</td><td>1.202e-13</td><td>7.866e-08</td><td>3.849e-15</td><td>1.093e-16</td></tr>
+<tr><th>1e-04</th><td>1.127e-14</td><td>9.307e-13</td><td>1.587e-12</td><td>7.624e-09</td><td>4.117e-15</td><td>1.336e-16</td></tr>
+<tr><th>1e-03</th><td>1.761e-14</td><td>1.089e-11</td><td>4.397e-12</td><td>6.713e-09</td><td>3.698e-15</td><td>1.087e-16</td></tr>
+<tr><th>1e-02</th><td>1.566e-14</td><td>8.158e-12</td><td>4.056e-12</td><td>1.817e-09</td><td>2.080e-15</td><td>3.274e-17</td></tr>
+</tbody></table>
+<figure><img src="/nova/figures/graded-layer-near-corner/value-derivative-error.svg" alt="Log-log value and derivative errors against radial offset, base and joint-scale quadrature"><figcaption>Each curve takes the larger error over the two offset signs. The exact-radius row is in the table because zero cannot appear on a logarithmic axis. The dotted derivative line is the 1e-9 requirement. The 128-node joint-scale rule uses the numerator and denominator end distance after subtraction of the logarithmic model.</figcaption></figure>
+</section>
+<section id="cfs-graded-layer-near-corner-gates"><h2>Measured checks</h2>
+<table><thead><tr><th>Check</th><th>Result</th><th>Receipt</th></tr></thead><tbody>
+<tr><td>Signed decade oracle, 23 samples</td><td>Passed; zero values less accurate than base; outside-band difference maximum 1.358e-14</td><td>joint-width-gate.log</td></tr>
+<tr><td>Graded hand tangent versus current primal JVP, 10,000 samples</td><td>Passed; primal and tangent maximum differences zero at the 1e-13 bound</td><td>joint-width-gate.log</td></tr>
+<tr><td>Moving panel bounds</td><td>Passed the endpoint-integrand rule at 1e-13 relative</td><td>moving-bounds.log</td></tr>
+<tr><td>Restored floor negative control</td><td>Named derivative row fails; maximum derivative error 0.1415, EXIT=1</td><td>negative-floor.log</td></tr><tr><td>Cold compile, median of seven fresh processes per arm</td><td>Current primal 0.274 s, hand tangent 0.585 s (2.14 ratio); pinned base primal 0.1868 s, so the required base ratio is 3.132 and fails the 3.0 bound</td><td>compile-joint-width.log; compile-base-primal.log</td></tr><tr><td>Resolution experiment</td><td>Offset-only 256 nodes: derivative maximum 2.340e-14, but 17 values less accurate than base; joint-scale 128 nodes: derivative maximum 2.515e-16, zero values less accurate</td><td>width-resolution-probe.json</td></tr>
+</tbody></table>
+</section>
+<section id="cfs-graded-layer-near-corner-cohort"><h2>Original corner cohort</h2>
+<p>H200 job 1282018: 2 failed, 1 passed in 380.38 s. The 1,189-sample cohort reaches 7.858e-5 relative derivative error and has 177 values less accurate than base. Hand tangent and current primal JVP differ by at most 1.053e-16; their agreement does not establish agreement with the exact integral.</p><table><thead><tr><th>Radial decade [m]</th><th>Samples</th><th>Value error</th><th>Derivative error</th><th>Base value error</th><th>Less accurate</th></tr></thead><tbody><tr><td>1e-14</td><td>26</td><td>2.547e-14</td><td>1.017e-07</td><td>2.293e-12</td><td>7</td></tr><tr><td>1e-13</td><td>74</td><td>2.075e-14</td><td>1.138e-06</td><td>1.099e-11</td><td>8</td></tr><tr><td>1e-12</td><td>140</td><td>2.122e-14</td><td>6.721e-05</td><td>1.194e-11</td><td>13</td></tr><tr><td>1e-11</td><td>147</td><td>2.943e-14</td><td>7.858e-05</td><td>1.050e-11</td><td>22</td></tr><tr><td>1e-10</td><td>184</td><td>2.579e-14</td><td>3.697e-07</td><td>2.476e-12</td><td>36</td></tr><tr><td>1e-9</td><td>190</td><td>2.574e-14</td><td>1.139e-07</td><td>1.664e-12</td><td>40</td></tr><tr><td>1e-8</td><td>160</td><td>2.776e-14</td><td>1.173e-08</td><td>3.621e-14</td><td>31</td></tr><tr><td>1e-7</td><td>136</td><td>2.443e-14</td><td>2.591e-09</td><td>3.095e-14</td><td>14</td></tr><tr><td>1e-6</td><td>119</td><td>2.849e-14</td><td>4.588e-09</td><td>3.130e-14</td><td>10</td></tr><tr><td>1e-5</td><td>13</td><td>2.814e-14</td><td>4.195e-11</td><td>2.980e-14</td><td>3</td></tr></tbody></table><p>Receipt: <code>joint-width-cohort-h200.log</code>. Isolation of the graded integral from the composed corner term is pending.</p>
+</section>
+<section id="cfs-graded-layer-near-corner-provenance"><h2>Revisions and receipts</h2>
+<p>Base: <code>646b68b8e9481178e41cc2059c8a9a534fa9b9b3</code>. Fixed-node experiment retained as <code>ed7b82af18d70a9642428a0ad617f697805c8dd9</code>. Joint-scale rule and binary-input oracle: <code>f313a297bbd9de308ab5a5c73a4335bc4cee907a</code>. Source: <code>nova/biot/gradedresidual.py</code>; oracle: <code>tests/biot/test_graded_layer_near_corner.py</code>.</p>
+<p>Receipt directory: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T045345540074-cfs-graded-layer-near-corner</code>. The numerical probe records all candidate widths and resolutions; the product gate independently confirms the joint-scale decade results. Full suite delta and remaining acceptance gates are pending.</p>
+</section>
+</main></body></html>

@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run's manifest names no baseline_suite arm, so the machinery's base-vs-head delta reads no base log; its head arm (gate-head.log: 6 passed, 1 skipped) reports no FAILED or ERROR id, and added failures are a subset of head failures, so the run provably added none. The 1 failure in negative-control.log is the declared control, not a gate arm.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-08T04:30:52.805Z",
+  "dispatched_at": "2026-10-08T04:11:09Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "11",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed run's manifest carries test_logs rather than the baseline_suite/after_suite pair the review store reads at annotate_review_of_run, so the base arm of the added-failure derivation resolves no log; the head arm gate-head.log reports 6 passed 1 skipped with no FAILED or ERROR id, which bounds added failures at zero, but the designed delta is not measurable from this manifest."
+    },
+    {
+      "file": "nova/database/layer_fetch.py",
+      "line": "44",
+      "severity": "follow-on",
+      "text": "follow-on: _UNREACHABLE_MARKERS classifies \"unauthorized\" and \"authentication required\" as LayerRegistryUnreachable, so an expired or missing GHCR token makes the availability gate skip the layer set cleanly rather than fail, and a credential fault is indistinguishable from a network outage (plan s1 assumes a token is needed)."
+    },
+    {
+      "file": "tests/test_layer_fetch.py",
+      "line": "127",
+      "severity": "follow-on",
+      "text": "follow-on: the gate fetches only the analytic layer; the six ITER layer digests are asserted only as well-formed hex by test_the_recorded_digests_are_well_formed, so a transcription error in them would pass the gate. I verified all eight digests and sizes against the live v0.0.14 registry manifest and they are correct, so this is non-blocking, but the gate does not test it."
+    },
+    {
+      "file": "tests/test_layer_fetch.py",
+      "line": "140",
+      "severity": "follow-on",
+      "text": "follow-on: test_unreachable_registry_yields_a_clean_skip drives fetch_layer with a mocked runner that is always unreachable, so the test can only ever skip and contributes no failure signal; the head arm's \"1 skipped\" is this arm, not evidence that the live registry was unreachable (the analytic fetch in the same arm reached it)."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base 188309ab7d3f85695608ba5d774c60a57ed5aeaf; one commit, four files, 552 insertions / 1 deletion, all inside the declared scope.",
+    "done_when": "the done_when is that a fetch module and a pinned manifest exist, a test refuses a fetched file whose digest disagrees with the manifest (negative control: altering one manifest digest fails it), and the analytic smoke rung passes; tests/test_layer_fetch.py carries the refusal (test_altered_manifest_digest_refuses_the_layer, plus the declared digest-alteration control I reproduced at EXIT=1), the analytic fetch runs against the live registry and is re-verified, and the manifest pins all eight layers.",
+    "goal": "plan s3's rung-1 second node asks for a digest-pinned fetch of the validator cross-section plus its pinned case records; the diff adds nova/database/layer_fetch.py, one entry point that runs `oras blob fetch` against ghcr.io/iterorganization/efitpp-test-data addressed by a layer's sha256 digest (never a mutable tag), refuses bytes whose sha256 disagrees with the record, and publishes the blob into the content store, and it extends tests/data-manifest.json with efitpp_validator_layers (the analytic pair and the CORSICA, DINA and ASTRA input and reference layers, each with its full digest, size, per-dataset dd_version and case metadata).",
+    "manifest": "read; it reports status complete, one commit 646d21fb3df72707cd602cf61c1e80713dd3c38a with a body, head gate 6 passed 1 skipped and a declared negative control at EXIT=1; its test_logs name gate-head.log, negative-control.log and the transport manifest-reading test, and it carries no baseline_suite/after_suite fields.",
+    "write_paths": "read the reviewed manifest's declared write paths (nova/database/layer_fetch.py, tests/data-manifest.json, tests/test_layer_fetch.py, the evidence fragment, and a figures directory); every path in the diff is inside them, and no figure was written because plan s4 places the per-case figures with the CORSICA rung, not this fetch rung."
+  },
+  "justifications": {
+    "durability": "the digest-mismatch refusal (test_altered_manifest_digest_refuses_the_layer, reproduced as the declared control) and the publish-then-reuse path are genuine guards over the store's atomic no-clobber publication; _publish_layer re-derives the store primitives correctly but omits the post-publish root-identity re-checks that materialize_machine_artifact performs (pinned_root_path, visible_root_matches_descriptor).",
+    "evidence": "I reproduced the head arm (6 passed, 1 skipped, EXIT=0) and the declared negative control (1 failed, 5 passed, 1 skipped, EXIT=1) at the reviewed head, and independently fetched the v0.0.14 registry manifest and confirmed all eight pinned layer digests and sizes match; the gaps are that the reviewed run recorded no baseline_suite/after_suite arm so the base side of the added-failure derivation reads no log, and the gate fetches only the analytic layer.",
+    "fit": "layer_fetch.py follows the surrounding module idiom, carries no plan, sprint or version label, and its error vocabulary (LayerFetchError with LayerRegistryUnreachable and LayerDigestMismatch subclassing it) is coherent; the import of both the content_store module and a long explicit name list is mildly redundant.",
+    "goal_fidelity": "nova/database/layer_fetch.py:88 fetch_layer addresses the layer by digest only (reference = registry@<digest> at line 116), refuses mismatched bytes in verify_layer_digest (line 74) and publishes into the content store, exactly as s3 prescribes, and tests/data-manifest.json gains exactly the s3 case records.",
+    "reuse": "layer_fetch reuses the content store's file_content_identity, verify_directory_files and publication primitives rather than re-implementing hashing or the atomics, as s3 intends for the store's second consumer, but it repeats the ~40-line publication orchestration that machine_artifact.materialize_machine_artifact also codes because the store exposes no single generic publisher.",
+    "scope_discipline": "the whole diff is four paths, each inside the manifest's declared write paths; no out-of-scope file is touched and no figure is required for this rung."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261008T031843283750-fpv-layer-fetch (node fpv-layer-fetch, plan nova:forward-profile-validator-set s3).\n\nVERDICT goal: plan s3's rung-1 second node asks for a digest-pinned fetch of the validator cross-section plus its pinned case records; the diff adds nova/database/layer_fetch.py, one entry point that runs `oras blob fetch` against ghcr.io/iterorganization/efitpp-test-data addressed by a layer's sha256 digest (never a mutable tag), refuses bytes whose sha256 disagrees with the record, and publishes the blob into the content store, and it extends tests/data-manifest.json with efitpp_validator_layers (the analytic pair and the CORSICA, DINA and ASTRA input and reference layers, each with its full digest, size, per-dataset dd_version and case metadata).\nVERDICT done_when: the done_when is that a fetch module and a pinned manifest exist, a test refuses a fetched file whose digest disagrees with the manifest (negative control: altering one manifest digest fails it), and the analytic smoke rung passes; tests/test_layer_fetch.py carries the refusal (test_altered_manifest_digest_refuses_the_layer, plus the declared digest-alteration control I reproduced at EXIT=1), the analytic fetch runs against the live registry and is re-verified, and the manifest pins all eight layers.\nVERDICT write_paths: read the reviewed manifest's declared write paths (nova/database/layer_fetch.py, tests/data-manifest.json, tests/test_layer_fetch.py, the evidence fragment, and a figures directory); every path in the diff is inside them, and no figure was written because plan s4 places the per-case figures with the CORSICA rung, not this fetch rung.\nVERDICT manifest: read; it reports status complete, one commit 646d21fb3df72707cd602cf61c1e80713dd3c38a with a body, head gate 6 passed 1 skipped and a declared negative control at EXIT=1; its test_logs name gate-head.log, negative-control.log and the transport manifest-reading test, and it carries no baseline_suite/after_suite fields.\nVERDICT diff: read commit by commit against base 188309ab7d3f85695608ba5d774c60a57ed5aeaf; one commit, four files, 552 insertions / 1 deletion, all inside the declared scope.\nCALL_SITES: none\n\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/database/layer_fetch.py:88 fetch_layer addresses the layer by digest only (reference = registry@<digest> at line 116), refuses mismatched bytes in verify_layer_digest (line 74) and publishes into the content store, exactly as s3 prescribes, and tests/data-manifest.json gains exactly the s3 case records.\nSCORE evidence: 18\nJUSTIFICATION evidence: I reproduced the head arm (6 passed, 1 skipped, EXIT=0) and the declared negative control (1 failed, 5 passed, 1 skipped, EXIT=1) at the reviewed head, and independently fetched the v0.0.14 registry manifest and confirmed all eight pinned layer digests and sizes match; the gaps are that the reviewed run recorded no baseline_suite/after_suite arm so the base side of the added-failure derivation reads no log, and the gate fetches only the analytic layer.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the whole diff is four paths, each inside the manifest's declared write paths; no out-of-scope file is touched and no figure is required for this rung.\nSCORE durability: 18\nJUSTIFICATION durability: the digest-mismatch refusal (test_altered_manifest_digest_refuses_the_layer, reproduced as the declared control) and the publish-then-reuse path are genuine guards over the store's atomic no-clobber publication; _publish_layer re-derives the store primitives correctly but omits the post-publish root-identity re-checks that materialize_machine_artifact performs (pinned_root_path, visible_root_matches_descriptor).\nSCORE fit: 19\nJUSTIFICATION fit: layer_fetch.py follows the surrounding module idiom, carries no plan, sprint or version label, and its error vocabulary (LayerFetchError with LayerRegistryUnreachable and LayerDigestMismatch subclassing it) is coherent; the import of both the content_store module and a long explicit name list is mildly redundant.\nSCORE reuse: 18\nJUSTIFICATION reuse: layer_fetch reuses the content store's file_content_identity, verify_directory_files and publication primitives rather than re-implementing hashing or the atomics, as s3 intends for the store's second consumer, but it repeats the ~40-line publication orchestration that machine_artifact.materialize_machine_artifact also codes because the store exposes no single generic publisher.\nFINDING manifest.md:11 follow-on: the reviewed run's manifest carries test_logs rather than the baseline_suite/after_suite pair the review store reads at annotate_review_of_run, so the base arm of the added-failure derivation resolves no log; the head arm gate-head.log reports 6 passed 1 skipped with no FAILED or ERROR id, which bounds added failures at zero, but the designed delta is not measurable from this manifest.\nFINDING nova/database/layer_fetch.py:44 follow-on: _UNREACHABLE_MARKERS classifies \"unauthorized\" and \"authentication required\" as LayerRegistryUnreachable, so an expired or missing GHCR token makes the availability gate skip the layer set cleanly rather than fail, and a credential fault is indistinguishable from a network outage (plan s1 assumes a token is needed).\nFINDING tests/test_layer_fetch.py:127 follow-on: the gate fetches only the analytic layer; the six ITER layer digests are asserted only as well-formed hex by test_the_recorded_digests_are_well_formed, so a transcription error in them would pass the gate. I verified all eight digests and sizes against the live v0.0.14 registry manifest and they are correct, so this is non-blocking, but the gate does not test it.\nFINDING tests/test_layer_fetch.py:140 follow-on: test_unreachable_registry_yields_a_clean_skip drives fetch_layer with a mocked runner that is always unreachable, so the test can only ever skip and contributes no failure signal; the head arm's \"1 skipped\" is this arm, not evidence that the live registry was unreachable (the analytic fetch in the same arm reached it).\n",
+  "review_run_id": "r-20261008T041032616093-review-of-fpv-layer-fetch",
+  "reviewed_base_sha": "188309ab7d3f85695608ba5d774c60a57ed5aeaf",
+  "reviewed_head_sha": "646d21fb3df72707cd602cf61c1e80713dd3c38a",
+  "reviewed_run_id": "r-20261008T031843283750-fpv-layer-fetch",
+  "reviewer": {
+    "backend": "clive",
+    "effort": null,
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T04:28:23.595288+00:00",
+  "total": 113
+}

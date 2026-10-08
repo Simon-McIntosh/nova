@@ -1,0 +1,366 @@
+{
+  "census": {
+    "classification_owner": "nova.imas.mast_calibration_cohort.calibration_experiments",
+    "path": "/home/ITER/mcintos/.cache/nova-mast/mast_vacuum_census.json",
+    "sha256": "2de2e52906dc9b45c9760221542ab720b4a32fbbcb0d8193b396b853e8c30687",
+    "toroidal_field_only_shots": 577
+  },
+  "level2_cohort_shots": [],
+  "observation_source": null,
+  "positive_control": {
+    "in_cohort": false,
+    "matched_geometry_count": 3,
+    "measured_channel_count": 3,
+    "measured_channels": [
+      "xmc/CC/MT/201",
+      "xmc/CC/MT/206",
+      "xmc/CC/MT/212"
+    ],
+    "probe_geometry_count": 36,
+    "shot": 30420
+  },
+  "probes": [
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_101",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_102",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_103",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_104",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_105",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_106",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_107",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_108",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_109",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_110",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_111",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_112",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": "xmc/CC/MT/201",
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_201",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_202",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_203",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_204",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_205",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": "xmc/CC/MT/206",
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_206",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_207",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_208",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_209",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_210",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_211",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": "xmc/CC/MT/212",
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_212",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_301",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_302",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_303",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_304",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_305",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_306",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_307",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_308",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_309",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_310",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_311",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    },
+    {
+      "control_signal_channel": null,
+      "field_direction": null,
+      "held_out_relative_error": null,
+      "orientation_sign": null,
+      "probe": "cc_mt_312",
+      "reason": "no level-2 toroidal probe shot in the TF-only cohort",
+      "verdict": "unresolved"
+    }
+  ],
+  "revision": "3cd9ca553dee024f78a6bcb21e96f693b99933bd",
+  "schema": "mast-toroidal-probe-orientation",
+  "scoring": {
+    "held_out": "maximum RMS field error / RMS independent reference <= 0.02",
+    "reference_required": "sourced signed TF field; current alone is insufficient",
+    "relative_tolerance": 0.02,
+    "training": "infer sign from independently predicted and measured B_phi"
+  },
+  "stores": {
+    "level1": "/work/projects/imas_gpu/mast/level1/shots",
+    "level2": "/work/projects/imas_gpu/mast/level2/shots"
+  },
+  "summary": {
+    "level2_cohort_shots": 0,
+    "promoted": 0,
+    "total_probes": 36,
+    "unresolved": 36
+  }
+}

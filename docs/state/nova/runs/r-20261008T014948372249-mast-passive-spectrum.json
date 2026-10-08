@@ -1,0 +1,1093 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 27998592,
+      "cached_input_tokens_cumulative": 27998592,
+      "input_tokens": 28381772,
+      "input_tokens_cumulative": 28381772,
+      "output_tokens": 110559,
+      "output_tokens_cumulative": 110559,
+      "reasoning_output_tokens": 52780,
+      "reasoning_output_tokens_cumulative": 52780
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 8748,
+    "files": 6,
+    "removed": 2
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 88,
+        "name": "main",
+        "path": "tests/build_exact_section_results.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 480
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "compare",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 480
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 382,
+        "name": "assemble_receipt",
+        "path": "docs/figures/mast-passive-identifiability/measure.py"
+      },
+      "window_line": 487
+    },
+    {
+      "existing_function": {
+        "line": 1017,
+        "name": "test_nonfinite_factor_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "run_function": {
+        "line": 998,
+        "name": "test_factor_with_wrong_identity_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "window_line": 1006
+    },
+    {
+      "existing_function": {
+        "line": 1036,
+        "name": "test_completed_factor_is_reused_without_rescoring",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "run_function": {
+        "line": 998,
+        "name": "test_factor_with_wrong_identity_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "window_line": 1005
+    },
+    {
+      "existing_function": {
+        "line": 998,
+        "name": "test_factor_with_wrong_identity_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "run_function": {
+        "line": 1017,
+        "name": "test_nonfinite_factor_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "window_line": 1025
+    },
+    {
+      "existing_function": {
+        "line": 1036,
+        "name": "test_completed_factor_is_reused_without_rescoring",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "run_function": {
+        "line": 1017,
+        "name": "test_nonfinite_factor_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "window_line": 1025
+    },
+    {
+      "existing_function": {
+        "line": 998,
+        "name": "test_factor_with_wrong_identity_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "run_function": {
+        "line": 1036,
+        "name": "test_completed_factor_is_reused_without_rescoring",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "window_line": 1042
+    },
+    {
+      "existing_function": {
+        "line": 1017,
+        "name": "test_nonfinite_factor_is_refused",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "run_function": {
+        "line": 1036,
+        "name": "test_completed_factor_is_reused_without_rescoring",
+        "path": "tests/test_mast_passive_decay_modes.py"
+      },
+      "window_line": 1043
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "3bd2bec7da2218068302c7f87f2085c8e918ecb7",
+    "85666bc51bdce3cbd7370f2620cfb9005a867766",
+    "57893849057caa1e51565f62eeae051e64fb2d40",
+    "98c3d01421cfbcbc8fb1276e3bd1273550343503",
+    "64a1622c771cd3bc93910e1821b21dc0a994a25f",
+    "0928eb68daa28a7fd305b09e715984ae4d7ae998",
+    "0d13bcc754d3df1bf3d2661094db4ff4cb63dc54",
+    "6bdfd7a7b96f5671e736e0849c5204640dfcf72f"
+  ],
+  "completed_at": "2026-10-08T03:31:54Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T01:50:39Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_mast_passive_decay_modes.py -q --timeout=120",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T014948372249-mast-passive-spectrum/factor-head-tests.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": null,
+    "plan": "mast-nonaxisymmetric-physics",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "codex-astra",
+    "burn_multiple": 1.0610526315789475,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex-astra' is projected to exhaust at 2026-10-13T20:46:01Z, which is after this node's 3600s horizon ending 2026-10-08T02:49:59.214980+00:00",
+    "horizon_ends_at": "2026-10-08T02:49:59.214980+00:00",
+    "horizon_seconds": 3600,
+    "metered": true,
+    "observed_at": "2026-10-08T01:49:58Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-10-13T20:46:01Z",
+    "resets_at": "2026-10-14T05:14:59Z",
+    "seconds_until_reset": 530700,
+    "state": "quiet",
+    "utilisation_pct": 13.0
+  },
+  "lane_declaration": {
+    "backend": "codex-astra",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-10-08T01:49:58Z",
+    "read_at": "2026-10-08T01:49:59Z",
+    "resolved_backend": "codex-astra",
+    "utilisation_pct": 13.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T03:31:54Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T014948372249-mast-passive-spectrum/manifest.md",
+  "member": "disposable-r-20261008T014948372249-mast-passive-spectrum",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_mast_passive_decay_modes.py::TestDrivenSensitivity::test_drive_aligned_passive_direction_is_removed"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_mast_passive_decay_modes.py::TestDrivenSensitivity::test_drive_aligned_passive_direction_is_removed"
+    ],
+    "declaration": "the drive-permuted control must not show the identifiable directions the real drives show, and the synthetic two-group case must report rank 1 when its two groups are made collinear",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T014948372249-mast-passive-spectrum/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T014948372249-mast-passive-spectrum/negative-control.log",
+    "test_paths": [
+      "tests/test_mast_passive_decay_modes.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "mast-passive-spectrum",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1303,
+          "cached_input_tokens": 412821,
+          "input_tokens": 414126,
+          "output_tokens": 367,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 414493,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "b6c2ae71-7e68-4a68-9865-122917c73505",
+      "session_id": "s24-nova"
+    },
+    "done_when": "A committed receipt and figure under docs/figures/mast-passive-identifiability give the singular spectrum of the grouped-parameter Jacobian of coil-driven transients over the vacuum cohort (component-family groups, exact geometric inductance from mast_passive_inductance.py, nominal intervals from mast_seed_parameters.py), with each coil drive scale carried as a nuisance column bounded by its uncertainty interval because the ampere-turn semantics are unconfirmed; the count of passive directions that stay above the sensor floor recorded in mast_fitted_parameters.py after projecting out the drive-scale columns; the same spectrum with drive columns permuted across shots reported beside it; tests/test_mast_passive_decay_modes.py pins the construction on a synthetic two-group case with a known rank; the cohort computation runs on all_debug with its log path in the manifest; no parameter is promoted",
+    "estimated_hours": 1.0,
+    "goal": "Report how many grouped MAST passive resistances the coil-driven vacuum transients identify above the sensor floor with every drive scale free",
+    "id": "mast-passive-spectrum",
+    "lane_declaration": {
+      "backend": "codex-astra",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-10-08T01:49:58Z",
+      "read_at": "2026-10-08T01:49:59Z",
+      "resolved_backend": "codex-astra",
+      "utilisation_pct": 13.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T014948372249-mast-passive-spectrum/manifest.md",
+    "negative_control": "the drive-permuted control must not show the identifiable directions the real drives show, and the synthetic two-group case must report rank 1 when its two groups are made collinear",
+    "plan": "mast-nonaxisymmetric-physics",
+    "requested_backend": "codex-astra",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/imas/mast_passive_decay_modes.py",
+      "tests/test_mast_passive_decay_modes.py",
+      "docs/figures/mast-passive-identifiability",
+      "docs/evidence/fragments/mast-nonaxisymmetric-physics/mast-passive-spectrum.html",
+      "docs/figures/mast-nonaxisymmetric-physics/mast-passive-spectrum"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": {
+      "burn_multiple": 1.0609459982304592,
+      "derived": 0.1347853710165345,
+      "drain_hours": 168.0,
+      "effective_limit": 0.1347853710165345,
+      "elapsed_fraction": 0.12253215546957683,
+      "elapsed_hours": 20.585402118888908,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-10-08T01:50:06+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.87,
+      "remaining_windows": null,
+      "resets_at": "2026-10-14T05:14:59Z",
+      "state": "observed",
+      "utilisation": 0.13,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.04630600000000001,
+      "decided_by": "window",
+      "margin": 0.6911940000000001,
+      "name": "mast-passive-spectrum",
+      "score": 0.7375,
+      "state": "observed",
+      "verdict": "send-metered",
+      "window_fill": 0.13
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.447628,
+        "observed_at": "2026-10-08T01:50:06+00:00",
+        "period": "primary",
+        "resets_at": "2026-10-14T05:14:59Z",
+        "state": "observed",
+        "utilisation": 0.13,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex-astra",
+    "member": "codex",
+    "node": "mast-passive-spectrum",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-10-08T01:50:06.447628+00:00",
+    "score": 0.7375,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Named lane: lead directive 2026-10-08 sends hard nodes to codex, and the picker routed this one local at 0.38. Hard: system identification of a passive L/R circuit from transient magnetics with an unconfirmed drive scale; deep reasoning, elevated risk. The free decays already showed one effective parameter only; the failure mode is reporting identifiability the data does not carry. Needs MAST vacuum-shot data and a compute node.",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.64,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "mast-nonaxisymmetric-physics",
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "6bdfd7a7b96f5671e736e0849c5204640dfcf72f",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "f2bac518e47057cec01dd505c6dbbba7c8892b3c",
+    "reviewed_head_sha": "6bdfd7a7b96f5671e736e0849c5204640dfcf72f",
+    "scores": {
+      "durability": 18,
+      "evidence": 16,
+      "fit": 18,
+      "goal_fidelity": 17,
+      "reuse": 5,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261008T014948372249-mast-passive-spectrum",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s24-nova",
+  "session_harness": "codex",
+  "session_id": "01a11934-cd47-75c3-b34d-c2cb2f979bc9",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": 9,
+  "throughput": {
+    "cumulative_cached_input_tokens": 27998592,
+    "cumulative_input_tokens": 56380364,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 163339
+  },
+  "time_budget": "60m",
+  "tool_steps": 26.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 6075,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T03:31:57Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T03:23:29Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T014948372249-mast-passive-spectrum",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 736,
+    "worker_pid": 469872
+  },
+  "worker_seconds": 6075,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

@@ -1,0 +1,128 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "env -C /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-remeasure-tolerance-keys TMPDIR=/tmp PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-remeasure-tolerance-keys /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_repaired_solve_remeasure_keys.py tests/test_derived_criterion_family.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T031529382331-review-of-dfo-remeasure-tolerance-keys/review-head-gate.log",
+    "revision": "9ab276c6c6cfbef217b96f572df2704272ca54e1"
+  },
+  "baseline_suite": {
+    "command": "env -C /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/review-of-dfo-remeasure-tolerance-keys TMPDIR=/tmp PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/review-of-dfo-remeasure-tolerance-keys /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -rA tests/test_derived_criterion_family.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T031529382331-review-of-dfo-remeasure-tolerance-keys/review-base-gate.log",
+    "revision": "2f490f924b87b22d8a8d46395d888c203064928c"
+  },
+  "call_site_count": 2,
+  "call_sites": [
+    "benchmarks/derived_criterion_family.py:262 reads remeasure['counts']['at_or_below_benchmark_registered_1e_5'] (retired name)",
+    "benchmarks/derived_criterion_family.py:364 reads remeasure['counts']['at_or_below_shipped_hard_coded_1e_6'] (retired name)"
+  ],
+  "commits_read": [
+    "9ab276c6c6cfbef217b96f572df2704272ca54e1"
+  ],
+  "completed_at": "2026-10-08T03:37:44.678Z",
+  "dispatched_at": "2026-10-08T03:16:06Z",
+  "findings": [
+    {
+      "file": "benchmarks/derived_criterion_family.py",
+      "line": "262,364",
+      "severity": "blocking",
+      "text": "blocking (outside this node's declared write paths): the node renamed the remeasure receipt's count keys (at_or_below_benchmark_registered_1e_5 -> at_or_below_registered_residual_tolerance, at_or_below_shipped_hard_coded_1e_6 -> at_or_below_gate_residual_tolerance) but the reader benchmarks/derived_criterion_family.py:262 and :364 still indexes the two retired names from that receipt. The banked receipt docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json still carries the retired names (bytes unchanged by the node), so the gate passes today; but that file is the benchmark's own DEFAULT_OUTPUT sibling (DEFAULT_OUTPUT) and regenerating it makes derived_criterion_family.py raise KeyError. The producer schema was changed without updating its consumer."
+    },
+    {
+      "file": "docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json",
+      "line": "4-8",
+      "severity": "follow-on",
+      "text": "follow-on: the goal the node landed against (nova:diiid-forward-onboarding section 11: 'the remeasure benchmark still labels its record keys with the retired 1e-6') is achieved in the producer code but not in the artifact consumers actually read: the banked receipt still labels every frame with meets_shipped_hard_coded_1e_6 / at_or_below_shipped_hard_coded_1e_6 and the counts with the retired names. The node left the bank bytes and digest unchanged (documented in its manifest). No test asserts the bank is free of the retired labels, so the goal is only half-landed."
+    },
+    {
+      "file": "tests/test_repaired_solve_remeasure_keys.py",
+      "line": "1-21",
+      "severity": "follow-on",
+      "text": "follow-on: the new test calls the helper _residual_tolerance_record directly with hand-passed tolerances and asserts the returned keys; it never exercises _solve_frame or run, so a regression that stopped run() from emitting the tolerance fields (or that reassigned GATE_RESIDUAL_BOUND back to 1.0e-6) would not redden it. The mutation the node used (a 1e_6 key suffix) is caught, but caller-path coverage is absent."
+    }
+  ],
+  "gate_arms": {
+    "after_suite": {
+      "command": "env -C /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-remeasure-tolerance-keys TMPDIR=/tmp PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-remeasure-tolerance-keys /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q tests/test_repaired_solve_remeasure_keys.py tests/test_derived_criterion_family.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T031529382331-review-of-dfo-remeasure-tolerance-keys/review-head-gate.log",
+      "revision": "9ab276c6c6cfbef217b96f572df2704272ca54e1"
+    },
+    "baseline_suite": {
+      "command": "env -C /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/review-of-dfo-remeasure-tolerance-keys TMPDIR=/tmp PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/review-of-dfo-remeasure-tolerance-keys /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -q -rA tests/test_derived_criterion_family.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T031529382331-review-of-dfo-remeasure-tolerance-keys/review-base-gate.log",
+      "revision": "2f490f924b87b22d8a8d46395d888c203064928c"
+    }
+  },
+  "gate_arms_note": "added_failure_count and added_failure_ids are measured over the reviewed run's own gate files. The reviewed run recorded only head arms only (its manifest test_logs are repaired-solve-keys-final.log and derived-criterion-family-final.log, both EXIT=0); it recorded no baseline arm, so I reproduced one. The reviewed run's new test file tests/test_repaired_solve_remeasure_keys.py does not exist at base 2f490f92, so the base arm runs the reviewed run's other gate file tests/test_derived_criterion_family.py, whose gate-relevant sources are byte-identical between base 2f490f92 and my base tree ((git diff --stat 2f490f92 1f327da -- <gate files>) is empty). Head has 17 passed (17 tests) against base 16 passed; the head-minus-base failing-id set is empty because neither arm failed, and the one extra head test is the newly added cloud test. added_failure_count is therefore a measured 0.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "two production consumers of the renamed receipt keys, both in benchmarks/derived_criterion_family.py (:262, :364), indexing the retired names against the banked receipt.",
+    "diff": "read commit 9ab276c against base 2f490f9; one commit, two files (M benchmarks/diiid_repaired_solve_remeasure.py, A tests/test_repaired_solve_remeasure_keys.py), 52 insertions, 16 deletions.",
+    "done_when": "the node's done-when (retire the retired 1e-6 record-key labels and keep a guard) is met in the producer; the new test passes at head and the base arm reproduces green.",
+    "goal": "record each residual verdict beside its tolerance and name the result fields by tolerance role; the module does this at :144-150 and :264-278.",
+    "manifest": "read; the declared paths, the gate logs, the mutation control and the deliberate decision to leave the bank unchanged all match the code and logs.",
+    "write_paths": "git diff --name-status 2f490f9 9ab276c is exactly the two declared paths."
+  },
+  "justifications": {
+    "durability": "the guard is real: tests/test_repaired_solve_remeasure_keys.py:21 asserts no returned key contains '1e_6' and :13-20 assert the two tolerance fields, and the node's mutation control restored a 1e_6 key suffix and was refused (negative-control.log EXIT=1). It is docked because it exercises only the helper, not the _solve_frame / run emission path, so it cannot catch a regression in the caller.",
+    "evidence": "I re-ran the reviewed run's gate command at head 9ab276c in the reviewed worktree (tests/test_repaired_solve_remeasure_keys.py tests/test_derived_criterion_family.py -> 17 passed, EXIT=0, review-head-gate.log) and reproduced the base arm on the byte-identical base files (tests/test_derived_criterion_family.py -> 16 passed, EXIT=0, review-base-gate.log); the reviewed run's own negative-control.log (EXIT=1, KeyError on the expected threshold-free key) shows the guard fires, but it is the run's own log rather than one I reproduced, and the new test file does not exist at base so the two-path base invocation cannot run.",
+    "fit": "the helper name _residual_tolerance_record and the field names gate_residual_tolerance / meets_gate_residual_tolerance are mechanism names with no plan, ticket or version identifier; the module keeps its existing record-building idiom.",
+    "goal_fidelity": "benchmarks/diiid_repaired_solve_remeasure.py:144-150 records gate_residual_tolerance and registered_residual_tolerance beside each verdict and the record/count keys are renamed to threshold-free names; the retired 1e-6 label is gone from the producer. But the landed goal is only partially visible: the banked receipt the consumers read still carries the retired labels, so the retirement is not complete across the artifact.",
+    "reuse": "the change extends the existing _solve_frame record dict and the existing run() receipt rather than adding a second instrument, and reuses forward_case.GATE_RESIDUAL_TOLERANCE / REGISTERED_RESIDUAL_TOLERANCE for the values.",
+    "scope_discipline": "git diff --name-status <base> <head> is exactly M benchmarks/diiid_repaired_solve_remeasure.py and A tests/test_repaired_solve_remeasure_keys.py, both inside the reviewed run's declared write paths; no production solver file and no concurrent node's path is touched."
+  },
+  "notes": "Independent review of %s at head 9ab276c vs base 2f490f9 (nova:diiid-forward-onboarding section 11 folded node). The change removes the retired 1e-6 label from the producer's record/count keys and records the two tolerances, with a new guard test; it is correct and minimal and touches exactly its two declared paths. Three issues, one blocking and two follow-on. BLOCKING, and note the verdict is pass because the finding is outside this node's declared write paths: the producer renamed keys that its consumer benchmarks/derived_criterion_family.py:262,364 still indexes under the retired names, from the banked receipt; regenerating that receipt breaks the consumer. FOLLOW-ON: the banked receipt itself still carries the retired labels, so the goal the node landed against is only half-applied to the artifact consumers read. FOLLOW-ON: the new test exercises only the helper, not the _solve_frame/run emission path. Scores: goal_fidelity 19, evidence 18, scope_discipline 20, durability 16, fit 19, reuse 20. Total 112, verdict pass.",
+  "plan": "nova:diiid-forward-onboarding",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is that benchmarks/diiid_repaired_solve_remeasure.py stop labelling its residual record keys with the retired 1e-6 and instead record each verdict beside the tolerance that produced it; benchmarks/diiid_repaired_solve_remeasure.py:144-150 and 264-278 do exactly that, but the banked receipt consumers read still carries the retired labels.\nVERDICT done_when: the reviewed run's done-when is the key rename plus a guard; the producer change is complete and the new unit test passes at head (17 passed over the node's two gate files, EXIT=0), with the base arm reproduced (16 passed, EXIT=0).\nVERDICT write_paths: git diff --name-status 2f490f924 9ab276c6c is exactly M benchmarks/diiid_repaired_solve_remeasure.py and A tests/test_repaired_solve_remeasure_keys.py, both inside the declared scope.\nVERDICT manifest: read; it names the helper, the two gate logs, the mutation control and the deliberate bank-left-2-digest decision, and its account matches the code and the logs I read.\nVERDICT diff: one commit, two files, 52 insertions and 16 deletions; the module, not a plan or docs file.\nCALL_SITE: benchmarks/derived_criterion_family.py:262 reads remeasure['counts']['at_or_below_benchmark_registered_1e_5'] (retired name)\nCALL_SITE: benchmarks/derived_criterion_family.py:364 reads remeasure['counts']['at_or_below_shipped_hard_coded_1e_6'] (retired name)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmarks/diiid_repaired_solve_remeasure.py:144-150 records gate_residual_tolerance and registered_residual_tolerance beside each verdict and the record/count keys are renamed to threshold-free names; the retired 1e-6 label is gone from the producer. But the landed goal is only partially visible: the banked receipt the consumers read still carries the retired labels, so the retirement is not complete across the artifact.\nSCORE evidence: 18\nJUSTIFICATION evidence: I re-ran the reviewed run's gate command at head 9ab276c in the reviewed worktree (tests/test_repaired_solve_remeasure_keys.py tests/test_derived_criterion_family.py -> 17 passed, EXIT=0, review-head-gate.log) and reproduced the base arm on the byte-identical base files (tests/test_derived_criterion_family.py -> 16 passed, EXIT=0, review-base-gate.log); the reviewed run's own negative-control.log (EXIT=1, KeyError on the expected threshold-free key) shows the guard fires, but it is the run's own log rather than one I reproduced, and the new test file does not exist at base so the two-path base invocation cannot run.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status <base> <head> is exactly M benchmarks/diiid_repaired_solve_remeasure.py and A tests/test_repaired_solve_remeasure_keys.py, both inside the reviewed run's declared write paths; no production solver file and no concurrent node's path is touched.\nSCORE durability: 16\nJUSTIFICATION durability: the guard is real: tests/test_repaired_solve_remeasure_keys.py:21 asserts no returned key contains '1e_6' and :13-20 assert the two tolerance fields, and the node's mutation control restored a 1e_6 key suffix and was refused (negative-control.log EXIT=1). It is docked because it exercises only the helper, not the _solve_frame / run emission path, so it cannot catch a regression in the caller.\nSCORE fit: 19\nJUSTIFICATION fit: the helper name _residual_tolerance_record and the field names gate_residual_tolerance / meets_gate_residual_tolerance are mechanism names with no plan, ticket or version identifier; the module keeps its existing record-building idiom.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing _solve_frame record dict and the existing run() receipt rather than adding a second instrument, and reuses forward_case.GATE_RESIDUAL_TOLERANCE / REGISTERED_RESIDUAL_TOLERANCE for the values.\nFINDING benchmarks/derived_criterion_family.py:262,364 blocking: blocking (outside this node's declared write paths): the node renamed the remeasure receipt's count keys (at_or_below_benchmark_registered_1e_5 -> at_or_below_registered_residual_tolerance, at_or_below_shipped_hard_coded_1e_6 -> at_or_below_gate_residual_tolerance) but the reader benchmarks/derived_criterion_family.py:262 and :364 still indexes the two retired names from that receipt. The banked receipt docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json still carries the retired names (bytes unchanged by the node), so the gate passes today; but that file is the benchmark's own DEFAULT_OUTPUT sibling (DEFAULT_OUTPUT) and regenerating it makes derived_criterion_family.py raise KeyError. The producer schema was changed without updating its consumer.\nFINDING docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json:4-8 follow: follow-on: the goal the node landed against (nova:diiid-forward-onboarding section 11: 'the remeasure benchmark still labels its record keys with the retired 1e-6') is achieved in the producer code but not in the artifact consumers actually read: the banked receipt still labels every frame with meets_shipped_hard_coded_1e_6 / at_or_below_shipped_hard_coded_1e_6 and the counts with the retired names. The node left the bank bytes and digest unchanged (documented in its manifest). No test asserts the bank is free of the retired labels, so the goal is only half-landed.\nFINDING tests/test_repaired_solve_remeasure_keys.py:1-21 follow: follow-on: the new test calls the helper _residual_tolerance_record directly with hand-passed tolerances and asserts the returned keys; it never exercises _solve_frame or run, so a regression that stopped run() from emitting the tolerance fields (or that reassigned GATE_RESIDUAL_BOUND back to 1.0e-6) would not redden it. The mutation the node used (a 1e_6 key suffix) is caught, but caller-path coverage is absent.",
+  "review_run_id": "r-20261008T031529382331-review-of-dfo-remeasure-tolerance-keys",
+  "reviewed_base_sha": "2f490f924b87b22d8a8d46395d888c203064928c",
+  "reviewed_commit": "9ab276c6c6cfbef217b96f572df2704272ca54e1",
+  "reviewed_head_sha": "9ab276c6c6cfbef217b96f572df2704272ca54e1",
+  "reviewed_revision": "9ab276c6c6cfbef217b96f572df2704272ca54e1",
+  "reviewed_run_id": "r-20261008T030413470150-dfo-remeasure-tolerance-keys",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s24-nova/dfo-remeasure-tolerance-keys",
+  "reviewer_node": "review-of-dfo-remeasure-tolerance-keys",
+  "reviewer_run_id": "r-20261008T031529382331-review-of-dfo-remeasure-tolerance-keys",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T03:33:26.989581+00:00",
+  "total": 112,
+  "verdict": "pass",
+  "verified_independently": [
+    "reviewed_head_sha 9ab276c6c6cfbef217b96f572df2704272ca54e1 is the reviewed worktree's HEAD (git -C <RW> rev-parse HEAD) and git status --porcelain is empty.",
+    "reviewed_base_sha 2f490f924b87b22d8a8d46395d888c203064928c is HEAD^ (git -C <RW> rev-parse 9ab276c^).",
+    "git diff --name-status 2f490f9 9ab276c is exactly M benchmarks/diiid_repaired_solve_remeasure.py and A tests/test_repaired_solve_remeasure_keys.py (52 insertions, 16 deletions); no file under nova/ or scripts/ is touched.",
+    "the head gate passes in a fresh process: tests/test_repaired_solve_remeasure_keys.py tests/test_derived_criterion_family.py -> 17 passed in 30.54s, EXIT=0 (review-head-gate.log).",
+    "the base arm is green on byte-identical base files: tests/test_derived_criterion_family.py -> 16 passed in 7.98s, EXIT=0 (review-base-gate.log); the new test file does not exist at base.",
+    "the producer now emits threshold-free keys: benchmarks/diiid_repaired_solve_remeasure.py:147-149 emits gate_residual_tolerance/verified keys and :344-347 emits at_or_below_gate_residual_tolerance / at_or_below_registered_residual_tolerance.",
+    "the consumer/contract mismatch is measured: benchmarks/derived_criterion_family.py:262 indexes at_or_below_benchmark_registered_1e_5 and :364 indexes at_or_below_shipped_hard_coded_1e_6; the banked receipt docs/figures/diiid-forward-onboarding/repaired-solve-five-frame-remeasure.json carries both retired names and its frame records carry meets_shipped_hard_coded_1e_6, while the producer now emits none of them, so a regeneration raises KeyError.",
+    "the reviewed run's negative control is a real mutation control: negative-control.log restores a 1e_6 key suffix and test_residual_record_names_and_records_the_gate_tolerance fails with KeyError, EXIT=1."
+  ]
+}

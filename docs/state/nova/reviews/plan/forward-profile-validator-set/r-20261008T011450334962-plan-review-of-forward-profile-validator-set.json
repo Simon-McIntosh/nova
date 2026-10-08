@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-08T01:35:21.241Z",
+  "dispatched_at": "2026-10-08T01:15:12Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/forward-profile-validator-set.html:19",
+      "id": "wiring-1",
+      "reason": "with no relationship declared the two S24 plans can be dispatched in either order, and retirement's deletion of machine_artifact.py runs before rung 1 lifts the primitives it reads, destroying the source of the lift.",
+      "text": "meta plan-depends-on is empty while \u00a73 (line 46) depends on machine-description-retirement: \u00a73 says the cache primitives are lifted out *because* machine_artifact.py is retired by that plan, and machine-description-retirement.html:110 names this plan as the lifter of those primitives before its own \u00a73 deletes the machine-description parts",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/forward-profile-validator-set.html:80",
+      "id": "done_when-1",
+      "reason": "a node dispatched on f-fpv-001 has no declared red arm, so its digest-verification and solve gates can pass on code that never refuses anything.",
+      "text": "f-fpv-001's done-when (\"Rungs 1 and 2 ... the analytic smoke case, then CORSICA 130506 solved end-to-end at all four slices\") names no negative control, so nothing in the node shows its guard fires on a bad input; the sibling followup f-fpv-currency-2026-10-01 (line 85) does carry one (\"negative control: altering one manifest digest fails it\")",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/forward-profile-validator-set.html:80",
+      "id": "single_goal-1",
+      "reason": "one node cannot be reviewed or closed on a single verdict when its gate proves both a fetch-integrity guard and a cross-code solve comparison; splitting along \u00a75's own rung boundary restores one goal per node.",
+      "text": "f-fpv-001 carries two deliverables \u2014 the digest-pinned fetch module with its availability gate and the analytic smoke rung (rung 1), and CORSICA 130506 solved end-to-end at four slices under the LOOSE band with per-case figures (rung 2) \u2014 while \u00a75 (line 52) declares the rungs \"each independently landable\"",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/nova/docs/plans/forward-profile-validator-set.html:43",
+      "id": "reasoning-1",
+      "reason": "the plan's stated root cause for the exclusion cites an owner directive that, as recorded, puts those cases in scope; a node following \u00a72 builds a narrower validator set than the plan's own authority requires, and rung 3/5 breadth is decided on a false premise.",
+      "text": "\u00a72 excludes \"every experimental reconstruction (out of scope by the owner's directive)\", but the only owner directive recorded in the plan \u2014 the rationale on the cross-section-breadth decision, data-by=\"user\" at line 72 \u2014 states the opposite: \"for the reconstruction validations remember that we are not validating the reconstruction (from measurements), we are validating forwardprofile based on what the reconstruction code returned, this is far easier problem and lets us validate the code correctness without any inference. this also widens our scope well beyond the ITER only cases, this is great.\" The excluded set is the NICE (11 variants), LIUQE (1), EPM (1), EPQ (1), EQH (1) and EFIT/HL-3 (1) references \u2014 16 of the 23 records",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "9f31163c003c707d8785a760e06b4b2e0f58637caf756f103302b86dd5af928f",
+  "plan_slug": "forward-profile-validator-set",
+  "plan_version": 8,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261008T011450334962-plan-review-of-forward-profile-validator-set",
+  "reviewed_blob_sha": "746556e07b0b661d59532e27cfd6cfab2cbcf658",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited module symbol resolves in nova/imas/machine_artifact.py (_verified_object_root:862, _verify_directory_files:994, _publish_directory_no_replace:1197, materialize_machine_artifact:1230, resolve_machine_artifact:1316), tests/data-manifest.json and tests/test_equilibrium_forward_reference.py exist, the registry/tag in \u00a71 match imas-efit's tests/data-manifest.json (v0.0.14), the LOOSE band literals in \u00a74 match imas-efit's PHYSICS_BANDS (axis 0.20 m, ip 200e3, psi_* 5.0 Wb, q95 2.0, fractions ip 0.015 / psi_* 0.05), the NK non-contraction claim matches nova/equilibrium/forward.py:39-46 and :2791-2797, and both cross-plans (machine-description-retirement.html, gs-absolute-accuracy-gates.html) exist. Caveat, not a broken pointer: the v0.0.14 manifest digest at line 34 and the truncated \u00a72 layer digests resolve in neither repository, so they are claims a node must re-derive rather than transcription targets.",
+    "done_when": "a finding \u2014 the \"Land the fetch shim\" followup (data-id f-fpv-001, line 80) names no negative control for either of the two rungs it carries, so its gate cannot show the digest guard fires.",
+    "evidence_paths": "pass \u2014 no gate or evidence artifact is placed in a session scratchpad or node-local temporary path; per-case figures follow the served docs/figures convention and the first rung's logs are the manifest-attached gate logs.",
+    "naming": "pass \u2014 no proposed symbol, filename or comment carries a rung label, stage name, ticket number or version tag into code; \u00a75's rung numbering lives in the plan HTML, where sequencing labels belong, and \u00a73 names no code symbol after its rung.",
+    "reasoning": "a finding \u2014 \u00a72 excludes every experimental reconstruction as \"out of scope by the owner's directive\", but the owner's own recorded rationale on the cross-section-breadth decision (line 72) says the reconstruction cases are in scope and widen the set beyond ITER.",
+    "single_goal": "a finding \u2014 f-fpv-001 bundles two independently landable deliverables (the fetch shim + pinned manifest + analytic smoke, and the CORSICA four-slice end-to-end).",
+    "wiring": "a finding \u2014 \u00a73 sequences rung 1 against machine-description-retirement, which names this plan as the lifter of the cache primitives, yet this plan's meta declares no relationship to it (plan-depends-on empty at line 19)."
+  },
+  "section_digests": {
+    "_document": "add42a95a533fdea2c80c051ebffdfe5f60bbd82e35d03a42250fa9a7525323c",
+    "s1": "6e49c515029c8bc27841b65ae395b2973bb1c3c32b13465ccf87e33de692f218",
+    "s2": "22575bebd77cacc03f777324b468c931d50b1d4c784911cbf6101bd01a6bb13e",
+    "s3": "438c8743c22af9009eaf98b975c7e6fd1c79290f717bf4cc6ffcbf43da23334b",
+    "s4": "35d18a38441135e0b09cdf40356e6317493e48f293b9a9a7242b7f8b09e3bb88",
+    "s5": "4be91cb3c77cc6653a6a21bc18dad12ca1d07d468c83bcaf1e9229dbf47ab7c4"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-08T01:35:22.877407+00:00"
+}

@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="113">
+<meta name="plan-version" content="114">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -375,6 +375,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261008T045345540074-cfs-graded-layer-near-corner" data-who="reckon-build" data-when="2026-10-08T11:20:22Z">
     <div class="r-comment-body"><p>/nova/evidence/fragments/converged-forward-solve/cfs-graded-layer-near-corner.html#cfs-graded-layer-near-corner-completion records repaired composed derivative max 2.166e-12, value max 5.909e-14, zero degraded values under the 1e-13 allowance; completed H200 affected-module head 43 passed versus baseline 39 passed/2 failed/1 skipped, zero added and two removed module-qualified failure ids; graded_residual H200 compile ratio 2.35, pinned-base CPU ratio remains red at 3.132.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T112038877075-review-of-cfs-graded-layer-near-corner" data-who="reckon-build" data-when="2026-10-08T11:37:50.368Z">
+    <div class="r-comment-body"><p>review of r-20261008T045345540074-cfs-graded-layer-near-corner stored as a parsed 6-dimension record at both granted JSON paths: goal_fidelity 16, evidence 17, scope_discipline 18, durability 18, fit 18, reuse 17 (total 104/120), reviewed_base_sha 646b68b8, reviewed_head_sha 6cde21247, added_failure_count 0 and added_failure_ids [] derived from the reviewed run&#x27;s own baseline_suite (09f5a9628, 2 failed) and after_suite (19091d2d1, 0 failed); five follow-on findings, no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

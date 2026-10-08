@@ -3,7 +3,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="cfs-graded-layer-near-corner"><meta name="plan-title" content="Graded corner layer: value and derivative">
-<meta name="plan-summary" content="The graded derivative meets the exact reference; value roundoff, a composed analytic remainder and compile cost block completion.">
+<meta name="plan-summary" content="The graded derivative meets the exact reference; the composed analytic remainder awaits its source grant. Base-program roundoff and the red compile row are measured separately.">
 <meta name="plan-evidence-for" content="converged-forward-solve"><meta name="plan-recorded-at" content="2026-10-08">
 <meta name="plan-verdict" content="blocked"><meta name="plan-tags" content="biot,tangents,custom-derivative-rules">
 <title>Graded corner layer: value and derivative | nova</title>
@@ -32,7 +32,7 @@
 <tr><td>Signed decade oracle, 23 samples</td><td>Passed; zero values less accurate than base; outside-band difference maximum 1.358e-14</td><td>joint-width-gate.log</td></tr>
 <tr><td>Graded hand tangent versus current primal JVP, 10,000 samples</td><td>Passed; primal and tangent maximum differences zero at the 1e-13 bound</td><td>joint-width-gate.log</td></tr>
 <tr><td>Moving panel bounds</td><td>Passed the endpoint-integrand rule at 1e-13 relative</td><td>moving-bounds.log</td></tr>
-<tr><td>Restored floor negative control</td><td>Named derivative row fails; maximum derivative error 0.1415, EXIT=1</td><td>negative-floor.log</td></tr><tr><td>Cold compile, median of seven fresh processes per arm</td><td>Current primal 0.274 s, hand tangent 0.585 s (2.14 ratio); pinned base primal 0.1868 s, so the required base ratio is 3.132 and fails the 3.0 bound</td><td>compile-joint-width.log; compile-base-primal.log</td></tr><tr><td>Resolution experiment</td><td>Offset-only 256 nodes: derivative maximum 2.340e-14, but 17 values less accurate than base; joint-scale 128 nodes: derivative maximum 2.515e-16, zero values less accurate</td><td>width-resolution-probe.json</td></tr>
+<tr><td>Restored floor negative control</td><td>Named derivative row fails; maximum derivative error 0.1415, EXIT=1</td><td>negative-floor.log</td></tr><tr><td>Cold compile: graded_residual tangent / pinned base primal, median of seven fresh processes per arm</td><td><strong>RED: 3.132 &gt; 3.0.</strong> Pinned base primal 0.1868 s / 372 equations; repaired primal 0.274 s / 428 equations; hand tangent 0.585 s / 918 equations; JVP 0.651 s / 1,078 equations. The hand/current-primal ratio is 2.14. The coordinator reports main already red at 4.47; 3.132 improves that row but does not pass or relax its bound</td><td>compile-joint-width.log; compile-base-primal.log</td></tr><tr><td>Resolution experiment</td><td>Offset-only 256 nodes: derivative maximum 2.340e-14, but 17 values less accurate than base; joint-scale 128 nodes: derivative maximum 2.515e-16, zero values less accurate</td><td>width-resolution-probe.json</td></tr>
 </tbody></table>
 </section>
 <section id="cfs-graded-layer-near-corner-cohort"><h2>Original corner cohort</h2>

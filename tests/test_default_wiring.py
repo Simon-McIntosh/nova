@@ -24,6 +24,7 @@ from nova.equilibrium.solve_request import (
     ExplicitSolveSeed,
     ForwardSolveRequest,
     ResolvedForwardSolveDefaults,
+    declared_forward_solve_policy,
 )
 from scripts.oracle_rebaseline import measure as oracle_rebaseline
 
@@ -78,6 +79,9 @@ class ProductionEntryPoint:
     name: str
     receipts: ReceiptFactory
     launcher: Callable[..., object] | None
+    bare_defaults: bool = False
+    seam_markers: tuple[str, ...] = ()
+    private_solver_kernels: tuple[str, ...] = ()
 
 
 def _solve_request(profile: RecordingProfile, request: ForwardSolveRequest) -> object:
@@ -169,7 +173,9 @@ def _solovev_certificate_receipts(profile: RecordingProfile) -> tuple[object, ..
 
 
 PRODUCTION_ENTRY_POINTS = (
-    ProductionEntryPoint("public-solve-and-routes", _public_solve_receipts, None),
+    ProductionEntryPoint(
+        "public-solve-and-routes", _public_solve_receipts, None, bare_defaults=True
+    ),
     ProductionEntryPoint(
         "exact-bank-replay",
         _bank_replay_receipts,
@@ -179,6 +185,9 @@ PRODUCTION_ENTRY_POINTS = (
         "topology-visuals",
         _topology_visual_receipts,
         real_equilibria_reachability._solve_with_defaults,
+        bare_defaults=True,
+        seam_markers=("_solve_with_defaults(",),
+        private_solver_kernels=("_margin_graded_newton_krylov",),
     ),
     ProductionEntryPoint(
         "efit-parity-slice",
@@ -194,6 +203,9 @@ PRODUCTION_ENTRY_POINTS = (
         "solovev-oracle-and-rebaseline",
         _solovev_oracle_receipts,
         oracle_rebaseline._solve_with_defaults,
+        bare_defaults=True,
+        seam_markers=("_solve_with_defaults(",),
+        private_solver_kernels=("_solve(operator.flux_map(), seed)",),
     ),
     ProductionEntryPoint(
         "solovev-certificate",
@@ -213,14 +225,19 @@ def production_receipts(request):
 
     assert receipts
     assert len(profile.calls) == len(receipts)
+    declared_policy = declared_forward_solve_policy()
     for positional, keywords in profile.calls:
         assert keywords == {}
         assert len(positional) == 1
         assert isinstance(positional[0], ForwardSolveRequest)
+        if entry_point.bare_defaults:
+            assert positional[0].policy == declared_policy
     for receipt in receipts:
         assert not (
             set(dict(receipt.resolved_defaults.deviations)) & set(REQUIRED_DEFAULTS)
         )
+        if entry_point.bare_defaults:
+            assert receipt.resolved_defaults.deviations == ()
     return entry_point.name, receipts
 
 
@@ -261,3 +278,43 @@ def test_launchers_leave_declared_defaults_to_the_public_seam(entry_point) -> No
         keyword_names = {keyword.arg for keyword in call.keywords}
         assert None not in keyword_names
         assert not (keyword_names & set(REQUIRED_DEFAULTS))
+
+
+def test_production_routes_forward_the_prescribed_current() -> None:
+    """Every route hands its prescribed current through the seam unchanged."""
+
+    by_name = {entry.name: entry for entry in PRODUCTION_ENTRY_POINTS}
+
+    profile = RecordingProfile()
+    by_name["solovev-oracle-and-rebaseline"].receipts(profile)
+    (oracle_request,), _ = profile.calls[0]
+    assert oracle_request.target_current == 1.0
+    assert oracle_request.current is None
+
+    profile = RecordingProfile()
+    by_name["topology-visuals"].receipts(profile)
+    assert len(profile.calls) == 2
+    (mast_request,), _ = profile.calls[0]
+    (diiid_request,), _ = profile.calls[1]
+    assert mast_request.current is None
+    assert diiid_request.current is not None
+    assert jnp.array_equal(diiid_request.current, jnp.zeros(2))
+
+
+@pytest.mark.parametrize(
+    "entry_point",
+    tuple(route for route in PRODUCTION_ENTRY_POINTS if route.private_solver_kernels),
+    ids=lambda route: route.name,
+)
+def test_production_routes_call_no_private_solver_kernel(entry_point) -> None:
+    """Reject a route that reaches a private kernel instead of the public seam."""
+
+    source_path = inspect.getsourcefile(entry_point.launcher)
+    assert source_path is not None
+    source = Path(source_path).read_text(encoding="utf-8")
+    for marker in entry_point.seam_markers:
+        assert marker in source, f"{entry_point.name} does not reach the seam"
+    for kernel in entry_point.private_solver_kernels:
+        assert kernel not in source, (
+            f"{entry_point.name} calls the private solver kernel {kernel}"
+        )

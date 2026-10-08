@@ -1,0 +1,2827 @@
+{
+  "revision": "07260595944fe706f0ac3cf0beb69aa354cc1389",
+  "split": {
+    "declared_at": "2026-10-08T06:20:19.510406+00:00",
+    "rule": "sort xmb-bearing light-census admissions; indices 0,4,8,... held out",
+    "training": [
+      15075,
+      15151,
+      15175,
+      15299,
+      15489,
+      15577,
+      15757,
+      15785,
+      15813,
+      15950,
+      15966,
+      15974,
+      16178,
+      16234,
+      16286,
+      16417,
+      16605,
+      25818,
+      25836
+    ],
+    "held_out": [
+      15051,
+      15295,
+      15737,
+      15865,
+      16006,
+      16381,
+      25828
+    ],
+    "available_loop_counts": {
+      "15051": 16,
+      "15075": 16,
+      "15151": 16,
+      "15175": 16,
+      "15295": 16,
+      "15299": 16,
+      "15489": 16,
+      "15577": 16,
+      "15737": 16,
+      "15757": 16,
+      "15785": 16,
+      "15813": 16,
+      "15865": 16,
+      "15950": 16,
+      "15966": 16,
+      "15974": 16,
+      "16006": 16,
+      "16178": 16,
+      "16234": 16,
+      "16286": 16,
+      "16381": 16,
+      "16417": 16,
+      "16605": 16,
+      "25818": 36,
+      "25828": 36,
+      "25836": 36
+    },
+    "refused": [],
+    "reach_sha256": "9ecd9cc5ab6d85f7c6dd817a6f901fa79ef7da9f03185265725356ad36c92fe8",
+    "fixed_before_scoring": {
+      "minimum_training_shots": 2,
+      "minimum_held_out_shots": 1,
+      "bins": 256,
+      "ridge": 1e-06,
+      "permutation_seed": 7301,
+      "maximum_control_gain_share": 0.5,
+      "spatial_basis": "axisymmetric ring harmonics, inner and outer, order two, focus (1.0,0.0), plus all described coil columns"
+    }
+  },
+  "geometry": {
+    "artifact_digest": "sha256:b41c076e1fb7e16dabe3bada2f5d890125a857c400ce7599dfa488e8ebef90e4",
+    "dd_version": "4.1.1",
+    "directory": "/home/ITER/mcintos/.cache/mast-artifact-ef/sha256/b41c076e1fb7e16dabe3bada2f5d890125a857c400ce7599dfa488e8ebef90e4",
+    "coil_columns": [
+      "p2_inner_lower",
+      "p2_inner_upper",
+      "p2_outer_lower",
+      "p2_outer_upper",
+      "p3_lower",
+      "p3_upper",
+      "p4_lower",
+      "p4_upper",
+      "p5_lower",
+      "p5_upper",
+      "p6_lower",
+      "p6_upper",
+      "sol"
+    ],
+    "probe_binding": [
+      {
+        "raw": "ccbv01",
+        "ids_name": "ccbv_0"
+      },
+      {
+        "raw": "ccbv02",
+        "ids_name": "ccbv_1"
+      },
+      {
+        "raw": "ccbv03",
+        "ids_name": "ccbv_2"
+      },
+      {
+        "raw": "ccbv04",
+        "ids_name": "ccbv_3"
+      },
+      {
+        "raw": "ccbv05",
+        "ids_name": "ccbv_4"
+      },
+      {
+        "raw": "ccbv06",
+        "ids_name": "ccbv_5"
+      },
+      {
+        "raw": "ccbv07",
+        "ids_name": "ccbv_6"
+      },
+      {
+        "raw": "ccbv08",
+        "ids_name": "ccbv_7"
+      },
+      {
+        "raw": "ccbv09",
+        "ids_name": "ccbv_8"
+      },
+      {
+        "raw": "ccbv10",
+        "ids_name": "ccbv_9"
+      },
+      {
+        "raw": "ccbv11",
+        "ids_name": "ccbv_10"
+      },
+      {
+        "raw": "ccbv12",
+        "ids_name": "ccbv_11"
+      },
+      {
+        "raw": "ccbv13",
+        "ids_name": "ccbv_12"
+      },
+      {
+        "raw": "ccbv14",
+        "ids_name": "ccbv_13"
+      },
+      {
+        "raw": "ccbv15",
+        "ids_name": "ccbv_14"
+      },
+      {
+        "raw": "ccbv16",
+        "ids_name": "ccbv_15"
+      },
+      {
+        "raw": "ccbv17",
+        "ids_name": "ccbv_16"
+      },
+      {
+        "raw": "ccbv18",
+        "ids_name": "ccbv_17"
+      },
+      {
+        "raw": "ccbv19",
+        "ids_name": "ccbv_18"
+      },
+      {
+        "raw": "ccbv20",
+        "ids_name": "ccbv_19"
+      },
+      {
+        "raw": "ccbv21",
+        "ids_name": "ccbv_20"
+      },
+      {
+        "raw": "ccbv22",
+        "ids_name": "ccbv_21"
+      },
+      {
+        "raw": "ccbv23",
+        "ids_name": "ccbv_22"
+      },
+      {
+        "raw": "ccbv24",
+        "ids_name": "ccbv_23"
+      },
+      {
+        "raw": "ccbv25",
+        "ids_name": "ccbv_24"
+      },
+      {
+        "raw": "ccbv26",
+        "ids_name": "ccbv_25"
+      },
+      {
+        "raw": "ccbv27",
+        "ids_name": "ccbv_26"
+      },
+      {
+        "raw": "ccbv28",
+        "ids_name": "ccbv_27"
+      },
+      {
+        "raw": "ccbv29",
+        "ids_name": "ccbv_28"
+      },
+      {
+        "raw": "ccbv30",
+        "ids_name": "ccbv_29"
+      },
+      {
+        "raw": "ccbv31",
+        "ids_name": "ccbv_30"
+      },
+      {
+        "raw": "ccbv32",
+        "ids_name": "ccbv_31"
+      },
+      {
+        "raw": "ccbv33",
+        "ids_name": "ccbv_32"
+      },
+      {
+        "raw": "ccbv34",
+        "ids_name": "ccbv_33"
+      },
+      {
+        "raw": "ccbv35",
+        "ids_name": "ccbv_34"
+      },
+      {
+        "raw": "ccbv36",
+        "ids_name": "ccbv_35"
+      },
+      {
+        "raw": "ccbv37",
+        "ids_name": "ccbv_36"
+      },
+      {
+        "raw": "ccbv38",
+        "ids_name": "ccbv_37"
+      },
+      {
+        "raw": "ccbv39",
+        "ids_name": "ccbv_38"
+      },
+      {
+        "raw": "ccbv40",
+        "ids_name": "ccbv_39"
+      },
+      {
+        "raw": "obr01",
+        "ids_name": "obr_40"
+      },
+      {
+        "raw": "obr02",
+        "ids_name": "obr_41"
+      },
+      {
+        "raw": "obr03",
+        "ids_name": "obr_42"
+      },
+      {
+        "raw": "obr04",
+        "ids_name": "obr_43"
+      },
+      {
+        "raw": "obr05",
+        "ids_name": "obr_44"
+      },
+      {
+        "raw": "obr06",
+        "ids_name": "obr_45"
+      },
+      {
+        "raw": "obr07",
+        "ids_name": "obr_46"
+      },
+      {
+        "raw": "obr08",
+        "ids_name": "obr_47"
+      },
+      {
+        "raw": "obr09",
+        "ids_name": "obr_48"
+      },
+      {
+        "raw": "obr10",
+        "ids_name": "obr_49"
+      },
+      {
+        "raw": "obr11",
+        "ids_name": "obr_50"
+      },
+      {
+        "raw": "obr12",
+        "ids_name": "obr_51"
+      },
+      {
+        "raw": "obr13",
+        "ids_name": "obr_52"
+      },
+      {
+        "raw": "obr14",
+        "ids_name": "obr_53"
+      },
+      {
+        "raw": "obr15",
+        "ids_name": "obr_54"
+      },
+      {
+        "raw": "obr16",
+        "ids_name": "obr_55"
+      },
+      {
+        "raw": "obr17",
+        "ids_name": "obr_56"
+      },
+      {
+        "raw": "obr18",
+        "ids_name": "obr_57"
+      },
+      {
+        "raw": "obr19",
+        "ids_name": "obr_58"
+      },
+      {
+        "raw": "obv01",
+        "ids_name": "obv_59"
+      },
+      {
+        "raw": "obv02",
+        "ids_name": "obv_60"
+      },
+      {
+        "raw": "obv03",
+        "ids_name": "obv_61"
+      },
+      {
+        "raw": "obv04",
+        "ids_name": "obv_62"
+      },
+      {
+        "raw": "obv05",
+        "ids_name": "obv_63"
+      },
+      {
+        "raw": "obv06",
+        "ids_name": "obv_64"
+      },
+      {
+        "raw": "obv07",
+        "ids_name": "obv_65"
+      },
+      {
+        "raw": "obv08",
+        "ids_name": "obv_66"
+      },
+      {
+        "raw": "obv09",
+        "ids_name": "obv_67"
+      },
+      {
+        "raw": "obv10",
+        "ids_name": "obv_68"
+      },
+      {
+        "raw": "obv11",
+        "ids_name": "obv_69"
+      },
+      {
+        "raw": "obv12",
+        "ids_name": "obv_70"
+      },
+      {
+        "raw": "obv13",
+        "ids_name": "obv_71"
+      },
+      {
+        "raw": "obv14",
+        "ids_name": "obv_72"
+      },
+      {
+        "raw": "obv15",
+        "ids_name": "obv_73"
+      },
+      {
+        "raw": "obv16",
+        "ids_name": "obv_74"
+      },
+      {
+        "raw": "obv17",
+        "ids_name": "obv_75"
+      },
+      {
+        "raw": "obv18",
+        "ids_name": "obv_76"
+      },
+      {
+        "raw": "obv19",
+        "ids_name": "obv_77"
+      }
+    ],
+    "saddle_count": 36
+  },
+  "read_errors": [
+    {
+      "shot": 15051,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15075,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15151,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15175,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15295,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15299,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15489,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15577,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15737,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15757,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15785,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15813,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15865,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15950,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15966,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 15974,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16006,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16178,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16234,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16286,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16381,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16417,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    },
+    {
+      "shot": 16605,
+      "error": "sad_out_l01: unrecognized voltage unit '' with label 'Arb'"
+    }
+  ],
+  "served_training": [
+    25818,
+    25836
+  ],
+  "served_held_out": [
+    25828
+  ],
+  "loops": [
+    {
+      "loop": "saddle_l_0",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.0012085904209321893,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.863448239528102,
+        "real": 1.1285598949660869,
+        "permuted": 0.7257572617365848
+      },
+      "whitened_rms": {
+        "removed": 7333.707173263626,
+        "real": 933.7819292789243,
+        "permuted": 600.4989359230616
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 13768514791.213663,
+        "real": 223218865.01065472,
+        "permuted": 92313336.8434507
+      },
+      "permuted_geometry": "saddle_u_8",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_1",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.0008407385427850897,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.854197691329372,
+        "real": 1.0979282691533845,
+        "permuted": 1.0708051297060668
+      },
+      "whitened_rms": {
+        "removed": 10531.452099243996,
+        "real": 1305.909284848902,
+        "permuted": 1273.6481976416144
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 28393339729.579727,
+        "real": 436582159.4251701,
+        "permuted": 415278011.22706765
+      },
+      "permuted_geometry": "saddle_l_1",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_2",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0008423231681301475,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.8483437745752,
+        "real": 1.0983607195201854,
+        "permuted": 1.0710972879548604
+      },
+      "whitened_rms": {
+        "removed": 10504.690016086606,
+        "real": 1303.9659373948,
+        "permuted": 1271.5989877526022
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 28249219157.521828,
+        "real": 435283754.46679026,
+        "permuted": 413942780.3272812
+      },
+      "permuted_geometry": "saddle_l_6",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_3",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0003427430185897047,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.74618376497661,
+        "real": 1.013126411122689,
+        "permuted": 0.31911191394643934
+      },
+      "whitened_rms": {
+        "removed": 25518.196697236323,
+        "real": 2955.935952514603,
+        "permuted": 931.0529949216734
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 166701660845.78372,
+        "real": 2236814682.9743133,
+        "permuted": 221916077.91427007
+      },
+      "permuted_geometry": "saddle_m_0",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_4",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0011172772507665866,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.85086209578644,
+        "real": 1.0987658196899168,
+        "permuted": 1.0715895688070634
+      },
+      "whitened_rms": {
+        "removed": 7921.813578244508,
+        "real": 983.4316584679688,
+        "permuted": 959.1080173446868
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 16065313374.325516,
+        "real": 247587283.68052724,
+        "permuted": 235491376.36732316
+      },
+      "permuted_geometry": "saddle_l_8",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_5",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0008364912057180443,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.854106092226885,
+        "real": 1.0938282006745619,
+        "permuted": 0.6687427957089996
+      },
+      "whitened_rms": {
+        "removed": 10584.816710208588,
+        "real": 1307.6386137683533,
+        "permuted": 799.461836702695
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 28681816265.910007,
+        "real": 437739198.5198133,
+        "permuted": 163619642.4560759
+      },
+      "permuted_geometry": "saddle_m_8",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_6",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.000601477499681815,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.798820845918145,
+        "real": 1.0102021179293421,
+        "permuted": 0.4384247766441771
+      },
+      "whitened_rms": {
+        "removed": 14628.678297314149,
+        "real": 1679.534344117186,
+        "permuted": 728.9130131652577
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 54783546553.935356,
+        "real": 722133916.9457015,
+        "permuted": 136016430.2749837
+      },
+      "permuted_geometry": "saddle_m_7",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_7",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0008020506605281042,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.855316535177161,
+        "real": 1.098666792451845,
+        "permuted": 0.6775859740427976
+      },
+      "whitened_rms": {
+        "removed": 11040.84438923901,
+        "real": 1369.8221901948639,
+        "permuted": 844.8169266473096
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 31206462675.811974,
+        "real": 480361685.18406487,
+        "permuted": 182711203.72475025
+      },
+      "permuted_geometry": "saddle_m_4",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_8",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0009890300773849271,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.85134056722002,
+        "real": 1.105357519121709,
+        "permuted": 0.6856931253016258
+      },
+      "whitened_rms": {
+        "removed": 8949.516065905354,
+        "real": 1117.6176987906786,
+        "permuted": 693.2985568190728
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 20504022480.3579,
+        "real": 319761746.0864441,
+        "permuted": 123049699.55517673
+      },
+      "permuted_geometry": "saddle_m_1",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_9",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0008419679007483868,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.85291578462628,
+        "real": 1.1002335542140353,
+        "permuted": 0.6785234993314068
+      },
+      "whitened_rms": {
+        "removed": 10514.552605577157,
+        "real": 1306.7404983445188,
+        "permuted": 805.8781085695764
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 28302289022.83505,
+        "real": 437138106.8835024,
+        "permuted": 166256518.62314957
+      },
+      "permuted_geometry": "saddle_m_3",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_10",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0008464360703982251,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.848534506865976,
+        "real": 1.097584568282238,
+        "permuted": 1.0702888060612854
+      },
+      "whitened_rms": {
+        "removed": 10453.872201716287,
+        "real": 1296.712896185833,
+        "permuted": 1264.465023989046
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 27976561666.51303,
+        "real": 430454869.79447055,
+        "permuted": 409311180.0042543
+      },
+      "permuted_geometry": "saddle_l_5",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_l_11",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.000873274085383446,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 8.856476943387241,
+        "real": 1.1017410874003848,
+        "permuted": 1.0747865373977326
+      },
+      "whitened_rms": {
+        "removed": 10141.69215785036,
+        "real": 1261.6211861097665,
+        "permuted": 1230.7551035661438
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 26330603475.098495,
+        "real": 407472132.4136997,
+        "permuted": 387778079.98825186
+      },
+      "permuted_geometry": "saddle_l_9",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_0",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009792109492424712,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.139352740631493,
+        "real": 7.13299040616176,
+        "permuted": 7.102546113373647
+      },
+      "whitened_rms": {
+        "removed": 729.0924132491142,
+        "real": 728.4426723046676,
+        "permuted": 725.3336085414749
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 136083391.2466988,
+        "real": 135840954.06959754,
+        "permuted": 134683863.9820282
+      },
+      "permuted_geometry": "saddle_u_4",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_1",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009167505777537914,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.095135142321044,
+        "real": 7.088646512395886,
+        "permuted": 7.20316723324749
+      },
+      "whitened_rms": {
+        "removed": 773.9438964636857,
+        "real": 773.2361107166556,
+        "permuted": 785.7281367519379
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 153341223.64758843,
+        "real": 153060885.22655234,
+        "permuted": 158046388.45022005
+      },
+      "permuted_geometry": "saddle_l_4",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_2",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009032990794315725,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.108455037112192,
+        "real": 7.101991993638159,
+        "permuted": 7.216923626120634
+      },
+      "whitened_rms": {
+        "removed": 786.943682217123,
+        "real": 786.2281890187795,
+        "permuted": 798.9517304348517
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 158535771.89924976,
+        "real": 158247619.89318392,
+        "permuted": 163410910.09660006
+      },
+      "permuted_geometry": "saddle_l_11",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_3",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009346611366213063,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.057601537475536,
+        "real": 7.051018882350031,
+        "permuted": 7.019942443622562
+      },
+      "whitened_rms": {
+        "removed": 755.0973567798019,
+        "real": 754.3930742470649,
+        "permuted": 751.0681859522753
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 145964036.66325587,
+        "real": 145691881.08081597,
+        "permuted": 144410475.5071082
+      },
+      "permuted_geometry": "saddle_u_2",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_4",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.010043868623924545,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.17235906390335,
+        "real": 7.165935453388242,
+        "permuted": 7.135297553355615
+      },
+      "whitened_rms": {
+        "removed": 714.1032337697802,
+        "real": 713.4636783598452,
+        "permuted": 710.4132700779559
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 130545517.69099711,
+        "real": 130311787.60672268,
+        "permuted": 129199875.6615308
+      },
+      "permuted_geometry": "saddle_u_5",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_5",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009426071002491895,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.133165554792886,
+        "real": 7.125553176055491,
+        "permuted": 7.0913736611510725
+      },
+      "whitened_rms": {
+        "removed": 756.7485490940126,
+        "real": 755.9409614219717,
+        "permuted": 752.314899736739
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 146603101.83830863,
+        "real": 146290364.71182713,
+        "permuted": 144890293.3416703
+      },
+      "permuted_geometry": "saddle_u_11",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_6",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.008129235930150263,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.082576835040673,
+        "real": 7.076718930291055,
+        "permuted": 7.192844536835731
+      },
+      "whitened_rms": {
+        "removed": 871.2475435449388,
+        "real": 870.5269463326116,
+        "permuted": 884.8118812935937
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 194322504.2260711,
+        "real": 194001194.0585425,
+        "permuted": 200420368.71124703
+      },
+      "permuted_geometry": "saddle_l_0",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_7",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009563964137781095,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.084810386767789,
+        "real": 7.077159141673253,
+        "permuted": 7.191771171981942
+      },
+      "whitened_rms": {
+        "removed": 740.7817809333101,
+        "real": 739.9817732184849,
+        "permuted": 751.965510156177
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 140481957.622458,
+        "real": 140178694.32206675,
+        "permuted": 144755744.8868965
+      },
+      "permuted_geometry": "saddle_l_3",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_8",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009316368351208675,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.062797547367833,
+        "real": 7.055837588635291,
+        "permuted": 7.173568300798739
+      },
+      "whitened_rms": {
+        "removed": 758.1063007723958,
+        "real": 757.359232980509,
+        "permuted": 769.9962077892792
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 147129641.79732636,
+        "real": 146839809.99189118,
+        "permuted": 151780904.96252692
+      },
+      "permuted_geometry": "saddle_l_10",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_9",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009124113134888872,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.0939508032991005,
+        "real": 7.08725451200116,
+        "permuted": 7.202162020403529
+      },
+      "whitened_rms": {
+        "removed": 777.494831379631,
+        "real": 776.7609199080234,
+        "permuted": 789.354747571447
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 154751542.48244247,
+        "real": 154459526.83426785,
+        "permuted": 159508714.88347715
+      },
+      "permuted_geometry": "saddle_l_7",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_10",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009450459056127389,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.119597779088695,
+        "real": 7.113187586076505,
+        "permuted": 7.082657114105205
+      },
+      "whitened_rms": {
+        "removed": 753.3599941341014,
+        "real": 752.6816997809785,
+        "permuted": 749.4511189393521
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 145293127.8750037,
+        "real": 145031613.74340686,
+        "permuted": 143789306.7979384
+      },
+      "permuted_geometry": "saddle_u_7",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_m_11",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.009071058308614542,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 7.116222750087733,
+        "real": 7.109821165674386,
+        "permuted": 7.082926418216298
+      },
+      "whitened_rms": {
+        "removed": 784.4975203532366,
+        "real": 783.791805077736,
+        "permuted": 780.8269087510805
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 157551708.0167365,
+        "real": 157268375.988996,
+        "permuted": 156080809.32602066
+      },
+      "permuted_geometry": "saddle_m_5",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_0",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.0007532421600657251,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.240870749658014,
+        "real": 1.901146926526973,
+        "permuted": 1.8983759862546778
+      },
+      "whitened_rms": {
+        "removed": 2974.9672395693888,
+        "real": 2523.951827604931,
+        "permuted": 2520.2731430872545
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 2265710099.586844,
+        "real": 1630805203.9859896,
+        "permuted": 1626054839.2363286
+      },
+      "permuted_geometry": "saddle_u_1",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_1",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.00037011333899732157,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.228754880837807,
+        "real": 1.8905027308822593,
+        "permuted": 1.887924314101256
+      },
+      "whitened_rms": {
+        "removed": 6021.817227327589,
+        "real": 5107.902179380626,
+        "permuted": 5100.935619385818
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 9283144376.150867,
+        "real": 6679210156.575065,
+        "permuted": 6661003313.43846
+      },
+      "permuted_geometry": "saddle_u_9",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_2",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0004115942648153828,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.222923735247145,
+        "real": 1.8802283729480755,
+        "permuted": 1.877376172734743
+      },
+      "whitened_rms": {
+        "removed": 5400.764600654043,
+        "real": 4568.159796374803,
+        "permuted": 4561.230156053863
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 7467074117.549523,
+        "real": 5342229484.85506,
+        "permuted": 5326034057.342755
+      },
+      "permuted_geometry": "saddle_u_3",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_3",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.00031028458776260234,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.226208352578776,
+        "real": 1.8864041551026707,
+        "permuted": 1.8854071934725152
+      },
+      "whitened_rms": {
+        "removed": 7174.7306839553385,
+        "real": 6079.593474832697,
+        "permuted": 6076.380419239623
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 13178050659.1463,
+        "real": 9462132945.722448,
+        "permuted": 9452134143.825584
+      },
+      "permuted_geometry": "saddle_m_2",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_4",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.00044774812810402563,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.2340366458118037,
+        "real": 1.8927016298849904,
+        "permuted": 1.889866310079411
+      },
+      "whitened_rms": {
+        "removed": 4989.494105250103,
+        "real": 4227.156990917129,
+        "permuted": 4220.824591901671
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 6373133165.139334,
+        "real": 4574427193.820047,
+        "permuted": 4560732220.314089
+      },
+      "permuted_geometry": "saddle_u_6",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_5",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0004086077618632922,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.2287266095861336,
+        "real": 1.8906518758192008,
+        "permuted": 1.8897109892012938
+      },
+      "whitened_rms": {
+        "removed": 5454.4402177357515,
+        "real": 4627.05815278114,
+        "permuted": 4624.755488207133
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 7616235030.7464285,
+        "real": 5480874790.199916,
+        "permuted": 5475421011.379711
+      },
+      "permuted_geometry": "saddle_m_10",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_6",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 26,
+      "usable_shots": 3,
+      "floor_volts": 0.0003848292496393867,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.235670822143105,
+        "real": 1.8939059104927949,
+        "permuted": 2.0202171655829417
+      },
+      "whitened_rms": {
+        "removed": 5809.513762891186,
+        "real": 4921.41881696239,
+        "permuted": 5249.645570018479
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 8640115241.27286,
+        "real": 6200412972.019583,
+        "permuted": 7055047324.368549
+      },
+      "permuted_geometry": "saddle_l_2",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_7",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0003573637064883627,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.2322523219154338,
+        "real": 1.8952558985627004,
+        "permuted": 1.8927490607008923
+      },
+      "whitened_rms": {
+        "removed": 6246.443836870507,
+        "real": 5303.43698633095,
+        "permuted": 5296.422178122132
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 9988623515.43745,
+        "real": 7200369630.203676,
+        "permuted": 7181334499.5594225
+      },
+      "permuted_geometry": "saddle_u_0",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_8",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0004369639773998675,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.247393817019929,
+        "real": 1.908693571846055,
+        "permuted": 1.9076450253981003
+      },
+      "whitened_rms": {
+        "removed": 5143.201575546192,
+        "real": 4368.079911766736,
+        "permuted": 4365.6802941730975
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 6771845746.355411,
+        "real": 4884511261.588503,
+        "permuted": 4879146094.318414
+      },
+      "permuted_geometry": "saddle_m_11",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_9",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0004188506643823316,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.2486636132771705,
+        "real": 1.914136999023929,
+        "permuted": 1.913270930215136
+      },
+      "whitened_rms": {
+        "removed": 5368.65237301991,
+        "real": 4569.974842577027,
+        "permuted": 4567.907115622194
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 7378541645.397072,
+        "real": 5346475535.8174515,
+        "permuted": 5341638506.73968
+      },
+      "permuted_geometry": "saddle_m_6",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_10",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0004168185088957157,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 2.283107810982972,
+        "real": 1.9511629952249874,
+        "permuted": 1.9502528049336605
+      },
+      "whitened_rms": {
+        "removed": 5477.462642030096,
+        "real": 4681.085301116393,
+        "permuted": 4678.901640189871
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 7680664830.677841,
+        "real": 5609615256.659956,
+        "permuted": 5604382862.994293
+      },
+      "permuted_geometry": "saddle_m_9",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    },
+    {
+      "loop": "saddle_u_11",
+      "training_shots": 2,
+      "held_out_shots": 1,
+      "raw_available_shots": 3,
+      "usable_shots": 3,
+      "floor_volts": 0.0005025632817220077,
+      "held_out_samples": 256,
+      "rms_volts": {
+        "removed": 1.2816132769637052,
+        "real": 0.3583951162583084,
+        "permuted": 0.29060533195171634
+      },
+      "whitened_rms": {
+        "removed": 2550.1530326137677,
+        "real": 713.1343042617152,
+        "permuted": 578.2462478276802
+      },
+      "whitened_squared_residual_contribution": {
+        "removed": 1664839805.3757937,
+        "real": 130191497.19419922,
+        "permuted": 85598393.12045848
+      },
+      "permuted_geometry": "saddle_u_10",
+      "traversal_options": [
+        -1,
+        1
+      ],
+      "disposition": "unresolved"
+    }
+  ],
+  "fits": {
+    "removed": {
+      "training_objective": 2849241757.1625385,
+      "normal_rank": 293,
+      "parameters": 299,
+      "sign_search": "coefficients use no saddle rows; evaluation signs profiled on training shots only",
+      "traversal_choices_conditional": {
+        "ccbv01": 1,
+        "ccbv02": 1,
+        "ccbv03": 1,
+        "ccbv04": 1,
+        "ccbv05": 1,
+        "ccbv07": 1,
+        "ccbv08": 1,
+        "ccbv09": 1,
+        "ccbv10": 1,
+        "ccbv11": 1,
+        "ccbv12": 1,
+        "ccbv13": 1,
+        "ccbv14": 1,
+        "ccbv15": 1,
+        "ccbv16": 1,
+        "ccbv17": 1,
+        "ccbv18": 1,
+        "ccbv19": 1,
+        "ccbv20": 1,
+        "ccbv21": 1,
+        "ccbv22": 1,
+        "ccbv23": 1,
+        "ccbv24": 1,
+        "ccbv25": 1,
+        "ccbv26": 1,
+        "ccbv27": 1,
+        "ccbv28": 1,
+        "ccbv29": 1,
+        "ccbv30": 1,
+        "ccbv31": 1,
+        "ccbv32": 1,
+        "ccbv33": 1,
+        "ccbv34": 1,
+        "ccbv36": 1,
+        "ccbv37": 1,
+        "ccbv38": 1,
+        "ccbv39": 1,
+        "ccbv40": 1,
+        "obr01": 1,
+        "obr03": 1,
+        "obr04": 1,
+        "obr06": 1,
+        "obr07": 1,
+        "obr08": 1,
+        "obr09": 1,
+        "obr10": 1,
+        "obr11": 1,
+        "obr12": 1,
+        "obr13": 1,
+        "obr14": 1,
+        "obr15": 1,
+        "obr16": 1,
+        "obv02": 1,
+        "obv04": 1,
+        "obv05": 1,
+        "obv06": 1,
+        "obv08": 1,
+        "obv09": 1,
+        "obv11": 1,
+        "obv12": 1,
+        "obv13": 1,
+        "obv14": 1,
+        "obv15": 1,
+        "obv16": 1,
+        "obv17": 1,
+        "obv18": 1,
+        "obv19": 1,
+        "saddle_l_0": 1,
+        "saddle_l_1": 1,
+        "saddle_l_2": 1,
+        "saddle_l_3": -1,
+        "saddle_l_4": 1,
+        "saddle_l_5": 1,
+        "saddle_l_6": 1,
+        "saddle_l_7": 1,
+        "saddle_l_8": 1,
+        "saddle_l_9": 1,
+        "saddle_l_10": 1,
+        "saddle_l_11": 1,
+        "saddle_m_0": -1,
+        "saddle_m_1": -1,
+        "saddle_m_2": -1,
+        "saddle_m_3": -1,
+        "saddle_m_4": -1,
+        "saddle_m_5": -1,
+        "saddle_m_6": -1,
+        "saddle_m_7": -1,
+        "saddle_m_8": -1,
+        "saddle_m_9": -1,
+        "saddle_m_10": -1,
+        "saddle_m_11": -1,
+        "saddle_u_0": -1,
+        "saddle_u_1": -1,
+        "saddle_u_2": -1,
+        "saddle_u_3": -1,
+        "saddle_u_4": -1,
+        "saddle_u_5": -1,
+        "saddle_u_6": -1,
+        "saddle_u_7": -1,
+        "saddle_u_8": -1,
+        "saddle_u_9": -1,
+        "saddle_u_10": -1,
+        "saddle_u_11": -1
+      }
+    },
+    "real": {
+      "training_objective": 20548533232.255173,
+      "normal_rank": 293,
+      "parameters": 299,
+      "sign_search": "16 deterministic coordinate-descent starts; conditional nuisance, not sign evidence",
+      "traversal_choices_conditional": {
+        "ccbv01": 1,
+        "ccbv02": 1,
+        "ccbv03": 1,
+        "ccbv04": 1,
+        "ccbv05": 1,
+        "ccbv07": 1,
+        "ccbv08": 1,
+        "ccbv09": 1,
+        "ccbv10": 1,
+        "ccbv11": 1,
+        "ccbv12": 1,
+        "ccbv13": 1,
+        "ccbv14": 1,
+        "ccbv15": 1,
+        "ccbv16": 1,
+        "ccbv17": 1,
+        "ccbv18": 1,
+        "ccbv19": 1,
+        "ccbv20": 1,
+        "ccbv21": 1,
+        "ccbv22": 1,
+        "ccbv23": 1,
+        "ccbv24": 1,
+        "ccbv25": 1,
+        "ccbv26": 1,
+        "ccbv27": 1,
+        "ccbv28": 1,
+        "ccbv29": 1,
+        "ccbv30": 1,
+        "ccbv31": 1,
+        "ccbv32": 1,
+        "ccbv33": 1,
+        "ccbv34": 1,
+        "ccbv36": 1,
+        "ccbv37": 1,
+        "ccbv38": 1,
+        "ccbv39": 1,
+        "ccbv40": 1,
+        "obr01": 1,
+        "obr03": 1,
+        "obr04": 1,
+        "obr06": 1,
+        "obr07": 1,
+        "obr08": 1,
+        "obr09": 1,
+        "obr10": 1,
+        "obr11": 1,
+        "obr12": 1,
+        "obr13": 1,
+        "obr14": 1,
+        "obr15": 1,
+        "obr16": 1,
+        "obv02": 1,
+        "obv04": 1,
+        "obv05": 1,
+        "obv06": 1,
+        "obv08": 1,
+        "obv09": 1,
+        "obv11": 1,
+        "obv12": 1,
+        "obv13": 1,
+        "obv14": 1,
+        "obv15": 1,
+        "obv16": 1,
+        "obv17": 1,
+        "obv18": 1,
+        "obv19": 1,
+        "saddle_l_0": -1,
+        "saddle_l_1": -1,
+        "saddle_l_2": -1,
+        "saddle_l_3": 1,
+        "saddle_l_4": -1,
+        "saddle_l_5": -1,
+        "saddle_l_6": -1,
+        "saddle_l_7": -1,
+        "saddle_l_8": -1,
+        "saddle_l_9": -1,
+        "saddle_l_10": -1,
+        "saddle_l_11": -1,
+        "saddle_m_0": -1,
+        "saddle_m_1": -1,
+        "saddle_m_2": -1,
+        "saddle_m_3": -1,
+        "saddle_m_4": -1,
+        "saddle_m_5": -1,
+        "saddle_m_6": -1,
+        "saddle_m_7": -1,
+        "saddle_m_8": -1,
+        "saddle_m_9": -1,
+        "saddle_m_10": -1,
+        "saddle_m_11": -1,
+        "saddle_u_0": -1,
+        "saddle_u_1": -1,
+        "saddle_u_2": -1,
+        "saddle_u_3": -1,
+        "saddle_u_4": -1,
+        "saddle_u_5": -1,
+        "saddle_u_6": -1,
+        "saddle_u_7": -1,
+        "saddle_u_8": -1,
+        "saddle_u_9": -1,
+        "saddle_u_10": -1,
+        "saddle_u_11": 1
+      }
+    },
+    "permuted": {
+      "training_objective": 20732838769.6875,
+      "normal_rank": 293,
+      "parameters": 299,
+      "sign_search": "16 deterministic coordinate-descent starts; conditional nuisance, not sign evidence",
+      "traversal_choices_conditional": {
+        "ccbv01": 1,
+        "ccbv02": 1,
+        "ccbv03": 1,
+        "ccbv04": 1,
+        "ccbv05": 1,
+        "ccbv07": 1,
+        "ccbv08": 1,
+        "ccbv09": 1,
+        "ccbv10": 1,
+        "ccbv11": 1,
+        "ccbv12": 1,
+        "ccbv13": 1,
+        "ccbv14": 1,
+        "ccbv15": 1,
+        "ccbv16": 1,
+        "ccbv17": 1,
+        "ccbv18": 1,
+        "ccbv19": 1,
+        "ccbv20": 1,
+        "ccbv21": 1,
+        "ccbv22": 1,
+        "ccbv23": 1,
+        "ccbv24": 1,
+        "ccbv25": 1,
+        "ccbv26": 1,
+        "ccbv27": 1,
+        "ccbv28": 1,
+        "ccbv29": 1,
+        "ccbv30": 1,
+        "ccbv31": 1,
+        "ccbv32": 1,
+        "ccbv33": 1,
+        "ccbv34": 1,
+        "ccbv36": 1,
+        "ccbv37": 1,
+        "ccbv38": 1,
+        "ccbv39": 1,
+        "ccbv40": 1,
+        "obr01": 1,
+        "obr03": 1,
+        "obr04": 1,
+        "obr06": 1,
+        "obr07": 1,
+        "obr08": 1,
+        "obr09": 1,
+        "obr10": 1,
+        "obr11": 1,
+        "obr12": 1,
+        "obr13": 1,
+        "obr14": 1,
+        "obr15": 1,
+        "obr16": 1,
+        "obv02": 1,
+        "obv04": 1,
+        "obv05": 1,
+        "obv06": 1,
+        "obv08": 1,
+        "obv09": 1,
+        "obv11": 1,
+        "obv12": 1,
+        "obv13": 1,
+        "obv14": 1,
+        "obv15": 1,
+        "obv16": 1,
+        "obv17": 1,
+        "obv18": 1,
+        "obv19": 1,
+        "saddle_l_0": 1,
+        "saddle_l_1": -1,
+        "saddle_l_2": -1,
+        "saddle_l_3": -1,
+        "saddle_l_4": -1,
+        "saddle_l_5": 1,
+        "saddle_l_6": 1,
+        "saddle_l_7": 1,
+        "saddle_l_8": 1,
+        "saddle_l_9": 1,
+        "saddle_l_10": -1,
+        "saddle_l_11": -1,
+        "saddle_m_0": -1,
+        "saddle_m_1": 1,
+        "saddle_m_2": 1,
+        "saddle_m_3": -1,
+        "saddle_m_4": -1,
+        "saddle_m_5": -1,
+        "saddle_m_6": 1,
+        "saddle_m_7": 1,
+        "saddle_m_8": 1,
+        "saddle_m_9": 1,
+        "saddle_m_10": -1,
+        "saddle_m_11": -1,
+        "saddle_u_0": -1,
+        "saddle_u_1": -1,
+        "saddle_u_2": -1,
+        "saddle_u_3": -1,
+        "saddle_u_4": -1,
+        "saddle_u_5": -1,
+        "saddle_u_6": 1,
+        "saddle_u_7": -1,
+        "saddle_u_8": -1,
+        "saddle_u_9": -1,
+        "saddle_u_10": -1,
+        "saddle_u_11": 1
+      }
+    }
+  },
+  "gain": {
+    "removed": 0.0,
+    "real": 0.873168207698878,
+    "permuted": 0.8787571201184281
+  },
+  "held_out_whitened_power": {
+    "removed": 561081931796.7281,
+    "real": 71163027037.55492,
+    "permuted": 68027189260.55105
+  },
+  "held_out_whitened_rms": {
+    "removed": 7802.646089772953,
+    "real": 2778.791575714607,
+    "permuted": 2716.8773335957444
+  },
+  "attributable": false,
+  "geometry_control_response_delta": 1.4569978834732877,
+  "signs_promoted": [],
+  "full_cohort_measured": false,
+  "single_held_out_diagnostic": true,
+  "cross_shot_uncertainty": null,
+  "scope": "axisymmetric vacuum pickup admission; no non-axisymmetric harmonic inference or sign calibration",
+  "weighting": "per-sensor median training quiet-signal standard deviation; no held-out value sets fit weights",
+  "raw_provenance": {
+    "25818": [
+      {
+        "key": "sad_out_l01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "4d11c96a-8f41-57e3-9b72-ce698df29ce6",
+        "loop": "saddle_l_1",
+        "ids_name": "saddle_l_0"
+      },
+      {
+        "key": "sad_out_l02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "e1f2f3d7-353a-532c-a036-35224f16094a",
+        "loop": "saddle_l_2",
+        "ids_name": "saddle_l_1"
+      },
+      {
+        "key": "sad_out_l03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "58c8ea43-8861-58d6-88a4-970b7ac14c0f",
+        "loop": "saddle_l_3",
+        "ids_name": "saddle_l_2"
+      },
+      {
+        "key": "sad_out_l04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "bf682190-26d4-5cfa-820d-35d59178ada2",
+        "loop": "saddle_l_4",
+        "ids_name": "saddle_l_3"
+      },
+      {
+        "key": "sad_out_l05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "b3d61452-62ba-544d-8e4f-f1614c37bc37",
+        "loop": "saddle_l_5",
+        "ids_name": "saddle_l_4"
+      },
+      {
+        "key": "sad_out_l06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "af617bbd-c1a1-5883-be4a-8498175f414e",
+        "loop": "saddle_l_6",
+        "ids_name": "saddle_l_5"
+      },
+      {
+        "key": "sad_out_l07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "004acb5e-d1f2-578c-b900-ddbb463961cd",
+        "loop": "saddle_l_7",
+        "ids_name": "saddle_l_6"
+      },
+      {
+        "key": "sad_out_l08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "42fd6b23-0d66-5785-833f-ad89dde154fe",
+        "loop": "saddle_l_8",
+        "ids_name": "saddle_l_7"
+      },
+      {
+        "key": "sad_out_l09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "0bc8412e-7302-5952-93d6-4c83a86f1932",
+        "loop": "saddle_l_9",
+        "ids_name": "saddle_l_8"
+      },
+      {
+        "key": "sad_out_l10",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "173c4619-4e68-5475-89ec-63b853b72375",
+        "loop": "saddle_l_10",
+        "ids_name": "saddle_l_9"
+      },
+      {
+        "key": "sad_out_l11",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "eba33387-d76a-5f6f-91bd-a055cd4452a7",
+        "loop": "saddle_l_11",
+        "ids_name": "saddle_l_10"
+      },
+      {
+        "key": "sad_out_l12",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "ae34c1cd-eee3-5c0b-8dbc-21985afc8f0c",
+        "loop": "saddle_l_12",
+        "ids_name": "saddle_l_11"
+      },
+      {
+        "key": "sad_out_m01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "5b9a3090-d1ab-54a3-86bd-0a783594524d",
+        "loop": "saddle_m_1",
+        "ids_name": "saddle_m_0"
+      },
+      {
+        "key": "sad_out_m02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "e1849423-ca92-56c1-96a4-68bccb2eb97c",
+        "loop": "saddle_m_2",
+        "ids_name": "saddle_m_1"
+      },
+      {
+        "key": "sad_out_m03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "6a70ac4f-ade0-5121-a666-855476ede824",
+        "loop": "saddle_m_3",
+        "ids_name": "saddle_m_2"
+      },
+      {
+        "key": "sad_out_m04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "a947c334-b77c-5695-bccf-f24e9f9b467a",
+        "loop": "saddle_m_4",
+        "ids_name": "saddle_m_3"
+      },
+      {
+        "key": "sad_out_m05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "0f52961b-06ee-578b-8cbd-9a7a6dbc37a2",
+        "loop": "saddle_m_5",
+        "ids_name": "saddle_m_4"
+      },
+      {
+        "key": "sad_out_m06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "1ad781a8-053c-52aa-a7ba-2d76c04389c0",
+        "loop": "saddle_m_6",
+        "ids_name": "saddle_m_5"
+      },
+      {
+        "key": "sad_out_m07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "73fd9e03-bb9a-55ca-b99e-b5fb7bb5ffd2",
+        "loop": "saddle_m_7",
+        "ids_name": "saddle_m_6"
+      },
+      {
+        "key": "sad_out_m08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "b4620d39-727b-5abc-951e-8752fa10d543",
+        "loop": "saddle_m_8",
+        "ids_name": "saddle_m_7"
+      },
+      {
+        "key": "sad_out_m09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "2c27726f-3dca-5255-8da6-3b62e927a438",
+        "loop": "saddle_m_9",
+        "ids_name": "saddle_m_8"
+      },
+      {
+        "key": "sad_out_m010",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "527d34ee-2838-5603-a3a3-ccb069684bc6",
+        "loop": "saddle_m_10",
+        "ids_name": "saddle_m_9"
+      },
+      {
+        "key": "sad_out_m011",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "6d8bcbcc-0698-5a94-8d3c-ff6e39c4d2a8",
+        "loop": "saddle_m_11",
+        "ids_name": "saddle_m_10"
+      },
+      {
+        "key": "sad_out_m012",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "e0017d1e-4da0-5654-910a-3446c4ca509b",
+        "loop": "saddle_m_12",
+        "ids_name": "saddle_m_11"
+      },
+      {
+        "key": "sad_out_u01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "c53e55b4-1a74-5956-abfe-c9d68446e297",
+        "loop": "saddle_u_1",
+        "ids_name": "saddle_u_0"
+      },
+      {
+        "key": "sad_out_u02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "112d5caf-f7d4-5cf2-b3d4-48c6e991b6ab",
+        "loop": "saddle_u_2",
+        "ids_name": "saddle_u_1"
+      },
+      {
+        "key": "sad_out_u03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "6368dbaa-0deb-5a82-92a8-9d53917a539f",
+        "loop": "saddle_u_3",
+        "ids_name": "saddle_u_2"
+      },
+      {
+        "key": "sad_out_u04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "8fe3aadf-3710-588c-b646-ce1f1a375c83",
+        "loop": "saddle_u_4",
+        "ids_name": "saddle_u_3"
+      },
+      {
+        "key": "sad_out_u05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "c1549d89-c82b-59f7-8830-d60e075842f9",
+        "loop": "saddle_u_5",
+        "ids_name": "saddle_u_4"
+      },
+      {
+        "key": "sad_out_u06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "4e288a67-88f3-52f6-81ca-7da7d2dafe27",
+        "loop": "saddle_u_6",
+        "ids_name": "saddle_u_5"
+      },
+      {
+        "key": "sad_out_u07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "6c7a25f1-c2fe-5060-912d-90c5ed4281f7",
+        "loop": "saddle_u_7",
+        "ids_name": "saddle_u_6"
+      },
+      {
+        "key": "sad_out_u08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "15f24e50-acfb-5899-a9ae-b625902059ad",
+        "loop": "saddle_u_8",
+        "ids_name": "saddle_u_7"
+      },
+      {
+        "key": "sad_out_u09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "26c0caa0-f4e5-5a34-b2f0-72ee53e2f5c3",
+        "loop": "saddle_u_9",
+        "ids_name": "saddle_u_8"
+      },
+      {
+        "key": "sad_out_u10",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "da0e3c5d-c095-5034-8a47-977275d1a608",
+        "loop": "saddle_u_10",
+        "ids_name": "saddle_u_9"
+      },
+      {
+        "key": "sad_out_u11",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "3a7f4a6b-84fa-5301-bf8c-dd27982a237c",
+        "loop": "saddle_u_11",
+        "ids_name": "saddle_u_10"
+      },
+      {
+        "key": "sad_out_u12",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "6e9b43ad-da49-5cad-8cfa-b3865c0e956e",
+        "loop": "saddle_u_12",
+        "ids_name": "saddle_u_11"
+      }
+    ],
+    "25828": [
+      {
+        "key": "sad_out_l01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "e237f13c-12d5-59ed-880b-c1b7fb3e9f33",
+        "loop": "saddle_l_1",
+        "ids_name": "saddle_l_0"
+      },
+      {
+        "key": "sad_out_l02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "52164535-14c7-571a-9dfd-8f3d6bf4a521",
+        "loop": "saddle_l_2",
+        "ids_name": "saddle_l_1"
+      },
+      {
+        "key": "sad_out_l03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "edf1c1e2-81cd-5520-bfda-88b675ae5276",
+        "loop": "saddle_l_3",
+        "ids_name": "saddle_l_2"
+      },
+      {
+        "key": "sad_out_l04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "0d4f5b8e-f2ce-572d-9bc0-251c91ec7c83",
+        "loop": "saddle_l_4",
+        "ids_name": "saddle_l_3"
+      },
+      {
+        "key": "sad_out_l05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "ecbebc02-1c29-5f4a-84c4-8dacf3434b6d",
+        "loop": "saddle_l_5",
+        "ids_name": "saddle_l_4"
+      },
+      {
+        "key": "sad_out_l06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "ddea9707-457b-587f-8409-42b5eff15c88",
+        "loop": "saddle_l_6",
+        "ids_name": "saddle_l_5"
+      },
+      {
+        "key": "sad_out_l07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "ff5b4e4c-3719-5d9a-a2d2-3997f4e9b7da",
+        "loop": "saddle_l_7",
+        "ids_name": "saddle_l_6"
+      },
+      {
+        "key": "sad_out_l08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "691f5d3d-6f2f-52f5-92e0-a30b40092b9d",
+        "loop": "saddle_l_8",
+        "ids_name": "saddle_l_7"
+      },
+      {
+        "key": "sad_out_l09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "66dc1058-98d8-5fe0-9951-3efcd4d8acbd",
+        "loop": "saddle_l_9",
+        "ids_name": "saddle_l_8"
+      },
+      {
+        "key": "sad_out_l10",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "88f3f2c4-e40c-55c2-9a54-d9e640564521",
+        "loop": "saddle_l_10",
+        "ids_name": "saddle_l_9"
+      },
+      {
+        "key": "sad_out_l11",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "3f55d7a8-849a-56d0-90c9-d1510558fa2a",
+        "loop": "saddle_l_11",
+        "ids_name": "saddle_l_10"
+      },
+      {
+        "key": "sad_out_l12",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "0c9854bd-81fc-5d55-a65d-3d72fab9ad48",
+        "loop": "saddle_l_12",
+        "ids_name": "saddle_l_11"
+      },
+      {
+        "key": "sad_out_m01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "389b953b-1266-58c6-a1a2-73b8e6f1915c",
+        "loop": "saddle_m_1",
+        "ids_name": "saddle_m_0"
+      },
+      {
+        "key": "sad_out_m02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "b767ffc1-b94c-52c7-80d7-874802e89f33",
+        "loop": "saddle_m_2",
+        "ids_name": "saddle_m_1"
+      },
+      {
+        "key": "sad_out_m03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "8228e80c-e562-536e-903c-86b4ca531f94",
+        "loop": "saddle_m_3",
+        "ids_name": "saddle_m_2"
+      },
+      {
+        "key": "sad_out_m04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "a0befce9-596b-5384-9c8e-52571c86a904",
+        "loop": "saddle_m_4",
+        "ids_name": "saddle_m_3"
+      },
+      {
+        "key": "sad_out_m05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "3cf5c8d9-f5f9-531f-a7b5-50ceafabd7fe",
+        "loop": "saddle_m_5",
+        "ids_name": "saddle_m_4"
+      },
+      {
+        "key": "sad_out_m06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "de87d6c4-bc16-5a32-b4aa-f6ad8ce1b7af",
+        "loop": "saddle_m_6",
+        "ids_name": "saddle_m_5"
+      },
+      {
+        "key": "sad_out_m07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "2bf38364-4c40-5252-90ca-852d48a992bb",
+        "loop": "saddle_m_7",
+        "ids_name": "saddle_m_6"
+      },
+      {
+        "key": "sad_out_m08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "2d4db449-f535-5a61-9be1-4e4eddcb7c38",
+        "loop": "saddle_m_8",
+        "ids_name": "saddle_m_7"
+      },
+      {
+        "key": "sad_out_m09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "74fad978-c9f7-5cc3-b619-ad809562f1ce",
+        "loop": "saddle_m_9",
+        "ids_name": "saddle_m_8"
+      },
+      {
+        "key": "sad_out_m010",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "069b8aec-d7bc-5d93-8893-3fcd912ee87a",
+        "loop": "saddle_m_10",
+        "ids_name": "saddle_m_9"
+      },
+      {
+        "key": "sad_out_m011",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "627bcfb9-28d3-561f-bb47-65ff32507115",
+        "loop": "saddle_m_11",
+        "ids_name": "saddle_m_10"
+      },
+      {
+        "key": "sad_out_m012",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "b2fed464-c624-5fbc-bce1-d269c2309b09",
+        "loop": "saddle_m_12",
+        "ids_name": "saddle_m_11"
+      },
+      {
+        "key": "sad_out_u01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "d3d76faa-eccd-5a8f-a11b-8ae8f0dcbbf9",
+        "loop": "saddle_u_1",
+        "ids_name": "saddle_u_0"
+      },
+      {
+        "key": "sad_out_u02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "433fdeae-7b8e-514c-9ef7-61dd1aae0b87",
+        "loop": "saddle_u_2",
+        "ids_name": "saddle_u_1"
+      },
+      {
+        "key": "sad_out_u03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "92c6dc16-a8dd-5a76-9e56-6ea69e9c70f8",
+        "loop": "saddle_u_3",
+        "ids_name": "saddle_u_2"
+      },
+      {
+        "key": "sad_out_u04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "5dfffb86-7c01-533b-9a2b-6e99dbb02888",
+        "loop": "saddle_u_4",
+        "ids_name": "saddle_u_3"
+      },
+      {
+        "key": "sad_out_u05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "4d684d38-e683-5c47-91af-b780506f0b2a",
+        "loop": "saddle_u_5",
+        "ids_name": "saddle_u_4"
+      },
+      {
+        "key": "sad_out_u06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "3cd5422a-1d4e-53c1-b6b9-4e365523491c",
+        "loop": "saddle_u_6",
+        "ids_name": "saddle_u_5"
+      },
+      {
+        "key": "sad_out_u07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "0cfe6a3c-de32-51b9-ac3c-d2b7be54556f",
+        "loop": "saddle_u_7",
+        "ids_name": "saddle_u_6"
+      },
+      {
+        "key": "sad_out_u08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "f491534f-451d-55a5-a9e9-709ad5fb9178",
+        "loop": "saddle_u_8",
+        "ids_name": "saddle_u_7"
+      },
+      {
+        "key": "sad_out_u09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "629ad514-d8f3-5fab-aa6c-92ce491d2d2e",
+        "loop": "saddle_u_9",
+        "ids_name": "saddle_u_8"
+      },
+      {
+        "key": "sad_out_u10",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "c4b2fc12-4dbc-51b6-9173-fd4f12d2e0b3",
+        "loop": "saddle_u_10",
+        "ids_name": "saddle_u_9"
+      },
+      {
+        "key": "sad_out_u11",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "bf6aa267-4bc5-5ccb-bdef-453ae8ad2e7e",
+        "loop": "saddle_u_11",
+        "ids_name": "saddle_u_10"
+      },
+      {
+        "key": "sad_out_u12",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "22d419d2-c3fa-539d-afcd-9c80f0ce25b9",
+        "loop": "saddle_u_12",
+        "ids_name": "saddle_u_11"
+      }
+    ],
+    "25836": [
+      {
+        "key": "sad_out_l01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "17c43663-d07b-52f3-918b-471ff8cc421c",
+        "loop": "saddle_l_1",
+        "ids_name": "saddle_l_0"
+      },
+      {
+        "key": "sad_out_l02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "5bd1b99c-77ac-5770-a3a5-432a0a788131",
+        "loop": "saddle_l_2",
+        "ids_name": "saddle_l_1"
+      },
+      {
+        "key": "sad_out_l03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "237f2c56-febc-558a-845b-1d783e913aa5",
+        "loop": "saddle_l_3",
+        "ids_name": "saddle_l_2"
+      },
+      {
+        "key": "sad_out_l04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "90c1df06-8ba6-5fe8-a37e-fdb181b31bee",
+        "loop": "saddle_l_4",
+        "ids_name": "saddle_l_3"
+      },
+      {
+        "key": "sad_out_l05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "8954de90-78ef-5b97-99c3-cc415e922e1d",
+        "loop": "saddle_l_5",
+        "ids_name": "saddle_l_4"
+      },
+      {
+        "key": "sad_out_l06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "a8139a0a-6aa6-5f52-9b0e-f7a8a53fe3dc",
+        "loop": "saddle_l_6",
+        "ids_name": "saddle_l_5"
+      },
+      {
+        "key": "sad_out_l07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "db213d34-fb5a-5d4e-ba59-8afc1c4d117d",
+        "loop": "saddle_l_7",
+        "ids_name": "saddle_l_6"
+      },
+      {
+        "key": "sad_out_l08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "18914c8e-68e1-5d8c-89cc-14a1f650dab9",
+        "loop": "saddle_l_8",
+        "ids_name": "saddle_l_7"
+      },
+      {
+        "key": "sad_out_l09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "18c70513-b8b1-5d98-85d6-100ae3336aa9",
+        "loop": "saddle_l_9",
+        "ids_name": "saddle_l_8"
+      },
+      {
+        "key": "sad_out_l10",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "15b54329-845d-5d8d-83c5-59e44a82771e",
+        "loop": "saddle_l_10",
+        "ids_name": "saddle_l_9"
+      },
+      {
+        "key": "sad_out_l11",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "f46b4f2d-23f6-5e2b-be1c-11b5790ff20d",
+        "loop": "saddle_l_11",
+        "ids_name": "saddle_l_10"
+      },
+      {
+        "key": "sad_out_l12",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "d070719a-862d-5074-b343-ce191694605d",
+        "loop": "saddle_l_12",
+        "ids_name": "saddle_l_11"
+      },
+      {
+        "key": "sad_out_m01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "1f9d97ac-7066-588f-94b8-597ebeab19ee",
+        "loop": "saddle_m_1",
+        "ids_name": "saddle_m_0"
+      },
+      {
+        "key": "sad_out_m02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "61d87c13-dc86-57f7-9414-050f28e2f8f3",
+        "loop": "saddle_m_2",
+        "ids_name": "saddle_m_1"
+      },
+      {
+        "key": "sad_out_m03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "20e095a2-2cc1-5de0-9640-3bd8a564b089",
+        "loop": "saddle_m_3",
+        "ids_name": "saddle_m_2"
+      },
+      {
+        "key": "sad_out_m04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "b9983ae8-02f3-56b8-8400-b8436629ccef",
+        "loop": "saddle_m_4",
+        "ids_name": "saddle_m_3"
+      },
+      {
+        "key": "sad_out_m05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "1cc502c6-cbb6-5dc0-a14c-ece7e051556e",
+        "loop": "saddle_m_5",
+        "ids_name": "saddle_m_4"
+      },
+      {
+        "key": "sad_out_m06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "518d3dbd-f9ee-55cb-854c-cb3628bf637e",
+        "loop": "saddle_m_6",
+        "ids_name": "saddle_m_5"
+      },
+      {
+        "key": "sad_out_m07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "553f1f40-cfdc-52a6-8653-c18cd8166b7c",
+        "loop": "saddle_m_7",
+        "ids_name": "saddle_m_6"
+      },
+      {
+        "key": "sad_out_m08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "f0b454bd-7d0f-5ebf-9175-c7838bcc6771",
+        "loop": "saddle_m_8",
+        "ids_name": "saddle_m_7"
+      },
+      {
+        "key": "sad_out_m09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "608e6e4c-cd29-5c24-bf9d-0f5842f7a3fb",
+        "loop": "saddle_m_9",
+        "ids_name": "saddle_m_8"
+      },
+      {
+        "key": "sad_out_m010",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "4f34eda0-a752-52d3-965b-d50d8ac750a5",
+        "loop": "saddle_m_10",
+        "ids_name": "saddle_m_9"
+      },
+      {
+        "key": "sad_out_m011",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "2b578071-ab88-5029-9eee-fc5cdc0c03d8",
+        "loop": "saddle_m_11",
+        "ids_name": "saddle_m_10"
+      },
+      {
+        "key": "sad_out_m012",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "3877707d-1a93-54b7-8f15-cc1122d22eaf",
+        "loop": "saddle_m_12",
+        "ids_name": "saddle_m_11"
+      },
+      {
+        "key": "sad_out_u01",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "36ab6c47-7c0a-5b81-8596-e27a135768a6",
+        "loop": "saddle_u_1",
+        "ids_name": "saddle_u_0"
+      },
+      {
+        "key": "sad_out_u02",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "c6f4bda8-4281-5a2f-a9d1-f005f0940261",
+        "loop": "saddle_u_2",
+        "ids_name": "saddle_u_1"
+      },
+      {
+        "key": "sad_out_u03",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "78e2b4c2-a9f4-5c68-962a-93412ccb8092",
+        "loop": "saddle_u_3",
+        "ids_name": "saddle_u_2"
+      },
+      {
+        "key": "sad_out_u04",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "1ee51e4d-7ee9-5c84-8089-e4c14c51d12d",
+        "loop": "saddle_u_4",
+        "ids_name": "saddle_u_3"
+      },
+      {
+        "key": "sad_out_u05",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "0f602889-834a-59b7-b5f9-1a19d49ecbba",
+        "loop": "saddle_u_5",
+        "ids_name": "saddle_u_4"
+      },
+      {
+        "key": "sad_out_u06",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "7b1c8b60-50d5-5cd0-8048-c1d1afccf8b7",
+        "loop": "saddle_u_6",
+        "ids_name": "saddle_u_5"
+      },
+      {
+        "key": "sad_out_u07",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "da24fe75-1147-55e8-8222-ba737e59c0c3",
+        "loop": "saddle_u_7",
+        "ids_name": "saddle_u_6"
+      },
+      {
+        "key": "sad_out_u08",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "c44dd5b2-e373-5a35-955e-87b1e95e76b2",
+        "loop": "saddle_u_8",
+        "ids_name": "saddle_u_7"
+      },
+      {
+        "key": "sad_out_u09",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "b6989845-508e-5c8c-b2f8-cb64b56a83d9",
+        "loop": "saddle_u_9",
+        "ids_name": "saddle_u_8"
+      },
+      {
+        "key": "sad_out_u10",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "5c888e23-90b7-5599-a7d9-69a1ca5eafbe",
+        "loop": "saddle_u_10",
+        "ids_name": "saddle_u_9"
+      },
+      {
+        "key": "sad_out_u11",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "9e56e353-3ecc-5b29-a2ef-d60f4b03119f",
+        "loop": "saddle_u_11",
+        "ids_name": "saddle_u_10"
+      },
+      {
+        "key": "sad_out_u12",
+        "clock": "sec",
+        "units": "Volt",
+        "uuid": "2ff3b54b-6f33-5760-966b-63a5f27a0a89",
+        "loop": "saddle_u_12",
+        "ids_name": "saddle_u_11"
+      }
+    ]
+  },
+  "quiet_floor_note": "voltage and field noise measured before first drive reaches 200 A; bin averaging can lower random-noise RMS below this unaveraged floor",
+  "removed_control": "no saddle amplitude rows in normal equations; binary evaluation signs alone profiled on training observations",
+  "limitations": "unmodeled passive dynamics and fixed ridge may affect residuals; conditional sign search is not a proof of a global discrete optimum"
+}

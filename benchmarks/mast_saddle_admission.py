@@ -138,7 +138,7 @@ def geometry():
     )
 
 
-def declare_split(reach_path, output):
+def declare_split(reach_path, output, *, minimum_held_out=2):
     """Admit through the cohort owner, then hold out every fourth ordered shot."""
     reach = json.loads(Path(reach_path).read_text())
     admitted, refused, counts = [], [], {}
@@ -169,6 +169,8 @@ def declare_split(reach_path, output):
         "refused": refused,
         "reach_sha256": hashlib.sha256(Path(reach_path).read_bytes()).hexdigest(),
         "fixed_before_scoring": {
+            "minimum_training_shots": 2,
+            "minimum_held_out_shots": minimum_held_out,
             "bins": BINS,
             "ridge": RIDGE,
             "permutation_seed": PERMUTATION_SEED,
@@ -202,12 +204,13 @@ def raw_voltage(group, loop):
     if not isinstance(dimensions, list) or len(dimensions) != 1:
         raise ValueError(f"{key}: no unique declared clock")
     clock = dimensions[0]
-    if clock not in group or metadata.get("units", "").lower() not in {
-        "volt",
-        "volts",
-        "v",
-    }:
-        raise ValueError(f"{key}: unavailable clock or unrecognized voltage unit")
+    if clock not in group:
+        raise ValueError(f"{key}: unavailable declared clock {clock!r}")
+    if metadata.get("units", "").lower() not in {"volt", "volts", "v"}:
+        raise ValueError(
+            f"{key}: unrecognized voltage unit {metadata.get('units')!r} "
+            f"with label {metadata.get('label')!r}"
+        )
     time, values = (
         np.asarray(group[clock], dtype=float),
         np.asarray(signal, dtype=float),
@@ -482,10 +485,20 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--run-directory", type=Path, required=True)
+    parser.add_argument(
+        "--allow-single-held-out",
+        action="store_true",
+        help=(
+            "Report a limited one-shot diagnostic when raw-unit refusals "
+            "leave only one held-out shot."
+        ),
+    )
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     split = declare_split(
-        ROOT / "docs/figures/mast-saddle-loops/reach.json", args.output / "split.json"
+        ROOT / "docs/figures/mast-saddle-loops/reach.json",
+        args.output / "split.json",
+        minimum_held_out=1 if args.allow_single_held_out else 2,
     )
     reader, probes, poses, described, response, provenance = geometry()
     print("GEOMETRY", json.dumps(provenance), flush=True)
@@ -508,8 +521,19 @@ def main():
             print("REFUSED", shot, repr(error), flush=True)
     train = [f for f in all_factors if f.shot in split["training"]]
     test = [f for f in all_factors if f.shot in split["held_out"]]
-    if min(len(train), len(test)) < 2:
-        raise ValueError("fewer than two served training or held-out shots")
+    write_json(
+        args.output / "read-validation.json",
+        {
+            "served_training": [f.shot for f in train],
+            "served_held_out": [f.shot for f in test],
+            "refused": errors,
+        },
+    )
+    minimum_held_out = 1 if args.allow_single_held_out else 2
+    if len(train) < 2 or len(test) < minimum_held_out:
+        raise ValueError(
+            "insufficient served training or held-out shots for the declared mode"
+        )
     samples = np.array([f.coupling for f in train])
     noise = np.nanmedian([f.floor for f in train], axis=0)
     noise = np.where(np.isfinite(noise) & (noise > 0), noise, 0)
@@ -581,6 +605,11 @@ def main():
         for name, residual in arms.items()
     }
     gains = {name: 1 - value / power["removed"] for name, value in power.items()}
+    reach = json.loads((ROOT / "docs/figures/mast-saddle-loops/reach.json").read_text())
+    available_counts = {
+        f"saddle_{loop['family']}_{loop['number'] - 1}": loop["raw_shot_count"]
+        for loop in reach["loops"]
+    }
     rows = []
     for row in loop_rows:
         counts = {
@@ -593,7 +622,8 @@ def main():
             {
                 "loop": bank.channel[row],
                 **counts,
-                "raw_available_shots": int(
+                "raw_available_shots": available_counts[bank.channel[row]],
+                "usable_shots": int(
                     sum(f.count[indices[row]] > 0 for f in all_factors)
                 ),
                 "floor_volts": float(noise[row]),
@@ -641,6 +671,9 @@ def main():
         ),
         "geometry_control_response_delta": changed,
         "signs_promoted": [],
+        "full_cohort_measured": not errors,
+        "single_held_out_diagnostic": len(test) == 1,
+        "cross_shot_uncertainty": None if len(test) == 1 else "not estimated",
         "scope": (
             "axisymmetric vacuum pickup admission; no non-axisymmetric "
             "harmonic inference or sign calibration"
@@ -692,6 +725,8 @@ def main():
                 "whitened_rms": receipt["held_out_whitened_rms"],
                 "attributable": receipt["attributable"],
                 "signs_promoted": 0,
+                "refused_shots": len(errors),
+                "single_held_out_diagnostic": len(test) == 1,
             }
         ),
         flush=True,

@@ -140,3 +140,41 @@ def test_waveform_fit_recovers_shared_response_with_binary_nuisance():
     np.testing.assert_allclose(fitted, coefficients, atol=1e-4)
     np.testing.assert_array_equal(choices, signs)
     assert detail["normal_rank"] == 4
+
+
+@pytest.mark.parametrize(
+    "units, clock_length, message", [("", 5, "unit"), ("Volt", 6, "clock")]
+)
+def test_raw_voltage_refuses_unscaled_or_misaligned_arrays(
+    units, clock_length, message
+):
+    from benchmarks.mast_saddle_admission import raw_voltage
+    from benchmarks.mast_saddle_voltage_reach import loop_identities
+
+    class Array:
+        attrs = {"_ARRAY_DIMENSIONS": ["sec"], "units": units}
+
+        def __array__(self, dtype=None, copy=None):
+            return np.arange(5, dtype=dtype)
+
+    group = {"sad_out_l01": Array(), "sec": np.arange(clock_length)}
+    with pytest.raises(ValueError, match=message):
+        raw_voltage(group, loop_identities()[0])
+
+
+def test_raw_voltage_uses_declared_clock_and_family_key():
+    from benchmarks.mast_saddle_admission import raw_voltage
+    from benchmarks.mast_saddle_voltage_reach import loop_identities
+
+    class Array:
+        attrs = {"_ARRAY_DIMENSIONS": ["sec"], "units": "Volt"}
+
+        def __array__(self, dtype=None, copy=None):
+            return np.arange(5, dtype=dtype)
+
+    loop = next(row for row in loop_identities() if row["loop"] == "saddle_m_10")
+    group = {"sad_out_m010": Array(), "sec": np.arange(5), "time": np.arange(9)}
+    clock, voltage, source = raw_voltage(group, loop)
+    np.testing.assert_array_equal(clock, voltage)
+    assert source["key"] == "sad_out_m010"
+    assert source["clock"] == "sec"

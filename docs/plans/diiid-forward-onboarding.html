@@ -23,9 +23,9 @@
   <title>DIII-D Forward Onboarding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6,6166a404,7c013864,b59e32a7,75a6ff83,05896c67,573a0292,b1807397,7978702b,6b9ff964,8c77ee35,e3e9bc15,0b10e948">
-<meta name="plan-impl" content="0.8">
-<meta name="plan-version" content="84">
+<meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6,6166a404,7c013864,b59e32a7,75a6ff83,05896c67,573a0292,b1807397,7978702b,6b9ff964,8c77ee35,e3e9bc15,0b10e948,013fcc42,4f92683f,3a1c0bd4">
+<meta name="plan-impl" content="0.82">
+<meta name="plan-version" content="85">
 <meta name="plan-modified" content="2026-10-08">
 <meta name="plan-artifacts" content="docs/evidence/diiid-forward-onboarding-state.html,docs/figures/diiid-forward-onboarding/state-of-play/machine_state.png,docs/figures/diiid-forward-onboarding/state-of-play/given_versus_extracted_topology.png,docs/figures/diiid-forward-onboarding/state-of-play/tared_flux.png,docs/figures/diiid-forward-onboarding/state-of-play/current_density_patches.png,docs/figures/diiid-forward-onboarding/state-of-play/state_of_play_receipt.json,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/exact-tare/exact_clipped_tare_receipt.json,docs/figures/diiid-forward-onboarding/exact-tare/exact_clipped_tare.png,docs/figures/diiid-forward-onboarding/unclaimed-origin/unclaimed_current_origin_receipt.json,docs/figures/diiid-forward-onboarding/unclaimed-current/unclaimed_current_patches_receipt.json,docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_self_interaction.npz,docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_hex_mesh.png,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png,docs/figures/diiid-forward-onboarding/negative-tail/negative_tail_attribution_receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json,docs/figures/diiid-forward-onboarding/cocos-ip-sign/receipt.json,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json">
 <meta name="plan-effort-hours" content="48.0">
@@ -778,6 +778,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261008-s24-classification" data-who="s24-nova coordinator" data-when="2026-10-08T01:20:00Z">
     <div class="r-comment-body">S24 build classification: §1–§3 and §6–§10 are landed or context (§2's kill gate passed by +0.1440; §7's artifact is built, and the owner's oras push stays outstanding against the 2026-10-18 deadline machine-description-retirement records). §4 stays deferred on its recorded reopen trigger. §5's gate waits on single-grid-solver-cutover. §11 is the one node buildable now. f-dfo-004 rides §5; f-dfo-010 and f-dfo-011 keep their foreign-owner exemptions.</div>
+</div>
+<div class="r-comment" data-section="s11" data-id="c-20261008-error-estimator-landed" data-who="reckon-build" data-when="2026-10-08T02:45:00Z">
+    <div class="r-comment-body">gate test_derived_convergence_criterion passed with zero added failures (15/16 at base and head; the one failure is the pre-existing stale benchmark digest); section open — the gate-constant restoration and the criterion-family guard land next, and the post-cutover run waits on single-grid-solver-cutover. Evidence: error-estimator.</div>
 </div>
 </section>
 </main>

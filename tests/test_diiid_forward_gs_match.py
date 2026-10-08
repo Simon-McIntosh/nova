@@ -19,6 +19,20 @@ sys.modules[SPEC.name] = gate
 SPEC.loader.exec_module(gate)
 
 
+def test_gate_residual_tolerance_reads_the_registered_criterion():
+    """The gate criterion is the registered tolerance read in place.
+
+    The pinned gate tolerance must be the registered 1e-5 criterion the
+    harness preregistration declares, so the scored gate and its registered
+    declaration cannot disagree by a decade.
+    """
+
+    assert gate.GATE_RESIDUAL_TOLERANCE == gate.REGISTERED_RESIDUAL_TOLERANCE
+    assert gate.GATE_RESIDUAL_TOLERANCE == 1.0e-5
+    declared = gate.preregistration()["solver"]["relative_residual_tolerance"]
+    assert declared == gate.GATE_RESIDUAL_TOLERANCE
+
+
 def test_publication_artifact_records_are_stable_and_strict(tmp_path):
     receipt = {}
 

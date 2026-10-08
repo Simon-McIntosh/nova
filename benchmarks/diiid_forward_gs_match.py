@@ -186,7 +186,10 @@ REGISTERED_FRAME_COUNT = 3
 EXECUTION_FRAME_COUNT = 5
 REGISTERED_GRID_STRIDE = 2
 REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5
-GATE_RESIDUAL_TOLERANCE = 1.0e-6
+# The gate criterion is the registered tolerance read in place, so the pinned
+# value cannot drift a decade inside the platform: it is the criterion the
+# harness's preregistration declares, not a separate literal.
+GATE_RESIDUAL_TOLERANCE = REGISTERED_RESIDUAL_TOLERANCE
 REPRESENTATIVE_CURRENT_FLOOR_A = 200_000.0
 REGISTERED_SOLVER_ROUTE = "newton_krylov"
 REGISTERED_PROFILE_EVALUATIONS = 180

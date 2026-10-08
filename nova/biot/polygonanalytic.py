@@ -151,6 +151,11 @@ import numpy as np
 
 from nova.biot.elliptic import (
     POLE_HEADROOM,
+    _cn_pole_moment_tangent,
+    _harmonic_moments_tangent,
+    _harmonic_pole_moments_tangent,
+    _harmonic_root_moments_tangent,
+    _sn_pole_moment_tangent,
     cn_pole_moment,
     cn_pole_moment_paired,
     harmonic_moments,
@@ -158,8 +163,13 @@ from nova.biot.elliptic import (
     sn_pole_moment,
     sn_pole_moment_paired,
 )
-from nova.biot.gradedresidual import QUARTER, graded_residual
-from nova.biot.momentchannel import Channel
+from nova.biot.gradedresidual import QUARTER, _graded_residual_tangent, graded_residual
+from nova.biot.momentchannel import (
+    POLE_CEILING,
+    Channel,
+    _across_tangent,
+    _factorise_tangent,
+)
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import divide as paired_divide
 from nova.biot.pairedfloat import multiply as paired_multiply
@@ -169,7 +179,12 @@ from nova.biot.pairedfloat import value as paired_value
 from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
+    _across_the_range_tangent,
     _array_program,
+    _product_range_tangent,
+    _scaled_tangent,
+    _sine_squared_times_tangent,
+    _total_tangent,
     across_the_range,
     paired_across_the_range,
     paired_product,
@@ -2573,4 +2588,469 @@ def packed_analytic_moments(
             0.0,
             vertical_vertical_central - displacement_z * uniform_vertical,
         ),
+    )
+
+
+# Tangents of the corner's reduction, written as the primal forms each quantity:
+# every product is differentiated by its own product rule and every recurrence
+# by the recurrence the elliptic, moment-channel, graded-residual and
+# range-function modules already carry, so nothing here differentiates the
+# primal program.  ``None`` is a tangent known to be zero, as in
+# :mod:`nova.biot.rangefunction`; the moment channel's contractions take dense
+# tangents, which :func:`_dense_range` supplies.  Each returns its primal --
+# formed by the primal method itself, so it is bit-identical -- beside a tangent
+# of the same structure.
+
+
+def _vertex_product_tangent(left, d_left, right, d_right):
+    """Return the tangent of ``left * right`` by the product rule."""
+    if d_left is None:
+        return None if d_right is None else left * d_right
+    if d_right is None:
+        return d_left * right
+    return d_left * right + left * d_right
+
+
+def _vertex_quotient_tangent(numerator, d_numerator, denominator, d_denominator):
+    """Return the tangent of ``numerator / denominator`` by the quotient rule."""
+    return d_numerator / denominator + (-d_denominator * numerator) * (
+        1.0 / (denominator * denominator)
+    )
+
+
+def _dense(value, tangent, xp):
+    """Return a tangent as an array, a known zero as zeros of the value's shape."""
+    return xp.zeros_like(xp.asarray(value)) if tangent is None else tangent
+
+
+def _dense_range(term: tuple, d_term: tuple, xp) -> tuple:
+    """Return a range function's tangent with every known zero made explicit."""
+    bulk, near, far = term
+    d_bulk, d_near, d_far = d_term
+    d_bulk = [None] * len(bulk) if d_bulk is None else d_bulk
+    return (
+        [_dense(c, d, xp) for c, d in zip(bulk, d_bulk, strict=True)],
+        _dense(near, d_near, xp),
+        _dense(far, d_far, xp),
+    )
+
+
+def _constant_range(value, d_value, one):
+    """Return ``range_function([], value one, value one)`` and its tangent."""
+    end = value * one
+    d_end = None if d_value is None else d_value * one
+    return range_function([], end, end), ([], d_end, d_end)
+
+
+def _vertex_tangent(
+    r, z, corner_r, corner_z, d_r, d_z, d_corner_r, d_corner_z, nodes, *,
+    residual: bool, xp=np,
+):  # fmt: skip
+    """Return a :class:`_Vertex` and the tangents of its floating quantities.
+
+    The tangent is a dict keyed by the vertex attribute it differentiates:
+    the geometry, the modulus and its complement, the harmonic and root moment
+    stacks, the corner's three range functions, the ring denominator's split
+    ``(factors, poles)`` and, when formed, the first residual integral.
+    """
+    vertex = _Vertex(
+        r, z, corner_r, corner_z, nodes, residual=residual, paired=False, xp=xp
+    )
+    r = xp.asarray(r)
+    u, offset, radius_sum = vertex.level, vertex.offset, vertex.radius_sum
+    d_u = d_corner_z - d_z
+    d_offset = d_corner_r - d_r
+    rp = offset + r
+    d_rp = d_offset + d_r
+    d_radius_sum = d_r + d_rp
+    a2 = u * u + radius_sum**2
+    d_a2 = _vertex_product_tangent(u, d_u, u, d_u) + 2.0 * radius_sum * d_radius_sum
+    d_span = d_a2 * (0.5 / vertex.span)
+    product_r = 4.0 * r
+    d_parameter = _vertex_quotient_tangent(
+        product_r * rp,
+        _vertex_product_tangent(product_r, 4.0 * d_r, rp, d_rp),
+        a2,
+        d_a2,
+    )
+    d_complement = _vertex_quotient_tangent(
+        u * u + offset**2,
+        _vertex_product_tangent(u, d_u, u, d_u) + 2.0 * offset * d_offset,
+        a2,
+        d_a2,
+    )
+    parameter, complement = vertex.parameter, vertex.parameter_complement
+    _, d_moments = _harmonic_moments_tangent(
+        parameter,
+        d_parameter,
+        _HARMONICS + POLE_HEADROOM + 2,
+        complement=complement,
+        d_complement=d_complement,
+        xp=xp,
+    )
+    _, d_root_moments = _harmonic_root_moments_tangent(
+        vertex.moments, d_moments, parameter, d_parameter, xp=xp
+    )
+    d_u_squared = _vertex_product_tangent(u, d_u, u, d_u)
+    d_ring_squared = (
+        [_vertex_product_tangent(4.0 * r, 4.0 * d_r, r, d_r)],
+        d_u_squared,
+        d_u_squared,
+    )
+    _, d_factors = _factorise_tangent(
+        vertex.ring_squared, _dense_range(vertex.ring_squared, d_ring_squared, xp), xp
+    )
+    factors, poles, _ = vertex.ring
+    d_poles = []
+    for shift, d_shift, seed_tangent in (
+        (factors[3], d_factors[3], _cn_pole_moment_tangent),
+        (factors[4], d_factors[4], _sn_pole_moment_tangent),
+    ):
+        # the cap's tangent, balanced where the shift sits on it as jax.lax.min is
+        capped = xp.minimum(shift, POLE_CEILING)
+        d_capped = xp.where(
+            shift < POLE_CEILING,
+            d_shift,
+            xp.where(shift == POLE_CEILING, 0.5 * d_shift, 0.0),
+        )
+        _, d_seed = seed_tangent(
+            capped,
+            d_capped,
+            parameter,
+            d_parameter,
+            parameter_complement=complement,
+            d_parameter_complement=d_complement,
+            xp=xp,
+        )
+        d_poles.append((capped, d_capped, d_seed))
+    d_families = []
+    for (capped, d_capped, d_seed), seed, family, mirrored in zip(
+        d_poles, poles[:2], poles[2:], (False, True), strict=True
+    ):
+        if family is None:
+            d_families.append(None)
+            continue
+        _, d_family = _harmonic_pole_moments_tangent(
+            capped,
+            d_capped,
+            seed,
+            d_seed,
+            vertex.moments,
+            d_moments,
+            _HARMONICS + 1,
+            mirrored=mirrored,
+        )
+        d_families.append(d_family)
+    tangent = {
+        "level": d_u,
+        "offset": d_offset,
+        "radius": d_r,
+        "radius_sum": d_radius_sum,
+        "span": d_span,
+        "parameter": d_parameter,
+        "parameter_complement": d_complement,
+        "moments": d_moments,
+        "root_moments": d_root_moments,
+        "cosine": ([], None, None),
+        "edge_radius": ([], d_offset, d_radius_sum),
+        "ring_squared": d_ring_squared,
+        "ring": (
+            d_factors,
+            (d_poles[0][2], d_poles[1][2], d_families[0], d_families[1]),
+        ),
+        "ring_residual": None,
+    }
+    if residual:
+        tangent["ring_residual"] = _first_residual_tangent(vertex, tangent, nodes)
+    return vertex, tangent
+
+
+def _first_residual_tangent(vertex: _Vertex, d_vertex: dict, nodes: int):
+    """Return the tangent of :meth:`_Vertex._first_residual`."""
+    xp = vertex.xp
+    radius, level, offset = vertex.radius, vertex.level, vertex.offset
+    d_radius, d_level, d_offset = (
+        d_vertex["radius"],
+        d_vertex["level"],
+        d_vertex["offset"],
+    )
+    span = 2.0 * xp.where(radius > 0.0, radius, 1.0)
+    d_span = 2.0 * xp.where(radius > 0.0, d_radius, 0.0)
+    level_offset = xp.abs(level)
+    d_level_offset = xp.where(level >= 0.0, d_level, -d_level)
+    zero = xp.zeros_like(radius)
+    panels = (
+        (level_offset, vertex.radius_sum, span, *vertex.panels[0]),
+        (level_offset, offset, span, *vertex.panels[1]),
+    )
+    panels = tuple(
+        tuple(value + zero for value in panel) for panel in panels
+    )  # the constant panel bounds broadcast as the primal broadcasts them
+    d_panels = (
+        (d_level_offset, d_vertex["radius_sum"], d_span, zero, zero),
+        (d_level_offset, d_offset, d_span, zero, zero),
+    )
+    r, u, o = radius[:, None], level[:, None], offset[:, None]
+    d_r, d_u, d_o = d_radius[:, None], d_level[:, None], d_offset[:, None]
+
+    def pieces_tangent(x, d_x, y, d_y):
+        twice = 2.0 * r
+        d_numerator = d_o + _vertex_product_tangent(twice, 2.0 * d_r, y, d_y)
+        quadruple = 4.0 * r**2
+        d_quadruple = 4.0 * (d_r * (2.0 * r))
+        cross = quadruple * x
+        d_cross = _vertex_product_tangent(quadruple, d_quadruple, x, d_x)
+        d_cross = _vertex_product_tangent(cross, d_cross, y, d_y)
+        cross = cross * y
+        denominator = xp.sqrt(u**2 + cross)
+        d_denominator = (d_u * (2.0 * u) + d_cross) * (0.5 / denominator)
+        return (o + twice * y, denominator), (d_numerator, d_denominator)
+
+    _, d_residual = _graded_residual_tangent(
+        panels, d_panels, pieces_tangent, nodes, xp
+    )
+    return d_residual
+
+
+def _vertex_across_tangent(vertex: _Vertex, d_vertex: dict, numerator, d_numerator):
+    """Return :meth:`_Vertex.across` over the ring split and its tangent."""
+    xp = vertex.xp
+    factors, poles, _ = vertex.ring
+    d_factors, d_poles = d_vertex["ring"]
+    d_poles = tuple(
+        tangent if tangent is not None or value is None else xp.zeros_like(value)
+        for value, tangent in zip(poles, d_poles, strict=True)
+    )
+    return _across_tangent(
+        numerator, _dense_range(numerator, d_numerator, xp),
+        factors, d_factors, poles, d_poles,
+        vertex.moments, d_vertex["moments"], xp=xp,
+    )  # fmt: skip
+
+
+def _vertex_against_root_tangent(vertex: _Vertex, d_vertex: dict, term, d_term):
+    """Return :meth:`_Vertex.against_root` and its tangent."""
+    series, d_series = _across_the_range_tangent(term, d_term)
+    d_series = _series_list(series, d_series)
+    moments, d_moments = vertex.root_moments, d_vertex["root_moments"]
+    total_value = d_total = 0.0
+    for order, coefficient in enumerate(series):
+        total_value = total_value + coefficient * moments[order]
+        d_total = d_total + _vertex_product_tangent(
+            coefficient, d_series[order], moments[order], d_moments[order]
+        )
+    return vertex.against_root(term), d_total
+
+
+def _series_list(series: list, d_series) -> list:
+    """Return a series' tangent as a list of its length."""
+    return [None] * len(series) if d_series is None else list(d_series)
+
+
+def _ring_core_tangent(vertex: _Vertex, d_vertex: dict):
+    """Return ``ring_squared - r cos (edge_radius cos)`` and its tangent.
+
+    The numerator the ring denominator's derivative leaves, common to the
+    corner's arsinh term and every weight integrated against it.
+    """
+    edge_cosine, d_edge_cosine = _product_range_tangent(
+        vertex.edge_radius, d_vertex["edge_radius"], vertex.cosine, d_vertex["cosine"]
+    )
+    scaled_term, d_scaled_term = _scaled_tangent(
+        edge_cosine, d_edge_cosine, -vertex.radius, -d_vertex["radius"]
+    )
+    return _total_tangent(
+        (vertex.ring_squared, scaled_term), (d_vertex["ring_squared"], d_scaled_term)
+    )
+
+
+def _ring_ratio_tangent(vertex: _Vertex, d_vertex: dict, factor: float):
+    """Return ``factor r / span`` and its tangent."""
+    lever = factor * vertex.radius
+    return lever / vertex.span, _vertex_quotient_tangent(
+        lever, factor * d_vertex["radius"], vertex.span, d_vertex["span"]
+    )
+
+
+def _arsinh_terms_tangent(vertex: _Vertex, d_vertex: dict):
+    """Return :meth:`_Vertex.arsinh_terms` and its tangent."""
+    r, u = vertex.radius, vertex.level
+    d_r, d_u = d_vertex["radius"], d_vertex["level"]
+    inner, d_inner = _ring_core_tangent(vertex, d_vertex)
+    core, d_core = _product_range_tangent(
+        vertex.cosine, d_vertex["cosine"], inner, d_inner
+    )
+    core, d_core = _scaled_tangent(core, d_core, -1.0, None)
+    series, d_series = _across_the_range_tangent(core, d_core)
+    numerator, d_numerator = _sine_squared_times_tangent(series, d_series)
+    across, d_across = _vertex_across_tangent(vertex, d_vertex, numerator, d_numerator)
+    ratio, d_ratio = _ring_ratio_tangent(vertex, d_vertex, 0.5)
+    residual, d_residual = vertex.ring_residual, d_vertex["ring_residual"]
+    first = 0.5 * residual + ratio * across
+    d_first = 0.5 * d_residual + _vertex_product_tangent(
+        ratio, d_ratio, across, d_across
+    )
+    four_u = 4.0 * u
+    d_four_u = 4.0 * d_u
+    four_ur = four_u * r
+    d_four_ur = _vertex_product_tangent(four_u, d_four_u, r, d_r)
+    four_r = 4.0 * r
+    return vertex.arsinh_terms(), (
+        _vertex_product_tangent(four_ur, d_four_ur, first, d_first),
+        _vertex_product_tangent(four_r, 4.0 * d_r, first, d_first),
+        _vertex_product_tangent(four_u, d_four_u, residual, d_residual),
+    )
+
+
+def _against_first_arsinh_tangent(vertex: _Vertex, d_vertex: dict, weight, d_weight):
+    """Return :meth:`_Vertex.against_first_arsinh` and its tangent."""
+    xp = vertex.xp
+    series, d_series = _across_the_range_tangent(weight, d_weight)
+    d_series = [
+        _dense(value, tangent, xp)
+        for value, tangent in zip(series, _series_list(series, d_series), strict=True)
+    ]
+    primitive = _oscillatory_primitive(series)
+    # the primitive is linear in the series, so its tangent is the same map
+    d_primitive = _oscillatory_primitive(d_series)
+    derivative, d_derivative = _ring_core_tangent(vertex, d_vertex)
+    raised, d_raised = _sine_squared_times_tangent(primitive, d_primitive)
+    core, d_core = _product_range_tangent(raised, d_raised, derivative, d_derivative)
+    across, d_across = _vertex_across_tangent(vertex, d_vertex, core, d_core)
+    ratio, d_ratio = _ring_ratio_tangent(vertex, d_vertex, 2.0)
+    return vertex.against_first_arsinh(weight), _vertex_product_tangent(
+        series[0], d_series[0], vertex.ring_residual, d_vertex["ring_residual"]
+    ) + _vertex_product_tangent(ratio, d_ratio, across, d_across)
+
+
+def _flux_moment_residuals_tangent(
+    vertex: _Vertex, d_vertex: dict, expansion_r, d_expansion_r,
+    target_z_minus_expansion_z, d_target_z_minus_expansion_z,
+):  # fmt: skip
+    """Return :meth:`_Vertex.flux_moment_residuals` and its tangent."""
+    r, u, one = vertex.radius, vertex.level, vertex.one
+    d_r, d_u = d_vertex["radius"], d_vertex["level"]
+    cosine, d_cosine = vertex.cosine, d_vertex["cosine"]
+    ring_squared, d_ring_squared = vertex.ring_squared, d_vertex["ring_squared"]
+    source_cosine, d_source_cosine = _scaled_tangent(cosine, d_cosine, r, d_r)
+    minus_u = -u
+    level_squared, d_level_squared = _constant_range(
+        minus_u * u, _vertex_product_tangent(minus_u, -d_u, u, d_u), one
+    )
+    sine_squared, d_sine_squared = _total_tangent(
+        (ring_squared, level_squared), (d_ring_squared, d_level_squared)
+    )
+    shifted, d_shifted = _total_tangent(
+        (source_cosine, *_constant_range(-expansion_r, -d_expansion_r, one)[:1]),
+        (d_source_cosine, _constant_range(-expansion_r, -d_expansion_r, one)[1]),
+    )
+    squared, d_squared = _product_range_tangent(
+        source_cosine, d_source_cosine, shifted, d_shifted
+    )
+    half_sine, d_half_sine = _scaled_tangent(sine_squared, d_sine_squared, -0.5, None)
+    bracket, d_bracket = _total_tangent((squared, half_sine), (d_squared, d_half_sine))
+    bracket, d_bracket = _scaled_tangent(bracket, d_bracket, u, d_u)
+    cube = -(u**3) * one / 6.0
+    d_cube = -(3.0 * u**2 * d_u) * one / 6.0
+    radial_coefficient, d_radial_coefficient = _total_tangent(
+        (bracket, range_function([], cube, cube)), (d_bracket, ([], d_cube, d_cube))
+    )
+    half_ring, d_half_ring = _scaled_tangent(ring_squared, d_ring_squared, 0.5, None)
+    vertical_coefficient, d_vertical_coefficient = _product_range_tangent(
+        source_cosine, d_source_cosine, half_ring, d_half_ring
+    )
+    rows = []
+    for coefficient, d_coefficient in (
+        (radial_coefficient, d_radial_coefficient),
+        (vertical_coefficient, d_vertical_coefficient),
+    ):
+        weight, d_weight = _product_range_tangent(
+            cosine, d_cosine, coefficient, d_coefficient
+        )
+        _, d_row = _against_first_arsinh_tangent(vertex, d_vertex, weight, d_weight)
+        rows.append(4.0 * d_row)
+    base_flux, d_base_flux = _arsinh_terms_tangent(vertex, d_vertex)
+    return vertex.flux_moment_residuals(expansion_r, target_z_minus_expansion_z), (
+        rows[0],
+        rows[1]
+        + _vertex_product_tangent(
+            target_z_minus_expansion_z,
+            d_target_z_minus_expansion_z,
+            base_flux[0],
+            d_base_flux[0],
+        ),
+    )
+
+
+def _horizontal_flux_line_moments_tangent(
+    vertex: _Vertex, d_vertex: dict, expansion_r, d_expansion_r,
+    target_z_minus_expansion_z, d_target_z_minus_expansion_z,
+):  # fmt: skip
+    """Return :meth:`_Vertex.horizontal_flux_line_moments` and its tangent."""
+    one, r, a = vertex.one, vertex.radius, vertex.span
+    d_r, d_a = d_vertex["radius"], d_vertex["span"]
+    outer, d_outer = vertex.cosine, d_vertex["cosine"]
+    source_cosine, d_source_cosine = _scaled_tangent(outer, d_outer, r, d_r)
+    centre, d_centre = _constant_range(-expansion_r, -d_expansion_r, one)
+    four_a = 4.0 * a
+    d_four_a = 4.0 * d_a
+
+    def rooted(root_weight, d_root_weight, arsinh_weight, d_arsinh_weight):
+        _, d_root = _vertex_against_root_tangent(
+            vertex, d_vertex, root_weight, d_root_weight
+        )
+        _, d_first = _against_first_arsinh_tangent(
+            vertex, d_vertex, arsinh_weight, d_arsinh_weight
+        )
+        return (
+            _vertex_product_tangent(
+                four_a, d_four_a, vertex.against_root(root_weight), d_root
+            )
+            + 4.0 * d_first
+        )
+
+    base_weight, d_base_weight = _product_range_tangent(
+        outer, d_outer, source_cosine, d_source_cosine
+    )
+    d_base = rooted(outer, d_outer, base_weight, d_base_weight)
+    half_edge, d_half_edge = _scaled_tangent(
+        vertex.edge_radius, d_vertex["edge_radius"], 0.5, None
+    )
+    twice_source, d_twice_source = _scaled_tangent(
+        source_cosine, d_source_cosine, 2.0, None
+    )
+    radial_root_sum, d_radial_root_sum = _total_tangent(
+        (half_edge, twice_source, centre), (d_half_edge, d_twice_source, d_centre)
+    )
+    radial_root_weight, d_radial_root_weight = _product_range_tangent(
+        outer, d_outer, radial_root_sum, d_radial_root_sum
+    )
+    shifted, d_shifted = _total_tangent(
+        (source_cosine, centre), (d_source_cosine, d_centre)
+    )
+    squared, d_squared = _product_range_tangent(
+        source_cosine, d_source_cosine, shifted, d_shifted
+    )
+    half_ring, d_half_ring = _scaled_tangent(
+        vertex.ring_squared, d_vertex["ring_squared"], -0.5, None
+    )
+    radial_arsinh_sum, d_radial_arsinh_sum = _total_tangent(
+        (squared, half_ring), (d_squared, d_half_ring)
+    )
+    radial_arsinh_weight, d_radial_arsinh_weight = _product_range_tangent(
+        outer, d_outer, radial_arsinh_sum, d_radial_arsinh_sum
+    )
+    d_radial = rooted(
+        radial_root_weight, d_radial_root_weight,
+        radial_arsinh_weight, d_radial_arsinh_weight,
+    )  # fmt: skip
+    primal = vertex.horizontal_flux_line_moments(
+        expansion_r, target_z_minus_expansion_z
+    )
+    lever = vertex.level + target_z_minus_expansion_z
+    d_lever = d_vertex["level"] + d_target_z_minus_expansion_z
+    return primal, (
+        d_base,
+        d_radial,
+        _vertex_product_tangent(lever, d_lever, primal[0], d_base),
     )

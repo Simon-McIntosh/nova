@@ -48,7 +48,24 @@
   "plan_slug": "machine-description-retirement",
   "plan_version": 6,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "s24-nova",
+      "finding": "reuse_search-1",
+      "reason": "",
+      "when": "2026-10-08T01:10:36.215548+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "s24-nova",
+      "reason": "",
+      "when": "2026-10-08T01:10:36.215548+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/machine-description-retirement/r-20261006T094029653591-plan-review-of-machine-description-retirement.json",
   "review_run_id": "r-20261006T094029653591-plan-review-of-machine-description-retirement",
   "reviewed_blob_sha": "3daecece843f7fcc870867ee978c85f3bf5e9900",
   "rubric": "design",

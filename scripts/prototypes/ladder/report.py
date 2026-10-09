@@ -22,7 +22,17 @@ def _row(path: Path) -> dict | None:
 
 
 def _number(value, digits: int = 3) -> str:
-    return "—" if value is None else f"{value:.{digits}g}"
+    return "—" if value is None or not np.isfinite(value) else f"{value:.{digits}g}"
+
+
+def _read_status(kind: str, row: dict) -> str:
+    if not row["valid"]:
+        return f"invalid ({row['reason']})"
+    if not row["qualified"]:
+        return "unqualified"
+    if kind == "diverted" and row["x_error_pitches"] is None:
+        return "no admitted X"
+    return "admitted"
 
 
 def _fit(rows: list[dict], key: str) -> str:
@@ -112,10 +122,11 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         "carrier's realised count. `map` is relative sup at the analytic state. "
         "`axis` and `X` show metres / pitches; a missing X on a diverted row "
         "means no X-point was admitted. `resid` and `solve` are absent "
-        "because this run measures the map and read, not a solved state.",
+        "because this run measures the map and read, not a solved state. "
+        "Read reason 7 is `UNRESOLVED_COMPONENT`.",
         "",
-        "| Case | N | Arm | Nmap | map | smooth | saddle | axis m / h | X m / h | contact m | resid | solve | cold s | warm s | GPU temp GB | RSS GB | Job / log |",
-        "|---|---:|:---:|---:|---:|---:|---:|---:|---:|---:|---:|:---:|---:|---:|---:|---:|---|",
+        "| Case | N | Arm | Read | Nmap | map | smooth | saddle | axis m / h | X m / h | contact m | resid | solve | cold s | warm s | GPU temp GB | RSS GB | Job / log |",
+        "|---|---:|:---:|---|---:|---:|---:|---:|---:|---:|---:|---:|:---:|---:|---:|---:|---:|---|",
     ]
     for kind in MAJOR_RADIUS:
         for cells in COUNTS:
@@ -124,20 +135,24 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                 row = rows[kind, cells, arm]
                 if row is None:
                     lines.append(
-                        f"| {kind} | {cells} | {arm} | — | — | — | — | — | — | — | — | — | — | — | — | — | missing |"
+                        f"| {kind} | {cells} | {arm} | — | — | — | — | — | — | — | — | — | — | — | — | — | — | — | missing |"
                     )
                     continue
-                top_log = rows_root.parent / "logs" / (
-                    f"{kind}-{cells}-A.log"
-                    if arm == "A"
-                    else f"quadratic-{kind}-{cells}.log"
+                top_log = (
+                    rows_root.parent
+                    / "logs"
+                    / (
+                        f"{kind}-{cells}-A.log"
+                        if arm == "A"
+                        else f"quadratic-{kind}-{cells}.log"
+                    )
                 )
                 map_log = map_root.parent / "logs" / f"map-{kind}-{cells}.log"
                 map_label = (
                     f"{mapped['job_id']} `{map_log}`" if mapped else "map pending"
                 )
                 lines.append(
-                    f"| {kind} | {cells} | {arm} | "
+                    f"| {kind} | {cells} | {arm} | {_read_status(kind, row)} | "
                     f"{mapped['realised_cells'] if mapped else '—'} | "
                     f"{_number(mapped['map_relative_sup']) if mapped else '—'} | "
                     f"{_number(row['smooth_membership_error'])} | "

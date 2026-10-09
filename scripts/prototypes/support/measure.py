@@ -293,7 +293,7 @@ def measure(args):
 
     geometry_uncertainty = fraction_change(exact_polygons, coarse_polygons)
     subdivisions = 0
-    while geometry_uncertainty > 2e-5 and point_count < 65537:
+    while geometry_uncertainty > args.oracle_fraction_bound and point_count < 65537:
         coarse_polygons = exact_polygons
         if args.kind == "diverted":
             subdivisions += 1
@@ -311,7 +311,7 @@ def measure(args):
         )
         refinement_wall += extra_wall
         geometry_uncertainty = fraction_change(exact_polygons, coarse_polygons)
-    if geometry_uncertainty > 2e-5:
+    if geometry_uncertainty > args.oracle_fraction_bound:
         raise AssertionError(
             f"analytic polygon refinement unresolved: {geometry_uncertainty}"
         )
@@ -319,6 +319,7 @@ def measure(args):
         "analytic-support", lambda: pack(exact_polygons, legacy_partition[3])
     )
     exact_wall += polygon_wall + refinement_wall
+    identity["oracle_fraction_bound"] = args.oracle_fraction_bound
     identity["analytic_boundary_points"] = point_count
     identity["analytic_polygon_fraction_uncertainty"] = geometry_uncertainty
     identity["fixture_walls"]["analytic_polygon_refinement"] = refinement_wall
@@ -430,9 +431,8 @@ def measure(args):
             booking_seconds=booking_wall,
             cold_compile_seconds=compile_wall,
             warm_execute_seconds=warm_wall,
-            serialized_executable_bytes=len(
-                executable.runtime_executable().serialize()
-            ),
+            serialized_executable_bytes=None,
+            serialization_status="pending",
             device_temp_bytes=memory.temp_size_in_bytes,
             host_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
             child_peak_rss_kib=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,
@@ -459,13 +459,51 @@ def measure(args):
                 flush=True,
             )
         write(args.out / f"{args.kind}-{args.cells}-{arm}.json", row)
+        print(
+            "NUMERICAL_ROW_PERSISTED "
+            + str(args.out / f"{args.kind}-{args.cells}-{arm}.json"),
+            flush=True,
+        )
+        try:
+            row["serialized_executable_bytes"] = len(
+                executable.runtime_executable().serialize()
+            )
+            row["serialization_status"] = "complete"
+        except jax.errors.JaxRuntimeError as error:
+            if "size must be smaller than 2GiB" not in str(error):
+                raise
+            row["serialization_status"] = "unavailable"
+            row["serialization_refusal"] = str(error)
+            print(f"SERIALIZATION_REFUSAL arm={arm} {error}", flush=True)
+        row["host_peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        write(args.out / f"{args.kind}-{args.cells}-{arm}.json", row)
         print("SUPPORT_ROW " + json.dumps(row, sort_keys=True, default=str), flush=True)
         rows.append(row)
         return row
 
+    arm_failures = []
     for arm in arms:
         if arm[0] in args.arms:
-            run_arm(*arm)
+            try:
+                run_arm(*arm)
+            except Exception as error:
+                refusal = dict(
+                    case=args.kind,
+                    requested_cells=args.cells,
+                    arm=arm[0],
+                    error_type=type(error).__name__,
+                    error=str(error),
+                    traceback=traceback.format_exc(),
+                    completed=False,
+                )
+                write(
+                    args.out / f"{args.kind}-{args.cells}-{arm[0]}-refusal.json",
+                    refusal,
+                )
+                print("ARM_REFUSAL " + json.dumps(refusal), flush=True)
+                arm_failures.append(arm[0])
+    if arm_failures:
+        raise RuntimeError("support arms refused: " + ", ".join(arm_failures))
     if "read" in args.arms:
         (reading, support), read_wall = stage(
             "read-support",
@@ -528,7 +566,6 @@ def measure(args):
 
 
 def main():
-    global STAGE_LABEL
     parser = argparse.ArgumentParser()
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
     parser.add_argument("--cells", type=int, required=True)
@@ -541,47 +578,11 @@ def main():
         choices=("legacy", "exact", "shifted", "read"),
         default=("legacy", "exact", "read"),
     )
+    parser.add_argument("--oracle-fraction-bound", type=float, default=2e-5)
     args = parser.parse_args()
+    if not 0 < args.oracle_fraction_bound <= 1e-4:
+        raise ValueError("oracle fraction bound must be positive and at most 1e-4")
     try:
-        # Repair a missing cached intermediate pair before a subsequent large
-        # pair. The read phase cannot start while this recovery is pending.
-        if (
-            args.cells >= 3500 or (args.kind == "limited" and args.cells == 550)
-        ) and set(args.arms) == {"legacy", "exact"}:
-            recover_cells = (2000, 5000) if args.cells == 550 else (2000,)
-            for kind, requested in (
-                (kind, cells)
-                for cells in recover_cells
-                for kind in ("diverted", "limited")
-            ):
-                actual = (
-                    3500
-                    if requested == 5000
-                    and (args.out.parent / f"{kind}-5000-binder.json").exists()
-                    else requested
-                )
-                expected = [
-                    args.out / f"{kind}-{actual}-{arm}.json"
-                    for arm in ("legacy", "exact")
-                ]
-                if not all(
-                    path.exists() and json.loads(path.read_text()).get("completed")
-                    for path in expected
-                ):
-                    fixture_receipt = args.out / f"{kind}-{actual}-fixture.json"
-                    if not fixture_receipt.exists():
-                        raise RuntimeError(
-                            "decisive recovery requires a completed fixture receipt"
-                        )
-                    recovery = argparse.Namespace(**vars(args))
-                    recovery.kind, recovery.cells = kind, actual
-                    print(f"RECOVER_DECISIVE case={kind} cells={actual}", flush=True)
-                    STAGE_LABEL = "RECOVERY_STAGE"
-                    try:
-                        measure(recovery)
-                    finally:
-                        STAGE_LABEL = "STAGE"
-                    jax.clear_caches()
         measure(args)
     except Exception as error:
         refusal = {

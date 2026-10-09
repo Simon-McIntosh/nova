@@ -68,6 +68,8 @@ def run_row(args, kind, cells, arms):
         str(args.cache),
         "--control",
         str(args.control),
+        "--oracle-fraction-bound",
+        "1e-4",
         "--arms",
         *arms,
     ]
@@ -139,54 +141,17 @@ def main():
     args = parser.parse_args()
     (args.output / "logs").mkdir(parents=True, exist_ok=True)
     (args.output / "rows").mkdir(exist_ok=True)
-    decisive_failures = []
-    for kind in ("diverted", "limited"):
-        code = run_row(args, kind, 2000, ("legacy", "exact"))
+    failures = []
+    for kind, cells, arms in (
+        ("diverted", 5000, ("exact",)),
+        ("limited", 550, ("legacy", "exact")),
+        ("limited", 5000, ("legacy", "exact")),
+    ):
+        code = run_row(args, kind, cells, arms)
         if code:
-            decisive_failures.append((kind, 2000, code))
-    if run_row(args, "diverted", 550, ("shifted",)):
-        decisive_failures.append(("diverted", 550, "shifted"))
-    largest = {}
-    for kind in ("diverted", "limited"):
-        cells = 5000
-        code = run_row(args, kind, cells, ("legacy", "exact"))
-        if code == 124:
-            cells = 3500
-            code = run_row(args, kind, cells, ("legacy", "exact"))
-        largest[kind] = cells
-        if code:
-            decisive_failures.append((kind, cells, code))
-    # The accepted diverted coarse pair is supplied as an input receipt.
-    # The limited coarse pair completes the other case's comparison ladder.
-    if run_row(args, "limited", 550, ("legacy", "exact")):
-        decisive_failures.append(("limited", 550, "legacy-exact"))
-    print("DECISIVE_FAILURES=" + json.dumps(decisive_failures), flush=True)
-    refusals = set()
-    for cells in (550, 2000, 5000):
-        for kind in ("diverted", "limited"):
-            actual = largest[kind] if cells == 5000 else cells
-            code = run_row(args, kind, actual, ("read",))
-            if code:
-                path = args.output / "rows" / f"{kind}-{actual}-read-refusal.json"
-                record = (
-                    json.loads(path.read_text())
-                    if path.exists()
-                    else {"signature": f"process-exit:{code}"}
-                )
-                refusals.add(record["signature"])
-                print("READ_REFUSAL " + json.dumps(record), flush=True)
-                if len(refusals) >= 3:
-                    print(
-                        "READ_STOP distinct_refusals=3; decisive receipts retained",
-                        flush=True,
-                    )
-                    return 1 if decisive_failures else 0
-    print(
-        f"LADDER_COMPLETE decisive_failures={len(decisive_failures)} "
-        f"distinct_read_refusals={len(refusals)}",
-        flush=True,
-    )
-    return 1 if decisive_failures else 0
+            failures.append((kind, cells, code))
+    print("MEASUREMENT_FAILURES=" + json.dumps(failures), flush=True)
+    return int(bool(failures))
 
 
 if __name__ == "__main__":

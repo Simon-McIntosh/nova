@@ -38,9 +38,15 @@ def main():
                         "map_relative_rms",
                         "booked_current_normalised_a",
                         "analytic_current_a",
-                        "serialized_executable_bytes",
                     ):
                         valid &= math.isfinite(row[key]) and row[key] > 0
+                    size = row.get("serialized_executable_bytes")
+                    valid &= (isinstance(size, int) and size > 0) or (
+                        size is None
+                        and row.get("serialization_status") == "unavailable"
+                        and "size must be smaller than 2GiB"
+                        in row.get("serialization_refusal", "")
+                    )
                 if not valid:
                     failures.append(f"missing-core-receipt::{case}-{cells}-{arm}")
                 coverage.append(

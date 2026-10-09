@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run is a measurement prototype and declares no suite gate: its manifest carries baseline_suite null and after_suite null, so no base and head suite arm exists to compare and no failure ids are derivable; added_failure_count is 0 with an empty id list.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-09T17:02:37.770Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-09T16:58:44Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-taylor.md",
+      "line": "Run records",
+      "severity": "follow-on",
+      "text": "follow-on: the Run-records section names 'taylor-h200/ - job 1283090' as the device rung and never lists taylor-h200b/, but the headline Result-1 numbers come from job 1283098 in taylor-h200b/ (taylor-h200/ itself is job 1283090, cancelled with CUDA_ERROR_OUT_OF_MEMORY). Result 1's own caption and the evidence fragment both say 'taylor-h200b/ (job 1283098)', so the section contradicts the report it belongs to. A reader reproducing from Run records opens the wrong (failed) directory."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-taylor.md",
+      "line": "Result 3",
+      "severity": "follow-on",
+      "text": "follow-on: Result 3 says the identity check is 'not evaluable' because 'the Taylor arm does not reach the end of the kernel', attributing non-evaluability solely to the trace refusal. In fact the identity subcommand never executed on either rung - taylor-h200/identity.log (3909 lines) is entirely CUDA_ERROR_OUT_OF_MEMORY noise with no IDENTITY line, and the CPU arm's identity row exited 137 (OOM). The check is implemented but was not exercised to any boundary, so its own trace behaviour is unmeasured."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "The diff is the prototype driver, a rules module, a SLURM payload and a small evidence fragment - 575 insertions across four new files, no production code touched.",
+    "done_when": "Reconciled the report and fragment against the reviewed run's own receipts at base 73da1f5ad719b859d2fbd461e26a5b4432134c67 and head 7cf4fd8fbb30d8d51bc59af4473c12f78bccfd31. Every table number reproduces from taylor-h200b/rows.jsonl.",
+    "goal": "The plan's kernel-loop-representation decision asks whether a Taylor-mode pass costs less to compile than the nested jaxfwd construction the read uses. The node delivers a measured negative: nested cold compile 65.75/198.39/413.37/984.58 s at orders 1-4 for one polygon at one point, and jax.experimental.jet (JAX 0.11.0) does not trace value_gradient at all (min/max broadcast, missing atan rule, then a slice on a 0-d operand), so no Taylor compile wall exists. All four done-when deliverables are present and the verdict follows from the evidence.",
+    "manifest": "Reviewed manifest status complete, five changed_paths matching the diff plus the report, tests naming job 1283098 with its four order rows, and baseline_suite/after_suite both null (a measurement node with no suite gate).",
+    "write_paths": "Node declared four write paths; the diff adds exactly the three script files plus the fragment within them, and the report at the granted external path; the reviewed worktree is clean and its HEAD equals the reviewed head."
+  },
+  "justifications": {
+    "durability": "The driver, job script and evidence fragment are committed, and every table row is reproducible from rows.jsonl written as each row lands. Not higher: the report's Run-records section points a later reader at the wrong job directory, and the report itself lives at a path outside the repository.",
+    "evidence": "Independently reproduced from the reviewed run's own receipts: taylor-h200b/rows.jsonl gives cold compile 65.7537095/198.3865677/413.3713276/984.5835759 s and unique/expanded 17456/97653, 49194/260081, 145557/753483, 440855/2255503, matching the report and fragment to the digit; the refusal error ('slice start_indices must have length equal to the number of dimensions of the operand, got indices (0,) for operand shape ()') and the value_gradient primitive census both reproduce from primitives.log and the row logs. The 550-cell read figures (value_gradient 1,486,950 of 1,499,787 expanded equations; read cold compile 628-640 s) reconcile with prior \u00a72 receipts. Not higher because Result 3 rests on a check that never ran, and the Run-records path defect means the report alone does not lead a reader to the numbers.",
+    "fit": "Follows the report conventions - headline, definitions stated before use, a per-result structure (equations/compile, refusals, identity, verdict), per-run run records, and a candid negative verdict that does not overclaim. Kept from full marks by the stale Run-records section and the identity attribution.",
+    "goal_fidelity": "All four brief parts are delivered for a negative result: (1) the equations+compile table, (2) the primitive census and the two workarounds plus the remaining refusal, (3) the identity check implemented with an honest not-evaluable verdict, (4) the verdict. The decision question (is a Taylor pass cheaper to compile) is answered as 'not measurable yet - the library does not trace the kernel'. Not full marks because the headline numbers sit in a run-directory branch that the report's own Run-records section never names, and the identity subcommand was never exercised to any boundary.",
+    "reuse": "Reuses the existing shared environment, the committed kernel (BiotMomentCoupling, packed_analytic_moments) and the repository's rung-ordered submission pattern; the only new machinery is the prototype driver and its rules module, placed under the declared scripts/prototypes branch. It hands the representation decision a measured input rather than new production code.",
+    "scope_discipline": "The reviewed worktree at head 7cf4fd8fb adds exactly four files (scripts/prototypes/taylor/point_jet_taylor.py, jet_broadcast_rules.py, run_h200_job.sh, docs/evidence/fragments/converged-forward-solve/proto-taylor.html), all inside the node's declared write paths; the report is written to its granted external path; git status is clean; no plan, sprint or index mutation; no push."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261009T160409583874-proto-taylor (node proto-taylor, plan nova:converged-forward-solve section 2, decision kernel-loop-representation; scope: a prototype measuring whether a jax.experimental.jet Taylor pass to a given order costs less to compile than the nested jaxfwd construction of the Biot point jet, and whether the two agree).\n\nVERDICT goal: The plan's kernel-loop-representation decision asks whether a Taylor-mode pass costs less to compile than the nested jaxfwd construction the read uses. The node delivers a measured negative: nested cold compile 65.75/198.39/413.37/984.58 s at orders 1-4 for one polygon at one point, and jax.experimental.jet (JAX 0.11.0) does not trace value_gradient at all (min/max broadcast, missing atan rule, then a slice on a 0-d operand), so no Taylor compile wall exists. All four done-when deliverables are present and the verdict follows from the evidence.\nVERDICT done_when: Reconciled the report and fragment against the reviewed run's own receipts at base 73da1f5ad719b859d2fbd461e26a5b4432134c67 and head 7cf4fd8fbb30d8d51bc59af4473c12f78bccfd31. Every table number reproduces from taylor-h200b/rows.jsonl.\nVERDICT write_paths: Node declared four write paths; the diff adds exactly the three script files plus the fragment within them, and the report at the granted external path; the reviewed worktree is clean and its HEAD equals the reviewed head.\nVERDICT manifest: Reviewed manifest status complete, five changed_paths matching the diff plus the report, tests naming job 1283098 with its four order rows, and baseline_suite/after_suite both null (a measurement node with no suite gate).\nVERDICT diff: The diff is the prototype driver, a rules module, a SLURM payload and a small evidence fragment - 575 insertions across four new files, no production code touched.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nSCORE evidence: 16\nSCORE scope_discipline: 20\nSCORE durability: 17\nSCORE fit: 18\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: All four brief parts are delivered for a negative result: (1) the equations+compile table, (2) the primitive census and the two workarounds plus the remaining refusal, (3) the identity check implemented with an honest not-evaluable verdict, (4) the verdict. The decision question (is a Taylor pass cheaper to compile) is answered as 'not measurable yet - the library does not trace the kernel'. Not full marks because the headline numbers sit in a run-directory branch that the report's own Run-records section never names, and the identity subcommand was never exercised to any boundary.\nJUSTIFICATION evidence: Independently reproduced from the reviewed run's own receipts: taylor-h200b/rows.jsonl gives cold compile 65.7537095/198.3865677/413.3713276/984.5835759 s and unique/expanded 17456/97653, 49194/260081, 145557/753483, 440855/2255503, matching the report and fragment to the digit; the refusal error and the value_gradient primitive census both reproduce from primitives.log and the row logs. The 550-cell read figures (value_gradient 1,486,950 of 1,499,787 expanded equations; read cold compile 628-640 s) reconcile with prior section-2 receipts. Not higher because Result 3 rests on a check that never ran, and the Run-records path defect means the report alone does not lead a reader to the numbers.\nJUSTIFICATION scope_discipline: The reviewed worktree at head 7cf4fd8fb adds exactly four files, all inside the node's declared write paths; the report is written to its granted external path; git status is clean; no plan, sprint or index mutation; no push.\nJUSTIFICATION durability: The driver, job script and evidence fragment are committed, and every table row is reproducible from rows.jsonl written as each row lands. Not higher: the report's Run-records section points a later reader at the wrong job directory, and the report itself lives at a path outside the repository.\nJUSTIFICATION fit: Follows the report conventions - headline, definitions stated before use, a per-result structure, per-run run records, and a candid negative verdict that does not overclaim. Kept from full marks by the stale Run-records section and the identity attribution.\nJUSTIFICATION reuse: Reuses the existing shared environment, the committed kernel and the repository's rung-ordered submission pattern; the only new machinery is the prototype driver and its rules module, placed under the declared scripts/prototypes branch.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-taylor.md:Run records follow-on: the Run-records section names 'taylor-h200/ - job 1283090' as the device rung and never lists taylor-h200b/, but the headline Result-1 numbers come from job 1283098 in taylor-h200b/ (taylor-h200/ itself is job 1283090, cancelled with CUDA_ERROR_OUT_OF_MEMORY). Result 1's own caption and the evidence fragment both say 'taylor-h200b/ (job 1283098)', so the section contradicts the report it belongs to.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-taylor.md:Result 3 follow-on: Result 3 says the identity check is 'not evaluable' because 'the Taylor arm does not reach the end of the kernel', but the identity subcommand never executed on either rung - taylor-h200/identity.log (3909 lines) is entirely CUDA_ERROR_OUT_OF_MEMORY noise with no IDENTITY line, and the CPU arm's identity row exited 137 (OOM).\n",
+  "review_run_id": "r-20261009T165828263699-review-of-proto-taylor",
+  "reviewed_base_sha": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+  "reviewed_head_sha": "7cf4fd8fbb30d8d51bc59af4473c12f78bccfd31",
+  "reviewed_run_id": "r-20261009T160409583874-proto-taylor",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T17:02:00Z",
+  "total": 106
+}

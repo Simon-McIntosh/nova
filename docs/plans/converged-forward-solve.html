@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="123">
+<meta name="plan-version" content="124">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -405,6 +405,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261009T160409583874-proto-taylor" data-who="reckon-build" data-when="2026-10-09T16:57:49.986Z">
     <div class="r-comment-body"><p>proto-taylor measured the Biot point jet two ways: nested jaxfwd compiles cold on the H200 in 65.75 / 198.39 / 413.37 / 984.58 s at orders 1 to 4 (unique equations 17456 / 49194 / 145557 / 440855), while jax.experimental.jet does not trace the kernel at all (min/max broadcasting, a missing atan rule, then a slice on a 0-d operand), so a Taylor pass is not a viable route to the 60 s read compile.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261009T165828263699-review-of-proto-taylor" data-who="reckon-build" data-when="2026-10-09T17:02:37.770Z">
+    <div class="r-comment-body"><p>Stored a parsed independent review of run r-20261009T160409583874-proto-taylor at both granted JSON paths, scoring all six dimensions in 0..20 (goal_fidelity 17, evidence 16, scope_discipline 20, durability 17, fit 18, reuse 18; total 106/120), with reviewed_base_sha 73da1f5ad719b859d2fbd461e26a5b4432134c67, reviewed_head_sha 7cf4fd8fbb30d8d51bc59af4473c12f78bccfd31, added_failure_count 0 and added_failure_ids [] derived from the reviewed run&#x27;s own (null) baseline_suite and after_suite, and two follow-on findings and no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

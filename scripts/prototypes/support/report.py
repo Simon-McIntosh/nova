@@ -407,6 +407,7 @@ def main():
     args.report.write_text("\n".join(text))
 
     plt.style.use("data-ink")
+    plt.rcParams["svg.hashsalt"] = "support-convergence"
     fig, ax = plt.subplots(figsize=(14, 8), dpi=100)
     styles = {"legacy": "-", "read": "--", "exact": "-."}
     markers = {"legacy": "o", "read": "s", "exact": "^"}
@@ -451,7 +452,7 @@ def main():
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
     args.figure.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(args.figure, format="svg")
+    fig.savefig(args.figure, format="svg", metadata={"Date": None})
     plt.close(fig)
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
     args.fragment.write_text("""<figure id="proto-support-convergence">

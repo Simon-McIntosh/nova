@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run is a read-only synthesis and declares no gate: its manifest carries baseline_suite null and after_suite null, so no suite arm exists to compare and no failure ids are derivable. added_failure_count is therefore 0 with an empty id list; its own document/source audit (63 checks, 0 failures, document-audit-completed.log) is a document check, not a code suite arm.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-09T16:28:19.530Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-10-09T16:20:58Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/pivot-critique.md",
+      "line": "33",
+      "severity": "follow-on",
+      "text": "follow-on (advisory, not an error): the load-bearing pro-pivot premise in this row -- that the compile barrier is largely a fixed expression cost -- rests on (a) a graph census whose native compiles were censored and (b) a completed H200 ladder run at small carriers (132/300/550) under concurrent compiles. The row's own limit cell states both caveats, but the headline sentence in paragraph 3 presents the fixed-cost reading without them, so a downstream reader citing the headline alone could over-trust flatness at the several-thousand-cell scale this critique is about."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/pivot-critique.md",
+      "line": "107",
+      "severity": "follow-on",
+      "text": "follow-on (advisory, not an error): the three proposed experiments specify witnesses, rungs and acceptance clauses but not the concrete invocation -- no partition, launcher or gate command (the brief's sibling nodes pin their follow-ons to existing sbatch/driver paths). A coordinator commissioning them must re-derive the lane and command, which is where the node's own evidence (fresh process, no persistent cache, deliberate warm-hit refusal) would otherwise be lost."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "No code diff to read; the reviewed revision equals the base, so the deliverable is the report alone.",
+    "done_when": "Reconciled the report against its cited sources read-only at base=head 73da1f5ad719b859d2fbd461e26a5b4432134c67. Every reported part is present and every sampled load-bearing number reproduced from its receipt; the section-6 clause set matches the plan exactly.",
+    "goal": "The brief asks for four parts (strongest case for; strongest case against; per-section-6-clause cheaper route; recommended direction with the fastest confirm/refute measurements and stop/keep/redirect). The report at the granted path carries all four, with the six-row pro table, nine-row con table, a nine-clause table matching the plan's own nine rows, three prioritized experiments and a six-row stop/keep/redirect table.",
+    "manifest": "Reviewed manifest status complete, one changed_path, baseline_suite and after_suite both null (read-only synthesis node, no gate arm).",
+    "write_paths": "Node declared one write path; the deliverable is exactly that one file; the reviewed worktree HEAD equals its base (no commits) and is clean."
+  },
+  "justifications": {
+    "durability": "The deliverable is a 169-line markdown report at a durable grant outside the repository, carrying a provenance paragraph, a measured/derived/proposed labeling discipline, and a full source register with absolute links that survives as a read artifact. Not higher: its individual numbers are only as durable as the receipts it cites, and it is a synthesis of historical evidence rather than a new reproducible measurement.",
+    "evidence": "Independent reproduction from the cited sources matched every sampled value (~50 numbers over 7 sources): frame.py dplasma=-2100; topology.py 3173/forward_operator.py 4133/fixed_point.py 5641 lines; 54 equilibrium files / 55,893 lines; plan section-6 nine clauses and the 26-row accounting; the [A] two-arm constants 0.274714 / 2.1805365680219544 and fixed-radius orders 1.9757348872592038 limited / 2.130864895628803 diverted / 0.8967816356562383 moving-floor, plus normal-form maxima 5.0310618239e-06 / 6.097618096e-06 / 5.89088575332e-06 at 550/1074/2616 (report's 5.8909e-6 is the correct 5-sig-fig rounding); boundary repair 2.2322358387255243e-14 Wb and historical fixture 0.04010840152526049 Wb / 0.1019796914478578 m; [R] fits 0.8499579427726649 membership and 0.9065279984498927 current/first-moment envelope with budget order 0.5; [M] map ladder 0.180568/0.154141/0.138457/0.0879875/0.0658035 and chord 0.00409184, offset -4.83186 mm vs 36.2526 mm; [O] 2.92544e-4 -> 7.93053e-5 -> 7.31958e-5 (72.89% / 7.70%), build 3.2378x, memory 13.6227x, modes 0.987429 -> 0.973992; [H] 2210 cells, 5427/121 targets, 17,145,180 pairs, 62.72940013837069 s, 27.3519/14.8292 s; [W] 625.6522108912468 s wall / 624.349089 s compile / 36,892,631 B executable / 14,062 B generated / 13,242,336 KiB RSS; [Q] -0.00907 exponent and 99.14% value_gradient; exact-clip 245,632 -> 472 and quadrature defects; [SG] 0.007578125005 m / 0.006640624953 m; tests/equilibrium/test_topology_read.py:2016 test_topology_read_traces, :2050 AnalyticExteriorField, :2403 parametrize(132,300,550), and topology.py:2235 BiotMomentCoupling / :2864 _curvature_derivatives (step=0.01*pitch). Not 20 because the work is a read-only synthesis: nothing is newly measured, some rows are deliberately second-hand historical receipts, and the source register is the load-bearing warranty.",
+    "fit": "Follows the resolution-pivot report conventions well: a bolded headline judgment, sectioned tables with a per-row source-and-limit column, an explicit inference-vs-measurement discipline, an interface 'instrument trap' note, and a source register. Its self-checks are real and could have failed (the node's own document audit ran 63 checks incl. source-link liveness, section-6 clause coverage and live-plan byte identity, 0 failures). Minor: a reader lifting the headline alone loses the concurrent-compile caveat that the supporting row states.",
+    "goal_fidelity": "All four brief parts delivered against the granted report path /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/pivot-critique.md: (1) a six-row strongest-case-for table, each row tied to a measurement/source with an explicit limit cell; (2) a nine-row strongest-case-against table, each tied to a measurement/source; (3) a per-clause table covering all nine section-6 clauses (verified against the plan's own nine-row table and its '10 clause and 26 row tests' accounting), each naming refinement/higher-order/both/neither with reasoning and evidence; (4) a headline judgment plus three prioritized experiments and a stop/keep/redirect table. Not 20: part 3's recommendations are declared engineering judgments rather than measured head-to-head cost winners, which the report itself states.",
+    "reuse": "Reuses existing receipts, fragments and gates rather than re-running anything, and points its three follow-on experiments at existing witnesses/fixtures (132-cell witness, 1074/2616 rungs, DIII-D frame 44); introduces no new machinery. Not 20 because the three proposed experiments are argued as designs without concrete invocation, lane or gate identifiers, so a coordinator commissioning them must re-derive the command lines.",
+    "scope_discipline": "The node wrote exactly one file at its single granted path; the reviewed tree /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pivot-critique has HEAD equal to base 73da1f5ad719b859d2fbd461e26a5b4432134c67 and is clean (no commits). No plan/sprint/index mutation, no primary-branch push, read-only access to every cited receipt. The report is explicitly independent (no peer pivot report read) and adds no out-of-scope repair."
+  },
+  "project": "nova",
+  "raw_text": "Independent review of run r-20261009T160107868970-pivot-critique (node pivot-critique, plan nova:converged-forward-solve section 2; scope: a read-only synthesis arguing both sides of raising plasma cell count instead of polynomial order and judging whether that pivot is grounded). Reviewed deliverable: /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/pivot-critique.md, sha256 424e44b3b3ac0e5c8117863863ea14d38af93fb6ca4a53241438937393a05b46.\n\nVERDICT goal: The brief asks for four parts (strongest case for; strongest case against; per-section-6-clause cheaper route; recommended direction with the fastest confirm/refute measurements and stop/keep/redirect). The report at the granted path carries all four.\nVERDICT done_when: Reconciled the report against its cited sources read-only at base=head 73da1f5ad719b859d2fbd461e26a5b4432134c67. Every part is present and ~50 load-bearing numbers reproduced from their receipt; the nine section-6 clauses match the plan's own nine-row table and its '10 clause and 26 row tests' accounting.\nVERDICT write_paths: Node declared one write path; the deliverable is exactly that one file; the reviewed worktree HEAD equals its base (no commits) and is clean.\nVERDICT manifest: Reviewed manifest status complete, one changed_path, baseline_suite and after_suite both null (read-only node, no gate).\nVERDICT diff: No code diff to read; the reviewed revision equals the base, so the deliverable is the report alone.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nSCORE evidence: 18\nSCORE scope_discipline: 20\nSCORE durability: 18\nSCORE fit: 19\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: All four brief parts delivered; six-row pro table each with a limit cell, nine-row con table, a per-clause table covering all nine section-6 clauses, three prioritized experiments and a six-row stop/keep/redirect table. Not 20: part 3's recommendations are declared engineering judgments rather than measured head-to-head winners.\nJUSTIFICATION evidence: Every independently reproduced value matched across 7 sources (~50 numbers): plan section-6 clauses and 26-row accounting; frame/topology/forward_operator/fixed_point line counts; [A] two-arm constants 0.274714 / 2.1805365680219544, fixed-radius orders 1.97573489/2.13086490/0.89678164, normal-form maxima 5.0311e-6/6.0976e-6/5.8909e-6 at 550/1074/2616; boundary repair 2.2323e-14 Wb and fixture 0.04010840152526049 Wb / 0.1019796914478578 m; [R] fits 0.8499579427726649 / 0.9065279984498927 with budget order 0.5; [M] map ladder 0.180568/0.154141/0.138457/0.0879875/0.0658035, chord 0.00409184, offsets -4.83186/36.2526 mm; [O] 2.92544e-4 -> 7.93053e-5 -> 7.31958e-5 (72.89%/7.70%), 3.2378x build, 13.6227x memory, modes 0.987429 -> 0.973992; [H] 2210 cells / 5427 / 121 / 17,145,180 pairs / 62.72940013837069 s; [W] 625.6522108912468 s / 624.349089 s / 36,892,631 B / 14,062 B / 13,242,336 KiB; [Q] -0.00907 and 99.14%; [SG] 0.007578125005/0.006640624953 m; test/topology anchors. Not 20: a read-only synthesis, nothing newly measured, source register is the warranty.\nJUSTIFICATION scope_discipline: One file at the single granted path; reviewed tree HEAD==base and clean; no plan/sprint/index mutation; read-only; independent (no peer pivot report read).\nJUSTIFICATION durability: A 169-line markdown report at a durable grant with a provenance paragraph, measured/derived/proposed labels and a full source register; survives. Not higher: numbers only as durable as the receipts cited.\nJUSTIFICATION fit: Bolded headline, per-row source-and-limit columns, inference-vs-measurement discipline, an instrument-trap note, a source register, and a real self-audit (63 checks, 0 failures) that could have failed.\nJUSTIFICATION reuse: Reuses existing receipts/gates, no new machinery; follow-ons point at existing witnesses. Not 20 because the three experiments lack concrete invocation/lane identifiers.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/pivot-critique.md:33 follow-on (advisory): the fixed-expression-cost premise rests on a censored native-compile census plus a small-carrier concurrent-compile ladder; the row's limit cell states this but the headline in paragraph 3 does not.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/pivot-critique.md:107 follow-on (advisory): the three proposed experiments name witnesses and clauses but no concrete invocation/lane/gate command, so a coordinator must re-derive them.\n",
+  "review_run_id": "r-20261009T162043821421-review-of-pivot-critique",
+  "reviewed_base_sha": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+  "reviewed_head_sha": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+  "reviewed_run_id": "r-20261009T160107868970-pivot-critique",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-09T16:33:00Z",
+  "total": 112
+}

@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import signal
 import subprocess
 from time import perf_counter
 
@@ -28,9 +29,33 @@ from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 assert jax.config.jax_enable_x64 is True
 ROOT = Path(__file__).resolve().parents[3]
+CONTROL = (
+    ROOT
+    / "docs/figures/cut-cell-current-attribution/reposed-fixture/parts"
+    / "diverted-single-null-cells-500-analytic-clipped-exact.json"
+)
+
+
+def _budget(seconds: int, stage: str) -> None:
+    def expired(_signum, _frame):
+        raise TimeoutError(f"{stage} exceeded {seconds} s")
+
+    signal.signal(signal.SIGALRM, expired)
+    signal.alarm(seconds)
+
+
+def _stage(kind: str, cells: int, name: str, seconds: float) -> None:
+    print(
+        f"MAP_STAGE_DONE case={kind} cells={cells} stage={name} seconds={seconds:.6f}",
+        flush=True,
+    )
 
 
 def measure(kind: str, cells: int, output: Path) -> dict:
+    if os.environ.get("XLA_PYTHON_CLIENT_PREALLOCATE") != "false":
+        raise RuntimeError("CUDA preallocation must be disabled in every child")
+    _budget(1800, "fixture construction")
+
     # Keep the existing semantic cache protocol, with its store rooted in the
     # granted run directory so a cold build cannot write into another scope.
     def scoped_store(*, filename, dirname, group=None):
@@ -47,6 +72,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         raise RuntimeError("the map measurement requires one GPU")
     started = perf_counter()
     carrier, source, exact = certificate._case(case_name, clip_mode="exact")
+    case_wall = perf_counter() - started
     requested = -500 if cells == 550 else -cells
     platforms = os.environ.get("JAX_PLATFORMS", "cuda,cpu")
     os.environ["JAX_PLATFORMS"] = "cpu"
@@ -59,6 +85,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     if jax.default_backend() != "gpu":
         raise RuntimeError("the carrier build changed the parent device")
     build_wall = perf_counter() - started
+    _stage(kind, cells, "machine", build_wall)
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
@@ -71,13 +98,20 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     physical, exterior, exterior_cache = oracle_fixture.cached_fixture_exterior(
         source, exact, machine, empty, analytic
     )
+    exterior_wall = perf_counter() - started
+    _stage(kind, cells, "exterior", exterior_wall)
+    print(f"MAP_STAGE case={kind} cells={cells} stage=carrier", flush=True)
+    started = perf_counter()
     operator = oracle_fixture.forward_operator(
         source, machine, exterior
     ).with_clip_mode("exact")
     target, _centroid, _receipt = certificate._closed_form_current_target(
         case_name, source, operator, physical
     )
-    fixture_wall = perf_counter() - started
+    carrier_wall = perf_counter() - started
+    _stage(kind, cells, "carrier", carrier_wall)
+    signal.alarm(0)
+    _budget(1200, "map compile and execution")
     requested_class = (
         TopologyClass.LIMITED if kind == "limited" else TopologyClass.DIVERTED
     )
@@ -87,6 +121,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     started = perf_counter()
     executable = jax.jit(mapped).lower(state).compile()
     compile_wall = perf_counter() - started
+    _stage(kind, cells, "compile", compile_wall)
     span = abs(float(oracle_fixture._analytic_axis_flux(exact)))
     if span <= 0:
         raise AssertionError("the analytic span control is zero")
@@ -110,7 +145,10 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         "map_relative_sup": None,
         "map_relative_rms": None,
         "machine_build_seconds": build_wall,
-        "fixture_seconds": fixture_wall,
+        "case_seconds": case_wall,
+        "exterior_seconds": exterior_wall,
+        "carrier_seconds": carrier_wall,
+        "fixture_seconds": build_wall + exterior_wall + carrier_wall,
         "cold_compile_seconds": compile_wall,
         "warm_execute_seconds": None,
         "device_temp_bytes": memory.temp_size_in_bytes if memory else None,
@@ -148,6 +186,27 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     row["map_relative_sup"] = float(np.max(np.abs(difference)) / span)
     row["map_relative_rms"] = float(np.sqrt(np.mean(difference**2)) / span)
     row["warm_execute_seconds"] = warm_wall
+    _stage(kind, cells, "execute", warm_wall)
+    if kind == "diverted" and cells == 550:
+        control = json.loads(CONTROL.read_text())
+        expected = control["map_floor"]["sup_fraction_of_span"]
+        row["positive_control"] = {
+            "receipt": str(CONTROL),
+            "expected": expected,
+            "observed": row["map_relative_sup"],
+            "absolute_delta": abs(row["map_relative_sup"] - expected),
+        }
+        if abs(row["map_relative_sup"] - expected) > 1e-8:
+            raise AssertionError(
+                "stored certificate control mismatch: "
+                f"{row['map_relative_sup']} vs {expected}"
+            )
+        print(
+            "MAP_POSITIVE_CONTROL "
+            + json.dumps(row["positive_control"], sort_keys=True),
+            flush=True,
+        )
+    signal.alarm(0)
     row["completed"] = True
     output.write_text(json.dumps(row, indent=2, sort_keys=True, default=str) + "\n")
     return row

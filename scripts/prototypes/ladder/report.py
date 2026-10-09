@@ -47,6 +47,18 @@ def _fit(rows: list[dict], key: str) -> str:
     return f"{np.polyfit(np.log(pitch), np.log(error), 1)[0]:.3f} ({len(pairs)} rows)"
 
 
+def _cost_fit(rows: list[dict], key: str) -> str:
+    pairs = [
+        (row.get("realised_cells", row.get("cells")), row.get(key))
+        for row in rows
+        if row.get(key) is not None and np.isfinite(row[key]) and row[key] > 0
+    ]
+    if len(pairs) < 2:
+        return "—"
+    count, cost = map(np.asarray, zip(*pairs, strict=True))
+    return f"{np.polyfit(np.log(count), np.log(cost), 1)[0]:.3f} ({len(pairs)} rows)"
+
+
 def _first(rows: list[dict], predicate) -> str:
     for row in sorted(
         rows, key=lambda item: item.get("cells", item.get("realised_cells", 0))
@@ -333,6 +345,37 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                 f"{_first(mapped, lambda row: row['cold_compile_seconds'] <= 60)} | "
                 f"{_first(mapped, lambda row: row['serialized_executable_bytes'] is not None and row['serialized_executable_bytes'] <= 50e6)} | "
                 f"{_first(mapped, lambda row: row['host_peak_rss_kib'] <= 64 * 1048576)} |"
+            )
+    lines += [
+        "",
+        "### Cost growth exponents",
+        "",
+        "These slopes fit log(cost) against log(realised map cells or requested "
+        "read cells). Map cost is repeated for A and B because the production "
+        "map does not consume either prototype read. Two-row map slopes are "
+        "provisional. Fixture construction is excluded because cache-hit "
+        "states differ across rows; its measured walls remain above.",
+        "",
+        "| Case | Arm | map executable | map compile | map warm | map GPU temp | map RSS | read compile | read warm | read GPU temp | read RSS |",
+        "|---|:---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for kind in MAJOR_RADIUS:
+        mapped = [map_rows[kind, cells] for cells in COUNTS if map_rows[kind, cells]]
+        for arm in "AB":
+            group = [
+                rows[kind, cells, arm] for cells in COUNTS if rows[kind, cells, arm]
+            ]
+            lines.append(
+                f"| {kind} | {arm} | "
+                f"{_cost_fit(mapped, 'serialized_executable_bytes')} | "
+                f"{_cost_fit(mapped, 'cold_compile_seconds')} | "
+                f"{_cost_fit(mapped, 'warm_execute_seconds')} | "
+                f"{_cost_fit(mapped, 'device_temp_bytes')} | "
+                f"{_cost_fit(mapped, 'host_peak_rss_kib')} | "
+                f"{_cost_fit(group, 'cold_compile_seconds')} | "
+                f"{_cost_fit(group, 'warm_execute_seconds')} | "
+                f"{_cost_fit(group, 'device_temp_bytes')} | "
+                f"{_cost_fit(group, 'host_peak_rss_kib')} |"
             )
     lines += [
         "",

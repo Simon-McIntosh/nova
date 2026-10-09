@@ -1,0 +1,12 @@
+<section id="proto-taylor">
+  <h2>proto-taylor — Taylor-mode jet vs nested jacfwd on the Biot point jet</h2>
+  <p id="proto-taylor-landing">
+    Cold compile of the nested <code>jax.jacfwd</code> point jet on one polygon
+    at one target point rises 65.75 s / 198.39 s / 413.37 s / 984.58 s for
+    orders 1 to 4 (unique equations 17,456 / 49,194 / 145,557 / 440,855,
+    expanded 97,653 / 260,081 / 753,483 / 2,255,503), and a Taylor pass does not
+    trace the kernel at all. Report:
+    <code>reports/nova/resolution-pivot/proto-taylor.md</code>; rows and job ids
+    in the run directory <code>taylor-h200b/</code> (job 1283098).
+  </p>
+</section>

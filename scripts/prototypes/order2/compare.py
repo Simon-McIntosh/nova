@@ -55,6 +55,8 @@ def main():
         cache_enabled=False,
         measurement_module=topology.__file__,
         measurement_cwd=str(Path.cwd().resolve()),
+        concurrent_rung_processes=int(os.environ.get("MEASUREMENT_CONCURRENCY", "1")),
+        assigned_cpu=os.environ.get("MEASUREMENT_CPU"),
     )
 
     def checkpoint(phase):

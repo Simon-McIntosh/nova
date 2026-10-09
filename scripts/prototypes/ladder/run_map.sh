@@ -3,6 +3,7 @@ set -u
 export TMPDIR=/tmp
 export JAX_PLATFORMS=cuda,cpu
 export JAX_ENABLE_COMPILATION_CACHE=false
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
 root=$(pwd -P)
 export PYTHONPATH="$root"
 output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160304793011-proto-ladder

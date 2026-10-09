@@ -43,12 +43,21 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     case_name = (
         "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
     )
+    if jax.default_backend() != "gpu" or len(jax.devices("gpu")) != 1:
+        raise RuntimeError("the map measurement requires one GPU")
     started = perf_counter()
     carrier, source, exact = certificate._case(case_name, clip_mode="exact")
     requested = -500 if cells == 550 else -cells
-    machine = certificate._case_machine(
-        case_name, carrier, exact, requested, clip_mode="exact"
-    )
+    platforms = os.environ.get("JAX_PLATFORMS", "cuda,cpu")
+    os.environ["JAX_PLATFORMS"] = "cpu"
+    try:
+        machine = certificate._case_machine(
+            case_name, carrier, exact, requested, clip_mode="exact"
+        )
+    finally:
+        os.environ["JAX_PLATFORMS"] = platforms
+    if jax.default_backend() != "gpu":
+        raise RuntimeError("the carrier build changed the parent device")
     build_wall = perf_counter() - started
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
@@ -84,7 +93,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     memory = executable.memory_analysis()
     try:
         executable_bytes = len(executable.runtime_executable().serialize())
-    except (AttributeError, RuntimeError):
+    except AttributeError, RuntimeError:
         executable_bytes = None
     row = {
         "revision": subprocess.check_output(

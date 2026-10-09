@@ -39,6 +39,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         )
 
     oracle_fixture.ZarrStore = scoped_store
+    print(f"MAP_STAGE case={kind} cells={cells} stage=machine", flush=True)
     case_name = (
         "weak-rotation-reactor-static" if kind == "limited" else "diverted-single-null"
     )
@@ -55,6 +56,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     analytic = certificate._exact_state(case_name, exact, coordinates)
     if np.ptp(analytic[: len(machine.node)]) <= 1e-10:
         raise AssertionError("the analytic-state control is uniform")
+    print(f"MAP_STAGE case={kind} cells={cells} stage=exterior", flush=True)
     started = perf_counter()
     empty = oracle_fixture.forward_operator(source, machine).with_clip_mode("exact")
     physical, exterior, exterior_cache = oracle_fixture.cached_fixture_exterior(
@@ -72,22 +74,19 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     )
     mapped = operator.flux_map(requested_class=requested_class, target_current=target)
     state = jnp.asarray(analytic, dtype=jnp.float64)
+    print(f"MAP_STAGE case={kind} cells={cells} stage=compile", flush=True)
     started = perf_counter()
     executable = jax.jit(mapped).lower(state).compile()
     compile_wall = perf_counter() - started
-    started = perf_counter()
-    value = np.asarray(jax.block_until_ready(executable(state)))
-    warm_wall = perf_counter() - started
-    started = perf_counter()
-    value = np.asarray(jax.block_until_ready(executable(state)))
-    warm_wall = min(warm_wall, perf_counter() - started)
     span = abs(float(oracle_fixture._analytic_axis_flux(exact)))
     if span <= 0:
         raise AssertionError("the analytic span control is zero")
-    difference = value[: len(machine.node)] - analytic[: len(machine.node)]
     memory = executable.memory_analysis()
-    largest_arrays = certificate._largest_hlo_arrays(executable.as_text(), limit=3)
-    return {
+    try:
+        executable_bytes = len(executable.runtime_executable().serialize())
+    except (AttributeError, RuntimeError):
+        executable_bytes = None
+    row = {
         "revision": subprocess.check_output(
             ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
         ).strip(),
@@ -99,23 +98,50 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         "requested_cells": requested,
         "realised_cells": len(machine.node),
         "pitch_m": float(np.sqrt(np.median(np.asarray(machine.area)))),
-        "map_relative_sup": float(np.max(np.abs(difference)) / span),
-        "map_relative_rms": float(np.sqrt(np.mean(difference**2)) / span),
+        "map_relative_sup": None,
+        "map_relative_rms": None,
         "machine_build_seconds": build_wall,
         "fixture_seconds": fixture_wall,
         "cold_compile_seconds": compile_wall,
-        "warm_execute_seconds": warm_wall,
+        "warm_execute_seconds": None,
         "device_temp_bytes": memory.temp_size_in_bytes if memory else None,
         "device_output_bytes": memory.output_size_in_bytes if memory else None,
         "device_argument_bytes": memory.argument_size_in_bytes if memory else None,
-        "largest_array_intermediates": largest_arrays,
+        "serialized_executable_bytes": executable_bytes,
+        "largest_array_intermediates": None,
         "host_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         "machine_cache": machine.cache,
         "exterior_cache": exterior_cache,
         "arm_relation": (
             "both arms share this map; the prototype changes only the topology read"
         ),
+        "completed": False,
     }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(row, indent=2, sort_keys=True, default=str) + "\n")
+    row["largest_array_intermediates"] = certificate._largest_hlo_arrays(
+        executable.as_text(), limit=3
+    )
+    output.write_text(json.dumps(row, indent=2, sort_keys=True, default=str) + "\n")
+    print(f"MAP_STAGE case={kind} cells={cells} stage=execute", flush=True)
+    try:
+        started = perf_counter()
+        value = np.asarray(jax.block_until_ready(executable(state)))
+        warm_wall = perf_counter() - started
+        started = perf_counter()
+        value = np.asarray(jax.block_until_ready(executable(state)))
+        warm_wall = min(warm_wall, perf_counter() - started)
+    except Exception as error:
+        row["execution_error"] = f"{type(error).__name__}: {error}"
+        output.write_text(json.dumps(row, indent=2, sort_keys=True, default=str) + "\n")
+        raise
+    difference = value[: len(machine.node)] - analytic[: len(machine.node)]
+    row["map_relative_sup"] = float(np.max(np.abs(difference)) / span)
+    row["map_relative_rms"] = float(np.sqrt(np.mean(difference**2)) / span)
+    row["warm_execute_seconds"] = warm_wall
+    row["completed"] = True
+    output.write_text(json.dumps(row, indent=2, sort_keys=True, default=str) + "\n")
+    return row
 
 
 def main() -> None:

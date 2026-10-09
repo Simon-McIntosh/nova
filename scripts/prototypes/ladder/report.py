@@ -237,7 +237,7 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                 f"{_fit(group, 'saddle_membership_error')} | "
                 f"{_fit(group, 'axis_error_m')} | {_fit(group, 'x_error_m')} | "
                 f"{membership} | {position} | "
-                f"{_first(mapped, lambda row: row['map_relative_sup'] <= 0.01)} | "
+                f"{_first(mapped, lambda row: row['map_relative_sup'] is not None and row['map_relative_sup'] <= 0.01)} | "
                 f"{_first(group, lambda row: row['cold_compile_seconds'] <= 60)} | "
                 f"{_first(group, lambda row: row['host_peak_rss_kib'] <= 64 * 1048576)} |"
             )

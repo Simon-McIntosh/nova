@@ -32,3 +32,51 @@ def make_read(spacing_fraction=0.01):
         topology.read.__defaults__,
         topology.read.__closure__,
     )
+
+
+def batched_field(field):
+    """Share one point-kernel body across the plasma and reference image.
+
+    The analytic exterior has total minus reference-image structure. Mapping
+    its reference and plasma operands together shares their point program
+    while retaining their arithmetic order when composing the total field.
+    The read's existing map evaluates the centre and eight stencil offsets.
+    """
+    import jax
+    import jax.numpy as jnp
+    from dataclasses import dataclass
+
+    if not hasattr(field.exterior, "reference_moments"):
+        raise TypeError("the batch requires an analytic reference-image exterior")
+
+    @jax.tree_util.register_dataclass
+    @dataclass(frozen=True)
+    class BatchedField(topology.TotalField):
+        def sources(self):
+            coupling = jax.tree.map(
+                lambda a, b: jnp.stack((a, b)), self.coupling, self.exterior.coupling
+            )
+            moments = jax.tree.map(
+                lambda a, b: jnp.stack((a, b)),
+                self.moments,
+                self.exterior.reference_moments,
+            )
+            return coupling, moments
+
+        def value(self, point):
+            values = jax.lax.map(
+                lambda pair: pair[0].value_gradient(point, pair[1])[0], self.sources()
+            )
+            return values[0] + (self.exterior.total.value(point) - values[1])
+
+        def evaluate(self, point):
+            jets = jax.lax.map(
+                lambda pair: pair[0].evaluate(point, pair[1]), self.sources()
+            )
+            return jax.tree.map(
+                lambda pair, total: pair[0] + (total - pair[1]),
+                jets,
+                self.exterior.total.evaluate(point),
+            )
+
+    return BatchedField(field.moments, field.coupling, field.exterior)

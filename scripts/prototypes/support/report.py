@@ -30,8 +30,8 @@ def main():
     ]
     rows = [r for r in rows if r.get("completed")]
     groups = {}
-    for case in ("limited", "diverted"):
-        for arm in ("legacy", "read", "exact"):
+    for case in ("diverted", "limited"):
+        for arm in ("exact", "legacy", "read"):
             groups[case, arm] = sorted(
                 (r for r in rows if r["case"] == case and r["arm"] == arm),
                 key=lambda r: r["realised_cells"],
@@ -50,7 +50,7 @@ def main():
             else None
         )
     verdicts = []
-    for arm in ("read", "exact"):
+    for arm in ("exact", "read"):
         values = groups["diverted", arm]
         if len(values) < 3:
             verdicts.append(f"{arm}: convergence unmeasured ({len(values)} rungs)")
@@ -61,8 +61,34 @@ def main():
                 f"relative sup {values[0]['map_relative_sup']:.9g} → "
                 f"{values[-1]['map_relative_sup']:.9g}"
             )
-    text = [
-        "Diverted map verdict — " + "; ".join(verdicts) + ".",
+    exact_values = groups["diverted", "exact"]
+    lead = [
+        "Exact-arm diverted map — " + verdicts[0] + ".",
+        "",
+        "| Realised cells | Exact relative sup | Fitted order | Booking contribution | Exterior contribution | Legacy relative sup |",
+        "|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in exact_values:
+        control = next(
+            (
+                r
+                for r in groups["diverted", "legacy"]
+                if r["realised_cells"] == row["realised_cells"]
+            ),
+            None,
+        )
+        lead.append(
+            f"| {row['realised_cells']} | {row['map_relative_sup']:.12g} | "
+            f"{number(orders['diverted', 'exact'])} | "
+            f"{row['booking_image_relative_sup']:.12g} | "
+            f"{row['exterior_closure_relative_sup']:.12g} | "
+            f"{number(None if control is None else control['map_relative_sup'])} |"
+        )
+    text = lead + [
+        "",
+        "The fitted order uses all available exact-arm rungs and is unmeasured until three exist. "
+        "The accepted 550-cell diverted pair is retained from its original receipt; "
+        "the remaining decisive rows run before optional read support in the resumed allocation.",
         "",
         "The residual decomposition compares the normalized booked-current image "
         "against independently integrated analytic density on the true separatrix. "
@@ -245,7 +271,7 @@ def main():
             f"| {key[0]} | {key[1]} | {len(values)} | {number(orders[key])} | {first} |"
         )
     text += ["", "## Dominant residual term", ""]
-    for case in ("limited", "diverted"):
+    for case in ("diverted", "limited"):
         for legacy in groups[case, "legacy"]:
             exact = next(
                 (
@@ -271,6 +297,35 @@ def main():
                     else "Booking/discretisation on the true analytic support dominates this exact-arm residual."
                 )
             )
+    text += ["", "## Read-arm coverage", ""]
+    refusal_rows = [
+        json.loads(path.read_text())
+        for path in sorted((args.run / "rows").glob("*-read-refusal.json"))
+    ]
+    for case in ("diverted", "limited"):
+        for requested in (550, 2000, 5000):
+            actual = [
+                r
+                for r in groups[case, "read"]
+                if abs(r["requested_cells"]) == (500 if requested == 550 else requested)
+            ]
+            refused = [
+                r
+                for r in refusal_rows
+                if r["case"] == case and r["requested_cells"] == requested
+            ]
+            if actual:
+                text.append(
+                    f"- {case}, requested {requested}: measured at {actual[0]['realised_cells']} cells, sup {actual[0]['map_relative_sup']:.12g}."
+                )
+            elif refused:
+                text.append(
+                    f"- {case}, requested {requested}: refused — `{refused[0]['error_type']}: {refused[0]['error']}`."
+                )
+            else:
+                text.append(
+                    f"- {case}, requested {requested}: not yet measured; inspect the job log for the last completed stage or the three-distinct-refusal stop."
+                )
     text += ["", "## Provenance", ""]
     for r in ordered:
         receipt = (
@@ -280,7 +335,7 @@ def main():
         )
         text.append(
             f"- {r['case']} / {r['realised_cells']} / {r['arm']}: "
-            f"[receipt]({receipt}), [row log]({args.run / 'logs' / (receipt.stem.rsplit('-', 1)[0] + '-' + r['job_id'] + '.log')}), "
+            f"[receipt]({receipt}), "
             f"revision `{r['revision']}`, H200 job `{r['job_id']}`."
         )
     text += ["", f"[Convergence figure]({args.figure})", ""]

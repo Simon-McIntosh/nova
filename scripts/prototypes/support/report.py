@@ -455,9 +455,9 @@ def main():
     fig.savefig(args.figure, format="svg", metadata={"Date": None})
     plt.close(fig)
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
-    args.fragment.write_text("""<figure id="proto-support-convergence">
+    args.fragment.write_text(f"""<figure id="proto-support-convergence">
 <img src="/nova/figures/converged-forward-solve/proto-support/map-convergence.svg" alt="Certificate map relative sup against realised cells for legacy, read and analytic support in limited and diverted cases.">
-<figcaption>Certificate map at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read fragment support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. Only completed rows are plotted. Read fragment polygons retain membership within a checked 2e-5 area-fraction bound; analytic support is independent of the certificate spline clip.</figcaption>
+<figcaption>{len(ordered)} completed certificate map rows at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read fragment support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. Only completed rows are plotted. Read fragment polygons retain membership within a checked 2e-5 area-fraction bound; analytic support is independent of the certificate spline clip.</figcaption>
 </figure>
 """)
     print("REPORT_ROWS=" + str(len(ordered)))

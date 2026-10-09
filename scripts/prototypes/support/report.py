@@ -85,11 +85,21 @@ def main():
             f"{row['exterior_closure_relative_sup']:.12g} | "
             f"{number(None if control is None else control['map_relative_sup'])} |"
         )
+    for row in groups["diverted", "legacy"]:
+        if not any(r["realised_cells"] == row["realised_cells"] for r in exact_values):
+            lead.append(
+                f"| {row['realised_cells']} | unavailable | — | unavailable | "
+                f"{row['exterior_closure_relative_sup']:.12g} | "
+                f"{row['map_relative_sup']:.12g} |"
+            )
     text = lead + [
         "",
         "The fitted order uses all available exact-arm rungs and is unmeasured until three exist. "
         "The accepted 550-cell diverted pair is retained from its original receipt; "
-        "the remaining decisive rows run before optional read support in the resumed allocation.",
+        "the remaining decisive rows were scheduled before optional read support. "
+        "An unavailable value was not persisted and cannot be inferred from execution timings. "
+        "The exterior contribution uses the same fixture and analytic image across arms, "
+        "so a completed legacy receipt can supply it when an exact receipt is missing.",
         "",
         "The residual decomposition compares the normalized booked-current image "
         "against independently integrated analytic density on the true separatrix. "
@@ -98,6 +108,50 @@ def main():
         "measured map residual to a checked relative bound of 1e-10. The displayed "
         "sup norms are not additive: the two error fields can cancel.",
         "",
+    ]
+    audit_path = args.run / "receipt-audit.json"
+    if audit_path.exists():
+        audit = json.loads(audit_path.read_text())
+        text += [
+            "## Receipt coverage and execution barriers",
+            "",
+            f"The completed-receipt gate has {audit['completed_core_rows']} of "
+            f"{audit['expected_core_rows']} required legacy/exact rows, with "
+            f"{sum(audit['controls'].values())} of 3 controls passing. "
+            f"[Audit receipt]({audit_path}). Scheduler exit alone does not decide coverage.",
+            "",
+            "| Case | Requested cells | Arm | Durable receipt |",
+            "|---|---:|---|---|",
+        ]
+        for row in audit["coverage"]:
+            text.append(
+                f"| {row['case']} | {row['cells']} | {row['arm']} | "
+                f"{'complete' if row['completed'] else 'missing'} |"
+            )
+        if audit["serialization_refusals"]:
+            text += [
+                "",
+                "Executable serialization refused after map execution and booking, "
+                "before the row writer persisted the computed metrics. The diagnostic "
+                "proto sizes below are refusal data, not successful serialized executable sizes. "
+                "The computed but unwritten map values are unavailable.",
+                "",
+                "| Refusal log | Serializer-reported proto [bytes] | Limit [bytes] |",
+                "|---|---:|---:|",
+            ]
+            for row in audit["serialization_refusals"]:
+                text.append(
+                    f"| [{Path(row['log']).name}]({row['log']}) | "
+                    f"{row['serializer_reported_proto_bytes']} | 2147483648 |"
+                )
+        text += [
+            "",
+            f"Read attempts produced {audit['read_attempt_refusals']} refusals of "
+            f"{audit['distinct_read_refusals']} distinct types. Their detailed coverage "
+            "appears below. No convergence verdict is inferred from a refused or missing row.",
+            "",
+        ]
+    text += [
         "## Support and booking contract",
         "",
         "All three arms share one machine, exterior, analytic flux state, profile, "
@@ -292,7 +346,7 @@ def main():
         text.append(
             f"| [{log.name}]({log}) | "
             + " | ".join(
-                number(float(stages[k])) if k in stages else "pending"
+                number(float(stages[k])) if k in stages else "not recorded"
                 for k in ("machine", "exterior", "carrier")
             )
             + " |"
@@ -380,7 +434,7 @@ def main():
                 )
             elif refused:
                 text.append(
-                    f"- {case}, requested {requested}: refused — `{refused[0]['error_type']}: {refused[0]['error']}`."
+                    f"- {case}, requested {requested}: refused — `{refused[0]['error_type']}: {refused[0]['error'].splitlines()[0]}`."
                 )
             else:
                 text.append(

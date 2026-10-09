@@ -591,6 +591,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 5008,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261009T155958843717-pivot-census",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5008,
+        "path": "/tmp/reckon-crew-scratch/r-20261009T155958843717-pivot-census"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pivot-census",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

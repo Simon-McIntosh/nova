@@ -65,10 +65,10 @@ def main():
         "Diverted map verdict — " + "; ".join(verdicts) + ".",
         "",
         "The residual decomposition compares the normalized booked-current image "
-        "against the analytic-current image used to pose the exterior. The exterior "
-        "closure is checked explicitly. A nonzero exact-arm error with zero support "
-        "difference therefore measures booking/discretisation on that fixed support, "
-        "not an exterior defect.",
+        "against independently integrated analytic density on the true separatrix. "
+        "Exterior closure uses that same true image, so it detects a fixture exterior "
+        "posed on an inaccurate support. Booking plus exterior terms reconstruct the "
+        "measured map residual to a checked relative bound of 1e-10.",
         "",
         "## Support and booking contract",
         "",
@@ -80,22 +80,25 @@ def main():
         "",
         "- **legacy:** unmodified `_fixed_design_read` and `_profile_support`. "
         "Its topology scalars normalize grid and sample flux; its masks choose cells.",
-        "- **read:** `topology.read` on the closed-form field with `TopologyPolicy()` "
-        "on the certificate's actual atomic cells. Positive membership selects "
-        "connected cells; read axis flux, boundary flux and admitted X-point drive "
-        "the existing curved polygon clip. The resulting polygons enter the unchanged "
-        "current booker. Fractions are **not** multiplied into already clipped current. "
-        "The read-to-polygon area discrepancy is measured separately below; this is a "
-        "read-driven certificate support adapter, not the future fragment booker.",
-        "- **exact:** `_analytic_profile_support` from the analytic state, true zero "
-        "boundary level, true X-point and analytic separatrix participation. It uses "
-        "the certificate's own spline clip and is the support floor for this experiment; "
-        "it does not remove that clip's geometric discretisation.",
+        "- **read:** `topology.read` on the closed-form analytic field with "
+        "`TopologyPolicy()` on the certificate's actual atomic cells. Selected "
+        "quadratic fragments are polygonized between their algebraic slice events; "
+        "selected saddle sectors follow the read's cubic normal-form rays. The "
+        "polygon area fraction must match read membership within 2e-5 or the run "
+        "refuses it. The closed-form field is checked against certificate flux "
+        "samples in the same unit before reading. Read axis flux, boundary level "
+        "and X-point accompany these polygons into current booking.",
+        "- **exact:** independently sampled analytic separatrix intersected with "
+        "each cell, true zero boundary level and true X-point. The boundary is "
+        "sampled at 16,385 points; an 8,193-point comparison bounds the area-fraction "
+        "uncertainty to 2e-5. This arm does not use the certificate spline clip.",
         "",
-        "The map's current target is the certificate's declared analytic net current. "
-        "Raw current is also reported so normalization cannot conceal a booking error. "
-        "The diverted target is integrated from analytic density on exact supports; "
-        "the limited target comes from the analytic aggregate current.",
+        "The map's normalization target remains the certificate target for every "
+        "arm, preserving the legacy positive control. The analytic current column "
+        "is independently integrated on the true analytic support with an oriented "
+        "degree-fifteen triangle rule; the receipt also records the certificate "
+        "target and both raw and normalized errors against the true current. "
+        "This distinguishes a fixture-target bias from booking error.",
         "",
         "## Controls",
         "",
@@ -262,10 +265,10 @@ def main():
                 f"is {exact['booking_image_relative_sup']:.9g}, and exterior closure is "
                 f"{exact['exterior_closure_relative_sup']:.6g}. "
                 + (
-                    "Support selection dominates the legacy error; booking on the fixed "
-                    "analytic support sets the remaining discretisation floor."
-                    if ratio < 0.5
-                    else "The booked-current discretisation remains material even with analytic support."
+                    "The exterior posed by the certificate dominates this exact-arm residual."
+                    if exact["exterior_closure_relative_sup"]
+                    > exact["booking_image_relative_sup"]
+                    else "Booking/discretisation on the true analytic support dominates this exact-arm residual."
                 )
             )
     text += ["", "## Provenance", ""]
@@ -334,7 +337,7 @@ def main():
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
     args.fragment.write_text("""<figure id="proto-support-convergence">
 <img src="/nova/figures/converged-forward-solve/proto-support/map-convergence.svg" alt="Certificate map relative sup against realised cells for legacy, read and analytic support in limited and diverted cases.">
-<figcaption>Certificate map at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read-driven polygon support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. The read adapter retains the certificate polygon booker; its fraction discrepancy is recorded in the measurement report.</figcaption>
+<figcaption>Certificate map at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read fragment support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. The read fragment polygons retain the read membership within a checked 2e-5 area-fraction bound; the analytic support is independent of the certificate spline clip.</figcaption>
 </figure>
 """)
     print("REPORT_ROWS=" + str(len(ordered)))

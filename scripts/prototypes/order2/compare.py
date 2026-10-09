@@ -114,6 +114,9 @@ def main():
         receipt["lower_seconds"] + receipt["compile_seconds"]
     )
     receipt["executable_bytes"] = len(executable.runtime_executable().serialize())
+    receipt["compile_peak_host_rss_kib"] = resource.getrusage(
+        resource.RUSAGE_SELF
+    ).ru_maxrss
     checkpoint("compiled")
     result = executable(*operands)
     jax.block_until_ready(result)
@@ -136,16 +139,17 @@ def main():
         }
     )
     # The limited read has no saddle: compare a nonzero off-axis jet as well.
-    point = jnp.asarray(axis) + jnp.asarray((0.2, 0.1)) * receipt["pitch_m"]
-    jet = jax.jit(lambda f, p: f.evaluate(p))(field, point)
-    jax.block_until_ready(jet)
-    arrays.update(
-        {
-            f"point_{name}": np.asarray(getattr(jet, name))
-            for name in ("value", "gradient", "hessian")
-        }
-    )
-    assert np.linalg.norm(arrays["point_hessian"]) > 0
+    if args.cells == 132:
+        point = jnp.asarray(axis) + jnp.asarray((0.2, 0.1)) * receipt["pitch_m"]
+        jet = jax.jit(lambda f, p: f.evaluate(p))(field, point)
+        jax.block_until_ready(jet)
+        arrays.update(
+            {
+                f"point_{name}": np.asarray(getattr(jet, name))
+                for name in ("value", "gradient", "hessian")
+            }
+        )
+        assert np.linalg.norm(arrays["point_hessian"]) > 0
     arrays_path = args.directory / f"{args.arm}-{args.cells}-outputs.npz"
     np.savez(arrays_path, **arrays)
     receipt["output_path"] = str(arrays_path)

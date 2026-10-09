@@ -25,7 +25,7 @@ def attribute_graph(graph):
         return [code.co_name for code in codes]
 
     def walk(value, path, stage=None):
-        if hasattr(value, "jaxpr"):
+        if not hasattr(value, "eqns") and hasattr(value, "jaxpr"):
             return walk(value.jaxpr, path, stage)
         if isinstance(value, dict):
             return sum(

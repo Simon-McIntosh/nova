@@ -86,6 +86,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         raise AssertionError("the analytic span control is zero")
     difference = value[: len(machine.node)] - analytic[: len(machine.node)]
     memory = executable.memory_analysis()
+    largest_arrays = certificate._largest_hlo_arrays(executable.as_text(), limit=3)
     return {
         "revision": subprocess.check_output(
             ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
@@ -104,6 +105,9 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         "cold_compile_seconds": compile_wall,
         "warm_execute_seconds": warm_wall,
         "device_temp_bytes": memory.temp_size_in_bytes if memory else None,
+        "device_output_bytes": memory.output_size_in_bytes if memory else None,
+        "device_argument_bytes": memory.argument_size_in_bytes if memory else None,
+        "largest_array_intermediates": largest_arrays,
         "host_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         "machine_cache": machine.cache,
         "exterior_cache": exterior_cache,

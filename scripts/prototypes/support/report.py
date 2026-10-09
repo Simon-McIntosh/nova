@@ -117,7 +117,9 @@ def main():
         "- **exact:** independently sampled analytic separatrix intersected with "
         "each cell, true zero boundary level and true X-point. The boundary is "
         "sampled initially at 8,193 points against a 4,097-point comparison. "
-        "Limited boundaries refine further until their measured area-fraction "
+        "Limited boundaries add closed-form samples; diverted boundaries insert "
+        "midpoints and project them with the analytic gradient to the true zero level. "
+        "Both refine until their measured area-fraction "
         "difference is at most 2e-5; each receipt records its point count. "
         "This arm does not use the certificate spline clip.",
         "",

@@ -97,6 +97,7 @@ def run_row(args, kind, cells, arms):
                 for line in reader:
                     if line.startswith("STAGE_START machine"):
                         machine_started = monotonic()
+                        machine_done = False
                     if line.startswith("STAGE_DONE machine"):
                         machine_done = True
                 position = reader.tell()

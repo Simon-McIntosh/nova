@@ -40,6 +40,7 @@ from scripts.prototypes.support.geometry import (
 
 assert jax.config.jax_enable_x64 is True
 ROOT = Path(__file__).resolve().parents[3]
+STAGE_LABEL = "STAGE"
 
 
 def write(path, value):
@@ -48,12 +49,12 @@ def write(path, value):
 
 
 def stage(name, function):
-    print(f"STAGE_START {name}", flush=True)
+    print(f"{STAGE_LABEL}_START {name}", flush=True)
     start = perf_counter()
     result = function()
     jax.block_until_ready(result)
     wall = perf_counter() - start
-    print(f"STAGE_DONE {name} seconds={wall:.9g}", flush=True)
+    print(f"{STAGE_LABEL}_DONE {name} seconds={wall:.9g}", flush=True)
     return result, wall
 
 
@@ -417,7 +418,7 @@ def measure(args):
             booked_current_normalised_a=float(jnp.sum(scaled.cell_current)),
             analytic_current_a=true_current,
             certificate_target_current_a=target,
-            analytic_current_receipt=target_receipt,
+            certificate_current_receipt=target_receipt,
             raw_current_relative_error=booked / true_current - 1,
             normalised_current_relative_error=float(jnp.sum(scaled.cell_current))
             / true_current
@@ -527,6 +528,7 @@ def measure(args):
 
 
 def main():
+    global STAGE_LABEL
     parser = argparse.ArgumentParser()
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
     parser.add_argument("--cells", type=int, required=True)
@@ -566,10 +568,19 @@ def main():
                     path.exists() and json.loads(path.read_text()).get("completed")
                     for path in expected
                 ):
+                    fixture_receipt = args.out / f"{kind}-{actual}-fixture.json"
+                    if not fixture_receipt.exists():
+                        raise RuntimeError(
+                            "decisive recovery requires a completed fixture receipt"
+                        )
                     recovery = argparse.Namespace(**vars(args))
                     recovery.kind, recovery.cells = kind, actual
                     print(f"RECOVER_DECISIVE case={kind} cells={actual}", flush=True)
-                    measure(recovery)
+                    STAGE_LABEL = "RECOVERY_STAGE"
+                    try:
+                        measure(recovery)
+                    finally:
+                        STAGE_LABEL = "STAGE"
                     jax.clear_caches()
         measure(args)
     except Exception as error:

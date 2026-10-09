@@ -44,8 +44,9 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     )
     started = perf_counter()
     carrier, source, exact = certificate._case(case_name, clip_mode="exact")
+    requested = -500 if cells == 550 else -cells
     machine = certificate._case_machine(
-        case_name, carrier, exact, -cells, clip_mode="exact"
+        case_name, carrier, exact, requested, clip_mode="exact"
     )
     build_wall = perf_counter() - started
     coordinates = np.vstack(
@@ -94,7 +95,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         "job_id": os.environ.get("SLURM_JOB_ID"),
         "device": str(jax.devices()[0]),
         "case": kind,
-        "requested_cells": cells,
+        "requested_cells": requested,
         "realised_cells": len(machine.node),
         "map_relative_sup": float(np.max(np.abs(difference)) / span),
         "map_relative_rms": float(np.sqrt(np.mean(difference**2)) / span),

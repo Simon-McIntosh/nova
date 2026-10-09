@@ -78,21 +78,32 @@ def main():
     serialization = []
     for path in sorted((args.run / "logs").glob("*.log")):
         log = path.read_text()
-        values = re.findall(r"size must be smaller than 2GiB: ([0-9]+)", log)
-        if values:
-            case, cells = re.findall(r" CASE=(\w+) CELLS=(\d+) ARMS=", log)[-1]
-            arm = re.findall(r"STAGE_DONE (legacy|exact|read)-booking seconds=", log)[
-                -1
-            ]
-            serialization.append(
-                dict(
-                    log=str(path),
-                    case=case,
-                    cells=int(cells),
-                    arm=arm,
-                    serializer_reported_proto_bytes=int(values[-1]),
-                )
+        case = cells = arm = None
+        observed = set()
+        for line in log.splitlines():
+            header = re.search(r" CASE=(\w+) CELLS=(\d+) ARMS=", line)
+            if header:
+                case, cells = header.groups()
+            booking = re.search(
+                r"STAGE_DONE (legacy|exact|read)-booking seconds=", line
             )
+            if booking:
+                arm = booking.group(1)
+            refusal = re.search(r"size must be smaller than 2GiB: ([0-9]+)", line)
+            if refusal and case and cells and arm:
+                size = int(refusal.group(1))
+                key = case, cells, arm, size
+                if key not in observed:
+                    observed.add(key)
+                    serialization.append(
+                        dict(
+                            log=str(path),
+                            case=case,
+                            cells=int(cells),
+                            arm=arm,
+                            serializer_reported_proto_bytes=size,
+                        )
+                    )
     result = dict(
         revision=revision,
         completed=True,

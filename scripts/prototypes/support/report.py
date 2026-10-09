@@ -56,9 +56,13 @@ def main():
         if len(values) < 3:
             verdicts.append(f"{arm}: convergence unmeasured ({len(values)} rungs)")
         else:
+            monotone = all(
+                b["map_relative_sup"] < a["map_relative_sup"]
+                for a, b in zip(values, values[1:])
+            )
             verdicts.append(
-                f"{arm}: {'decreases' if orders['diverted', arm] > 0 else 'does not decrease'} "
-                f"with refinement, fitted order {orders['diverted', arm]:.5g}, "
+                f"{arm}: {'monotone decrease' if monotone else 'nonmonotonic; convergence not established'}, "
+                f"fitted map order {orders['diverted', arm]:.5g}, "
                 f"relative sup {values[0]['map_relative_sup']:.9g} → "
                 f"{values[-1]['map_relative_sup']:.9g}"
             )
@@ -86,10 +90,18 @@ def main():
         "Diverted map verdict — "
         + "; ".join(verdicts)
         + ". "
-        + f"Exact-support booking decreases with refinement: {booking_values}; "
-        + f"fitted order in pitch {number(booking_order)} "
         + (
-            "(two-point slope only; a third rung is required). "
+            "Exact-support booking decreases with refinement: "
+            if all(
+                b["booking_image_relative_sup"] < a["booking_image_relative_sup"]
+                for a, b in zip(exact_values, exact_values[1:])
+            )
+            else "Exact-support booking is not monotone with refinement: "
+        )
+        + f"{booking_values}; "
+        + f"fitted order in pitch {number(booking_order)}"
+        + (
+            " (two-point slope only; a third rung is required). "
             if len(exact_values) == 2
             else ". "
         )
@@ -166,7 +178,7 @@ def main():
                 "Executable serialization refused after map execution and booking, "
                 "before the row writer persisted the computed metrics. The diagnostic "
                 "proto sizes below are refusal data, not successful serialized executable sizes. "
-                "The computed but unwritten map values are unavailable.",
+                "Computed but unwritten values from those attempts remain unavailable; later completed receipts supersede missing rows.",
                 "",
                 "| Actual case / requested cells / arm | Refusal log | Serializer-reported proto [bytes] | Limit [bytes] |",
                 "|---|---|---:|---:|",
@@ -198,8 +210,9 @@ def main():
         "compared to the ladder's roughly 30 MB coarse executable. The separate "
         "2,160,882,862-byte refusal belongs to limited requested 5,000.",
         "",
-        "The initial fine analytic-reference attempts refused fraction uncertainties "
-        "2.4834499509362173e-5 (diverted) and about 3.90e-5 (limited), "
+        "The original analytic-reference attempts refused fraction uncertainties "
+        "2.4834499509362173e-5 (diverted requested 5,000) and "
+        "3.895593359561445e-5 (limited requested 2,000, not 5,000), "
         "against 2e-5. These were reference-polygon uncertainty refusals before "
         "a durable map row, not measured map errors. The authorized follow-up "
         "records uncertainty up to 1e-4 explicitly and preserves numerical metrics "
@@ -228,8 +241,9 @@ def main():
         "sampled initially at 8,193 points against a 4,097-point comparison. "
         "Limited boundaries add closed-form samples; diverted boundaries insert "
         "midpoints and project them with the analytic gradient to the true zero level. "
-        "Both refine until their measured area-fraction "
-        "difference is at most 2e-5; each receipt records its point count. "
+        "The original rows refine to a measured area-fraction difference of 2e-5. "
+        "The follow-up rows explicitly admit and record uncertainty up to 1e-4; "
+        "each receipt records its achieved uncertainty, bound and point count. "
         "This arm does not use the certificate spline clip.",
         "",
         "The map's normalization target remains the certificate target for every "
@@ -335,7 +349,9 @@ def main():
         "a fully dynamic production read-book-map. RSS is the process high-water mark "
         "across the shared fixture and arms, not an isolated compiler allocation. "
         "Child RSS is separately retained in each receipt. Executable size is serialized "
-        "bytes; temporary memory is the executable memory-analysis figure.",
+        "bytes; temporary memory is the executable memory-analysis figure. "
+        "A dash in executable bytes means unavailable when the recorded serializer "
+        "refusal exceeds 2 GiB; numerical metrics are persisted before this attempt.",
         "",
         "| Case | Cells | Arm | Cold compile [s] | Warm [s] | Executable [bytes] | Device temporary [bytes] | Peak RSS [KiB] | Support [s] | Booking diagnostic [s] |",
         "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|",
@@ -356,6 +372,20 @@ def main():
                 )
             )
             + " |"
+        )
+    text += [
+        "",
+        "## Oracle uncertainty and serialization status",
+        "",
+        "| Case | Cells | Arm | Fraction uncertainty | Fraction bound | Serialization |",
+        "|---|---:|---|---:|---:|---|",
+    ]
+    for r in ordered:
+        text.append(
+            f"| {r['case']} | {r['realised_cells']} | {r['arm']} | "
+            f"{number(r.get('analytic_polygon_fraction_uncertainty'))} | "
+            f"{number(r.get('oracle_fraction_bound', 2e-5))} | "
+            f"{r.get('serialization_status', 'complete')} |"
         )
     text += [
         "",
@@ -420,18 +450,39 @@ def main():
         "cell threshold is reported; the threshold is the first measured row ≤0.01. "
         "A fitted order over nonmonotonic rows does not establish convergence.",
         "",
-        "| Case | Arm | Rows | Fitted p | First cells ≤0.01 |",
-        "|---|---|---:|---:|---:|",
+        "| Case | Arm | Rows | Map fitted p | Booking fitted p | First cells ≤0.01 |",
+        "|---|---|---:|---:|---:|---:|",
     ]
     for key, values in groups.items():
         first = next(
             (r["realised_cells"] for r in values if r["map_relative_sup"] <= 0.01),
             "none measured",
         )
-        text.append(
-            f"| {key[0]} | {key[1]} | {len(values)} | {number(orders[key])} | {first} |"
+        booking_fit = (
+            float(
+                np.polyfit(
+                    np.log([r["pitch_m"] for r in values]),
+                    np.log([r["booking_image_relative_sup"] for r in values]),
+                    1,
+                )[0]
+            )
+            if len(values) >= 3
+            else None
         )
-    text += ["", "## Dominant residual term", ""]
+        text.append(
+            f"| {key[0]} | {key[1]} | {len(values)} | {number(orders[key])} | {number(booking_fit)} | {first} |"
+        )
+    text += [
+        "",
+        "The limited exact ladder is also nonmonotonic: the intermediate error "
+        "exceeds the coarse error and the fine error decreases again. All measured "
+        "limited rows meet 0.01, but these rows do not establish asymptotic order. "
+        "The oracle uncertainty is an area-fraction difference, not a propagated "
+        "flux-error bound; its numerical floor limits interpretation of small map errors.",
+        "",
+        "## Dominant residual term",
+        "",
+    ]
     for case in ("diverted", "limited"):
         for legacy in groups[case, "legacy"]:
             exact = next(
@@ -575,6 +626,9 @@ def main():
     args.figure.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.figure, format="svg", metadata={"Date": None})
     plt.close(fig)
+    args.figure.write_text(
+        "\n".join(line.rstrip() for line in args.figure.read_text().splitlines()) + "\n"
+    )
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
     args.fragment.write_text(f"""<figure id="proto-support-convergence">
 <img src="/nova/figures/converged-forward-solve/proto-support/map-convergence.svg" alt="Certificate map relative sup against realised cells for legacy, read and analytic support in limited and diverted cases.">
@@ -583,6 +637,7 @@ def main():
 """)
     print("REPORT_ROWS=" + str(len(ordered)))
     print("VERDICT=" + "; ".join(verdicts))
+    print("BOOKING_ORDER=" + number(booking_order))
 
 
 if __name__ == "__main__":

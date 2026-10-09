@@ -241,6 +241,33 @@ def main():
         text.append(
             f"| {key[0]} | {key[1]} | {len(values)} | {number(orders[key])} | {first} |"
         )
+    text += ["", "## Dominant residual term", ""]
+    for case in ("limited", "diverted"):
+        for legacy in groups[case, "legacy"]:
+            exact = next(
+                (
+                    r
+                    for r in groups[case, "exact"]
+                    if r["realised_cells"] == legacy["realised_cells"]
+                ),
+                None,
+            )
+            if exact is None:
+                continue
+            ratio = exact["map_relative_sup"] / legacy["map_relative_sup"]
+            text.append(
+                f"{case}, {legacy['realised_cells']} cells: analytic support retains "
+                f"{ratio:.6g} of the legacy sup error. The exact-arm support discrepancy "
+                f"is {exact['membership_error_sup']:.6g}, its booked-current image error "
+                f"is {exact['booking_image_relative_sup']:.9g}, and exterior closure is "
+                f"{exact['exterior_closure_relative_sup']:.6g}. "
+                + (
+                    "Support selection dominates the legacy error; booking on the fixed "
+                    "analytic support sets the remaining discretisation floor."
+                    if ratio < 0.5
+                    else "The booked-current discretisation remains material even with analytic support."
+                )
+            )
     text += ["", "## Provenance", ""]
     for r in ordered:
         receipt = (
@@ -250,7 +277,8 @@ def main():
         )
         text.append(
             f"- {r['case']} / {r['realised_cells']} / {r['arm']}: "
-            f"[receipt]({receipt}), revision `{r['revision']}`, H200 job `{r['job_id']}`."
+            f"[receipt]({receipt}), [row log]({args.run / 'logs' / (receipt.stem.rsplit('-', 1)[0] + '-' + r['job_id'] + '.log')}), "
+            f"revision `{r['revision']}`, H200 job `{r['job_id']}`."
         )
     text += ["", f"[Convergence figure]({args.figure})", ""]
     args.report.parent.mkdir(parents=True, exist_ok=True)

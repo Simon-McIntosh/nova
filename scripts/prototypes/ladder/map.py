@@ -94,7 +94,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         raise AssertionError("the analytic-state control is uniform")
     print(f"MAP_STAGE case={kind} cells={cells} stage=exterior", flush=True)
     started = perf_counter()
-    empty = oracle_fixture.forward_operator(source, machine).with_clip_mode("exact")
+    empty = oracle_fixture.forward_operator(source, machine)
     physical, exterior, exterior_cache = oracle_fixture.cached_fixture_exterior(
         source, exact, machine, empty, analytic
     )
@@ -117,6 +117,25 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     )
     mapped = operator.flux_map(requested_class=requested_class, target_current=target)
     state = jnp.asarray(analytic, dtype=jnp.float64)
+    driver_control = None
+    if kind == "diverted" and cells == 550:
+        print(f"MAP_STAGE case={kind} cells={cells} stage=driver-control", flush=True)
+        started = perf_counter()
+        certificate.REPOSED_FIXTURE_ROOT = output.parent / "current-certificate-control"
+        driver_control, _distance, _floor = certificate._fixture_floor_mode(
+            case_name=case_name,
+            requested_cells=requested,
+            exterior_name="analytic-clipped",
+            mode="exact",
+            operator=oracle_fixture.forward_operator(source, machine, exterior),
+            analytic=analytic,
+            clipped_coefficients=empty.coupling_current_moments(physical),
+            target_current=target,
+            requested_class=int(requested_class),
+            boundary=certificate._boundary(case_name, exact),
+            machine=machine,
+        )
+        _stage(kind, cells, "driver-control", perf_counter() - started)
     print(f"MAP_STAGE case={kind} cells={cells} stage=compile", flush=True)
     started = perf_counter()
     executable = jax.jit(mapped).lower(state).compile()
@@ -131,7 +150,8 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     except AttributeError, RuntimeError:
         executable_bytes = None
     row = {
-        "revision": subprocess.check_output(
+        "revision": os.environ.get("NOVA_MEASUREMENT_REVISION")
+        or subprocess.check_output(
             ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
         ).strip(),
         "module": str(Path(certificate.__file__).resolve()),
@@ -159,9 +179,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         "host_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
         "machine_cache": machine.cache,
         "exterior_cache": exterior_cache,
-        "arm_relation": (
-            "both arms share this map; the prototype changes only the topology read"
-        ),
+        "arm_relation": "production map uses the legacy fixed-design support read",
         "completed": False,
     }
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -188,17 +206,25 @@ def measure(kind: str, cells: int, output: Path) -> dict:
     row["warm_execute_seconds"] = warm_wall
     _stage(kind, cells, "execute", warm_wall)
     if kind == "diverted" and cells == 550:
-        control = json.loads(CONTROL.read_text())
-        expected = control["map_floor"]["sup_fraction_of_span"]
+        historical = json.loads(CONTROL.read_text())
+        expected = driver_control["map_floor"]["sup_fraction_of_span"]
         row["positive_control"] = {
-            "receipt": str(CONTROL),
+            "receipt": str(
+                certificate.REPOSED_FIXTURE_ROOT
+                / "parts/diverted-single-null-cells-500-analytic-clipped-exact.json"
+            ),
             "expected": expected,
             "observed": row["map_relative_sup"],
             "absolute_delta": abs(row["map_relative_sup"] - expected),
+            "historical_receipt": str(CONTROL),
+            "historical_value": historical["map_floor"]["sup_fraction_of_span"],
         }
         if abs(row["map_relative_sup"] - expected) > 1e-8:
+            output.write_text(
+                json.dumps(row, indent=2, sort_keys=True, default=str) + "\n"
+            )
             raise AssertionError(
-                "stored certificate control mismatch: "
+                "current certificate control mismatch: "
                 f"{row['map_relative_sup']} vs {expected}"
             )
         print(

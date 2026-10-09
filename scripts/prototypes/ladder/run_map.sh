@@ -8,6 +8,7 @@ root=$(pwd -P)
 export PYTHONPATH="$root"
 output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160304793011-proto-ladder
 revision=$(git -C "$root" rev-parse HEAD)
+export NOVA_MEASUREMENT_REVISION="$revision"
 printf 'REVISION=%s TREE=%s COMMAND=%s\n' "$revision" "$root" "$0"
 printf 'MODULE=%s CWD=%s JOB=%s\n' "$root/benchmarks/solovev_certificate.py" "$root" "$SLURM_JOB_ID"
 mkdir -p "$output/map-rows" "$output/logs"

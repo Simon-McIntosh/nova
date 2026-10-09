@@ -202,11 +202,17 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         lines.extend(
             [
                 "",
-                "Positive control: stored certificate receipt "
+                "Positive control: the certificate driver's receipt written "
+                "before the compiled map measurement, "
                 f"`{receipt['receipt']}` reports relative sup "
                 f"{receipt['expected']:.12g}; job {control['job_id']} "
                 f"reproduced {receipt['observed']:.12g} "
                 f"(absolute difference {receipt['absolute_delta']:.3g}).",
+                "The historical certificate receipt "
+                f"`{receipt['historical_receipt']}` reports "
+                f"{receipt['historical_value']:.12g}; it does not reproduce "
+                "at the current base, so it is retained as a source-revision "
+                "comparison rather than used as the compiled-map control.",
                 "",
             ]
         )
@@ -215,7 +221,9 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
             mapped = map_rows[kind, cells]
             if mapped is None:
                 continue
-            map_log = map_root.parent / "logs" / f"map-{kind}-{cells}-{mapped['job_id']}.log"
+            map_log = (
+                map_root.parent / "logs" / f"map-{kind}-{cells}-{mapped['job_id']}.log"
+            )
             lines.append(
                 f"| {kind} | {cells} | {mapped['realised_cells']} | "
                 f"{_number(mapped['map_relative_sup'])} | "

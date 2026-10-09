@@ -443,6 +443,19 @@ def main():
                 text.append(
                     f"- {case}, requested {requested}: refused — `{refused[0]['error_type']}: {refused[0]['error'].splitlines()[0]}`."
                 )
+                logs = sorted(
+                    (args.run / "logs").glob(f"{case}-{measured_request}-read-*.log")
+                )
+                if logs:
+                    gaps = re.findall(
+                        r"READ_POLYGON_FRACTION_ERROR=([0-9.e+-]+)",
+                        logs[-1].read_text(),
+                    )
+                    if gaps:
+                        text[-1] += (
+                            f" Fragment/read fraction discrepancy {float(gaps[-1]):.9g} "
+                            f"against the 2e-5 bound; [attempt log]({logs[-1]})."
+                        )
             else:
                 text.append(
                     f"- {case}, requested {requested}: not yet measured; inspect the job log for the last completed stage or the three-distinct-refusal stop."

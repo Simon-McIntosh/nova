@@ -6,6 +6,7 @@
 import argparse
 import json
 from pathlib import Path
+import re
 
 import matplotlib
 
@@ -265,6 +266,41 @@ def main():
         )
     text += [
         "",
+        "Fixture attempts retain their original stage walls below, including a "
+        "cold build whose map was deferred by the analytic-reference guard. "
+        "A later row can therefore report a cache hit without hiding the build cost. "
+        "Recovery stages inside another process carry a separate log prefix and "
+        "remain in that process's log.",
+        "",
+        "| Attempt log | Machine [s] | Exterior [s] | Carrier [s] |",
+        "|---|---:|---:|---:|",
+    ]
+    for log in sorted((args.run / "logs").glob("*-legacy-exact-*.log")):
+        stages = dict(
+            re.findall(
+                r"^STAGE_DONE (machine|exterior|carrier) seconds=([0-9.e+-]+)$",
+                log.read_text(),
+                flags=re.MULTILINE,
+            )
+        )
+        text.append(
+            f"| [{log.name}]({log}) | "
+            + " | ".join(
+                number(float(stages[k])) if k in stages else "pending"
+                for k in ("machine", "exterior", "carrier")
+            )
+            + " |"
+        )
+    for binder in sorted(args.run.glob("*-binder.json")):
+        record = json.loads(binder.read_text())
+        text.append(
+            f"Machine-build binder: {record['case']}, requested "
+            f"{record['requested_cells']} cells, stage `{record['stage']}`, "
+            f"wall {record['wall_seconds']:.6g} s against "
+            f"{record['budget_seconds']} s; [receipt]({binder})."
+        )
+    text += [
+        "",
         "## Orders and first measured acceptance",
         "",
         "Order p fits log(error) against log(pitch): error ∝ h^p. No extrapolated "
@@ -308,22 +344,29 @@ def main():
                     else "Booking/discretisation on the true analytic support dominates this exact-arm residual."
                 )
             )
-    text += ["", "## Read-arm coverage", ""]
+    text += ["", "## Read-arm coverage", "", verdicts[1] + ".", ""]
     refusal_rows = [
         json.loads(path.read_text())
         for path in sorted((args.run / "rows").glob("*-read-refusal.json"))
     ]
     for case in ("diverted", "limited"):
         for requested in (550, 2000, 5000):
+            measured_request = (
+                3500
+                if requested == 5000
+                and (args.run / f"{case}-5000-binder.json").exists()
+                else requested
+            )
             actual = [
                 r
                 for r in groups[case, "read"]
-                if abs(r["requested_cells"]) == (500 if requested == 550 else requested)
+                if abs(r["requested_cells"])
+                == (500 if measured_request == 550 else measured_request)
             ]
             refused = [
                 r
                 for r in refusal_rows
-                if r["case"] == case and r["requested_cells"] == requested
+                if r["case"] == case and r["requested_cells"] == measured_request
             ]
             if actual:
                 text.append(

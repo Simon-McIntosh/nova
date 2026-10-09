@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import traceback
 from time import perf_counter
 from types import MethodType, SimpleNamespace
 
@@ -426,29 +427,37 @@ def measure(args):
         return row
 
     for arm in arms:
-        run_arm(*arm)
-    (reading, support), read_wall = stage(
-        "read-support",
-        lambda: read_support(
-            operator, analytic, machine, args.kind, legacy_partition[3]
-        ),
-    )
-    read_partition = partition(
-        operator,
-        analytic,
-        reading.axis_flux,
-        reading.boundary_flux,
-        jnp.where(
-            jnp.any(reading.x_point_valid),
-            reading.x_points[jnp.argmax(reading.x_point_valid)],
-            jnp.full(2, jnp.nan),
-        ),
-        support,
-    )
-    run_arm(
-        "read", override(operator, read_partition), read_partition, read_wall, reading
-    )
-    if args.kind == "diverted" and args.cells == 550:
+        if arm[0] in args.arms:
+            run_arm(*arm)
+    if "read" in args.arms:
+        (reading, support), read_wall = stage(
+            "read-support",
+            lambda: read_support(
+                operator, analytic, machine, args.kind, legacy_partition[3]
+            ),
+        )
+        read_partition = partition(
+            operator,
+            analytic,
+            reading.axis_flux,
+            reading.boundary_flux,
+            jnp.where(
+                jnp.any(reading.x_point_valid),
+                reading.x_points[jnp.argmax(reading.x_point_valid)],
+                jnp.full(2, jnp.nan),
+            ),
+            support,
+        )
+        run_arm(
+            "read",
+            override(operator, read_partition),
+            read_partition,
+            read_wall,
+            reading,
+        )
+    if "shifted" in args.arms:
+        if args.kind != "diverted" or args.cells != 550:
+            raise ValueError("shifted support control requires diverted 550 cells")
         pitch = identity["pitch_m"]
         wrong, wrong_wall = stage(
             "shifted-support",
@@ -468,7 +477,10 @@ def measure(args):
         row = run_arm(
             "shifted", override(operator, wrong_partition), wrong_partition, wrong_wall
         )
-        floor = next(r for r in rows if r["arm"] == "exact")["map_relative_sup"]
+        floor_row = next((r for r in rows if r["arm"] == "exact"), None)
+        if floor_row is None:
+            floor_row = json.loads((args.out / "diverted-550-exact.json").read_text())
+        floor = floor_row["map_relative_sup"]
         assert row["map_relative_sup"] > floor, (row["map_relative_sup"], floor)
         print(
             f"NEGATIVE_CONTROL shifted_sup={row['map_relative_sup']:.12g} "
@@ -485,7 +497,32 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--cache", type=Path, required=True)
     parser.add_argument("--control", type=Path, required=True)
-    measure(parser.parse_args())
+    parser.add_argument(
+        "--arms",
+        nargs="+",
+        choices=("legacy", "exact", "shifted", "read"),
+        default=("legacy", "exact", "read"),
+    )
+    args = parser.parse_args()
+    try:
+        measure(args)
+    except Exception as error:
+        refusal = {
+            "case": args.kind,
+            "requested_cells": args.cells,
+            "arms": args.arms,
+            "revision": os.environ.get("NOVA_MEASUREMENT_REVISION"),
+            "error_type": type(error).__name__,
+            "error": str(error),
+            "signature": type(error).__name__ + ":" + str(error).split(":")[0],
+            "traceback": traceback.format_exc(),
+            "completed": False,
+        }
+        write(
+            args.out / f"{args.kind}-{args.cells}-{'-'.join(args.arms)}-refusal.json",
+            refusal,
+        )
+        raise
 
 
 if __name__ == "__main__":

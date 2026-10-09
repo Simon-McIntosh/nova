@@ -162,7 +162,8 @@ def read_polygons(geometry, reading, sigma):
     coefficients[:, 0] -= float(sigma) * float(reading.boundary_flux)
     local = (vertices - centres[:, None, :]) / pitches[:, None, None]
     fragments = jax.jit(
-        jax.vmap(topology.quadratic_cell_fragments, in_axes=(0, 0, 0, None))
+        jax.vmap(topology.quadratic_cell_fragments, in_axes=(0, 0, 0, None)),
+        static_argnums=(3,),
     )(
         jnp.asarray(local),
         geometry.vertex_count,

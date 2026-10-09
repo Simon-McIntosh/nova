@@ -47,8 +47,13 @@ def _first(rows: list[dict], predicate) -> str:
 
 
 def build(rows_root: Path, map_root: Path, report: Path) -> None:
+    quadratic_root = rows_root.parent / "quadratic-rows"
     rows = {
-        (kind, cells, arm): _row(rows_root / f"{kind}-{cells}-{arm}.json")
+        (kind, cells, arm): _row(
+            (rows_root / f"{kind}-{cells}-A.json")
+            if arm == "A"
+            else (quadratic_root / f"{kind}-{cells}.json")
+        )
         for kind in MAJOR_RADIUS
         for cells in COUNTS
         for arm in "AB"
@@ -67,10 +72,10 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         "The topology rows evaluate the closed-form analytic field through "
         "`nova.equilibrium.topology.read` on exact-count hex carriers. "
         "Arm A uses `TopologyPolicy` defaults with the calibrated physical "
-        "normal-form radius. Arm B sets that radius and its pitch floor to zero "
-        "and zeros the third and fourth curvature derivatives. The current "
-        "implementation still uses straight-ray normal-form support in the "
-        "saddle owner cell; the row records its count. The forward-map rows "
+        "normal-form radius. Arm B sets that radius and its pitch floor to zero, "
+        "zeros the third and fourth curvature derivatives, and switches off "
+        "saddle normal-form support through a source-checked prototype flag. "
+        "The forward-map rows "
         "use the certificate machine, exact exterior and exact clip. The "
         "prototype changes only topology, so the map value is common to A and B. "
         "These are separate carriers, and any map row with a different realised "
@@ -105,7 +110,8 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         "area units; the smooth and saddle sets are split at the larger of the "
         "physical normal-form radius and 1.5 pitches. `Nmap` is the certificate "
         "carrier's realised count. `map` is relative sup at the analytic state. "
-        "`axis` and `X` show metres / pitches. `resid` and `solve` are absent "
+        "`axis` and `X` show metres / pitches; a missing X on a diverted row "
+        "means no X-point was admitted. `resid` and `solve` are absent "
         "because this run measures the map and read, not a solved state.",
         "",
         "| Case | N | Arm | Nmap | map | smooth | saddle | axis m / h | X m / h | contact m | resid | solve | cold s | warm s | GPU temp GB | RSS GB | Job / log |",
@@ -121,7 +127,11 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                         f"| {kind} | {cells} | {arm} | — | — | — | — | — | — | — | — | — | — | — | — | — | missing |"
                     )
                     continue
-                top_log = rows_root.parent / "logs" / f"{kind}-{cells}-{arm}.log"
+                top_log = rows_root.parent / "logs" / (
+                    f"{kind}-{cells}-A.log"
+                    if arm == "A"
+                    else f"quadratic-{kind}-{cells}.log"
+                )
                 map_log = map_root.parent / "logs" / f"map-{kind}-{cells}.log"
                 map_label = (
                     f"{mapped['job_id']} `{map_log}`" if mapped else "map pending"
@@ -141,6 +151,30 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                     f"{_number(row['host_peak_rss_kib'] / 1048576)} | "
                     f"{row['job_id']} `{top_log}`; {map_label} |"
                 )
+    lines += [
+        "",
+        "### Owner-cell straight-ray control",
+        "",
+        "This intermediate arm zeros the radius and curvature corrections "
+        "through `TopologyPolicy` and a prototype flag, but retains straight-ray "
+        "normal-form support in the saddle owner cell. It is not arm B.",
+        "",
+        "| Case | N | smooth | saddle | owner cells | Job / log |",
+        "|---|---:|---:|---:|---:|---|",
+    ]
+    for kind in MAJOR_RADIUS:
+        for cells in COUNTS:
+            control = _row(rows_root / f"{kind}-{cells}-B.json")
+            if control is None:
+                continue
+            log = rows_root.parent / "logs" / f"{kind}-{cells}-B.log"
+            lines.append(
+                f"| {kind} | {cells} | "
+                f"{_number(control['smooth_membership_error'])} | "
+                f"{_number(control['saddle_membership_error'])} | "
+                f"{control['normal_form_owner_cells']} | "
+                f"{control['job_id']} `{log}` |"
+            )
     lines += [
         "",
         "## Fitted orders and first measured acceptance",
@@ -172,7 +206,10 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
             membership = _first(
                 group,
                 lambda row: (
-                    row["smooth_membership_error"] <= bound(row)
+                    row["valid"]
+                    and row["qualified"]
+                    and (kind == "limited" or row["x_error_pitches"] is not None)
+                    and row["smooth_membership_error"] <= bound(row)
                     and (
                         row["saddle_membership_error"] is None
                         or row["saddle_membership_error"] <= bound(row)
@@ -182,8 +219,16 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
             position = _first(
                 group,
                 lambda row: (
-                    row["axis_error_pitches"] <= 1
-                    and (row["x_error_pitches"] is None or row["x_error_pitches"] <= 1)
+                    row["valid"]
+                    and row["qualified"]
+                    and row["axis_error_pitches"] <= 1
+                    and (
+                        (row["x_error_pitches"] is None and kind == "limited")
+                        or (
+                            row["x_error_pitches"] is not None
+                            and row["x_error_pitches"] <= 1
+                        )
+                    )
                 ),
             )
             lines.append(

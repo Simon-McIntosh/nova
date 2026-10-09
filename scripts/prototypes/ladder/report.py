@@ -189,6 +189,8 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         "and `warm` time the JIT program. The executable is serialized bytes; "
         "GPU temporary bytes come from JAX executable memory analysis. The "
         "peak RSS includes fixture and compilation in the fresh row process. "
+        "Machine and exterior cache hit status is recorded in each row JSON; "
+        "fixture walls reflect that status. "
         "The analytic-membership variant is unavailable through the existing "
         "`flux_map` API: `_support_partition` unconditionally invokes "
         "`_fixed_design_read`. No product override was introduced.",
@@ -199,6 +201,9 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
     control = map_rows["diverted", 550]
     if control and control.get("positive_control"):
         receipt = control["positive_control"]
+        control_log = (
+            map_root.parent / "logs" / f"map-diverted-550-{control['job_id']}.log"
+        )
         lines.extend(
             [
                 "",
@@ -207,7 +212,8 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                 f"`{receipt['receipt']}` reports relative sup "
                 f"{receipt['expected']:.12g}; job {control['job_id']} "
                 f"reproduced {receipt['observed']:.12g} "
-                f"(absolute difference {receipt['absolute_delta']:.3g}).",
+                f"(absolute difference {receipt['absolute_delta']:.3g}); "
+                f"log `{control_log}`.",
                 "The historical certificate receipt "
                 f"`{receipt['historical_receipt']}` reports "
                 f"{receipt['historical_value']:.12g}; it does not reproduce "

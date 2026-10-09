@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="125">
+<meta name="plan-version" content="126">
 <meta name="plan-modified" content="2026-10-09">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -411,6 +411,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261009T160337032033-proto-order2" data-who="reckon-build" data-when="2026-10-09T16:05:03.003Z">
     <div class="r-comment-body"><p>Kernel sharing measured in H200 job 1283105: native 132 has 10 packed-kernel / 6 Hessian sites and 827553 expanded equations; batching source terms reduces them to 5 / 3 and 419939. Cold walls native/batched are 932.887760/477.653022 s at 132 and 854.907227/449.409065 s at 550; all requested read outputs and the coarse nonzero point jet match exactly. Experiment complete; 60 s clause remains unmet and no product signature changed.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261009T172718771289-review-of-proto-order2" data-who="reckon-build" data-when="2026-10-09T17:33:01.732Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261009T160337032033-proto-order2 stored at both assigned JSON paths (base 73da1f5ad719b859d2fbd461e26a5b4432134c67, head f1a6cc3429d295c7b19c7e06c1e8fb689c3eb8a1): parsed record scores all six dimensions 0..20 (goal_fidelity 16, evidence 17, scope_discipline 20, durability 16, fit 17, reuse 18; total 104), records reviewed_base_sha/reviewed_head_sha, and carries added_failure_count 0 with an empty added_failure_ids (the reviewed run is a measurement prototype declaring no suite gate, baseline_suite and after_suite absent). Five follow-on findings, no blocking finding: the ruling&#x27;s single-kernel-body target is met only by reinterpretation (5 packed / 3 Hessian sites remain); the batching identity is confined to the limited state so its equivalence on the diverted saddle path is unmeasured; the four rows ran non-interleaved so the ~48% cold-wall reduction carries an ordering confound; the &quot;complete stencil&quot; 208,621 figure is the standalone helper trace not the in-read curvature stage; and the original done-when (2,000 cells, diverted saddle accuracy, three-spacing ladder) remains unmeasured under the superseding ruling.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

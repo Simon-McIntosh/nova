@@ -98,6 +98,7 @@ def measure(kind: str, cells: int, output: Path) -> dict:
         "case": kind,
         "requested_cells": requested,
         "realised_cells": len(machine.node),
+        "pitch_m": float(np.sqrt(np.median(np.asarray(machine.area)))),
         "map_relative_sup": float(np.max(np.abs(difference)) / span),
         "map_relative_rms": float(np.sqrt(np.mean(difference**2)) / span),
         "machine_build_seconds": build_wall,

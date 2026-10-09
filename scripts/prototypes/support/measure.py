@@ -28,6 +28,13 @@ from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from tests.equilibrium.test_topology_read import _analytic_inputs
+from scripts.prototypes.support.geometry import (
+    certificate_field,
+    pack,
+    analytic_polygons,
+    read_polygons,
+    analytic_moments,
+)
 
 assert jax.config.jax_enable_x64 is True
 ROOT = Path(__file__).resolve().parents[3]
@@ -133,8 +140,11 @@ def override(operator, fixed):
     return active
 
 
-def read_support(operator, analytic, machine, kind):
+def read_support(operator, analytic, machine, kind, template):
     _, field, _, _, _ = _analytic_inputs(kind)
+    field = certificate_field(field, kind)
+    probes = jax.vmap(field.value)(jnp.asarray(machine.node[:16]))
+    np.testing.assert_allclose(probes, analytic[:16], rtol=1e-11, atol=1e-13)
     geometry = topology.TopologyGeometry.from_cells(
         machine.cell_polygons, machine.sampling_vertices, (machine.wall_node,)
     )
@@ -145,34 +155,18 @@ def read_support(operator, analytic, machine, kind):
         raise AssertionError(
             f"read refused certificate carrier: reason={int(reading.reason)}"
         )
-    # Membership selects connected cells; the existing curved clip supplies
-    # the polygons consumed by the unchanged certificate current integrator.
-    selected = reading.membership > 0
-    labels = jnp.where(
-        selected, int(PlasmaDomain.CORE), int(PlasmaDomain.EXCLUDED_MATERIAL)
-    ).astype(jnp.int32)
-    span = reading.boundary_flux - reading.axis_flux
-    masks = DomainMasks(
-        labels, (analytic[: operator.grid.node_number] - reading.axis_flux) / span
+    polygons = read_polygons(geometry, reading, convention.sigma)
+    support = pack(polygons, template)
+    gap = float(
+        np.max(
+            np.abs(
+                np.asarray(support.area / support.full_area)
+                - np.asarray(reading.membership)
+            )
+        )
     )
-    sample = (operator.sample_node_flux(analytic) - reading.axis_flux) / span
-    saddle = jnp.where(
-        jnp.any(reading.x_point_valid),
-        reading.x_points[jnp.argmax(reading.x_point_valid)],
-        jnp.full(2, jnp.nan),
-    )
-    state = SimpleNamespace(
-        axis_flux=reading.axis_flux,
-        boundary_flux=reading.boundary_flux,
-        flux_span=span,
-        x_point=saddle,
-    )
-    support = jax.jit(
-        lambda values, samples: operator._profile_support(
-            masks, state, values, samples, fixed_participation=selected
-        ).qualify(selected)
-    )(analytic, sample)
-    jax.block_until_ready(support)
+    if gap > 2e-5:
+        raise AssertionError(f"packed support differs from read membership: {gap}")
     return reading, support
 
 
@@ -264,10 +258,42 @@ def measure(args):
     )
     # The topology object is a pytree only in the production partition. The
     # prototype adapter is closed over after its measured support construction.
-    exact_support, exact_wall = stage(
-        "analytic-support",
-        lambda: fixture._analytic_profile_support(exact, operator, analytic),
+    exact_polygons, polygon_wall = stage(
+        "analytic-polygons", lambda: analytic_polygons(exact, machine.cell_polygons)
     )
+    exact_support, exact_wall = stage(
+        "analytic-support", lambda: pack(exact_polygons, legacy_partition[3])
+    )
+    exact_wall += polygon_wall
+    coarse_polygons, refinement_wall = stage(
+        "analytic-polygon-refinement",
+        lambda: analytic_polygons(exact, machine.cell_polygons, points=8193),
+    )
+    geometry_uncertainty = float(
+        np.max(
+            np.abs(
+                np.asarray([p.area for p in exact_polygons])
+                - np.asarray([p.area for p in coarse_polygons])
+            )
+            / np.asarray(legacy_partition[3].full_area)
+        )
+    )
+    if geometry_uncertainty > 2e-5:
+        raise AssertionError(
+            f"analytic polygon refinement unresolved: {geometry_uncertainty}"
+        )
+    identity["analytic_polygon_fraction_uncertainty"] = geometry_uncertainty
+    identity["fixture_walls"]["analytic_polygon_refinement"] = refinement_wall
+    true_physical, truth_wall = stage(
+        "analytic-density",
+        lambda: analytic_moments(
+            source,
+            exact_polygons,
+            np.asarray(operator.moment_geometry.atomic_mesh.centroids),
+        ),
+    )
+    true_current = float(jnp.sum(true_physical.cell_current))
+    identity["fixture_walls"]["analytic_density"] = truth_wall
     exact_support.assert_no_refusal()
     exact_fraction = np.asarray(exact_support.area / exact_support.full_area)
     axis_flux = jnp.asarray(fixture._analytic_axis_flux(exact))
@@ -289,6 +315,9 @@ def measure(args):
             None,
         ),
     ]
+    shadow = np.asarray(
+        jax.jit(lambda state: operator.residual_shadow_mask(state, branch))(analytic)
+    )[: len(machine.node)]
     rows = []
 
     def run_arm(arm, active, fixed, support_wall, reading=None):
@@ -313,7 +342,7 @@ def measure(args):
             raw, active.current_normalisation_amplitude(target, booked)
         )
         reference_image = operator.current_moment_image(
-            operator.coupling_current_moments(physical)
+            operator.coupling_current_moments(true_physical)
         )
         booking_delta = np.asarray(
             operator.current_moment_image(scaled) - reference_image
@@ -321,6 +350,16 @@ def measure(args):
         exterior_closure = np.asarray(exterior + reference_image - analytic)[
             : len(machine.node)
         ]
+        booking_delta = np.where(shadow, 0.0, booking_delta)
+        exterior_closure = np.where(shadow, 0.0, exterior_closure)
+        reconstruction_error = float(
+            np.max(np.abs(booking_delta + exterior_closure - delta)) / span
+        )
+        if reconstruction_error > 1e-10:
+            raise AssertionError(
+                "residual decomposition does not reconstruct map: "
+                f"{reconstruction_error}"
+            )
         fraction = np.asarray(support.area / support.full_area)
         row = dict(
             identity,
@@ -339,9 +378,13 @@ def measure(args):
             else float(np.max(np.abs(np.asarray(reading.membership) - fraction))),
             booked_current_raw_a=booked,
             booked_current_normalised_a=float(jnp.sum(scaled.cell_current)),
-            analytic_current_a=target,
+            analytic_current_a=true_current,
+            certificate_target_current_a=target,
             analytic_current_receipt=target_receipt,
-            raw_current_relative_error=booked / target - 1,
+            raw_current_relative_error=booked / true_current - 1,
+            normalised_current_relative_error=float(jnp.sum(scaled.cell_current))
+            / true_current
+            - 1,
             boundary_flux=float(fixed[1].boundary_flux),
             axis_flux=float(fixed[1].axis_flux),
             x_point=np.asarray(fixed[1].x_point).tolist(),
@@ -355,6 +398,7 @@ def measure(args):
             device_temp_bytes=memory.temp_size_in_bytes,
             host_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
             child_peak_rss_kib=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,
+            decomposition_reconstruction_relative_sup=reconstruction_error,
             booking_image_relative_sup=float(np.max(np.abs(booking_delta)) / span),
             exterior_closure_relative_sup=float(
                 np.max(np.abs(exterior_closure)) / span
@@ -403,22 +447,11 @@ def measure(args):
     )
     if args.kind == "diverted" and args.cells == 550:
         pitch = identity["pitch_m"]
-        shifted_coordinates = coordinates - np.asarray((pitch, 0.0))
-        shifted_state = certificate._exact_state(name, exact, shifted_coordinates)
-
-        # Translating the analytic support radially supplies a deliberately
-        # wrong region while the map still receives the unshifted flux state.
-        class ShiftedOracle:
-            axis_flux = exact.axis_flux
-            x_point = np.asarray(exact.x_point) + np.asarray((pitch, 0.0))
-
-            def separatrix(self, points):
-                return exact.separatrix(points) + np.asarray((pitch, 0.0))
-
         wrong, wrong_wall = stage(
             "shifted-support",
-            lambda: fixture._analytic_profile_support(
-                ShiftedOracle(), operator, shifted_state
+            lambda: pack(
+                analytic_polygons(exact, machine.cell_polygons, (pitch, 0.0)),
+                legacy_partition[3],
             ),
         )
         wrong_partition = partition(
@@ -426,7 +459,7 @@ def measure(args):
             analytic,
             axis_flux,
             jnp.asarray(0.0),
-            jnp.asarray(ShiftedOracle.x_point),
+            fixture._analytic_saddle(exact) + jnp.asarray((pitch, 0.0)),
             wrong,
         )
         row = run_arm(

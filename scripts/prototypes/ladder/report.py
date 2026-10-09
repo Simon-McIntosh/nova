@@ -73,6 +73,10 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         for kind in MAJOR_RADIUS
         for cells in COUNTS
     }
+    map_rows = {
+        key: row if row and row.get("completed") else None
+        for key, row in map_rows.items()
+    }
     baseline = {kind: _row(rows_root / f"{kind}-132-A.json") for kind in MAJOR_RADIUS}
     lines = [
         "# Forward map and topology resolution ladder",
@@ -85,9 +89,12 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         "normal-form radius. Arm B sets that radius and its pitch floor to zero, "
         "zeros the third and fourth curvature derivatives, and switches off "
         "saddle normal-form support through a source-checked prototype flag. "
-        "The forward-map rows "
-        "use the certificate machine, exact exterior and exact clip. The "
-        "prototype changes only topology, so the map value is common to A and B. "
+        "The forward-map rows use the certificate machine, analytic-clipped "
+        "exterior and exact clip. Their support is the production "
+        "`ForwardFluxOperator._fixed_design_read`, which calls "
+        "`Topology.read_qualification`; it does not use the new topology "
+        "read measured in A and B. Thus the same map value is listed beside "
+        "both read arms, without claiming either read is in that map. "
         "These are separate carriers, and any map row with a different realised "
         "count is identified below. No forward solve was run.",
         "",
@@ -123,7 +130,9 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         "`axis` and `X` show metres / pitches; a missing X on a diverted row "
         "means no X-point was admitted. `resid` and `solve` are absent "
         "because this run measures the map and read, not a solved state. "
-        "Read reason 7 is `UNRESOLVED_COMPONENT`.",
+        "Read reason 7 is `UNRESOLVED_COMPONENT`. Cold, warm, GPU and RSS "
+        "in this joint table refer to the topology read; the forward-map "
+        "costs are below.",
         "",
         "| Case | N | Arm | Read | Nmap | map | smooth | saddle | axis m / h | X m / h | contact m | resid | solve | cold s | warm s | GPU temp GB | RSS GB | Job / log |",
         "|---|---:|:---:|---|---:|---:|---:|---:|---:|---:|---:|---:|:---:|---:|---:|---:|---:|---|",
@@ -172,6 +181,54 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                     f"{_number(row['host_peak_rss_kib'] / 1048576)} | "
                     f"{row['job_id']} `{top_log}`; {map_label} |"
                 )
+    lines += [
+        "",
+        "### Forward-map cost by completed row",
+        "",
+        "`machine`, `exterior` and `carrier` are fixture-stage walls; `compile` "
+        "and `warm` time the JIT program. The executable is serialized bytes; "
+        "GPU temporary bytes come from JAX executable memory analysis. The "
+        "peak RSS includes fixture and compilation in the fresh row process. "
+        "The analytic-membership variant is unavailable through the existing "
+        "`flux_map` API: `_support_partition` unconditionally invokes "
+        "`_fixed_design_read`. No product override was introduced.",
+        "",
+        "| Case | Requested | Realised | relative sup | machine s | exterior s | carrier s | compile s | warm s | executable MB | GPU temp GB | peak RSS GB | Job / log |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+    ]
+    control = map_rows["diverted", 550]
+    if control and control.get("positive_control"):
+        receipt = control["positive_control"]
+        lines.extend(
+            [
+                "",
+                "Positive control: stored certificate receipt "
+                f"`{receipt['receipt']}` reports relative sup "
+                f"{receipt['expected']:.12g}; job {control['job_id']} "
+                f"reproduced {receipt['observed']:.12g} "
+                f"(absolute difference {receipt['absolute_delta']:.3g}).",
+                "",
+            ]
+        )
+    for kind in MAJOR_RADIUS:
+        for cells in COUNTS:
+            mapped = map_rows[kind, cells]
+            if mapped is None:
+                continue
+            map_log = map_root.parent / "logs" / f"map-{kind}-{cells}-{mapped['job_id']}.log"
+            lines.append(
+                f"| {kind} | {cells} | {mapped['realised_cells']} | "
+                f"{_number(mapped['map_relative_sup'])} | "
+                f"{_number(mapped['machine_build_seconds'])} | "
+                f"{_number(mapped['exterior_seconds'])} | "
+                f"{_number(mapped['carrier_seconds'])} | "
+                f"{_number(mapped['cold_compile_seconds'])} | "
+                f"{_number(mapped['warm_execute_seconds'])} | "
+                f"{_number(mapped['serialized_executable_bytes'] / 1e6) if mapped['serialized_executable_bytes'] is not None else '—'} | "
+                f"{_number(mapped['device_temp_bytes'] / 1e9) if mapped['device_temp_bytes'] is not None else '—'} | "
+                f"{_number(mapped['host_peak_rss_kib'] / 1048576)} | "
+                f"{mapped['job_id']} `{map_log}` |"
+            )
     lines += [
         "",
         "### Owner-cell straight-ray control",
@@ -259,8 +316,8 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                 f"{_fit(group, 'axis_error_m')} | {_fit(group, 'x_error_m')} | "
                 f"{membership} | {position} | "
                 f"{_first(mapped, lambda row: row['map_relative_sup'] is not None and row['map_relative_sup'] <= 0.01)} | "
-                f"{_first(group, lambda row: row['cold_compile_seconds'] <= 60)} | "
-                f"{_first(group, lambda row: row['host_peak_rss_kib'] <= 64 * 1048576)} |"
+                f"{_first(mapped, lambda row: row['cold_compile_seconds'] <= 60)} | "
+                f"{_first(mapped, lambda row: row['host_peak_rss_kib'] <= 64 * 1048576)} |"
             )
     lines += [
         "",

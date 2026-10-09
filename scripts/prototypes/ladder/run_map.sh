@@ -13,7 +13,7 @@ printf 'MODULE=%s CWD=%s JOB=%s\n' "$root/benchmarks/solovev_certificate.py" "$r
 for cells in 550 2000 5000 10000; do
   for kind in limited diverted; do
     row="$output/map-rows/$kind-$cells.json"
-    log="$output/logs/map-$kind-$cells.log"
+    log="$output/logs/map-$kind-$cells-$SLURM_JOB_ID.log"
     mkdir -p "$output/map-rows" "$output/logs"
     printf 'REVISION=%s TREE=%s COMMAND=/home/ITER/mcintos/Code/nova/.venv/bin/python %s/scripts/prototypes/ladder/map.py --kind %s --cells %s --out %s\n' "$revision" "$root" "$root" "$kind" "$cells" "$row" > "$log"
     printf 'MODULE=%s CWD=%s JOB=%s\n' "$root/benchmarks/solovev_certificate.py" "$root" "$SLURM_JOB_ID" >> "$log"

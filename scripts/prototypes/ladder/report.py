@@ -147,7 +147,13 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                         else f"quadratic-{kind}-{cells}.log"
                     )
                 )
-                map_log = map_root.parent / "logs" / f"map-{kind}-{cells}.log"
+                map_log = (
+                    map_root.parent
+                    / "logs"
+                    / f"map-{kind}-{cells}-{mapped['job_id']}.log"
+                    if mapped
+                    else None
+                )
                 map_label = (
                     f"{mapped['job_id']} `{map_log}`" if mapped else "map pending"
                 )

@@ -76,7 +76,7 @@ def pack(polygons, template):
     return result
 
 
-def analytic_polygons(exact, cells, shift=(0.0, 0.0), points=16385):
+def analytic_polygons(exact, cells, shift=(0.0, 0.0), points=8193):
     boundary = fixture._analytic_separatrix(exact, points) + np.asarray(shift)
     core = Polygon(boundary)
     if not core.is_valid:

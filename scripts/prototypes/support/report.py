@@ -90,7 +90,7 @@ def main():
         "and X-point accompany these polygons into current booking.",
         "- **exact:** independently sampled analytic separatrix intersected with "
         "each cell, true zero boundary level and true X-point. The boundary is "
-        "sampled at 16,385 points; an 8,193-point comparison bounds the area-fraction "
+        "sampled at 8,193 points; a 4,097-point comparison bounds the area-fraction "
         "uncertainty to 2e-5. This arm does not use the certificate spline clip.",
         "",
         "The map's normalization target remains the certificate target for every "

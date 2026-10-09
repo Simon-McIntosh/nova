@@ -267,7 +267,7 @@ def measure(args):
     exact_wall += polygon_wall
     coarse_polygons, refinement_wall = stage(
         "analytic-polygon-refinement",
-        lambda: analytic_polygons(exact, machine.cell_polygons, points=8193),
+        lambda: analytic_polygons(exact, machine.cell_polygons, points=4097),
     )
     geometry_uncertainty = float(
         np.max(

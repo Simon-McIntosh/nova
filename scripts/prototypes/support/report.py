@@ -136,12 +136,13 @@ def main():
                 "proto sizes below are refusal data, not successful serialized executable sizes. "
                 "The computed but unwritten map values are unavailable.",
                 "",
-                "| Refusal log | Serializer-reported proto [bytes] | Limit [bytes] |",
-                "|---|---:|---:|",
+                "| Actual case / requested cells / arm | Refusal log | Serializer-reported proto [bytes] | Limit [bytes] |",
+                "|---|---|---:|---:|",
             ]
             for row in audit["serialization_refusals"]:
                 text.append(
-                    f"| [{Path(row['log']).name}]({row['log']}) | "
+                    f"| {row['case']} / {row['cells']} / {row['arm']} | "
+                    f"[{Path(row['log']).name}]({row['log']}) | "
                     f"{row['serializer_reported_proto_bytes']} | 2147483648 |"
                 )
         text += [
@@ -149,6 +150,11 @@ def main():
             f"Read attempts produced {audit['read_attempt_refusals']} refusals of "
             f"{audit['distinct_read_refusals']} distinct types. Their detailed coverage "
             "appears below. No convergence verdict is inferred from a refused or missing row.",
+            "The actual case column comes from the log's last measurement header, "
+            "because a recovery process can evaluate a different rung from the one "
+            "named in its log filename. A refusal interrupts that process's remaining arms "
+            "and its queued coarse measurement; missing receipts do not imply those "
+            "measurements executed.",
             "",
         ]
     text += [
@@ -364,7 +370,8 @@ def main():
         "## Orders and first measured acceptance",
         "",
         "Order p fits log(error) against log(pitch): error ∝ h^p. No extrapolated "
-        "cell threshold is reported; the threshold is the first measured row ≤0.01.",
+        "cell threshold is reported; the threshold is the first measured row ≤0.01. "
+        "A fitted order over nonmonotonic rows does not establish convergence.",
         "",
         "| Case | Arm | Rows | Fitted p | First cells ≤0.01 |",
         "|---|---|---:|---:|---:|",

@@ -265,8 +265,8 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
         "Cold compile ≤60 s and host RSS ≤64 GB are production gates, so a "
         "pass in this closed-form prototype does not qualify the kernel-backed solve.",
         "",
-        "| Case | Arm | map order | smooth order | saddle order | axis order | X order | first membership | first position | first map | first compile | first RSS |",
-        "|---|:---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Case | Arm | map order | smooth order | saddle order | axis order | X order | first membership | first position | first map | first compile | first executable | first RSS |",
+        "|---|:---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for kind in MAJOR_RADIUS:
         mapped = [map_rows[kind, cells] for cells in COUNTS if map_rows[kind, cells]]
@@ -317,6 +317,7 @@ def build(rows_root: Path, map_root: Path, report: Path) -> None:
                 f"{membership} | {position} | "
                 f"{_first(mapped, lambda row: row['map_relative_sup'] is not None and row['map_relative_sup'] <= 0.01)} | "
                 f"{_first(mapped, lambda row: row['cold_compile_seconds'] <= 60)} | "
+                f"{_first(mapped, lambda row: row['serialized_executable_bytes'] is not None and row['serialized_executable_bytes'] <= 50e6)} | "
                 f"{_first(mapped, lambda row: row['host_peak_rss_kib'] <= 64 * 1048576)} |"
             )
     lines += [

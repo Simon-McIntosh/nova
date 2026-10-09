@@ -116,8 +116,10 @@ def main():
         "and X-point accompany these polygons into current booking.",
         "- **exact:** independently sampled analytic separatrix intersected with "
         "each cell, true zero boundary level and true X-point. The boundary is "
-        "sampled at 8,193 points; a 4,097-point comparison bounds the area-fraction "
-        "uncertainty to 2e-5. This arm does not use the certificate spline clip.",
+        "sampled initially at 8,193 points against a 4,097-point comparison. "
+        "Limited boundaries refine further until their measured area-fraction "
+        "difference is at most 2e-5; each receipt records its point count. "
+        "This arm does not use the certificate spline clip.",
         "",
         "The map's normalization target remains the certificate target for every "
         "arm, preserving the legacy positive control. The analytic current column "
@@ -129,6 +131,13 @@ def main():
         "## Controls",
         "",
     ]
+    guard = args.run.parent / "fraction-guard-committed.log"
+    if guard.exists() and "GUARD_COMPLETE=passed" in guard.read_text():
+        text.append(
+            "The read-arm fraction guard accepts correct geometry with discrepancy "
+            "7.60090607677e-8 and refuses corrupted membership with discrepancy 0.5. "
+            f"[Guard control log]({guard})."
+        )
     for row in rows:
         if "positive_control_expected" in row:
             text.append(
@@ -338,7 +347,11 @@ def main():
             f"[receipt]({receipt}), "
             f"revision `{r['revision']}`, H200 job `{r['job_id']}`."
         )
-    text += ["", f"[Convergence figure]({args.figure})", ""]
+    text += [
+        "",
+        "[Convergence figure](/nova/figures/converged-forward-solve/proto-support/map-convergence.svg)",
+        "",
+    ]
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text("\n".join(text))
 
@@ -392,7 +405,7 @@ def main():
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
     args.fragment.write_text("""<figure id="proto-support-convergence">
 <img src="/nova/figures/converged-forward-solve/proto-support/map-convergence.svg" alt="Certificate map relative sup against realised cells for legacy, read and analytic support in limited and diverted cases.">
-<figcaption>Certificate map at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read fragment support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. The read fragment polygons retain the read membership within a checked 2e-5 area-fraction bound; the analytic support is independent of the certificate spline clip.</figcaption>
+<figcaption>Certificate map at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read fragment support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. Only completed rows are plotted. Read fragment polygons retain membership within a checked 2e-5 area-fraction bound; analytic support is independent of the certificate spline clip.</figcaption>
 </figure>
 """)
     print("REPORT_ROWS=" + str(len(ordered)))

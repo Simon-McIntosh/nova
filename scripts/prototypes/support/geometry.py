@@ -76,8 +76,34 @@ def pack(polygons, template):
     return result
 
 
-def analytic_polygons(exact, cells, shift=(0.0, 0.0), points=8193):
-    boundary = fixture._analytic_separatrix(exact, points) + np.asarray(shift)
+def analytic_polygons(exact, cells, shift=(0.0, 0.0), points=8193, subdivisions=0):
+    boundary = fixture._analytic_separatrix(exact, points)
+    for _ in range(subdivisions):
+        midpoint = 0.5 * (boundary + np.roll(boundary, -1, axis=0))
+        for _ in range(12):
+            if hasattr(exact, "x_point"):
+                value = np.asarray(exact.flux(midpoint))
+                gradient = np.asarray(exact.gradient(midpoint))
+            else:
+                value = np.asarray(exact.flux(midpoint[:, 0], midpoint[:, 1]))
+                gradient = np.column_stack(
+                    exact.flux_gradient(midpoint[:, 0], midpoint[:, 1])
+                )
+            norm = np.sum(gradient * gradient, axis=1)
+            if np.any(norm == 0) or not np.isfinite(norm).all():
+                raise ValueError("analytic midpoint projection has a singular gradient")
+            midpoint -= value[:, None] * gradient / norm[:, None]
+        value = (
+            np.asarray(exact.flux(midpoint))
+            if hasattr(exact, "x_point")
+            else np.asarray(exact.flux(midpoint[:, 0], midpoint[:, 1]))
+        )
+        if np.max(np.abs(value)) > 1e-10 * abs(float(exact.axis_flux)):
+            raise ValueError(
+                "analytic midpoint projection did not reach the true zero level"
+            )
+        boundary = np.stack((boundary, midpoint), axis=1).reshape(-1, 2)
+    boundary = boundary + np.asarray(shift)
     core = Polygon(boundary)
     if not core.is_valid:
         raise ValueError("analytic separatrix polygon is invalid")

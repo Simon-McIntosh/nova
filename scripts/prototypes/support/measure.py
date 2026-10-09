@@ -291,14 +291,22 @@ def measure(args):
         )
 
     geometry_uncertainty = fraction_change(exact_polygons, coarse_polygons)
-    while (
-        geometry_uncertainty > 2e-5 and args.kind == "limited" and point_count < 65537
-    ):
+    subdivisions = 0
+    while geometry_uncertainty > 2e-5 and point_count < 65537:
         coarse_polygons = exact_polygons
-        point_count = 2 * point_count - 1
+        if args.kind == "diverted":
+            subdivisions += 1
+            point_count = 8193 * 2**subdivisions
+        else:
+            point_count = 2 * point_count - 1
         exact_polygons, extra_wall = stage(
             "analytic-polygon-refinement",
-            lambda: analytic_polygons(exact, machine.cell_polygons, points=point_count),
+            lambda: analytic_polygons(
+                exact,
+                machine.cell_polygons,
+                points=8193 if args.kind == "diverted" else point_count,
+                subdivisions=subdivisions,
+            ),
         )
         refinement_wall += extra_wall
         geometry_uncertainty = fraction_change(exact_polygons, coarse_polygons)
@@ -535,18 +543,32 @@ def main():
     try:
         # Repair a missing cached intermediate pair before a subsequent large
         # pair. The read phase cannot start while this recovery is pending.
-        if args.cells >= 3500 and set(args.arms) == {"legacy", "exact"}:
-            for kind in ("diverted", "limited"):
+        if (
+            args.cells >= 3500 or (args.kind == "limited" and args.cells == 550)
+        ) and set(args.arms) == {"legacy", "exact"}:
+            recover_cells = (2000, 5000) if args.cells == 550 else (2000,)
+            for kind, requested in (
+                (kind, cells)
+                for cells in recover_cells
+                for kind in ("diverted", "limited")
+            ):
+                actual = (
+                    3500
+                    if requested == 5000
+                    and (args.out.parent / f"{kind}-5000-binder.json").exists()
+                    else requested
+                )
                 expected = [
-                    args.out / f"{kind}-2000-{arm}.json" for arm in ("legacy", "exact")
+                    args.out / f"{kind}-{actual}-{arm}.json"
+                    for arm in ("legacy", "exact")
                 ]
                 if not all(
                     path.exists() and json.loads(path.read_text()).get("completed")
                     for path in expected
                 ):
                     recovery = argparse.Namespace(**vars(args))
-                    recovery.kind, recovery.cells = kind, 2000
-                    print(f"RECOVER_DECISIVE case={kind} cells=2000", flush=True)
+                    recovery.kind, recovery.cells = kind, actual
+                    print(f"RECOVER_DECISIVE case={kind} cells={actual}", flush=True)
                     measure(recovery)
                     jax.clear_caches()
         measure(args)

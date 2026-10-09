@@ -63,8 +63,40 @@ def main():
                 f"{values[-1]['map_relative_sup']:.9g}"
             )
     exact_values = groups["diverted", "exact"]
+    booking_order = (
+        float(
+            np.polyfit(
+                np.log([r["pitch_m"] for r in exact_values]),
+                np.log([r["booking_image_relative_sup"] for r in exact_values]),
+                1,
+            )[0]
+        )
+        if len(exact_values) >= 2
+        else None
+    )
+    booking_values = ", ".join(
+        f"{r['booking_image_relative_sup']:.9g} at {r['realised_cells']} cells"
+        for r in exact_values
+    )
+    exterior_values = ", ".join(
+        f"{r['exterior_closure_relative_sup']:.9g} at {r['realised_cells']} cells"
+        for r in exact_values
+    )
     lead = [
-        "Exact-arm diverted map — " + verdicts[0] + ".",
+        "Diverted map verdict — "
+        + "; ".join(verdicts)
+        + ". "
+        + f"Exact-support booking decreases with refinement: {booking_values}; "
+        + f"fitted order in pitch {number(booking_order)} "
+        + (
+            "(two-point slope only; a third rung is required). "
+            if len(exact_values) == 2
+            else ". "
+        )
+        + f"Exterior closure is {exterior_values}. "
+        + "It is a fixture artefact: the prescribed exterior subtracts an analytic-density "
+        + "image integrated on production spline-clipped support seeded by analytic topology, so replacing support leaves a closure "
+        + "mismatch even at the analytic state. It is not the exact-support booking error. Here legacy support means the existing spline geometry: the fixture uses _analytic_profile_support, not _fixed_design_read.",
         "",
         "| Realised cells | Exact relative sup | Fitted order | Booking contribution | Exterior contribution | Legacy relative sup |",
         "|---:|---:|---:|---:|---:|---:|",
@@ -158,6 +190,21 @@ def main():
             "",
         ]
     text += [
+        "The apparent limited-550 executable of 2,156,136,745 bytes is excluded: "
+        "the log named limited-550-legacy-exact-1283120.log contains "
+        "CASE=diverted CELLS=5000, followed by RECOVERY_STAGE exact-booking. "
+        "Its nested recovery evaluated 5,158 diverted cells and aborted before "
+        "the requested 553-cell limited fixture ran. It therefore cannot be "
+        "compared to the ladder's roughly 30 MB coarse executable. The separate "
+        "2,160,882,862-byte refusal belongs to limited requested 5,000.",
+        "",
+        "The initial fine analytic-reference attempts refused fraction uncertainties "
+        "2.4834499509362173e-5 (diverted) and about 3.90e-5 (limited), "
+        "against 2e-5. These were reference-polygon uncertainty refusals before "
+        "a durable map row, not measured map errors. The authorized follow-up "
+        "records uncertainty up to 1e-4 explicitly and preserves numerical metrics "
+        "before attempting executable serialization.",
+        "",
         "## Support and booking contract",
         "",
         "All three arms share one machine, exterior, analytic flux state, profile, "
@@ -531,7 +578,7 @@ def main():
     args.fragment.parent.mkdir(parents=True, exist_ok=True)
     args.fragment.write_text(f"""<figure id="proto-support-convergence">
 <img src="/nova/figures/converged-forward-solve/proto-support/map-convergence.svg" alt="Certificate map relative sup against realised cells for legacy, read and analytic support in limited and diverted cases.">
-<figcaption>{len(ordered)} completed certificate map rows at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read fragment support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. Only completed rows are plotted. Read fragment polygons retain membership within a checked 2e-5 area-fraction bound; analytic support is independent of the certificate spline clip.</figcaption>
+<figcaption>{len(ordered)} completed certificate map rows at the analytic state, one shared machine and exterior per rung. Solid: legacy; dashed: read fragment support; dash-dot: analytic support. Dark lines are diverted; grey lines are limited. The dotted grey line marks relative sup 0.01. Only completed rows are plotted; read-arm convergence is unavailable because no read map row completed. Read fragment polygons retain membership within a checked 2e-5 area-fraction bound; analytic support is independent of the certificate spline clip.</figcaption>
 </figure>
 """)
     print("REPORT_ROWS=" + str(len(ordered)))

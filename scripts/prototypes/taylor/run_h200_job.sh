@@ -41,13 +41,15 @@ launch() {
   ) &
 }
 
-for mode in nested taylor; do
-  for order in 1 2 3 4; do
+for mode in ${TAYLOR_MODES:-nested taylor}; do
+  for order in ${TAYLOR_ORDERS:-1 2 3 4}; do
     launch "row-$mode-$order" row --mode "$mode" --order "$order"
   done
 done
-launch "identity" identity --points-per-band 500
-launch "primitives" primitives
+if [ "${TAYLOR_ROWS_ONLY:-0}" != "1" ]; then
+  launch "identity" identity --points-per-band 500
+  launch "primitives" primitives
+fi
 
 wait
 echo "HOST payload end $(date -u +%FT%TZ)"

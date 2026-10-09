@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import subprocess
 import traceback
 from time import perf_counter
 from types import MethodType, SimpleNamespace
@@ -172,6 +173,15 @@ def read_support(operator, analytic, machine, kind, template):
 
 
 def measure(args):
+    source_revision = subprocess.check_output(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+    ).strip()
+    print(
+        f"SOURCE_REVISION={source_revision} "
+        f"HARNESS_REVISION={os.environ.get('NOVA_MEASUREMENT_REVISION')} "
+        f"CASE={args.kind} CELLS={args.cells} ARMS={args.arms}",
+        flush=True,
+    )
     if os.environ.get("XLA_PYTHON_CLIENT_PREALLOCATE") != "false":
         raise RuntimeError("CUDA preallocation must be disabled")
     if jax.default_backend() != "gpu" or len(jax.devices("gpu")) != 1:
@@ -232,7 +242,8 @@ def measure(args):
         else topology.TopologyClass.DIVERTED
     )
     identity = dict(
-        revision=os.environ["NOVA_MEASUREMENT_REVISION"],
+        revision=source_revision,
+        harness_revision=os.environ["NOVA_MEASUREMENT_REVISION"],
         module=str(Path(certificate.__file__).resolve()),
         cwd=str(Path.cwd().resolve()),
         job_id=os.environ.get("SLURM_JOB_ID"),
@@ -262,27 +273,44 @@ def measure(args):
     exact_polygons, polygon_wall = stage(
         "analytic-polygons", lambda: analytic_polygons(exact, machine.cell_polygons)
     )
-    exact_support, exact_wall = stage(
-        "analytic-support", lambda: pack(exact_polygons, legacy_partition[3])
-    )
-    exact_wall += polygon_wall
     coarse_polygons, refinement_wall = stage(
         "analytic-polygon-refinement",
         lambda: analytic_polygons(exact, machine.cell_polygons, points=4097),
     )
-    geometry_uncertainty = float(
-        np.max(
-            np.abs(
-                np.asarray([p.area for p in exact_polygons])
-                - np.asarray([p.area for p in coarse_polygons])
+    point_count = 8193
+
+    def fraction_change(first, second):
+        return float(
+            np.max(
+                np.abs(
+                    np.asarray([p.area for p in first])
+                    - np.asarray([p.area for p in second])
+                )
+                / np.asarray(legacy_partition[3].full_area)
             )
-            / np.asarray(legacy_partition[3].full_area)
         )
-    )
+
+    geometry_uncertainty = fraction_change(exact_polygons, coarse_polygons)
+    while (
+        geometry_uncertainty > 2e-5 and args.kind == "limited" and point_count < 65537
+    ):
+        coarse_polygons = exact_polygons
+        point_count = 2 * point_count - 1
+        exact_polygons, extra_wall = stage(
+            "analytic-polygon-refinement",
+            lambda: analytic_polygons(exact, machine.cell_polygons, points=point_count),
+        )
+        refinement_wall += extra_wall
+        geometry_uncertainty = fraction_change(exact_polygons, coarse_polygons)
     if geometry_uncertainty > 2e-5:
         raise AssertionError(
             f"analytic polygon refinement unresolved: {geometry_uncertainty}"
         )
+    exact_support, exact_wall = stage(
+        "analytic-support", lambda: pack(exact_polygons, legacy_partition[3])
+    )
+    exact_wall += polygon_wall + refinement_wall
+    identity["analytic_boundary_points"] = point_count
     identity["analytic_polygon_fraction_uncertainty"] = geometry_uncertainty
     identity["fixture_walls"]["analytic_polygon_refinement"] = refinement_wall
     true_physical, truth_wall = stage(
@@ -505,6 +533,22 @@ def main():
     )
     args = parser.parse_args()
     try:
+        # Repair a missing cached intermediate pair before a subsequent large
+        # pair. The read phase cannot start while this recovery is pending.
+        if args.cells >= 3500 and set(args.arms) == {"legacy", "exact"}:
+            for kind in ("diverted", "limited"):
+                expected = [
+                    args.out / f"{kind}-2000-{arm}.json" for arm in ("legacy", "exact")
+                ]
+                if not all(
+                    path.exists() and json.loads(path.read_text()).get("completed")
+                    for path in expected
+                ):
+                    recovery = argparse.Namespace(**vars(args))
+                    recovery.kind, recovery.cells = kind, 2000
+                    print(f"RECOVER_DECISIVE case={kind} cells=2000", flush=True)
+                    measure(recovery)
+                    jax.clear_caches()
         measure(args)
     except Exception as error:
         refusal = {

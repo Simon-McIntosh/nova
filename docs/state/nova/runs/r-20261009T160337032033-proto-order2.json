@@ -1,0 +1,1522 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 4849408,
+      "cached_input_tokens_cumulative": 4849408,
+      "input_tokens": 5014631,
+      "input_tokens_cumulative": 5014631,
+      "output_tokens": 22432,
+      "output_tokens_cumulative": 22432,
+      "reasoning_output_tokens": 7921,
+      "reasoning_output_tokens_cumulative": 7921
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 562,
+    "files": 5,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 2517,
+        "name": "_measure_kernel_compile_growth",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 131
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_assert_same_topology",
+        "path": "tests/test_fused_same_state_read.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 16,
+        "name": "main",
+        "path": "scripts/prototypes/order2/compare.py"
+      },
+      "window_line": 129
+    },
+    {
+      "existing_function": {
+        "line": 2517,
+        "name": "_measure_kernel_compile_growth",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 17,
+        "name": "main",
+        "path": "scripts/prototypes/order2/measure.py"
+      },
+      "window_line": 120
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "437318c998aa0606e4ab0bedaa9ddeb2fe3ceba0",
+    "0a4954081eb7614c3dc20f3bdd1c5b440e241277",
+    "a5f3dbb1fe8376ddaf1f5eecf9875c760ed25a5a",
+    "f1a6cc3429d295c7b19c7e06c1e8fb689c3eb8a1"
+  ],
+  "completed_at": "2026-10-09T16:05:03.003Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-09T16:04:01Z",
+  "disposition": "still-working",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -u scripts/prototypes/order2/run_comparison.py --directory /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160337032033-proto-order2/shared-kernel-1283105",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160337032033-proto-order2/shared-kernel-1283105.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-09T17:03:46.535842+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-09T16:03:46Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 29,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 11,
+    "mean_context": 120000,
+    "observed_at": "2026-10-09T16:03:17Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 29,
+      "aggregate_tokens_per_second": 146.223,
+      "detail": "",
+      "mean_tokens_per_second": 81.235,
+      "observed_at": "2026-10-09T16:03:17Z",
+      "runs": 1.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-09T16:05:03.003Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-09T16:05:02Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "lead request 2026-10-09: difficult work runs on the codex lane; the order-2 read prototype reworks the saddle curvature construction and its compile and accuracy qualification decide the pivot",
+        "session": "fresh",
+        "session_id": "d759fde0-835e-4ee4-9d1c-9b3d9fe9b012",
+        "session_source": "stream",
+        "to_backend": "codex-astra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261009T160337032033-proto-order2"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160337032033-proto-order2/manifest.md",
+  "member": "disposable-r-20261009T160337032033-proto-order2",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "proto-order2",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 4356,
+          "cached_input_tokens": 895741,
+          "input_tokens": 900099,
+          "output_tokens": 1162,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 901261,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Prototype the topology read capped at second point derivatives, to measure whether removing the third and fourth derivatives the saddle curvature corrections take brings the cold compile under the 60 s clause without losing saddle accuracy. The measured facts behind this: the point jet costs 43,632, 97,639, 260,060 and 753,448 expanded equations at orders one to four, and the 132-cell read compiles cold in about 772 s with 0.83 million equations, so the fourth derivative dominates it; the hand-tangent custom rule made orders two to four heavier, not lighter (cfs-point-jet-custom-rule run r-20261008T122151393511). Build the prototype as a module under the assigned prototype directory that reuses nova.equilibrium.topology internals and replaces only the curvature-correction derivatives (around topology.py _curvature_derivatives) by finite differences of the analytic kernel Hessian evaluated at a small stencil around the null, its spacing chosen and stated, with the Hessian itself from plain autodiff. Done when the report at the assigned path holds: (1) cold compile wall, unique and expanded equations, serialized executable bytes and host RSS of the prototype read and of the current read at 132, 550 and 2,000 cells, in fresh cache-disabled processes on the H200, one job; (2) on the weak-rotation limited and diverted single-null analytic states at those rungs, the axis and X-point positions, saddle-neighbourhood membership error and the curvature values from both reads against the analytic values, with the difference between the two reads per quantity; (3) the stencil-spacing sensitivity of the curvature values over three spacings; (4) a verdict on whether the order-two read meets 60 s and keeps saddle accuracy within the design budgets. Every heavy measurement runs on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (the targets), or as one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with an explicit --mem and --time sized to finish; one measurement is one job that loops over its rows inside the allocation and persists each row as it lands, never a job array; on the compute node uv is not invoked and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python runs directly with PYTHONPATH set to the run worktree and TMPDIR=/tmp exported before submission and inside the payload; configure_dtypes() before any array and jax_enable_x64 asserted True; cold compiles run in fresh processes with the persistent cache disabled before jax is imported. Any wait names every job in wait_condition and is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists. Prototype code lives only under the assigned scripts/prototypes directory and changes no file under nova/ or tests/; it may import nova internals. Every number in the report carries its job id and log path. Commit with conventional subjects and bodies, write the manifest before every wait, list every commit, and set status complete, blocked or failed yourself.",
+    "estimated_hours": 5.0,
+    "goal": "Prototype a topology read capped at second point derivatives and measure its cold compile and saddle accuracy",
+    "id": "proto-order2",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-09T16:03:46Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 29,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 11,
+      "mean_context": 120000,
+      "observed_at": "2026-10-09T16:03:17Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 29,
+        "aggregate_tokens_per_second": 146.223,
+        "detail": "",
+        "mean_tokens_per_second": 81.235,
+        "observed_at": "2026-10-09T16:03:17Z",
+        "runs": 1.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160337032033-proto-order2/manifest.md",
+    "negative_control": "the prototype measurement reproduces the base topology read figures at 132 cells within their recorded receipts before any variant is measured",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/order2",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-order2.md",
+      "docs/evidence/fragments/converged-forward-solve/proto-order2.html",
+      "docs/figures/converged-forward-solve/proto-order2"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 252004.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "proto-order2",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-09T16:03:49.741969+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "difficult: replace the read curvature corrections by Hessian finite differences in a prototype and qualify compile and saddle accuracy on the H200; deep reasoning, critical to a lead decision",
+    "confidence": 0.41,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 1390.538,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 1698.204,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 289137.188779,
+        "budget_reason": null,
+        "burn_multiple": 0.891282757675594,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.5808414145949075,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.06572793506876376,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 289137.188779,
+        "budget_reason": null,
+        "burn_multiple": 0.891282757675594,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.5808414145949075,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.06572793506876376,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 289137.188779,
+        "budget_reason": null,
+        "burn_multiple": 0.891282757675594,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 29.8,
+          "peak_utilisation_p90_pct": 36.4,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.5808414145949075,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.06572793506876376,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 57.4,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 104,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 5,
+          "passed": 27,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 80
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 16.807779,
+        "budget_reason": null,
+        "burn_multiple": 2.056792587007381,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.549579840520834,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 10,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3850655651926257,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 72.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 16.807779,
+        "budget_reason": null,
+        "burn_multiple": 2.056792587007381,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.549579840520834,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 0,
+          "passed": 11,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3850655651926257,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 72.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 16.807779,
+        "budget_reason": null,
+        "burn_multiple": 2.056792587007381,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.549579840520834,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3850655651926257,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": false,
+        "utilisation_pct": 72.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.13,
+      "claude:claude-sonnet-5-5": 0.05,
+      "codex:gpt-6-astra": 0.01,
+      "codex:gpt-6-luna": 0.06,
+      "codex:gpt-6-sol": 0.24,
+      "hold": 0.03,
+      "local:deepseek-v4.1-flash": 0.48
+    },
+    "rendered_token_estimate": 2636,
+    "usage": {
+      "cost": 0.00025851,
+      "input_tokens": 6155,
+      "output_tokens": 150
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f1a6cc3429d295c7b19c7e06c1e8fb689c3eb8a1",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+    "reviewed_head_sha": "f1a6cc3429d295c7b19c7e06c1e8fb689c3eb8a1",
+    "scores": {
+      "durability": 16,
+      "evidence": 17,
+      "fit": 17,
+      "goal_fidelity": 16,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 104
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261009T160337032033-proto-order2",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a12169-37b2-73c0-a1c7-071c0f075743",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 4849408,
+    "cumulative_input_tokens": 9864039,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 30353
+  },
+  "time_budget": "60m",
+  "tool_steps": 4.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex-astra",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 96063,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Two full H200 identity failures trigger the binding retry stop: test_polygon_jet_identity at 90ae20b87 and 854ad81c1 both give Hessian maximum 1.5909594271806873e-7 > 1e-9. Final higher-order graph growth and the 20000-unique full-jet budget are unmet. No filament/geometry/moments/higher-order/CPU-floor/TopologyRead-leaf identity; final compile ladder or full matched suite delta is claimed. Do not promote as qualified.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 99663,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T13:09:38Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T12:22:48Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 682,
+          "worker_pid": 1598874
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Two full H200 identity failures trigger the binding retry stop: test_polygon_jet_identity at 90ae20b87 and 854ad81c1 both give Hessian maximum 1.5909594271806873e-7 > 1e-9. Final higher-order graph growth and the 20000-unique full-jet budget are unmet. No filament/geometry/moments/higher-order/CPU-floor/TopologyRead-leaf identity; final compile ladder or full matched suite delta is claimed. Do not promote as qualified.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T13:09:38Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 96852,
+        "log_fresh": false,
+        "manifest_commits": [
+          "90ae20b87fac3761bb417ff9b84f964bb90bb140",
+          "4b028629bd1af3069c51e7d8954c58dbab8b447a",
+          "190a74f4f4ca091420cd7ad91fbfd6179092fb67",
+          "854ad81c15bd64dc469119af8d9b5e93f8a9ff66",
+          "9e2246f09c1fcfb8f9c5a5cecc5daada5168e45d"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "af861dd802862cf6621a0cdc33c0bb1dd5bae3c2bd0dc7b2fac0ad1e3af8d9c5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "astra",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/manifest.md; resolve the blocker before resuming the run",
+        "node": "cfs-point-jet-custom-rule",
+        "phase": "blocked",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+        "session": "s21-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+          "session_id": "01a11b77-5cda-7891-969f-9f305b3f57d4",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 96909,
+        "terminal_at": "2026-10-08T13:08:38Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-point-jet-custom-rule"
+      }
+    ]
+  },
+  "wall_seconds": 62,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-09T17:26:47Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-09T16:31:49Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261009T160337032033-proto-order2",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 895,
+    "worker_pid": 76656
+  },
+  "worker_seconds": 22,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

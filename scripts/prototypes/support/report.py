@@ -95,7 +95,8 @@ def main():
         "against independently integrated analytic density on the true separatrix. "
         "Exterior closure uses that same true image, so it detects a fixture exterior "
         "posed on an inaccurate support. Booking plus exterior terms reconstruct the "
-        "measured map residual to a checked relative bound of 1e-10.",
+        "measured map residual to a checked relative bound of 1e-10. The displayed "
+        "sup norms are not additive: the two error fields can cancel.",
         "",
         "## Support and booking contract",
         "",
@@ -169,7 +170,10 @@ def main():
         "",
         "Membership is max absolute clipped-area fraction difference against the exact arm, "
         "with RMS beside it. Read fraction error and read/polygon gap distinguish the "
-        "read receipt from the support actually booked.",
+        "read receipt from the support actually booked. Exact-arm membership error "
+        "is zero by definition; its independent boundary-refinement check is reported "
+        "separately below. Nonzero legacy differences and the shifted-support control "
+        "establish sensitivity to incorrect geometry.",
         "",
         "| Case | Cells | Arm | Map sup | Map RMS | Membership sup | Membership RMS | Read fraction error | Read/polygon gap |",
         "|---|---:|---|---:|---:|---:|---:|---:|---:|",
@@ -250,8 +254,8 @@ def main():
         "",
         "## Shared fixture stages",
         "",
-        "| Case | Cells | Case [s] | Machine [s] | Exterior [s] | Carrier [s] | Machine cache | Exterior cache |",
-        "|---|---:|---:|---:|---:|---:|---|---|",
+        "| Case | Cells | Case [s] | Machine [s] | Exterior [s] | Carrier [s] | Machine cache | Exterior cache | Boundary fraction refinement |",
+        "|---|---:|---:|---:|---:|---:|---|---|---:|",
     ]
     for r in ordered:
         if r["arm"] != "legacy":
@@ -262,7 +266,9 @@ def main():
                 number(r["fixture_walls"][k])
                 for k in ("case", "machine", "exterior", "carrier")
             )
-            + f" | {r['machine_cache'].get('hit')} | {r['exterior_cache'].get('hit')} |"
+            + f" | {r['machine_cache'].get('hit')} | {r['exterior_cache'].get('hit')} | "
+            + number(r.get("analytic_polygon_fraction_uncertainty"))
+            + " |"
         )
     text += [
         "",

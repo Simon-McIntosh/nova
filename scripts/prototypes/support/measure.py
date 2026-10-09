@@ -428,7 +428,10 @@ def measure(args):
     for arm in arms:
         run_arm(*arm)
     (reading, support), read_wall = stage(
-        "read-support", lambda: read_support(operator, analytic, machine, args.kind)
+        "read-support",
+        lambda: read_support(
+            operator, analytic, machine, args.kind, legacy_partition[3]
+        ),
     )
     read_partition = partition(
         operator,

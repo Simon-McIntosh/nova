@@ -1,0 +1,856 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 67111808,
+      "cached_input_tokens_cumulative": 67111808,
+      "input_tokens": 67458774,
+      "input_tokens_cumulative": 67458774,
+      "output_tokens": 103566,
+      "output_tokens_cumulative": 103566,
+      "reasoning_output_tokens": 37735,
+      "reasoning_output_tokens_cumulative": 37735
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1003,
+    "files": 7,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 71,
+        "name": "build",
+        "path": "scripts/prototypes/ladder/report.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 71,
+        "name": "build",
+        "path": "scripts/prototypes/ladder/report.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 71,
+        "name": "build",
+        "path": "scripts/prototypes/ladder/report.py"
+      },
+      "window_line": 98
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 71,
+        "name": "build",
+        "path": "scripts/prototypes/ladder/report.py"
+      },
+      "window_line": 98
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "2a517d8d88b36c0f6a629f76809b098eb617ccae",
+    "2e2b9ae90dfe02d23958a7f5eab856f5c541cb83",
+    "b1c1b00becc730288f7b56947800f7ed4cce15f5",
+    "f11560acd13c3d409cd79b786f6defef2ea76160",
+    "06a399ac6cf0b83d75196f003cf54639aa0e07f7",
+    "5f9acdb40d1ed8687d6bef5f1c50f1d13c156852",
+    "67c21e9313e566c2e969c32b18aa1a24137794eb",
+    "2466b3f91173754ab56f494243e5084ad3d3cda3",
+    "7e628a03d3d45671aaedfddaadcc18e40217f3a6",
+    "72394814d13e4728c16afc2d2538b5e697c0fb07",
+    "bcacf19673b4ef8ad4751c151b03a082b6928fcb",
+    "1bcff90d47365b10bd2a40a20e47cbda9910c6a7",
+    "304e361936c970884d043f99c7826af363a705d1",
+    "14ec6b1d3bd00f7063c8cbc69265e78ea44c3323",
+    "c141fb35eeb6267afd14971c3ca09d66fa8d825b",
+    "4a2c1dd751b9112cc219e317f849c4195063ad9b",
+    "1a1cfc7d758188fcf71f86de0ac81d747a241588",
+    "598110c181df7ef7a3749808a5dd2df587c8e6ab"
+  ],
+  "completed_at": "2026-10-09T16:05:19.756Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-09T16:03:28Z",
+  "disposition": "still-working",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "negative-result",
+  "follow_on_paths": [
+    "1.1",
+    "80.6"
+  ],
+  "gate": "failed",
+  "gate_check": {
+    "command": "RECKON_ALLOW_NESTED_LAUNCH=1 sbatch --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 --cpus-per-task=8 --mem=16G scripts/prototypes/ladder/run_map.sh",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160304793011-proto-ladder/logs/h200-map-control.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "failure-classification:negative-result",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-09T17:03:14.178550+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-09T16:03:14Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 27,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 10,
+    "mean_context": 160000,
+    "observed_at": "2026-10-09T16:02:47Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 27,
+      "aggregate_tokens_per_second": 63.095,
+      "detail": "",
+      "mean_tokens_per_second": 45.068,
+      "observed_at": "2026-10-09T16:02:47Z",
+      "runs": 1.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-09T16:05:19.756Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-09T16:05:20Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "lead request 2026-10-09: the refinement ladder decides the resolution pivot, so it runs on the codex lane",
+        "session": "fresh",
+        "session_id": "55cea9b0-a083-46d1-818e-4d7a98d78abf",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261009T160304793011-proto-ladder"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160304793011-proto-ladder/manifest.md",
+  "member": "disposable-r-20261009T160304793011-proto-ladder",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "proto-ladder",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 4356,
+          "cached_input_tokens": 895741,
+          "input_tokens": 900099,
+          "output_tokens": 1162,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 901261,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Prototype the resolution pivot directly: measure how the forward map and the topology read behave on the analytic certificate cases as plasma cell count rises, with and without the high-order machinery, so the lead can judge whether accuracy can be carried by cell count. Use the existing drivers (benchmarks/solovev_certificate.py with its requested-cells argument and the analytic oracle fixtures, nova.equilibrium.topology.read with TopologyPolicy) rather than new solvers. Done when the report at the assigned path holds: (1) a table for the weak-rotation limited case and the diverted single-null case at 550, 2,000, 5,000 and 10,000 realised cells (20,000 as well if one card holds it), in two arms: A, the current defaults; B, the simplest representation the code admits, with the saddle-cell normal form and its third and fourth derivative curvature corrections switched off (through TopologyPolicy or a prototype flag kept under the prototype directory), giving per arm and rung: map fidelity at the analytic state (relative sup), per-cell membership error split into smooth and saddle-neighbourhood cells, axis and X-point position error in metres and in pitches, limiter contact error, the forward-solve terminal residual and whether it converged where the solve runs, cold compile wall, warm execute wall, device memory and host RSS; (2) fitted orders per quantity and arm, and the cell count at which each arm meets each acceptance bound of the converged-forward-solve section 6 table; (3) the rung at which memory or wall binds on one H200, and which data structure binds; (4) a verdict on whether arm B at some cell count up to 10,000 meets the clauses arm A needs the machinery for. Every heavy measurement runs on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (the targets), or as one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with an explicit --mem and --time sized to finish; one measurement is one job that loops over its rows inside the allocation and persists each row as it lands, never a job array; on the compute node uv is not invoked and the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python runs directly with PYTHONPATH set to the run worktree and TMPDIR=/tmp exported before submission and inside the payload; configure_dtypes() before any array and jax_enable_x64 asserted True; cold compiles run in fresh processes with the persistent cache disabled before jax is imported. Any wait names every job in wait_condition and is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists. Prototype code lives only under the assigned scripts/prototypes directory and changes no file under nova/ or tests/; it may import nova internals. Every number in the report carries its job id and log path. Commit with conventional subjects and bodies, write the manifest before every wait, list every commit, and set status complete, blocked or failed yourself.",
+    "estimated_hours": 4.0,
+    "goal": "Measure accuracy and cost of the forward map and topology read from 550 to 10,000 plasma cells with and without the high-order machinery",
+    "id": "proto-ladder",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-09T16:03:14Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 27,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 10,
+      "mean_context": 160000,
+      "observed_at": "2026-10-09T16:02:47Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 27,
+        "aggregate_tokens_per_second": 63.095,
+        "detail": "",
+        "mean_tokens_per_second": 45.068,
+        "observed_at": "2026-10-09T16:02:47Z",
+        "runs": 1.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160304793011-proto-ladder/manifest.md",
+    "negative_control": "the prototype measurement reproduces the base topology read figures at 132 cells within their recorded receipts before any variant is measured",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/ladder",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-ladder.md",
+      "docs/evidence/fragments/converged-forward-solve/proto-ladder.html",
+      "docs/figures/converged-forward-solve/proto-ladder"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 271227.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "proto-ladder",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-09T16:03:17.188191+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "heavy H200 measurement ladder up to 10,000 cells across two representation arms; moderate code, strict measurement",
+    "confidence": 0.46,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 556.33,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 848.117,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 289105.775643,
+        "budget_reason": null,
+        "burn_multiple": 0.8913425016359856,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.5812049925578702,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.06570585390648696,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 289105.775643,
+        "budget_reason": null,
+        "burn_multiple": 0.8913425016359856,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.5812049925578702,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.06570585390648696,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 289105.775643,
+        "budget_reason": null,
+        "burn_multiple": 0.8913425016359856,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 29.8,
+          "peak_utilisation_p90_pct": 36.4,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.5812049925578702,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.06570585390648696,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 2,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 57.4,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 104,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 5,
+          "passed": 27,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 86
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 1381.073643,
+        "budget_reason": null,
+        "burn_multiple": 2.057097513992664,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.549943418483797,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 10,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3850084862835649,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 72.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 1381.073643,
+        "budget_reason": null,
+        "burn_multiple": 2.057097513992664,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.549943418483797,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 0,
+          "passed": 11,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3850084862835649,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 72.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 1381.073643,
+        "budget_reason": null,
+        "burn_multiple": 2.057097513992664,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.549943418483797,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3850084862835649,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 72.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.11,
+      "claude:claude-sonnet-5-5": 0.03,
+      "codex:gpt-6-astra": 0.02,
+      "codex:gpt-6-luna": 0.08,
+      "codex:gpt-6-sol": 0.2,
+      "hold": 0.03,
+      "local:deepseek-v4.1-flash": 0.53
+    },
+    "rendered_token_estimate": 2611,
+    "usage": {
+      "cost": 0.00025788,
+      "input_tokens": 6140,
+      "output_tokens": 150
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "598110c181df7ef7a3749808a5dd2df587c8e6ab",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "73da1f5ad719b859d2fbd461e26a5b4432134c67",
+    "reviewed_head_sha": "598110c181df7ef7a3749808a5dd2df587c8e6ab",
+    "scores": {
+      "durability": 17,
+      "evidence": 16,
+      "fit": 17,
+      "goal_fidelity": 16,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 104
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261009T160304793011-proto-ladder",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a12169-7d94-7af0-8210-6590b93e6747",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 67111808,
+    "cumulative_input_tokens": 134570582,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 141301
+  },
+  "time_budget": "60m",
+  "tool_steps": 4.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex-astra",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 96031,
+        "budget_seconds": 3600,
+        "classification": "blocked",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports blocked: Two full H200 identity failures trigger the binding retry stop: test_polygon_jet_identity at 90ae20b87 and 854ad81c1 both give Hessian maximum 1.5909594271806873e-7 > 1e-9. Final higher-order graph growth and the 20000-unique full-jet budget are unmet. No filament/geometry/moments/higher-order/CPU-floor/TopologyRead-leaf identity; final compile ladder or full matched suite delta is claimed. Do not promote as qualified.",
+        "effective_phase": "blocked",
+        "elapsed_seconds": 99631,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-08T13:09:38Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-08T12:22:48Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 682,
+          "worker_pid": 1598874
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "Two full H200 identity failures trigger the binding retry stop: test_polygon_jet_identity at 90ae20b87 and 854ad81c1 both give Hessian maximum 1.5909594271806873e-7 > 1e-9. Final higher-order graph growth and the 20000-unique full-jet budget are unmet. No filament/geometry/moments/higher-order/CPU-floor/TopologyRead-leaf identity; final compile ladder or full matched suite delta is claimed. Do not promote as qualified.",
+          "lifting_condition": null,
+          "recovery": "decide",
+          "recovery_classification": "blocked",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "blocked"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-08T13:09:38Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 96820,
+        "log_fresh": false,
+        "manifest_commits": [
+          "90ae20b87fac3761bb417ff9b84f964bb90bb140",
+          "4b028629bd1af3069c51e7d8954c58dbab8b447a",
+          "190a74f4f4ca091420cd7ad91fbfd6179092fb67",
+          "854ad81c15bd64dc469119af8d9b5e93f8a9ff66",
+          "9e2246f09c1fcfb8f9c5a5cecc5daada5168e45d"
+        ],
+        "manifest_derived": false,
+        "manifest_digest": "af861dd802862cf6621a0cdc33c0bb1dd5bae3c2bd0dc7b2fac0ad1e3af8d9c5",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "blocked",
+        "manifest_status": "blocked",
+        "marker": "!",
+        "model_key": "astra",
+        "needs_help_complete": false,
+        "next_action": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/manifest.md; resolve the blocker before resuming the run",
+        "node": "cfs-point-jet-custom-rule",
+        "phase": "blocked",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "decide",
+        "recovery_classification": "blocked",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+        "session": "s21-nova",
+        "session_resolution": {
+          "consulted": [
+            "pointer",
+            "stream",
+            "ledger"
+          ],
+          "resolved": true,
+          "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+          "session_id": "01a11b77-5cda-7891-969f-9f305b3f57d4",
+          "source": "stream"
+        },
+        "stored_phase": "blocked",
+        "terminal_age_seconds": 96877,
+        "terminal_at": "2026-10-08T13:08:38Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-point-jet-custom-rule"
+      }
+    ]
+  },
+  "wall_seconds": 111,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-09T18:06:02Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-09T17:06:31Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261009T160304793011-proto-ladder",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2172,
+    "worker_pid": 126849
+  },
+  "worker_seconds": 71,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-09T16:05:19.756Z",
+    "session_id": "01a12169-7d94-7af0-8210-6590b93e6747",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-ladder"
+  }
+}

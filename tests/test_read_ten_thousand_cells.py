@@ -106,6 +106,41 @@ def test_large_membership_overfill_is_refused(monkeypatch):
     assert int(result.reason) == int(topology.TopologyReason.UNRESOLVED_COMPONENT)
 
 
+def test_membership_overfill_respects_edge_tolerance(monkeypatch):
+    """A stricter edge policy narrows the cell membership admission band."""
+    assert jax.config.jax_enable_x64 is True
+    _, field, wall, _, _ = fixture._analytic_inputs("limited")
+    geometry = fixture._realised_hex_geometry(wall, 550)
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    original = topology._support_at_level
+
+    def overfill(*args):
+        area, intervals, labels, boundary, selected, owner, valid, count = original(
+            *args
+        )
+        membership = (
+            jnp.sum(jnp.where(selected, area, 0.0), axis=1) / geometry.full_area
+        )
+        cell = jnp.argmax(membership)
+        fragment = jnp.argmax(selected[cell])
+        excess = geometry.full_area[cell] * (1.0 + 2e-12 - membership[cell])
+        area = area.at[cell, fragment].add(excess)
+        return area, intervals, labels, boundary, selected, owner, valid, count
+
+    monkeypatch.setattr(topology, "_support_at_level", overfill)
+    evaluate = jax.jit(
+        lambda candidate, carrier, handedness, admission: topology.read(
+            candidate, carrier, handedness, admission
+        )
+    )
+    default = evaluate(field, geometry, convention, TopologyPolicy())
+    strict = evaluate(field, geometry, convention, TopologyPolicy(edge_tolerance=1e-13))
+    jax.block_until_ready((default, strict))
+    assert bool(default.valid)
+    assert not bool(strict.valid)
+    assert int(strict.reason) == int(topology.TopologyReason.UNRESOLVED_COMPONENT)
+
+
 def test_fragment_representatives_converge_across_long_paths():
     count = 2048
     split = count // 2

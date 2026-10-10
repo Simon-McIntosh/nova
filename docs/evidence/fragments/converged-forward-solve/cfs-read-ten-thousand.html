@@ -4,7 +4,7 @@
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="cfs-read-ten-thousand">
 <meta name="plan-title" content="Topology read at ten thousand cells">
-<meta name="plan-summary" content="Quadrature-derived membership admission and bounded fragment labels; the H200 wall remains superlinear">
+<meta name="plan-summary" content="Quadrature-derived membership admission validates both 10,000-cell reads; the measured wall is an open follow-on">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verdict" content="partial">
 <meta name="plan-recorded-at" content="2026-10-10">
@@ -16,9 +16,10 @@
 <table id="cfs-read-ten-thousand-roundoff"><caption>The membership guard measured before and after its repair on the same analytic limited carrier. Read execution excludes oracle scoring.</caption><thead><tr><th>Arm</th><th>Valid</th><th>Raw maximum</th><th>Admission allowance</th><th>Cold compile [s]</th><th>Warm read [s]</th></tr></thead><tbody>
 <tr><td>base, job 1283203</td><td>no, reason 7</td><td>1.0000000000015354</td><td>1e-12</td><td>11.608</td><td>79.139</td></tr>
 <tr><td>roundoff admission, job 1283220</td><td>yes, reason 0</td><td>1.0000000000015354</td><td>4.77485e-12</td><td>11.009</td><td>78.558</td></tr>
+<tr><td>one-hop labels restored, job 1283227</td><td>yes, reason 0</td><td>1.0000000000015354</td><td>4.77485e-12</td><td>11.385</td><td>79.236</td></tr>
 </tbody></table>
 <p id="cfs-read-ten-thousand-guard">The new allowance is four machine epsilons times the maximum number of 32-point quadrature contributions across strips, vertical intervals, and fragment slots. Admitted fractions are clipped to [0, 1]. The test that injects a 1e-8 cell-area excess obtains reason 7; a deliberately permissive 1e-7 allowance makes that same test fail with EXIT=1. The roundoff-only arm remains slow. Its 78.558 s warm wall is the timing control for the one-hop base propagation.</p>
-<p id="cfs-read-ten-thousand-labels">The representative-hooking and parent-halving repair passed a 2,048-fragment disconnected-path test. H200 rounds reached 6, 7, 8 and 8 from 550 to 10,000 cells, below the four-times-bit-length bound. Yet the limited warm read rises from 1.124 to 80.623 s, with fitted log-log exponent 1.479; the base one-hop exponent was 1.472. The 10,000-cell one-hop admission control took 78.558 s. Label convergence is bounded, but this change has not made the read near-linear.</p>
+<p id="cfs-read-ten-thousand-labels">The representative-hooking and parent-halving repair passed a 2,048-fragment disconnected-path test. H200 rounds reached 6, 7, 8 and 8 from 550 to 10,000 cells, below the four-times-bit-length bound. Yet the limited warm read rises from 1.124 to 80.623 s, with fitted log-log exponent 1.479; the base one-hop exponent was 1.472. Restoring one-hop propagation with the same admission bound took 79.236 s at 10,000 cells. The near-linear wall is an open follow-on for a later read-wall node after compile-route work; its kernel stages are outside this node.</p>
 <table id="cfs-read-ten-thousand-wall"><caption>H200 closed-form read wall, timed apart from oracle scoring. Cold compile and warm execution are separate columns.</caption><thead><tr><th>Carrier</th><th>Realised cells</th><th>Valid</th><th>Cold compile [s]</th><th>Warm read [s]</th><th>Label rounds</th></tr></thead><tbody>
 <tr><td>limited</td><td>550</td><td>yes</td><td>9.717</td><td>1.124</td><td>6</td></tr>
 <tr><td>limited</td><td>2,000</td><td>yes</td><td>9.767</td><td>7.463</td><td>7</td></tr>

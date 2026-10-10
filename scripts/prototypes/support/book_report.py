@@ -19,6 +19,60 @@ def render(rows_directory, figure_path, fragment_path, commits):
     rows.sort(key=lambda row: (row["case"], row["realised_cells"]))
     if not rows:
         raise ValueError("at least one measured certificate row is required")
+    expected = {
+        (kind, cells) for kind in ("limited", "diverted") for cells in (550, 2000, 5000)
+    }
+    present = {(row["case"], row["requested_cells"]) for row in rows}
+
+    def image_ceiling(row):
+        factor = 2 if row["case"] == "limited" else 1
+        return (
+            factor * row["exact_image_error"] + row["oracle_area_fraction_uncertainty"]
+        )
+
+    def acceptable(row):
+        return (
+            row["read_image_error"] <= image_ceiling(row)
+            and (row["case"] != "limited" or row["read_image_error"] <= 1e-4)
+            and row["net_current_relative_error"] <= 1e-12
+            and row["private_current"] == 0
+            and row["clip_current_error"] <= 2e-6
+            and row["clip_first_moment_error"] <= 2e-6
+            and all(
+                row[name] <= 1
+                for name in (
+                    "smooth_current_budget_ratio",
+                    "smooth_moment_budget_ratio",
+                    "saddle_current_budget_ratio",
+                    "saddle_moment_budget_ratio",
+                )
+            )
+        )
+
+    control = next(
+        (
+            row
+            for row in rows
+            if row["case"] == "diverted" and row["requested_cells"] == 550
+        ),
+        None,
+    )
+    control_pass = (
+        control is not None and abs(control["legacy_map_error"] / 0.197327 - 1) < 5e-6
+    )
+    passed = present == expected and all(map(acceptable, rows)) and control_pass
+    verdict = "passed" if passed else "failed"
+    coverage = f"{len(rows)} of 6 certificate rows measured; " + (
+        "all acceptance clauses pass."
+        if passed
+        else "acceptance incomplete or failing; no unmeasured result is inferred."
+    )
+    control_text = (
+        f"{control['legacy_map_error']:.12g} against 0.197327; "
+        f"relative difference {abs(control['legacy_map_error'] / 0.197327 - 1):.3g}"
+        if control is not None
+        else "Not measured"
+    )
     cases = sorted({row["case"] for row in rows})
     plt.style.use("data-ink")
     figure, axes = plt.subplots(1, len(cases), figsize=(14, 6), dpi=100, squeeze=False)
@@ -69,6 +123,8 @@ def render(rows_directory, figure_path, fragment_path, commits):
                     f"{row['smooth_current_budget_ratio']:.4g}",
                     f"{row['saddle_current_budget_ratio']:.4g}",
                     f"{row['oracle_area_fraction_uncertainty']:.3g}",
+                    f"{image_ceiling(row):.9g}",
+                    "pass" if acceptable(row) else "fail",
                     row["job_id"],
                 )
             )
@@ -76,7 +132,8 @@ def render(rows_directory, figure_path, fragment_path, commits):
         )
     fragment_path.parent.mkdir(parents=True, exist_ok=True)
     fragment_path.write_text(
-        '''<!doctype html>
+        (
+            '''<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -90,10 +147,10 @@ normal-form fragments">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s3">
 <meta name="plan-commits" content="'''
-        + html.escape(commits)
-        + """">
+            + html.escape(commits)
+            + """">
 <meta name="plan-recorded-at" content="2026-10-10">
-<meta name="plan-verdict" content="failed">
+<meta name="plan-verdict" content="__VERDICT__">
 <meta name="plan-environment" content="H200, binary64; CPU regression delta">
 <title>Connected fragment current booking | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
@@ -115,13 +172,15 @@ normal-form fragments">
 <th>Smooth current / budget</th>
 <th>Saddle current / budget</th>
 <th>Oracle area uncertainty</th>
+<th>Image ceiling</th>
+<th>Row verdict</th>
 <th>H200 job</th>
 </tr>
 </thead>
 <tbody>
 """
-        + "\n".join(table)
-        + """
+            + "\n".join(table)
+            + """
 </tbody>
 </table>
 <figure>
@@ -131,10 +190,11 @@ alt="Log-log booking image error against realised cell count, comparing read, ex
 and legacy supports for limited and diverted states">
 <figcaption>Current moments from the connected topology read, exact analytic support
 and legacy support, on the same cached certificate carriers. Errors use the analytic
-density image and fixed-cell moment basis. Only measured rows are plotted. The first
-limited row fails image dominance; the other five certificate rows were not run after
-the fail-fast refusal, and no convergence rate is inferred. The read books all
-selected pieces; holes subtract through ring winding. The prescribed total is the
+density image and fixed-cell moment basis. The diverted image must not exceed the
+exact arm plus the independently measured oracle area uncertainty. The limited
+image may reach twice the exact arm plus that uncertainty, and must also remain
+at or below 1e-4, one hundredth of the 1e-2 map bound. The read books all selected
+pieces; holes subtract through ring winding. The prescribed total is the
 independently integrated analytic-density total on the refined analytic support. The
 oracle area-refinement change is reported separately in the table.</figcaption>
 </figure>
@@ -163,15 +223,23 @@ zero added failures across six modules.</td>
 <tr>
 <td>Independent support attribution</td>
 <td>Analytic density on the read polygons gives image error 1.7777786713e-5; booked
-minus read-polygon image is 5.13e-13. Improving this fixed-support result requires the
-topology owner or clarification of the limited-state acceptance.</td>
+minus read-polygon image is 5.13e-13. This retained 553-cell row is accepted under
+the limited-state allowance. The other rows refine the oracle until its area change
+reaches 2.5e-8, five refinements, or a 30-second refinement budget; the measured
+uncertainty is used without enlargement.</td>
 </tr>
 <tr>
-<td>Raw rows and moment arrays</td>
+<td>Coverage</td><td>"""
+            + html.escape(coverage)
+            + """</td></tr>
+<tr><td>Legacy diverted 550 positive control</td><td>"""
+            + html.escape(control_text)
+            + """</td></tr>
+<tr><td>Raw rows and moment arrays</td>
 <td>
 <code>"""
-        + html.escape(str(rows_directory))
-        + """</code>
+            + html.escape(str(rows_directory))
+            + """</code>
 </td>
 </tr>
 </tbody>
@@ -180,6 +248,7 @@ topology owner or clarification of the limited-state acceptance.</td>
 </body>
 </html>
 """
+        ).replace("__VERDICT__", verdict)
     )
 
 

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-gs-runtime-operands">
+<meta name="plan-title" content="Runtime forward-map operands">
+<meta name="plan-summary" content="Coupling blocks cross the JAX call boundary as arrays">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-recorded-at" content="2026-10-10">
+<meta name="plan-verdict" content="partial">
+<title>Runtime forward-map operands | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-gs-runtime-operands">Runtime forward-map operands</h1>
+<p id="cfs-gs-runtime-operands-method">The map takes its mesh and coupling blocks through the operator pytree. The operator's trace identity contains leaf shapes, dtypes and static controls rather than geometry values. Each runtime row compiled <code>jax.jit(gs.apply)</code> in a fresh H200 process. The cached certified carrier rows used analytic states, and their map output was compared with the existing book and image composition. The 10,238-cell row built the production carrier and stencil geometry and supplied zero-valued arrays of the production coupling shapes as runtime operands; it measures executable size, not map fidelity. HLO footprint counts bytes of StableHLO constant lines, a textual literal-footprint measure rather than resident device memory. The prior rows are the legacy-support closure-bound map measurements in the resolution-pivot support receipt; their HLO constants were not counted. The support path is unchanged here. Cell counts are listed separately because the cached carriers differ.</p>
+<table id="cfs-gs-runtime-operands-map-table"><thead><tr><th>Case</th><th>Prior cells</th><th>Prior executable</th><th>Prior cold compile</th><th>Runtime cells</th><th>Runtime executable</th><th>Runtime HLO constants</th><th>Runtime cold compile</th><th>Peak host RSS</th><th>Map difference</th></tr></thead><tbody>
+<tr><td>Limited</td><td>553</td><td>30,243,134 B</td><td>8.47 s</td><td>555</td><td>1,143,865 B</td><td>139,407 B</td><td>5.57 s</td><td>2.86 GiB</td><td>0</td></tr>
+<tr><td>Diverted</td><td>550</td><td>29,556,742 B</td><td>10.23 s</td><td>548</td><td>1,201,573 B</td><td>139,410 B</td><td>9.81 s</td><td>2.96 GiB</td><td>0</td></tr>
+<tr><td>Limited</td><td>2,105</td><td>359,737,173 B</td><td>9.10 s</td><td>2,608</td><td>1,053,468 B</td><td>139,504 B</td><td>4.78 s</td><td>4.89 GiB</td><td>0</td></tr>
+<tr><td>Diverted</td><td>2,098</td><td>360,123,463 B</td><td>8.89 s</td><td>2,621</td><td>1,059,564 B</td><td>139,506 B</td><td>5.78 s</td><td>5.05 GiB</td><td>0</td></tr>
+<tr><td>Limited</td><td>5,167</td><td>serializer refused above 2 GiB</td><td>17.01 s</td><td>5,167</td><td>1,090,426 B</td><td>139,508 B</td><td>4.78 s</td><td>18.38 GiB</td><td>0</td></tr>
+<tr><td>Diverted</td><td>5,158</td><td>2,100,262,720 B</td><td>17.20 s</td><td>5,158</td><td>1,091,794 B</td><td>139,520 B</td><td>4.73 s</td><td>18.48 GiB</td><td>0</td></tr>
+<tr><td>Limited, placeholder blocks</td><td>not measured</td><td>not measured</td><td>not measured</td><td>10,238</td><td>1,071,555 B</td><td>139,603 B</td><td>6.72 s</td><td>62.31 GiB</td><td>not applicable</td></tr>
+</tbody></table>
+<p id="cfs-gs-runtime-operands-controls">The focused test compiled one program for two geometry values with the same operand layout. Its declared negative control bound the coupling arrays in separate closures, traced two programs, and failed the one-program assertion. Both test logs are in the node run directory. The support partition path remained the existing operator path.</p>
+</main></body></html>

@@ -246,11 +246,14 @@ def _measure_placeholder_map(case_name: str, requested_cells: int):
         plasma_to_sample_r=block(len(sample)),
         plasma_to_sample_z=block(len(sample)),
     )
+    geometry_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     operator = fixture.forward_operator(source, machine)
+    operand_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     coordinates = np.vstack((centres, wall, sample))
     state = jnp.asarray(certificate._exact_state(case_name, exact, coordinates))
     external = jnp.zeros_like(state)
     lowered = jax.jit(gs.apply).lower(state, external, operator)
+    lowered_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     hlo_constant_text_bytes = sum(
         len(line.encode())
         for line in lowered.as_text().splitlines()
@@ -272,6 +275,9 @@ def _measure_placeholder_map(case_name: str, requested_cells: int):
                 "serialized_executable_bytes": executable_bytes,
                 "hlo_constant_text_bytes": hlo_constant_text_bytes,
                 "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                "geometry_rss_kib": geometry_rss_kib,
+                "operand_rss_kib": operand_rss_kib,
+                "lowered_rss_kib": lowered_rss_kib,
             },
             sort_keys=True,
         ),

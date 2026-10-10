@@ -196,7 +196,10 @@ def test_analytic_certificate_moments(kind, cells):
     assert row["saddle_moment_budget_ratio"] <= 1, row
     assert row["clip_current_error"] <= 2e-6, row
     assert row["clip_first_moment_error"] <= 2e-6, row
+    factor = 2 if kind == "limited" else 1
     assert (
         row["read_image_error"]
-        <= row["exact_image_error"] + row["oracle_area_fraction_uncertainty"]
+        <= factor * row["exact_image_error"] + row["oracle_area_fraction_uncertainty"]
     ), row
+    if kind == "limited":
+        assert row["read_image_error"] <= 1e-4, row

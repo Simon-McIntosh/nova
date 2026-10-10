@@ -9,6 +9,7 @@ from copy import copy
 import json
 import os
 from pathlib import Path
+from time import perf_counter
 from types import MethodType
 
 import jax
@@ -132,22 +133,31 @@ def measure(kind, cells, directory, cache):
     assert bool(reading.valid) and bool(reading.qualified)
     psi = jax.vmap(jax.vmap(field.value))(geometry.sample_points)
     reference = analytic_polygons(exact, machine.cell_polygons)
-    refined = analytic_polygons(
-        exact,
-        machine.cell_polygons,
-        points=16385,
-        subdivisions=1 if kind == "diverted" else 0,
-    )
-    uncertainty = float(
-        np.max(
-            np.abs(
-                np.asarray([p.area for p in reference])
-                - np.asarray([p.area for p in refined])
-            )
-            / np.asarray(geometry.full_area)
+    refinement_start = perf_counter()
+    for refinement in range(1, 6):
+        refined = analytic_polygons(
+            exact,
+            machine.cell_polygons,
+            points=8193 if kind == "diverted" else 8192 * 2**refinement + 1,
+            subdivisions=refinement if kind == "diverted" else 0,
         )
-    )
-    reference = refined
+        uncertainty = float(
+            np.max(
+                np.abs(
+                    np.asarray([p.area for p in reference])
+                    - np.asarray([p.area for p in refined])
+                )
+                / np.asarray(geometry.full_area)
+            )
+        )
+        reference = refined
+        print(
+            f"ORACLE_REFINEMENT={refinement} AREA_FRACTION_CHANGE={uncertainty:.12g}",
+            flush=True,
+        )
+        if uncertainty <= 2.5e-8 or perf_counter() - refinement_start >= 30:
+            break
+    refinement_seconds = perf_counter() - refinement_start
     truth = analytic_moments(source, reference, np.asarray(geometry.centre))
     total = jnp.sum(truth.cell_current)
     polygons = read_polygons(geometry, reading, convention.sigma)
@@ -297,6 +307,8 @@ def measure(kind, cells, directory, cache):
         legacy_image_error=error(legacy),
         legacy_map_error=legacy_map,
         oracle_area_fraction_uncertainty=uncertainty,
+        oracle_refinement_steps=refinement,
+        oracle_refinement_seconds=refinement_seconds,
         clip_current_error=float(clip[0].max()),
         clip_first_moment_error=float(clip[1:].max()),
         current_budget_coefficient=current_coefficient,

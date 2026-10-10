@@ -1,0 +1,668 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "lane-change",
+  "backend": "codex-astra",
+  "base_sha": "450f3d2b7cbb3acbe3e3de0f20604a780da267e0",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 13674752,
+      "cached_input_tokens_cumulative": 13674752,
+      "input_tokens": 13946213,
+      "input_tokens_cumulative": 13946213,
+      "output_tokens": 61358,
+      "output_tokens_cumulative": 61358,
+      "reasoning_output_tokens": 25683,
+      "reasoning_output_tokens_cumulative": 25683
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": null,
+  "clone_matches": {
+    "reason": "the run asserted no revision pair to compare",
+    "status": "unmeasured"
+  },
+  "commit_resolution": null,
+  "commits": [],
+  "completed_at": "2026-10-08T13:09:35Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-08T12:22:17Z",
+  "disposition": "handed-off",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "work-rejected",
+  "follow_on_paths": [
+    "scripts/nova_lane/run.sh"
+  ],
+  "gate": "failed",
+  "gate_check": {
+    "command": "RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/after-identity.log --wait -- tests/biot/test_point_jet_custom_rule.py::test_polygon_jet_identity",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/after-identity.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-08T13:22:01.345743+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-08T12:22:01Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 18,
+    "binding_observed": "unknown",
+    "detail": "lane document carries no numeric 'mean_context'",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": "unknown",
+    "observed_at": "2026-10-08T12:21:43Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 18,
+      "aggregate_tokens_per_second": 0.0,
+      "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": "2026-10-08T12:21:43Z",
+      "runs": 0.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-08T13:09:35Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-08T12:22:45Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "lead directive 2026-10-08: difficult work runs on the codex lane; this is the sprint's hardest node (the full point-jet custom rule and the 60 s compile qualification, critical risk), and Jev routed it locally at 0.46 with codex-astra at 0.04 despite the difficulty comment and an 8 h estimate, while the jev-sees-declared-difficulty fix is not yet landed",
+        "session": "fresh",
+        "session_id": "a45d9c75-a695-44c4-8763-fb6dfc0d14f2",
+        "session_source": "stream",
+        "to_backend": "codex-astra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/manifest.md",
+  "member": "disposable-r-20261008T122151393511-cfs-point-jet-custom-rule",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/biot/test_point_jet_custom_rule.py",
+      "tests/equilibrium/test_topology_read.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": "closed unmerged by the lead decision of 2026-10-10 (resolution pivot); its five commits 90ae20b87, 4b028629b, 190a74f4f, 854ad81c1 and 9e2246f09 stay recorded here and in the worktree",
+  "node": "cfs-point-jet-custom-rule",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 605,
+          "cached_input_tokens": 864687,
+          "input_tokens": 865294,
+          "output_tokens": 1190,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 866484,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Wrap the Biot point jet in custom derivative rules and qualify the topology read's compile, under the lead's locked decisions kernel-loop-representation = custom-derivative-rules and tangent-identity-tolerance = scan-tangents-1e-9 on converged-forward-solve. Every private tangent the jet needs has landed: elliptic, complete-elliptic, range-function, moment-channel, graded-residual (repaired near corner radii by cfs-graded-layer-near-corner), polygon corner terms and polygon edge terms, with one helper home in nova/biot/rangefunction.py and one identity and compile harness in tests/biot/tangent_identity.py. The edge-term fragment (docs/evidence/fragments/converged-forward-solve/cfs-edge-term-tangents.html) ends with the packed_analytic_moments census; the one function it named without a tangent, _near_collinear_arsinh_difference, now has one (cfs-wrap-prerequisites, docs/evidence/fragments/converged-forward-solve/cfs-wrap-prerequisites.html), and the topology read test now measures the serialized executable size (36.9 MB at 132 cells) so its 50 MB branch can fire. The read builds the jet in BiotMomentCoupling.evaluate (nova/equilibrium/topology.py) as jax.jacfwd of value_gradient, which calls packed_analytic_moments, and then takes jax.jacfwd of the Hessian twice more for its curvature corrections (around topology.py line 2878). Measured cause of the compile barrier: the shared-kernel read compiles cold in 628 to 640 s on the H200 with about 0.75 to 0.82 million expanded equations at every rung, value_gradient carrying almost all of them. Done when: (1) re-run the packed_analytic_moments census at the head and confirm every reached function has a private tangent, naming any that does not and writing its tangent the same way if one is missing; (2) packed_analytic_moments (or the narrowest function that contains the whole jet, named in the fragment) carries a jax.custom_jvp whose rule returns the primal and its tangent with respect to the target point, the moments and the source geometry by composing the landed private tangents, never by autodiff through the recurrences; (3) identity: on 10,000 target points spanning near-source and far-field distances for the polygon and filament source kinds, including targets whose complete_kind complement falls below 1e-7, a near-singular domain the elliptic node identity rows did not cover, the value, gradient and Hessian of the wrapped jet agree with the base-revision autodiff jet within 1e-13 relative for exact parts and 1e-9 for scan parts on the H200, maxima printed per component, and the third and fourth derivatives the read takes for its curvature corrections agree the same way; on CPU the same rows are recorded against the CPU base-to-base floor rather than asserted at 1e-13, as the corner node established; (4) the third and fourth derivatives must not rebuild the autodiff graph the wrap removes: report the expanded equation count and cold compile of the jet, of its Hessian and of each further derivative order, and if a further order through the custom rule's own tangent program dominates, give the rule its own custom derivative in turn or restructure until no order dominates, stating which in the fragment; (5) negative control: the custom rule with one landed tangent replaced by its truncated variant (the NOVA_TANGENT_TRUNCATION switch) fails the identity rows by test id; (6) compile qualification: in fresh processes with the persistent compilation cache disabled before jax is imported, the kernel-backed topology read at 132, 300 and 550 cells compiles cold on the H200 with wall, unique and expanded equation counts, the serialized executable size (compiled.runtime_executable() serialized, or the size of the serialized executable the cache would store, not generated_code_size_in_bytes, which reads about 14 KB where the serialized executable is about 36 MB) and peak host RSS per rung, in one job, using the serialized byte measure the test already carries; (7) if the 550-cell read compiles cold at or below 60 s with a serialized executable at or below 50 MB, the strict expected-failure markers on test_kernel_compile_growth are removed for exactly the rows that pass, and a second job runs the 1074 and 2616 rows and the implicit kernel null tangent rows of tests/equilibrium/test_topology_read.py with the same bounds asserted in their bodies; if 550 does not qualify, no larger row runs, the markers stay, and the fragment names the remaining dominating construct from the jaxpr with its equation share; (8) the graded residual tangent compiles at 3.13 times the base primal and two compile rows (finite_part, graded_residual) stay red by design; say in the fragment whether the wrapped jet's compile changes either; (9) every TopologyRead leaf of the analytic certificate states at 132, 300 and 550 cells is unchanged against the base within the identity tolerances; tests/biot and tests/equilibrium/test_topology_read.py pass by delta against orientation_base_sha, run on the H200 in both arms because their CPU compiles exceed the all_debug hour (one job per arm, modules one after another, each job with --time sized to finish, split by module across jobs rather than one row per job), both arms carrying the repository root conftest and running the same test files, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable; (10) an evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-point-jet-custom-rule.html with plan-evidence-for converged-forward-solve, one table of identity maxima, equation counts per derivative order, compile walls, serialized executable bytes and RSS per rung, job ids and gate commands, reckon audit-doc at 0 errors. Gates run on the H200 through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (the targets of that step), each job with --time sized to finish; any wait is declared with wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, on the job that finishes last, and every job the run waits on is named in wait_condition. On a compute node uv is not invoked and the shared interpreter runs directly with PYTHONPATH set to the run worktree; every login-node uv command carries --no-sync and nothing runs uv sync; configure_dtypes() before any array and jax_enable_x64 asserted True. Base-revision code is loaded through the shared harness from git show at orientation_base_sha, never copied into the tree. No public signature in nova/biot or nova/equilibrium changes. Run filepath relativize over the fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself.",
+    "estimated_hours": 8.0,
+    "goal": "Wrap the Biot point jet in custom derivative rules and qualify the topology read cold compile against the 60 s and 50 MB clause",
+    "id": "cfs-point-jet-custom-rule",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-08T12:22:01Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 18,
+      "binding_observed": "unknown",
+      "detail": "lane document carries no numeric 'mean_context'",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": "unknown",
+      "observed_at": "2026-10-08T12:21:43Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 18,
+        "aggregate_tokens_per_second": 0.0,
+        "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": "2026-10-08T12:21:43Z",
+        "runs": 0.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261008T122151393511-cfs-point-jet-custom-rule/manifest.md",
+    "negative_control": "the custom rule with one landed tangent replaced by its truncated variant fails the jet identity rows by test id",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/polygonanalytic.py",
+      "nova/equilibrium/topology.py",
+      "tests/biot/test_point_jet_custom_rule.py",
+      "tests/equilibrium/test_topology_read.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-point-jet-custom-rule.html",
+      "docs/figures/converged-forward-solve/cfs-point-jet-custom-rule"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "member": null,
+    "node": "cfs-point-jet-custom-rule",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-08T12:22:04.230969+00:00",
+    "score": 0.6625,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "the hardest node of the sprint and critical risk: wrap the full Biot point jet in jax.custom_jvp composing about forty hand-written tangents, hold value, gradient, Hessian and the third and fourth derivatives to 1e-13 against the autodiff jet on the H200, and bring the topology read cold compile from about 640 s under 60 s; the section declares deep reasoning, strict verification and critical risk",
+    "confidence": 0.38,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 1576.857,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2673.987,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 189430.556759,
+        "budget_reason": null,
+        "burn_multiple": 1.1324355918756568,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 159671,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.7348533592708333,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031788017770827716,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 189430.556759,
+        "budget_reason": null,
+        "burn_multiple": 1.1324355918756568,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 159671,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.7348533592708333,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031788017770827716,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 189430.556759,
+        "budget_reason": null,
+        "burn_multiple": 1.1324355918756568,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 159671,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 29.8,
+          "peak_utilisation_p90_pct": 36.4,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 2.7348533592708333,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 1,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.031788017770827716,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 159671,
+          "headroom_pct": 30.6,
+          "peak_utilisation_p50_pct": 57.4,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 104,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 5,
+          "passed": 27,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 12
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 2682.355759,
+        "budget_reason": null,
+        "burn_multiple": 3.131737850696987,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 159671,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.7035917851967595,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 1,
+          "passed": 10,
+          "unknown": 0
+        },
+        "pace_allowance": 0.2037207551896495,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 2682.355759,
+        "budget_reason": null,
+        "burn_multiple": 3.131737850696987,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 159671,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.7035917851967595,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 0,
+          "passed": 11,
+          "unknown": 0
+        },
+        "pace_allowance": 0.2037207551896495,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 2682.355759,
+        "budget_reason": null,
+        "burn_multiple": 3.131737850696987,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 159671,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 5.7035917851967595,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.2037207551896495,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 57.99999999999999,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.12,
+      "claude:claude-sonnet-5-5": 0.07,
+      "codex:gpt-6-astra": 0.04,
+      "codex:gpt-6-luna": 0.03,
+      "codex:gpt-6-sol": 0.2,
+      "hold": 0.08,
+      "local:deepseek-v4.1-flash": 0.46
+    },
+    "rendered_token_estimate": 3644,
+    "usage": {
+      "cost": 0.000301098,
+      "input_tokens": 7169,
+      "output_tokens": 150
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9e2246f09c1fcfb8f9c5a5cecc5daada5168e45d",
+  "resume_waiver": {
+    "reason": "the lead closed this node unmerged on 2026-10-10; no continuation of this session is wanted",
+    "session_id": "01a11b77-5cda-7891-969f-9f305b3f57d4",
+    "source": "stream"
+  },
+  "review": null,
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a11b77-5cda-7891-969f-9f305b3f57d4",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 13674752,
+    "cumulative_input_tokens": 27620965,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 87041
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 2838,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-08T13:09:38Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-08T12:22:48Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261008T122151393511-cfs-point-jet-custom-rule",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 682,
+    "worker_pid": 1598874
+  },
+  "worker_seconds": 2838,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-08T13:09:35Z",
+    "session_id": "01a11b77-5cda-7891-969f-9f305b3f57d4",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-point-jet-custom-rule"
+  }
+}

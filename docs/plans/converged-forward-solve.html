@@ -23,7 +23,7 @@
   <title>Converged Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="130">
+<meta name="plan-version" content="131">
 <meta name="plan-modified" content="2026-10-10">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;}">
 </head>
@@ -426,6 +426,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261009T203928932033-review-of-proto-support" data-who="reckon-build" data-when="2026-10-09T20:44:58.296Z">
     <div class="r-comment-body"><p>Independent review of r-20261009T181553786165-proto-support stored as a parsed record at both assigned JSON paths: scores goal_fidelity 15 / evidence 18 / scope_discipline 18 / durability 16 / fit 17 / reuse 18 = 102/120, reviewed_base_sha 50ec68c949b7151ff9d2744e996dc48e0314e83f and reviewed_head_sha c165fdfd4626dddbf1218fdaa2fce0ed768794da, added_failure_count 0 with an empty added_failure_ids (the reviewed measurement prototype declares baseline_suite and after_suite both null), three follow-on findings and no blocking finding: the topology-read arm is 0 of 6 rows, the reviewed worktree carries an untracked out-of-scope root audit.py against a claimed-clean manifest, and the row receipts embed worktree-absolute module/cwd paths.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261008T122151393511-cfs-point-jet-custom-rule" data-who="reckon-build" data-when="2026-10-08T13:09:35Z">
+    <div class="r-comment-body"><p>Partial, blocked: composed point-jet custom JVP preserves 10000-point values and gradients bitwise, but H200 Hessian identity is 1.59e-7 against 1e-9 and the final fourth-derivative graph is 1201056 expanded equations; no qualification or marker removal claimed.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

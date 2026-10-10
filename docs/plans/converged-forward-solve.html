@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="136">
+<meta name="plan-version" content="137">
 <meta name="plan-modified" content="2026-10-10">
 </head>
 <body>
@@ -60,7 +60,7 @@
     <h2 id="s4">§4 — The map and its derivative</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="8.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
     <p>Implement <code>gs.apply</code> as ψ_ext + G @ book(ψ, read(ψ)) with geometry (mesh, coupling blocks, stencils) as traced operands and nothing captured as closure constants; it replaces the map <code>ForwardFluxOperator</code> performs in <code>forward_operator.py</code>, and the compensating unknowns enter it as a differentiated argument. Carry the implicit Picard derivative, the moment-map derivative and the boundary-flux envelope derivative into it.</p>
-    <p>Done when: evaluated once at the analytic state with no solve, the map reproduces it within 1e-2 relative sup at every certificate rung in exact mode for both cases (the map-fidelity gate), measured with the certificate exterior posed on the exact support (followup f-cfs-exterior-on-exact-support). Until that fixture lands, the certificate's exterior closure residual (0.006 to 0.018 at 550 to 5,158 cells) is reported beside the map's own booking term, which measured 0.0090 at 2,098 cells and 0.0044 at 5,158 with exact support, so a failure from the fixture is not read as a map failure; the JVP matches central differences at the existing contract's tolerances; one compiled program serves two geometries of the same shape, counted as compilations; and the program's compile wall, executable size and host memory during a cold compile are reported; and a negative control fails the one-program clause: the coupling blocks captured as closure constants compile a second program for the second geometry, counted.</p>
+    <p>Done when: evaluated once at the analytic state with no solve, the map reproduces it within 1e-2 relative sup at every analytic-certificate rung (about 2,000, 5,000 and 10,000 cells) in exact mode for both cases; the centroid-constrained rows of §6 at 110 to 1,000 cells keep their solve and row clauses but are not held to this bound, which their coarse rungs cannot meet (the map-fidelity gate), measured with the certificate exterior posed on the exact support (followup f-cfs-exterior-on-exact-support). Until that fixture lands, the certificate's exterior closure residual (0.006 to 0.018 at 550 to 5,158 cells) is reported beside the map's own booking term, which measured 0.0090 at 2,098 cells and 0.0044 at 5,158 with exact support, so a failure from the fixture is not read as a map failure; the JVP matches central differences at the existing contract's tolerances; one compiled program serves two geometries of the same shape, counted as compilations; and the program's compile wall, executable size and host memory during a cold compile are reported; and a negative control fails the one-program clause: the coupling blocks captured as closure constants compile a second program for the second geometry, counted.</p>
 
     <h2 id="s5">§5 — The fixed-point solve</h2>
     <section data-reckon="section" data-id="s5" data-effort-hours="10.0" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-attempts="0" data-status="implementable" data-links=""></section>
@@ -76,7 +76,7 @@
         <tr><td>global residual</td><td>≤ 1e-12</td></tr>
         <tr><td>every constraint row</td><td>|row| ≤ 1e-12</td></tr>
         <tr><td>axis and every admitted X-point</td><td>within one pitch of the analytic</td></tr>
-        <tr><td>map fidelity at the analytic state, no solve</td><td>≤ 1e-2 relative sup, exact mode</td></tr>
+        <tr><td>map fidelity at the analytic state, no solve</td><td>≤ 1e-2 relative sup, exact mode, on the analytic certificate rows</td></tr>
         <tr><td>compiled programs per mesh shape</td><td>one</td></tr>
         <tr><td>executable size</td><td>≤ 50 MB</td></tr>
         <tr><td>compile wall</td><td>≤ 60 s on the H200, warm cache excluded</td></tr>

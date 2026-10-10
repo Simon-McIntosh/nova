@@ -2780,6 +2780,20 @@ def _connected_fragment_labels(area, intervals, geometry, tolerance):
     return labels, wall
 
 
+def _membership_roundoff_bound(area, geometry):
+    """Bound cell-area summation error by the quadrature work per cell.
+
+    Each fragment area sums a 32-point rule over at most three vertical
+    intervals in each of at most 3 * vertex_slots + 1 strips. Membership
+    then sums the fragment slots. Four machine epsilons per summed term
+    cover the accumulated arithmetic error without admitting a geometric
+    overfill at the scale of a resolved cell fraction.
+    """
+    strips = 3 * geometry.vertices.shape[1] + 1
+    terms = 32 * 3 * strips * area.shape[1]
+    return 4 * jnp.finfo(area.dtype).eps * terms
+
+
 def _support_at_level(
     geometry, coefficient, sigma, level, axis, form, saddle_live, policy
 ):
@@ -3082,9 +3096,9 @@ def read(field, geometry, convention, policy):
     )
     membership = jnp.sum(jnp.where(selected, area, 0.0), axis=1) / geometry.full_area
     finite = jnp.all(jnp.isfinite(coefficient)) & jnp.all(jnp.isfinite(membership))
+    membership_roundoff = _membership_roundoff_bound(area, geometry)
     support_valid = support_valid & jnp.all(
-        (membership >= -policy.edge_tolerance)
-        & (membership <= 1.0 + policy.edge_tolerance)
+        (membership >= -membership_roundoff) & (membership <= 1.0 + membership_roundoff)
     )
     membership = jnp.clip(membership, 0.0, 1.0)
     unique_axis = jnp.sum(axes) == 1

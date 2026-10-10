@@ -7,6 +7,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import jax  # noqa: E402
+import jax.numpy as jnp  # noqa: E402
 import numpy as np  # noqa: E402
 import pytest  # noqa: E402
 
@@ -71,3 +72,31 @@ def test_closed_form_read_is_accurate_and_compatible(kind, cells):
             np.testing.assert_allclose(
                 result.boundary_flux, saved["boundary_flux"], rtol=0, atol=1e-13
             )
+
+
+def test_large_membership_overfill_is_refused(monkeypatch):
+    """A real area excess remains invalid above the summation allowance."""
+    assert jax.config.jax_enable_x64 is True
+    _, field, wall, _, _ = fixture._analytic_inputs("limited")
+    geometry = fixture._realised_hex_geometry(wall, 550)
+    policy = TopologyPolicy()
+    convention = topology.TopologyConvention.from_cocos(17, 1.0)
+    original = topology._support_at_level
+
+    def overfill(*args):
+        area, intervals, labels, boundary, selected, owner, valid, count = original(
+            *args
+        )
+        membership = (
+            jnp.sum(jnp.where(selected, area, 0.0), axis=1) / geometry.full_area
+        )
+        cell = jnp.argmax(membership)
+        fragment = jnp.argmax(selected[cell])
+        area = area.at[cell, fragment].set(geometry.full_area[cell] * (1.0 + 1e-8))
+        return area, intervals, labels, boundary, selected, owner, valid, count
+
+    monkeypatch.setattr(topology, "_support_at_level", overfill)
+    result = jax.jit(topology.read)(field, geometry, convention, policy)
+    jax.block_until_ready(result)
+    assert not bool(result.valid)
+    assert int(result.reason) == int(topology.TopologyReason.UNRESOLVED_COMPONENT)

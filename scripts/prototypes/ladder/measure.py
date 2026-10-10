@@ -77,12 +77,20 @@ def _measure(kind: str, cells: int, arm: str) -> dict:
         result = executable(field, geometry, convention, policy)
         jax.block_until_ready(result)
         warm_wall = min(warm_wall, perf_counter() - started)
+        print(
+            f"READ case={kind} cells={cells} valid={bool(result.valid)} "
+            f"reason={int(result.reason)} cold={compile_wall:.3f} "
+            f"warm={warm_wall:.3f}",
+            flush=True,
+        )
     finally:
         if arm == "B":
             topology._curvature_derivatives = original
+    started = perf_counter()
     reference, uncertainty = oracle_fixture._reference_cell_fractions(
         kind, oracle, geometry
     )
+    oracle_wall = perf_counter() - started
     area = np.asarray(geometry.full_area)
     error = np.abs(np.asarray(result.membership) - reference) * area / np.median(area)
     near = (
@@ -128,6 +136,7 @@ def _measure(kind: str, cells: int, arm: str) -> dict:
         "limiter_contact_error_m": contact_error,
         "cold_compile_seconds": compile_wall,
         "warm_execute_seconds": warm_wall,
+        "oracle_scoring_seconds": oracle_wall,
         "device_temp_bytes": memory.temp_size_in_bytes if memory else None,
         "device_output_bytes": memory.output_size_in_bytes if memory else None,
         "host_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,

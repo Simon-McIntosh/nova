@@ -26,6 +26,10 @@ import xarray
 
 from nova.biot.null import Null1D, Null2D
 from nova.biot.plasmagrid import PlasmaGrid
+from nova.biot.polygonanalytic import (
+    polygon_analytic_flux_moment_executor,
+    polygon_analytic_flux_moments_batched,
+)
 from nova.biot.target import FluxTarget
 from nova.database.zarrstore import ZarrStore
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
@@ -54,6 +58,10 @@ FIXTURE_REQUESTS = {"coarse": -500, "fine": -1000}
 WALL_POINT_COUNT = 121
 CACHE_SCHEMA = "analytic-oracle-hex-machine"
 CACHE_FILENAME = "analytic_oracle_hex_machine"
+BUILDER_HOST = "host"
+BUILDER_DEVICE = "device"
+BUILDER_PATHS = (BUILDER_HOST, BUILDER_DEVICE)
+BUILDER_ENVIRONMENT = "NOVA_ANALYTIC_ORACLE_BUILDER"
 EXTERIOR_CACHE_SCHEMA = "analytic-oracle-clipped-exterior"
 EXTERIOR_CACHE_FILENAME = "analytic_oracle_clipped_exterior"
 OUTPUT = Path(__file__).resolve().parent
@@ -395,12 +403,28 @@ def builder_revision() -> str:
     return digest.hexdigest()[:16]
 
 
+def resolve_builder(builder: str | None = None) -> str:
+    """Return the assembly path to use, defaulting to the host builder.
+
+    The device path's two moment channels reduce through the packed kernel's
+    reflected edge pairing, which is not yet shown equivalent to the host
+    builder's per-section reduction, so it is never selected implicitly: a
+    caller opts in by argument, and a scale rung by environment variable.
+    """
+    if builder is None:
+        builder = os.environ.get(BUILDER_ENVIRONMENT, BUILDER_HOST)
+    if builder not in BUILDER_PATHS:
+        raise ValueError(f"unknown coupling assembly path {builder!r}")
+    return builder
+
+
 def cache_identity(
     case: RotatingEquilibrium,
     *,
     requested_cells: int,
     wall_nodes: int,
     wall: np.ndarray | None = None,
+    builder: str | None = None,
 ) -> dict[str, object]:
     """Return the complete semantic identity of an oracle carrier."""
     resolved_wall = _resolved_wall(case, wall_nodes=wall_nodes, wall=wall)
@@ -428,6 +452,7 @@ def cache_identity(
         },
         "precision": "float64",
         "kernel": "exact-authored-polygon-moments",
+        "builder": resolve_builder(builder),
         "builder_revision": builder_revision(),
     }
 
@@ -495,9 +520,46 @@ def _flux_blocks(
     targets: np.ndarray,
     polygons: tuple[np.ndarray, ...],
     centres: np.ndarray,
+    *,
+    builder: str,
+    executor=None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Assemble exact authored-section blocks for one target family."""
-    return coupling_build.build_flux_blocks(targets, polygons, centres)
+    if builder == BUILDER_DEVICE:
+        return coupling_build.build_flux_blocks(targets, polygons, centres)
+    return polygon_analytic_flux_moments_batched(
+        targets[:, 0],
+        targets[:, 1],
+        polygons,
+        expansion_points=centres,
+        executor=executor,
+    )
+
+
+def _assemble_families(
+    families: dict[str, np.ndarray],
+    polygons: tuple[np.ndarray, ...],
+    centres: np.ndarray,
+    *,
+    builder: str,
+) -> dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]]:
+    """Assemble every target family, sharing one process batch on the host."""
+    if builder == BUILDER_DEVICE:
+        return {
+            name: _flux_blocks(targets, polygons, centres, builder=builder)
+            for name, targets in families.items()
+        }
+    with polygon_analytic_flux_moment_executor() as executor:
+        return {
+            name: _flux_blocks(
+                targets,
+                polygons,
+                centres,
+                builder=builder,
+                executor=executor,
+            )
+            for name, targets in families.items()
+        }
 
 
 def build_machine(
@@ -506,8 +568,10 @@ def build_machine(
     *,
     wall_nodes: int,
     wall: np.ndarray | None = None,
+    builder: str | None = None,
 ) -> OracleMachine:
     """Build a hex carrier without a conductor or external data source."""
+    builder = resolve_builder(builder)
     wall = _resolved_wall(case, wall_nodes=wall_nodes, wall=wall)
     coilset = CoilSet(dplasma=requested_cells, tplasma="hex")
     coilset.firstwall.insert(wall, turn="hex")
@@ -553,9 +617,15 @@ def build_machine(
     regular = np.asarray([len(polygon) == 6 for polygon in polygons])
     interior_stencil = stencil[(condition < 1.0e3) & regular[stencil].all(axis=1)]
     sample = geometry.sample_node_coordinates
-    grid_blocks = _flux_blocks(centres, polygons, geometry.atomic_mesh.centroids)
-    wall_blocks = _flux_blocks(wall, polygons, geometry.atomic_mesh.centroids)
-    sample_blocks = _flux_blocks(sample, polygons, geometry.atomic_mesh.centroids)
+    assembled = _assemble_families(
+        {"grid": centres, "wall": wall, "sample": sample},
+        polygons,
+        geometry.atomic_mesh.centroids,
+        builder=builder,
+    )
+    grid_blocks = assembled["grid"]
+    wall_blocks = assembled["wall"]
+    sample_blocks = assembled["sample"]
     return OracleMachine(
         node=centres,
         area=area,
@@ -664,13 +734,16 @@ def cached_machine(
     *,
     wall_nodes: int,
     wall: np.ndarray | None = None,
+    builder: str | None = None,
 ) -> OracleMachine:
     """Warm-load one semantic carrier or publish a validated cold build."""
+    builder = resolve_builder(builder)
     identity = cache_identity(
         case,
         requested_cells=requested_cells,
         wall_nodes=wall_nodes,
         wall=wall,
+        builder=builder,
     )
     store = ZarrStore(
         filename=f"{CACHE_FILENAME}_{abs(requested_cells)}",
@@ -689,7 +762,11 @@ def cached_machine(
             load_seconds = perf_counter() - started
             build_started = perf_counter()
             machine = build_machine(
-                case, requested_cells, wall_nodes=wall_nodes, wall=wall
+                case,
+                requested_cells,
+                wall_nodes=wall_nodes,
+                wall=wall,
+                builder=builder,
             )
             build_seconds = perf_counter() - build_started
             store.data = _dataset(machine, identity, store.group)

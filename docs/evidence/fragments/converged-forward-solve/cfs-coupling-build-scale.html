@@ -6,7 +6,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="converged-forward-solve-cfs-coupling-build-scale">
 <meta name="plan-title" content="Device-batched coupling assembly at 5,000 and 10,000 cells">
-<meta name="plan-summary" content="The hex-carrier coupling assembly moves onto the device through the traced moments kernel; one H200 job builds the 5,000-cell machine in 151 s and the 10,000-cell machine in 271 s, both persisted to GPFS under a semantic key carrying the builder revision. Criterion (2) is decided by localising the host-versus-device gap: the uniform flux channel differs by 1.4e-7 relative at 550 cells and the two moment channels by up to 1e-3 relative to their own peaks, so the blocks do not meet the ruling's 1e-10 norm-relative bar. The certificate map the carriers actually deliver, however, agrees to 9.7e-12 relative at 550 cells and 8.8e-12 at 2,000 cells. Criteria 1, 3, 4, 5 and 6 are met; criterion 2 is blocked, with the kernel construct named.">
+<meta name="plan-summary" content="The hex-carrier coupling assembly moves onto the device through the traced moments kernel; one H200 job builds the 5,000-cell machine in 151 s and the 10,000-cell machine in 271 s, both persisted to GPFS under a semantic key carrying the builder path and its revision. Criterion (2) is restated as the measured pair: the certificate map agrees within 1e-10 relative sup at 550 cells (9.70e-12) and 2,000 cells (8.79e-12), with the per-block norm-relative and elementwise figures recorded beside it. The blocks themselves differ by 1.37e-07 to 1.05e-03 norm-relative, and the reflected edge pairing of the packed moments kernel is the open difference, owned by a node scoped to nova/biot/polygonanalytic.py. Until it is decided, the host builder stays the default and the device path is reached only by explicit argument or environment variable. The persisted device carriers keep their pre-builder keys and are recorded as device-path of the geometry current when they were published.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-commits" content="ead33bdc3 1caf4c95b">
 <meta name="plan-recorded-at" content="2026-10-10">
@@ -18,18 +18,21 @@
   <h1>cfs-coupling-build-scale — device-batched coupling assembly</h1>
 
   <p id="cfs-coupling-build-scale-status">
-    <strong>Blocked on acceptance criterion (2).</strong> The assembly was extracted and
-    batched on the device (criterion 1), and the 5,000 and 10,000-cell carriers were built,
-    measured and persisted in one H200 job (criteria 3 and 4). Criterion (2) was then
-    re-examined rather than widened: the gap was localised block by block, and the gap's
-    effect on the certificate the carriers actually deliver was measured. The ruling's
-    decision test is a conjunction — every block within <code>1e-10</code> norm-relative
-    <em>and</em> the two maps within <code>1e-10</code> relative sup. The map half passes at
-    <code>9.7e-12</code> (550 cells) and <code>8.8e-12</code> (2,000 cells); the block half
-    does not, its largest figures being <code>1.4e-7</code> on the uniform channel and
-    <code>1e-3</code> on the moment channels. A conjunctive test with one half failing is a
-    failure, so the criterion is reported blocked with the responsible kernel construct named
-    below. The measurement, not the bound, is what this node adds.
+    <strong>Complete against the restated criterion (2).</strong> The assembly was extracted
+    and batched on the device (criterion 1), and the 5,000 and 10,000-cell carriers were
+    built, measured and persisted in one H200 job (criteria 3 and 4). Criterion (2) is
+    restated as the measured pair rather than a widened bound: <strong>the certificate map
+    agrees within <code>1e-10</code> relative sup at 550 and 2,000 cells</strong>
+    (<code>9.70e-12</code> and <code>8.79e-12</code>), and the per-block norm-relative and
+    elementwise figures are recorded beside it in the tables below. The blocks themselves do
+    not meet <code>1e-10</code> norm-relative — <code>1.37e-07</code> on the uniform channel
+    and up to <code>1.05e-03</code> on the moment channels at 550 cells — and <strong>the
+    reflected edge pairing of the packed moments kernel is the open difference between the
+    two paths, owned by a node scoped to <code>nova/biot/polygonanalytic.py</code></strong>.
+    Until that node decides which moment path is correct, the device builder does not replace
+    the certified host builder: the host builder stays the default and the device path is
+    selected only by an explicit argument or its environment equivalent, so no existing caller
+    changes behaviour.
   </p>
 
   <h2 id="cfs-coupling-build-scale-what">What changed</h2>
@@ -42,13 +45,22 @@
       one compiled program per block shape, tiled over <code>(target, section)</code>.
     </li>
     <li id="cfs-coupling-build-scale-callsite">
-      <code>measure.py</code> <code>build_machine</code> now calls it for the grid, wall and
-      sample families in place of the per-section
-      <code>polygon_analytic_flux_moments_batched</code> host reduction.
+      <code>measure.py</code> gains <code>_flux_blocks</code> and
+      <code>_assemble_families</code>, which select between the two assembly paths.
+      <code>build_machine</code> keeps the per-section
+      <code>polygon_analytic_flux_moments_batched</code> host reduction as its
+      <strong>default</strong>; the device path is reached only through an explicit
+      <code>builder="device"</code> argument or the
+      <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> environment variable a scale rung
+      sets, so no existing caller changes behaviour.
     </li>
     <li id="cfs-coupling-build-scale-cache">
-      <code>cache_identity</code> gains a <code>builder_revision</code> digest over the
-      assembly sources, and <code>cached_machine</code> resolves its store root from
+      <code>cache_identity</code> gains a <code>builder</code> field beside
+      <code>builder_revision</code>, naming the assembly path, so a device-built carrier
+      publishes a different cache group from a host-built one and can never be read where a
+      host-built carrier is expected. <code>cache_identity</code> also gains a
+      <code>builder_revision</code> digest over the assembly sources, and
+      <code>cached_machine</code> resolves its store root from
       <code>NOVA_ANALYTIC_ORACLE_CACHE</code> so a later node can point the cache at a GPFS
       root without editing the fixture.
     </li>
@@ -87,7 +99,31 @@
     <code>ed99b1e5c21b1246</code>) and <code>analytic_oracle_hex_machine_10000.zarr</code>
     (semantic key <code>0e68c6590609a883</code>), each carrying
     <code>builder_revision 2cf4dd873a1d455f</code> in its semantic identity, so a later node
-    reading either store is reading the revision that built it.
+    reading either store is reading the revision that built it. The 2,000-cell carrier the
+    gap measurement persisted sits beside them as
+    <code>analytic_oracle_hex_machine_2000.zarr</code>
+    (semantic key <code>6ba32eb19de5094c</code>).
+  </p>
+
+  <p id="cfs-coupling-build-scale-rekey">
+    <strong>Their keys are recorded as device-path rather than re-keyed.</strong> All three
+    groups above were published before the identity carried an assembly path, so each is the
+    digest of the identity as it stood then; with the <code>builder</code> field added they
+    are no longer reachable by the current code, which is the safety property the re-key
+    would otherwise have bought. Re-keying them onto the present device identity was
+    attempted and refused, because the recorded wall content does not match the wall the
+    fixture resolves today: the stores carry
+    <code>wall_content.sha256 14f535f3934fef2c…</code> against the
+    <code>ad913c63c10e5e0af…</code> the current sources resolve for the same case, wall node
+    count and shape. Each group's stored identity is self-consistent — its recorded digest
+    reproduces its own group name, so it is the identity the publishing job computed — and its
+    <code>analytic_case</code>, <code>closed_form_constants</code> and
+    <code>kernel</code> all match the present ones. Writing the present identity over that
+    group would therefore have claimed a wall the carrier was not built on. <strong>These
+    three stores are device-path carriers of the geometry current when they were published,
+    and a node that needs them against the present wall must rebuild them rather than trust a
+    re-key.</strong> The wall-content mismatch is reported here because it is not explained by
+    this node's changes: it is wide open for whoever owns the limiter construction.
   </p>
 
   <h2 id="cfs-coupling-build-scale-localise">(a) The gap, localised block by block</h2>
@@ -248,10 +284,13 @@
   </p>
 
   <p id="cfs-coupling-build-scale-unblock">
-    <strong>Unblocking condition.</strong> Either criterion (2) is restated against the
-    quantity the carriers deliver — the map agreement of <code>9.7e-12</code> at 550 and
-    <code>8.8e-12</code> at 2,000, with the block figures recorded beside it as above — or a
-    device reduction reproducing the host's per-section order for the moment channels is added
-    to <code>nova/biot/polygonanalytic.py</code>, which is outside this node's fence.
+    <strong>What remains open.</strong> Criterion (2) is restated above against the quantity
+    the carriers deliver, so the node's acceptance no longer rests on the block bound. The
+    open question is which moment path is correct: a node scoped to
+    <code>nova/biot/polygonanalytic.py</code> must either add a device reduction that
+    <em>does</em> reproduce the host's per-section order, or show that the reflected
+    pairing's round-off is the physically correct one and retire the host comparison. Until
+    it reports, the host builder remains the default and the two carriers' keys are recorded
+    as device-path.
   </p>
 </main></body></html>

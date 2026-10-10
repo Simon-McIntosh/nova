@@ -24,7 +24,24 @@
   "plan_slug": "converged-forward-solve",
   "plan_version": 135,
   "project": "nova",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "s21-nova",
+      "finding": "done_when-1",
+      "reason": "",
+      "when": "2026-10-10T18:15:24.952918+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "s21-nova",
+      "reason": "",
+      "when": "2026-10-10T18:15:24.952918+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261010T180532933077-plan-review-of-converged-forward-solve.json",
   "review_run_id": "r-20261010T180532933077-plan-review-of-converged-forward-solve",
   "reviewed_blob_sha": "4ae0b2e324889207fe9d05a1de7f16d3e39c7770",
   "rubric": "content",

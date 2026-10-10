@@ -9,6 +9,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import NullFormatter
 
 
 def render(rows_directory, figure_path, fragment_path, commits):
@@ -95,6 +96,11 @@ def render(rows_directory, figure_path, fragment_path, commits):
                 label=arm,
             )
         ax.set_xlabel("Realised cells")
+        ax.set_xticks(
+            [row["realised_cells"] for row in selected],
+            [f"{row['realised_cells']:,}" for row in selected],
+        )
+        ax.xaxis.set_minor_formatter(NullFormatter())
         ax.text(
             0.02, 0.97, kind, transform=ax.transAxes, ha="left", va="top", fontsize=20
         )
@@ -130,6 +136,44 @@ def render(rows_directory, figure_path, fragment_path, commits):
             )
             + "</tr>"
         )
+    details = (
+        "<table><thead><tr>"
+        + "".join(
+            f"<th>{name}</th>"
+            for name in (
+                "Case",
+                "Cells",
+                "Excluded cells",
+                "Clip current error",
+                "Clip first-moment error",
+                "Smooth first moment / budget",
+                "Saddle first moment / budget",
+                "Oracle refinement [s]",
+            )
+        )
+        + "</tr></thead><tbody>"
+    )
+    for row in rows:
+        details += (
+            "<tr>"
+            + "".join(
+                f"<td>{html.escape(str(value))}</td>"
+                for value in (
+                    row["case"],
+                    row["realised_cells"],
+                    row["private_cell_count"],
+                    f"{row['clip_current_error']:.4g}",
+                    f"{row['clip_first_moment_error']:.4g}",
+                    f"{row['smooth_moment_budget_ratio']:.4g}",
+                    f"{row['saddle_moment_budget_ratio']:.4g}",
+                    f"{row['oracle_refinement_seconds']:.3g}"
+                    if "oracle_refinement_seconds" in row
+                    else "retained row",
+                )
+            )
+            + "</tr>"
+        )
+    details += "</tbody></table>"
     fragment_path.parent.mkdir(parents=True, exist_ok=True)
     fragment_path.write_text(
         (
@@ -168,7 +212,7 @@ normal-form fragments">
 <th>Exact image</th>
 <th>Legacy image</th>
 <th>Net current relative error</th>
-<th>Private current [A]</th>
+<th>Excluded current [A]</th>
 <th>Smooth current / budget</th>
 <th>Saddle current / budget</th>
 <th>Oracle area uncertainty</th>
@@ -190,7 +234,10 @@ alt="Log-log booking image error against realised cell count, comparing read, ex
 and legacy supports for limited and diverted states">
 <figcaption>Current moments from the connected topology read, exact analytic support
 and legacy support, on the same cached certificate carriers. Errors use the analytic
-density image and fixed-cell moment basis. The diverted image must not exceed the
+density image and fixed-cell moment basis. The exact and read arms share the refined
+analytic-current total; legacy retains the certificate's declared current for its
+positive control. The exact-arm errors are recomputed with the refined oracle.
+The diverted image must not exceed the
 exact arm plus the independently measured oracle area uncertainty. The limited
 image may reach twice the exact arm plus that uncertainty, and must also remain
 at or below 1e-4, one hundredth of the 1e-2 map bound. The read books all selected
@@ -225,8 +272,9 @@ zero added failures across six modules.</td>
 <td>Analytic density on the read polygons gives image error 1.7777786713e-5; booked
 minus read-polygon image is 5.13e-13. This retained 553-cell row is accepted under
 the limited-state allowance. The other rows refine the oracle until its area change
-reaches 2.5e-8, five refinements, or a 30-second refinement budget; the measured
-uncertainty is used without enlargement.</td>
+reaches 2.5e-8, five refinements, or the elapsed refinement time reaches 30 seconds
+at an iteration boundary. A running iteration is completed, and its full cost is
+retained in the row receipt. The measured uncertainty is used without enlargement.</td>
 </tr>
 <tr>
 <td>Coverage</td><td>"""
@@ -244,11 +292,14 @@ uncertainty is used without enlargement.</td>
 </tr>
 </tbody>
 </table>
+__DETAILS__
 </main>
 </body>
 </html>
 """
-        ).replace("__VERDICT__", verdict)
+        )
+        .replace("__VERDICT__", verdict)
+        .replace("__DETAILS__", details)
     )
 
 

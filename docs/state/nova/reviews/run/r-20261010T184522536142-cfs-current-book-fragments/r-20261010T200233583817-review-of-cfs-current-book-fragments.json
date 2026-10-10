@@ -1,0 +1,80 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Measured from the reviewed run's own arms: baseline_suite (revision b86bfc7284bf89bce864e3062dbaa537b5277ba7, exit_status 0, completed true, failure_count 0, six per-module fresh processes) and after_suite (revision b365c78a9dfa086d0915713d88f2199b58feba54, exit_status 0, completed true, failure_count 0) both ran to their summary lines with no FAILED ids, so the added set is empty. The node's own new gate tests/test_current_book_fragments.py (8 passed) is carried separately in the manifest's tests field and is not one of the six delta-suite targets.",
+  "base_log_revision": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/support/book.py:167 \u2014 current.book(samples, read, mesh) inside the certificate harness's traced booking closure",
+    "tests/test_current_book_fragments.py:111 \u2014 book((design @ coefficients)[None], read, geometry, Density(slope), Quadrature(segments=64)) in the focused booking tests"
+  ],
+  "completed_at": "2026-10-10T20:10:50.546Z",
+  "dispatched_at": "2026-10-10T20:02:50Z",
+  "findings": [
+    {
+      "file": "tests/test_current_book_fragments.py",
+      "line": "178-200",
+      "severity": "follow-on",
+      "text": "follow-on: the six analytic certificate rows (test_analytic_certificate_moments, parametrized limited/diverted x 550/2000/5000) read os.environ[\"NOVA_BOOK_RESULTS\"] and os.environ[\"NOVA_BOOK_CACHE\"] directly and call scripts.prototypes.support.book.measure, so with those variables unset the node's headline acceptance row raises KeyError rather than skipping or failing a named clause. The rows are heavy by construction (H200, 17:24 wall in certificate-resumed.log) and the node carried the receipt through an external script, so this is not a defect in the change; it is the reason the acceptance clause is not exercisable in the default CPU lane. A skip-with-reason guard would make the row's absence visible.",
+      "type": "environment-gated-acceptance-row"
+    },
+    {
+      "file": "manifest.md",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed node's done-when (3) holds every read-driven booking image error at or below the exact-support arm's, but the limited-553 rung does not meet that literally (read 1.777778665e-05 against exact 1.211317518e-05). The node stopped and asked (NEEDS-HELP in lane-change-2-final.txt), and the coordinator supplied a resume ruling (resume-1-advice.txt) relaxing the limited case to read <= 2*exact + oracle uncertainty and <= 1e-4 absolute; under that ruling all six rows pass. The relaxation is a real change to the node's acceptance and is recorded only in the run directory, not in the plan; the plan's \u00a73 done-when should carry it so a later reader reconciles the row without the run's advice file.",
+      "type": "superseded-done-when-clause"
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-current-book.html",
+      "line": "n/a",
+      "severity": "follow-on",
+      "text": "follow-on: the published figure booking-image-error.svg is a three-rung comparison (read, exact, legacy) but the read arm's limited rungs pass only under the resumed ruling above, which the figure's caption-level context should name so a reader does not read the read arm as strictly dominating the exact arm at every rung. Cosmetic to the change; named for the coordinator's writeback.",
+      "type": "figure-legacy-arm-only"
+    }
+  ],
+  "head_log_revision": "b365c78a9dfa086d0915713d88f2199b58feba54",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "current.book has two callers at the reviewed head: the certificate harness scripts/prototypes/support/book.py:167 and the focused test tests/test_current_book_fragments.py:111. It is deliberately not yet wired into the forward solve \u2014 manifest follow_ons carries that to a later node \u2014 so no production solve path reaches it, which is the scope the brief sets.",
+    "diff": "Read commit by commit across nine commits from b86bfc728 to 95a2e2460, 8 files, 3473 insertions / 42 deletions. The product change is nova/equilibrium/current.py (new, 285 lines: book(), Quadrature, FragmentSupport, Booking, the conic-ring and normal-form ring tracers) and nova/equilibrium/clip_quadrature.py (96 lines: a signed=False keyword on _quadrature_from_arrays, and _fragment_current_moments, which integrates a 4-D oriented ring bank through the same polynomial and point quadrature kernels). The remaining six files are the prototype harness (geometry.py, book.py, book_report.py), the new test, the evidence fragment and the SVG.",
+    "done_when": "Every clause of \u00a73 and of followup f-cfs-book-read-fragments is met at the reviewed head under the coordinator's resumed ruling: the booked moments reproduce the analytic cell moments (max current budget ratio 0.832, max moment budget ratio 0.147), the private-flux cells book zero (private_current 0.0 over 2052 excluded cells, asserted by test_private_fragment_current_is_zero), the net current matches to 2.220446049250313e-16 relative, the booking's JVP matches central differences at all four contract stages (smooth/axis/boundary/support), and the declared level-membership negative control fails by test id printing private current 1.6000000000000001. The diverted read-driven booking image error (1.15e-4, 2.50e-5, 3.95e-6) sits below the exact arm's (2.39e-2, 5.78e-3, 3.45e-4) at every rung; the limited-553 row passes under the resumed ruling.",
+    "goal": "current.book books per-cell plasma current moments from topology.read's membership over connected multi-polygon fragments, with the exact clip as the one booking and the private-flux region excluded by construction \u2014 exactly what \u00a73 and followup f-cfs-book-read-fragments require. The module is new and pure/traced, the legacy spline-clip support is not on the certificate path (it is carried only as the positive control, legacy_map_error 0.08610860010174584 at the diverted 5,158 rung).",
+    "manifest": "status complete; commits list nine shas reconciling with the git log b86bfc728..95a2e2460; changed_paths list eight files reconciling exactly with the diffstat; baseline_suite and after_suite are present, complete and zero-failure with literal runnable commands; negative_control_log names one path whose last line is EXIT=1 over one failing id; test_logs name ten logs; the manifest audit returned ok=true with zero findings and the document audit reports OK. One provenance note: the aggregate suite logs carry a HEADER_PROVENANCE line recording that their header lines were reconstructed from retained per-module headers, with the originals preserved as .log.asdelivered companions.",
+    "write_paths": "Declared: nova/equilibrium/current.py, nova/equilibrium/clip_quadrature.py, tests/test_current_book_fragments.py, scripts/prototypes/support/{geometry,book,book_report}.py, docs/evidence/fragments/converged-forward-solve/cfs-current-book.html and docs/figures/converged-forward-solve/cfs-current-book/booking-image-error.svg. The nine commits touch only these eight files; forward.py, forward_operator.py and topology.py, which the brief fences to concurrent nodes, are untouched."
+  },
+  "justifications": {
+    "durability": "The clause that matters most \u2014 private-flux cells booking zero \u2014 is genuinely falsifiable and I reproduced the failure myself: with NOVA_BOOK_LEVEL_MEMBERSHIP=1 the reviewed head prints PRIVATE_FLUX_CURRENT=1.6000000000000001 and test_private_fragment_current_is_zero fails, EXIT=1 (review-negcontrol.log). The differentiation contract is held by test_booking_jvp_matches_central_difference at a strict 1e-10 (smooth) / 1e-8 (others) on the final step, and test_fragment_capacity_is_refused holds the capacity refusal. The gap that keeps this below the top band is that the headline analytic acceptance row is env-gated: with NOVA_BOOK_RESULTS/NOVA_BOOK_CACHE unset it raises KeyError instead of running, so nothing in the default lane asserts the certificate clauses.",
+    "evidence": "Independently reproduced rather than read: the reviewed head 95a2e2460 in its own worktree gives 8 passed, EXIT=0 for the focused gate (review-head.log), and the declared negative control re-run under the mutation gives 1 failed, EXIT=1 (review-negcontrol.log). The heavy certificate arm is read from the run's own logs: certificate-resumed.log reports 5 passed in 1044.09s on H200 job 1283223 including the asserted legacy diverted 550 control, and certificate-acceptance.log accepts all six rows with max_net_current_relative_error 2.220446049250313e-16 and excluded_current 0.0. The one provenance caveat is that the aggregate suite logs had their header lines reconstructed after the fact (asdelivered companions preserved); the failure content is unchanged.",
+    "fit": "Extends the owners the plan names rather than adding a parallel path: book() calls the same clipped_support_current_moments and, as the brief explicitly required, widens the one-polygon-per-cell contract in clip_quadrature.py (a 4-D ring bank and a signed option) instead of writing a second booker. It reuses topology.quadratic_cell_fragments, topology._positive_vertical_intervals, topology._cubic_parameters and saddle_normal_form, and FluxFieldPolynomial. The module is new and holds current.book as \u00a73 assigns; it is intentionally not yet on the solve path.",
+    "goal_fidelity": "All six \u00a73 clauses and the followup's booking clause are met at the reviewed head. The diverted read-driven booking error is at or below the exact-support arm at all three rungs, the private-flux region books zero by construction, the net current matches the analytic total to 2.2e-16, the JVP matches central differences at the four existing stages, and the negative control fires. The limited-553 rung meets clause (3) only through the coordinator's resumed ruling (recorded as a follow-on), which is a relaxation the node asked for and did not grant itself \u2014 the correct handling, but a clause a later reader cannot reconstruct from the plan alone.",
+    "reuse": "Reuses the existing quadrature kernels (_quadrature_from_arrays, _integrate_current_polynomial, _integrate_current_points) and the topology read's fragment machinery; the only additions to clip_quadrature.py are a signed flag on the existing array quadrature and a ring-reduction wrapper, so the signed-ring integration shares the polygon kernels rather than re-deriving them. Quadrature and FragmentSupport are new dataclasses scoped to the booking, not a duplicated mechanism.",
+    "scope_discipline": "Eight files changed across nine commits, every one inside the declared write paths; the diffstat reconciles at 8 files, 3473 insertions / 42 deletions. The three files the brief fences off to concurrent nodes (nova/equilibrium/forward.py, forward_operator.py, topology.py) are untouched, and wiring the book onto the solve path is correctly left to a later node."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: current.book books current moments from topology.read's connected multi-polygon fragments with the exact clip as the one booking and the private-flux region excluded by construction (nova/equilibrium/current.py:book, via a signed 4-D ring bank added to nova/equilibrium/clip_quadrature.py). EVIDENCE: reviewed head 95a2e2460 re-run gives 8 passed EXIT=0 (review-head.log); the declared level-membership negative control re-run fails by test id printing PRIVATE_FLUX_CURRENT=1.6000000000000001, EXIT=1 (review-negcontrol.log); H200 job 1283223 certificate arm 5 passed EXIT=0 in 1044.09s and certificate-acceptance.log accepts all six rows with max_net_current_relative_error 2.22e-16 and excluded_current 0.0. SCOPE: eight declared files, forward.py/forward_operator.py/topology.py untouched. DURABILITY: the private-flux guard is falsifiable (reproduced red); the analytic acceptance row is env-gated (KeyError with NOVA_BOOK_RESULTS unset), which keeps durability below the top band. FIT: extends clipped_support_current_moments as the brief required (widening the one-polygon contract) rather than adding a parallel booker. REUSE: shares the polygon quadrature kernels and the read's fragment machinery. FEEDBACK: the limited-553 rung meets its clause only under the coordinator's resumed ruling (2*exact + uncertainty) recorded in the run advice, not in the plan; the plan's section-3 done-when should carry it. FINDINGS: three follow-ons (env-gated acceptance row; the relaxed limited clause; the figure caption and the reconstructed suite-log headers), none blocking.",
+  "review_run_id": "r-20261010T200233583817-review-of-cfs-current-book-fragments",
+  "reviewed_base_sha": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "reviewed_head_sha": "95a2e24607bb785b0021b80626312480c2571ad3",
+  "reviewed_run_id": "r-20261010T184522536142-cfs-current-book-fragments",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-10T20:12:00Z",
+  "total": 113
+}

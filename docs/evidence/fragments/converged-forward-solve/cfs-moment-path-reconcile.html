@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="cfs-moment-path-reconcile">
+  <meta name="plan-title" content="Moment-path reference: host sliver cancellation">
+  <meta name="plan-summary" content="An independent area integral disproves host moment accuracy on a certificate sliver; host repair requires a lead decision.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s4">
+  <meta name="plan-recorded-at" content="2026-10-10">
+  <meta name="plan-verdict" content="blocked">
+  <meta name="plan-environment" content="Shared nova environment, CPU on fleet compute allocation 1281970; float64 host, 50-digit mpmath reference">
+  <meta name="plan-tags" content="equilibrium,jax,convergence">
+  <title>Moment-path reference | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Host moment accuracy fails on a certificate sliver</h1>
+  <section id="cfs-moment-path-reconcile-authority">
+    <h2>Repair stops at the host authority boundary</h2>
+    <p>The host per-section reduction fails an independent source-area integral.
+    Its change affects the certified carriers and requires the lead under the
+    node's explicit stop condition. No product source or tests have changed.
+    Device-only parity repair cannot establish correctness when the host
+    reference is inaccurate.</p>
+    <p>Measured source revision <code>1b78fea1183c9c531c2b203af202d649e5d5cb28</code>.
+    The input is the requested 550-cell moderate-rotation certificate machine,
+    realised as 607 polygons, from
+    <code>/work/projects/imas_gpu/analytic_oracle_cache/analytic_oracle_hex_machine_550.zarr</code>,
+    group <code>d990cde70becc203</code>. Source 203 has area
+    <code>1.3104853070005762e-9 m²</code>. Its triangle is not horizontally
+    reflection-symmetric, so reflected-edge pairing cannot explain this host error.</p>
+  </section>
+  <section id="cfs-moment-path-reconcile-sliver-reference">
+    <h2>Independent reference at source 203, grid target 175</h2>
+    <p>The target is <code>(1.235343986217499, -0.3794637941625385) m</code>;
+    the moments are area means of the circular-filament total flux multiplied
+    by <code>1</code>, <code>R′ − Rc</code> and <code>Z′ − Zc</code>, with
+    <code>(Rc, Zc) = (0.997984018147677, -0.22134247497518833) m</code>,
+    the represented area centroid. A Duffy tensor Gauss rule integrates each
+    triangle directly, independently of the contour antiderivatives.</p>
+    <table>
+      <thead><tr><th>Channel</th><th>Fresh host</th><th>50-digit reference</th><th>Host elementwise relative error</th></tr></thead>
+      <tbody>
+        <tr><td>Uniform, Wb/A</td><td>2.0607326000310684e-6</td><td>2.0607327970675548520915304361471057943e-6</td><td>9.561476715e-08</td></tr>
+        <tr><td>Radial moment, m Wb/A</td><td>1.9727275158517421e-13</td><td>6.3239054666705598766846304397442664218e-16</td><td>310.9476605</td></tr>
+        <tr><td>Vertical moment, m Wb/A</td><td>6.5757583861724730e-13</td><td>−1.7364717201586264351503436233643109810e-15</td><td>379.6850261</td></tr>
+      </tbody>
+    </table>
+    <p>Dense orders 24, 48 and 96 agree; independent 50-digit orders 12 and 24
+    agree through more than 40 significant figures. In particular, the vertical
+    reference is negative and nonzero, while the host returns a positive value.
+    The reference sees both small nonzero moments rather than reporting an
+    instrument floor as a zero.</p>
+    <p>The log and executable probe are retained under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T201559333857-cfs-moment-path-reconcile/logs/</code>:
+    <code>sliver_probe.log</code>, <code>sliver_probe.py</code> and
+    <code>reference_probe.py</code>. The log records the imported module,
+    working directory, revision, complete output and <code>EXIT=0</code>.</p>
+  </section>
+  <section id="cfs-moment-path-reconcile-unmet">
+    <h2>Remaining qualification</h2>
+    <p>The broader sampled reference table is being retained separately. The
+    550/2,000-cell repaired parity, mutation control and H200 module-suite delta
+    have not run because host repair is not authorized. H200 job 1283243 stayed
+    pending on Resources with all eight cards allocated and was cancelled before
+    execution; the fleet CPU measurement is not an H200 gate result.</p>
+    <p>Next action: the lead decides whether to authorize a conditioning repair
+    that includes the host reduction and requalification of its certified
+    carriers. Preserve the host failure as the baseline for that work.</p>
+  </section>
+</main>
+</body>
+</html>

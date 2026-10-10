@@ -23,32 +23,56 @@ def certificate_field(field, kind):
     )
 
 
+def polygon_rings(polygon):
+    """Return CCW exteriors and CW holes without merging disconnected pieces."""
+    if polygon.is_empty:
+        return []
+    if polygon.geom_type == "Polygon":
+        polygon = orient(polygon, sign=1.0)
+        return [np.asarray(polygon.exterior.coords[:-1])] + [
+            np.asarray(ring.coords[:-1]) for ring in polygon.interiors
+        ]
+    if polygon.geom_type in ("MultiPolygon", "GeometryCollection"):
+        return [
+            ring
+            for part in polygon.geoms
+            for ring in polygon_rings(part)
+            if part.geom_type in ("Polygon", "MultiPolygon", "GeometryCollection")
+        ]
+    return []
+
+
 def pack(polygons, template):
-    arrays = []
-    for polygon in polygons:
-        if polygon.is_empty:
-            arrays.append(np.empty((0, 2)))
-            continue
-        if polygon.geom_type != "Polygon" or len(polygon.interiors):
-            raise ValueError(
-                "certificate booker requires one hole-free polygon per cell"
-            )
-        arrays.append(np.asarray(orient(polygon, sign=1.0).exterior.coords[:-1]))
-    size = max(24, max(map(len, arrays)))
-    vertices = np.zeros((len(arrays), size, 2))
-    count = np.asarray(list(map(len, arrays)), dtype=np.int32)
+    """Pack arbitrary polygon components and signed hole rings per cell."""
+    arrays = [polygon_rings(polygon) for polygon in polygons]
+    ring_count = max(1, max(map(len, arrays)))
+    size = max(24, max((len(ring) for cell in arrays for ring in cell), default=0))
+    vertices = np.zeros((len(arrays), ring_count, size, 2))
+    count = np.zeros((len(arrays), ring_count), dtype=np.int32)
     area = np.zeros(len(arrays))
     first = np.zeros((len(arrays), 2))
     second = np.zeros((len(arrays), 2, 2))
     centres = np.asarray(template.centroids)
-    for index, points in enumerate(arrays):
-        vertices[index, : len(points)] = points
-        area[index], first[index], second[index] = _area_moments(points, centres[index])
+    for index, rings in enumerate(arrays):
+        for slot, points in enumerate(rings):
+            vertices[index, slot, : len(points)] = points
+            count[index, slot] = len(points)
+            local = points - centres[index]
+            following = np.roll(local, -1, axis=0)
+            sign = np.sign(
+                np.sum(local[:, 0] * following[:, 1] - local[:, 1] * following[:, 0])
+            )
+            measure = _area_moments(points, centres[index])
+            area[index] += sign * measure[0]
+            first[index] += sign * measure[1]
+            second[index] += sign * measure[2]
     included = area > 0
     full = np.asarray(template.full_area)
     boundary = included & (area < full * (1 - 1e-10))
-    branch_vertices = np.stack((vertices, np.zeros_like(vertices)), axis=1)
-    result = template._replace(
+    # Preserve the compact single-ring layout for consumers that only need it.
+    if ring_count == 1:
+        vertices, count = vertices[:, 0], count[:, 0]
+    return template._replace(
         support_vertices=jnp.asarray(vertices),
         vertex_count=jnp.asarray(count),
         included=jnp.asarray(included),
@@ -58,7 +82,9 @@ def pack(polygons, template):
         second_area_moment=jnp.asarray(second),
         contour_area=jnp.asarray(area.sum()),
         patch_area_sum=jnp.asarray(area.sum()),
-        branch_support_vertices=jnp.asarray(branch_vertices),
+        branch_support_vertices=jnp.asarray(
+            np.stack((vertices, np.zeros_like(vertices)), axis=1)
+        ),
         branch_vertex_count=jnp.asarray(
             np.stack((count, np.zeros_like(count)), axis=1)
         ),
@@ -73,7 +99,6 @@ def pack(polygons, template):
         vertex_capacity=jnp.asarray(size),
         refused_cell_count=jnp.asarray(0),
     )
-    return result
 
 
 def analytic_polygons(exact, cells, shift=(0.0, 0.0), points=8193, subdivisions=0):
@@ -177,7 +202,7 @@ def normal_form_sectors(form, extent):
 
 
 def read_polygons(geometry, reading, sigma):
-    """Carry fragment connectivity into the unchanged polygon current booker."""
+    """Polygonize selected conic strips and normal-form sectors for comparison."""
     vertices = np.asarray(geometry.vertices)
     count = np.asarray(geometry.vertex_count)
     centres = np.asarray(geometry.centre)
@@ -279,21 +304,19 @@ def analytic_moments(source, polygons, centres):
     for index, polygon in enumerate(polygons):
         if polygon.is_empty:
             continue
-        if polygon.geom_type != "Polygon" or len(polygon.interiors):
-            raise ValueError("analytic support is not one hole-free polygon")
-        points = np.asarray(orient(polygon, sign=1.0).exterior.coords[:-1])
-        first = points[0]
-        edge_a, edge_b = points[1:-1] - first, points[2:] - first
-        sample = first + u[None, :, None] * (
-            (1 - v)[None, :, None] * edge_a[:, None]
-            + v[None, :, None] * edge_b[:, None]
-        )
-        jacobian = edge_a[:, 0] * edge_b[:, 1] - edge_a[:, 1] * edge_b[:, 0]
-        density = np.asarray(
-            source.toroidal_current_density(sample[..., 0], sample[..., 1])
-        )
-        weighted = density * jacobian[:, None] * u[None, :] * weight[None, :]
-        offset = sample - centres[index]
-        values[0, index] = weighted.sum()
-        values[1:, index] = (weighted[..., None] * offset).sum(axis=(0, 1))
+        for points in polygon_rings(polygon):
+            first = points[0]
+            edge_a, edge_b = points[1:-1] - first, points[2:] - first
+            sample = first + u[None, :, None] * (
+                (1 - v)[None, :, None] * edge_a[:, None]
+                + v[None, :, None] * edge_b[:, None]
+            )
+            jacobian = edge_a[:, 0] * edge_b[:, 1] - edge_a[:, 1] * edge_b[:, 0]
+            density = np.asarray(
+                source.toroidal_current_density(sample[..., 0], sample[..., 1])
+            )
+            weighted = density * jacobian[:, None] * u[None, :] * weight[None, :]
+            offset = sample - centres[index]
+            values[0, index] += weighted.sum()
+            values[1:, index] += (weighted[..., None] * offset).sum(axis=(0, 1))
     return fixture.CellCurrentMoments(*map(jnp.asarray, values))

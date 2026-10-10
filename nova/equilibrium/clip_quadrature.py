@@ -375,7 +375,7 @@ def cut_cell_bank_capacity(coordinates: np.ndarray, ring_centres: np.ndarray) ->
     return min(len(point), hull_count + _ROW_CROSSING_CAPACITY * row_count)
 
 
-def _quadrature_from_arrays(vertices, count, centroids, selection):
+def _quadrature_from_arrays(vertices, count, centroids, selection, *, signed=False):
     capacity = vertices.shape[1]
     triangle_slot = jnp.arange(1, capacity - 1)
     first = jnp.broadcast_to(vertices[:, :1], (len(vertices), capacity - 2, 2))
@@ -399,16 +399,18 @@ def _quadrature_from_arrays(vertices, count, centroids, selection):
         * v[None, None, :, None]
         * edge_second[:, :, None, :]
     )
-    cross = jnp.abs(
+    cross = (
         edge_first[..., 0] * edge_second[..., 1]
         - edge_first[..., 1] * edge_second[..., 0]
     )
+    if not signed:
+        cross = jnp.abs(cross)
     live = (triangle_slot[None, :] + 1 < count[:, None]) & selection[:, None]
     weights = cross[:, :, None] * (1.0 - u)[None, None, :] * rule_weight[None, None, :]
     weights = jnp.where(live[:, :, None], weights, 0.0)
     points = points.reshape(len(vertices), -1, 2)
     weights = weights.reshape(len(vertices), -1)
-    points = jnp.where((weights > 0.0)[..., None], points, centroids[:, None, :])
+    points = jnp.where((weights != 0.0)[..., None], points, centroids[:, None, :])
     return points, weights
 
 
@@ -720,9 +722,23 @@ def clipped_support_current_moments(
     cut_cell_capacity: int,
     boundary_reduction: bool = False,
 ) -> ClippedCurrentMoments:
-    """Reduce current moments with an opt-in sampled-arc boundary route."""
+    """Reduce moments on cell polygons or banks of oriented fragment rings.
+
+    A four-dimensional vertex bank carries any number of rings per cell.
+    Exterior rings wind counterclockwise and hole rings clockwise. The
+    capacity counts occupied cells, independently of their ring count.
+    """
     from nova.equilibrium.source import _FluxSelectedProfile
 
+    if jnp.ndim(support.support_vertices) == 4:
+        return _fragment_current_moments(
+            support,
+            selection,
+            field,
+            profile,
+            cut_cell_capacity=cut_cell_capacity,
+            boundary_reduction=boundary_reduction,
+        )
     if isinstance(profile, _FluxSelectedProfile):
         return _flux_selected_current_moments(
             support, selection, field, profile, cut_cell_capacity=cut_cell_capacity
@@ -826,6 +842,78 @@ def clipped_support_current_moments(
             )
         )
     )
+
+
+def _fragment_current_moments(
+    support, selection, field, profile, *, cut_cell_capacity, boundary_reduction
+):
+    """Reduce signed rings through the same polygon quadrature kernels."""
+    vertices = jnp.asarray(support.support_vertices)
+    count = jnp.asarray(support.vertex_count)
+    cells, rings, width, _ = vertices.shape
+    if count.shape != (cells, rings):
+        raise ValueError("fragment counts must have shape (cells, rings)")
+    if int(cut_cell_capacity) < 1:
+        raise ValueError("cut_cell_capacity must be positive")
+    selected = jnp.asarray(selection, dtype=bool) & support.included
+    overflow = jnp.sum(selected & support.boundary) > int(cut_cell_capacity)
+
+    def ring(carry, entry):
+        cell, polygon, number = entry
+        centre = support.centroids[cell][None]
+
+        def integrate(_):
+            slot = jnp.arange(width)
+            following = jnp.where(slot + 1 < number, slot + 1, 0)
+            local = polygon - centre[0]
+            cross = (
+                local[:, 0] * local[following, 1] - local[:, 1] * local[following, 0]
+            )
+            orientation = jnp.where(
+                jnp.sum(jnp.where(slot < number, cross, 0)) < 0, -1.0, 1.0
+            )
+            if boundary_reduction:
+                value = _integrate_current_polynomial(
+                    polygon[None], number[None], field, cell[None], centre, profile
+                )
+                return jax.tree.map(lambda x: orientation * x[0], value)
+            points, weights = _quadrature_from_arrays(
+                polygon[None],
+                number[None],
+                centre,
+                jnp.ones(1, dtype=bool),
+                signed=True,
+            )
+            value = _integrate_current_points(
+                points, weights, field, cell[None], centre, profile
+            )
+            return jax.tree.map(lambda x: x[0], value)
+
+        value = jax.lax.cond(
+            selected[cell] & (number >= 3),
+            integrate,
+            lambda _: ClippedCurrentMoments(
+                *(jnp.zeros((), vertices.dtype) for _ in range(3))
+            ),
+            None,
+        )
+        return jax.tree.map(
+            lambda total, addition: total.at[cell].add(addition), carry, value
+        ), None
+
+    initial = ClippedCurrentMoments(
+        *(jnp.zeros(cells, vertices.dtype) for _ in range(3))
+    )
+    result, _ = jax.lax.scan(
+        ring,
+        initial,
+        (
+            jnp.repeat(jnp.arange(cells), rings),
+            vertices.reshape(-1, width, 2),
+            count.reshape(-1),
+        ),
+    )
+    return jax.tree.map(lambda value: jnp.where(overflow, jnp.nan, value), result)
 
 
 def _quadratic_support(vertices, count, centres, coefficient, origin, scale, selected):

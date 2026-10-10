@@ -96,7 +96,12 @@ def test_large_membership_overfill_is_refused(monkeypatch):
         return area, intervals, labels, boundary, selected, owner, valid, count
 
     monkeypatch.setattr(topology, "_support_at_level", overfill)
-    result = jax.jit(topology.read)(field, geometry, convention, policy)
+    evaluate = jax.jit(
+        lambda candidate, carrier, handedness, admission: topology.read(
+            candidate, carrier, handedness, admission
+        )
+    )
+    result = evaluate(field, geometry, convention, policy)
     jax.block_until_ready(result)
     assert not bool(result.valid)
     assert int(result.reason) == int(topology.TopologyReason.UNRESOLVED_COMPONENT)

@@ -89,11 +89,25 @@ def _measure(kind: str, cells: int, arm: str, figure_dir: Path | None = None) ->
             topology._membership_roundoff_bound(result.fragment_area, geometry)
         )
         raw_max = float(np.max(raw_membership))
+        label_started = perf_counter()
+        labels, _wall, label_converged, label_rounds = (
+            topology._connected_fragment_labels(
+                result.fragment_area,
+                result.edge_interval,
+                geometry,
+                policy.edge_tolerance,
+            )
+        )
+        jax.block_until_ready((labels, label_converged, label_rounds))
+        label_seconds = perf_counter() - label_started
+        assert np.array_equal(np.asarray(labels), np.asarray(result.fragment_component))
         print(
             f"READ case={kind} cells={cells} valid={bool(result.valid)} "
             f"reason={int(result.reason)} cold={compile_wall:.3f} "
             f"warm={warm_wall:.3f} raw_max={raw_max:.16g} "
-            f"membership_roundoff_bound={roundoff_bound:.3g}",
+            f"membership_roundoff_bound={roundoff_bound:.3g} "
+            f"label_rounds={int(label_rounds)} "
+            f"label_converged={bool(label_converged)}",
             flush=True,
         )
     finally:
@@ -155,6 +169,9 @@ def _measure(kind: str, cells: int, arm: str, figure_dir: Path | None = None) ->
         "raw_overfill_count_at_edge_tolerance": int(
             np.count_nonzero(raw_membership > 1.0 + policy.edge_tolerance)
         ),
+        "label_rounds": int(label_rounds),
+        "label_check_seconds": label_seconds,
+        "label_converged": bool(label_converged),
         "device_temp_bytes": memory.temp_size_in_bytes if memory else None,
         "device_output_bytes": memory.output_size_in_bytes if memory else None,
         "host_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,

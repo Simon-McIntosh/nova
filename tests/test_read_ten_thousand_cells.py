@@ -1,6 +1,7 @@
 """Closed-form topology reads across the analytic refinement ladder."""
 
 from pathlib import Path
+from types import SimpleNamespace
 
 from nova.jax.config import configure_dtypes
 
@@ -105,3 +106,27 @@ def test_large_membership_overfill_is_refused(monkeypatch):
     jax.block_until_ready(result)
     assert not bool(result.valid)
     assert int(result.reason) == int(topology.TopologyReason.UNRESOLVED_COMPONENT)
+
+
+def test_fragment_representatives_converge_across_long_paths():
+    count = 2048
+    split = count // 2
+    cell = jnp.arange(count, dtype=jnp.int32)
+    neighbour = jnp.stack((cell - 1, cell + 1), axis=1)
+    neighbour = neighbour.at[0, 0].set(-1)
+    neighbour = neighbour.at[-1, 1].set(-1)
+    neighbour = neighbour.at[split - 1, 1].set(-1)
+    neighbour = neighbour.at[split, 0].set(-1)
+    geometry = SimpleNamespace(
+        neighbour=neighbour,
+        neighbour_edge=jnp.broadcast_to(jnp.asarray((1, 0)), (count, 2)),
+    )
+    area = jnp.ones((count, 1))
+    intervals = jnp.broadcast_to(jnp.asarray((0.0, 1.0)), (count, 1, 2, 1, 2))
+    labels, _wall, converged, rounds = topology._connected_fragment_labels(
+        area, intervals, geometry, 1e-12
+    )
+    assert bool(converged)
+    assert int(rounds) <= 4 * count.bit_length()
+    assert np.all(np.asarray(labels[:split]) == 0)
+    assert np.all(np.asarray(labels[split:]) == split)

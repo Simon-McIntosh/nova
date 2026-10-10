@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="137">
+<meta name="plan-version" content="138">
 <meta name="plan-modified" content="2026-10-10">
 </head>
 <body>
@@ -611,6 +611,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s21-corsica-130506-evidence" data-who="s21-nova" data-when="2026-10-08T08:25:00Z">
     <div class="r-comment-body"><p><strong>Real-machine evidence from the S24 validator set: the shipped solve does not solve ITER CORSICA 130506.</strong> Run <code>r-20261008T063930660089-fpv-corsica-130506</code> (H200 jobs 1282053 and 1282093, solve code read-only, inputs from <code>nova/imas/validator_case.py</code> with the layers pinned in <code>tests/data-manifest.json</code>, DD 4.1.0, 20 active and 210 passive elements, prescribed p' and FF'). Seeded from the reference flux at 150 s and 200 s the terminal state equals the seed (terminal minus seed 0 Wb), converged false, residual 0.0328 and 0.0339, plasma current error 249 and 252 kA against a 225 kA band: the solve does not move. Seeded from the input conductors' vacuum field at 150, 200, 230 and 231 s, all four raise NoQualifiedAxisError in the topology read before any terminal receipt. Separately, the 230 s reference has no closed axis-containing contour at its own declared boundary flux. This is the failure this plan retires, measured on an ITER case rather than an analytic one. <code>tests/test_forward_profile_corsica.py</code> is ready to rerun, which makes CORSICA 130506 a candidate real-machine acceptance row for section 6 beside the DIII-D frames; adding it to the acceptance table is the lead's decision and is not made here. The S24 session defers its remaining validator rungs (DINA 105027, ASTRA 131046) until the single-grid cutover lands.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261010T184522536142-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T18:46:29.609Z">
+    <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>
 </div>
 </section>
 </main>

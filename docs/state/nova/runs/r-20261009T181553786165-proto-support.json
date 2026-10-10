@@ -1,0 +1,1513 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 7,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "50ec68c949b7151ff9d2744e996dc48e0314e83f",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 15084160,
+      "cached_input_tokens_cumulative": 15084160,
+      "input_tokens": 15334337,
+      "input_tokens_cumulative": 15334337,
+      "output_tokens": 57993,
+      "output_tokens_cumulative": 57993,
+      "reasoning_output_tokens": 20235,
+      "reasoning_output_tokens_cumulative": 20235
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3295,
+    "files": 9,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 224,
+        "name": "test_statistics_are_canonically_serializable",
+        "path": "tests/test_mast_probe_discriminant.py"
+      },
+      "run_function": {
+        "line": 12,
+        "name": "main",
+        "path": "scripts/prototypes/support/audit.py"
+      },
+      "window_line": 36
+    },
+    {
+      "existing_function": {
+        "line": 1268,
+        "name": "_normal_form_slice",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 113,
+        "name": "normal_form_sectors",
+        "path": "scripts/prototypes/support/geometry.py"
+      },
+      "window_line": 139
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "_schema_payload",
+        "path": "tests/imas/test_diiid_dataset_recheck.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 320
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_pf_active_supply_and_circuit_round_trip_without_losing_uncertainty",
+        "path": "tests/imas/test_diiid_description.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 320
+    },
+    {
+      "existing_function": {
+        "line": 81,
+        "name": "test_omissions_and_grid_margins_are_quantified",
+        "path": "tests/imas/test_diiid_geometry_corroboration.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 320
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_mast_frame_exposes_exact_shared_helper_surface",
+        "path": "tests/test_efit_parity_warm_neighbour.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 320
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_a_rule_call_elsewhere_in_the_body_does_not_cover_the_step",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 253,
+        "name": "test_a_rule_subject_covers_a_step_inside_it",
+        "path": "tests/test_krylov_reverse_mode_guard.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_treats_a_positionally_passed_wall_as_guarded",
+        "path": "tests/test_renderer_wall_scan.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 141
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 417,
+        "name": "test_marker_census_refuses_a_module_without_markers",
+        "path": "tests/test_solve_program_size.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 205
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 310
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 22,
+        "name": "main",
+        "path": "scripts/prototypes/support/report.py"
+      },
+      "window_line": 309
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "3b50b2ce1ed29cb06fc2a835298eb5bf6b07d28b",
+    "900b2047aca397fc37cb8c56bace882a43ac1dca",
+    "d6a43ed3cd59ddeba82371d108d1e17fe1530503",
+    "4c645b2633fcdef31bbe61ab935b623b8ff2bb3c",
+    "3857b10bef41e6ccf3210324205d401642a17d34",
+    "2e3f98fc44d299a3461b5c0464b97db58e287636",
+    "299e2a532476c34511a2a2188526c2a698d9ecbd",
+    "35d5d93861ef944f2db863c06026a8f5814b2a87",
+    "070a6c69c2bc608e0f0b47aea555960af2be2be2",
+    "b1243062d70c888bf5eb1f60663f3f6bb09cd15e",
+    "be524363fba54f9432ea0136458e6dce18f5a957",
+    "acc165ac4d65ad3621de0228616f0532d6a41899",
+    "e88dc45755d6647bdbe2b4dffcc056af113bc1e9",
+    "e5cb7e6e841c7aea4f6ab8c61e6297f1cb87cf7c",
+    "84ba0410e43969959546f5f14d5fa9fee48435fd",
+    "15b245a2e2125b5c10988e3f325ce4c21741b148",
+    "fd07ad005e4f0b7cfc974e1ec703230a1296ab31",
+    "7eb66de12e467c266ebada93eec94bb40fa3d339",
+    "fca1467b87cd4ee4a56c529df924cc313d967232",
+    "0ad132e74b45b59911a5b556480a4c58556f1081",
+    "cf292a976d34445ee4b41ea1b7c307c2848afc7b",
+    "888be9912ebef00bf9a83c4c016e00a1931452c8",
+    "3222accceb8f1bbfc51aad950ad79013e892f264",
+    "dcb4076156fbd69b0e3162aeb0e643c15ac52c25",
+    "c165fdfd4626dddbf1218fdaa2fce0ed768794da"
+  ],
+  "completed_at": "2026-10-09T20:39:25Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-09T18:16:19Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python scripts/prototypes/support/audit.py /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/h200-recovery.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-09T19:16:02.734060+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-09T18:16:02Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 23,
+    "binding_observed": "unknown",
+    "detail": "lane document carries no numeric 'mean_context'",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": "unknown",
+    "observed_at": "2026-10-09T18:15:39Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 23,
+      "aggregate_tokens_per_second": 0.0,
+      "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": "2026-10-09T18:15:39Z",
+      "runs": 0.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-09T20:39:25Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-09T18:16:45Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "decisive prototype for the lead resolution pivot: private override of the forward operator support partition, three support arms, H200 measurement; the hard tier belongs on codex per the lead directive of 2026-10-08",
+        "session": "fresh",
+        "session_id": "9392db32-734d-4ae6-b3f2-80692dd14b9b",
+        "session_source": "stream",
+        "to_backend": "codex-astra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261009T181553786165-proto-support"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/manifest.md",
+  "member": "disposable-r-20261009T181553786165-proto-support",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "proto-support",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 316,
+          "cached_input_tokens": 298151,
+          "input_tokens": 298469,
+          "output_tokens": 830,
+          "reasoning_output_tokens": 70,
+          "total_tokens": 299299,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Measure whether the certificate forward map converges with cell count once its plasma support is right. The ladder prototype (scripts/prototypes/ladder/map.py; report /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-ladder.md; H200 job 1283109) found the following. The production map's diverted relative sup at the analytic state rises from 0.197327 at 550 cells to 0.361706 at 2,098, while the limited case holds 0.0012 at both. The support comes from ForwardFluxOperator._fixed_design_read (Topology.read_qualification), not from the new topology read. ForwardFluxOperator._support_partition (nova/equilibrium/forward_operator.py near line 3308) calls _fixed_design_read unconditionally. The new read (nova.equilibrium.topology.read, TopologyPolicy defaults, closed-form analytic field) measured diverted saddle membership 2.74e-5 at 2,000 cells.\n\nDone when:\n\n(1) Support arms. In scripts/prototypes/support only, with no product module or public signature changed, the certificate map at the analytic state runs with three support arms through a private override of the support partition, in a prototype namespace, as scripts/prototypes/order2/read.py does:\n- legacy: the production _fixed_design_read, the control;\n- read: the support built from nova.equilibrium.topology.read on the closed-form analytic field, the ladder's arm A;\n- exact: the support built from the analytic state's own flux and its true boundary level and X-point, the floor.\nFor each arm, the report states what quantity becomes the support (cell fractions, boundary flux, X-point) and how it enters current booking.\n\n(2) Positive control. The legacy arm reproduces the ladder's 0.197327 at 550 diverted cells within 1e-9 relative.\n\n(3) Rows. Limited and diverted, at about 550, 2,000 and 5,000 realised cells, for all three arms. Each row gives the realised count, the map relative sup and rms, the support membership error against the exact arm, the booked net current against the analytic net current, cold compile, warm execution, serialized executable bytes, device temporary bytes, peak host RSS and per-stage fixture walls. Build each rung's machine and exterior once and apply the three arms to it. The ladder's fixture cache under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T160304793011-proto-ladder/map-rows/cache (machines at 500 and 2000 requested cells) may be read in place to skip rebuilding; do not write into it. If machine construction at 5,000 cells exceeds a 60-minute budget, run about 3,500 instead and name the binder with its stage wall.\n\n(4) Orders. Give the fitted map order per arm and case where three rows exist, and the cell count at which each arm first meets relative sup 0.01.\n\n(5) Figure. One SVG under docs/figures/converged-forward-solve/proto-support/: map relative sup against realised cells, log-log, one line per arm and case. Label each line directly, draw the 0.01 bound as a dotted grey line, and follow the repository data-ink plot style (no grid, despined, no title).\n\n(6) Report. Write it at the assigned path, leading with the verdict: does the diverted map converge with refinement under the read arm, under the exact arm, or under neither; and where it does not, which term dominates the residual error (support, booking, exterior or discretisation).\n\nRun conditions:\n- All rows run in one H200 job: RECKON_ALLOW_NESTED_LAUNCH=1 sbatch --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1, with --cpus-per-task 8 or more (up to 14 if admitted), --mem sized to what admits (group A carries mem=650G with 600G held by the serving lane, so read squeue a minute after submitting), and --time 03:00:00.\n- XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child.\n- On the compute node, run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree; never invoke uv there. Every login-node uv command carries --no-sync, and nothing runs uv sync.\n- Call configure_dtypes() before building any array, and assert jax_enable_x64.\n- Declare any wait on the job as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"], as JSON lists.\n- Commit with conventional subjects and bodies at every step. Write the manifest and commit before the job wait. The manifest commits line lists every commit. Status is complete, blocked or failed, which the worker sets itself.",
+    "estimated_hours": 3.0,
+    "goal": "Measure whether the certificate forward map converges with cell count once its plasma support is right: legacy fixed-design support against the new topology read and the exact analytic support, at about 550, 2,000 and 5,000 cells, limited and diverted",
+    "id": "proto-support",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-09T18:16:02Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 23,
+      "binding_observed": "unknown",
+      "detail": "lane document carries no numeric 'mean_context'",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": "unknown",
+      "observed_at": "2026-10-09T18:15:39Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 23,
+        "aggregate_tokens_per_second": 0.0,
+        "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": "2026-10-09T18:15:39Z",
+        "runs": 0.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/manifest.md",
+    "negative_control": "the legacy arm reproduces the ladder value 0.197327 at 550 diverted cells, and a deliberately wrong support (the exact support shifted by one pitch outward) raises the exact-arm map error above its unshifted value",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/support",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-support.md",
+      "docs/evidence/fragments/converged-forward-solve/proto-support.html",
+      "docs/figures/converged-forward-solve/proto-support"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "proto-support",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-09T18:16:06.231240+00:00",
+    "score": 0.64375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Hard and decisive: overriding the forward operator support partition in a private namespace without touching product code, three support arms, a three-rung H200 measurement with a 60-minute host machine build at 5,000 cells; the result decides the lead resolution pivot",
+    "confidence": 0.7,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 401.786,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 685.424,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 297074.928545,
+        "budget_reason": null,
+        "burn_multiple": 0.8764244672768332,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.4889694265625,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0718338686802564,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 297074.928545,
+        "budget_reason": null,
+        "burn_multiple": 0.8764244672768332,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.4889694265625,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0718338686802564,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 297074.928545,
+        "budget_reason": null,
+        "burn_multiple": 0.8764244672768332,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 29.8,
+          "peak_utilisation_p90_pct": 36.4,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 1.4889694265625,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0718338686802564,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 0,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 57.5,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 105,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 13,
+          "passed": 70,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 11
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 593.487545,
+        "budget_reason": null,
+        "burn_multiple": 2.1201359280494554,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.457707852488426,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 2,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.39950268697123015,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 77.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 593.487545,
+        "budget_reason": null,
+        "burn_multiple": 2.1201359280494554,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.457707852488426,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.39950268697123015,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 77.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 593.487545,
+        "budget_reason": null,
+        "burn_multiple": 2.1201359280494554,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 4.457707852488426,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.39950268697123015,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 77.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.06,
+      "claude:claude-sonnet-5-5": 0.08,
+      "codex:gpt-6-astra": 0.03,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.07,
+      "hold": 0.02,
+      "local:deepseek-v4.1-flash": 0.74
+    },
+    "rendered_token_estimate": 3013,
+    "usage": {
+      "cost": 0.00027804,
+      "input_tokens": 6620,
+      "output_tokens": 150
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "c165fdfd4626dddbf1218fdaa2fce0ed768794da",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "50ec68c949b7151ff9d2744e996dc48e0314e83f",
+    "reviewed_head_sha": "c165fdfd4626dddbf1218fdaa2fce0ed768794da",
+    "scores": {
+      "durability": 16,
+      "evidence": 18,
+      "fit": 17,
+      "goal_fidelity": 15,
+      "reuse": 18,
+      "scope_discipline": 18
+    },
+    "status": "parsed",
+    "total": 102
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261009T181553786165-proto-support",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a12259-0d63-7c43-a21e-a549828baf45",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 15084160,
+    "cumulative_input_tokens": 30418497,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 78228
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 8586,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 7,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-09T20:39:26Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-09T20:27:01Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261009T181553786165-proto-support",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1688,
+    "worker_pid": 343071
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

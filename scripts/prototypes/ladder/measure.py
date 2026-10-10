@@ -43,7 +43,7 @@ def _identity():
     }
 
 
-def _measure(kind: str, cells: int, arm: str) -> dict:
+def _measure(kind: str, cells: int, arm: str, figure_dir: Path | None = None) -> dict:
     oracle, field, wall, axis, saddle = oracle_fixture._analytic_inputs(kind)
     geometry = oracle_fixture._realised_hex_geometry(wall, cells)
     pitch = float(np.median(np.asarray(geometry.pitch)))
@@ -144,6 +144,14 @@ def _measure(kind: str, cells: int, arm: str) -> dict:
             np.count_nonzero(np.asarray(result.normal_form_cells))
         ),
     }
+    if figure_dir is not None and cells == 10000 and arm == "A" and bool(result.valid):
+        oracle_fixture._render_read_panel(
+            figure_dir, kind, field, geometry, result, wall, axis, saddle
+        )
+        extra = figure_dir / f"{kind}-poloidal.png"
+        extra.unlink()
+        print(f"REMOVED_EXTRA_FIGURE={extra}", flush=True)
+        row["figure"] = str(figure_dir / f"{kind}-poloidal.svg")
     if cells == 132 and arm == "A":
         baseline = json.loads(
             (BASE_ROWS / f"{kind}-moving-floor-current-rows.json").read_text()
@@ -179,8 +187,9 @@ def main() -> None:
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--arm", choices=("A", "B"), required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--figure-dir", type=Path)
     args = parser.parse_args()
-    row = _measure(args.kind, args.cells, args.arm)
+    row = _measure(args.kind, args.cells, args.arm, args.figure_dir)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(row, indent=2, sort_keys=True) + "\n")
     print("LADDER_ROW " + json.dumps(row, sort_keys=True), flush=True)

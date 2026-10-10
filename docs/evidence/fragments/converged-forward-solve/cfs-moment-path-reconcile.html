@@ -63,9 +63,71 @@
     <code>reference_probe.py</code>. The log records the imported module,
     working directory, revision, complete output and <code>EXIT=0</code>.</p>
   </section>
+  <section id="cfs-moment-path-reconcile-sampled-reference">
+    <h2>Reference over 251 distinct source-target pairs</h2>
+    <p>The sample contains 131 pairs selected from the largest absolute
+    differences across the nine grid, wall and sample blocks, plus 120 random
+    pairs (seed 9173) spread across those target families and source cells.
+    Random pairs stay at least three source diameters from the expansion point
+    so the fixed Gauss rule does not cross the filament singularity. This is an
+    off-singularity accuracy measurement, not self-cell qualification.</p>
+    <p>The reference directly integrates the circular-filament elliptic formula
+    on a triangle fan over each authored polygon, using 48×48 and 96×96 Gauss
+    rules. Geometry and accumulation use long double; the independent SciPy
+    complete elliptic functions use float64. Fifty-digit mpmath checks at
+    source 203, targets 49 and 175, validate the small sliver moments and their
+    signs. The moment reference point is each carrier's atomic area centroid.</p>
+    <p>The norm-relative error is max absolute error divided by the sampled
+    reference channel's max absolute value. Those denominators are
+    <code>5.592656325443431e-6 Wb/A</code>,
+    <code>2.7094029754116442e-9 m Wb/A</code> and
+    <code>2.412059801250414e-9 m Wb/A</code>.
+    Max elementwise error uses each entry's own nonzero reference and becomes
+    large for very small physical moments; no floor or tolerance hides it.</p>
+    <table>
+      <thead><tr><th>Arm</th><th>Channel</th><th>Max norm-relative error</th><th>Max absolute error</th><th>Max elementwise relative error</th></tr></thead>
+      <tbody>
+        <tr><td>Fresh host, CPU</td><td>Uniform</td><td>2.173819714e-06</td><td>1.215742657e-11</td><td>1.552360922e-05</td></tr>
+        <tr><td>Fresh host, CPU</td><td>Radial moment</td><td>0.01201327792</td><td>3.254881094e-11</td><td>14092745.71</td></tr>
+        <tr><td>Fresh host, CPU</td><td>Vertical moment</td><td>0.005484079211</td><td>1.322792701e-11</td><td>35836494.1</td></tr>
+        <tr><td>Fresh packed kernel, NumPy</td><td>Uniform</td><td>2.173819714e-06</td><td>1.215742657e-11</td><td>1.552360922e-05</td></tr>
+        <tr><td>Fresh packed kernel, NumPy</td><td>Radial moment</td><td>0.01201327792</td><td>3.254881094e-11</td><td>14092745.71</td></tr>
+        <tr><td>Fresh packed kernel, NumPy</td><td>Vertical moment</td><td>0.005484079211</td><td>1.322792701e-11</td><td>35836494.1</td></tr>
+        <tr><td>Retained carrier; device provenance unconfirmed</td><td>Uniform</td><td>1.65926276e-06</td><td>9.279686373e-12</td><td>1.177164267e-05</td></tr>
+        <tr><td>Retained carrier; device provenance unconfirmed</td><td>Radial moment</td><td>0.00846624163</td><td>2.293846026e-11</td><td>11517782.98</td></tr>
+        <tr><td>Retained carrier; device provenance unconfirmed</td><td>Vertical moment</td><td>0.006002757696</td><td>1.447901054e-11</td><td>29385923.34</td></tr>
+      </tbody>
+    </table>
+    <p>Quadrature order-doubling differences in the same norm are
+    <code>1.5145449639034287e-16</code>,
+    <code>3.800984467701982e-14</code> and
+    <code>4.572158985304093e-14</code>. All 251 pairs are distinct; reference
+    peaks are positive and finite. Both freshly evaluated reductions fail the
+    requested 1e-12 reference bound, regardless of the retained carrier's provenance.</p>
+    <p>The retained carrier is the same cache group used by the prior H200
+    investigation, but it has not been re-evaluated on H200 in this run. A
+    provenance question through the declared peer channel was refused by its
+    read-only filesystem fence. Its table rows therefore describe retained
+    arrays, not a freshly qualified device result. The fresh packed NumPy arm
+    calls <code>packed_analytic_moments</code> on the same polygons, targets,
+    expansion points and reflected-edge metadata.</p>
+    <p>Fresh host versus retained carrier also reproduces the block gap:
+    grid channels <code>5.268900556e-7 / 1.975568010e-3 / 8.962150695e-4</code>,
+    wall <code>5.184080985e-7 / 1.723259001e-3 / 5.927710854e-4</code>, and
+    sample <code>7.076452632e-7 / 1.448435508e-3 / 7.109817797e-4</code>, each
+    divided by that full host block's peak. These CPU-host/cache comparisons
+    do not replace the prior H200-host figures with another backend's result.</p>
+    <p>Durable artifacts in the run's <code>logs/</code> directory:
+    <code>host_reference.log</code>, <code>packed_sample.log</code>,
+    <code>reference.json</code> (all sampled geometry and values),
+    <code>blocks.npz</code> (the full block comparison), and the executable
+    drivers <code>reference_probe.py</code> and <code>packed_sample.py</code>.
+    The measurement logs finish with <code>MEASUREMENT_COMPLETE</code> and
+    <code>EXIT=0</code>. Raw arrays and receipts remain outside git.</p>
+  </section>
   <section id="cfs-moment-path-reconcile-unmet">
     <h2>Remaining qualification</h2>
-    <p>The broader sampled reference table is being retained separately. The
+    <p>The 251-pair reference comparison establishes the host defect. The
     550/2,000-cell repaired parity, mutation control and H200 module-suite delta
     have not run because host repair is not authorized. H200 job 1283243 stayed
     pending on Resources with all eight cards allocated and was cancelled before

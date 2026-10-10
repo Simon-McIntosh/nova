@@ -155,15 +155,146 @@ def _measure_cached_map(
     assert executable_bytes <= 50_000_000
 
 
+def _measure_placeholder_map(case_name: str, requested_cells: int):
+    """Build the production mesh and pass zero-valued coupling blocks as data."""
+    from benchmarks import solovev_certificate as certificate
+    from nova.biot.plasmagrid import PlasmaGrid
+    from nova.equilibrium.stencil_mesh import (
+        MomentGeometry,
+        StencilMesh,
+        ring_condition,
+    )
+    from nova.frame.coilset import CoilSet
+    from scipy.spatial import Delaunay
+    from shapely.geometry import LineString
+    from scripts.analytic_oracle_fixtures import measure as fixture
+
+    carrier, source, exact = certificate._case(case_name)
+    wall = fixture._resolved_wall(
+        carrier,
+        wall_nodes=fixture.WALL_POINT_COUNT,
+        wall=(
+            certificate._diverted_wall(exact)
+            if certificate._is_diverted_case(case_name)
+            else None
+        ),
+    )
+    coilset = CoilSet(dplasma=requested_cells, tplasma="hex")
+    coilset.firstwall.insert(wall, turn="hex")
+    plasma = np.asarray(coilset.subframe.loc[:, "plasma"], dtype=bool)
+    material = np.asarray(coilset.subframe.loc[:, "poly"], dtype=object)[plasma]
+    centres = np.c_[
+        np.asarray(coilset.subframe.loc[plasma, "x"], dtype=np.float64),
+        np.asarray(coilset.subframe.loc[plasma, "z"], dtype=np.float64),
+    ]
+    polygons = tuple(
+        fixture._clean_vertices(np.asarray(item.poly.exterior.coords)[:-1, :2])
+        for item in material
+    )
+    area = np.asarray([item.poly.area for item in material], dtype=np.float64)
+    triangulation = Delaunay(centres)
+    boundary_cells = np.asarray(
+        [
+            index
+            for index, item in enumerate(material)
+            if item.poly.intersects(LineString(wall))
+        ]
+    )
+    stencil, _ = PlasmaGrid.loop_neighbour_vertices(
+        centres, triangulation.vertex_neighbor_vertices, boundary_cells
+    )
+    mesh = StencilMesh(centres, stencil, area)
+    sections = np.asarray(coilset.aloc["plasma", "section"], dtype=object).astype(str)
+    full = np.flatnonzero(sections == "hexagon")
+    dimensions = np.c_[
+        np.asarray(coilset.aloc["plasma", "dl"], dtype=float)[full],
+        np.asarray(coilset.aloc["plasma", "dt"], dtype=float)[full],
+    ]
+    width, height = dimensions[0]
+    radius = min(width / 2.0, height / np.sqrt(3.0))
+    angles = np.linspace(0.0, 2.0 * np.pi, 7)[:-1]
+    sampling = (
+        centres[:, None, :]
+        + radius * np.column_stack([np.cos(angles), np.sin(angles)])[None, :, :]
+    )
+    geometry = MomentGeometry.from_cells(mesh, polygons, sampling_vertices=sampling)
+    condition = ring_condition(centres, stencil)
+    regular = np.asarray([len(polygon) == 6 for polygon in polygons])
+    interior = stencil[(condition < 1.0e3) & regular[stencil].all(axis=1)]
+    sample = geometry.sample_node_coordinates
+    zero = np.zeros((1, 1), dtype=np.float64)
+
+    def block(rows):
+        return np.broadcast_to(zero, (rows, len(centres)))
+
+    machine = fixture.OracleMachine(
+        node=centres,
+        area=area,
+        cell_polygons=polygons,
+        stencil=stencil,
+        interior_stencil=interior,
+        wall_node=wall,
+        sampling_vertices=sampling,
+        sample_coordinates=sample,
+        plasma_to_grid=block(len(centres)),
+        plasma_to_grid_r=block(len(centres)),
+        plasma_to_grid_z=block(len(centres)),
+        plasma_to_wall=block(len(wall)),
+        plasma_to_wall_r=block(len(wall)),
+        plasma_to_wall_z=block(len(wall)),
+        plasma_to_sample=block(len(sample)),
+        plasma_to_sample_r=block(len(sample)),
+        plasma_to_sample_z=block(len(sample)),
+    )
+    operator = fixture.forward_operator(source, machine)
+    coordinates = np.vstack((centres, wall, sample))
+    state = jnp.asarray(certificate._exact_state(case_name, exact, coordinates))
+    external = jnp.zeros_like(state)
+    lowered = jax.jit(gs.apply).lower(state, external, operator)
+    hlo_constant_text_bytes = sum(
+        len(line.encode())
+        for line in lowered.as_text().splitlines()
+        if "stablehlo.constant" in line
+    )
+    started = time.perf_counter()
+    executable = lowered.compile()
+    compile_seconds = time.perf_counter() - started
+    executable_bytes = len(executable.runtime_executable().serialize())
+    print(
+        "MAP_ROW "
+        + json.dumps(
+            {
+                "case": case_name,
+                "requested_cells": requested_cells,
+                "realised_cells": len(centres),
+                "operands": "zero-valued production-shape blocks",
+                "compile_seconds": compile_seconds,
+                "serialized_executable_bytes": executable_bytes,
+                "hlo_constant_text_bytes": hlo_constant_text_bytes,
+                "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    assert executable_bytes <= 50_000_000
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--case", required=True)
     parser.add_argument("--requested-cells", type=int, required=True)
-    parser.add_argument("--cache-root", type=Path, required=True)
-    parser.add_argument("--group", required=True)
+    parser.add_argument("--cache-root", type=Path)
+    parser.add_argument("--group")
     arguments = parser.parse_args()
     configure_dtypes()
     assert jax.config.jax_enable_x64 is True
-    _measure_cached_map(
-        arguments.case, arguments.requested_cells, arguments.cache_root, arguments.group
-    )
+    if arguments.cache_root is None:
+        _measure_placeholder_map(arguments.case, arguments.requested_cells)
+    else:
+        _measure_cached_map(
+            arguments.case,
+            arguments.requested_cells,
+            arguments.cache_root,
+            arguments.group,
+        )

@@ -30,8 +30,6 @@ COEFFICIENT = {"limited": 0.274714, "diverted": 2.1805365680219544}
 def test_closed_form_read_is_accurate_and_compatible(kind, cells):
     assert jax.config.jax_enable_x64 is True
     backend = jax.default_backend()
-    if backend == "cpu" and cells > 550:
-        pytest.skip("larger analytic carriers use the device lane")
     oracle, field, wall, axis, saddle = fixture._analytic_inputs(kind)
     geometry = fixture._realised_hex_geometry(wall, cells)
     pitch = float(np.median(np.asarray(geometry.pitch)))

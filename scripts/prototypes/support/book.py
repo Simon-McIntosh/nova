@@ -16,6 +16,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from benchmarks import solovev_certificate as certificate
+from nova.database.zarrstore import ZarrStore
 from nova.equilibrium import current, topology
 from nova.equilibrium.solve_request import TopologyPolicy
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
@@ -28,8 +29,6 @@ from scripts.prototypes.support.geometry import (
     read_polygons,
 )
 from scripts.prototypes.support.measure import (
-    exterior_from_cache,
-    machine_from_cache,
     override,
     partition,
     stage,
@@ -39,12 +38,54 @@ from tests.equilibrium.test_topology_read import _analytic_inputs
 assert jax.config.jax_enable_x64
 
 
+def _cached_machine(carrier, requested, wall, receipt):
+    """Read the recorded semantic group, refusing every cache miss."""
+    identity = fixture.cache_identity(
+        carrier,
+        requested_cells=requested,
+        wall_nodes=fixture.WALL_POINT_COUNT,
+        wall=wall,
+    )
+    store = ZarrStore(
+        filename=f"{fixture.CACHE_FILENAME}_{abs(requested)}",
+        dirname=Path(receipt["machine_cache"]["store"]).parent,
+    )
+    store.group = store.hash_attrs(identity)
+    assert store.group == receipt["machine_cache"]["semantic_key"]
+    store.load()
+    machine = fixture._from_dataset(store.data, identity, store.group)
+    machine.cache.update(hit=True, readonly=True, store=str(store.filepath))
+    return machine
+
+
+def _cached_exterior(source, exact, machine, analytic, receipt):
+    """Read the recorded exterior without invoking its writable miss path."""
+    identity = fixture._exterior_cache_identity(source, exact, machine, analytic)
+    store = ZarrStore(
+        filename=fixture.EXTERIOR_CACHE_FILENAME,
+        dirname=Path(receipt["exterior_cache"]["store"]).parent,
+    )
+    store.group = store.hash_attrs(identity)
+    store.load()
+    assert store.data.attrs["semantic_identity"] == json.dumps(
+        identity, sort_keys=True, separators=(",", ":")
+    )
+    moments = CellCurrentMoments(
+        *(
+            jnp.asarray(store.data[name])
+            for name in ("cell_current", "radial_moment", "vertical_moment")
+        )
+    )
+    return moments, jnp.asarray(store.data["exterior"])
+
+
 def measure(kind, cells, directory, cache):
     """Keep the map immutable and replace its private booking on a copy."""
     if jax.default_backend() != "gpu":
         raise RuntimeError("certificate rows require the GPU measurement lane")
     directory = Path(directory)
     cache = Path(cache)
+    receipt = json.loads((cache.parent / f"{kind}-{cells}-fixture.json").read_text())
     directory.mkdir(parents=True, exist_ok=True)
     name = (
         "diverted-single-null" if kind == "diverted" else "weak-rotation-reactor-static"
@@ -53,18 +94,14 @@ def measure(kind, cells, directory, cache):
     wall = certificate._diverted_wall(exact) if kind == "diverted" else None
     requested = -500 if cells == 550 else -cells
     machine, _ = stage(
-        "cached-machine", lambda: machine_from_cache(carrier, requested, wall, cache)
+        "cached-machine", lambda: _cached_machine(carrier, requested, wall, receipt)
     )
     assert machine.cache["hit"] and machine.cache["readonly"]
     coordinates = np.vstack(
         (machine.node, machine.wall_node, machine.sample_coordinates)
     )
     analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
-    empty = fixture.forward_operator(source, machine)
-    physical, exterior, exterior_cache = exterior_from_cache(
-        source, exact, machine, empty, analytic, cache
-    )
-    assert exterior_cache["hit"] and exterior_cache["readonly"]
+    physical, exterior = _cached_exterior(source, exact, machine, analytic, receipt)
     operator = fixture.forward_operator(source, machine, exterior).with_clip_mode(
         "exact"
     )

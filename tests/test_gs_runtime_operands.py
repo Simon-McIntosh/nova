@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import resource
+import threading
 import time
 
 import jax
@@ -16,6 +18,38 @@ from nova.equilibrium import gs
 from nova.jax.config import configure_dtypes
 from tests.test_forward_operator_arguments import _operator
 from tests.test_forward_profile_arguments import _source
+
+
+def _resident_kib():
+    """Read current process RSS without confusing it with prior high water."""
+    resident_pages = int(Path("/proc/self/statm").read_text().split()[1])
+    return resident_pages * os.sysconf("SC_PAGE_SIZE") // 1024
+
+
+def _sample_peak(call):
+    """Sample live RSS while a compiled phase is running."""
+    stop = threading.Event()
+    samples = [_resident_kib()]
+
+    def sample():
+        while not stop.wait(0.01):
+            samples.append(_resident_kib())
+
+    worker = threading.Thread(target=sample, daemon=True)
+    worker.start()
+    try:
+        result = call()
+    finally:
+        stop.set()
+        worker.join()
+        samples.append(_resident_kib())
+    return result, max(samples)
+
+
+def _report_phase(name, **values):
+    print(
+        "PHASE_RSS " + json.dumps({"phase": name, **values}, sort_keys=True), flush=True
+    )
 
 
 def _geometry_pair():
@@ -247,22 +281,53 @@ def _measure_placeholder_map(case_name: str, requested_cells: int):
         plasma_to_sample_z=block(len(sample)),
     )
     geometry_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    geometry_live_rss_kib = _resident_kib()
+    _report_phase(
+        "geometry", high_water_kib=geometry_rss_kib, live_kib=geometry_live_rss_kib
+    )
     operator = fixture.forward_operator(source, machine)
     operand_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    operand_live_rss_kib = _resident_kib()
+    _report_phase(
+        "operands", high_water_kib=operand_rss_kib, live_kib=operand_live_rss_kib
+    )
     coordinates = np.vstack((centres, wall, sample))
     state = jnp.asarray(certificate._exact_state(case_name, exact, coordinates))
     external = jnp.zeros_like(state)
     lowered = jax.jit(gs.apply).lower(state, external, operator)
     lowered_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    lowered_live_rss_kib = _resident_kib()
+    _report_phase(
+        "lowering", high_water_kib=lowered_rss_kib, live_kib=lowered_live_rss_kib
+    )
     hlo_constant_text_bytes = sum(
         len(line.encode())
         for line in lowered.as_text().splitlines()
         if "stablehlo.constant" in line
     )
     started = time.perf_counter()
-    executable = lowered.compile()
+    executable, compile_sampled_peak_rss_kib = _sample_peak(lowered.compile)
     compile_seconds = time.perf_counter() - started
+    compiled_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    compiled_live_rss_kib = _resident_kib()
+    _report_phase(
+        "compile",
+        high_water_kib=compiled_rss_kib,
+        live_kib=compiled_live_rss_kib,
+        sampled_peak_kib=compile_sampled_peak_rss_kib,
+    )
     executable_bytes = len(executable.runtime_executable().serialize())
+    _output, execution_sampled_peak_rss_kib = _sample_peak(
+        lambda: jax.block_until_ready(executable(state, external, operator))
+    )
+    execution_rss_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    execution_live_rss_kib = _resident_kib()
+    _report_phase(
+        "execution",
+        high_water_kib=execution_rss_kib,
+        live_kib=execution_live_rss_kib,
+        sampled_peak_kib=execution_sampled_peak_rss_kib,
+    )
     print(
         "MAP_ROW "
         + json.dumps(
@@ -276,8 +341,17 @@ def _measure_placeholder_map(case_name: str, requested_cells: int):
                 "hlo_constant_text_bytes": hlo_constant_text_bytes,
                 "peak_host_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
                 "geometry_rss_kib": geometry_rss_kib,
+                "geometry_live_rss_kib": geometry_live_rss_kib,
                 "operand_rss_kib": operand_rss_kib,
+                "operand_live_rss_kib": operand_live_rss_kib,
                 "lowered_rss_kib": lowered_rss_kib,
+                "lowered_live_rss_kib": lowered_live_rss_kib,
+                "compiled_rss_kib": compiled_rss_kib,
+                "compiled_live_rss_kib": compiled_live_rss_kib,
+                "compile_sampled_peak_rss_kib": compile_sampled_peak_rss_kib,
+                "execution_rss_kib": execution_rss_kib,
+                "execution_live_rss_kib": execution_live_rss_kib,
+                "execution_sampled_peak_rss_kib": execution_sampled_peak_rss_kib,
             },
             sort_keys=True,
         ),

@@ -23,10 +23,8 @@ for kind in limited diverted; do
       --out "$output/$kind-$cells.json" --figure-dir "$figures" || failures=1
   done
 done
-for kind in limited diverted; do
-  "$python" "$run_root/scripts/prototypes/ladder/measure.py" \
-    --kind "$kind" --cells 10000 --arm A --propagation one-hop \
-    --out "$output/$kind-10000-one-hop.json" || failures=1
-done
+"$python" "$run_root/scripts/prototypes/ladder/measure.py" \
+  --kind limited --cells 10000 --arm A --propagation one-hop \
+  --out "$output/limited-10000-one-hop.json" || failures=1
 printf 'EXIT=%s\n' "$failures"
 exit "$failures"

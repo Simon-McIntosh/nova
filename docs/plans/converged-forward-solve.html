@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="139">
+<meta name="plan-version" content="140">
 <meta name="plan-modified" content="2026-10-10">
 </head>
 <body>
@@ -219,6 +219,21 @@
     <h4 class="r-fu-title">Choose the read&#x27;s compile route on solved states (§2)</h4>
     <div class="r-fu-body"><p>The kernel-backed read compiles in 450 to 930 s, flat in cell count. 98.5 percent of it is ten copies of the polygon kernel's point jet: five stages times the plasma and reference terms. Batching the two terms halves it with bit-identical output (proto-order2, job 1283105), and one kernel's first derivative alone compiles in 66 s (proto-taylor). Land the batching, then measure a read of solved states from the sampled field at 2,000 to 10,000 cells against the kernel read. If the sampled route wins, §2's rule that nulls never come from differentiating the mesh flux goes to the lead as a decision.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-wire-current-book" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-10" data-recommends-skill="/reckon-build converged-forward-solve §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Route the forward map&#x27;s support through topology.read and current.book (§3)</h4>
+    <div class="r-fu-body"><p>current.book and gs.apply now exist separately. The production support partition (<code>ForwardFluxOperator._support_partition</code>, which calls the legacy fixed-design read) still drives the map and the solve. Replace it with topology.read membership booked by current.book through gs.apply's operand interface. Done when the certificate map at about 2,000 and 5,000 cells reproduces the read-driven booking rows of the current.book evidence, the legacy spline-clip support is off the solve path, and the forward-solve tests pass by delta.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-read-warm-wall" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-10" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Find and repair the topology read&#x27;s superlinear warm wall (§2)</h4>
+    <div class="r-fu-body"><p>With the roundoff bound, the read is valid at 10,000 cells and its labels settle in 8 rounds. Its warm wall still grows with exponent about 1.47 (1.1 s at 550 cells, 80.6 s at 10,000; H200, cfs-read-ten-thousand), so the cost sits in the read's kernel stages, not in labelling. Profile the stages and repair the dominant one after f-cfs-read-compile-route lands, because both touch the same stages. Done when the warm-wall exponent across 550 to 10,000 cells is reported per stage and the 10,000-cell warm read is at or below 10 s.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-moment-path-reconcile" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-10" data-recommends-skill="/reckon-build converged-forward-solve §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Reconcile the host and device moment coupling paths (§4)</h4>
+    <div class="r-fu-body"><p>The device-batched coupling build differs from the host builder by up to 1.05e-3 norm-relative on the radial moment channel at 550 cells (6.6e-5 at 2,000), though the certificate map agrees within 1e-11 (H200 job 1283232). The difference traces to the packed moments kernel's reflected edge pairing in <code>nova/biot/polygonanalytic.py</code> (pad_batch, _reflection_geometry, tile_evaluator with the moments kernel). Decide which path is correct against an independent dense or extended-precision reference, and repair the wrong one. Done when both paths agree within 1e-12 norm-relative on every block at 550 and 2,000 cells, and the reference comparison is recorded.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -616,7 +631,10 @@
     <div class="r-comment-body"><p>Implemented traced current.book over connected multi-polygon membership using the widened signed-ring exact clip. Six certificate rows pass: diverted read image errors 1.15131582e-4, 2.49842782e-5, 3.95031905e-6 at 550/2098/5158 cells; limited errors 1.77777866e-5, 2.66948705e-6, 5.45231060e-7 at 553/2105/5167. Maximum net-current error 2.22e-16, excluded current zero, legacy control 0.197326978718; evidence docs/evidence/fragments/converged-forward-solve/cfs-current-book.html#cfs-current-book-fragments-booking and one three-rung SVG; audit-doc 0 errors.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261010T200233583817-review-of-cfs-current-book-fragments" data-who="reckon-build" data-when="2026-10-10T20:10:50.546Z">
-    <div class="r-comment-body"><p>Independent review of r-20261010T184522536142-cfs-current-book-fragments (nova:converged-forward-solve §3 and followup f-cfs-book-read-fragments) at base b86bfc728 head 95a2e2460 stored as a parsed six-dimension record, total 113/120 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 20), added_failure_count 0 with empty ids derived from the reviewed run&#x27;s own completed zero-failure baseline_suite and after_suite. Reproduced independently: focused head gate 8 passed EXIT=0 and the declared level-membership negative control 1 failed EXIT=1 printing private current 1.6. Three follow-ons, no blocking finding; the limited-553 clause is met only under the coordinator&#x27;s resumed ruling, which the plan&#x27;s §3 done-when should carry.</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261010T184522536142-cfs-current-book-fragments (nova:converged-forward-solve §3 and followup f-cfs-book-read-fragments) at base b86bfc728 head 95a2e2460 stored as a parsed six-dimension record, total 113/120 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 17, fit 19, reuse 20), added_failure_count 0 with empty ids derived from the reviewed run's own completed zero-failure baseline_suite and after_suite. Reproduced independently: focused head gate 8 passed EXIT=0 and the declared level-membership negative control 1 failed EXIT=1 printing private current 1.6. Three follow-ons, no blocking finding; the limited-553 clause is met only under the coordinator's resumed ruling, which the plan's §3 done-when should carry.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-s21-current-book-ruling" data-who="reckon-build" data-when="2026-10-10T20:20:00Z">
+    <div class="r-comment-body"><p>Coordinator ruling on current.book: the limited 553 row is accepted under the limited-case clause, which requires the read image error to be at most twice the exact arm's error plus the oracle uncertainty, and at or below 1e-4. Read against exact is not a like-for-like comparison of booking quadratures: the exact arm books through the old cell-moment basis, while current.book integrates over the read's fragments to 5e-13. The legacy support path still drives the solve; wiring current.book onto it is followup f-cfs-wire-current-book.</p></div>
 </div>
 </section>
 </main>

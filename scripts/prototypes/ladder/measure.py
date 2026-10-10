@@ -206,8 +206,16 @@ def main() -> None:
     parser.add_argument("--arm", choices=("A", "B"), required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--figure-dir", type=Path)
+    parser.add_argument(
+        "--propagation", choices=("current", "one-hop"), default="current"
+    )
     args = parser.parse_args()
+    if args.propagation == "one-hop":
+        from scripts.prototypes.ladder.reference_propagation import one_hop_labels
+
+        topology._connected_fragment_labels = one_hop_labels
     row = _measure(args.kind, args.cells, args.arm, args.figure_dir)
+    row["propagation"] = args.propagation
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(row, indent=2, sort_keys=True) + "\n")
     print("LADDER_ROW " + json.dumps(row, sort_keys=True), flush=True)

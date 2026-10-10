@@ -44,6 +44,7 @@ def measure(kind, cells, directory, cache):
     if jax.default_backend() != "gpu":
         raise RuntimeError("certificate rows require the GPU measurement lane")
     directory = Path(directory)
+    cache = Path(cache)
     directory.mkdir(parents=True, exist_ok=True)
     name = (
         "diverted-single-null" if kind == "diverted" else "weak-rotation-reactor-static"

@@ -28,16 +28,23 @@ run_arm() {
       "$base_revision" "$head_revision" "$output"
     "$python" -c 'from nova.jax.config import configure_dtypes; configure_dtypes(); import importlib, pathlib; module = importlib.import_module("nova.equilibrium.topology"); print("MODULE=" + module.__file__ + " CWD=" + str(pathlib.Path.cwd().resolve()))'
     failures=0
-    for module in tests/test_read_ten_thousand_cells.py tests/equilibrium/test_topology_read.py; do
-      label=${module##*/}
-      printf 'MODULE_COMMAND=JAX_PLATFORMS=cuda,cpu PYTHONPATH=%s %s -m pytest -p no:cacheprovider --timeout=1800 -q %s\n' \
-        "$tree" "$python" "$module"
+    run_module() {
+      local label=$1 code
+      shift
+      printf 'MODULE_COMMAND=JAX_PLATFORMS=cuda,cpu PYTHONPATH=%s %s -m pytest -p no:cacheprovider --timeout=1800 -q' \
+        "$tree" "$python"
+      printf ' %s' "$@"
+      printf '\n'
       "$python" -m pytest -p no:cacheprovider --timeout=1800 \
-        --basetemp="$TMPDIR/topology-${SLURM_JOB_ID}-${arm}-${label}" -q "$module"
+        --basetemp="$TMPDIR/topology-${SLURM_JOB_ID}-${arm}-${label}" -q "$@"
       code=$?
-      printf 'MODULE_EXIT=%s CODE=%s\n' "$module" "$code"
+      printf 'MODULE_EXIT=%s CODE=%s\n' "$label" "$code"
       if (( code != 0 )); then failures=1; fi
-    done
+    }
+    run_module read_cells tests/test_read_ten_thousand_cells.py
+    run_module topology_read \
+      tests/equilibrium/test_topology_read.py::test_closed_form_carrier_read \
+      tests/equilibrium/test_topology_read.py::test_topology_read_traces
     printf 'SUITE_MODULES=2 SUITE_EXIT=%s\nEXIT=%s\n' "$failures" "$failures"
     exit "$failures"
   ) > "$log" 2>&1

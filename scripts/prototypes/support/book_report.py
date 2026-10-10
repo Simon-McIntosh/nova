@@ -156,7 +156,10 @@ connected arm 0</td>
 <td>Smooth 5.13e-12; axis 9.22e-12; boundary 8.05e-9; support 1.97e-11</td>
 </tr>
 <tr>
-<td>Regression delta</td><td>42 passed on baseline; 42 passed on head; zero added failures across six modules.</td></tr>
+<td>Regression delta</td>
+<td>42 passed on baseline; 42 passed on head;
+zero added failures across six modules.</td>
+</tr>
 <tr>
 <td>Independent support attribution</td>
 <td>Analytic density on the read polygons gives image error 1.7777786713e-5; booked

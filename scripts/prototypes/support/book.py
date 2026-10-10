@@ -54,7 +54,9 @@ def _cached_machine(carrier, requested, wall, receipt):
     assert store.group == receipt["machine_cache"]["semantic_key"]
     store.load()
     machine = fixture._from_dataset(store.data, identity, store.group)
-    machine.cache.update(hit=True, readonly=True, store=str(store.filepath))
+    machine.cache.update(
+        hit=True, readonly=True, store=str(store.filepath), semantic_key=store.group
+    )
     return machine
 
 

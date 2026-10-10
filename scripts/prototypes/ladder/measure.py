@@ -77,10 +77,23 @@ def _measure(kind: str, cells: int, arm: str, figure_dir: Path | None = None) ->
         result = executable(field, geometry, convention, policy)
         jax.block_until_ready(result)
         warm_wall = min(warm_wall, perf_counter() - started)
+        raw_membership = np.sum(
+            np.where(
+                np.asarray(result.fragment_selected),
+                np.asarray(result.fragment_area),
+                0.0,
+            ),
+            axis=1,
+        ) / np.asarray(geometry.full_area)
+        roundoff_bound = float(
+            topology._membership_roundoff_bound(result.fragment_area, geometry)
+        )
+        raw_max = float(np.max(raw_membership))
         print(
             f"READ case={kind} cells={cells} valid={bool(result.valid)} "
             f"reason={int(result.reason)} cold={compile_wall:.3f} "
-            f"warm={warm_wall:.3f}",
+            f"warm={warm_wall:.3f} raw_max={raw_max:.16g} "
+            f"membership_roundoff_bound={roundoff_bound:.3g}",
             flush=True,
         )
     finally:
@@ -137,6 +150,11 @@ def _measure(kind: str, cells: int, arm: str, figure_dir: Path | None = None) ->
         "cold_compile_seconds": compile_wall,
         "warm_execute_seconds": warm_wall,
         "oracle_scoring_seconds": oracle_wall,
+        "raw_membership_max": raw_max,
+        "membership_roundoff_bound": roundoff_bound,
+        "raw_overfill_count_at_edge_tolerance": int(
+            np.count_nonzero(raw_membership > 1.0 + policy.edge_tolerance)
+        ),
         "device_temp_bytes": memory.temp_size_in_bytes if memory else None,
         "device_output_bytes": memory.output_size_in_bytes if memory else None,
         "host_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,

@@ -63,6 +63,7 @@ from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
     polish_stationary_points,
 )
+from nova.equilibrium import gs
 from nova.equilibrium.observation import ClippedIntegralMeasure
 from nova.equilibrium.separatrix_clip import (
     _SPLINE_BOUNDARY_SEGMENTS,
@@ -2667,7 +2668,7 @@ class ForwardFluxOperator:
     @property
     def program_identity(self) -> str:
         """Return the mesh and static evaluator identity of one solve program."""
-        return self._batch_identity()
+        return self.tree_flatten()[1].identity
 
     def with_source(self, source: ForwardSource) -> ForwardFluxOperator:
         """Return this mesh with compatible flux-function arguments replaced.
@@ -2742,18 +2743,6 @@ class ForwardFluxOperator:
         }
         prescribed = self.prescribed_field is not None
         geometry_identity = self.geometry_identity
-        identity = self._batch_identity(source_layout)
-        aux = _OperatorPytreeAux(
-            identity=identity,
-            geometry_identity=geometry_identity,
-            operator_type=type(self),
-            source_layout=source_layout,
-            static_state=static_state,
-            dynamic_state_names=dynamic_state_names,
-            dynamic_state_widths=dynamic_state_widths,
-            dynamic_extra_names=dynamic_extra_names,
-            prescribed=prescribed,
-        )
         prescribed_children = (
             (None,) * 10
             if self.prescribed_field is None
@@ -2768,6 +2757,36 @@ class ForwardFluxOperator:
             *source_children,
             *(value for values in dynamic_state_values for value in values),
             *(getattr(self, name) for name in dynamic_extra_names),
+        )
+        layout = tuple(
+            (tuple(value.shape), str(value.dtype))
+            for value in jax.tree_util.tree_leaves(children)
+            if hasattr(value, "shape")
+        )
+        static_controls = tuple(
+            (name, repr(value))
+            for name, value in sorted(static_state.items())
+            if name != "_geometry_identity"
+        )
+        identity = repr(
+            (
+                type(self),
+                source_layout.identity,
+                static_controls,
+                str(jax.tree_util.tree_structure(children)),
+                layout,
+            )
+        )
+        aux = _OperatorPytreeAux(
+            identity=identity,
+            geometry_identity=geometry_identity,
+            operator_type=type(self),
+            source_layout=source_layout,
+            static_state=static_state,
+            dynamic_state_names=dynamic_state_names,
+            dynamic_state_widths=dynamic_state_widths,
+            dynamic_extra_names=dynamic_extra_names,
+            prescribed=prescribed,
         )
         return children, aux
 
@@ -4034,8 +4053,7 @@ class ForwardFluxOperator:
                 if target_current is not None
                 else None
             )
-            image = external + active.internal(psi, requested_class, active_target)
-            return active._exclude_shadow_residual(psi, image, requested_class)
+            return gs.apply(psi, external, active, requested_class, active_target)
 
         return mapped
 
@@ -4088,9 +4106,8 @@ class ForwardFluxOperator:
                 if target_current is not None
                 else None
             )
-            image = external + active.internal(psi, requested_class, active_target)
-            return active._exclude_shadow_residual(
-                psi, image, requested_class, shadow=shadow
+            return gs.apply(
+                psi, external, active, requested_class, active_target, shadow
             )
 
         if target_current is None and (
@@ -4113,14 +4130,14 @@ class ForwardFluxOperator:
                 psi, partition, external, operator=None, _target_value=None
             ):
                 active = self if operator is None else operator
-                image = external + active._internal_on_partition(
-                    psi, partition, target_current
-                )
-                return active._exclude_shadow_residual(
+                return gs.apply(
                     psi,
-                    image,
+                    external,
+                    active,
                     requested_class,
-                    shadow=partition.residual_shadow,
+                    target_current,
+                    partition.residual_shadow,
+                    partition,
                 )
 
             mapped._read_frozen_partition = read_partition

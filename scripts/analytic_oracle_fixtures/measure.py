@@ -11,6 +11,7 @@ import fcntl
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 from time import perf_counter
 from types import SimpleNamespace
@@ -25,10 +26,6 @@ import xarray
 
 from nova.biot.null import Null1D, Null2D
 from nova.biot.plasmagrid import PlasmaGrid
-from nova.biot.polygonanalytic import (
-    polygon_analytic_flux_moment_executor,
-    polygon_analytic_flux_moments_batched,
-)
 from nova.biot.target import FluxTarget
 from nova.database.zarrstore import ZarrStore
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
@@ -47,6 +44,7 @@ from nova.equilibrium.stencil_mesh import (
 from nova.equilibrium.topology import Topology
 from nova.frame.coilset import CoilSet
 from nova.jax.config import configure_dtypes
+from scripts.analytic_oracle_fixtures import coupling_build
 from tests.rotating_equilibrium_references import RotatingEquilibrium, reference_cases
 
 
@@ -383,6 +381,20 @@ def _array_identity(value: np.ndarray) -> dict[str, object]:
     }
 
 
+def builder_revision() -> str:
+    """Return a digest of the coupling-assembly sources that define a carrier.
+
+    The carrier's blocks are only reproducible against the revision that
+    assembled them, so the digest of the assembly modules joins the semantic
+    identity: a later revision of the builder publishes a distinct cache group
+    rather than replaying a warm-load from blocks it would no longer produce.
+    """
+    digest = hashlib.sha256()
+    for path in (Path(__file__), Path(coupling_build.__file__)):
+        digest.update(path.read_bytes())
+    return digest.hexdigest()[:16]
+
+
 def cache_identity(
     case: RotatingEquilibrium,
     *,
@@ -416,6 +428,7 @@ def cache_identity(
         },
         "precision": "float64",
         "kernel": "exact-authored-polygon-moments",
+        "builder_revision": builder_revision(),
     }
 
 
@@ -482,17 +495,9 @@ def _flux_blocks(
     targets: np.ndarray,
     polygons: tuple[np.ndarray, ...],
     centres: np.ndarray,
-    *,
-    executor=None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Assemble exact authored-section blocks for one target family."""
-    return polygon_analytic_flux_moments_batched(
-        targets[:, 0],
-        targets[:, 1],
-        polygons,
-        expansion_points=centres,
-        executor=executor,
-    )
+    return coupling_build.build_flux_blocks(targets, polygons, centres)
 
 
 def build_machine(
@@ -548,16 +553,9 @@ def build_machine(
     regular = np.asarray([len(polygon) == 6 for polygon in polygons])
     interior_stencil = stencil[(condition < 1.0e3) & regular[stencil].all(axis=1)]
     sample = geometry.sample_node_coordinates
-    with polygon_analytic_flux_moment_executor() as executor:
-        grid_blocks = _flux_blocks(
-            centres, polygons, geometry.atomic_mesh.centroids, executor=executor
-        )
-        wall_blocks = _flux_blocks(
-            wall, polygons, geometry.atomic_mesh.centroids, executor=executor
-        )
-        sample_blocks = _flux_blocks(
-            sample, polygons, geometry.atomic_mesh.centroids, executor=executor
-        )
+    grid_blocks = _flux_blocks(centres, polygons, geometry.atomic_mesh.centroids)
+    wall_blocks = _flux_blocks(wall, polygons, geometry.atomic_mesh.centroids)
+    sample_blocks = _flux_blocks(sample, polygons, geometry.atomic_mesh.centroids)
     return OracleMachine(
         node=centres,
         area=area,
@@ -675,7 +673,8 @@ def cached_machine(
         wall=wall,
     )
     store = ZarrStore(
-        filename=f"{CACHE_FILENAME}_{abs(requested_cells)}", dirname=".nova"
+        filename=f"{CACHE_FILENAME}_{abs(requested_cells)}",
+        dirname=os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova"),
     )
     store.group = store.hash_attrs(identity)
     with _cache_lock(store) as lock_wait:

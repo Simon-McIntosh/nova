@@ -1,0 +1,81 @@
+<section id="cfs-coupling-build-scale" class="evidence-fragment" plan-evidence-for="converged-forward-solve">
+  <h2>cfs-coupling-build-scale — device-batched coupling assembly</h2>
+
+  <p id="cfs-coupling-build-scale-status">
+    <strong>Blocked on acceptance criterion (2).</strong> The assembly was extracted and
+    batched on the device (criterion 1), but the batched blocks do not equal the host
+    analytic builder within the required <code>1e-13</code> relative. The gap is a property
+    of the packed kernel in <code>nova/biot/polygonanalytic.py</code>, which this node is
+    fenced out of editing, so criteria (3) and (4) were not attempted.
+  </p>
+
+  <h3 id="cfs-coupling-build-scale-what">What changed</h3>
+  <ul>
+    <li id="cfs-coupling-build-scale-extract">
+      New <code>scripts/analytic_oracle_fixtures/coupling_build.py</code> exposes
+      <code>build_flux_blocks</code>, which assembles the three exact flux rows
+      <code>(uniform, radial, vertical)</code> for one target family through the traced
+      <code>moments</code> kernel of <code>nova.biot.tiledassembly.tile_evaluator</code> —
+      one compiled program per block shape, tiled over <code>(target, section)</code>.
+    </li>
+    <li id="cfs-coupling-build-scale-callsite">
+      <code>measure.py</code> <code>build_machine</code> now calls it for the grid, wall and
+      sample families in place of the per-section
+      <code>polygon_analytic_flux_moments_batched</code> host reduction.
+    </li>
+    <li id="cfs-coupling-build-scale-cache">
+      <code>cache_identity</code> gains a <code>builder_revision</code> digest over the
+      assembly sources, and <code>cached_machine</code> resolves its store root from
+      <code>NOVA_ANALYTIC_ORACLE_CACHE</code> so a later node can point the cache at a GPFS
+      root without editing the fixture.
+    </li>
+    <li id="cfs-coupling-build-scale-tests">
+      <code>tests/test_coupling_build.py</code> carries the identity row and a negative
+      control that perturbs one block entry by <code>1e-9</code> relative and asserts the
+      identity check catches it.
+    </li>
+  </ul>
+
+  <h3 id="cfs-coupling-build-scale-measure">The gate: device blocks against the host builder</h3>
+
+  <p id="cfs-coupling-build-scale-method">
+    One 550-cell synthetic hex family at the spec's rung. The reference is the unchanged
+    host builder <code>polygon_analytic_flux_moments_batched</code> (its own process pool);
+    the candidate is <code>build_flux_blocks</code>. The reported ratio is the maximum
+    absolute difference over the row's peak element. Reproduce with
+    <code>runs/r-20261010T184700018486-cfs-coupling-build-scale/logs/coupling_identity_probe.py</code>.
+  </p>
+
+  <table id="cfs-coupling-build-scale-table">
+    <caption>Row agreement at 550 cells; required relative difference 1e-13.</caption>
+    <thead>
+      <tr><th>row</th><th>block max [Wb/A]</th><th>max |Δ|</th><th>|Δ| / block max</th><th>vs 1e-13</th></tr>
+    </thead>
+    <tbody>
+      <tr id="cfs-coupling-build-scale-row-uniform"><td>uniform flux</td><td>3.20e-06</td><td>7.68e-17</td><td>2.40e-11</td><td>fails (240×)</td></tr>
+      <tr id="cfs-coupling-build-scale-row-radial"><td>radial moment</td><td>1.96e-10</td><td>2.49e-16</td><td>1.27e-06</td><td>fails (1.3e7×)</td></tr>
+      <tr id="cfs-coupling-build-scale-row-vertical"><td>vertical moment</td><td>2.20e-10</td><td>1.27e-16</td><td>5.77e-07</td><td>fails (5.8e6×)</td></tr>
+    </tbody>
+  </table>
+
+  <p id="cfs-coupling-build-scale-cause">
+    The uniform row is the packed kernel's primary channel and is already 240 times outside
+    the bound. The two moment companions lose four orders of magnitude to the cancellation
+    of two large partial reductions before the displacement correction, so their own
+    absolute round-off (<code>~2.5e-16</code> on <code>~2e-10</code>) sits near
+    <code>1e-6</code> relative to the row's peak: at that conditioning no expression graph
+    reproduces the host's order to <code>1e-13</code>. The node's own regression bound
+    (<code>tests/biot/test_traced_section_moments.py</code>) accepts <code>3e-10</code> for
+    the same comparison, which is consistent with this measurement.
+  </p>
+
+  <p id="cfs-coupling-build-scale-unblock">
+    <strong>Unblocking condition.</strong> Either the criterion is restated against the
+    kernel's reachable round-off (the measured per-row figures above), or a device kernel
+    reproducing the host reduction order is added to
+    <code>nova/biot/polygonanalytic.py</code> — a change the node's brief forbids, so it
+    belongs to a node scoped to that module. Because criteria (3) and (4) share the same
+    kernel, they are gated behind this decision rather than measured on a path whose blocks
+    are known not to be the certified ones.
+  </p>
+</section>

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="152">
+<meta name="plan-version" content="153">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -254,6 +254,11 @@
     <h4 class="r-fu-title">Measure the production chord support default against the exact and read supports (§3)</h4>
     <div class="r-fu-body"><p>The census found that the public production request and the certificate fixture's map both default to chord support (<code>solve_request.py:309</code>, <code>forward_operator.py:2341</code>), which uses whole selected cells. Every support comparison so far measured exact-mode spline support against exact analytic and read support, so the production default is an unmeasured third arm. Done when the certificate map at about 550, 2,000 and 5,000 cells reports chord beside exact spline, exact analytic and read-fragment support on the same machine, exterior and repaired coupling blocks, so the default either joins the read route or is retired.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-near-edge-moment" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-12" data-recommends-skill="/reckon-build converged-forward-solve §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair the moment kernel&#x27;s near-edge accuracy (§4)</h4>
+    <div class="r-fu-body"><p>The conditioned moment kernel matches the independent reference within 2.24e-14 on 251 off-singularity pairs (at least three source diameters from the filament). Near an edge it still misses an independent split reference by 1.81e-6 (uniform), 2.40e-5 (radial) and 2.82e-5 (vertical). The case is a sharp angular peak at target (5.1290, 0.0612) m, retained in the cfs-moment-path-reconcile run logs (requalification/identity_split_reference.json). This is a remaining near-field coupling floor, outside the repair's no-further-factoring ruling. Done when near-edge and self-cell targets on the certificate machine agree with an extended-precision split reference within 1e-12 norm-relative, and the 2.24e-14 off-singularity agreement and the expression bound still hold. Settle this before the 5,000 and 10,000-cell carriers are regenerated.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

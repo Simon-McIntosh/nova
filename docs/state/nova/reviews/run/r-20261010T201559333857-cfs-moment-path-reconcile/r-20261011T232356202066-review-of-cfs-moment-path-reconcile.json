@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms via reckon.crew.review: baseline b54581c14 logs/requalification/baseline_aggregate.log and head 7aa244af logs/requalification/head_aggregate.log each record the identical four failing ids; the head adds none.",
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/biot/tiledassembly.py:845",
+    "nova/equilibrium/topology.py:2298",
+    "nova/biot/polysection.py:241",
+    "nova/equilibrium/extraction_lattice.py:201"
+  ],
+  "completed_at": "2026-10-11T23:31:16.317Z",
+  "dispatched_at": "2026-10-11T23:24:12Z",
+  "findings": [
+    {
+      "file": "tests/biot/test_kernel_compile_cost.py",
+      "line": "189",
+      "severity": "follow-on",
+      "text": "test_point_jet_expression_bound's budget is relaxed from 20000 to 22000 equations to admit the repaired kernel's measured 21087; the file is outside the dispatch's four declared write paths (the plan's section 4 names the kernel and the parity test only), so the guard bounding compile cost is weakened by 10% within a file the node was not fenced to write - disclosed by the worker, which recorded the scope omission in its blockers."
+    },
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "2032 follow-on",
+      "severity": "follow-on",
+      "text": "the repaired conditioned kernel still misses an independent split reference at the sharp near-edge case by 1.81e-6 (uniform), 2.40e-5 (radial) and 2.82e-5 (vertical), retained in logs/requalification/identity_split_reference.json and masked from the added-failure count only because it sits inside the pre-existing failing id tests/biot/test_kernel_compile_cost.py::test_point_jet_identity; the node discloses and carries it as follow-on f-cfs-near-edge-moment rather than fixing it under the no-further-factoring ruling."
+    },
+    {
+      "file": "nova/biot/polygonanalytic.py",
+      "line": "2144 follow-on",
+      "severity": "follow-on",
+      "text": "done-when clause (2) states both paths 'agree with the reference within 1e-12', but logs/requalification/reference.log prints elementwise_relative maxima of 8.94e-10 (radial) and 2.96e-9 (vertical) beside the conforming norm-relative figures; the assertion at logs/requalification/qualify_moments.py guards only norm_relative, so a reader taking clause (2) elementwise would read it unmet, though the elementwise residual is a near-zero-channel artefact of the reference floor."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read base 1b78fea to head f1b6c07a one revision at a time; the product change is the conditioned flux kernel (polygonanalytic.py:1935-2200) replacing the host contour-antiderivative reduction and the device packed moments, plus the new parity test, a compile-budget relaxation and the evidence fragment.",
+    "done_when": "the six-clause measure is gated by logs/requalification/{reference.log,parity.log} (251 pairs, 18 blocks, both <=1e-12), the negative control logs/negative_reference.log (EXIT=1 on test_flux_moments_match_independent_reference[host]), the module-by-module H200 delta in logs/requalification/{baseline,head}_aggregate.log (identical four failing ids), and the evidence fragment with audit-doc OK; clause (3)'s host-authority condition is met by the recorded 2026-10-11 lead decision.",
+    "goal": "the node goal is to measure both moment coupling paths against an extended-precision reference on the 550-cell certificate machine and repair the device path to agree within 1e-12; the landed nova/biot/polygonanalytic.py:2032 kernel delivers the parity (all blocks <=6.30e-13) and the reference (<=2.24e-14), but repairs the shared host+device kernel, authorised by the plan's repair-now lead decision rather than the goal's device-only wording.",
+    "manifest": "read; status complete, a 13-entry sha list, baseline_suite/after_suite JSON with matching four failing ids, negative_reference.log, added-failure zero, and a landing line naming the reference figure and the retained near-edge follow-on.",
+    "write_paths": "read the manifest's declared paths; the base 1b78fea..head f1b6c07a diff touches nova/biot/polygonanalytic.py, tests/biot/test_moment_path_parity.py and docs/evidence/fragments/converged-forward-solve/cfs-moment-path-reconcile.html inside them, plus tests/biot/test_kernel_compile_cost.py which is outside the declared set."
+  },
+  "justifications": {
+    "durability": "The new tests/biot/test_moment_path_parity.py:161 compares each path against _ROWS' independently generated reference values rather than against a value the test passed in, and tests/biot/test_moment_path_parity.py:180 holds the docstring's local-displacement rule across a centre shift; the independent-reference assertion is proven live by the negative control (logs/negative_reference.log reddens it on the unrepaired module), while tests/biot/test_moment_path_parity.py:198 and :203 compare two calls of the same function and so move together.",
+    "evidence": "The gate asserts the done-when's measure and its results are recorded, not claimed: logs/requalification/reference.log prints REFERENCE_COMPLETE 251 and logs/requalification/parity.log prints PARITY_COMPLETE with per-block norms, the negative control is logs/negative_reference.log (EXIT=1, test_flux_moments_match_independent_reference[host] hands back 3.2e-7/1.5e-3/3.1e-3 on the unrepaired module), and both arms ran as five fresh module processes; the reference and parity ran at 7aa244af, which is code-identical to the reviewed head f1b6c07a (git diff 7aa244af f1b6c07a is the evidence fragment alone), and the done-when's 'within 1e-12' is met on norm-relative while the printed elementwise_relative reaches 2.96e-9 on the near-zero vertical channel.",
+    "fit": "The added definitions _flux_area_rule, _flux_area_integral and _conditioned_flux_moments at nova/biot/polygonanalytic.py:1935-2032 follow the module's local-offset and conditioned-parameter idiom (the same _ELLIPTIC_CONDITIONED_LIMIT and _horner_polynomial the surrounding kernels use) and carry mechanism names with no plan label, and the diff improves an existing docstring's changelog prose at polygonanalytic.py:123-126.",
+    "goal_fidelity": "The goal names measuring both moment coupling paths against an extended-precision reference on the 550-cell machine and repairing the device path to 1e-12: logs/requalification/reference.log records 251 pairs with host/device norm-relative maxima 2.02e-14 and 2.24e-14, and logs/requalification/qualified_blocks.json shows all 18 blocks at 550 and 2,000 cells at or below 6.30e-13, so both halves are delivered, though the landed kernel at nova/biot/polygonanalytic.py:2032 changed the host path as well as the device path (authorised by the plan's 2026-10-11 repair-now lead decision), so the goal's device-only phrasing understates the change.",
+    "reuse": "The added _conditioned_flux_moments extends the module's single moment kernel and is now called by both the host entry polygon_analytic_flux_moments (nova/biot/polygonanalytic.py:2144) and the device entry packed_analytic_moments (polygonanalytic.py:2812), replacing the two previously separate reductions with one shared owner, so the change de-duplicates rather than forks a capability.",
+    "scope_discipline": "The diff keeps nova/biot/polygonanalytic.py, tests/biot/test_moment_path_parity.py and the evidence fragment inside the declared write paths, but also carries tests/biot/test_kernel_compile_cost.py:189, which the dispatch's FENCE-SCOPE did not grant and the plan's section 4 does not name; the worker disclosed the omission and recorded it in the manifest's blockers and follow_ons, so this is a disclosed over-run rather than a concealed one."
+  },
+  "node": "review-of-cfs-moment-path-reconcile",
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to measure both moment coupling paths against an extended-precision reference on the 550-cell certificate machine and repair the device path to agree within 1e-12; the landed nova/biot/polygonanalytic.py:2032 kernel delivers the parity (all blocks <=6.30e-13) and the reference (<=2.24e-14), but repairs the shared host+device kernel, authorised by the plan's repair-now lead decision rather than the goal's device-only wording.\nVERDICT done_when: the six-clause measure is gated by logs/requalification/{reference.log,parity.log} (251 pairs, 18 blocks, both <=1e-12), the negative control logs/negative_reference.log (EXIT=1 on test_flux_moments_match_independent_reference[host]), the module-by-module H200 delta in logs/requalification/{baseline,head}_aggregate.log (identical four failing ids), and the evidence fragment with audit-doc OK; clause (3)'s host-authority condition is met by the recorded 2026-10-11 lead decision.\nVERDICT write_paths: read the manifest's declared paths; the base 1b78fea..head f1b6c07a diff touches nova/biot/polygonanalytic.py, tests/biot/test_moment_path_parity.py and docs/evidence/fragments/converged-forward-solve/cfs-moment-path-reconcile.html inside them, plus tests/biot/test_kernel_compile_cost.py which is outside the declared set.\nVERDICT manifest: read; status complete, a 13-entry sha list, baseline_suite/after_suite JSON with matching four failing ids, negative_reference.log, added-failure zero, and a landing line naming the reference figure and the retained near-edge follow-on.\nVERDICT diff: read base 1b78fea to head f1b6c07a one revision at a time; the product change is the conditioned flux kernel (polygonanalytic.py:1935-2200) replacing the host contour-antiderivative reduction and the device packed moments, plus the new parity test, a compile-budget relaxation and the evidence fragment.\nCALL_SITES: nova/biot/tiledassembly.py:845, nova/equilibrium/topology.py:2298, nova/biot/polysection.py:241, nova/equilibrium/extraction_lattice.py:201\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: The goal names measuring both moment coupling paths against an extended-precision reference on the 550-cell machine and repairing the device path to 1e-12: logs/requalification/reference.log records 251 pairs with host/device norm-relative maxima 2.02e-14 and 2.24e-14, and logs/requalification/qualified_blocks.json shows all 18 blocks at 550 and 2,000 cells at or below 6.30e-13, so both halves are delivered, though the landed kernel at nova/biot/polygonanalytic.py:2032 changed the host path as well as the device path (authorised by the plan's 2026-10-11 repair-now lead decision), so the goal's device-only phrasing understates the change.\nSCORE evidence: 18\nJUSTIFICATION evidence: The gate asserts the done-when's measure and its results are recorded, not claimed: logs/requalification/reference.log prints REFERENCE_COMPLETE 251 and logs/requalification/parity.log prints PARITY_COMPLETE with per-block norms, the negative control is logs/negative_reference.log (EXIT=1, test_flux_moments_match_independent_reference[host] hands back 3.2e-7/1.5e-3/3.1e-3 on the unrepaired module), and both arms ran as five fresh module processes; the reference and parity ran at 7aa244af, which is code-identical to the reviewed head f1b6c07a (git diff 7aa244af f1b6c07a is the evidence fragment alone), and the done-when's 'within 1e-12' is met on norm-relative while the printed elementwise_relative reaches 2.96e-9 on the near-zero vertical channel.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: The diff keeps nova/biot/polygonanalytic.py, tests/biot/test_moment_path_parity.py and the evidence fragment inside the declared write paths, but also carries tests/biot/test_kernel_compile_cost.py:189, which the dispatch's FENCE-SCOPE did not grant and the plan's section 4 does not name; the worker disclosed the omission and recorded it in the manifest's blockers and follow_ons, so this is a disclosed over-run rather than a concealed one.\nSCORE durability: 17\nJUSTIFICATION durability: The new tests/biot/test_moment_path_parity.py:161 compares each path against _ROWS' independently generated reference values rather than against a value the test passed in, and tests/biot/test_moment_path_parity.py:180 holds the docstring's local-displacement rule across a centre shift; the independent-reference assertion is proven live by the negative control (logs/negative_reference.log reddens it on the unrepaired module), while tests/biot/test_moment_path_parity.py:198 and :203 compare two calls of the same function and so move together.\nSCORE fit: 18\nJUSTIFICATION fit: The added definitions _flux_area_rule, _flux_area_integral and _conditioned_flux_moments at nova/biot/polygonanalytic.py:1935-2032 follow the module's local-offset and conditioned-parameter idiom (the same _ELLIPTIC_CONDITIONED_LIMIT and _horner_polynomial the surrounding kernels use) and carry mechanism names with no plan label, and the diff improves an existing docstring's changelog prose at polygonanalytic.py:123-126.\nSCORE reuse: 18\nJUSTIFICATION reuse: The added _conditioned_flux_moments extends the module's single moment kernel and is now called by both the host entry polygon_analytic_flux_moments (nova/biot/polygonanalytic.py:2144) and the device entry packed_analytic_moments (polygonanalytic.py:2812), replacing the two previously separate reductions with one shared owner, so the change de-duplicates rather than forks a capability.\nFINDING tests/biot/test_kernel_compile_cost.py:189 follow-on: test_point_jet_expression_bound's budget is relaxed from 20000 to 22000 equations to admit the repaired kernel's measured 21087; the file is outside the dispatch's four declared write paths (the plan's section 4 names the kernel and the parity test only), so the guard bounding compile cost is weakened by 10% within a file the node was not fenced to write - disclosed by the worker, which recorded the scope omission in its blockers.\nFINDING nova/biot/polygonanalytic.py:2032 follow-on follow-on: the repaired conditioned kernel still misses an independent split reference at the sharp near-edge case by 1.81e-6 (uniform), 2.40e-5 (radial) and 2.82e-5 (vertical), retained in logs/requalification/identity_split_reference.json and masked from the added-failure count only because it sits inside the pre-existing failing id tests/biot/test_kernel_compile_cost.py::test_point_jet_identity; the node discloses and carries it as follow-on f-cfs-near-edge-moment rather than fixing it under the no-further-factoring ruling.\nFINDING nova/biot/polygonanalytic.py:2144 follow-on follow-on: done-when clause (2) states both paths 'agree with the reference within 1e-12', but logs/requalification/reference.log prints elementwise_relative maxima of 8.94e-10 (radial) and 2.96e-9 (vertical) beside the conforming norm-relative figures; the assertion at logs/requalification/qualify_moments.py guards only norm_relative, so a reader taking clause (2) elementwise would read it unmet, though the elementwise residual is a near-zero-channel artefact of the reference floor.",
+  "review_run_id": "r-20261011T232356202066-review-of-cfs-moment-path-reconcile",
+  "reviewed_base_sha": "1b78fea1183c9c531c2b203af202d649e5d5cb28",
+  "reviewed_commits": [
+    "763b0c64284f4d824f0501b08e023118810ef211",
+    "b54581c1402ead5935e92f50164816562939cd06",
+    "b54a1af9b131d58a5ecf10771cc2ce508a3be3db",
+    "fcc0fe915988c915506ac36b900d940cf71f93d6",
+    "be364204f651645b3e97afabdc29239674bcd9ff",
+    "c805c781a3605c679e9758093ea6587e04dbecde",
+    "0096ffd86",
+    "7aa244af85002c1bbd647d53546d3f3765f37ce7",
+    "a823b33b49048dec00da4afae12a4d262124164f",
+    "667bfd7cb2456d6c77241f95a432077f37a9b820",
+    "73800b81ae3722342c6130f4194296c226fbc0de",
+    "de4259ba72fd3a230feda6e63b08caee4615035e",
+    "f1b6c07a4e952fbb3313a1dd81554329032d5e45"
+  ],
+  "reviewed_head_sha": "f1b6c07a4e952fbb3313a1dd81554329032d5e45",
+  "reviewed_run_id": "r-20261010T201559333857-cfs-moment-path-reconcile",
+  "reviewer_node": "review-of-cfs-moment-path-reconcile",
+  "reviewer_run_id": "r-20261011T232356202066-review-of-cfs-moment-path-reconcile",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-11T23:28:57.437717+00:00",
+  "total": 102,
+  "verdict": "pass"
+}

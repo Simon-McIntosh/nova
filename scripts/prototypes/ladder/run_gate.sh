@@ -51,9 +51,13 @@ run_arm() {
   return $?
 }
 
-run_arm "$base_revision" "$scratch" "$output/base-suite.log" base
+run_arm "$base_revision" "$scratch" "$output/base-suite.log" base &
+base_pid=$!
+run_arm "$head_revision" "$root" "$output/head-suite.log" head &
+head_pid=$!
+wait "$base_pid"
 base_code=$?
-run_arm "$head_revision" "$root" "$output/head-suite.log" head
+wait "$head_pid"
 head_code=$?
 printf 'BASE_EXIT=%s HEAD_EXIT=%s\n' "$base_code" "$head_code"
 printf 'EXIT=%s\n' "$head_code"

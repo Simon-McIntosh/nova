@@ -264,6 +264,26 @@
     finish with <code>1 failed, 7 passed, 2 xfailed</code>; the remaining
     failing id is <code>test_point_jet_identity</code>. The full module delta
     is still running.</p>
+    <p>The required existing modules are <code>test_kernel_compile_cost</code>,
+    <code>test_edge_term_tangents</code>, <code>test_near_collinear_tangent</code>,
+    <code>test_vertex_term_tangents</code> and
+    <code>test_traced_section_moments</code>. These are the five existing
+    modules under <code>tests/biot</code> that exercise
+    <code>polygonanalytic.py</code>; the head also runs the six new parity tests.
+    The inherited launcher overselected two modules exercising unchanged
+    <code>gradedresidual</code> and <code>momentchannel</code> helpers. Their
+    queued invocations explicitly report <code>NOT_SELECTED</code> before
+    pytest and are never counted as passed tests. The source-path selection is
+    retained in <code>required_modules.txt</code> and
+    <code>module_selection.txt</code>.</p>
+    <p>At the 22:55 UTC checkpoint, the compile module has one shared failing
+    id in each arm and the near-collinear module has four passes in each arm.
+    The edge and vertex modules are still running, and the traced-section
+    module is queued. Both full suite records remain
+    <code>completed: false</code>. The scheduler job has its requested
+    90-minute budget; the worker's 60-minute deadline is separate. The
+    manifest declares a wait on job <code>1283519</code>'s terminal scheduler
+    state so a resume can read every remaining module receipt.</p>
     <table><thead><tr><th>Final arm</th><th>Channel</th><th>Max norm-relative error</th><th>Max elementwise relative error</th></tr></thead><tbody>
 <tr><td>host</td><td>Uniform</td><td>3.029089928e-16</td><td>5.051070727e-16</td></tr>
 <tr><td>host</td><td>Radial moment</td><td>1.633354771e-14</td><td>8.941522453e-10</td></tr>

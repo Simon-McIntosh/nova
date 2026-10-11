@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="149">
+<meta name="plan-version" content="150">
 <meta name="plan-modified" content="2026-10-11">
 </head>
 <body>
@@ -679,6 +679,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-s21-accuracy-floor-review" data-who="reckon-build" data-when="2026-10-11T21:20:00Z">
     <div class="r-comment-body"><p>Accuracy-floor review, 2026-10-11, at the lead's request. A health review of ten accuracy-path modules and a census of ten capabilities ranked six floors on the production path; each is owned by a followup or section. In rank order: the packed moment kernel (f-cfs-moment-path-reconcile); legacy spline support on the map (f-cfs-wire-current-book); the certificate exterior (f-cfs-exterior-on-exact-support); the production-seed Newton defect (f-cfs-newton-production-seed); the read on solved states (f-cfs-read-compile-route); the dense literals, fixed by gs.apply. The health review found polygon moment integration implemented in four modules (clip_quadrature, separatrix_clip, polygon_moments, stencil_mesh). The census found no accuracy floor among them, and their consolidation is a deletion-led treatment. The production chord default is an unmeasured arm (f-cfs-chord-default-arm). Reports: accuracy-floor-census.md under the crew reports directory resolution-pivot/, and code-review/98773e8b1367/report.md.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s21-code-review-dispositions" data-who="reckon-build" data-when="2026-10-11T21:30:00Z">
+    <div class="r-comment-body"><p>Dispositions for the findings of health review code-98773e8b1367 (run r-20261011T205901336241). They are recorded here because crew dispose cannot yet store dispositions on code reviews; the repair is in reckon.</p><ul><li>Findings 0 and 1, duplicate_capability: four polygon-moment implementations with no owner. Folded into node polygon-moment-owner, which keeps the most accurate copy after an exact-integral census and deletes the rest. It will dispatch once this plan's content review is stored.</li><li>Finding 2, interface_growth: topology.py gained a second read surface beside the legacy Topology.read. Exempted: this is the planned migration, and section 6 deletes the legacy read once f-cfs-wire-current-book lands.</li><li>Findings 3 and 4, test_debt: a duplicated _double_precision helper and source-text assertions. Exempted: test hygiene off the accuracy path, not acted on in this wave.</li></ul></div>
 </div>
 </section>
 </main>

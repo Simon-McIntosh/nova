@@ -2085,8 +2085,8 @@ class ForwardProfile:
             def solve(
                 initial_flux,
                 external,
-                operator=self.operator,
-                target_value=target_current,
+                operator,
+                target_value,
             ):
                 if live_read_fallback:
                     return fixed_point.newton_krylov(
@@ -2116,8 +2116,8 @@ class ForwardProfile:
             def solve(
                 initial_flux,
                 external,
-                operator=self.operator,
-                target_value=target_current,
+                operator,
+                target_value,
             ):
                 return scheme(
                     mapped,

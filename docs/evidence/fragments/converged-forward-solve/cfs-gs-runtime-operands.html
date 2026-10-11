@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-gs-runtime-operands">
+<meta name="plan-title" content="Runtime forward-map operands">
+<meta name="plan-summary" content="Coupling blocks cross the JAX call boundary as arrays">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-recorded-at" content="2026-10-10">
+<meta name="plan-verdict" content="complete">
+<title>Runtime forward-map operands | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="cfs-gs-runtime-operands">Runtime forward-map operands</h1>
+<p id="cfs-gs-runtime-operands-method">The map takes its mesh and coupling blocks through the operator pytree. The operator's trace identity contains leaf shapes, dtypes and static controls rather than geometry values. Each runtime row compiled <code>jax.jit(gs.apply)</code> in a fresh H200 process. The cached certified carrier rows used analytic states, and their map output was compared with the existing book and image composition. The 10,238-cell row built the production carrier and stencil geometry and supplied zero-valued arrays of the production coupling shapes as runtime operands; it measures executable size, not map fidelity. HLO footprint counts bytes of StableHLO constant lines, a textual literal-footprint measure rather than resident device memory. The prior rows are the legacy-support closure-bound map measurements in the resolution-pivot support receipt; their HLO constants were not counted. The prior compile timer includes lowering; the runtime timer starts after lowering and measures the cold backend compile. The two compile columns have different boundaries and are not a direct speed comparison. The support path is unchanged here. Cell counts are listed separately because the cached carriers differ.</p>
+<table id="cfs-gs-runtime-operands-map-table"><thead><tr><th>Case</th><th>Prior cells</th><th>Prior executable</th><th>Prior lower + compile</th><th>Runtime cells</th><th>Runtime executable</th><th>Runtime HLO constants</th><th>Runtime backend compile</th><th>Peak host RSS</th><th>Map difference</th></tr></thead><tbody>
+<tr><td>Limited</td><td>553</td><td>30,243,134 B</td><td>8.47 s</td><td>555</td><td>1,143,865 B</td><td>139,407 B</td><td>5.57 s</td><td>2.86 GiB</td><td>0</td></tr>
+<tr><td>Diverted</td><td>550</td><td>29,556,742 B</td><td>10.23 s</td><td>548</td><td>1,201,573 B</td><td>139,410 B</td><td>9.81 s</td><td>2.96 GiB</td><td>0</td></tr>
+<tr><td>Limited</td><td>2,105</td><td>359,737,173 B</td><td>9.10 s</td><td>2,608</td><td>1,053,468 B</td><td>139,504 B</td><td>4.78 s</td><td>4.89 GiB</td><td>0</td></tr>
+<tr><td>Diverted</td><td>2,098</td><td>360,123,463 B</td><td>8.89 s</td><td>2,621</td><td>1,059,564 B</td><td>139,506 B</td><td>5.78 s</td><td>5.05 GiB</td><td>0</td></tr>
+<tr><td>Limited</td><td>5,167</td><td>serializer refused above 2 GiB</td><td>17.01 s</td><td>5,167</td><td>1,090,426 B</td><td>139,508 B</td><td>4.78 s</td><td>18.38 GiB</td><td>0</td></tr>
+<tr><td>Diverted</td><td>5,158</td><td>2,100,262,720 B</td><td>17.20 s</td><td>5,158</td><td>1,091,794 B</td><td>139,520 B</td><td>4.73 s</td><td>18.48 GiB</td><td>0</td></tr>
+<tr><td>Limited, placeholder blocks</td><td>not measured</td><td>not measured</td><td>not measured</td><td>10,238</td><td>1,071,555 B</td><td>139,603 B</td><td>6.72 s</td><td>62.31 GiB</td><td>not applicable</td></tr>
+</tbody></table>
+<p id="cfs-gs-runtime-operands-memory">At 10,238 cells, the first run's whole-process high-water RSS was 62.31 GiB (66.91 GB). A fresh H200 phase probe reached 70.24 GB while constructing the nine dense placeholder coupling operands. That high-water mark did not rise during lowering, compile or execution. Live RSS sampled every 10 ms during backend compile peaked at 11.09 GB, within the plan's 64 GB cold-compile clause; execution peaked at 11.13 GB. Thus the over-limit whole-process peak comes from operand construction, not the compile phase. The phase receipt is <code>placeholder-phases-direct.log</code> in the node run directory.</p>
+<table id="cfs-gs-runtime-operands-memory-table"><thead><tr><th>Phase</th><th>Whole-process high water</th><th>Live RSS at boundary or sampled peak</th></tr></thead><tbody>
+<tr><td>Geometry</td><td>7.56 GB</td><td>1.10 GB</td></tr>
+<tr><td>Placeholder operands</td><td>70.24 GB</td><td>10.65 GB</td></tr>
+<tr><td>Lowering</td><td>70.24 GB</td><td>10.70 GB</td></tr>
+<tr><td>Backend compile</td><td>70.24 GB</td><td>11.09 GB sampled peak</td></tr>
+<tr><td>Execution</td><td>70.24 GB</td><td>11.13 GB sampled peak</td></tr>
+</tbody></table>
+<p id="cfs-gs-runtime-operands-controls">The focused test compiled one program for two geometry values with the same operand layout. Its declared negative control bound the coupling arrays in separate closures, traced two programs, and failed the one-program assertion. Both test logs are in the node run directory. The support partition path remained the existing operator path.</p>
+<p id="cfs-gs-runtime-operands-terminal">The cached analytic-state maps match the existing map exactly. The terminal solve is a different measure: the production-seed Newton trajectory remains non-converged at residual about 0.0536 after 50 attempted promotions in both arms. That known production-seed Newton defect belongs to §5. Bit-identity of terminal states is not meaningful on this trajectory, and the lead accepted criterion (2) on the measured pair on 2026-10-11. The base revision's own traced-versus-bound failure is pre-existing and recorded in <code>terminal-base.log</code>. Fresh direct base and head solves, without that test's internal assertion, are recorded in <code>terminal-direct-base.log</code>, <code>terminal-direct-head.log</code> and <code>terminal-direct-compare.log</code> in the node run directory. The head process imported from revision <code>b0173b542e40</code>, a documentation-only successor to the revision named at job submission; scoped product source and tests are identical across those two commits. The base tangent test passed on H200, and the changed revision's tangent test passed on CPU at the existing central-difference tolerance.</p>
+<table id="cfs-gs-runtime-operands-terminal-table"><thead><tr><th>Comparison</th><th>Maximum relative state difference</th><th>First residual; steps</th><th>Second residual; steps</th><th>Disposition</th></tr></thead><tbody>
+<tr><td>Base traced versus base bound</td><td>4.032022558672695e-11</td><td>0.053588552190604676; 50</td><td>0.053588552189206037; 50</td><td>Pre-existing base failure against 1e-14</td></tr>
+<tr><td>Head traced versus base traced</td><td>3.7155677965180508e-11</td><td>0.053588552190078589; 50</td><td>0.053588552191409039; 50</td><td>Accepted measured pair on a non-converged trajectory</td></tr>
+<tr><td>Head versus base after the §5 solve converges</td><td>Re-run at 1e-13 relative</td><td>Converged terminal residual</td><td>Converged terminal residual</td><td>Pending the production-seed Newton repair</td></tr>
+</tbody></table>
+</main></body></html>

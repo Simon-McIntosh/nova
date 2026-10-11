@@ -123,8 +123,8 @@ one, where ``K`` diverges logarithmically.  Two things carry it:
 * ``k'^2 = (u^2 + (r' - r)^2)/a^2`` -- the target's squared distance to the edge's
   OWN END over the squared ring span -- is formed from the geometry and handed to
   every complete integral, because a float parameter cannot carry its own complement
-  and ``K`` is then wrong by ``eps/k'^2``.  That error, not the confluence, is what
-  used to make a target within a micron of a corner useless.
+  and ``K`` is then wrong by ``eps/k'^2``. This error grows without bound
+  as a target approaches the corner.
 * AT the corner the divergence itself cancels.  ``u = 0`` collapses the
   arctangent's numerator onto ``N = -b1 G^2`` exactly, so its interior part becomes
   ``-b1[(G^2)' - G^2 (B^2)'/B^2]``, and at ``phi = 0`` with ``r' = r`` the ratio
@@ -1932,6 +1932,159 @@ def _condition_vertical_contour_sum(
     return np.where(on_axis, conditioned, unconditioned)
 
 
+@lru_cache(maxsize=4)
+def _flux_area_rule(near: bool):
+    """Tensor rule with polynomial grading of the logarithmic endpoint."""
+    from numpy.polynomial.legendre import leggauss
+
+    q, w = leggauss(64 if near else 12)
+    q, w = (q + 1.0) / 2.0, w / 2.0
+    if near:
+        return (
+            q**4,
+            4.0 * w * q**7,
+            np.concatenate((0.5 * q**4, 1.0 - 0.5 * q**4)),
+            np.concatenate((2.0 * w * q**3, 2.0 * w * q**3)),
+        )
+    return q, w * q, q, w
+
+
+def _flux_area_integral(
+    xp, radius, height, edge, present, norm, centre, expansion, near, origin_mask=None
+):
+    """Integrate local first moments over the signed fan of authored edges."""
+    from nova.biot.completeelliptic import complete_kind
+    from nova.biot.greens import _filament_elliptic_combinations
+
+    u, wu, v, wv = (xp.asarray(x) for x in _flux_area_rule(near))
+    u, v = u[:, None, None], v[None, :, None]
+    quadrature = wu[:, None, None] * wv[None, :, None]
+    origin_mask = near if origin_mask is None else origin_mask
+    origin_r = xp.where(origin_mask, radius, centre[0])
+    origin_z = xp.where(origin_mask, height, centre[1])
+    displacement_r = origin_r - expansion[0]
+    displacement_z = origin_z - expansion[1]
+
+    def one_edge(index, result):
+        ar = edge[index, 0] - origin_r
+        az = edge[index, 1] - origin_z
+        br = edge[index, 2] - origin_r
+        bz = edge[index, 3] - origin_z
+        determinant = xp.where(present[index], ar * bz - az * br, 0.0)
+        active = determinant != 0.0
+        dr = u * ((1.0 - v) * ar + v * br)
+        dz = u * ((1.0 - v) * az + v * bz)
+        source_r = origin_r + dr
+        vertical = origin_z - height + dz
+        gap = (origin_r - radius + dr) ** 2 + vertical**2
+        span = (radius + source_r) ** 2 + vertical**2
+        complement = xp.where(active, gap / span, 0.5)
+        parameter = xp.where(active, 4.0 * radius * source_r / span, 0.5)
+        if xp is np:
+            from scipy.special import ellipkm1, ellipe
+
+            first, second = ellipkm1(complement), ellipe(1.0 - complement)
+        else:
+            first, second = complete_kind(complement, xp=xp)
+        _, flux, _ = _filament_elliptic_combinations(
+            xp, parameter, complement, first, second
+        )
+        # norm contains minus the orientation and mu0 divided by section area.
+        weighted = -norm * determinant * quadrature * xp.sqrt(span) * flux
+        return result + xp.stack(
+            (
+                xp.sum(weighted, axis=(0, 1)),
+                xp.sum(weighted * (displacement_r + dr), axis=(0, 1)),
+                xp.sum(weighted * (displacement_z + dz), axis=(0, 1)),
+            )
+        )
+
+    result = xp.zeros((3, radius.size), dtype=radius.dtype)
+    if xp is np:
+        for index in range(edge.shape[0]):
+            result = one_edge(index, result)
+        return result
+    return lax.fori_loop(0, edge.shape[0], one_edge, result)
+
+
+def _conditioned_flux_moments(
+    xp, signed, height, edge, weight, norm, centre, expansion
+):
+    """Area means of flux, (R-Rc) flux and (Z-Zc) flux about the requested centre.
+
+    Each signed triangle uses local coordinates before weighting and sums its
+    integral before the next edge. Nearby targets are the fan origin, keeping
+    the filament distance as a local displacement even when it is below one
+    ulp of a machine coordinate. Distant targets use the area centroid as fan
+    origin. The two rules integrate the same authored material and moments.
+    """
+    shape = signed.shape
+    radius = xp.abs(signed).reshape(-1)
+    height = height.reshape(-1)
+    edge = edge.reshape((edge.shape[0], 4, -1))
+    weight = weight.reshape((weight.shape[0], -1))
+    norm = norm.reshape(-1)
+    centre, expansion = centre.reshape((2, -1)), expansion.reshape((2, -1))
+    present = ~xp.signbit(weight)
+    distance = (radius - centre[0]) ** 2 + (height - centre[1]) ** 2
+    extent = xp.max(
+        xp.where(
+            present, (edge[:, 0] - centre[0]) ** 2 + (edge[:, 1] - centre[1]) ** 2, 0.0
+        ),
+        axis=0,
+    )
+    near = distance < 16.0 * extent
+    held_radius = xp.where(radius == 0.0, 1.0, radius)
+    if xp is np:
+        result = np.empty((3, radius.size))
+        for selected in (False, True):
+            mask = near == selected
+            if np.any(mask):
+                result[:, mask] = _flux_area_integral(
+                    np,
+                    held_radius[mask],
+                    height[mask],
+                    edge[..., mask],
+                    present[:, mask],
+                    norm[mask],
+                    centre[:, mask],
+                    expansion[:, mask],
+                    selected,
+                )
+    else:
+        # Bounded pair chunks keep the graded rule's working set independent of tiles.
+        width = min(128, radius.size)
+        count = (radius.size + width - 1) // width
+        index = xp.minimum(xp.arange(count * width), radius.size - 1).reshape(
+            count, width
+        )
+
+        def chunk(indices):
+            args = (
+                held_radius[indices],
+                height[indices],
+                edge[..., indices],
+                present[:, indices],
+                norm[indices],
+                centre[:, indices],
+                expansion[:, indices],
+            )
+            return lax.cond(
+                xp.any(near[indices]),
+                lambda operands: _flux_area_integral(
+                    xp, *operands, True, near[indices]
+                ),
+                lambda operands: _flux_area_integral(xp, *operands, False),
+                args,
+            )
+
+        result = xp.moveaxis(lax.map(chunk, index), 1, 0).reshape(3, -1)[
+            :, : radius.size
+        ]
+    result = xp.where(radius[None] == 0.0, 0.0, result)
+    return tuple(result[i].reshape(shape) for i in range(3))
+
+
 def polygon_analytic_flux_moments(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -1943,111 +2096,35 @@ def polygon_analytic_flux_moments(
     """Return the exact fixed-section flux blocks ``(G_0, G_R, G_Z)``.
 
     The companions are the area means of ``(R - R_c) K_psi`` and
-    ``(Z - Z_c) K_psi`` in m Wb/A.  The uniform and both weighted rows share one
-    Part V corner channel, pole family and pair of graded residual builds.  The
-    default expansion point is the polygon's area centroid.
+    ``(Z - Z_c) K_psi`` in m Wb/A, where the default reference point is the
+    polygon's area centroid. Signed triangle integrals accumulate source-local
+    offsets times the filament flux directly: no large corner antiderivatives
+    or raw coordinate moments are subtracted. A fourth-power Duffy coordinate
+    grades the logarithmic filament singularity when the target is nearby.
+    Changing the requested centre subtracts only its represented displacement
+    from each local source coordinate, before multiplication and accumulation.
     """
     area_centroid = _section_centroid(vertices)
-    requested_centre = (
-        area_centroid
-        if expansion_point is None
-        else np.asarray(expansion_point, dtype=np.float64)
+    requested = (
+        area_centroid if expansion_point is None else np.asarray(expansion_point)
     )
-    if requested_centre.shape != (2,) or not np.all(np.isfinite(requested_centre)):
+    if requested.shape != (2,) or not np.all(np.isfinite(requested)):
         raise ValueError("expansion_point must be a finite (R, Z) pair")
-    edges, weights, norm = pack_section(vertices)
+    edge, weight, norm = pack_section(vertices)
     signed = np.asarray(target_r, dtype=np.float64)
-    height = np.asarray(target_z, dtype=np.float64)
-    shape = signed.shape
-    r = np.abs(signed).ravel()
-    z = np.broadcast_to(height, shape).ravel()
-    axis = r == 0.0
-    if np.any(axis):
-        rows = [np.zeros_like(r), np.zeros_like(r), np.zeros_like(r)]
-        off_axis = ~axis
-        if np.any(off_axis):
-            computed = polygon_analytic_flux_moments(
-                signed.ravel()[off_axis],
-                z[off_axis],
-                vertices,
-                expansion_point=requested_centre,
-                nodes=nodes,
-            )
-            for row, values in zip(rows, computed, strict=True):
-                row[off_axis] = values
-        return tuple(row.reshape(shape) for row in rows)
-
-    flux = np.zeros_like(r)
-    radial_moment = np.zeros_like(r)
-    vertical_moment = np.zeros_like(r)
-    target_z_minus_expansion_z = z - area_centroid[1]
-    sides = len(edges)
-    live = weights != 0.0
-    flux_terms = [np.zeros_like(r) for _ in range(sides)]
-    vertical_terms = [np.zeros_like(r) for _ in range(sides)]
-    chain = live.astype(np.int64) - np.roll(live, 1).astype(np.int64)
-    last_read: dict[int, int] = {}
-    for index in np.flatnonzero(live):
-        last_read[int(index)] = int(index)
-        last_read[int(index + 1) % sides] = int(index)
-    corners: dict[int, _Vertex] = {}
-
-    def corner_part(index: int, corner_r: float, corner_z: float) -> _Vertex:
-        if index not in corners:
-            corners[index] = _Vertex(
-                r, z, corner_r, corner_z, nodes, residual=bool(chain[index])
-            )
-        return corners[index]
-
-    for index in range(sides):
-        if not live[index]:
-            continue
-        ra, za, rb, zb = edges[index]
-        lower = corner_part(index, ra, za)
-        upper = corner_part((index + 1) % sides, rb, zb)
-        edge = _Edge(r, z, edges[index], nodes)
-        high = edge.flux_and_moment_terms(
-            upper, area_centroid[0], target_z_minus_expansion_z
-        )
-        low = edge.flux_and_moment_terms(
-            lower, area_centroid[0], target_z_minus_expansion_z
-        )
-        flux_terms[index] = low[0] - high[0]
-        vertical_terms[index] = low[2] - high[2]
-        flux = flux + flux_terms[index]
-        radial_moment = radial_moment + low[1] - high[1]
-        vertical_moment = vertical_moment + vertical_terms[index]
-        for corner in dict.fromkeys((index, (index + 1) % sides)):
-            if last_read[corner] != index:
-                continue
-            if chain[corner]:
-                one_flux = corners[corner].arsinh_terms()[0]
-                one_radial, one_vertical = corners[corner].flux_moment_residuals(
-                    area_centroid[0], target_z_minus_expansion_z
-                )
-                flux = flux + chain[corner] * one_flux
-                radial_moment = radial_moment + chain[corner] * one_radial
-                vertical_moment = vertical_moment + chain[corner] * one_vertical
-            del corners[corner]
-    vertical_moment = _condition_vertical_contour_sum(
-        vertices,
-        area_centroid[1],
-        z,
-        live,
-        flux_terms,
-        vertical_terms,
-        vertical_moment,
+    height = np.broadcast_to(np.asarray(target_z, dtype=np.float64), signed.shape)
+    count = signed.size
+    values = _conditioned_flux_moments(
+        np,
+        signed.ravel(),
+        height.ravel(),
+        np.broadcast_to(edge[:, :, None], (*edge.shape, count)),
+        np.broadcast_to(weight[:, None], (len(weight), count)),
+        np.full(count, norm),
+        np.broadcast_to(area_centroid[:, None], (2, count)),
+        np.broadcast_to(requested[:, None], (2, count)),
     )
-    scale = 0.5 * norm * r
-    uniform = scale * flux
-    radial_central = scale * radial_moment
-    vertical_central = scale * vertical_moment
-    displacement = requested_centre - area_centroid
-    return (
-        uniform.reshape(shape),
-        (radial_central - displacement[0] * uniform).reshape(shape),
-        (vertical_central - displacement[1] * uniform).reshape(shape),
-    )
+    return tuple(value.reshape(signed.shape) for value in values)
 
 
 def _one_flux_moment_source(arguments):
@@ -2527,6 +2604,11 @@ def packed_analytic_moments(
     JAX accelerator.  Section and requested expansion centres are ``(2, pair)``
     arrays.  ``reflection_partner`` maps every packed edge to its reflected edge,
     or to itself when the section has no horizontal reflection.
+
+    Flux moments are the area means of K, (R-Rc) K and (Z-Zc) K about the
+    requested expansion centre. They accumulate signed triangle integrals of
+    local source offsets, avoiding differences of large corner primitives;
+    the field rows retain their analytic contour reduction.
     """
     signed = xp.asarray(target_r)
     radius = xp.abs(signed)
@@ -2700,10 +2782,11 @@ def packed_analytic_moments(
     uniform_flux = xp.where(axis, 0.0, uniform_flux)
     uniform_radial = xp.where(axis, 0.0, uniform_radial)
     uniform_vertical = xp.where(axis, axis_vertical, uniform_vertical)
+    conditioned_flux = _conditioned_flux_moments(
+        xp, signed, height, edge, weight, norm, section_centre, expansion_centre
+    )
     return (
-        uniform_flux,
-        xp.where(axis, 0.0, radial_flux - displacement_r * uniform_flux),
-        xp.where(axis, 0.0, vertical_flux - displacement_z * uniform_flux),
+        *conditioned_flux,
         uniform_radial,
         xp.where(axis, 0.0, radial_central - displacement_r * uniform_radial),
         xp.where(axis, 0.0, vertical_central - displacement_z * uniform_radial),

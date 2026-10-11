@@ -2736,13 +2736,6 @@ def _wall_events(field, geometry, policy, sigma):
 
 
 def _connected_fragment_labels(area, intervals, geometry, tolerance):
-    """Label each live fragment by the least index in its connected component.
-
-    Every round hooks the larger representatives across overlap edges to
-    smaller ones, then halves parent chains. At most four times the bit
-    length of the fragment count is allowed; an unsettled graph is refused
-    rather than returned as a partial component labelling.
-    """
     cells, capacity = area.shape
     edge_interval = jnp.transpose(intervals, (0, 2, 1, 3, 4))
     peer = jnp.maximum(geometry.neighbour, 0)
@@ -2761,43 +2754,23 @@ def _connected_fragment_labels(area, intervals, geometry, tolerance):
     )
     sentinel = cells * capacity
     initial = jnp.where(
-        area.reshape(-1) > 0.0,
-        jnp.arange(sentinel, dtype=jnp.int32),
-        sentinel,
+        area > 0.0, jnp.arange(sentinel).reshape(cells, capacity), sentinel
     )
-    source = jnp.broadcast_to(
-        jnp.arange(sentinel, dtype=jnp.int32).reshape(cells, 1, capacity, 1),
-        links.shape,
-    ).reshape(-1)
-    target = jnp.broadcast_to(
-        peer[:, :, None, None] * capacity
-        + jnp.arange(capacity, dtype=jnp.int32)[None, None, None, :],
-        links.shape,
-    ).reshape(-1)
-    edge_live = links.reshape(-1)
-    round_limit = 4 * sentinel.bit_length()
 
     def condition(state):
-        iteration, _parents, changed = state
-        return changed & (iteration < round_limit)
+        iteration, _labels, changed = state
+        return changed & (iteration < sentinel)
 
     def propagate(state):
-        iteration, parents, _changed = state
-        left, right = parents[source], parents[target]
-        high = jnp.maximum(left, right)
-        low = jnp.where(
-            edge_live & (left < sentinel) & (right < sentinel),
-            jnp.minimum(left, right),
-            sentinel,
+        iteration, labels, _changed = state
+        incoming = labels[peer]
+        next_label = jnp.minimum(
+            labels,
+            jnp.min(jnp.where(links, incoming[:, :, None, :], sentinel), axis=(1, 3)),
         )
-        hooked = parents.at[jnp.minimum(high, sentinel - 1)].min(low)
-        doubled = hooked[jnp.minimum(hooked, sentinel - 1)]
-        next_parent = jnp.where(
-            hooked < sentinel, jnp.minimum(hooked, doubled), sentinel
-        )
-        return iteration + 1, next_parent, jnp.any(next_parent != parents)
+        return iteration + 1, next_label, jnp.any(next_label != labels)
 
-    iteration, labels, changed = jax.lax.while_loop(
+    _, labels, _ = jax.lax.while_loop(
         condition, propagate, (jnp.asarray(0), initial, jnp.asarray(True))
     )
     wall = jnp.any(
@@ -2805,7 +2778,7 @@ def _connected_fragment_labels(area, intervals, geometry, tolerance):
         & (edge_interval[..., 1] - edge_interval[..., 0] > tolerance),
         axis=(1, 3),
     )
-    return labels.reshape(cells, capacity), wall, ~changed, iteration
+    return labels, wall
 
 
 def _membership_roundoff_bound(area, geometry, edge_tolerance):
@@ -2871,7 +2844,7 @@ def _support_at_level(
     intervals = jnp.where(
         represented[:, None, None, None, None], saddle_intervals, intervals
     )
-    labels, wall, converged, _label_rounds = _connected_fragment_labels(
+    labels, wall = _connected_fragment_labels(
         area, intervals, geometry, policy.edge_tolerance
     )
     axis_cells = _inside_cells(geometry, axis)
@@ -2895,7 +2868,7 @@ def _support_at_level(
     axis_fragment = fragments.slice_labels[axis_cell, axis_strip, axis_interval]
     axis_label = labels[axis_cell, jnp.maximum(axis_fragment, 0)]
     selected = (labels == axis_label) & (area > 0.0)
-    valid = converged & jnp.all(jnp.where(represented, saddle.valid, fragments.valid))
+    valid = jnp.all(jnp.where(represented, saddle.valid, fragments.valid))
     valid = valid & jnp.any(axis_cells) & (axis_fragment >= 0)
     return (
         area,

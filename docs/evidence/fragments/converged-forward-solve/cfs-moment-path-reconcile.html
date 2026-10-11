@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="cfs-moment-path-reconcile">
   <meta name="plan-title" content="Moment-path conditioning and independent reference">
-  <meta name="plan-summary" content="Numerical conditioning passes; the point-jet expression guard remains above its bound and module qualification is incomplete.">
+  <meta name="plan-summary" content="The accepted compile budget passes; final-head qualification exposes a separate near-edge flux error within an already-failing identity test.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s4">
   <meta name="plan-recorded-at" content="2026-10-11">
@@ -235,14 +235,63 @@
     that to 48 minutes within the 60-minute session ceiling was refused by the
     scheduler. Peer jobs and serving allocations were outside the cancellation.
     No worker process is left waiting on this job.</p>
-    <p>Next: factor the quadrature expression below the existing point-jet
-    bound, then rerun the final head's numerical and complete module gates.
+    <p>At this stop, the proposed next action was further expression reduction.
+    The subsequent ruling below supersedes that proposal.
     The following carrier node must also repair <code>builder_revision</code>
     in <code>scripts/analytic_oracle_fixtures/measure.py</code>: it hashes the
     two assembly files but omits <code>polygonanalytic.py</code>, so this kernel
     change alone does not invalidate cached carriers. That file is outside
     this node's write scope. The 5,000/10,000-cell carriers and certificate rows
     remain assigned to the following node.</p>
+  </section>
+  <section id="cfs-moment-path-reconcile-resumed-qualification">
+    <h2>Accepted compile budget and final-head qualification</h2>
+    <p>The subsequent ruling accepts a 22,000-equation compile-cost budget
+    for the conditioned first-moment formulation. Commit
+    <code>7aa244af85002c1bbd647d53546d3f3765f37ce7</code> changes that budget
+    from 20,000 and reports the observed count on assertion failure.
+    H200 job <code>1283519</code>, requested for 90 minutes with 1,800-second
+    per-test timeouts, measures <code>21,087</code> and passes the bound.
+    The launcher includes <code>scripts/h200_test_lane</code> in its Python
+    path; the cold-compile test now passes in both arms.</p>
+    <p>The final-head 251-pair reference check passes at
+    <code>2.2376532680120586e-14</code> maximum norm-relative error, and all
+    six small tests pass. Full block and module receipts are under the run's
+    <code>logs/requalification/</code> directory. Both compile-module arms
+    finish with <code>1 failed, 7 passed, 2 xfailed</code>; the remaining
+    failing id is <code>test_point_jet_identity</code>. The full module delta
+    is still running.</p>
+    <h3>A shared failing test id conceals an additional flux discrepancy</h3>
+    <p>The baseline and head identity tests have identical Hessian-component
+    discrepancies against their historical reference kernel. The repaired
+    head also differs in flux at
+    <code>(5.1290090247138025, 0.06117221140408553) m</code>. An independent
+    signed triangle integral, with angular panels resolving the closest
+    approach to each edge, decides this point. Unsplit dense rules through
+    order 1,024 do not converge sufficiently here and are not used as the
+    reference verdict.</p>
+    <table><thead><tr><th>Arm or quadrature order</th><th>Weighted flux, Wb/A</th></tr></thead><tbody>
+      <tr><td>Independent split rule, 24</td><td>2.403411879680788e-5</td></tr>
+      <tr><td>Independent split rule, 48</td><td>2.403411879680798e-5</td></tr>
+      <tr><td>Independent split rule, 96</td><td>2.403411879680774e-5</td></tr>
+      <tr><td>Independent split rule, 192</td><td>2.4034118796809135e-5</td></tr>
+      <tr><td>Historical unrepaired kernel</td><td>2.4034118796873249e-5</td></tr>
+      <tr><td>Conditioned kernel, host and H200</td><td>2.403407339868999e-5</td></tr>
+    </tbody></table>
+    <p>The conditioned result has approximately <code>1.89e-6</code>
+    relative error at this near-edge point. This point is outside the
+    251-pair sample and the six small tests. The existing failing identity
+    test remains enabled and no numerical-value pin is changed. These
+    receipts establish a further angular-resolution defect; a zero added
+    failing-id count would not demonstrate its absence.</p>
+    <p><code>identity_split_reference.py</code>,
+    <code>identity_split_reference.log</code> and
+    <code>identity_split_reference.json</code> retain the geometry,
+    coefficients, order-doubling values and imported-module provenance.
+    The unsplit probe is retained as <code>identity_reference.log</code>.
+    The kernel is unchanged pending direction on a separate repair node
+    versus extension of this node; the current ruling says not to factor
+    further here.</p>
   </section>
 </main>
 </body>

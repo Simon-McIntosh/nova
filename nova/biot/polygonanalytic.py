@@ -2021,10 +2021,15 @@ def _conditioned_flux_moments(
     shape = signed.shape
     radius = xp.abs(signed).reshape(-1)
     height = height.reshape(-1)
-    edge = edge.reshape((edge.shape[0], 4, -1))
-    weight = weight.reshape((weight.shape[0], -1))
-    norm = norm.reshape(-1)
-    centre, expansion = centre.reshape((2, -1)), expansion.reshape((2, -1))
+    edge = xp.broadcast_to(edge, (edge.shape[0], 4) + shape).reshape(
+        (edge.shape[0], 4, -1)
+    )
+    weight = xp.broadcast_to(weight, (weight.shape[0],) + shape).reshape(
+        (weight.shape[0], -1)
+    )
+    norm = xp.broadcast_to(norm, shape).reshape(-1)
+    centre = xp.broadcast_to(centre, (2,) + shape).reshape((2, -1))
+    expansion = xp.broadcast_to(expansion, (2,) + shape).reshape((2, -1))
     present = ~xp.signbit(weight)
     distance = (radius - centre[0]) ** 2 + (height - centre[1]) ** 2
     extent = xp.max(

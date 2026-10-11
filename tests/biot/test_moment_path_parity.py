@@ -1,8 +1,8 @@
 """Polygon source-area moments against independently integrated reference values.
 
-The ordinary rows use dense Gauss integration with order doubling. The two
-small triangular sections additionally carry fifty-digit elliptic-integral
-checks; their nonzero moment signs must survive the reduction.
+The ordinary rows use dense Gauss integration with order doubling. The sliver
+triangle at two targets additionally carries fifty-digit elliptic-integral
+checks; its nonzero moment signs must survive the reduction.
 """
 
 import numpy as np
@@ -178,3 +178,28 @@ def test_moment_reference_point_is_a_local_displacement():
     np.testing.assert_allclose(
         moved[1:], base[1:] - shift * base[0], rtol=1e-12, atol=1e-23
     )
+
+
+@pytest.mark.parametrize("backend", ["numpy", "device"])
+def test_one_polygon_broadcasts_across_targets(backend):
+    row = _ROWS[1]
+    targets = np.asarray([one["target"] for one in _ROWS[:3]])
+    inputs = list(_packed_inputs([row]))
+    inputs[:2] = targets[:, 0], targets[:, 1]
+    expected = np.asarray(
+        polygon_analytic_flux_moments(
+            targets[:, 0],
+            targets[:, 1],
+            np.asarray(row["polygon"]),
+            expansion_point=row["expansion_point"],
+        )
+    )
+    if backend == "numpy":
+        actual = np.asarray(packed_analytic_moments(np, *inputs)[:3])
+    else:
+        evaluate = jax.jit(lambda *args: packed_analytic_moments(jnp, *args)[:3])
+        actual = np.asarray(evaluate(*inputs))
+    relative = np.max(np.abs(actual - expected), axis=1) / np.max(
+        np.abs(expected), axis=1
+    )
+    assert np.all(relative <= 1e-12), relative

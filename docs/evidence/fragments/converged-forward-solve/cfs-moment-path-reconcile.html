@@ -7,12 +7,12 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="cfs-moment-path-reconcile">
   <meta name="plan-title" content="Moment-path conditioning and independent reference">
-  <meta name="plan-summary" content="The accepted compile budget passes; final-head qualification exposes a separate near-edge flux error within an already-failing identity test.">
+  <meta name="plan-summary" content="Final-head reference and all 18 blocks pass; the full module delta adds no failing ids. A near-edge accuracy defect is a separate repair follow-on; scope metadata blocks administrative completion.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s4">
   <meta name="plan-recorded-at" content="2026-10-11">
   <meta name="plan-verdict" content="blocked">
-  <meta name="plan-environment" content="Shared nova environment; CPU fleet allocation 1281970 and H200 job 1283504; float64 kernels and 50-digit mpmath reference">
+  <meta name="plan-environment" content="Shared nova environment; CPU fleet allocation 1281970 and H200 jobs 1283504 and 1283519; float64 kernels and 50-digit mpmath reference">
   <meta name="plan-tags" content="equilibrium,jax,convergence">
   <title>Moment-path reference | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -193,7 +193,7 @@
     under the run directory already named above.</p>
   </section>
   <section id="cfs-moment-path-reconcile-expression-blocker">
-    <h2>Stop record: point-jet expression bound remains unmet</h2>
+    <h2>Prior stop record: point-jet expression bound</h2>
     <p>The numerical candidate and broadcasting repair are committed. The
     small suite passed on H200: <code>6 passed</code> in
     <code>gpu_broadcast_small.log</code>. Broadcasting one polygon over
@@ -206,8 +206,8 @@
     Removing unused elliptic field combinations reduces the CPU trace to
     <code>21,087</code>, still a failure. The two recorded attempts are
     <code>expression_reproduction.log</code> and
-    <code>expression_trimmed.log</code>. The retry stop applies; the bound
-    was not weakened and the node is not complete.</p>
+    <code>expression_trimmed.log</code>. The retry stop applied; the bound
+    was unchanged and the node was incomplete at that checkpoint.</p>
     <p>The final flux-only simplification passes the 251-pair CPU reference
     with channel errors <code>3.029089928e-16 / 1.419644801e-14 / 2.186212963e-14</code>.
     It changes the earlier candidate's CPU outputs by at most
@@ -263,7 +263,7 @@
     <code>logs/requalification/</code> directory. Both compile-module arms
     finish with <code>1 failed, 7 passed, 2 xfailed</code>; the remaining
     failing id is <code>test_point_jet_identity</code>. The full module delta
-    is still running.</p>
+    is now complete, with the same four failing ids in each arm.</p>
     <p>The required existing modules are <code>test_kernel_compile_cost</code>,
     <code>test_edge_term_tangents</code>, <code>test_near_collinear_tangent</code>,
     <code>test_vertex_term_tangents</code> and
@@ -276,14 +276,38 @@
     pytest and are never counted as passed tests. The source-path selection is
     retained in <code>required_modules.txt</code> and
     <code>module_selection.txt</code>.</p>
-    <p>At the 22:55 UTC checkpoint, the compile module has one shared failing
-    id in each arm and the near-collinear module has four passes in each arm.
-    The edge and vertex modules are still running, and the traced-section
-    module is queued. Both full suite records remain
-    <code>completed: false</code>. The scheduler job has its requested
-    90-minute budget; the worker's 60-minute deadline is separate. The
-    manifest declares a wait on job <code>1283519</code>'s terminal scheduler
-    state so a resume can read every remaining module receipt.</p>
+    <p>Job <code>1283519</code> completed in <code>01:08:20</code> of its
+    requested <code>01:30:00</code>. Every required module ran as a fresh
+    process with a 1,800-second per-test bound. All module summaries are
+    present; both manifest suite arms now carry <code>completed: true</code>.
+    The final worker read the receipts after the scheduler completed, rather
+    than inferring test success from the batch exit code.</p>
+    <table><thead><tr><th>Module</th><th>Baseline</th><th>Final head</th></tr></thead><tbody>
+      <tr><td>Kernel compile cost</td><td>7 passed, 1 failed, 2 xfailed</td><td>7 passed, 1 failed, 2 xfailed</td></tr>
+      <tr><td>Edge-term tangents</td><td>21 passed, 3 failed</td><td>21 passed, 3 failed</td></tr>
+      <tr><td>Near-collinear tangent</td><td>4 passed</td><td>4 passed</td></tr>
+      <tr><td>Vertex-term tangents</td><td>18 passed</td><td>18 passed</td></tr>
+      <tr><td>Traced section moments</td><td>1 passed</td><td>1 passed</td></tr>
+      <tr><td>Moment reference and parity</td><td>Not present</td><td>6 passed</td></tr>
+      <tr><td>Total</td><td>51 passed, 4 failed, 2 xfailed</td><td>57 passed, 4 failed, 2 xfailed</td></tr>
+    </tbody></table>
+    <p>There are zero added failing test ids. The common ids are
+    <code>test_point_jet_identity</code>,
+    <code>test_tangent_matches_base_jvp[edge_terms]</code>,
+    <code>test_truncated_tangent_fails_identity[edge_terms]</code> and
+    <code>test_near_edge_tangent_meets_reference</code>. The two edge-terms
+    checks fail the same primal-bit comparison in both arms; the near-edge
+    tangent row is a strict unexpected pass in both arms. Those baseline
+    findings remain visible. No numerical-value pin or expected-failure
+    marker was changed. The compile budget alone changed from 20,000 to
+    22,000, against a measured 21,087 equations.</p>
+    <p><code>suite_summary.json</code>, <code>baseline_aggregate.log</code>,
+    <code>head_aggregate.log</code>, the individual module logs and
+    <code>complete.json</code> retain the exact commands, revisions,
+    imported modules, working directories and completion summaries. The
+    measured code revision is
+    <code>7aa244af85002c1bbd647d53546d3f3765f37ce7</code>; subsequent commits
+    change evidence only.</p>
     <table><thead><tr><th>Final arm</th><th>Channel</th><th>Max norm-relative error</th><th>Max elementwise relative error</th></tr></thead><tbody>
 <tr><td>host</td><td>Uniform</td><td>3.029089928e-16</td><td>5.051070727e-16</td></tr>
 <tr><td>host</td><td>Radial moment</td><td>1.633354771e-14</td><td>8.941522453e-10</td></tr>
@@ -323,9 +347,25 @@
     <code>identity_split_reference.json</code> retain the geometry,
     coefficients, order-doubling values and imported-module provenance.
     The unsplit probe is retained as <code>identity_reference.log</code>.
-    The kernel is unchanged pending direction on a separate repair node
-    versus extension of this node; the current ruling says not to factor
-    further here.</p>
+    Disposition: retain this as a separate near-edge accuracy repair
+    follow-on under the ruling not to factor further in this node. The error
+    is neither waived nor fixed. The following repair must add this geometry
+    as a regression case and resolve the sharp angular peak; the retained
+    quadrature refinements supply its independent reference. Carrier
+    regeneration should account for that repair before relying on the
+    resulting carriers.</p>
+  </section>
+  <section id="cfs-moment-path-reconcile-scope-metadata">
+    <h2>Remaining administrative scope update</h2>
+    <p>The numerical qualification and requested failing-id delta are complete.
+    The node's persisted write scope still omits the explicitly authorized
+    <code>tests/biot/test_kernel_compile_cost.py</code> edit.
+    <code>reckon crew widen</code> refused the metadata update while this
+    worker was active: it accepts only a stopped worker reporting a scope
+    block. <code>logs/requalification/widen_scope.log</code> retains that
+    refusal and <code>EXIT=1</code>. The coordinator must add this path after
+    the worker exits, then rerun the manifest audit; the kernel and tests need
+    no further execution for that metadata correction.</p>
   </section>
 </main>
 </body>

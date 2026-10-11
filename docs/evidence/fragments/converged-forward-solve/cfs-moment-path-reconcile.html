@@ -363,9 +363,15 @@
     <code>reckon crew widen</code> refused the metadata update while this
     worker was active: it accepts only a stopped worker reporting a scope
     block. <code>logs/requalification/widen_scope.log</code> retains that
-    refusal and <code>EXIT=1</code>. The coordinator must add this path after
-    the worker exits, then rerun the manifest audit; the kernel and tests need
-    no further execution for that metadata correction.</p>
+    refusal and <code>EXIT=1</code>. After the manifest recorded the scope
+    block, a second official attempt reached the pointer lock and failed with
+    <code>OSError: [Errno 30] Read-only file system</code> at this run's lock
+    under <code>/home/ITER/mcintos/.config/reckon/crew/locks/</code>.
+    <code>widen_blocked_scope.log</code> retains that failure and
+    <code>EXIT=1</code>. No scope change landed. The coordinator must add the
+    path outside this worker's filesystem fence after the worker exits, then
+    resume the final manifest audit; the kernel and tests need no further
+    execution for that metadata correction.</p>
   </section>
 </main>
 </body>

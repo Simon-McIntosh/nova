@@ -521,10 +521,15 @@ def _flux_blocks(
     polygons: tuple[np.ndarray, ...],
     centres: np.ndarray,
     *,
-    builder: str,
+    builder: str | None = None,
     executor=None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Assemble exact authored-section blocks for one target family."""
+    """Assemble exact authored-section blocks for one target family.
+
+    The assembly path defaults through :func:`resolve_builder`, so a caller that
+    names no path gets the certified host builder rather than an error.
+    """
+    builder = resolve_builder(builder)
     if builder == BUILDER_DEVICE:
         return coupling_build.build_flux_blocks(targets, polygons, centres)
     return polygon_analytic_flux_moments_batched(

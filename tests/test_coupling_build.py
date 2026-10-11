@@ -154,6 +154,17 @@ def test_the_device_path_publishes_a_distinct_cache_key(tmp_path):
     assert device_identity["discretisation"] == host_identity["discretisation"]
 
 
+def test_naming_no_assembly_path_reaches_the_host_builder():
+    """A caller that names no path keeps working and gets the host builder."""
+    targets, polygons, centres = _case()
+    with _builder_environment(None):
+        blocks = measure._flux_blocks(targets, polygons, centres)
+    analytic = polygon_analytic_flux_moments_batched(
+        targets[:, 0], targets[:, 1], polygons, expansion_points=centres, workers=1
+    )
+    _assert_identity(blocks, analytic)
+
+
 def test_each_assembly_path_reaches_its_own_builder():
     """The device path is the traced assembly; the host path is the analytic one."""
     targets, polygons, centres = _case()

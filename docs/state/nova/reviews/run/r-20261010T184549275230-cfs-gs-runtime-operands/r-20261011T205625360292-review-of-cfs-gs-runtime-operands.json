@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms, read from the manifest's JSON. baseline_suite: revision b86bfc7284bf89bce864e3062dbaa537b5277ba7, command 'env -C /tmp/cfs-gs-base.Tc62y9 JAX_PLATFORMS=cuda,cpu PYTHONPATH=/tmp/cfs-gs-base.Tc62y9 .../python -m pytest -p no:cacheprovider -q tests/test_forward_operator_arguments.py ...; ... tests/test_forward_compile_identity.py::test_certificate_rows_share_one_solve_program_per_mesh', exit_status 0, completed true, failure_count 0, failure_ids []. after_suite: revision d4f93d8de7a9f198f5f8a9976101ab5273e515a8, same two targets run from the worktree, exit_status 0, completed true, failure_count 0, failure_ids []. The head arm's failing set is empty, so the added set over the base's empty set is empty: added_failure_count 0. Both arms are the focused per-module suite, not the whole-file suites that exercise the changed identity (see evidence justification).",
+  "base_log_revision": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "call_site_count": 6,
+  "call_sites": [
+    "nova/equilibrium/forward.py:1971 - history = program(initial_flux, external, self.operator, target_value); the returned history program is now called with operator and target as required positional arguments, the changed solve contract",
+    "nova/equilibrium/forward.py:1985 - live_history = live_program(...) under live_read_fallback, same four-argument contract",
+    "nova/equilibrium/forward_operator.py:4056 - traced_flux_map mapped() returns gs.apply(psi, external, active, requested_class, active_target)",
+    "nova/equilibrium/forward_operator.py:4109 - traced_flux_map_with_shadow mapped() returns gs.apply(..., shadow)",
+    "nova/equilibrium/forward_operator.py:4133 - map_partition (frozen partition) returns gs.apply(..., partition.residual_shadow, partition)",
+    "nova/equilibrium/reduced_newton.py:2092 - _operator_program_identity reads the changed ForwardFluxOperator.program_identity (forward_operator.py:2671) at :2464, :2803, :3113"
+  ],
+  "completed_at": "2026-10-11T21:07:35.161Z",
+  "dispatched_at": "2026-10-11T20:56:39Z",
+  "findings": [
+    {
+      "file": "tests/test_gs_runtime_operands.py",
+      "line": "69-77",
+      "severity": "follow-on",
+      "text": "follow-on: test_map_matches_the_existing_book_and_image builds its expected value from the same primitives gs.apply composes (external + operator.internal(state) then operator._exclude_shadow_residual), so both sides move together. It cannot fail on any change to gs.apply's composition of book and image - only on gs.apply literally reordering those two calls - so it is not independent coverage of the map, and the map-fidelity measure done_when (2) states (gs.apply against the existing/analytic state at a pinned rung) is asserted nowhere independently. The observed map_relative_difference 0.0 in the fragment's MAP_ROW rows is this same tautology, not a fidelity result."
+    },
+    {
+      "file": "nova/equilibrium/reduced_newton.py",
+      "line": "2092",
+      "severity": "follow-on",
+      "text": "follow-on: program_identity (nova/equilibrium/forward_operator.py:2671) changed from _batch_identity(), which carried geometry_identity, to the tree_flatten layout identity, which excludes _geometry_identity. reduced_newton caches ReducedProgram keyed on this value via _operator_program_identity and refuses reuse with a ValueError when it changes (reduced_newton.py:2464, :2803, :3113). Same-shape operators with different geometry values now share an identity where the base raised, so a cached reduced program can be reused across geometries of one shape. The kernels take the operator as a traced argument (_image's operator_value), so such reuse is plausibly intended, but no reduced_newton test was in the delta gate and this consequence of the identity change is unverified. Reachable only because this node changed the identity; scope it as a \u00a74/\u00a75 verification item."
+    }
+  ],
+  "head_log_revision": "62d9700d3fc770c7e03f2512f2046277941d74c7",
+  "item_verdicts": {
+    "call_sites": "Six production call sites verified at the reviewed head: nova/equilibrium/forward.py:1971 and :1985, nova/equilibrium/forward_operator.py:4056, :4109, :4133 and nova/equilibrium/reduced_newton.py:2092.",
+    "diff": "Read commit by commit against base b86bfc728; five files, +492/-28 (nova/equilibrium/gs.py new, forward.py 8 lines, forward_operator.py 65, test file 380, fragment 43), all inside the declared write paths.",
+    "done_when": "Read; the nine-clause done_when. The gate asserts (3) executable_bytes <= 50_000_000 and (4) program_identity equality plus jit cache size (tests/test_gs_runtime_operands.py:83,87); (7) is the declared negative control. Clause (2)'s terminal 1e-13 is unmet (measured 3.7e-11), an authorised deviation recorded in the run's resume-3-advice.txt ruling. Clause (8)'s 'tests that exercise _accelerated_history_program and traced_flux_map' was run as the per-module subset only.",
+    "goal": "The node goal is 'Route the forward map through gs.apply with coupling blocks as traced runtime operands, so one program serves a mesh shape and the executable stays under 50 MB at 10,000 cells'. nova/equilibrium/gs.py:8 defines gs.apply and forward_operator.py:2671 keys the program by operand layout rather than geometry values; the fragment reports 1,071,555 B at 10,238 cells. Goal met.",
+    "manifest": "Read; it records the 15 commits, the focused gate (3 passed), the H200 base/after suites (6 passed each), the negative-control log, and the terminal comparison EXIT=1 at 3.7155677965180508e-11. I re-ran the named gate at head and reproduced 3 passed, EXIT=0.",
+    "write_paths": "Read the six declared paths; all five changed files - nova/equilibrium/gs.py, nova/equilibrium/forward.py, nova/equilibrium/forward_operator.py, tests/test_gs_runtime_operands.py, docs/evidence/fragments/converged-forward-solve/cfs-gs-runtime-operands.html - are inside them, and nothing outside them changed."
+  },
+  "justifications": {
+    "durability": "tests/test_gs_runtime_operands.py:83-89 is a real guard: reverting program_identity to include geometry_identity reddens the identity equality and the cache-size assertion, and the run's negative-control.log shows the closure-capture mutation failing this test; but the map-equality assertion at :69-77 is not independent (finding 1) and the hazard-demonstration test at :93 passes whatever the product code does.",
+    "evidence": "tests/test_gs_runtime_operands.py:87 asserts the jit cache stays at one across two geometries and :~/_measure_cached_map asserts executable_bytes <= 50_000_000, both recorded in the fragment; but the map-equality row is the self-referential comparison of finding 1 and the delta gate ran only tests/test_forward_operator_arguments.py plus one test of test_forward_compile_identity.py, not the other four files that exercise the changed map (tests/test_fixed_point.py, test_solve_trips_are_a_scan.py, test_live_read_fallback_acceptance.py, test_forward_profile_arguments.py).",
+    "fit": "nova/equilibrium/gs.py follows the module style of the package, but gs.apply:21,:24 reaches into operator._internal_on_partition and operator._exclude_shadow_residual, private methods the previous inlined callers reached as self. within the class.",
+    "goal_fidelity": "nova/equilibrium/gs.py:8 adds gs.apply and forward_operator.py:2671 keys the program identity on leaf shapes/dtypes and static controls, so one compiled program serves a mesh shape and the 10,238-cell executable measured 1,071,555 B.",
+    "reuse": "gs.apply factors the book-and-image composition out of the three inlined sites in forward_operator.py (4056, 4109, 4133) into one owner rather than duplicating a capability; the search over nova/equilibrium found no prior map-composition owner to fork.",
+    "scope_discipline": "git diff --stat b86bfc728..62d9700d lists exactly the five files of the declared write paths and nothing else."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is 'Route the forward map through gs.apply with coupling blocks as traced runtime operands, so one program serves a mesh shape and the executable stays under 50 MB at 10,000 cells'; nova/equilibrium/gs.py:8 defines gs.apply and forward_operator.py:2671 keys the program by operand layout, with 1,071,555 B measured at 10,238 cells.\nVERDICT done_when: read; the gate at tests/test_gs_runtime_operands.py:83-89 asserts the one-program clause, the fragment's measurement entry points assert executable_bytes <= 50_000_000, clause (2)'s terminal 1e-13 is unmet at 3.7e-11 (authorised by the ruling in the run's resume-3-advice.txt), and clause (8) ran only the per-module subset.\nVERDICT write_paths: read the six declared paths; all five changed files are inside nova/equilibrium/gs.py, nova/equilibrium/forward.py, nova/equilibrium/forward_operator.py, tests/test_gs_runtime_operands.py and docs/evidence/fragments/converged-forward-solve/cfs-gs-runtime-operands.html.\nVERDICT manifest: read; it states the focused gate (3 passed), the H200 base/after suites (6 passed each) and the terminal comparison EXIT=1 at 3.7155677965180508e-11; I re-ran the named gate at head and reproduced 3 passed, EXIT=0.\nVERDICT diff: read commit by commit against base b86bfc728; five files changed (+492/-28), all inside the declared write paths.\nCALL_SITES: nova/equilibrium/forward.py:1971, nova/equilibrium/forward.py:1985, nova/equilibrium/forward_operator.py:4056, nova/equilibrium/forward_operator.py:4109, nova/equilibrium/forward_operator.py:4133, nova/equilibrium/reduced_newton.py:2092\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: nova/equilibrium/gs.py:8 adds gs.apply and forward_operator.py:2671 keys program identity on leaf shapes and static controls, so one program serves a mesh shape and the 10,238-cell executable measured 1,071,555 B.\nSCORE evidence: 16\nJUSTIFICATION evidence: the one-program and 50 MB assertions are recorded and I reproduced the gate (3 passed), but the map-equality row is self-referential (finding 1) and the delta gate ran only tests/test_forward_operator_arguments.py plus one test of test_forward_compile_identity.py, not the other four files exercising the changed map.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat b86bfc728..62d9700d lists exactly the five files of the declared write paths and nothing else.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_gs_runtime_operands.py:83-89 reddens if program_identity is reverted and the negative-control.log shows the closure-capture mutation failing it, but the map-equality assertion at :69-77 is not independent and the hazard-demonstration test at :93 passes whatever the product code does.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/gs.py follows the package style but gs.apply:21,:24 calls operator._internal_on_partition and operator._exclude_shadow_residual, private methods the prior inlined callers reached as self.\nSCORE reuse: 18\nJUSTIFICATION reuse: gs.apply factors the book-and-image composition out of the three inlined sites in forward_operator.py (4056, 4109, 4133) into one owner; the search over nova/equilibrium found no prior map-composition owner to fork.\nFINDING tests/test_gs_runtime_operands.py:69-77 follow-on: the map-equality assertion builds its expected value from the same primitives gs.apply composes, so both sides move together and it cannot fail on any change to gs.apply's composition; the fidelity measure done_when (2) states is asserted nowhere independently.\nFINDING nova/equilibrium/reduced_newton.py:2092 follow-on: program_identity no longer carries geometry values, so same-shape different-geometry operators now share reduced_newton's cached ReducedProgram keyed at :2464, :2803, :3113 where the base raised; no reduced_newton test was in the delta gate.",
+  "review_run_id": "r-20261011T205625360292-review-of-cfs-gs-runtime-operands",
+  "reviewed_base_sha": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "reviewed_head_sha": "62d9700d3fc770c7e03f2512f2046277941d74c7",
+  "reviewed_run_id": "r-20261010T184549275230-cfs-gs-runtime-operands",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-11T21:05:00Z",
+  "total": 104
+}

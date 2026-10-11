@@ -1,0 +1,104 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite suite-90m-read/base-suite.log 2 failed/11 passed EXIT=1 at b86bfc72 and after_suite suite-90m-read/head-suite.log 13 passed EXIT=0 at 91dcb079; head adds no failing test id.",
+  "after_suite": {
+    "command": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-read-ten-thousand/scripts/prototypes/ladder/run_gate.sh b86bfc7284bf89bce864e3062dbaa537b5277ba7 91dcb07986f0a0c2cbcc43b8744b2a98b0837353 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read/head-suite.log",
+    "revision": "91dcb07986f0a0c2cbcc43b8744b2a98b0837353"
+  },
+  "baseline_suite": {
+    "command": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-read-ten-thousand/scripts/prototypes/ladder/run_gate.sh b86bfc7284bf89bce864e3062dbaa537b5277ba7 91dcb07986f0a0c2cbcc43b8744b2a98b0837353 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[10000-limited]",
+      "tests/test_read_ten_thousand_cells.py::test_fragment_representatives_converge_across_long_paths"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read/base-suite.log",
+    "revision": "b86bfc7284bf89bce864e3062dbaa537b5277ba7"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-10T18:47:49Z",
+  "findings": [
+    {
+      "anchor": "nova/equilibrium/topology.py:2793",
+      "id": "reuse-hook-and-compress-1",
+      "reason": "build the fragment neighbour table (vertices = cells*capacity, neighbours = peer*capacity+k) and call label_parallel_graph_components_with_steps, or extend that owner, rather than duplicating its algorithm inline.",
+      "text": "the fragment-label propagation reimplements hook-and-compress (union-by-minimum plus parent pointer-jump with a settled bit) that nova/equilibrium/parallel_components.py:77 label_parallel_graph_components_with_steps already owns as a general-graph kernel returning (labels, steps, settled); the fragment graph maps to that owner's centre-first neighbour table with admissibility = links, so the addition duplicates rather than extends or wraps it, and its 4*sentinel.bit_length() cap is a weaker copy of the owner's ceil(log2(cell_count))+2 bound.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read/head-suite.log:1",
+      "id": "evidence-stale-delta-arm",
+      "reason": "re-run the H200 read-path suite at the reviewed head 29b5b4e2 so the zero-added-failure delta covers the final topology admission change, or record the delta gap explicitly in the manifest.",
+      "text": "the after_suite arm supplying the done-when's H200 zero-added-failure delta records revision 91dcb079, five commits behind the reviewed head, so the final production change 6ec12f42c (policy-scaled membership admission) is covered by no H200 delta arm.",
+      "type": "evidence_gap",
+      "would_change": false
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/policy-revert-negative.log:1",
+      "id": "negative-control-mismatch-1",
+      "reason": "either record a control that applies the declared mutation (base one-hop propagation at 10,000 cells) or restate the declared string to the admission revert that was actually applied.",
+      "text": "the declared mutation is 'restoring the base label propagation reproduces UNRESOLVED_COMPONENT at 10,000 cells by test id', but the recorded control reverts the parent of the admission commit 6ec12f42c and reddens test_membership_overfill_respects_edge_tolerance, so the declared label-propagation control was not the one applied.",
+      "type": "negative_control",
+      "would_change": false
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified no production runtime call site reaches the change; the module-level read at nova/equilibrium/topology.py:2971 is called only by tests and scripts/prototypes.",
+    "diff": "read base b86bfc72 to head 29b5b4e2 (32 commits); the only product-source change is nova/equilibrium/topology.py:2738, the propagation replaced with hook-and-compress returning a converged bit, plus _membership_roundoff_bound at 2811 and its policy-scaled call.",
+    "done_when": "the seven-part done_when is gated by the H200 suite recorded at suite-90m-read/head-suite.log (base 2 failed/11 passed, head 13 passed, zero added) at revision 91dcb079, five commits behind the reviewed head.",
+    "goal": "the node goal is to make the topology read valid and near-linear at 10,000 cells by bounding its component-label propagation; nova/equilibrium/topology.py:2778 lands the bound and both 10,000-cell reads are valid, but the wall is not near-linear (exponents 1.479/1.458 against a base 1.472).",
+    "manifest": "read; status complete, a 32-entry commits list, an H200 base/head suite JSON pair, a reason-7 negative control log, and a landing line naming the exponents.",
+    "write_paths": "read the manifest's five declared paths; every path in the base..head diff is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_read_ten_thousand_cells.py:144 asserts the exact 0 and split labels and a 4*bit_length round cap that the base one-hop algorithm cannot satisfy.",
+    "evidence": "the head suite at suite-90m-read/head-suite.log ran at revision 91dcb079, five commits before the reviewed head 29b5b4e2, so the done-when's H200 delta is recorded pre-head.",
+    "fit": "the added names are mechanism words with no plan label, but nova/equilibrium/topology.py:2827 constructs a throwaway TopologyPolicy() only to read its default edge_tolerance as a constant.",
+    "goal_fidelity": "nova/equilibrium/topology.py:2778 bounds the label rounds, but the WALL table in the evidence fragment reports limited exponent 1.479 against a base 1.472 and 80.623 s versus 79.236 s for the one-hop control, so the read got valid but not near-linear.",
+    "reuse": "nova/equilibrium/topology.py:2793 hand-rolls hook-and-compress union-by-minimum that the repository already owns at nova/equilibrium/parallel_components.py:77.",
+    "scope_discipline": "every path in the base..head diff lies inside the five declared write paths, with no product file touched beyond nova/equilibrium/topology.py."
+  },
+  "node": "review-of-cfs-read-ten-thousand",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the topology read valid and near-linear at 10,000 cells by bounding its component-label propagation; nova/equilibrium/topology.py:2778 lands the bound and both 10,000-cell reads are valid, but the wall is not near-linear - the recorded exponents are 1.479 (limited) and 1.458 (diverted) against a base 1.472, so the goal's near-linear half is unmet.\nVERDICT done_when: the seven-part done_when is gated by the H200 suite over tests/test_read_ten_thousand_cells.py and tests/equilibrium/test_topology_read.py recorded at suite-90m-read/head-suite.log (base 2 failed/11 passed, head 13 passed, zero added), but that arm names revision 91dcb079, five commits behind the reviewed head, so the delta does not cover the final topology admission change.\nVERDICT write_paths: read the manifest's five declared paths; every path in the base..head diff - nova/equilibrium/topology.py, tests/test_read_ten_thousand_cells.py, scripts/prototypes/ladder/*, the evidence fragment and the two SVG poloidal panels - is inside them.\nVERDICT manifest: read; status complete, a 32-entry commits list, an H200 base/head suite JSON pair, a reason-7 negative control log, and a landing line naming the exponents and the deferred read wall.\nVERDICT diff: read base b86bfc72 to head 29b5b4e2 (32 commits); the only product-source change is nova/equilibrium/topology.py:2738 - the one-hop fragment propagation replaced with hook-and-compress at 2784-2798 that returns a converged bit, a new _membership_roundoff_bound at 2811, and its policy-scaled call at 3130-3137.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:2778 bounds the label rounds, but the shared WALL table in docs/evidence/fragments/converged-forward-solve/cfs-read-ten-thousand.html reports limited exponent 1.479 against a base 1.472 and 80.623 s versus 79.236 s for the one-hop control, so the read got valid but not near-linear.\nSCORE evidence: 14\nJUSTIFICATION evidence: the head suite at suite-90m-read/head-suite.log ran at revision 91dcb079, five commits before the reviewed head 29b5b4e2, so the done-when's H200 delta is recorded pre-head and the final admission change rests on the CPU targeted test and the reason-7 negative control instead.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the base..head diff (git diff --stat b86bfc72 29b5b4e2) lies inside the five declared write paths, with no product file touched beyond nova/equilibrium/topology.py.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_read_ten_thousand_cells.py:144 asserts the exact 0 and split labels and a 4*bit_length round cap that the base one-hop algorithm cannot satisfy, and the recorded negative control reddens the strict-policy case by test id.\nSCORE fit: 16\nJUSTIFICATION fit: the added names (_connected_fragment_labels, _membership_roundoff_bound) are mechanism words with no plan label, but nova/equilibrium/topology.py:2827 constructs a throwaway TopologyPolicy() only to read its default edge_tolerance as a constant.\nSCORE fit: 16\nSCORE reuse: 4\nJUSTIFICATION reuse: nova/equilibrium/topology.py:2793 hand-rolls hook-and-compress union-by-minimum with parent pointer-jump that the repository already owns at nova/equilibrium/parallel_components.py:77.\nFINDING nova/equilibrium/topology.py:2793 follow-on: the fragment-label propagation reimplements hook-and-compress (union-by-minimum plus parent pointer-jump with a settled bit) that nova/equilibrium/parallel_components.py:77 label_parallel_graph_components_with_steps already owns as a general-graph kernel returning (labels, steps, settled); the fragment graph maps cleanly to that owner's centre-first neighbour table with admissibility = links, so the addition duplicates rather than extends or wraps it, and its 4*sentinel.bit_length() cap is a weaker copy of the owner's ceil(log2(cell_count))+2 bound.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read/head-suite.log:1 follow-on: the after_suite arm that supplies the done-when's H200 zero-added-failure delta records revision 91dcb079, five commits behind the reviewed head, so the final production change 6ec12f42c (policy-scaled membership admission) is not covered by any H200 delta arm and rests only on the CPU targeted run and the negative control.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/policy-revert-negative.log:1 follow-on: the declared mutation is 'restoring the base label propagation reproduces UNRESOLVED_COMPONENT at 10,000 cells by test id', but the recorded control reverts the parent of the admission commit 6ec12f42c (MUTATION=source content from answering commit parent) and reddens test_membership_overfill_respects_edge_tolerance, so the declared label-propagation control was not the one applied; the label change instead rests on test_fragment_representatives_converge_across_long_paths.",
+  "review_run_id": "legacy-4e8cd89705c6",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "reviewed_head_sha": "29b5b4e29efffd7c30ce21222223334affe10927",
+  "reviewed_run_id": "r-20261010T184728541171-cfs-read-ten-thousand",
+  "reviewer_run_id": "r-20261011T205333945418-review-of-cfs-read-ten-thousand",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 4,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "test_logs": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read/base-suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-90m-read/head-suite.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/gate-90m-read.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/base-snapshots.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/base-cpu-snapshots.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/base-read.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/policy-revert-negative.log"
+  ],
+  "times_source": "run-record",
+  "timestamp": "2026-10-11T21:08:47.114811+00:00"
+}

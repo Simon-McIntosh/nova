@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-read-ten-thousand">
+<meta name="plan-title" content="Topology read at ten thousand cells">
+<meta name="plan-summary" content="Roundoff admission validates both 10,000-cell reads with the base fragment propagation; the measured wall is an open follow-on">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verdict" content="complete">
+<meta name="plan-recorded-at" content="2026-10-10">
+<meta name="plan-tags" content="equilibrium,topology,analytic-oracle,refinement">
+<title>Topology read at ten thousand cells | nova</title>
+</head><body><main class="plan-doc">
+<h1 id="cfs-read-ten-thousand">Topology read at ten thousand cells</h1>
+<p id="cfs-read-ten-thousand-diagnosis">On the base limited state at 10,000 cells, the read returned reason 7 and took 79.139 s warm on the H200 (job 1283203). A direct predicate check in job 1283208 found no invalid or nonfinite fragment, but 29 cells exceeded the former 1 + 1e-12 membership limit. The largest raw fraction was 1.0000000000015354. The component label count was two, including the inactive-fragment sentinel; the refusal was the membership check. With the roundoff admission and the base fragment propagation, the same read is valid at 79.236 s warm. Bounding the propagation did not reduce the read wall.</p>
+<table id="cfs-read-ten-thousand-roundoff"><caption>The membership guard measured before and after its repair on the same analytic limited carrier. Read execution excludes oracle scoring.</caption><thead><tr><th>Arm</th><th>Valid</th><th>Raw maximum</th><th>Admission allowance</th><th>Cold compile [s]</th><th>Warm read [s]</th></tr></thead><tbody>
+<tr><td>base, job 1283203</td><td>no, reason 7</td><td>1.0000000000015354</td><td>1e-12</td><td>11.608</td><td>79.139</td></tr>
+<tr><td>roundoff admission, job 1283220</td><td>yes, reason 0</td><td>1.0000000000015354</td><td>4.77485e-12</td><td>11.009</td><td>78.558</td></tr>
+<tr><td>one-hop labels restored, job 1283227</td><td>yes, reason 0</td><td>1.0000000000015354</td><td>4.77485e-12</td><td>11.385</td><td>79.236</td></tr>
+</tbody></table>
+<p id="cfs-read-ten-thousand-guard">At the default edge policy, the allowance is four machine epsilons times the maximum number of 32-point quadrature contributions across strips, vertical intervals, and fragment slots. It scales in proportion to the caller's edge tolerance, so tightening that policy still narrows the membership admission band. A 2e-12 injected excess is accepted by the default policy and refused with reason 7 when edge tolerance is tightened from 1e-12 to 1e-13. Admitted fractions are clipped to [0, 1]. The test that injects a 1e-8 cell-area excess obtains reason 7; a deliberately permissive 1e-7 allowance makes that same test fail with EXIT=1. The roundoff-only arm remains slow. Its 78.558 s warm wall is the timing control for the one-hop base propagation.</p>
+<p id="cfs-read-ten-thousand-labels">The exploratory hook-and-compress propagation settled in eight rounds at 10,000 cells but took 80.623 s warm on the limited case, against 79.236 s and 99 rounds for the base propagation with the same admission bound. The base warm-wall exponent was 1.472; the exploratory limited and diverted exponents were 1.479 and 1.458. The hook duplicates an existing component-label owner and has no measured wall benefit, so the read retains its base propagation. The superlinear wall is the open follow-on f-cfs-read-warm-wall after compile-route work.</p>
+<table id="cfs-read-ten-thousand-wall"><caption>H200 exploratory hook arm, timed apart from oracle scoring and removed after comparison with the base propagation. Cold compile and warm execution are separate columns.</caption><thead><tr><th>Carrier</th><th>Realised cells</th><th>Valid</th><th>Cold compile [s]</th><th>Warm read [s]</th><th>Label rounds</th></tr></thead><tbody>
+<tr><td>limited</td><td>550</td><td>yes</td><td>9.717</td><td>1.124</td><td>6</td></tr>
+<tr><td>limited</td><td>2,000</td><td>yes</td><td>9.767</td><td>7.463</td><td>7</td></tr>
+<tr><td>limited</td><td>5,000</td><td>yes</td><td>9.938</td><td>30.334</td><td>8</td></tr>
+<tr><td>limited</td><td>10,000</td><td>yes</td><td>11.557</td><td>80.623</td><td>8</td></tr>
+<tr><td>diverted</td><td>550</td><td>yes</td><td>13.733</td><td>1.091</td><td>6</td></tr>
+<tr><td>diverted</td><td>2,000</td><td>yes</td><td>14.007</td><td>7.130</td><td>7</td></tr>
+<tr><td>diverted</td><td>5,000</td><td>yes</td><td>14.011</td><td>27.284</td><td>7</td></tr>
+<tr><td>diverted</td><td>10,000</td><td>yes</td><td>17.662</td><td>74.792</td><td>8</td></tr>
+</tbody></table>
+<p id="cfs-read-ten-thousand-diverted-growth">The exploratory diverted warm-wall exponent fitted across all four rungs is 1.458. At 10,000 cells the axis and admitted X-point errors are 2.63e-13 and 7.44e-14 pitches; the smooth and saddle neighbourhood membership errors are 1.03e-4 and 2.70e-5. The final read uses the base propagation with the roundoff admission for both cases.</p>
+<figure id="cfs-read-ten-thousand-limited-panel"><img src="/nova/figures/converged-forward-solve/cfs-read-ten-thousand/limited-poloidal.svg" alt="Limited analytic poloidal flux contours, wall and qualified nulls at 10,000 cells"><figcaption>Limited closed-form read at 10,000 realised cells. Flux is drawn as line contours with analytic and read null sets and the unit-faithful wall.</figcaption></figure>
+<figure id="cfs-read-ten-thousand-diverted-panel"><img src="/nova/figures/converged-forward-solve/cfs-read-ten-thousand/diverted-poloidal.svg" alt="Diverted analytic poloidal flux contours, wall and qualified nulls at 10,000 cells"><figcaption>Diverted closed-form read at 10,000 realised cells. Flux line contours show analytic and read null sets and the unit-faithful wall.</figcaption></figure>
+<p id="cfs-read-ten-thousand-identity">The same-backend CPU identity gate passed all six limited and diverted rows at 550, 2,000 and 5,000 cells, with membership fractions, nulls and boundary flux asserted against base CPU snapshots at absolute tolerance 1e-13. Its receipt reports 6 passed and 2 deselected in 591.81 s. A fresh H200 read differed from its stored 5,000-cell diverted snapshot by 1.835e-13, so the strict snapshot assertion runs on CPU only; H200 rows retain the analytic geometry and membership bounds.</p>
+<p id="cfs-read-ten-thousand-suite">Both 10,000-cell CPU reads are valid: limited cold 10.197 s, warm 33.044 s; diverted cold 15.435 s, warm 34.705 s. H200 job 1283247 completed the base and head read-path suites with each test module in a fresh process and a 1,800 s per-test timeout. The base arm had 2 failures and 11 passes: the original 10,000-cell limited refusal and its two-value long-path label function. The head arm passed all 13 tests, adding no failure ID. The separate overfill mutation fails the reason-7 refusal test by its test ID.</p>
+</main></body></html>

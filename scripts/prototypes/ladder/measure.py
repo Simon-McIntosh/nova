@@ -43,7 +43,7 @@ def _identity():
     }
 
 
-def _measure(kind: str, cells: int, arm: str) -> dict:
+def _measure(kind: str, cells: int, arm: str, figure_dir: Path | None = None) -> dict:
     oracle, field, wall, axis, saddle = oracle_fixture._analytic_inputs(kind)
     geometry = oracle_fixture._realised_hex_geometry(wall, cells)
     pitch = float(np.median(np.asarray(geometry.pitch)))
@@ -77,12 +77,47 @@ def _measure(kind: str, cells: int, arm: str) -> dict:
         result = executable(field, geometry, convention, policy)
         jax.block_until_ready(result)
         warm_wall = min(warm_wall, perf_counter() - started)
+        raw_membership = np.sum(
+            np.where(
+                np.asarray(result.fragment_selected),
+                np.asarray(result.fragment_area),
+                0.0,
+            ),
+            axis=1,
+        ) / np.asarray(geometry.full_area)
+        roundoff_bound = float(
+            topology._membership_roundoff_bound(result.fragment_area, geometry)
+        )
+        raw_max = float(np.max(raw_membership))
+        label_started = perf_counter()
+        labels, _wall, label_converged, label_rounds = (
+            topology._connected_fragment_labels(
+                result.fragment_area,
+                result.edge_interval,
+                geometry,
+                policy.edge_tolerance,
+            )
+        )
+        jax.block_until_ready((labels, label_converged, label_rounds))
+        label_seconds = perf_counter() - label_started
+        assert np.array_equal(np.asarray(labels), np.asarray(result.fragment_component))
+        print(
+            f"READ case={kind} cells={cells} valid={bool(result.valid)} "
+            f"reason={int(result.reason)} cold={compile_wall:.3f} "
+            f"warm={warm_wall:.3f} raw_max={raw_max:.16g} "
+            f"membership_roundoff_bound={roundoff_bound:.3g} "
+            f"label_rounds={int(label_rounds)} "
+            f"label_converged={bool(label_converged)}",
+            flush=True,
+        )
     finally:
         if arm == "B":
             topology._curvature_derivatives = original
+    started = perf_counter()
     reference, uncertainty = oracle_fixture._reference_cell_fractions(
         kind, oracle, geometry
     )
+    oracle_wall = perf_counter() - started
     area = np.asarray(geometry.full_area)
     error = np.abs(np.asarray(result.membership) - reference) * area / np.median(area)
     near = (
@@ -128,6 +163,15 @@ def _measure(kind: str, cells: int, arm: str) -> dict:
         "limiter_contact_error_m": contact_error,
         "cold_compile_seconds": compile_wall,
         "warm_execute_seconds": warm_wall,
+        "oracle_scoring_seconds": oracle_wall,
+        "raw_membership_max": raw_max,
+        "membership_roundoff_bound": roundoff_bound,
+        "raw_overfill_count_at_edge_tolerance": int(
+            np.count_nonzero(raw_membership > 1.0 + policy.edge_tolerance)
+        ),
+        "label_rounds": int(label_rounds),
+        "label_check_seconds": label_seconds,
+        "label_converged": bool(label_converged),
         "device_temp_bytes": memory.temp_size_in_bytes if memory else None,
         "device_output_bytes": memory.output_size_in_bytes if memory else None,
         "host_peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
@@ -135,6 +179,14 @@ def _measure(kind: str, cells: int, arm: str) -> dict:
             np.count_nonzero(np.asarray(result.normal_form_cells))
         ),
     }
+    if figure_dir is not None and cells == 10000 and arm == "A" and bool(result.valid):
+        oracle_fixture._render_read_panel(
+            figure_dir, kind, field, geometry, result, wall, axis, saddle
+        )
+        extra = figure_dir / f"{kind}-poloidal.png"
+        extra.unlink()
+        print(f"REMOVED_EXTRA_FIGURE={extra}", flush=True)
+        row["figure"] = str(figure_dir / f"{kind}-poloidal.svg")
     if cells == 132 and arm == "A":
         baseline = json.loads(
             (BASE_ROWS / f"{kind}-moving-floor-current-rows.json").read_text()
@@ -170,8 +222,17 @@ def main() -> None:
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--arm", choices=("A", "B"), required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--figure-dir", type=Path)
+    parser.add_argument(
+        "--propagation", choices=("current", "one-hop"), default="current"
+    )
     args = parser.parse_args()
-    row = _measure(args.kind, args.cells, args.arm)
+    if args.propagation == "one-hop":
+        from scripts.prototypes.ladder.reference_propagation import one_hop_labels
+
+        topology._connected_fragment_labels = one_hop_labels
+    row = _measure(args.kind, args.cells, args.arm, args.figure_dir)
+    row["propagation"] = args.propagation
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(row, indent=2, sort_keys=True) + "\n")
     print("LADDER_ROW " + json.dumps(row, sort_keys=True), flush=True)

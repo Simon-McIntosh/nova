@@ -30,6 +30,7 @@ from nova.equilibrium.flux_surface_connectivity import (
     hex_edge_admissibility,
     polish_census_stationary_points,
 )
+from nova.equilibrium.solve_request import TopologyPolicy
 from nova.geometry.hexstencil import HEX_RING
 from nova.jax.tree_util import Pytree
 from nova.linalg.tensor_spline import TensorBSpline, fit_tensor_spline
@@ -2780,6 +2781,26 @@ def _connected_fragment_labels(area, intervals, geometry, tolerance):
     return labels, wall
 
 
+def _membership_roundoff_bound(area, geometry, edge_tolerance):
+    """Bound cell-area summation error by the quadrature work per cell.
+
+    Each fragment area sums a 32-point rule over at most three vertical
+    intervals in each of at most 3 * vertex_slots + 1 strips. Membership
+    then sums the fragment slots. Four machine epsilons per summed term
+    cover the accumulated arithmetic error at the default edge tolerance.
+    Scaling by the caller's edge tolerance preserves stricter admission
+    policies while retaining that allowance for the default policy.
+    """
+    strips = 3 * geometry.vertices.shape[1] + 1
+    terms = 32 * 3 * strips * area.shape[1]
+    return (
+        4
+        * jnp.finfo(area.dtype).eps
+        * terms
+        * (edge_tolerance / TopologyPolicy().edge_tolerance)
+    )
+
+
 def _support_at_level(
     geometry, coefficient, sigma, level, axis, form, saddle_live, policy
 ):
@@ -3082,9 +3103,11 @@ def read(field, geometry, convention, policy):
     )
     membership = jnp.sum(jnp.where(selected, area, 0.0), axis=1) / geometry.full_area
     finite = jnp.all(jnp.isfinite(coefficient)) & jnp.all(jnp.isfinite(membership))
+    membership_roundoff = _membership_roundoff_bound(
+        area, geometry, policy.edge_tolerance
+    )
     support_valid = support_valid & jnp.all(
-        (membership >= -policy.edge_tolerance)
-        & (membership <= 1.0 + policy.edge_tolerance)
+        (membership >= -membership_roundoff) & (membership <= 1.0 + membership_roundoff)
     )
     membership = jnp.clip(membership, 0.0, 1.0)
     unique_axis = jnp.sum(axes) == 1

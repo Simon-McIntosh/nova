@@ -1,0 +1,101 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite suite-final-rerun/base-suite.log 2 failed/8 passed EXIT=1 at b86bfc72 and after_suite suite-final-rerun/head-suite.log 10 passed EXIT=0 at c813459c; head adds no failing test id.",
+  "after_suite": {
+    "command": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-read-ten-thousand/scripts/prototypes/ladder/run_gate.sh b86bfc7284bf89bce864e3062dbaa537b5277ba7 c813459c51cf233a0195991d9a04f3414c3dd93c /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-final-rerun",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-final-rerun/head-suite.log",
+    "revision": "c813459c51cf233a0195991d9a04f3414c3dd93c"
+  },
+  "baseline_suite": {
+    "command": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-read-ten-thousand/scripts/prototypes/ladder/run_gate.sh b86bfc7284bf89bce864e3062dbaa537b5277ba7 c813459c51cf233a0195991d9a04f3414c3dd93c /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-final-rerun",
+    "completed": true,
+    "exit_status": 1,
+    "failure_count": 2,
+    "failure_ids": [
+      "tests/test_read_ten_thousand_cells.py::test_closed_form_read_is_accurate_and_compatible[10000-limited]",
+      "tests/test_read_ten_thousand_cells.py::test_membership_overfill_respects_edge_tolerance"
+    ],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/suite-final-rerun/base-suite.log",
+    "revision": "b86bfc7284bf89bce864e3062dbaa537b5277ba7"
+  },
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "",
+  "dispatched_at": "2026-10-10T18:47:49Z",
+  "findings": [
+    {
+      "file": "nova/equilibrium/topology.py",
+      "line": "3106 follow-on",
+      "severity": "",
+      "text": "the goal's near-linear half and done_when clause (1) are unmet - the read stays superlinear (exponent ~1.47, 80.6 s warm versus the base 79.2 s) and the component-label propagation was not bounded; the node substitutes a widened admission for the named propagation bound and defers the wall to follow-on f-cfs-read-warm-wall."
+    },
+    {
+      "file": "tests/test_read_ten_thousand_cells.py",
+      "line": "60 follow-on",
+      "severity": "",
+      "text": "the done-when clause (3) 1e-13 identity block runs only when backend==\"cpu\", so the final-head H200 arm (suite-final-rerun) skipped it; the head identity rests on head-cpu-identity-six.log at revision 34df9ac81, three commits before the reviewed head, and the final-head CPU run (final-policy-cpu.log at 061cd78fc) exercised only the two admission controls."
+    },
+    {
+      "file": "scripts/prototypes/ladder/compatibility/limited-550.npz",
+      "line": "1 follow-on",
+      "severity": "",
+      "text": "six binary goldens (limited/diverted at 550, 2000, 5000 without the -cpu suffix) are committed but referenced by nothing in the tree - git grep finds no reader and tests/test_read_ten_thousand_cells.py:61 loads only *-cpu.npz - so they are orphaned artifacts."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/strict-policy-negative-current.log",
+      "line": "1 follow-on",
+      "severity": "",
+      "text": "the declared negative-control string is 'restoring the base label propagation reproduces UNRESOLVED_COMPONENT at 10,000 cells by test id', but the head ships the base propagation, so that mutation is a no-op at head; the applied control reverts the membership admission scaling and reddens test_membership_overfill_respects_edge_tolerance, so the declared string names a lever that no longer distinguishes head from base."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read base b86bfc72 to head c813459c; the whole 25-insertion/2-deletion product change is nova/equilibrium/topology.py:2784 _membership_roundoff_bound plus its call at 3106-3108 replacing the fixed edge_tolerance membership band; the hook-and-compress propagation added earlier was removed at c674321a6.",
+    "done_when": "the seven-part measure is gated by the fresh H200 delta at suite-final-rerun (base b86bfc72 2 failed/8 passed EXIT=1, head c813459c 10 passed EXIT=0, zero added ids) and the reason-7 negative control; clause (1)'s propagation bound was not implemented (the base propagation is retained) and clause (3)'s CPU 1e-13 identity was measured at revision 34df9ac81, three commits before the reviewed head.",
+    "goal": "the node goal is to make the topology read valid and near-linear at 10,000 cells by bounding its component-label propagation; the landed change nova/equilibrium/topology.py:2784-2801 makes both 10,000-cell reads valid, but the near-linear half is not delivered - the warm wall stays superlinear (exponents 1.479 limited / 1.458 diverted against a base 1.472; 80.6 s versus 79.2 s) and the component-label propagation is unchanged.",
+    "manifest": "read; status complete, a 34-entry commits list, an H200 base/head suite JSON pair at suite-final-rerun, the strict-policy negative_control_log, added_failure_count 0, and a landing line naming the exponent and the deferred read wall.",
+    "write_paths": "read the manifest's five declared paths; every path in the base..head diff - nova/equilibrium/topology.py, tests/test_read_ten_thousand_cells.py, scripts/prototypes/ladder/*, the evidence fragment and the two SVG poloidal panels - is inside them."
+  },
+  "justifications": {
+    "durability": "tests/test_read_ten_thousand_cells.py:140 asserts not strict.valid under a 1e-13 policy against an injected 2e-12 excess and :56 asserts membership error against the independent oracle, both of which the base admission (fixed edge_tolerance band) reddens.",
+    "evidence": "suite-final-rerun/head-suite.log ran at the reviewed head c813459c (10 passed, zero added ids) and the wall/exponent table is recorded, but tests/test_read_ten_thousand_cells.py:60 guards the 1e-13 identity on backend==\"cpu\", so the head H200 arm skips it and the head identity rests on head-cpu-identity-six.log at revision 34df9ac81.",
+    "fit": "nova/equilibrium/topology.py:2793 follows the module's N * finfo(dtype).eps * scale idiom (cf. topology.py:1704) and the name is mechanism-based with no plan label.",
+    "goal_fidelity": "nova/equilibrium/topology.py:3106 admits a bounded roundoff excess so both 10,000-cell reads are valid, but docs/evidence/fragments/converged-forward-solve/cfs-read-ten-thousand.html#cfs-read-ten-thousand-wall reports exponent 1.472 (base) and 80.623 s versus 79.236 s, so the goal's near-linear half and done_when clause (1) are unmet.",
+    "reuse": "the hook-and-compress propagation that duplicated nova/equilibrium/parallel_components.py:77 was removed at c674321a6, and the remaining addition _membership_roundoff_bound (topology.py:2784) has no existing owner - a search over nova/equilibrium for an eps-driven membership/area summation bound found only inline local idioms (cell_partition.py:52, clip_quadrature.py:373).",
+    "scope_discipline": "every path in git diff --stat b86bfc72 c813459c lies inside the five declared write paths, with no product file touched beyond nova/equilibrium/topology.py, though six unused non-cpu .npz goldens were committed under scripts/prototypes/ladder/compatibility/."
+  },
+  "node": "review-of-cfs-read-ten-thousand",
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to make the topology read valid and near-linear at 10,000 cells by bounding its component-label propagation; the landed change nova/equilibrium/topology.py:2784-2801 makes both 10,000-cell reads valid, but the near-linear half is not delivered - the warm wall stays superlinear (exponents 1.479 limited / 1.458 diverted against a base 1.472; 80.6 s versus 79.2 s) and the component-label propagation is unchanged.\nVERDICT done_when: the seven-part measure is gated by the fresh H200 delta at suite-final-rerun (base b86bfc72 2 failed/8 passed EXIT=1, head c813459c 10 passed EXIT=0, zero added ids) and the reason-7 negative control; clause (1)'s propagation bound was not implemented (the base propagation is retained) and clause (3)'s CPU 1e-13 identity was measured at revision 34df9ac81, three commits before the reviewed head.\nVERDICT write_paths: read the manifest's five declared paths; every path in the base..head diff - nova/equilibrium/topology.py, tests/test_read_ten_thousand_cells.py, scripts/prototypes/ladder/*, the evidence fragment and the two SVG poloidal panels - is inside them.\nVERDICT manifest: read; status complete, a 34-entry commits list, an H200 base/head suite JSON pair at suite-final-rerun, the strict-policy negative_control_log, added_failure_count 0, and a landing line naming the exponent and the deferred read wall.\nVERDICT diff: read base b86bfc72 to head c813459c; the whole 25-insertion/2-deletion product change is nova/equilibrium/topology.py:2784 _membership_roundoff_bound plus its call at 3106-3108 replacing the fixed edge_tolerance membership band; the hook-and-compress propagation added earlier was removed at c674321a6.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: nova/equilibrium/topology.py:3106 admits a bounded roundoff excess so both 10,000-cell reads are valid, but docs/evidence/fragments/converged-forward-solve/cfs-read-ten-thousand.html#cfs-read-ten-thousand-wall reports exponent 1.472 (base) and 80.623 s versus 79.236 s, so the goal's near-linear half and done_when clause (1) are unmet.\nSCORE evidence: 15\nJUSTIFICATION evidence: suite-final-rerun/head-suite.log ran at the reviewed head c813459c (10 passed, zero added ids) and the wall/exponent table is recorded, but tests/test_read_ten_thousand_cells.py:60 guards the 1e-13 identity on backend==\"cpu\", so the head H200 arm skips it and the head identity rests on head-cpu-identity-six.log at revision 34df9ac81.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --stat b86bfc72 c813459c lies inside the five declared write paths, with no product file touched beyond nova/equilibrium/topology.py, though six unused non-cpu .npz goldens were committed under scripts/prototypes/ladder/compatibility/.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_read_ten_thousand_cells.py:140 asserts not strict.valid under a 1e-13 policy against an injected 2e-12 excess and :56 asserts membership error against the independent oracle, both of which the base admission (fixed edge_tolerance band) reddens.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/topology.py:2793 follows the module's N * finfo(dtype).eps * scale idiom (cf. topology.py:1704) and the name is mechanism-based with no plan label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the hook-and-compress propagation that duplicated nova/equilibrium/parallel_components.py:77 was removed at c674321a6, and the remaining addition _membership_roundoff_bound (topology.py:2784) has no existing owner - a search over nova/equilibrium for an eps-driven membership/area summation bound found only inline local idioms (cell_partition.py:52, clip_quadrature.py:373).\nFINDING nova/equilibrium/topology.py:3106 follow-on: the goal's near-linear half and done_when clause (1) are unmet - the read stays superlinear (exponent ~1.47, 80.6 s warm versus the base 79.2 s) and the component-label propagation was not bounded; the node substitutes a widened admission for the named propagation bound and defers the wall to follow-on f-cfs-read-warm-wall.\nFINDING tests/test_read_ten_thousand_cells.py:60 follow-on: the done-when clause (3) 1e-13 identity block runs only when backend==\"cpu\", so the final-head H200 arm (suite-final-rerun) skipped it; the head identity rests on head-cpu-identity-six.log at revision 34df9ac81, three commits before the reviewed head, and the final-head CPU run (final-policy-cpu.log at 061cd78fc) exercised only the two admission controls.\nFINDING scripts/prototypes/ladder/compatibility/limited-550.npz:1 follow-on: six binary goldens (limited/diverted at 550, 2000, 5000 without the -cpu suffix) are committed but referenced by nothing in the tree - git grep finds no reader and tests/test_read_ten_thousand_cells.py:61 loads only *-cpu.npz - so they are orphaned artifacts.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184728541171-cfs-read-ten-thousand/strict-policy-negative-current.log:1 follow-on: the declared negative-control string is 'restoring the base label propagation reproduces UNRESOLVED_COMPONENT at 10,000 cells by test id', but the head ships the base propagation, so that mutation is a no-op at head; the applied control reverts the membership admission scaling and reddens test_membership_overfill_respects_edge_tolerance, so the declared string names a lever that no longer distinguishes head from base.",
+  "review_run_id": "legacy-735d1b6258e2",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "reviewed_commits": [
+    "c813459c51cf233a0195991d9a04f3414c3dd93c"
+  ],
+  "reviewed_head_sha": "c813459c51cf233a0195991d9a04f3414c3dd93c",
+  "reviewed_run_id": "r-20261010T184728541171-cfs-read-ten-thousand",
+  "reviewer_node": "review-of-cfs-read-ten-thousand",
+  "reviewer_run_id": "r-20261011T230223261654-review-of-cfs-read-ten-thousand",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 13,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "complete",
+  "times_source": "run-record",
+  "timestamp": "2026-10-11T23:08:26.261839+00:00",
+  "total": 100,
+  "verdict": "pass"
+}

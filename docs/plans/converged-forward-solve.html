@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="150">
-<meta name="plan-modified" content="2026-10-11">
+<meta name="plan-version" content="151">
+<meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -514,6 +514,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261011T205333945418-review-of-cfs-read-ten-thousand" data-who="reckon-build" data-when="2026-10-11T21:06:04.582Z">
     <div class="r-comment-body"><p>Independent review of r-20261010T184728541171-cfs-read-ten-thousand at head 29b5b4e2: scores goal_fidelity 13, evidence 14, scope_discipline 19, durability 18, fit 16, reuse 4; the read is valid but not near-linear (exponents 1.479/1.458 against a base 1.472), the H200 delta arm ran five commits behind the reviewed head, and the fragment-label propagation duplicates nova/equilibrium/parallel_components.py:77.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261011T230223261654-review-of-cfs-read-ten-thousand" data-who="reckon-build" data-when="2026-10-11T23:10:24.170Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261010T184728541171-cfs-read-ten-thousand at head c813459c51cf233a0195991d9a04f3414c3dd93c. Verdict pass, no blocking findings; total score 100/120 (goal_fidelity 13, evidence 15, scope_discipline 18, durability 18, fit 17, reuse 19). All six checklist items VERDICT lines emitted; CALL_SITES: none. Four follow-on findings recorded; the goal&#x27;s near-linear half and done_when clause (1) are unmet.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

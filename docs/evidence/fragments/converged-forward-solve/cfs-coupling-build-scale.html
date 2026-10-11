@@ -6,7 +6,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="converged-forward-solve-cfs-coupling-build-scale">
 <meta name="plan-title" content="Device-batched coupling assembly at 5,000 and 10,000 cells">
-<meta name="plan-summary" content="The hex-carrier coupling assembly moves onto the device through the traced moments kernel; one H200 job builds the 5,000-cell machine in 151 s and the 10,000-cell machine in 271 s, both persisted to GPFS under a semantic key carrying the builder path and its revision. Criterion (2) is restated as the measured pair: the certificate map agrees within 1e-10 relative sup at 550 cells (9.70e-12) and 2,000 cells (8.79e-12), with the per-block norm-relative and elementwise figures recorded beside it. The blocks themselves differ by 1.37e-07 to 1.05e-03 norm-relative, and the reflected edge pairing of the packed moments kernel is the open difference, owned by a node scoped to nova/biot/polygonanalytic.py. Until it is decided, the host builder stays the default and the device path is reached only by explicit argument or environment variable. The persisted device carriers keep their pre-builder keys and are recorded as device-path of the geometry current when they were published.">
+<meta name="plan-summary" content="The hex-carrier coupling assembly moves onto the device through the traced moments kernel; one H200 job with the device path selected (NOVA_ANALYTIC_ORACLE_BUILDER=device) builds the 5,000-cell machine in 151 s and the 10,000-cell machine in 271 s, both persisted to GPFS under a semantic key carrying the builder path and its revision. Criterion (2) is restated as the measured pair: the certificate map agrees within 1e-10 relative sup at 550 cells (9.70e-12) and 2,000 cells (8.79e-12) in the limited state, with the per-block norm-relative and elementwise figures recorded beside it. The blocks themselves differ by 1.37e-07 to 1.05e-03 norm-relative, and the reflected edge pairing of the packed moments kernel is the open difference, owned by a node scoped to nova/biot/polygonanalytic.py. Until it is decided, the host builder stays the default and the device path is reached only by explicit argument or environment variable. The persisted device carriers keep their pre-builder keys and are recorded as device-path of the geometry current when they were published.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-commits" content="ead33bdc3 1caf4c95b 347b95611 4cb109528 2cf0979c9">
 <meta name="plan-recorded-at" content="2026-10-10">
@@ -28,7 +28,9 @@
     not meet <code>1e-10</code> norm-relative — <code>1.37e-07</code> on the uniform channel
     and up to <code>1.05e-03</code> on the moment channels at 550 cells — and <strong>the
     reflected edge pairing of the packed moments kernel is the open difference between the
-    two paths, owned by a node scoped to <code>nova/biot/polygonanalytic.py</code></strong>.
+    two paths, and an independent reference shows both paths deviating on those channels,
+    so neither side is yet established as correct: the decision is owned by a node scoped to
+    <code>nova/biot/polygonanalytic.py</code>, where a repair is authorized</strong>.
     Until that node decides which moment path is correct, the device builder does not replace
     the certified host builder: the host builder stays the default and the device path is
     selected only by an explicit argument or its environment equivalent, so no existing caller
@@ -47,6 +49,10 @@
     <li id="cfs-coupling-build-scale-callsite">
       <code>measure.py</code> gains <code>_flux_blocks</code> and
       <code>_assemble_families</code>, which select between the two assembly paths.
+      <code>_flux_blocks</code>'s <code>builder</code> argument defaults to
+      <code>None</code> and resolves through the same host-defaulting resolver, so a caller
+      that names no path — as <code>scripts/accuracy_cost_ladder/measure.py</code> does, and
+      as every pre-existing call site does — keeps working unchanged.
       <code>build_machine</code> keeps the per-section
       <code>polygon_analytic_flux_moments_batched</code> host reduction as its
       <strong>default</strong>; the device path is reached only through an explicit
@@ -67,7 +73,10 @@
     <li id="cfs-coupling-build-scale-tests">
       <code>tests/test_coupling_build.py</code> carries the identity row and a negative
       control that perturbs one block entry by <code>1e-9</code> relative and asserts the
-      identity check catches it.
+      identity check catches it, plus the assembly-path contracts: the default is the host
+      builder, the environment selects the device path for a scale rung, a call naming no
+      path reaches the host builder, the two paths publish distinct cache keys differing
+      only by the <code>builder</code> field, and each path reaches its own builder.
     </li>
   </ul>
 
@@ -79,7 +88,11 @@
     empty store root. Reproduce with
     <code>runs/r-20261010T184700018486-cfs-coupling-build-scale/logs/coupling_scale.sbatch</code>
     and the driver beside it; the log is
-    <code>logs/h200_scale.1283225.log</code>.
+    <code>logs/h200_scale.1283225.log</code>. <strong>Reproducing these timings requires the
+    device path to be selected</strong> — <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> in
+    the job environment, or the equivalent explicit <code>builder</code> argument — because
+    the fixture's default is the host builder, which assembles the same carriers by an
+    O(cells²) host reduction and does not take these walls.
   </p>
 
   <table id="cfs-coupling-build-scale-table">
@@ -217,6 +230,9 @@
     and once with the device-assembled carrier, on identical geometry. <code>rel-sup</code> is
     the maximum absolute difference over the host map's sup, and <code>grid</code> restricts
     the same figure to the plasma-grid rows. Same job and log as (a).
+    <strong>This comparison covers the limited state only</strong>: both rungs are the
+    analytic limiter configuration, as the next paragraph records, so the map agreement below
+    is a statement about a limited plasma and says nothing about a diverted one.
   </p>
 
   <table id="cfs-coupling-build-scale-effect-table">
@@ -276,7 +292,8 @@
     the result — leaving <code>1e-4</code> to <code>1e-3</code> relative to the moment row's
     own peak while remaining <code>5e-13</code> to <code>2.5e-11</code> absolute, far below the
     uniform channel's peak. Closing the block gap to <code>1e-10</code> norm-relative requires
-    a device reduction reproducing the host's order for the moment channels, which lives in
+    one reduction order to be adopted on both paths for the moment channels, which is a
+    decision about the shared analytic kernel in
     <code>nova/biot/polygonanalytic.py</code> — a module this node's brief forbids editing, so
     the fix belongs to a node scoped to it. The repo's own regression bound
     (<code>tests/biot/test_traced_section_moments.py</code>, <code>3e-10</code>) accepts the
@@ -298,11 +315,17 @@
   <p id="cfs-coupling-build-scale-unblock">
     <strong>What remains open.</strong> Criterion (2) is restated above against the quantity
     the carriers deliver, so the node's acceptance no longer rests on the block bound. The
-    open question is which moment path is correct: a node scoped to
-    <code>nova/biot/polygonanalytic.py</code> must either add a device reduction that
-    <em>does</em> reproduce the host's per-section order, or show that the reflected
-    pairing's round-off is the physically correct one and retire the host comparison. Until
-    it reports, the host builder remains the default and the two carriers' keys are recorded
-    as device-path.
+    open question is which moment path is correct, and <strong>the two-path comparison above is
+    not by itself enough to settle it, because neither side is an independent reference.</strong>
+    An independent reference evaluation on the same sections shows <em>both</em> paths
+    deviating on the two moment rows, so the gap is not simply the device path failing to
+    reproduce a trusted host value: host and device differ from each other by up to
+    <code>1.05e-03</code> norm-relative at 550 cells, and each also differs from the reference.
+    A repair is therefore authorized under the node that owns the moment path, and it is not
+    constrained to making the device match the host — a change to
+    <code>nova/biot/polygonanalytic.py</code> may be needed on the shared analytic side as
+    well. Until it reports, the host builder remains the default and the two carriers' keys
+    are recorded as device-path, so no reader is silently handed one path's blocks where the
+    other's are expected.
   </p>
 </main></body></html>

@@ -8,9 +8,18 @@ Python/numpy reduction that grows without bound as the cell count climbs.
 This module assembles the same three flux rows ``(uniform, radial, vertical)``
 through one traced, compiled program per block shape: the exact moment kernel
 :func:`nova.biot.tiledassembly.tile_evaluator` already carries for the broad
-read's coupling.  The scalar reduction is unchanged -- the packed kernel is its
-device transcription -- so the blocks agree with the host analytic builder to
-round-off while the assembly runs on the accelerator.
+read's coupling.
+
+The uniform row reproduces the host analytic builder to round-off (1.4e-07
+norm-relative at 550 cells, 4.2e-09 at 2,000).  The two moment rows do not: they
+differ from the host builder by up to 1.05e-03 norm-relative at 550 cells and
+6.6e-05 at 2,000, because the packed kernel accumulates each target tile in the
+reflected edge pairing :func:`nova.biot.polygon.pad_batch` fixes, an order that
+cannot reproduce the host builder's per-section reduction about each centroid.
+That gap is open, and it is not yet established which side carries the error:
+an independent reference evaluation deviates from both paths on the moment
+rows, so a repair may land in either, starting from the module that owns the
+moment kernel, :mod:`nova.biot.polygonanalytic`.
 """
 
 from __future__ import annotations

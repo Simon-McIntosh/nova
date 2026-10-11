@@ -1954,7 +1954,11 @@ def _flux_area_integral(
 ):
     """Integrate local first moments over the signed fan of authored edges."""
     from nova.biot.completeelliptic import complete_kind
-    from nova.biot.greens import _filament_elliptic_combinations
+    from nova.biot.greens import (
+        _ELLIPTIC_CONDITIONED_LIMIT,
+        _FIRST_MINUS_SECOND_HORNER,
+        _horner_polynomial,
+    )
 
     u, wu, v, wv = (xp.asarray(x) for x in _flux_area_rule(near))
     u, v = u[:, None, None], v[None, :, None]
@@ -1986,8 +1990,26 @@ def _flux_area_integral(
             first, second = ellipkm1(complement), ellipe(1.0 - complement)
         else:
             first, second = complete_kind(complement, xp=xp)
-        _, flux, _ = _filament_elliptic_combinations(
-            xp, parameter, complement, first, second
+        # The flux combination needs only K-E after the Landen step. Avoid
+        # forming the two field combinations and their unused tangent graphs.
+        conditioned = parameter <= _ELLIPTIC_CONDITIONED_LIMIT
+        held_parameter = xp.where(conditioned, parameter, 0.0)
+        held_complement = xp.where(conditioned, complement, 1.0)
+        ratio = held_parameter / (1.0 + xp.sqrt(held_complement)) ** 2
+        transformed = ratio * ratio
+        difference = (
+            0.5
+            * np.pi
+            * transformed
+            * _horner_polynomial(xp, transformed, _FIRST_MINUS_SECOND_HORNER)
+        )
+        flux = xp.where(
+            conditioned,
+            2.0 * difference / (1.0 + ratio),
+            0.5
+            * (1.0 + xp.where(conditioned, 1.0, complement))
+            * xp.where(conditioned, 1.0, first)
+            - xp.where(conditioned, 1.0, second),
         )
         # norm contains minus the orientation and mu0 divided by section area.
         weighted = -norm * determinant * quadrature * xp.sqrt(span) * flux

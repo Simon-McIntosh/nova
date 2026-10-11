@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms through reckon.crew.review.added_failures_from_gate_logs. The reviewed manifest carries after_suite (revision 20104b264, tests/test_coupling_build.py, exit_status 0, completed true, failure_count 0, failure_ids [], log logs/coupling_build_delta.log) and baseline_suite null. With the baseline arm absent the added-failure count is unmeasured, recorded as null rather than zero, so the absent log is a fact in the record rather than a claimed measurement; the head arm's own failure set is empty. The store's read-time annotation returns the same (None, []) for this run.",
+  "base_log_revision": "",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/analytic_oracle_fixtures/measure.py:547 \u2014 _assemble_families calls _flux_blocks(..., builder=builder) and is correct",
+    "scripts/accuracy_cost_ladder/measure.py:140 \u2014 calls fixture._flux_blocks(targets, polygons, geometry.atomic_mesh.centroids) with no builder; the defaulted parameter now resolves it to the host builder rather than raising TypeError"
+  ],
+  "completed_at": "2026-10-11T21:11:18.865Z",
+  "dispatched_at": "2026-10-11T21:00:41Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html",
+      "line": "89",
+      "severity": "follow-on",
+      "text": "follow-on: the reproduction pointer cites runs/r-20261010T184700018486-cfs-coupling-build-scale/logs/coupling_scale.sbatch and the driver beside it for the 151 s and 271 s timings, but that sbatch exports no NOVA_ANALYTIC_ORACLE_BUILDER and coupling_scale_driver.py:71 calls measure.cached_machine with no builder argument, so following the cited pair selects the host builder and does not reproduce the device-path walls the paragraph now says are required.",
+      "type": "unreproducible-evidence-pointer"
+    }
+  ],
+  "head_log_revision": "20104b264",
+  "item_verdicts": {
+    "call_sites": "_flux_blocks has two production callers reachable at head: scripts/accuracy_cost_ladder/measure.py:140 (names no builder, now resolves to the host builder) and scripts/analytic_oracle_fixtures/measure.py:547 (_assemble_families, passes builder). Neither is a solve path; no other runtime code reaches the changed seam.",
+    "diff": "read commit by commit across fa25e579e, 06a7b1063 and 20104b264 from base e5e794122; measure.py defaults _flux_blocks builder to None through resolve_builder, coupling_build.py states the measured moment-row gap, and the fragment gains the device-path and limited-state caveats and the fix-commit citations.",
+    "done_when": "the source done_when is the 5,000-cell build under five minutes and the 10,000-cell build metered and cached; the gained diff adds no new timing measurement and instead carries the prior H200 job numbers, with the gate recorded as tests/test_coupling_build.py 7 passed (EXIT=0) in the manifest after_suite and re-run by this review.",
+    "goal": "the source node goal is device-batched coupling assembly meeting the 5,000-cell five-minute budget with 10,000 measured and cached; the gained commits (e5e794122..20104b264) repair the caller breakage and correct the record while keeping the host builder as the default, so the goal's contract holds (scripts/analytic_oracle_fixtures/measure.py:519-540).",
+    "manifest": "read; status complete, commits ead33bdc3..20104b264 reconciling with the git log, after_suite present complete and zero-failure with a literal command and log_path logs/coupling_build_delta.log, negative_control_log naming one red log carrying EXIT=1 and one failing id.",
+    "write_paths": "the manifest declares six paths; the gained diff touches exactly four of them -- docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html, scripts/analytic_oracle_fixtures/coupling_build.py, scripts/analytic_oracle_fixtures/measure.py, tests/test_coupling_build.py -- all inside the declaration."
+  },
+  "justifications": {
+    "durability": "tests/test_coupling_build.py:157 test_naming_no_assembly_path_reaches_the_host_builder fails with TypeError if the required-keyword defect is reinstated and it compares the blocks against the fixture's independent polygon_analytic_flux_moments_batched reference, though at the test's nine-cell case both builders agree within MOMENT_BOUND so the assertion pins the no-error behaviour rather than the host identity.",
+    "evidence": "the manifest's after_suite names tests/test_coupling_build.py with a literal command, revision 20104b264, exit_status 0 and log_path logs/coupling_build_delta.log, which this review re-ran to 7 passed in 26.66s EXIT=0, but the fragment's timing reproduction at docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html:89 still points at a script that does not reproduce the numbers.",
+    "fit": "the added docstring at scripts/analytic_oracle_fixtures/coupling_build.py:8-27 and the defaulted signature at scripts/analytic_oracle_fixtures/measure.py:526 follow the surrounding module style and introduce no plan, ticket or version token.",
+    "goal_fidelity": "scripts/analytic_oracle_fixtures/measure.py:532 now defaults the assembly path through resolve_builder, so the out-of-scope caller at scripts/accuracy_cost_ladder/measure.py:140 that the prior review found broken with TypeError runs again and the host builder stays the default.",
+    "reuse": "scripts/analytic_oracle_fixtures/measure.py:532 reuses resolve_builder, the owner added for the same assembly-path resolution, rather than forking a second resolver; no capability is duplicated.",
+    "scope_discipline": "the gained diffstat is four files (docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html, scripts/analytic_oracle_fixtures/coupling_build.py, scripts/analytic_oracle_fixtures/measure.py, tests/test_coupling_build.py), every one inside the six declared write paths, and no fenced or unowned file is touched."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the source node goal is device-batched coupling assembly meeting the 5,000-cell five-minute budget with 10,000 measured and cached; the gained commits (e5e794122..20104b264) repair the caller breakage and correct the record while keeping the host builder as the default, so the goal's contract holds (scripts/analytic_oracle_fixtures/measure.py:519-540).\nVERDICT done_when: the source done_when is the 5,000-cell build under five minutes and the 10,000-cell build metered and cached; the gained diff adds no new timing measurement and instead carries the prior H200 job numbers, with the gate recorded as tests/test_coupling_build.py 7 passed (EXIT=0) in the manifest after_suite and re-run by this review.\nVERDICT write_paths: the manifest declares six paths; the gained diff touches exactly four of them -- docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html, scripts/analytic_oracle_fixtures/coupling_build.py, scripts/analytic_oracle_fixtures/measure.py, tests/test_coupling_build.py -- all inside the declaration.\nVERDICT manifest: read; status complete, commits ead33bdc3..20104b264 reconciling with the git log, after_suite present complete and zero-failure with a literal command and log_path logs/coupling_build_delta.log, negative_control_log naming one red log carrying EXIT=1 and one failing id.\nVERDICT diff: read commit by commit across fa25e579e, 06a7b1063 and 20104b264 from base e5e794122; measure.py defaults _flux_blocks builder to None through resolve_builder, coupling_build.py states the measured moment-row gap, and the fragment gains the device-path and limited-state caveats and the fix-commit citations.\nCALL_SITES: scripts/accuracy_cost_ladder/measure.py:140, scripts/analytic_oracle_fixtures/measure.py:547\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/analytic_oracle_fixtures/measure.py:532 now defaults the assembly path through resolve_builder, so the out-of-scope caller at scripts/accuracy_cost_ladder/measure.py:140 that the prior review found broken with TypeError runs again and the host builder stays the default.\nSCORE evidence: 16\nJUSTIFICATION evidence: the manifest's after_suite names tests/test_coupling_build.py with a literal command, revision 20104b264, exit_status 0 and log_path logs/coupling_build_delta.log, which this review re-ran to 7 passed in 26.66s EXIT=0, but the fragment's timing reproduction at docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html:89 still points at a script that does not reproduce the numbers.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the gained diffstat is four files (docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html, scripts/analytic_oracle_fixtures/coupling_build.py, scripts/analytic_oracle_fixtures/measure.py, tests/test_coupling_build.py), every one inside the six declared write paths, and no fenced or unowned file is touched.\nSCORE durability: 17\nJUSTIFICATION durability: tests/test_coupling_build.py:157 test_naming_no_assembly_path_reaches_the_host_builder fails with TypeError if the required-keyword defect is reinstated and it compares the blocks against the fixture's independent polygon_analytic_flux_moments_batched reference, though at the test's nine-cell case both builders agree within MOMENT_BOUND so the assertion pins the no-error behaviour rather than the host identity.\nSCORE fit: 16\nJUSTIFICATION fit: the added docstring at scripts/analytic_oracle_fixtures/coupling_build.py:8-27 and the defaulted signature at scripts/analytic_oracle_fixtures/measure.py:526 follow the surrounding module style and introduce no plan, ticket or version token.\nSCORE reuse: 20\nJUSTIFICATION reuse: scripts/analytic_oracle_fixtures/measure.py:532 reuses resolve_builder, the owner added for the same assembly-path resolution, rather than forking a second resolver; no capability is duplicated.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-coupling-build-scale.html:89 follow-on: the reproduction pointer cites runs/r-20261010T184700018486-cfs-coupling-build-scale/logs/coupling_scale.sbatch and the driver beside it for the 151 s and 271 s timings, but that sbatch exports no NOVA_ANALYTIC_ORACLE_BUILDER and coupling_scale_driver.py:71 calls measure.cached_machine with no builder argument, so following the cited pair selects the host builder and does not reproduce the device-path walls the paragraph now says are required.\n",
+  "review_run_id": "r-20261011T210026040861-review-of-cfs-coupling-build-scale",
+  "reviewed_base_sha": "e5e7941225566fb116de3b669d8e714dc85d9bbd",
+  "reviewed_head_sha": "20104b2641f04a6695ccade4bb9aad3fc02859ed",
+  "reviewed_run_id": "r-20261010T184700018486-cfs-coupling-build-scale",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-11T21:07:49Z",
+  "total": 107
+}

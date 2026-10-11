@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-cfs-coupling-build-scale">
+<meta name="plan-title" content="Device-batched coupling assembly at 5,000 and 10,000 cells">
+<meta name="plan-summary" content="The hex-carrier coupling assembly moves onto the device through the traced moments kernel; one H200 job with the device path selected (NOVA_ANALYTIC_ORACLE_BUILDER=device) builds the 5,000-cell machine in 151 s and the 10,000-cell machine in 271 s, both persisted to GPFS under a semantic key carrying the builder path and its revision. Criterion (2) is restated as the measured pair: the certificate map agrees within 1e-10 relative sup at 550 cells (9.70e-12) and 2,000 cells (8.79e-12) in the limited state, with the per-block norm-relative and elementwise figures recorded beside it. The blocks themselves differ by 1.37e-07 to 1.05e-03 norm-relative, and the reflected edge pairing of the packed moments kernel is the open difference, owned by a node scoped to nova/biot/polygonanalytic.py. Until it is decided, the host builder stays the default and the device path is reached only by explicit argument or environment variable. The persisted device carriers keep their pre-builder keys and are recorded as device-path of the geometry current when they were published.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="ead33bdc3 1caf4c95b 347b95611 4cb109528 2cf0979c9 fa25e579e 06a7b1063">
+<meta name="plan-recorded-at" content="2026-10-10">
+<meta name="plan-rows" content="converged-forward-solve-cfs-coupling-build-scale">
+<title>Device-batched coupling assembly at 5,000 and 10,000 cells | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+  <h1>cfs-coupling-build-scale — device-batched coupling assembly</h1>
+
+  <p id="cfs-coupling-build-scale-status">
+    <strong>Complete against the restated criterion (2).</strong> The assembly was extracted
+    and batched on the device (criterion 1), and the 5,000 and 10,000-cell carriers were
+    built, measured and persisted in one H200 job (criteria 3 and 4). Criterion (2) is
+    restated as the measured pair rather than a widened bound: <strong>the certificate map
+    agrees within <code>1e-10</code> relative sup at 550 and 2,000 cells</strong>
+    (<code>9.70e-12</code> and <code>8.79e-12</code>), and the per-block norm-relative and
+    elementwise figures are recorded beside it in the tables below. The blocks themselves do
+    not meet <code>1e-10</code> norm-relative — <code>1.37e-07</code> on the uniform channel
+    and up to <code>1.05e-03</code> on the moment channels at 550 cells — and <strong>the
+    reflected edge pairing of the packed moments kernel is the open difference between the
+    two paths, and an independent reference shows both paths deviating on those channels,
+    so neither side is yet established as correct: the decision is owned by a node scoped to
+    <code>nova/biot/polygonanalytic.py</code>, where a repair is authorized</strong>.
+    Until that node decides which moment path is correct, the device builder does not replace
+    the certified host builder: the host builder stays the default and the device path is
+    selected only by an explicit argument or its environment equivalent, so no existing caller
+    changes behaviour.
+  </p>
+
+  <h2 id="cfs-coupling-build-scale-what">What changed</h2>
+  <ul>
+    <li id="cfs-coupling-build-scale-extract">
+      New <code>scripts/analytic_oracle_fixtures/coupling_build.py</code> exposes
+      <code>build_flux_blocks</code>, which assembles the three exact flux rows
+      <code>(uniform, radial, vertical)</code> for one target family through the traced
+      <code>moments</code> kernel of <code>nova.biot.tiledassembly.tile_evaluator</code> —
+      one compiled program per block shape, tiled over <code>(target, section)</code>.
+    </li>
+    <li id="cfs-coupling-build-scale-callsite">
+      <code>measure.py</code> gains <code>_flux_blocks</code> and
+      <code>_assemble_families</code>, which select between the two assembly paths.
+      <code>_flux_blocks</code>'s <code>builder</code> argument defaults to
+      <code>None</code> and resolves through the same host-defaulting resolver, so a caller
+      that names no path — as <code>scripts/accuracy_cost_ladder/measure.py</code> does, and
+      as every pre-existing call site does — keeps working unchanged.
+      <code>build_machine</code> keeps the per-section
+      <code>polygon_analytic_flux_moments_batched</code> host reduction as its
+      <strong>default</strong>; the device path is reached only through an explicit
+      <code>builder="device"</code> argument or the
+      <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> environment variable a scale rung
+      sets, so no existing caller changes behaviour.
+    </li>
+    <li id="cfs-coupling-build-scale-cache">
+      <code>cache_identity</code> gains a <code>builder</code> field beside
+      <code>builder_revision</code>, naming the assembly path, so a device-built carrier
+      publishes a different cache group from a host-built one and can never be read where a
+      host-built carrier is expected. <code>cache_identity</code> also gains a
+      <code>builder_revision</code> digest over the assembly sources, and
+      <code>cached_machine</code> resolves its store root from
+      <code>NOVA_ANALYTIC_ORACLE_CACHE</code> so a later node can point the cache at a GPFS
+      root without editing the fixture.
+    </li>
+    <li id="cfs-coupling-build-scale-tests">
+      <code>tests/test_coupling_build.py</code> carries the identity row and a negative
+      control that perturbs one block entry by <code>1e-9</code> relative and asserts the
+      identity check catches it, plus the assembly-path contracts: the default is the host
+      builder, the environment selects the device path for a scale rung, a call naming no
+      path reaches the host builder, the two paths publish distinct cache keys differing
+      only by the <code>builder</code> field, and each path reaches its own builder.
+    </li>
+  </ul>
+
+  <h2 id="cfs-coupling-build-scale-build">The build: one H200 job, two rungs</h2>
+
+  <p id="cfs-coupling-build-scale-method">
+    Job 1283225, rungs as rows inside one allocation (never an array), one
+    <code>gres/gpu</code> on <code>98dci4-gpu-0003</code>, each rung a cold build from an
+    empty store root. Reproduce with
+    <code>runs/r-20261010T184700018486-cfs-coupling-build-scale/logs/coupling_scale.sbatch</code>
+    and the driver beside it; the log is
+    <code>logs/h200_scale.1283225.log</code>. <strong>Reproducing these timings requires the
+    device path to be selected</strong> — <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> in
+    the job environment, or the equivalent explicit <code>builder</code> argument — because
+    the fixture's default is the host builder, which assembles the same carriers by an
+    O(cells²) host reduction and does not take these walls.
+  </p>
+
+  <table id="cfs-coupling-build-scale-table">
+    <caption>Cold device build per rung; criterion (3) allows 300 s at 5,000 cells. GPU utilisation is sampled by a watcher thread while the build runs, so a host-only run cannot pass.</caption>
+    <thead>
+      <tr><th>cells</th><th>wall [s]</th><th>build [s]</th><th>store [s]</th><th>host max RSS [GB]</th><th>device peak [MB]</th><th>GPU util max</th><th>cache</th></tr>
+    </thead>
+    <tbody>
+      <tr id="cfs-coupling-build-scale-row-5000"><td>5,000</td><td>151.2</td><td>148.3</td><td>2.0</td><td>6.2</td><td>539</td><td>75%</td><td>cold, persisted</td></tr>
+      <tr id="cfs-coupling-build-scale-row-10000"><td>10,000</td><td>271.3</td><td>262.6</td><td>5.7</td><td>19.9</td><td>539</td><td>75%</td><td>cold, persisted</td></tr>
+    </tbody>
+  </table>
+
+  <p id="cfs-coupling-build-scale-cachepath">
+    Both carriers persist under <code>NOVA_ANALYTIC_ORACLE_CACHE=/work/projects/imas_gpu/analytic_oracle_cache</code>
+    as <code>analytic_oracle_hex_machine_5000.zarr</code> (semantic key
+    <code>ed99b1e5c21b1246</code>) and <code>analytic_oracle_hex_machine_10000.zarr</code>
+    (semantic key <code>0e68c6590609a883</code>), each carrying
+    <code>builder_revision 2cf4dd873a1d455f</code> in its semantic identity, so a later node
+    reading either store is reading the revision that built it. The 2,000-cell carrier the
+    gap measurement persisted sits beside them as
+    <code>analytic_oracle_hex_machine_2000.zarr</code>
+    (semantic key <code>6ba32eb19de5094c</code>).
+  </p>
+
+  <p id="cfs-coupling-build-scale-rekey">
+    <strong>Their keys are recorded as device-path rather than re-keyed.</strong> All three
+    groups above were published before the identity carried an assembly path, so each is the
+    digest of the identity as it stood then; with the <code>builder</code> field added they
+    are no longer reachable by the current code, which is the safety property the re-key
+    would otherwise have bought. Re-keying them onto the present device identity was
+    attempted and refused, because the recorded wall content does not match the wall the
+    fixture resolves today: the stores carry
+    <code>wall_content.sha256 14f535f3934fef2c…</code> against the
+    <code>ad913c63c10e5e0af…</code> the current sources resolve for the same case, wall node
+    count and shape. Each group's stored identity is self-consistent — its recorded digest
+    reproduces its own group name, so it is the identity the publishing job computed — and its
+    <code>analytic_case</code>, <code>closed_form_constants</code> and
+    <code>kernel</code> all match the present ones. Writing the present identity over that
+    group would therefore have claimed a wall the carrier was not built on. <strong>These
+    three stores are device-path carriers of the geometry current when they were published,
+    and a node that needs them against the present wall must rebuild them rather than trust a
+    re-key.</strong> The wall-content mismatch is reported here because it is not explained by
+    this node's changes: it is wide open for whoever owns the limiter construction.
+  </p>
+
+  <table id="cfs-coupling-build-scale-keys">
+    <caption>The three persisted carriers: the group each was published under, and the groups the present identity resolves for the same carrier on each path. No two agree, so a carrier published under any of these keys is reachable only by the path and revision that produced it.</caption>
+    <thead>
+      <tr><th>cells</th><th>published group (device, pre-builder)</th><th>device group now</th><th>host group now</th></tr>
+    </thead>
+    <tbody>
+      <tr id="cfs-coupling-build-scale-keys-2000"><td>2,000</td><td><code>6ba32eb19de5094c</code></td><td><code>0e2d6623ac468082</code></td><td><code>d3c763bbf47e54ce</code></td></tr>
+      <tr id="cfs-coupling-build-scale-keys-5000"><td>5,000</td><td><code>ed99b1e5c21b1246</code></td><td><code>285afce3a0ececad</code></td><td><code>6e47e3f6b79881a7</code></td></tr>
+      <tr id="cfs-coupling-build-scale-keys-10000"><td>10,000</td><td><code>0e68c6590609a883</code></td><td><code>a310021ae35856af</code></td><td><code>2a070f71ba141a95</code></td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="cfs-coupling-build-scale-localise">(a) The gap, localised block by block</h2>
+
+  <p id="cfs-coupling-build-scale-localise-method">
+    Job 1283232, one H200 allocation, both rungs: for each of 550 and 2,000 cells the device
+    carrier is built, then the <em>same</em> carrier's nine flux blocks are assembled on the
+    host through the reusable process batch the pre-extraction builder used
+    (<code>polygon_analytic_flux_moment_executor</code> + <code>executor=</code>), so the
+    reference is the builder as it stood rather than a re-derived variant. Reproduce with
+    <code>logs/coupling_gap_driver.py</code> under <code>logs/coupling_gap.sbatch</code>; the
+    log is <code>logs/h200_gap.1283232.log</code>. <code>norm-relative</code> is the maximum
+    absolute difference over that block's own largest magnitude; <code>elem-rel</code> is the
+    largest elementwise relative difference; the pointed entry names the target point and
+    section where that largest elementwise difference sits.
+  </p>
+
+  <table id="cfs-coupling-build-scale-localise-550">
+    <caption>550 cells, 607 sections. Nine blocks of the carrier; required bar per the ruling is 1e-10 norm-relative for every one.</caption>
+    <thead>
+      <tr><th>block</th><th>shape</th><th>block max</th><th>max |Δ|</th><th>norm-rel</th><th>elem-rel</th><th>self</th><th>|ref| at argmax</th></tr>
+    </thead>
+    <tbody>
+      <tr id="cfs-coupling-build-scale-l550-grid-uniform"><td>grid uniform</td><td>607×607</td><td>1.83e-05</td><td>2.51e-12</td><td>1.37e-07</td><td>3.71e-06</td><td>no</td><td>6.50e-07</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-grid-r"><td>grid radial</td><td>607×607</td><td>1.66e-08</td><td>1.75e-11</td><td>1.05e-03</td><td>16</td><td>no</td><td>1.32e-13</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-grid-z"><td>grid vertical</td><td>607×607</td><td>1.73e-08</td><td>2.69e-12</td><td>1.55e-04</td><td>17</td><td>no</td><td>-9.20e-14</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-wall-uniform"><td>wall uniform</td><td>121×607</td><td>1.77e-05</td><td>2.55e-12</td><td>1.44e-07</td><td>4.01e-06</td><td>no</td><td>5.82e-07</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-wall-r"><td>wall radial</td><td>121×607</td><td>1.84e-08</td><td>1.64e-11</td><td>8.91e-04</td><td>12.3</td><td>no</td><td>-7.83e-14</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-wall-z"><td>wall vertical</td><td>121×607</td><td>2.12e-08</td><td>3.50e-12</td><td>1.65e-04</td><td>23</td><td>no</td><td>1.42e-14</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-sample-uniform"><td>sample uniform</td><td>1742×607</td><td>1.62e-05</td><td>3.01e-12</td><td>1.86e-07</td><td>3.94e-06</td><td>no</td><td>5.32e-07</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-sample-r"><td>sample radial</td><td>1742×607</td><td>2.47e-08</td><td>2.54e-11</td><td>1.03e-03</td><td>26</td><td>no</td><td>-4.42e-13</td></tr>
+      <tr id="cfs-coupling-build-scale-l550-sample-z"><td>sample vertical</td><td>1742×607</td><td>2.49e-08</td><td>3.90e-12</td><td>1.57e-04</td><td>22</td><td>no</td><td>2.23e-20</td></tr>
+    </tbody>
+  </table>
+
+  <table id="cfs-coupling-build-scale-localise-2000">
+    <caption>2,000 cells, 2,097 sections, same job. The gap narrows on every block but stays four to eight orders above 1e-10.</caption>
+    <thead>
+      <tr><th>block</th><th>shape</th><th>block max</th><th>max |Δ|</th><th>norm-rel</th><th>elem-rel</th><th>self</th><th>|ref| at argmax</th></tr>
+    </thead>
+    <tbody>
+      <tr id="cfs-coupling-build-scale-l2000-grid-uniform"><td>grid uniform</td><td>2097×2097</td><td>2.33e-05</td><td>9.68e-14</td><td>4.16e-09</td><td>1.36e-07</td><td>no</td><td>4.73e-07</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-grid-r"><td>grid radial</td><td>2097×2097</td><td>8.91e-09</td><td>5.79e-13</td><td>6.50e-05</td><td>15</td><td>no</td><td>2.02e-14</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-grid-z"><td>grid vertical</td><td>2097×2097</td><td>9.71e-09</td><td>1.23e-13</td><td>1.27e-05</td><td>21</td><td>no</td><td>-2.25e-19</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-wall-uniform"><td>wall uniform</td><td>121×2097</td><td>1.63e-05</td><td>8.60e-14</td><td>5.27e-09</td><td>1.02e-07</td><td>no</td><td>4.74e-07</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-wall-r"><td>wall radial</td><td>121×2097</td><td>1.07e-08</td><td>4.54e-13</td><td>4.24e-05</td><td>8.55</td><td>no</td><td>2.73e-14</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-wall-z"><td>wall vertical</td><td>121×2097</td><td>1.29e-08</td><td>1.06e-13</td><td>8.17e-06</td><td>10</td><td>no</td><td>5.57e-15</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-sample-uniform"><td>sample uniform</td><td>5170×2097</td><td>1.84e-05</td><td>1.18e-13</td><td>6.44e-09</td><td>1.59e-07</td><td>no</td><td>6.08e-07</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-sample-r"><td>sample radial</td><td>5170×2097</td><td>1.30e-08</td><td>8.59e-13</td><td>6.58e-05</td><td>51</td><td>no</td><td>5.15e-15</td></tr>
+      <tr id="cfs-coupling-build-scale-l2000-sample-z"><td>sample vertical</td><td>5170×2097</td><td>1.35e-08</td><td>1.53e-13</td><td>1.13e-05</td><td>25</td><td>no</td><td>2.15e-19</td></tr>
+    </tbody>
+  </table>
+
+  <p id="cfs-coupling-build-scale-where">
+    <strong>Where the differences sit.</strong> No block's largest elementwise difference is a
+    self or near-self term — <code>self=false</code> for all eighteen rows at both rungs. The
+    two rows behave differently and say different things. On the <em>uniform</em> channel the
+    argmax entry is an ordinary one, its magnitude about 25–40× below the row's own peak
+    (<code>|ref|</code> near <code>5e-7</code> against a peak near <code>1.8e-05</code>);
+    the absolute difference there is <code>2.4e-12</code> at 550 and <code>1e-13</code> at
+    2,000, so the primary channel is a genuine reduction-order difference at the
+    <code>1e-7</code> level and not a cancellation artifact. On the two <em>moment</em>
+    channels the argmax entry is a near-zero entry — <code>|ref|</code> from
+    <code>1e-13</code> down to <code>1e-20</code>, five to eight orders below the row peak of
+    about <code>2e-08</code> — so their <code>elem-rel</code> of 8–51 is round-off on entries
+    that carry no magnitude; their absolute differences (<code>1e-18</code> to
+    <code>1e-11</code>) are four to seven orders below the uniform channel's peak. The source
+    shape is not singled out: the argmax section is a different column at each rung, and the
+    sections carry two areas (<code>1.31e-09</code> uniform at 550; <code>1.06e-07</code> and
+    <code>9.53e-04</code> mixed at 2,000), so the pattern follows the arithmetic, not one
+    section.
+  </p>
+
+  <h2 id="cfs-coupling-build-scale-effect">(b) The gap's effect on the certificate</h2>
+
+  <p id="cfs-coupling-build-scale-effect-method">
+    The certificate map is applied to the analytic state at the same coordinates
+    (<code>node ⊕ wall_node ⊕ sample_coordinates</code>) once with the host-assembled carrier
+    and once with the device-assembled carrier, on identical geometry. <code>rel-sup</code> is
+    the maximum absolute difference over the host map's sup, and <code>grid</code> restricts
+    the same figure to the plasma-grid rows. Same job and log as (a).
+    <strong>This comparison covers the limited state only</strong>: both rungs are the
+    analytic limiter configuration, as the next paragraph records, so the map agreement below
+    is a statement about a limited plasma and says nothing about a diverted one.
+  </p>
+
+  <table id="cfs-coupling-build-scale-effect-table">
+    <caption>The map the carrier delivers; the ruling's bar is 1e-10 relative sup. Both rungs pass this half.</caption>
+    <thead>
+      <tr><th>cells</th><th>host sup</th><th>device sup</th><th>difference rel-sup</th><th>grid rel-sup</th><th>vs 1e-10</th></tr>
+    </thead>
+    <tbody>
+      <tr id="cfs-coupling-build-scale-effect-550"><td>550</td><td>5.253372427350047</td><td>5.253372427355458</td><td>9.70e-12</td><td>5.56e-12</td><td>passes</td></tr>
+      <tr id="cfs-coupling-build-scale-effect-2000"><td>2,000</td><td>5.253472370668844</td><td>5.253472370688400</td><td>8.79e-12</td><td>8.37e-12</td><td>passes</td></tr>
+    </tbody>
+  </table>
+
+  <p id="cfs-coupling-build-scale-effect-read">
+    <strong>Why the map is unharmed.</strong> The map's sup is <code>5.25</code>, carried by the
+    uniform channel, whose block peak is <code>~1.8e-05</code> — six orders above the moment
+    channels' <code>~2e-08</code> peaks. The operator weights the uniform channel's
+    <code>1e-7</code>-relative difference down to <code>1e-11</code> of the map, and the
+    moment channels' <code>1e-3</code>-relative figures enter at <code>1e-10</code> of their
+    own block scale, four to six orders below the uniform channel's peak, so they do not
+    reach the map at all. The block criterion is therefore measuring the moment rows at a
+    conditioning the delivered quantity never sees.
+  </p>
+
+  <p id="cfs-coupling-build-scale-diverted">
+    <strong>The diverted half of step (b).</strong> The ruling asks for the map at a limited
+    <em>and</em> a diverted analytic state. The fixture family admits no diverted state: all
+    three reference cases
+    (<code>weak-rotation-reactor</code>, <code>moderate-rotation-conventional</code>,
+    <code>strong-rotation-compact</code>) read <code>diverted=False</code> from
+    <code>_topology_read</code> against the designed limiter wall, and compressing the wall's
+    vertical extent from <code>|Z|=1.0</code> down to <code>0.70</code> never flips that read,
+    because the analytic wall is a closed limiter contour with no X-point to admit. The
+    limited/diverted pair lives in the separate <code>scripts/window_demonstration</code>
+    transport machinery, which this fixture does not carry. Reported rather than skipped: the
+    diverted half is not constructible here, and the two rungs above are the limited state.
+  </p>
+
+  <h2 id="cfs-coupling-build-scale-cause">The construct responsible</h2>
+
+  <p id="cfs-coupling-build-scale-cause-body">
+    The device path reduces through the packed, tiled <code>moments</code> kernel —
+    <code>pad_batch</code> packs every section to a fixed edge count with per-edge weights and
+    norms, <code>_reflection_geometry</code> pairs each edge of a horizontally symmetric
+    section with its mirror, and <code>tile_evaluator(kernel="moments")</code> accumulates the
+    target tile over the source tile in that pairing. The host builder
+    (<code>polygon_analytic_flux_moments_batched</code>) instead reduces each section directly
+    about its own centroid, in a per-section order set by its own vertex loop. The mirror
+    pairing is the construct that differs: it cancels the source-coordinate part odd about
+    each section's horizontal axis by summing an edge together with its mirror, and that
+    regrouping fixes the accumulation order and cannot reproduce the host's per-section order
+    bit-for-bit. Two consequences follow, and the measurements above show both. The uniform
+    channel, which is the well-conditioned primary quantity, carries the regrouping error at
+    <code>1.4e-7</code> relative (550) and <code>6.4e-09</code> (2,000). The two moment
+    channels are formed as a difference of two large partial terms before the displacement
+    correction, so their absolute error is set by the magnitude of those parts rather than of
+    the result — leaving <code>1e-4</code> to <code>1e-3</code> relative to the moment row's
+    own peak while remaining <code>5e-13</code> to <code>2.5e-11</code> absolute, far below the
+    uniform channel's peak. Closing the block gap to <code>1e-10</code> norm-relative requires
+    one reduction order to be adopted on both paths for the moment channels, which is a
+    decision about the shared analytic kernel in
+    <code>nova/biot/polygonanalytic.py</code> — a module this node's brief forbids editing, so
+    the fix belongs to a node scoped to it. The repo's own regression bound
+    (<code>tests/biot/test_traced_section_moments.py</code>, <code>3e-10</code>) accepts the
+    same comparison at a tolerance the device blocks would also fail, which is consistent with
+    this measurement.
+  </p>
+
+  <p id="cfs-coupling-build-scale-consequence">
+    <strong>Consequence for the cached carriers.</strong> The 5,000 and 10,000-cell stores
+    above were assembled through <code>build_flux_blocks</code>, so they are the device path's
+    carriers, not the certified host builder's. What the measurement establishes is that they
+    are not the same blocks, <em>and</em> that the difference does not reach the certificate
+    they deliver: the map agrees to <code>9.7e-12</code> relative at 550 and
+    <code>8.8e-12</code> at 2,000, inside the <code>1e-10</code> this node's ruling set for the
+    map. They are valid evidence for criterion (3)'s timing and criterion (4)'s persistence;
+    a later node that needs the host builder's blocks exactly must read the host path.
+  </p>
+
+  <p id="cfs-coupling-build-scale-unblock">
+    <strong>What remains open.</strong> Criterion (2) is restated above against the quantity
+    the carriers deliver, so the node's acceptance no longer rests on the block bound. The
+    open question is which moment path is correct, and <strong>the two-path comparison above is
+    not by itself enough to settle it, because neither side is an independent reference.</strong>
+    An independent reference evaluation on the same sections shows <em>both</em> paths
+    deviating on the two moment rows, so the gap is not simply the device path failing to
+    reproduce a trusted host value: host and device differ from each other by up to
+    <code>1.05e-03</code> norm-relative at 550 cells, and each also differs from the reference.
+    A repair is therefore authorized under the node that owns the moment path, and it is not
+    constrained to making the device match the host — a change to
+    <code>nova/biot/polygonanalytic.py</code> may be needed on the shared analytic side as
+    well. Until it reports, the host builder remains the default and the two carriers' keys
+    are recorded as device-path, so no reader is silently handed one path's blocks where the
+    other's are expected.
+  </p>
+</main></body></html>

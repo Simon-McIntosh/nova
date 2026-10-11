@@ -256,11 +256,22 @@
     path; the cold-compile test now passes in both arms.</p>
     <p>The final-head 251-pair reference check passes at
     <code>2.2376532680120586e-14</code> maximum norm-relative error, and all
-    six small tests pass. Full block and module receipts are under the run's
+    six small tests pass. All 18 full block/channel comparisons also pass,
+    with maximum <code>6.296446544648616e-13</code>; every channel equals
+    the earlier block table above. Both cache groups are unchanged and only
+    their geometry was reused. Full block and module receipts are under the run's
     <code>logs/requalification/</code> directory. Both compile-module arms
     finish with <code>1 failed, 7 passed, 2 xfailed</code>; the remaining
     failing id is <code>test_point_jet_identity</code>. The full module delta
     is still running.</p>
+    <table><thead><tr><th>Final arm</th><th>Channel</th><th>Max norm-relative error</th><th>Max elementwise relative error</th></tr></thead><tbody>
+<tr><td>host</td><td>Uniform</td><td>3.029089928e-16</td><td>5.051070727e-16</td></tr>
+<tr><td>host</td><td>Radial moment</td><td>1.633354771e-14</td><td>8.941522453e-10</td></tr>
+<tr><td>host</td><td>Vertical moment</td><td>2.023318664e-14</td><td>2.962517619e-09</td></tr>
+<tr><td>device</td><td>Uniform</td><td>3.029089928e-16</td><td>4.310969039e-16</td></tr>
+<tr><td>device</td><td>Radial moment</td><td>1.755474754e-14</td><td>8.941522453e-10</td></tr>
+<tr><td>device</td><td>Vertical moment</td><td>2.237653268e-14</td><td>2.962517619e-09</td></tr>
+    </tbody></table>
     <h3>A shared failing test id conceals an additional flux discrepancy</h3>
     <p>The baseline and head identity tests have identical Hessian-component
     discrepancies against their historical reference kernel. The repaired
@@ -279,7 +290,10 @@
       <tr><td>Conditioned kernel, host and H200</td><td>2.403407339868999e-5</td></tr>
     </tbody></table>
     <p>The conditioned result has approximately <code>1.89e-6</code>
-    relative error at this near-edge point. This point is outside the
+    relative error at this near-edge point. Uniform, radial-moment and
+    vertical-moment channel errors are respectively
+    <code>1.809402226e-6 / 2.397527628e-5 / 2.815081327e-5</code>.
+    This point is outside the
     251-pair sample and the six small tests. The existing failing identity
     test remains enabled and no numerical-value pin is changed. These
     receipts establish a further angular-resolution defect; a zero added

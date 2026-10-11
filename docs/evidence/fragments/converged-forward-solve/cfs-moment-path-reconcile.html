@@ -7,11 +7,11 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="cfs-moment-path-reconcile">
   <meta name="plan-title" content="Moment-path conditioning and independent reference">
-  <meta name="plan-summary" content="Local source-area integration repairs host and packed flux moments; independent reference and certificate-block parity qualify the change.">
+  <meta name="plan-summary" content="Numerical conditioning passes; the point-jet expression guard remains above its bound and module qualification is incomplete.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s4">
   <meta name="plan-recorded-at" content="2026-10-11">
-  <meta name="plan-verdict" content="partial">
+  <meta name="plan-verdict" content="blocked">
   <meta name="plan-environment" content="Shared nova environment; CPU fleet allocation 1281970 and H200 job 1283504; float64 kernels and 50-digit mpmath reference">
   <meta name="plan-tags" content="equilibrium,jax,convergence">
   <title>Moment-path reference | nova</title>
@@ -163,7 +163,10 @@
 <tr><td>550 (607 realised)</td><td>grid</td><td>1.111670893e-14</td><td>3.498016508e-13</td><td>3.146053918e-13</td></tr>
 <tr><td>550 (607 realised)</td><td>wall</td><td>4.200814172e-15</td><td>1.76726964e-13</td><td>1.397064026e-13</td></tr>
 <tr><td>550 (607 realised)</td><td>sample</td><td>1.665733888e-14</td><td>5.137992892e-13</td><td>2.817455284e-13</td></tr>
-    </tbody></table>
+<tr><td>2000 (2097 realised)</td><td>grid</td><td>1.223726978e-14</td><td>6.296446545e-13</td><td>3.598642558e-13</td></tr>
+<tr><td>2000 (2097 realised)</td><td>wall</td><td>4.567751485e-15</td><td>1.286802779e-13</td><td>1.32712924e-13</td></tr>
+<tr><td>2000 (2097 realised)</td><td>sample</td><td>3.687033825e-14</td><td>5.603048047e-13</td><td>5.969874113e-13</td></tr>
+</tbody></table>
     <p>Geometry comes from
     <code>analytic_oracle_hex_machine_550.zarr/d990cde70becc203</code> and
     <code>analytic_oracle_hex_machine_2000.zarr/6ba32eb19de5094c</code> under
@@ -181,13 +184,65 @@
     <code>EXIT=1</code>; the head H200 arm passes that test.</p>
     <p>One H200 job, <code>1283504</code>, runs the reference, small tests,
     full block checks, and baseline/head test modules as fresh processes with
-    per-test timeouts. Qualification is still running. No existing test value
-    pin has been changed.</p>
+    per-test timeouts. Qualification stopped after the expression bound failed twice. No existing
+    test value pin has been changed.</p>
     <p>Durable receipts: <code>qualified_reference.json</code>,
     <code>qualified_blocks.json</code>, <code>gpu_reference.log</code>,
     <code>gpu_small.log</code>, <code>gpu_parity.log</code>,
     <code>negative_reference.log</code>, and <code>near_convergence.log</code>
     under the run directory already named above.</p>
+  </section>
+  <section id="cfs-moment-path-reconcile-expression-blocker">
+    <h2>Stop record: point-jet expression bound remains unmet</h2>
+    <p>The numerical candidate and broadcasting repair are committed. The
+    small suite passed on H200: <code>6 passed</code> in
+    <code>gpu_broadcast_small.log</code>. Broadcasting one polygon over
+    several targets also passes the existing reactor-scale test on CPU;
+    <code>paired_trace.log</code> proves that the repair leaves the
+    already-paired JAX expression unchanged.</p>
+    <p>The broader module gate found an added failure:
+    <code>test_point_jet_expression_bound</code>. The H200 candidate has
+    <code>21,923</code> equations against the <code>20,000</code> bound.
+    Removing unused elliptic field combinations reduces the CPU trace to
+    <code>21,087</code>, still a failure. The two recorded attempts are
+    <code>expression_reproduction.log</code> and
+    <code>expression_trimmed.log</code>. The retry stop applies; the bound
+    was not weakened and the node is not complete.</p>
+    <p>The final flux-only simplification passes the 251-pair CPU reference
+    with channel errors <code>3.029089928e-16 / 1.419644801e-14 / 2.186212963e-14</code>.
+    It changes the earlier candidate's CPU outputs by at most
+    <code>4.235164736271502e-22</code>; an exact bit-identity probe failed and
+    remains recorded in <code>flux_identity.log</code>. This is not a fresh
+    GPU qualification of that final simplification. The full GPU block table
+    above qualifies the earlier conditioned arithmetic, with the broadcast
+    change separately shown to preserve its paired trace.</p>
+    <p>Completed module receipts cover traced section moments, graded-layer
+    checks, and kernel compile checks. Baseline compile checks have two failures:
+    <code>test_point_jet_cold_compile</code> cannot import
+    <code>cache_guard</code> because the launch omitted the lane-plugin path;
+    <code>test_point_jet_identity</code> times out after 300 seconds.
+    Head has those same two failures plus the expression bound. The launch
+    omission is scaffolding, not a kernel defect; the durable launchers now
+    include the plugin path for a resumed run. No cold-compile result is claimed.</p>
+    <p>The edge, near-collinear, vertex-edge and vertex-term modules did not
+    finish. <code>suite_summary.json</code> marks both full arms incomplete,
+    and reports the added expression failure only for the completed subset.
+    Independent modules ran as fresh processes inside the same H200 allocation,
+    with separate temporary directories and logs. An initial extra-step launch
+    failed CPU binding before Python; its corrected launch used the same job.</p>
+    <p>Job <code>1283504</code> ran for <code>00:39:45</code> and was cancelled
+    at the retry stop. Its selected limit was 45 minutes; a request to extend
+    that to 48 minutes within the 60-minute session ceiling was refused by the
+    scheduler. Peer jobs and serving allocations were outside the cancellation.
+    No worker process is left waiting on this job.</p>
+    <p>Next: factor the quadrature expression below the existing point-jet
+    bound, then rerun the final head's numerical and complete module gates.
+    The following carrier node must also repair <code>builder_revision</code>
+    in <code>scripts/analytic_oracle_fixtures/measure.py</code>: it hashes the
+    two assembly files but omits <code>polygonanalytic.py</code>, so this kernel
+    change alone does not invalidate cached carriers. That file is outside
+    this node's write scope. The 5,000/10,000-cell carriers and certificate rows
+    remain assigned to the following node.</p>
   </section>
 </main>
 </body>

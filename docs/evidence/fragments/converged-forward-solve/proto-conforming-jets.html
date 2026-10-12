@@ -7,7 +7,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="proto-conforming-jets">
 <meta name="plan-title" content="Conforming cached-jet read measurements">
-<meta name="plan-summary" content="Bell passes analytic rows at 2,000 cells, but the Picard saddle disagreement exceeds its budget by at least 92 times">
+<meta name="plan-summary" content="Both Bell curvature configurations fail the Picard saddle budget; higher-rung measurements remain pending">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s2">
 <title>Conforming cached-jet read measurements | nova</title>
@@ -26,21 +26,23 @@
 <tr><td>550-cell diverted smoke</td><td>Bell saddle error 6.9687e-4 against 3.8486e-3</td><td>Preassembled read, before coefficient conditioning</td></tr>
 <tr><td>550-cell Hessian mutation</td><td>Saddle error 0.712884; test_bell_saddle_membership fails; EXIT=1</td><td>All Hessian degrees of freedom zeroed</td></tr>
 <tr><td>Same-file gate delta</td><td>Baseline: 3 pass, 2 fail. Head: 5 pass, 0 fail</td><td>Quartic reproduction and shared-normal continuity distinguish the fields</td></tr>
-<tr><td>2,000-cell limited booked Bell</td><td>Smooth 6.97278e-5 against 9.00177e-5; axis 1.20146e-4 pitches; valid and qualified</td><td>Cold 21.9783 s; warm 7.51821 s including contraction; peak RSS 5,446,456 KiB</td></tr>
+<tr><td>2,000-cell limited Bell, finite-difference curvature</td><td>Smooth 6.97278e-5 against 9.00177e-5; axis 1.20146e-4 pitches; valid and qualified</td><td>Cold 21.9783 s; warm 7.51821 s including contraction; peak RSS 5,446,456 KiB</td></tr>
 <tr><td>2,000-cell limited coupling and edges</td><td>1,778,688,000 bytes; build 241.484637 s; booked value jump 5.68434e-14 and normal jump 3.37508e-14</td><td>GPFS matrix persisted; every interior edge measured</td></tr>
-<tr><td>2,000-cell diverted booked Bell</td><td>Smooth 5.73163e-4; saddle 2.92612e-4, both below 1.00109e-3; X error 2.26727e-5 pitches</td><td>Cold 16.2981 s; warm 7.19017 s; peak RSS 5,494,648 KiB; valid and qualified</td></tr>
+<tr><td>2,000-cell diverted Bell, finite-difference curvature</td><td>Smooth 5.73163e-4; saddle 2.92612e-4, both below 1.00109e-3; X error 2.26727e-5 pitches</td><td>Cold 16.2981 s; warm 7.19017 s; peak RSS 5,494,648 KiB; valid and qualified</td></tr>
 <tr><td>2,000-cell diverted coupling and edges</td><td>1,777,536,000 bytes; build 249.500911 s; value jump 4.85723e-17; normal jump 3.95517e-16 over 11,829 edges</td><td>Contracted booked field, not just analytic jets</td></tr>
 <tr><td>Nonconforming reproduction</td><td>NONCONFORMING_REPRODUCED saddle=0.22115872869025716</td><td>2,000-cell diverted row, unchanged interpolation</td></tr>
 <tr><td>2,000-cell Hessian mutation</td><td>valid=false, qualified=false, reason=3; test_bell_saddle_membership FAILED, EXIT=1</td><td>The unmodified Bell row passes the same test</td></tr>
-<tr><td>Curvature comparison</td><td>The inherited adapter finite-differences Hessians across a moving stencil; the native read differentiates the Bell polynomial within its selected triangle</td><td>The failed configuration is retained; native derivative rows are being measured from the persisted coupling matrices</td></tr>
-<tr><td>Larger rows</td><td>H200 job 1283902, one allocation, rungs ordered 2,000, 5,000, 10,000</td><td>Pending; per-arm receipts and matrix build checkpoints persisted</td></tr>
+<tr><td>Curvature comparison</td><td>The inherited adapter finite-differences Hessians across a moving stencil; the native read differentiates the Bell polynomial within its selected triangle</td><td>Native polynomial curvature also fails: Picard saddle error 0.120694052048, versus 0.120678390300 with finite differences</td></tr>
+<tr><td>Native polynomial curvature at 2,000 diverted cells</td><td>Analytic saddle error 2.92612e-4; cold 17.3923 s; warm 6.85423 s; Picard warm 6.84859 s</td><td>Picard kernel disagreement lower bound 0.0923683219496; 92.2682 times the bound</td></tr>
+<tr><td>Native polynomial curvature at 2,000 limited cells</td><td>Smooth 6.97278e-5 against 9.00177e-5; cold 16.9037 s; warm 7.35348 s; peak RSS 3,674,880 KiB</td><td>Axis error 1.20146e-4 pitches; valid and qualified; persistent matrix reused</td></tr>
+<tr><td>Larger rows</td><td>H200 job 1283913, one allocation, rungs ordered 2,000, 5,000, 10,000</td><td>Pending; per-arm receipts and matrix build checkpoints persisted</td></tr>
 <tr><td>Picard reference</td><td>Bell saddle error against analytic reference 0.120678390300; stored kernel 0.0283257300981; kernel-relative axis/X errors 2.43963e-5 / 6.29386e-5 pitches</td><td>Reverse triangle inequality: Bell–kernel saddle disagreement is at least 0.0923526602017, or 92.2525 times its 0.00100108526661 budget</td></tr>
-<tr><td>Decision</td><td>The finite-difference Bell curvature configuration fails the required 2,000-cell Picard row; the native polynomial-derivative comparison is pending</td><td>Prototype only; product APIs unchanged</td></tr>
+<tr><td>Decision</td><td>Reject the measured Bell read for production: both native polynomial and finite-difference curvature fail the required 2,000-cell Picard saddle bound</td><td>Prototype only; product APIs unchanged</td></tr>
 <tr><td>Report</td><td colspan="2"><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-conforming-jets.md</code></td></tr>
 </tbody></table>
 <figure id="proto-conforming-jets-membership">
 <img src="/nova/figures/converged-forward-solve/conforming-jets/membership.svg" alt="Smooth and saddle membership errors versus cells for the measured closed-form, kernel, nonconforming and Bell arms">
-<figcaption>Measured arms only; the kernel is reused at 2,000 cells. Bell has a 550-cell diverted smoke point and complete 2,000-cell analytic rows. Picard qualification is tabulated separately; no missing rung is plotted as zero.</figcaption>
+<figcaption>Measured arms only; the kernel is reused at 2,000 cells. Bell points show the native polynomial-curvature rows completed at this checkpoint. The finite-difference and smoke results are retained in the table and report; no missing rung is plotted as zero.</figcaption>
 </figure>
 </section>
 </main></body></html>

@@ -49,6 +49,19 @@
       </tbody>
     </table>
   </section>
+  <section id="red-base-triage-adjacent-failures">
+    <h2>Pre-existing failures in adjacent stencil importers</h2>
+    <p>The expanded 58-target base gate also found the following failures outside this node's repair scope. They are recorded from their completed base process logs and left visible for their owners; this table does not classify their causes.</p>
+    <table>
+      <thead><tr><th>Module</th><th>Failing base test IDs</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_current_book_fragments.py</code> (6)</td><td><code>test_analytic_certificate_moments[550-limited]</code>, <code>[550-diverted]</code>, <code>[2000-limited]</code>, <code>[2000-diverted]</code>, <code>[5000-limited]</code>, <code>[5000-diverted]</code></td></tr>
+        <tr><td><code>test_two_class_recovery.py</code> (5)</td><td><code>test_cold_limited_branch_recovers_each_banked_root[coarse]</code>, <code>[fine]</code>; <code>test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap</code>; <code>test_diverted_near_basin_perturbation_ladder_recovers_banked_root</code>; <code>test_banked_diverted_state_is_a_machine_precision_pinned_root</code></td></tr>
+        <tr><td><code>test_exact_clip_moments.py</code> (1)</td><td><code>test_order_study_receipt_carries_the_map_the_record_is_transcribed_from</code></td></tr>
+        <tr><td><code>test_equilibrium_forward_constrained.py</code> (1)</td><td><code>test_public_map_enforces_the_exact_declared_current</code></td></tr>
+      </tbody>
+    </table>
+  </section>
   <section id="red-base-triage-guard">
     <h2>Guard landed and verified</h2>
     <p>Commit <code>61be97d8c93b690f08fd5de41f0eb8b47e26b179</code> removes the dead third host-clip zip value, adds a three-vertex collinear support case, and configures x64 before pytest collects test modules. The fixture then refuses a test body if collection has disabled x64. Its claim is limited to that point; it does not claim to detect arrays made by plugins before pytest configuration.</p>

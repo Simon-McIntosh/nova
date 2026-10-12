@@ -1,0 +1,3124 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 4,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "be0fa0df9d7d9552846049628e0a396e0366879f",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 5559403,
+      "input_tokens_cumulative": 5559403,
+      "output_tokens": 16620,
+      "output_tokens_cumulative": 16620,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 371,
+    "files": 41,
+    "removed": 1656
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 1268,
+        "name": "_normal_form_slice",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 148,
+        "name": "normal_form_sectors",
+        "path": "scripts/prototypes/support/geometry.py"
+      },
+      "window_line": 174
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "_frame",
+        "path": "tests/test_diiid_frame_checkpointing.py"
+      },
+      "run_function": {
+        "line": 285,
+        "name": "_frame",
+        "path": "tests/imas/test_diiid_forward_gs_match.py"
+      },
+      "window_line": 289
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "_locator",
+        "path": "tests/test_census_polish_compaction.py"
+      },
+      "window_line": 21
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_diverted_exact_oracle_value_error_favours_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "run_function": {
+        "line": 47,
+        "name": "test_accepted_points_and_values_come_from_one_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "window_line": 56
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "_cubic_interpolation_disagreement",
+        "path": "tests/test_mask_threshold_consistency.py"
+      },
+      "run_function": {
+        "line": 47,
+        "name": "test_accepted_points_and_values_come_from_one_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_shared_surface_supplies_polish_wall_contour_and_edge_clips",
+        "path": "tests/test_shared_spline_authority.py"
+      },
+      "run_function": {
+        "line": 47,
+        "name": "test_accepted_points_and_values_come_from_one_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "window_line": 59
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_accepted_points_and_values_come_from_one_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "run_function": {
+        "line": 129,
+        "name": "test_diverted_exact_oracle_value_error_favours_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "window_line": 149
+    },
+    {
+      "existing_function": {
+        "line": 418,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "run_function": {
+        "line": 161,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "window_line": 169
+    },
+    {
+      "existing_function": {
+        "line": 158,
+        "name": "test_module_is_contour_free",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 378,
+        "name": "test_module_is_contour_free",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "window_line": 378
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_jit_vmap_grad_safe_and_fixed_shape",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "run_function": {
+        "line": 418,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "window_line": 420
+    },
+    {
+      "existing_function": {
+        "line": 161,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "run_function": {
+        "line": 418,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "window_line": 426
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_read",
+        "path": "tests/test_topology_read_equivalence.py"
+      },
+      "run_function": {
+        "line": 418,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "window_line": 421
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_contained_saddle_admission_matches_the_trace_reader",
+        "path": "tests/test_topology_read_equivalence.py"
+      },
+      "run_function": {
+        "line": 418,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "window_line": 423
+    },
+    {
+      "existing_function": {
+        "line": 118,
+        "name": "test_coarse_iteration_preserves_the_full_resolution_emit",
+        "path": "tests/test_topology_read_equivalence.py"
+      },
+      "run_function": {
+        "line": 418,
+        "name": "read",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "window_line": 421
+    },
+    {
+      "existing_function": {
+        "line": 85,
+        "name": "test_exact_bank_replay_request_names_every_policy_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "_bank_replay_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "test_diiid_match_request_names_every_registered_budget_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "run_function": {
+        "line": 142,
+        "name": "_diiid_match_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "window_line": 143
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "read",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 75,
+        "name": "test_jax_fsa_is_fp64_jit_vmap_grad_safe",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 75,
+        "name": "test_jax_fsa_is_fp64_jit_vmap_grad_safe",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 139,
+        "name": "read",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 141
+    },
+    {
+      "existing_function": {
+        "line": 378,
+        "name": "test_module_is_contour_free",
+        "path": "tests/test_connectivity_boundary.py"
+      },
+      "run_function": {
+        "line": 158,
+        "name": "test_module_is_contour_free",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 158
+    },
+    {
+      "existing_function": {
+        "line": 276,
+        "name": "test_hex_component_labels_match_six_neighbour_reference",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 212,
+        "name": "test_component_labels_and_private_mask_match_ndimage",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 214
+    },
+    {
+      "existing_function": {
+        "line": 472,
+        "name": "test_flood_matches_linear_reference_on_corridor",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 212,
+        "name": "test_component_labels_and_private_mask_match_ndimage",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 216
+    },
+    {
+      "existing_function": {
+        "line": 212,
+        "name": "test_component_labels_and_private_mask_match_ndimage",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 276,
+        "name": "test_hex_component_labels_match_six_neighbour_reference",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 278
+    },
+    {
+      "existing_function": {
+        "line": 212,
+        "name": "test_component_labels_and_private_mask_match_ndimage",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 472,
+        "name": "test_flood_matches_linear_reference_on_corridor",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 479
+    },
+    {
+      "existing_function": {
+        "line": 596,
+        "name": "fixed_iteration_fill",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 487,
+        "name": "linear_flood",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 488
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_doubling_fill_matches_fixed_iteration_fixtures_exactly",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 537,
+        "name": "test_connectivity_kernels_vmap_batch_equals_per_slice_bit_identical",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 543
+    },
+    {
+      "existing_function": {
+        "line": 537,
+        "name": "test_connectivity_kernels_vmap_batch_equals_per_slice_bit_identical",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 593,
+        "name": "test_doubling_fill_matches_fixed_iteration_fixtures_exactly",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 610
+    },
+    {
+      "existing_function": {
+        "line": 487,
+        "name": "linear_flood",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "run_function": {
+        "line": 596,
+        "name": "fixed_iteration_fill",
+        "path": "tests/test_flux_surface_connectivity.py"
+      },
+      "window_line": 597
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_native_and_torax_rungs_share_the_typed_call_and_receipt",
+        "path": "tests/test_forward_transport.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 123
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 121
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 308
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 308
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 308
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 308
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 308
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 296,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 305
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "test_coarse_diverted_exact_field_admits_axis_and_saddle",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "run_function": {
+        "line": 389,
+        "name": "test_forward_census_exact_diverted_oracle",
+        "path": "tests/test_forward_census.py"
+      },
+      "window_line": 405
+    },
+    {
+      "existing_function": {
+        "line": 118,
+        "name": "test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "test_profile_owned_moments_count_common_sol_current_once",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "test_profile_owned_moments_count_common_sol_current_once",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 58
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_consistent_labels_reproduce_label_selected_current_bit_exactly",
+        "path": "tests/test_sol_support_selection.py"
+      },
+      "run_function": {
+        "line": 53,
+        "name": "test_profile_owned_moments_count_common_sol_current_once",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 60
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_profile_owned_moments_count_common_sol_current_once",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 118,
+        "name": "test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 118,
+        "name": "test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 122
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_consistent_labels_reproduce_label_selected_current_bit_exactly",
+        "path": "tests/test_sol_support_selection.py"
+      },
+      "run_function": {
+        "line": 118,
+        "name": "test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 124
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_profile_owned_moments_count_common_sol_current_once",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 152
+    },
+    {
+      "existing_function": {
+        "line": 118,
+        "name": "test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 152
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_profile_domain_change_attributes_shadow_transitions_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 158
+    },
+    {
+      "existing_function": {
+        "line": 68,
+        "name": "test_consistent_labels_reproduce_label_selected_current_bit_exactly",
+        "path": "tests/test_sol_support_selection.py"
+      },
+      "run_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 154
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 181,
+        "name": "test_profile_domain_change_attributes_shadow_transitions_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 196
+    },
+    {
+      "existing_function": {
+        "line": 576,
+        "name": "_operator_with_components",
+        "path": "tests/test_wall_height_exclusion.py"
+      },
+      "run_function": {
+        "line": 181,
+        "name": "test_profile_domain_change_attributes_shadow_transitions_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "window_line": 185
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "test_persisted_class_free_read_publishes_the_axis_connected_contact",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "test_persisted_limited_terminal_boundary_contact_is_axis_connected",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 247,
+        "name": "test_wall_zone_disagreement_cannot_move_structured_boundary_level",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "run_function": {
+        "line": 143,
+        "name": "test_persisted_limited_terminal_boundary_contact_is_axis_connected",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "window_line": 146
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "test_persisted_limited_terminal_boundary_contact_is_axis_connected",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "run_function": {
+        "line": 193,
+        "name": "test_persisted_class_free_read_publishes_the_axis_connected_contact",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "window_line": 202
+    },
+    {
+      "existing_function": {
+        "line": 247,
+        "name": "test_wall_zone_disagreement_cannot_move_structured_boundary_level",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "run_function": {
+        "line": 193,
+        "name": "test_persisted_class_free_read_publishes_the_axis_connected_contact",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "window_line": 202
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "test_persisted_limited_terminal_boundary_contact_is_axis_connected",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "run_function": {
+        "line": 247,
+        "name": "test_wall_zone_disagreement_cannot_move_structured_boundary_level",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "test_persisted_class_free_read_publishes_the_axis_connected_contact",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "run_function": {
+        "line": 247,
+        "name": "test_wall_zone_disagreement_cannot_move_structured_boundary_level",
+        "path": "tests/test_limited_boundary_touches_wall.py"
+      },
+      "window_line": 250
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_accepted_points_and_values_come_from_one_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "_cubic_interpolation_disagreement",
+        "path": "tests/test_mask_threshold_consistency.py"
+      },
+      "window_line": 40
+    },
+    {
+      "existing_function": {
+        "line": 91,
+        "name": "test_shared_surface_supplies_polish_wall_contour_and_edge_clips",
+        "path": "tests/test_shared_spline_authority.py"
+      },
+      "run_function": {
+        "line": 19,
+        "name": "_cubic_interpolation_disagreement",
+        "path": "tests/test_mask_threshold_consistency.py"
+      },
+      "window_line": 27
+    },
+    {
+      "existing_function": {
+        "line": 389,
+        "name": "test_forward_census_exact_diverted_oracle",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 52,
+        "name": "test_coarse_diverted_exact_field_admits_axis_and_saddle",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "window_line": 56
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "_completed_profile",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 59,
+        "name": "_completed_route_profile",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 69
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "_bank_replay_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "run_function": {
+        "line": 85,
+        "name": "test_exact_bank_replay_request_names_every_policy_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "_diiid_match_receipts",
+        "path": "tests/test_default_wiring.py"
+      },
+      "run_function": {
+        "line": 121,
+        "name": "test_diiid_match_request_names_every_registered_budget_deviation",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 123
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_request_path_is_bit_identical_and_defaults_round_trip_through_json",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 181
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_cold_portfolio_seed_policy_solves_and_records_its_selected_branch",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 186
+    },
+    {
+      "existing_function": {
+        "line": 231,
+        "name": "test_compilation_cache_receipt_observes_reuse_not_the_request_field",
+        "path": "tests/test_forward_solve_request.py"
+      },
+      "run_function": {
+        "line": 177,
+        "name": "test_request_execution_is_bit_identical_to_the_keyword_fixture",
+        "path": "tests/test_route_solve_requests.py"
+      },
+      "window_line": 186
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_accepted_points_and_values_come_from_one_tensor_spline",
+        "path": "tests/test_census_spline_value_authority.py"
+      },
+      "run_function": {
+        "line": 91,
+        "name": "test_shared_surface_supplies_polish_wall_contour_and_edge_clips",
+        "path": "tests/test_shared_spline_authority.py"
+      },
+      "window_line": 120
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "_cubic_interpolation_disagreement",
+        "path": "tests/test_mask_threshold_consistency.py"
+      },
+      "run_function": {
+        "line": 91,
+        "name": "test_shared_surface_supplies_polish_wall_contour_and_edge_clips",
+        "path": "tests/test_shared_spline_authority.py"
+      },
+      "window_line": 96
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_profile_owned_moments_count_common_sol_current_once",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_consistent_labels_reproduce_label_selected_current_bit_exactly",
+        "path": "tests/test_sol_support_selection.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 118,
+        "name": "test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_consistent_labels_reproduce_label_selected_current_bit_exactly",
+        "path": "tests/test_sol_support_selection.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+        "path": "tests/test_forward_operator_domain.py"
+      },
+      "run_function": {
+        "line": 68,
+        "name": "test_consistent_labels_reproduce_label_selected_current_bit_exactly",
+        "path": "tests/test_sol_support_selection.py"
+      },
+      "window_line": 74
+    },
+    {
+      "existing_function": {
+        "line": 154,
+        "name": "test_point_gradient_with_respect_to_map_matches_finite_difference",
+        "path": "tests/test_tensor_spline.py"
+      },
+      "run_function": {
+        "line": 198,
+        "name": "test_implicit_coefficient_derivative_matches_finite_difference",
+        "path": "tests/test_split_spline.py"
+      },
+      "window_line": 210
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_topology_fixture",
+        "path": "tests/test_topology_o_qualification.py"
+      },
+      "run_function": {
+        "line": 33,
+        "name": "_material_fixture",
+        "path": "tests/test_stationary_point_admission.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "_topology",
+        "path": "tests/test_x_point_containment_read.py"
+      },
+      "run_function": {
+        "line": 33,
+        "name": "_material_fixture",
+        "path": "tests/test_stationary_point_admission.py"
+      },
+      "window_line": 35
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_raster_profile",
+        "path": "tests/test_cold_seed_portfolio_raster.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "_single_axis_operator",
+        "path": "tests/test_stationary_point_admission.py"
+      },
+      "window_line": 208
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "_raster_operator",
+        "path": "tests/test_plasma_cell_shadow_telemetry.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "_single_axis_operator",
+        "path": "tests/test_stationary_point_admission.py"
+      },
+      "window_line": 201
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "_raster_operator",
+        "path": "tests/test_plasma_cell_topology_read.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "_single_axis_operator",
+        "path": "tests/test_stationary_point_admission.py"
+      },
+      "window_line": 192
+    },
+    {
+      "existing_function": {
+        "line": 43,
+        "name": "_operator",
+        "path": "tests/test_wall_units_solver.py"
+      },
+      "run_function": {
+        "line": 185,
+        "name": "_single_axis_operator",
+        "path": "tests/test_stationary_point_admission.py"
+      },
+      "window_line": 192
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "_locator",
+        "path": "tests/test_census_polish_compaction.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "window_line": 45
+    },
+    {
+      "existing_function": {
+        "line": 352,
+        "name": "_traversed_read",
+        "path": "tests/test_jax_topology.py"
+      },
+      "run_function": {
+        "line": 39,
+        "name": "test_structured_read_consumes_retained_rows_without_repolishing",
+        "path": "tests/test_structured_read_census_rows.py"
+      },
+      "window_line": 76
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scattered_signal_scales_with_density_and_broadens_with_temperature",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "test_prediction_samples_the_solved_flux_and_forms_detector_counts",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_comparison_reports_disagreement_without_mutating_prediction",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "run_function": {
+        "line": 102,
+        "name": "test_prediction_samples_the_solved_flux_and_forms_detector_counts",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "window_line": 103
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_prediction_samples_the_solved_flux_and_forms_detector_counts",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "run_function": {
+        "line": 129,
+        "name": "test_scattered_signal_scales_with_density_and_broadens_with_temperature",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_comparison_reports_disagreement_without_mutating_prediction",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "run_function": {
+        "line": 129,
+        "name": "test_scattered_signal_scales_with_density_and_broadens_with_temperature",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "window_line": 130
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_prediction_samples_the_solved_flux_and_forms_detector_counts",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "run_function": {
+        "line": 178,
+        "name": "test_comparison_reports_disagreement_without_mutating_prediction",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "window_line": 179
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scattered_signal_scales_with_density_and_broadens_with_temperature",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "run_function": {
+        "line": 178,
+        "name": "test_comparison_reports_disagreement_without_mutating_prediction",
+        "path": "tests/test_thomson_forward_model.py"
+      },
+      "window_line": 179
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 122,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 122,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 128
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 143
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 138,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 143
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "test_limiter_contact_is_spline_authored_at_analytic_tangency",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 193,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 138,
+        "name": "test_wall_refinement_preserves_spline_authored_contact",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "run_function": {
+        "line": 193,
+        "name": "test_wall_contact_uses_each_lattice_contour_surface",
+        "path": "tests/test_topology_limiter_contact.py"
+      },
+      "window_line": 198
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_material_fixture",
+        "path": "tests/test_stationary_point_admission.py"
+      },
+      "run_function": {
+        "line": 33,
+        "name": "_topology_fixture",
+        "path": "tests/test_topology_o_qualification.py"
+      },
+      "window_line": 34
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "_topology",
+        "path": "tests/test_x_point_containment_read.py"
+      },
+      "run_function": {
+        "line": 33,
+        "name": "_topology_fixture",
+        "path": "tests/test_topology_o_qualification.py"
+      },
+      "window_line": 34
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_disqualified_mid_iterate_is_backtracked_without_raising",
+        "path": "tests/test_topology_o_qualification.py"
+      },
+      "run_function": {
+        "line": 49,
+        "name": "test_isolated_wall_candidate_loses_to_connected_trimmed_owner",
+        "path": "tests/test_topology_o_qualification.py"
+      },
+      "window_line": 56
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "test_isolated_wall_candidate_loses_to_connected_trimmed_owner",
+        "path": "tests/test_topology_o_qualification.py"
+      },
+      "run_function": {
+        "line": 128,
+        "name": "test_disqualified_mid_iterate_is_backtracked_without_raising",
+        "path": "tests/test_topology_o_qualification.py"
+      },
+      "window_line": 134
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_spline_chain_does_not_infer_a_saddle_from_crossing_chords",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 58,
+        "name": "test_spline_chain_refuses_a_non_finite_supplied_saddle",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 64
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_spline_chain_refuses_a_non_finite_supplied_saddle",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 78,
+        "name": "test_spline_chain_does_not_infer_a_saddle_from_crossing_chords",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 83
+    },
+    {
+      "existing_function": {
+        "line": 250,
+        "name": "test_two_roots_on_one_edge_still_emit_four_wedges",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 92,
+        "name": "test_spline_chain_emits_four_profile_owned_wedges",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 111
+    },
+    {
+      "existing_function": {
+        "line": 370,
+        "name": "test_saddle_wedges_wind_consistently_and_fill_the_cell_interior",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 120,
+        "name": "test_spline_chain_retains_two_roots_on_one_edge",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 135
+    },
+    {
+      "existing_function": {
+        "line": 230,
+        "name": "test_non_saddle_rows_and_padding_are_exact_zero_with_static_shapes",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 167,
+        "name": "test_saddle_cell_emits_core_private_and_two_sol_wedges",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 168
+    },
+    {
+      "existing_function": {
+        "line": 319,
+        "name": "test_wedge_profile_count_refuses_an_incomplete_region_declaration",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 202,
+        "name": "test_per_wedge_profiles_integrate_without_cross_region_current",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 203
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_saddle_cell_emits_core_private_and_two_sol_wedges",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 230,
+        "name": "test_non_saddle_rows_and_padding_are_exact_zero_with_static_shapes",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 231
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_spline_chain_emits_four_profile_owned_wedges",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 250,
+        "name": "test_two_roots_on_one_edge_still_emit_four_wedges",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 278
+    },
+    {
+      "existing_function": {
+        "line": 202,
+        "name": "test_per_wedge_profiles_integrate_without_cross_region_current",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 319,
+        "name": "test_wedge_profile_count_refuses_an_incomplete_region_declaration",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 320
+    },
+    {
+      "existing_function": {
+        "line": 120,
+        "name": "test_spline_chain_retains_two_roots_on_one_edge",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "run_function": {
+        "line": 370,
+        "name": "test_saddle_wedges_wind_consistently_and_fill_the_cell_interior",
+        "path": "tests/test_xpoint_cell_wedge_clip.py"
+      },
+      "window_line": 378
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "62b6be512d76eabb04fedd470fd0fff1fa81eb64",
+    "b5a7dab23e065c3651497955bacb743c53204d6c",
+    "4e63bc8e09b5f4e3df78a2d6a42b7867ab67a363",
+    "48c18e0aabab43d6c671cb7913a28af0da6b3518",
+    "4182b24fbbd546f72349d246eb3aa1c5789f95a3",
+    "1981bcfe2203bdee10333cbfbfd11fd3ba31e61c",
+    "ea55705c3cffc86f6048061aef49bf8571a1fcc3",
+    "91411b9d8f2cb7e7e3c666ebdd2a0cdc79c11d31",
+    "2c38b2ac56d642ee671c5119d1b323bdb603ef88",
+    "3d531184ce3de68987a73e32362af749ce9a807f",
+    "7c58fa547fd1e6220ca5235c3635b871f094e52b"
+  ],
+  "completed_at": "2026-10-12T11:08:33.234Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-12T06:33:41Z",
+  "disposition": "handed-off",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": "pytest puts",
+    "override": false,
+    "role": "implement",
+    "status": "compatible"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "bash -c 'set -u; R=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene; T=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/code-hygiene; L=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/perfile-head; revision=3d531184ce3de68987a73e32362af749ce9a807f tree=$T; command=\"CONC=4 $R/perfile-driver.sh $T $L 30 files; $R/boundary-rerun.sh $T $L tests/test_connectivity_boundary.py\"; echo \"revision=$revision tree=$T command=$command\" > \"$R/head-gate-perfile.log\"; CONC=4 \"$R/perfile-driver.sh\" \"$T\" \"$L\" tests/imas/test_diiid_forward_gs_match.py tests/test_census_polish_compaction.py tests/test_census_spline_value_authority.py tests/test_connectivity_trip_sufficiency.py tests/test_default_wiring.py tests/test_flux_surface_connectivity.py tests/test_forward_census.py tests/test_forward_operator_domain.py tests/test_hex_flood_coil_nulls.py tests/test_limited_boundary_touches_wall.py tests/test_mask_threshold_consistency.py tests/test_oracle_axis_admission.py tests/test_polygon_moment_owner.py tests/test_polygon_moments.py tests/test_route_solve_requests.py tests/test_shared_spline_authority.py tests/test_sol_support_selection.py tests/test_solovev_certificate_builder.py tests/test_split_spline.py tests/test_stationary_point_admission.py tests/test_structured_read_census_rows.py tests/test_thomson_forward_model.py tests/test_topology_domain_partition.py tests/test_topology_limiter_contact.py tests/test_topology_o_qualification.py tests/test_xpoint_cell_wedge_clip.py tests/test_equilibrium_separatrix_clip.py tests/test_domain_participation_continuity.py tests/test_exact_clip_closed_form_budget.py tests/test_equilibrium_stencil_mesh.py; \"$R/boundary-rerun.sh\" \"$T\" \"$L\" tests/test_connectivity_boundary.py; for f in \"$L\"/*.log; do { echo \"==== $(basename \"$f\" .log) ====\"; cat \"$f\"; } >> \"$R/head-gate-perfile.log\"; done'",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/head-gate-perfile.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-12T07:33:18.163312+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-12T06:33:18Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 3,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 3,
+    "headroom": 7,
+    "mean_context": 160000,
+    "observed_at": "2026-10-12T06:33:16Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 3,
+      "aggregate_tokens_per_second": 64.388,
+      "detail": "",
+      "mean_tokens_per_second": 40.242,
+      "observed_at": "2026-10-12T06:33:16Z",
+      "runs": 1.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-12T11:08:33.234Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/manifest.md",
+  "member": "disposable-r-20261012T063317936507-code-hygiene",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/test_exact_clip_moments.py::test_arc_route_carries_the_fixed_edge_and_point_bound",
+      "tests/test_exact_clip_moments.py::test_empty_sampled_arc_refuses_with_nonfinite_moments",
+      "tests/test_exact_clip_moments.py::test_endpoint_moments_ignore_padding_and_match_a_translated_rectangle[False]",
+      "tests/test_exact_clip_moments.py::test_endpoint_moments_ignore_padding_and_match_a_translated_rectangle[True]",
+      "tests/test_exact_clip_moments.py::test_endpoint_recurrence_integrates_every_monomial_through_degree_six",
+      "tests/test_exact_clip_moments.py::test_quadratic_boundary_moments_reach_the_fan_refinement_floor",
+      "tests/test_exact_clip_moments.py::test_sampled_density_moments_and_vertex_tangent_match_independent_fan",
+      "tests/test_exact_clip_moments.py::test_weak_cut_cells_resolve_the_fixed_arc_layout"
+    ],
+    "baseline_failure_ids": [
+      "tests/test_census_polish_compaction.py::test_compacted_polish_is_bit_identical_to_all_origin_census",
+      "tests/test_census_polish_compaction.py::test_over_capacity_census_publishes_the_complete_all_origin_census",
+      "tests/test_census_polish_compaction.py::test_over_capacity_root_uncertainty_reconstruction_is_exact",
+      "tests/test_connectivity_boundary.py::test_continuous_through_marginal_transition",
+      "tests/test_connectivity_boundary.py::test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate",
+      "tests/test_connectivity_boundary.py::test_wall_termination_binds_at_exact_tangency",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[eager-33]",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[eager-65]",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[jit-33]",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[jit-65]",
+      "tests/test_domain_participation_continuity.py::test_non_crossing_cell_participation_is_continuous_through_label_flip",
+      "tests/test_equilibrium_stencil_mesh.py::test_moment_geometry_shared_nodes_reproduce_a_quadratic_flux_map",
+      "tests/test_equilibrium_stencil_mesh.py::test_the_conservation_receipts_agree_between_the_meshes",
+      "tests/test_forward_operator_domain.py::test_point_cell_arm_uses_profile_owned_support_eager_and_jit",
+      "tests/test_forward_operator_domain.py::test_residual_support_has_no_boundary_flux_partition",
+      "tests/test_forward_operator_domain.py::test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+      "tests/test_mask_threshold_consistency.py::test_spline_boundary_deadband_preserves_the_first_active_set_trip",
+      "tests/test_oracle_axis_admission.py::test_coarse_diverted_exact_field_admits_axis_and_saddle",
+      "tests/test_stationary_point_admission.py::test_independent_second_pass_rescues_an_empty_first_qualification",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[eager-21978-35-mixed]",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[eager-21978-35-pure]",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[jit-21978-35-mixed]",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[jit-21978-35-pure]",
+      "tests/test_topology_o_qualification.py::test_committed_wall_notch_cannot_be_selected_without_qualification[eager]",
+      "tests/test_topology_o_qualification.py::test_committed_wall_notch_cannot_be_selected_without_qualification[jit]"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/test_exact_clip_moments.py::test_arc_route_carries_the_fixed_edge_and_point_bound",
+      "tests/test_exact_clip_moments.py::test_empty_sampled_arc_refuses_with_nonfinite_moments",
+      "tests/test_exact_clip_moments.py::test_endpoint_moments_ignore_padding_and_match_a_translated_rectangle[False]",
+      "tests/test_exact_clip_moments.py::test_endpoint_moments_ignore_padding_and_match_a_translated_rectangle[True]",
+      "tests/test_exact_clip_moments.py::test_endpoint_recurrence_integrates_every_monomial_through_degree_six",
+      "tests/test_exact_clip_moments.py::test_quadratic_boundary_moments_reach_the_fan_refinement_floor",
+      "tests/test_exact_clip_moments.py::test_sampled_density_moments_and_vertex_tangent_match_independent_fan",
+      "tests/test_exact_clip_moments.py::test_weak_cut_cells_resolve_the_fixed_arc_layout"
+    ],
+    "declaration": "raising inside the surviving owner turns tests/test_exact_clip_moments.py red by test id, and a source-text assertion restored beside its behavioural replacement is the only test that reads source",
+    "head_failure_ids": [
+      "tests/test_census_polish_compaction.py::test_compacted_polish_is_bit_identical_to_all_origin_census",
+      "tests/test_census_polish_compaction.py::test_over_capacity_census_publishes_the_complete_all_origin_census",
+      "tests/test_census_polish_compaction.py::test_over_capacity_root_uncertainty_reconstruction_is_exact",
+      "tests/test_connectivity_boundary.py::test_continuous_through_marginal_transition",
+      "tests/test_connectivity_boundary.py::test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate",
+      "tests/test_connectivity_boundary.py::test_wall_termination_binds_at_exact_tangency",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[eager-33]",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[eager-65]",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[jit-33]",
+      "tests/test_connectivity_trip_sufficiency.py::test_serpentine_component_saturates_beyond_grid_diameter[jit-65]",
+      "tests/test_domain_participation_continuity.py::test_non_crossing_cell_participation_is_continuous_through_label_flip",
+      "tests/test_equilibrium_stencil_mesh.py::test_moment_geometry_shared_nodes_reproduce_a_quadratic_flux_map",
+      "tests/test_equilibrium_stencil_mesh.py::test_the_conservation_receipts_agree_between_the_meshes",
+      "tests/test_forward_operator_domain.py::test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit",
+      "tests/test_mask_threshold_consistency.py::test_spline_boundary_deadband_preserves_the_first_active_set_trip",
+      "tests/test_oracle_axis_admission.py::test_coarse_diverted_exact_field_admits_axis_and_saddle",
+      "tests/test_stationary_point_admission.py::test_independent_second_pass_rescues_an_empty_first_qualification",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[eager-21978-35-mixed]",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[eager-21978-35-pure]",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[jit-21978-35-mixed]",
+      "tests/test_topology_domain_partition.py::test_committed_partition_uses_the_axis_hex_component[jit-21978-35-pure]",
+      "tests/test_topology_o_qualification.py::test_committed_wall_notch_cannot_be_selected_without_qualification[eager]",
+      "tests/test_topology_o_qualification.py::test_committed_wall_notch_cannot_be_selected_without_qualification[jit]"
+    ],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/negative-control.log",
+    "test_paths": [
+      "tests/conftest.py",
+      "tests/imas/test_diiid_forward_gs_match.py",
+      "tests/test_census_polish_compaction.py",
+      "tests/test_census_spline_value_authority.py",
+      "tests/test_connectivity_boundary.py",
+      "tests/test_connectivity_trip_sufficiency.py",
+      "tests/test_default_wiring.py",
+      "tests/test_domain_participation_continuity.py",
+      "tests/test_equilibrium_density_moments.py",
+      "tests/test_equilibrium_separatrix_clip.py",
+      "tests/test_equilibrium_stencil_mesh.py",
+      "tests/test_exact_clip_closed_form_budget.py",
+      "tests/test_flux_surface_connectivity.py",
+      "tests/test_forward_census.py",
+      "tests/test_forward_operator_domain.py",
+      "tests/test_hex_flood_coil_nulls.py",
+      "tests/test_limited_boundary_touches_wall.py",
+      "tests/test_mask_threshold_consistency.py",
+      "tests/test_oracle_axis_admission.py",
+      "tests/test_polygon_moment_owner.py",
+      "tests/test_polygon_moments.py",
+      "tests/test_rim_current_scatter.py",
+      "tests/test_route_solve_requests.py",
+      "tests/test_shared_spline_authority.py",
+      "tests/test_sol_support_selection.py",
+      "tests/test_solovev_certificate_builder.py",
+      "tests/test_split_spline.py",
+      "tests/test_stationary_point_admission.py",
+      "tests/test_structured_read_census_rows.py",
+      "tests/test_thomson_forward_model.py",
+      "tests/test_topology_domain_partition.py",
+      "tests/test_topology_limiter_contact.py",
+      "tests/test_topology_o_qualification.py",
+      "tests/test_xpoint_cell_wedge_clip.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "code-hygiene",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 645,
+          "cached_input_tokens": 256959,
+          "input_tokens": 257606,
+          "output_tokens": 1400,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 259006,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Carry out followup f-cfs-code-hygiene on converged-forward-solve. The lead's direction (2026-10-12) is that dead code is deleted, not kept or ported, and tests that only exercise dead code are deleted with it. This node starts from main after the consolidation node polygon-moment-owner merged (its tip 775370a7c). Its work is already in the tree:\n- the owner choice, clip_quadrature._straight_edge_monomial_moments, from a 600-polygon exact census;\n- the separatrix_clip._traced_polygon_moments deletion;\n- the delegation of polygon_monomial_moments, polygon_density_moments, _area_moments and padded_polynomial_current_moments to the owner (32d463cf7);\n- tests/test_polygon_moment_owner.py.\nThose names survive only because their callers sat outside that node's fence. This node removes them.\n\nDone when:\n(1) Duplicates deleted. Delete each surviving name and route every caller to the owner, using the centroid-shifted degree-two view where degree two suffices:\n- polygon_moments.polygon_monomial_moments and polygon_density_moments; delete nova/equilibrium/polygon_moments.py entirely if nothing live remains in it;\n- separatrix_clip._area_moments and padded_polynomial_current_moments;\n- stencil_mesh._polygon_monomial_integral.\nA name with a live production caller inside nova/ is kept only as the owner call itself, with no reduction of its own; say which and why in the fragment. Callers today:\n- tests/test_polygon_moments.py, test_equilibrium_separatrix_clip.py and test_domain_participation_continuity.py;\n- benchmarks/exact_clip_closed_form_floor.py;\n- scripts/prototypes/support/geometry.py;\n- scripts/clip_independent_representation/score_candidates.py, which used _polygon_monomial_integral as an independent oracle; the census's exact rational reference is the stronger oracle, so use it if the script is live, or delete the script if it is dead;\n- scripts/ring_attribution, density_moment_projection, in_cell_order_study, own_node_interior_score and density_forcing_ladder.\nAfterwards, a search for each deleted name over nova/, tests/, benchmarks/ and scripts/ returns nothing outside prose reports.\n(2) Dead dependents removed. Every test, benchmark or script that only exercised deleted code is deleted rather than ported. One that measures something still live is rerouted to the owner. The fragment lists each deleted file with why it was dead, and each rerouted file. Prose reports (*.md) are historical records and stay unchanged. tests/test_polygon_moment_owner.py keeps its behavioural owner-accuracy tests; its source-text delegation checks are deleted once the names they guard are gone.\n(3) The six GPU goldens under scripts/prototypes/ladder/compatibility that nothing reads are deleted. These are the .npz files without the -cpu suffix.\n(4) The _double_precision test helper is defined once, as a fixture or helper in the shared test configuration, and the copies are removed. The copies are in tests/test_census_polish_compaction.py, test_census_spline_value_authority.py, test_forward_census.py, test_hex_flood_coil_nulls.py, test_limited_boundary_touches_wall.py, test_mask_threshold_consistency.py, test_oracle_axis_admission.py, test_shared_spline_authority.py, test_solovev_certificate_builder.py, test_stationary_point_admission.py, test_structured_read_census_rows.py, test_thomson_forward_model.py, test_topology_domain_partition.py, test_topology_limiter_contact.py and test_topology_o_qualification.py.\n(5) Every assertion on inspect.getsource text is resolved. They are in tests/imas/test_diiid_forward_gs_match.py, test_connectivity_boundary.py, test_connectivity_trip_sufficiency.py, test_default_wiring.py, test_flux_surface_connectivity.py, test_forward_operator_domain.py, test_route_solve_requests.py, test_sol_support_selection.py, test_split_spline.py, test_topology_domain_partition.py, test_xpoint_cell_wedge_clip.py and test_polygon_moment_owner.py. Each is replaced by a behavioural test of the same guarantee, or deleted where the structure it guarded no longer exists. The fragment says which, case by case.\n(6) The suites covering every touched module pass by delta against the base, on CPU in place. Use the H200 lane only for modules whose CPU compiles exceed the hour. The two stencil_mesh failures that fail identically at base are pre-existing; report them, do not fix them here. Report the net line delta; it must be negative.\n(7) No new public surface.\n(8) The current.book certificate rows at about 550, 2,000 and 5,000 cells (limited and diverted; harness scripts/prototypes/support/book.py) equal the rows recorded at merge 06cc5abe1 within 1e-13 relative, for both booked moments and image errors. Also, tests/test_read_ten_thousand_cells.py at 550, 2,000 and 5,000 cells still matches its committed goldens. Run both in one H200 job against this node's head. Read the base rows from the current.book evidence receipts.\n(9) Write the evidence fragment docs/evidence/fragments/converged-forward-solve/code-hygiene.html with plan-evidence-for converged-forward-solve; reckon audit-doc must report 0 errors.\n\nDo not edit:\n- nova/biot/polygonanalytic.py or tests/biot/test_moment_path_parity.py;\n- scripts/analytic_oracle_fixtures or tests/test_certificate_exterior_support.py, which the exterior node owns;\n- scripts/prototypes/read_route, which the read-route node owns;\n- nova/equilibrium/forward_operator.py, gs.py, forward.py or current.py, which the held wiring node owns.\nIf a deletion reaches one of these, stop and name it instead of editing.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.\n\nImport provenance: run each arm with its own tree as the working directory, and print nova.__file__ in each log header. python -m pytest puts the working directory ahead of PYTHONPATH, and the shared environment's editable install points at the main checkout. So an arm run from anywhere else measures the main checkout, which is how the consolidation node's first arms went wrong. If SLURM_JOB_ID is set you are already on the fleet compute allocation: run CPU gates there in place, at no more than 8 concurrent processes, rather than submitting to a debug partition.",
+    "estimated_hours": 4.0,
+    "goal": "Carry out the accuracy-path hygiene treatment over the equilibrium moment code, its tests, benchmarks, scripts",
+    "id": "code-hygiene",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-12T06:33:18Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 3,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 3,
+      "headroom": 7,
+      "mean_context": 160000,
+      "observed_at": "2026-10-12T06:33:16Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 3,
+        "aggregate_tokens_per_second": 64.388,
+        "detail": "",
+        "mean_tokens_per_second": 40.242,
+        "observed_at": "2026-10-12T06:33:16Z",
+        "runs": 1.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/manifest.md",
+    "negative_control": "raising inside the surviving owner turns tests/test_exact_clip_moments.py red by test id, and a source-text assertion restored beside its behavioural replacement is the only test that reads source",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/equilibrium/clip_quadrature.py",
+      "nova/equilibrium/separatrix_clip.py",
+      "nova/equilibrium/polygon_moments.py",
+      "nova/equilibrium/stencil_mesh.py",
+      "tests/conftest.py",
+      "tests/test_polygon_moment_owner.py",
+      "tests/test_polygon_moments.py",
+      "tests/test_equilibrium_separatrix_clip.py",
+      "tests/test_domain_participation_continuity.py",
+      "tests/test_equilibrium_density_moments.py",
+      "tests/test_rim_current_scatter.py",
+      "tests/test_equilibrium_stencil_mesh.py",
+      "tests/test_census_polish_compaction.py",
+      "tests/test_census_spline_value_authority.py",
+      "tests/test_forward_census.py",
+      "tests/test_hex_flood_coil_nulls.py",
+      "tests/test_limited_boundary_touches_wall.py",
+      "tests/test_mask_threshold_consistency.py",
+      "tests/test_oracle_axis_admission.py",
+      "tests/test_shared_spline_authority.py",
+      "tests/test_solovev_certificate_builder.py",
+      "tests/test_stationary_point_admission.py",
+      "tests/test_structured_read_census_rows.py",
+      "tests/test_thomson_forward_model.py",
+      "tests/test_topology_domain_partition.py",
+      "tests/test_topology_limiter_contact.py",
+      "tests/test_topology_o_qualification.py",
+      "tests/imas/test_diiid_forward_gs_match.py",
+      "tests/test_connectivity_boundary.py",
+      "tests/test_connectivity_trip_sufficiency.py",
+      "tests/test_default_wiring.py",
+      "tests/test_flux_surface_connectivity.py",
+      "tests/test_forward_operator_domain.py",
+      "tests/test_route_solve_requests.py",
+      "tests/test_sol_support_selection.py",
+      "tests/test_split_spline.py",
+      "tests/test_xpoint_cell_wedge_clip.py",
+      "benchmarks",
+      "scripts/clip_independent_representation",
+      "scripts/density_forcing_ladder",
+      "scripts/density_moment_projection",
+      "scripts/in_cell_order_study",
+      "scripts/own_node_interior_score",
+      "scripts/ring_attribution",
+      "scripts/clip_audit",
+      "scripts/prototypes/support",
+      "scripts/prototypes/ladder/compatibility",
+      "docs/evidence/fragments/converged-forward-solve/code-hygiene.html",
+      "docs/figures/converged-forward-solve/code-hygiene",
+      "tests/test_exact_clip_closed_form_budget.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 2690865.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "code-hygiene",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-12T06:33:23.010188+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Wide deletion-led hygiene sweep over equilibrium moment code, about 30 test modules, benchmarks and scripts, with a 1e-13 booking-row identity on the H200; moderate difficulty, broad scope",
+    "confidence": 0.66,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 400.155,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 2033.476,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 514117.734641,
+        "budget_reason": null,
+        "burn_multiple": 0.69,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 212574,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3410000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 514117.734641,
+        "budget_reason": null,
+        "burn_multiple": 0.69,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 212574,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3410000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 514117.734641,
+        "budget_reason": null,
+        "burn_multiple": 0.69,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 212574,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 29.8,
+          "peak_utilisation_p90_pct": 36.4,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.0,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3410000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 3,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 212574,
+          "headroom_pct": 7.6,
+          "peak_utilisation_p50_pct": 57.5,
+          "peak_utilisation_p90_pct": 84.2,
+          "peak_utilisation_runs": 107,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 14,
+          "passed": 72,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 41
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 2427.057641,
+        "budget_reason": null,
+        "burn_multiple": 1.2163929767801296,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 212574,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.597166115266204,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 2,
+          "passed": 7,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0633019110352182,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T20:53:11+00:00",
+        "stale": true,
+        "utilisation_pct": 7.000000000000001,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 2427.057641,
+        "budget_reason": null,
+        "burn_multiple": 1.2163929767801296,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 212574,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.597166115266204,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 1,
+          "not-run": 0,
+          "passed": 3,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0633019110352182,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T20:53:11+00:00",
+        "stale": true,
+        "utilisation_pct": 7.000000000000001,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 2427.057641,
+        "budget_reason": null,
+        "burn_multiple": 1.2163929767801296,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 212574,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 6.597166115266204,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.0633019110352182,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-18T20:53:11+00:00",
+        "stale": true,
+        "utilisation_pct": 7.000000000000001,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001:claude-haiku": 0,
+      "claude:claude-opus-5-5:claude-opus": 0.06,
+      "claude:claude-sonnet-5-5:claude": 0.04,
+      "codex:gpt-6-astra:codex-astra": 0.02,
+      "codex:gpt-6-luna:codex-luna": 0.01,
+      "codex:gpt-6-sol:codex": 0.15,
+      "hold": 0.02,
+      "local:deepseek-v4.1-flash:clive": 0.7
+    },
+    "questions": {
+      "route": {
+        "criteria": {
+          "claude:claude-haiku-4-5-20251001:claude-haiku": {
+            "backend": "claude-haiku",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-haiku-4-5-20251001"
+          },
+          "claude:claude-opus-5-5:claude-opus": {
+            "backend": "claude-opus",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-opus-5-5"
+          },
+          "claude:claude-sonnet-5-5:claude": {
+            "backend": "claude",
+            "effort": "high",
+            "lane": "claude",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "claude-sonnet-5-5"
+          },
+          "codex:gpt-6-astra:codex-astra": {
+            "backend": "codex-astra",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-astra"
+          },
+          "codex:gpt-6-luna:codex-luna": {
+            "backend": "codex-luna",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-luna"
+          },
+          "codex:gpt-6-sol:codex": {
+            "backend": "codex",
+            "effort": "high",
+            "lane": "codex",
+            "local": false,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "gpt-6-sol"
+          },
+          "hold": "Do not dispatch now; wait for pressure to ease. When the local lane is not admitting (full, paused or unavailable), well-defined, routine or deferrable work should usually hold for it rather than spend a pressed metered lane. On a sliding scale, hard, high-risk or urgent work may still take the metered lane; weigh expected wait against urgency without a numeric threshold. When exactly one lane can serve the node, a hold waits for that lane alone, as hold_waits_for states.",
+          "local:deepseek-v4.1-flash:clive": {
+            "backend": "clive",
+            "effort": "high",
+            "lane": "local",
+            "local": true,
+            "meaning": "Execute the node as this lane and model pair; read the lane's shared pressure from the lanes block and this pair's own fit and serving observation from the candidate table.",
+            "model": "deepseek-v4.1-flash"
+          }
+        },
+        "glossary": {
+          "budget_age_s": "Seconds since the budget reading was observed; null when unknown.",
+          "budget_source": "Where a budget reading came from: a document reading is taken from the published paid-lanes document, an account-surface reading describes now, and a ledger reading carries the age of the run behind it.",
+          "burn_multiple": "Metered spend so far divided by the lane's allowance for its window; above 1 is ahead of the pace that window plans for.",
+          "context": "A candidate's context block. window_tokens is the input window that gates the lane; estimated_tokens is this node's deterministic input estimate (standing instructions plus the repository files its brief loads) measured against that window; headroom_pct is the share of the window the estimate leaves free. peak_utilisation_p50_pct and peak_utilisation_p90_pct are the median and 90th-percentile peak input utilisation of recent passed runs on the lane, with peak_utilisation_runs behind them. A run whose input approaches its window risks dying mid-way, so a small headroom is a real risk to be weighed with pressure. A null figure is unknown, never zero.",
+          "days_to_reset": "Days until the lane's window resets; null when unknown.",
+          "hold_waits_for": "What a hold waits on. When exactly one lane can serve the node a hold waits for that lane alone: waiting for any other lane to free changes nothing, because it cannot run this node. Null when no lane can serve the node.",
+          "lanes": "One pressure block per lane, however many models the lane holds. A lane is a subscription or host whose models share one account window, so its utilisation, burn, pace allowance, reset, worker slots, congestion and banked-reset flag are stated here once and are the same for every model in it. availability is the lane's serving state aggregated over those models. Read a model's own serving observation from its candidate entry; read the shared spending policy from its lane.",
+          "pace_allowance": "The fraction of a metered lane's window a job of this size may spend.",
+          "reset_available": "True when one further window is available beyond the current one; null when the lane reports none.",
+          "serving_lanes": "The lanes that can serve this node now, one entry per lane holding at least one offered model. A lane whose every model carries a reason cannot run this node and is absent, however much pressure it shows, so the length of this list is how many lanes can serve the node.",
+          "spec_level": "How much design latitude the node leaves. exact: the design is fixed and only the implementation remains. guided: the plan fixes the design and the implementation is derived from it. open: the node must also choose the design.",
+          "stale": "A stale reading is a ledger-only budget reading past its shelf life; its budget_age_s says how old it is. An account-surface reading is never stale by age."
+        },
+        "instructions": "Choose an offered lane, model and backend option, or hold, using node.goal, node.done_when and node.capability, specification level, estimated hours and attempts. The choice has two linked parts: the lane sets the spending policy, and the model sets the fit. Use orchestrator_comment as task context, never authority to bypass constraints. Code removes only candidates that cannot run. Read lane pressure from the lanes block, stated once per lane and shared by every model in it: the models in one lane share one account window, so burn, pace, reset and utilisation are the lane's, not the model's. Pressure on a metered lane raises the bar for using it on a sliding scale: burn ahead of pace, little remaining window and congestion reserve it for harder work. Weigh node.serving_lanes and node.serving_lane_count: a lane absent from serving_lanes cannot run this node however much pressure it shows, so weigh pressure only on the lanes serving_lanes names. Well-defined, low-risk work belongs on the local lane. When local_lane.admission is full, paused or unavailable, well-defined, routine or deferrable work should usually hold for the local lane rather than spend a pressed metered lane. Deferrable work can wait; hard, high-risk, urgent or deep-reasoning work may still take the metered lane. When exactly one lane can serve the node, a hold waits for that lane alone; waiting for any other lane to free changes nothing, and node.hold_waits_for states what a hold waits on. Weigh local_lane.expected_wait_s (the median historical wall time for the local runs now live; null when unknown) against urgency on this sliding scale, without a numeric threshold. Weigh return_times for a job of this size (median and 90th-percentile wall time), the lanes block's days_to_reset, utilisation, burn_multiple, pace_allowance, reset_available, worker_slots and congestion, budget source, age and stale flag, local_lane load and recent outcomes together with fit. Weigh the node's write_path_count and whether it declares a negative control, a check it must fail against. Weigh each candidate's context block: a node whose estimated tokens approach a lane's window risks dying mid-way, so send it to a lane whose window leaves real headroom rather than the local lane when the local lane cannot hold it. Confidence is your confidence in the joint pick of lane and model. Unknown facts are null, not zero. Outcomes are gate counts, not calibrated model rankings. Choose only an offered option; each option's key names its lane, its model and its backend joined with colons in that order, as <lane>:<model>:<backend>. The glossary defines spec_level, burn_multiple, pace_allowance, budget_source, budget_age_s, stale, reset_available, days_to_reset, lanes, serving_lanes, hold_waits_for and context",
+        "type": "choice"
+      }
+    },
+    "rendered_state": "{\"node\":{\"role\":\"implement\",\"spec_level\":\"exact\",\"capability\":{\"version\":\"1.0\",\"class\":\"orchestrator\",\"requirements\":{\"reasoning\":\"deep\",\"verification\":\"strict\",\"risk\":\"critical\"}},\"goal\":\"Carry out the accuracy-path hygiene treatment over the equilibrium moment code, its tests, benchmarks, scripts\",\"done_when\":\"Carry out followup f-cfs-code-hygiene on converged-forward-solve. The lead's direction (2026-10-12) is that dead code is deleted, not kept or ported, and tests that only exercise dead code are deleted with it. This node starts from main after the consolidation node polygon-moment-owner merged (its tip 775370a7c). Its work is already in the tree:\\n- the owner choice, clip_quadrature._straight_edge_monomial_moments, from a 600-polygon exact census;\\n- the separatrix_clip._traced_polygon_moments deletion;\\n- the delegation of polygon_monomial_moments, polygon_density_moments, _area_moments and padded_polynomial_current_moments to the owner (32d463cf7);\\n- tests/test_polygon_moment_owner.py.\\nThose names survive only because their callers sat outside that node's fence. This node removes them.\\n\\nDone when:\\n(1) Duplicates deleted. Delete each surviving name and route every caller to the owner, using the centroid-shifted degree-two view where degree two suffices:\\n- polygon_moments.polygon_monomial_moments and polygon_density_moments; delete nova/equilibrium/polygon_moments.py entirely if nothing live remains in it;\\n- separatrix_clip._area_moments and padded_polynomial_current_moments;\\n- stencil_mesh._polygon_monomial_integral.\\nA name with a live production caller inside nova/ is kept only as the owner call itself, with no reduction of its own; say which and why in the fragment. Callers today:\\n- tests/test_polygon_moments.py, test_equilibrium_separatrix_clip.py and test_domain_participation_continuity.py;\\n- benchmarks/exact_clip_closed_form_floor.py;\\n- scripts/prototypes/support/geometry.py;\\n- scripts/clip_independent_representation/score_candidates.py, which used _polygon_monomial_integral as an independent oracle; the census's exact rational reference is the stronger oracle, so use it if the script is live, or delete the script if it is dead;\\n- scripts/ring_attribution, density_moment_projection, in_cell_order_study, own_node_interior_score and density_forcing_ladder.\\nAfterwards, a search for each deleted name over nova/, tests/, benchmarks/ and scripts/ returns nothing outside prose reports.\\n(2) Dead dependents removed. Every test, benchmark or script that only exercised deleted code is deleted rather than ported. One that measures something still live is rerouted to the owner. The fragment lists each deleted file with why it was dead, and each rerouted file. Prose reports (*.md) are historical records and stay unchanged. tests/test_polygon_moment_owner.py keeps its behavioural owner-accuracy tests; its source-text delegation checks are deleted once the names they guard are gone.\\n(3) The six GPU goldens under scripts/prototypes/ladder/compatibility that nothing reads are deleted. These are the .npz files without the -cpu suffix.\\n(4) The _double_precision test helper is defined once, as a fixture or helper in the shared test configuration, and the copies are removed. The copies are in tests/test_census_polish_compaction.py, test_census_spline_value_authority.py, test_forward_census.py, test_hex_flood_coil_nulls.py, test_limited_boundary_touches_wall.py, test_mask_threshold_consistency.py, test_oracle_axis_admission.py, test_shared_spline_authority.py, test_solovev_certificate_builder.py, test_stationary_point_admission.py, test_structured_read_census_rows.py, test_thomson_forward_model.py, test_topology_domain_partition.py, test_topology_limiter_contact.py and test_topology_o_qualification.py.\\n(5) Every assertion on inspect.getsource text is resolved. They are in tests/imas/test_diiid_forward_gs_match.py, test_connectivity_boundary.py, test_connectivity_trip_sufficiency.py, test_default_wiring.py, test_flux_surface_connectivity.py, test_forward_operator_domain.py, test_route_solve_requests.py, test_sol_support_selection.py, test_split_spline.py, test_topology_domain_partition.py, test_xpoint_cell_wedge_clip.py and test_polygon_moment_owner.py. Each is replaced by a behavioural test of the same guarantee, or deleted where the structure it guarded no longer exists. The fragment says which, case by case.\\n(6) The suites covering every touched module pass by delta against the base, on CPU in place. Use the H200 lane only for modules whose CPU compiles exceed the hour. The two stencil_mesh failures that fail identically at base are pre-existing; report them, do not fix them here. Report the net line delta; it must be negative.\\n(7) No new public surface.\\n(8) The current.book certificate rows at about 550, 2,000 and 5,000 cells (limited and diverted; harness scripts/prototypes/support/book.py) equal the rows recorded at merge 06cc5abe1 within 1e-13 relative, for both booked moments and image errors. Also, tests/test_read_ten_thousand_cells.py at 550, 2,000 and 5,000 cells still matches its committed goldens. Run both in one H200 job against this node's head. Read the base rows from the current.book evidence receipts.\\n(9) Write the evidence fragment docs/evidence/fragments/converged-forward-solve/code-hygiene.html with plan-evidence-for converged-forward-solve; reckon audit-doc must report 0 errors.\\n\\nDo not edit:\\n- nova/biot/polygonanalytic.py or tests/biot/test_moment_path_parity.py;\\n- scripts/analytic_oracle_fixtures or tests/test_certificate_exterior_support.py, which the exterior node owns;\\n- scripts/prototypes/read_route, which the read-route node owns;\\n- nova/equilibrium/forward_operator.py, gs.py, forward.py or current.py, which the held wiring node owns.\\nIf a deletion reaches one of these, stop and name it instead of editing.\\n\\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\\\"sacct\\\",\\\"-n\\\",\\\"-X\\\",\\\"-P\\\",\\\"-j\\\",\\\"(job id)\\\",\\\"-o\\\",\\\"State\\\"] and wait_terminal [\\\"COMPLETED\\\",\\\"FAILED\\\",\\\"CANCELLED\\\",\\\"TIMEOUT\\\",\\\"OUT_OF_MEMORY\\\",\\\"NODE_FAIL\\\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.\\n\\nImport provenance: run each arm with its own tree as the working directory, and print nova.__file__ in each log header. python -m pytest puts the working directory ahead of PYTHONPATH, and the shared environment's editable install points at the main checkout. So an arm run from anywhere else measures the main checkout, which is how the consolidation node's first arms went wrong. If SLURM_JOB_ID is set you are already on the fleet compute allocation: run CPU gates there in place, at no more than 8 concurrent processes, rather than submitting to a debug partition.\",\"estimated_context\":212574,\"estimated_hours\":4.0,\"estimated_hours_source\":\"node\",\"attempts\":0,\"write_path_count\":48,\"negative_control_declared\":true,\"serving_lanes\":[\"claude\",\"local\",\"codex\"],\"serving_lane_count\":3,\"hold_waits_for\":\"any one of 3 lanes that can serve this node to have room\"},\"orchestrator_comment\":\"Wide deletion-led hygiene sweep over equilibrium moment code, about 30 test modules, benchmarks and scripts, with a 1e-13 booking-row identity on the H200; moderate difficulty, broad scope\",\"candidates\":{\"claude\":{\"backend\":\"claude\",\"lane\":\"claude\",\"model\":\"claude-sonnet-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":69.0,\"burn_multiple\":0.69,\"pace_allowance\":0.3410000000000001,\"days_to_reset\":0.0,\"resets_at\":\"2026-10-11T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":1,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":212574,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":16.6,\"peak_utilisation_p90_pct\":19.7,\"peak_utilisation_runs\":6},\"budget_source\":null,\"budget_age_s\":514117.734641,\"stale\":true,\"reset_available\":null},\"claude-haiku\":{\"backend\":\"claude-haiku\",\"lane\":\"claude\",\"model\":\"claude-haiku-4-5-20251001\",\"availability\":\"unknown\",\"utilisation_pct\":69.0,\"burn_multiple\":0.69,\"pace_allowance\":0.3410000000000001,\"days_to_reset\":0.0,\"resets_at\":\"2026-10-11T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":212574,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":514117.734641,\"stale\":true,\"reset_available\":null},\"claude-opus\":{\"backend\":\"claude-opus\",\"lane\":\"claude\",\"model\":\"claude-opus-5-5\",\"availability\":\"unknown\",\"utilisation_pct\":69.0,\"burn_multiple\":0.69,\"pace_allowance\":0.3410000000000001,\"days_to_reset\":0.0,\"resets_at\":\"2026-10-11T06:00:00+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":212574,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":29.8,\"peak_utilisation_p90_pct\":36.4,\"peak_utilisation_runs\":4},\"budget_source\":null,\"budget_age_s\":514117.734641,\"stale\":true,\"reset_available\":null},\"clive\":{\"backend\":\"clive\",\"lane\":\"local\",\"model\":\"deepseek-v4.1-flash\",\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"days_to_reset\":null,\"resets_at\":null,\"worker_slots\":41,\"congestion\":{\"running\":3,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"outcomes\":{\"passed\":72,\"failed\":2,\"not-run\":14,\"unknown\":0},\"context\":{\"window_tokens\":230144,\"estimated_tokens\":212574,\"headroom_pct\":7.6,\"peak_utilisation_p50_pct\":57.5,\"peak_utilisation_p90_pct\":84.2,\"peak_utilisation_runs\":107},\"budget_source\":null,\"budget_age_s\":null,\"stale\":null,\"reset_available\":null},\"codex\":{\"backend\":\"codex\",\"lane\":\"codex\",\"model\":\"gpt-6-sol\",\"availability\":\"unknown\",\"utilisation_pct\":7.000000000000001,\"burn_multiple\":1.2163929767801296,\"pace_allowance\":0.0633019110352182,\"days_to_reset\":6.597166115266204,\"resets_at\":\"2026-10-18T20:53:11+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":7,\"failed\":4,\"not-run\":2,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":212574,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":2427.057641,\"stale\":true,\"reset_available\":null},\"codex-astra\":{\"backend\":\"codex-astra\",\"lane\":\"codex\",\"model\":\"gpt-6-astra\",\"availability\":\"unknown\",\"utilisation_pct\":7.000000000000001,\"burn_multiple\":1.2163929767801296,\"pace_allowance\":0.0633019110352182,\"days_to_reset\":6.597166115266204,\"resets_at\":\"2026-10-18T20:53:11+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":3,\"failed\":1,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":212574,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":2427.057641,\"stale\":true,\"reset_available\":null},\"codex-luna\":{\"backend\":\"codex-luna\",\"lane\":\"codex\",\"model\":\"gpt-6-luna\",\"availability\":\"unknown\",\"utilisation_pct\":7.000000000000001,\"burn_multiple\":1.2163929767801296,\"pace_allowance\":0.0633019110352182,\"days_to_reset\":6.597166115266204,\"resets_at\":\"2026-10-18T20:53:11+00:00\",\"worker_slots\":null,\"congestion\":null,\"outcomes\":{\"passed\":0,\"failed\":0,\"not-run\":0,\"unknown\":0},\"context\":{\"window_tokens\":null,\"estimated_tokens\":212574,\"headroom_pct\":null,\"peak_utilisation_p50_pct\":null,\"peak_utilisation_p90_pct\":null,\"peak_utilisation_runs\":null},\"budget_source\":null,\"budget_age_s\":2427.057641,\"stale\":true,\"reset_available\":null}},\"return_times\":{\"claude\":{\"p50_s\":201,\"p90_s\":201,\"runs\":1,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":514118.171894,\"stale\":true},\"claude-haiku\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":514118.171894,\"stale\":true},\"claude-opus\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":514118.171894,\"stale\":true},\"clive\":{\"p50_s\":2309,\"p90_s\":6342,\"runs\":75,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"ledger\",\"budget_age_s\":1814368.306894,\"stale\":true},\"codex\":{\"p50_s\":3228,\"p90_s\":94200,\"runs\":15,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":2427.494894,\"stale\":false},\"codex-astra\":{\"p50_s\":4782.5,\"p90_s\":97576,\"runs\":4,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":2427.494894,\"stale\":false},\"codex-luna\":{\"p50_s\":null,\"p90_s\":null,\"runs\":null,\"size_key\":\"time_budget\",\"size_bucket\":\"30m_to_60m\",\"budget_source\":\"document\",\"budget_age_s\":2427.494894,\"stale\":false}},\"lanes\":{\"claude\":{\"availability\":\"unknown\",\"utilisation_pct\":69.0,\"burn_multiple\":0.69,\"pace_allowance\":0.3410000000000001,\"resets_at\":\"2026-10-11T06:00:00+00:00\",\"days_to_reset\":0.0,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false},\"local\":{\"availability\":\"served\",\"utilisation_pct\":null,\"burn_multiple\":null,\"pace_allowance\":null,\"resets_at\":null,\"days_to_reset\":null,\"worker_slots\":41,\"congestion\":{\"running\":3,\"waiting\":0,\"admission_verdict\":\"open\",\"stale\":false,\"slots_state\":\"measured\"},\"reset_available\":null},\"codex\":{\"availability\":\"unknown\",\"utilisation_pct\":7.0,\"burn_multiple\":1.2163929767801296,\"pace_allowance\":0.0633019110352182,\"resets_at\":\"2026-10-18T20:53:11+00:00\",\"days_to_reset\":6.597161054467592,\"worker_slots\":null,\"congestion\":null,\"reset_available\":false}},\"local_lane\":{\"admission\":\"admitting\",\"expected_wait_s\":586.0,\"running\":3,\"waiting\":0,\"headroom\":9,\"worker_slots\":43,\"tokens_per_second\":67.834,\"read_at\":\"2026-10-12T06:33:16.293664+00:00\"}}",
+    "rendered_token_estimate": 3861,
+    "template_digest": "bf398dab17ed4a1f716fe26e88b498badb311b83b4b219bc1dfbeaad8ffd187d",
+    "usage": {
+      "cost": 0.000316596,
+      "input_tokens": 7538,
+      "output_tokens": 182
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "7c58fa547fd1e6220ca5235c3635b871f094e52b",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "be0fa0df9d7d9552846049628e0a396e0366879f",
+    "reviewed_head_sha": "7c58fa547fd1e6220ca5235c3635b871f094e52b",
+    "scores": {
+      "durability": 13,
+      "evidence": 17,
+      "fit": 16,
+      "goal_fidelity": 17,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 102
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261012T063317936507-code-hygiene",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "b54e6824-ebf6-4c0e-8f3f-9485081afc80",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 51088227,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 405.198,
+    "generated_tokens": 239738,
+    "generation_seconds": 151.446,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 79.7,
+    "machine_seconds": 253.752,
+    "peak_input_tokens": 183428,
+    "tokens_per_second": 1582.99,
+    "wall_tokens_per_second": 591.66
+  },
+  "time_budget": "60m",
+  "tool_steps": 126.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 16492,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-12T11:08:36Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-12T11:01:44Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261012T063317936507-code-hygiene",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 39788,
+    "worker_pid": 3324875
+  },
+  "worker_seconds": 16451,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

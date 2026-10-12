@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="171">
+<meta name="plan-version" content="172">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -757,6 +757,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T035931836920-review-of-accuracy-floor-census" data-who="reckon-build" data-when="2026-10-12T04:25:57.998Z">
     <div class="r-comment-body"><p>claims review of the accuracy-floor census: top three claims reproduced byte-identically</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261012T041830700797-cfs-exterior-exact-support" data-who="reckon-build" data-when="2026-10-12T07:18:48.728Z">
+    <div class="r-comment-body"><p>The fixture computes its prescribed exterior from the analytic density integrated on the exact analytic-separatrix polygon support, sharing geometry.analytic_polygons with the certificate, and the exterior cache identity names both the support arm and the content digest of nova/biot/polygonanalytic.py. Measured in H200 job 1283614 at head d33556de9: at 550 cells the exterior closure is 6.08e-15 against a booking term of 2.386e-02; at 2098 realised cells 1.088e-05 against 5.778e-03; at 5158 realised cells 4.348e-06 against 2.794e-04. All four gate tests passed and the decomposition residual is 0.0 at each rung. The legacy 550 positive control reproduced the certified map relative sup 0.197326978712335 against 0.1973269787182143, a relative agreement of 3.0e-11. The declared negative control is admitted: the same allocation applied the one-line flip to an exported copy of the head tree and test_exterior_closure_falls_below_booking[2000] FAILED with the closure back at 0.017694 against booking 0.008968. The first attempt at that control passed because exact_current_moments routed on the module-global default the mutation flips; commit 7af372a9f routes on the literal token instead.</p></div>
 </div>
 </section>
 </main>

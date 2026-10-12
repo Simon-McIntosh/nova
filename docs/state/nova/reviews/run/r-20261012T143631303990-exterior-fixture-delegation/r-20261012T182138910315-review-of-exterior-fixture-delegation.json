@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "Unmeasured: the reviewed manifest /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation/manifest.md records baseline_suite null and after_suite null, so no baseline/after failure-id pair exists to difference. The node's own H200 arms report zero failures on both sides (base_exterior.log EXIT_SELECT_*=0; head_gate_s.log 4 passed), but those are not the manifest's baseline_suite/after_suite gate-log pair and no 1e-13 identity assertion was armed on any rung.",
+  "added_failure_ids": [],
+  "blocking_finding_count": 2,
+  "call_site_count": 5,
+  "call_sites": [
+    "scripts/analytic_oracle_fixtures/reduced_oracle.py:38",
+    "scripts/accuracy_cost_ladder/measure.py:234",
+    "scripts/oracle_rebaseline/measure.py:549",
+    "scripts/moment_branch_integration/measure.py:58",
+    "scripts/analytic_oracle_fixtures/measure.py:1343"
+  ],
+  "commits_read": [
+    "898553203",
+    "dd24703dc",
+    "f9bfca897",
+    "4732f0375",
+    "885cb05a0",
+    "fd0b6f4ee",
+    "d48aaef5a"
+  ],
+  "completed_at": "2026-10-12T18:29:26.449Z",
+  "dispatched_at": "2026-10-12T18:22:00Z",
+  "findings": [
+    {
+      "file": "scripts/analytic_oracle_fixtures/measure.py",
+      "line": "1205",
+      "severity": "blocking",
+      "text": "blocking: exact_current_moments's default flips from _LEGACY_SUPPORT_ARM to EXTERIOR_SUPPORT_ARM, silently changing the support arm for every caller that omits support_arm (reduced_oracle.py:38, accuracy_cost_ladder/measure.py:234, oracle_rebaseline/measure.py:549, moment_branch_integration/measure.py:58 and six test modules), and done-when (2) required updating every caller; none is updated and no gate in this run exercises them."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html",
+      "line": "211",
+      "severity": "blocking",
+      "text": "blocking: done-when (3) is unmet because the head rows differ from the recorded reference and from the node's own base by ~1e-3 at 2000 and 5000 cells, yet the fragment records it superseded rather than satisfied and sets plan-verdict pass at line 17, resolving the node's own driving clause, which the worker contract reserves to the coordinator."
+    },
+    {
+      "file": "tests/test_certificate_exterior_support.py",
+      "line": "170",
+      "severity": "follow-on",
+      "text": "follow-on: the assertions hold at base with the deleted integrator (base_exterior.log, selection -k 2000, 1 passed, closure 1.0877e-05 against booking 0.005778), so no test reddens if the fixture re-grows its own integrator."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html",
+      "line": "45",
+      "severity": "follow-on",
+      "text": "follow-on: eight of the nine element ids (arm-default, carrier-identity, certified-reads, equivalence, follow-ons, identity-gate, negative-control, which-integrator) do not begin with the node id, so a sibling fragment composed into the same record can claim the same anchor."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's gate is tests/test_certificate_exterior_support.py, run head at revision 898553203 (H200 job 1283955, 4 passed, EXIT=0) and base at 437a68db4 (H200 job 1283976, three selections EXIT_SELECT_*=0). Both arms pass, so the base/head gate arms add no failing id.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against base 437a68db4; 898553203 contains the code change (delete the fixture-local integrator and flip exact_current_moments's default to the exact arm, net -33 lines) and the five commits dd24703dc..d48aaef5a touch only the single evidence fragment, 504 insertions against 46 deletions overall.",
+    "done_when": "clauses (1), (2), (4) and (5) are met, but clause (3), the identity measure, is NOT met and is not asserted by the gate; clauses (1) and (2) by the diff, (4) by the negative control job 1283965 which reddens test_exterior_closure_falls_below_booking[2000] (1 failed, EXIT=1), (5) by the committed fragment with audit-doc OK, while tests/test_certificate_exterior_support.py:170-174 assert only decomposition<1e-10 and closure<booking and the head rows differ from the f68870f99 record by 1.55e-3 at 2000 and 1.98e-3 at 5000 and from the node's own base by 1.549e-3 and 1.974e-3.",
+    "goal": "the node goal is to route the certificate exterior fixture through the support moment owner; the landed diff deletes _polygon_current_moments and _signed_ring_area from scripts/analytic_oracle_fixtures/measure.py and calls scripts/prototypes/support/geometry.py:307 analytic_moments from exact_current_moments, so the goal is met, though the node's own identity clause is unmet.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation/manifest.md; status complete, six commits listed, negative_control_log names control_root2.log (EXIT=1), and both baseline_suite and after_suite are null, so no added-failure count is derivable from them.",
+    "write_paths": "the manifest declares scripts/analytic_oracle_fixtures, scripts/prototypes/support, tests/test_certificate_exterior_support.py, docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html and the figures directory; git diff --name-status 437a68db4..d48aaef5a returns exactly the fragment (A) and scripts/analytic_oracle_fixtures/measure.py (M), both inside."
+  },
+  "justifications": {
+    "durability": "the negative control covers the arm-default flip, but reverting the integrator reroute leaves tests/test_certificate_exterior_support.py green because it passed at base with the deleted rule (base_exterior.log, selection -k 2000, 1 passed).",
+    "evidence": "tests/test_certificate_exterior_support.py:170 asserts closure<booking, which holds at base too (base_exterior.log, selection -k 2000, 1 passed, closure 1.0877e-05), so the gate does not assert the done-when's identity clause, and the reviewed manifest records neither baseline_suite nor after_suite.",
+    "fit": "scripts/analytic_oracle_fixtures/measure.py:1239 keeps _polygon_rule only where the legacy arm still uses it, but docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:45 gives eight of nine element ids that do not begin with the node id.",
+    "goal_fidelity": "scripts/analytic_oracle_fixtures/measure.py:1225 routes the exact arm through scripts/prototypes/support/geometry.py:307 analytic_moments, so the fixture and the certificate share one owner as the goal states.",
+    "reuse": "the diff adds no definition and instead deletes a duplicated integrator to call the existing owner scripts/prototypes/support/geometry.py:307; a search over scripts/ and nova/biot found no other analytic-density cell-moment owner for the clipped-support path.",
+    "scope_discipline": "git diff --name-status 437a68db4..d48aaef5a returns only the declared fragment and scripts/analytic_oracle_fixtures/measure.py, with nothing outside the fenced paths."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to route the certificate exterior fixture through the support moment owner; the landed diff deletes _polygon_current_moments and _signed_ring_area from scripts/analytic_oracle_fixtures/measure.py and calls scripts/prototypes/support/geometry.py:307 analytic_moments from exact_current_moments, so the goal is met, though the node's own identity clause is unmet.\nVERDICT done_when: clauses (1), (2), (4) and (5) are met, but clause (3), the identity measure, is NOT met and is not asserted by the gate; clauses (1) and (2) by the diff, (4) by the negative control job 1283965 which reddens test_exterior_closure_falls_below_booking[2000] (1 failed, EXIT=1), (5) by the committed fragment with audit-doc OK, while tests/test_certificate_exterior_support.py:170-174 assert only decomposition<1e-10 and closure<booking and the head rows differ from the f68870f99 record by 1.55e-3 at 2000 and 1.98e-3 at 5000 and from the node's own base by 1.549e-3 and 1.974e-3.\nVERDICT write_paths: the manifest declares scripts/analytic_oracle_fixtures, scripts/prototypes/support, tests/test_certificate_exterior_support.py, docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html and the figures directory; git diff --name-status 437a68db4..d48aaef5a returns exactly the fragment (A) and scripts/analytic_oracle_fixtures/measure.py (M), both inside.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation/manifest.md; status complete, six commits listed, negative_control_log names control_root2.log (EXIT=1), and both baseline_suite and after_suite are null, so no added-failure count is derivable from them.\nVERDICT diff: read commit by commit against base 437a68db4; 898553203 contains the code change (delete the fixture-local integrator and flip exact_current_moments's default to the exact arm, net -33 lines) and the five commits dd24703dc..d48aaef5a touch only the single evidence fragment, 504 insertions against 46 deletions overall.\nCALL_SITES: scripts/analytic_oracle_fixtures/reduced_oracle.py:38, scripts/accuracy_cost_ladder/measure.py:234, scripts/oracle_rebaseline/measure.py:549, scripts/moment_branch_integration/measure.py:58, scripts/analytic_oracle_fixtures/measure.py:1343\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: scripts/analytic_oracle_fixtures/measure.py:1225 routes the exact arm through scripts/prototypes/support/geometry.py:307 analytic_moments, so the fixture and the certificate share one owner as the goal states.\nSCORE evidence: 11\nJUSTIFICATION evidence: tests/test_certificate_exterior_support.py:170 asserts closure<booking, which holds at base too (base_exterior.log, selection -k 2000, 1 passed, closure 1.0877e-05), so the gate does not assert the done-when's identity clause, and the reviewed manifest records neither baseline_suite nor after_suite.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --name-status 437a68db4..d48aaef5a returns only the declared fragment and scripts/analytic_oracle_fixtures/measure.py, with nothing outside the fenced paths.\nSCORE durability: 9\nJUSTIFICATION durability: the negative control covers the arm-default flip, but reverting the integrator reroute leaves tests/test_certificate_exterior_support.py green because it passed at base with the deleted rule (base_exterior.log, selection -k 2000, 1 passed).\nSCORE fit: 13\nJUSTIFICATION fit: scripts/analytic_oracle_fixtures/measure.py:1239 keeps _polygon_rule only where the legacy arm still uses it, but docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:45 gives eight of nine element ids that do not begin with the node id.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no definition and instead deletes a duplicated integrator to call the existing owner scripts/prototypes/support/geometry.py:307; a search over scripts/ and nova/biot found no other analytic-density cell-moment owner for the clipped-support path.\nFINDING scripts/analytic_oracle_fixtures/measure.py:1205 blocking: exact_current_moments's default flips from _LEGACY_SUPPORT_ARM to EXTERIOR_SUPPORT_ARM, silently changing the support arm for every caller that omits support_arm (reduced_oracle.py:38, accuracy_cost_ladder/measure.py:234, oracle_rebaseline/measure.py:549, moment_branch_integration/measure.py:58 and six test modules), and done-when (2) required updating every caller; none is updated and no gate in this run exercises them.\nFINDING docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:211 blocking: done-when (3) is unmet because the head rows differ from the recorded reference and from the node's own base by ~1e-3 at 2000 and 5000 cells, yet the fragment records it superseded rather than satisfied and sets plan-verdict pass at line 17, resolving the node's own driving clause, which the worker contract reserves to the coordinator.\nFINDING tests/test_certificate_exterior_support.py:170 follow-on: the assertions hold at base with the deleted integrator (base_exterior.log, selection -k 2000, 1 passed, closure 1.0877e-05 against booking 0.005778), so no test reddens if the fixture re-grows its own integrator.\nFINDING docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:45 follow-on: eight of the nine element ids (arm-default, carrier-identity, certified-reads, equivalence, follow-ons, identity-gate, negative-control, which-integrator) do not begin with the node id, so a sibling fragment composed into the same record can claim the same anchor.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T182138910315-review-of-exterior-fixture-delegation",
+  "reviewed_base_sha": "437a68db4ee910dbd9029408f03068688aff0cce",
+  "reviewed_head_sha": "d48aaef5a48359692495583db1d3fef4136387b0",
+  "reviewed_revision": "d48aaef5a48359692495583db1d3fef4136387b0",
+  "reviewed_run_id": "r-20261012T143631303990-exterior-fixture-delegation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/exterior-fixture-delegation",
+  "reviewer_node": "review-of-exterior-fixture-delegation",
+  "reviewer_run_id": "r-20261012T182138910315-review-of-exterior-fixture-delegation",
+  "scores": {
+    "durability": 9,
+    "evidence": 11,
+    "fit": 13,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "section": "\u00a76",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T18:30:00+00:00",
+  "total": 87,
+  "verdict": "blocked-by-findings"
+}

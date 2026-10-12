@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="red-base-triage">
   <meta name="plan-title" content="Red base test triage">
-  <meta name="plan-summary" content="The shared-node weighted sum, checked support and mask-threshold goldens are repaired at their original numerical tolerances. The margin test passes alone within its 900-second bound. Census authority and oracle admission remain visible under separate delegated followups; the full paired gate has no completed receipt yet.">
+  <meta name="plan-summary" content="The scoped repairs pass at their original tolerances. Resumed base and head gates have no added failures among 56 completed pairs; compile identity remains incomplete after 51 minutes in both arms. Census and oracle failures remain visible under delegated followups.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s2">
   <meta name="plan-recorded-at" content="2026-10-12">
@@ -73,6 +73,11 @@
   <section id="red-base-triage-resume">
     <h2>Scoped progress after coordinator ruling</h2>
     <p>Commit <code>7107f08e6</code> updates five stale test modules; all five pass in separate CPU processes. Commit <code>bc6e333e2</code> repairs the pointwise-flux continuity fixture and wall-sampler unpacking; the continuity module and isolated tangency test pass. Commits <code>30181f6cd</code> and <code>19e90b158</code> repair the stencil arithmetic and checked-support assertion. Commit <code>3cb810221</code> refreshes the mask-threshold goldens without widening their tolerance. The census authority has no committed change; the oracle test remains enabled. The final per-file base/head gate remains incomplete in this record.</p>
+  </section>
+  <section id="red-base-triage-expanded-gate">
+    <h2>Expanded per-target gate</h2>
+    <p>The resumed CPU gate reused only completed per-file receipts and relaunched unfinished targets with <code>--timeout=900</code>, at no more than eight simultaneous processes. At 18:24 UTC, base has 57/58 complete and head has 56/58 complete; the 56 completed pairs contain 65 base failing IDs and 47 head failing IDs, with zero added and 18 removed. The two compile-identity processes produced only one progress mark each over 51 minutes; they were stopped and recorded as incomplete rather than treated as a passing gate. The head wall-margin test was still running at this checkpoint.</p>
+    <p>Other expanded-importer failures with completed base and head receipts include 25 IDs in <code>test_equilibrium_forward_reference.py</code> and two in <code>test_exact_clip_memory.py</code>; each set matches between arms. Their detailed IDs are in the resumed suite logs. These findings are reported as found outside this node's declared repair scope.</p>
   </section>
 </main>
 </body>

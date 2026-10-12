@@ -45,30 +45,9 @@ def _stack(jet):
     )
 
 
-def _local_value(field, cell, point):
-    node = field.nodes[field.sample_index[cell]]
-    jet = field.jets[field.sample_index[cell]]
-    delta = point[None, :] - node
-    squared = jnp.sum((delta / field.pitch[cell]) ** 2, axis=-1)
-    factors = jnp.where(jnp.eye(len(squared), dtype=bool), 1.0, squared[None, :] ** 3)
-    weight = jnp.prod(factors, axis=-1)
-    weight = weight / jnp.sum(weight)
-    taylor = (
-        jet[:, 0]
-        + jnp.sum(jet[:, 1:3] * delta, axis=-1)
-        + 0.5
-        * (
-            jet[:, 3] * delta[:, 0] ** 2
-            + 2 * jet[:, 4] * delta[:, 0] * delta[:, 1]
-            + jet[:, 5] * delta[:, 1] ** 2
-        )
-    )
-    return jnp.sum(weight * taylor)
-
-
 def _local_jet(field, cell, point):
     def value(target):
-        return _local_value(field, cell, target)
+        return field.local_value(cell, target)
 
     return topology.FieldJet(
         value(point), jax.grad(value)(point), jax.hessian(value)(point)

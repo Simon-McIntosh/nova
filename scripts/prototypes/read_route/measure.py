@@ -286,6 +286,7 @@ def main():
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--perturbed", action="store_true")
+    parser.add_argument("--bell", action="store_true")
     parser.add_argument("--reuse-prefix", type=Path)
     args = parser.parse_args()
     revision = subprocess.check_output(
@@ -295,6 +296,10 @@ def main():
         f"REVISION={revision} TREE={ROOT} COMMAND={' '.join(os.sys.argv)}", flush=True
     )
     print(f"MODULE={topology.__file__} CWD={Path.cwd().resolve()}", flush=True)
+    if args.bell:
+        from scripts.prototypes.read_route.conforming import run
+
+        return run(args)
     assert jax.default_backend() == "gpu"
     oracle, analytic, wall, axis, saddle = fixture._analytic_inputs(args.kind)
     geometry = fixture._realised_hex_geometry(wall, args.cells)

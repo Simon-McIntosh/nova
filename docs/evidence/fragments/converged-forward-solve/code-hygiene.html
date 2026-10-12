@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="code-hygiene">
+  <meta name="plan-title" content="Accuracy-path hygiene over the equilibrium moment code">
+  <meta name="plan-summary" content="The duplicate reductions adjacent to the polygon-moment owner are removed and the host clip routes to the owner. The remaining duplicate names carry live consumers and are reported as unfinished rather than rerouted without a gate.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s3">
+  <meta name="plan-recorded-at" content="2026-10-12">
+  <meta name="plan-verdict" content="blocked">
+  <meta name="plan-environment" content="Shared nova environment; CPU in place under JAX_PLATFORMS=cpu; base revision be0fa0df9">
+  <meta name="plan-tags" content="equilibrium,hygiene,refactor">
+  <title>Code hygiene | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Accuracy-path hygiene over the equilibrium moment code</h1>
+  <section id="code-hygiene-verdict">
+    <h2>Verdict: partial delivery</h2>
+    <p>This node reduced the duplicate polygon-moment surface but did not close
+    the full done-when inside its time fence. The landed commits are verified;
+    the remaining items are named below with the reason each was stopped, no
+    guessing and no unverified reroutes.</p>
+    <p>Base revision <code>be0fa0df9</code>. Three commits landed on the node
+    branch (followed by the fragment commit).</p>
+  </section>
+  <section id="code-hygiene-landed">
+    <h2>Landed</h2>
+    <ul>
+      <li><code>62b6be512</code> — one shared <code>_double_precision</code>
+      fixture in <code>tests/conftest.py</code>, replacing the fifteen
+      per-module copies; the six bare <code>.npz</code> GPU goldens under
+      <code>scripts/prototypes/ladder/compatibility</code> deleted, the six
+      <code>-cpu</code> goldens kept because
+      <code>tests/test_read_ten_thousand_cells.py</code> reads only those.</li>
+      <li><code>b5a7dab23</code> — <code>stencil_mesh._polygon_monomial_integral</code>
+      deleted with its dead scorer <code>scripts/clip_independent_representation/</code>.</li>
+      <li><code>4e63bc8e0</code> — <code>separatrix_clip._area_moments</code>
+      deleted; the host <code>clip()</code> and the prototype
+      <code>geometry.pack</code> now compute area and first two area moments in
+      one batched call to the owner-routing
+      <code>_centred_degree_two_moments</code> (the centroid-shifted degree-two
+      view). Non-positive-area cells keep zeroed support and vertex count.</li>
+    </ul>
+  </section>
+  <section id="code-hygiene-evidence">
+    <h2>Verification</h2>
+    <p>The reroute is verified behaviourally:
+    <code>tests/test_polygon_moment_owner.py</code> (owner monomial accuracy and
+    the degree-two view) and
+    <code>tests/test_equilibrium_separatrix_clip.py::test_traced_clip_matches_host_supports_and_linear_moments</code>
+    pass on CPU in place. That test caught the one real defect of the
+    refactor: an unconditional support fill left vertex counts nonzero on
+    zero-area cells where the traced path carries none; the fix zeroes support
+    and count for non-included cells and the test passes.</p>
+    <p>The file-level delta gate was run on both arms but both background runs
+    were killed at their time limit before printing a summary, so the
+    base-versus-head failure diff is not recorded here. The pre-existing
+    failures observed at base in
+    <code>tests/test_equilibrium_stencil_mesh.py</code> are reported, not
+    fixed, per the node brief.</p>
+    <p>Negative control: mutating the owner
+    <code>clip_quadrature._straight_edge_monomial_moments</code> drove the
+    owner-accuracy test red (8 failed, exit 1); the mutation was reverted and
+    the worktree is clean.</p>
+  </section>
+  <section id="code-hygiene-unfinished">
+    <h2>Unfinished, with reason</h2>
+    <ul>
+      <li><code>separatrix_clip.padded_polynomial_current_moments</code>: no
+      caller inside <code>nova/</code>, but roughly ten
+      <code>scripts/</code> modules and two test modules consume it directly.
+      Deleting it is a multi-file reroute that could not be gated inside the
+      fence.</li>
+      <li><code>polygon_moments.polygon_monomial_moments</code> and
+      <code>polygon_density_moments</code>: the sole live consumer of
+      <code>polygon_density_moments</code> is
+      <code>benchmarks/exact_clip_closed_form_floor.py</code>, which an
+      out-of-scope test imports. Deleting the module crosses the node's scope
+      fence.</li>
+      <li>The twelve <code>inspect.getsource</code> assertions and the H200
+      certificate-row reconciliation were not attempted within the fence.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

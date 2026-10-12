@@ -18,7 +18,7 @@ run_case() {
   local -a command
   log="$output/$kind-$cells.log"
   command=("$python" "$root/scripts/prototypes/read_route/measure.py" --kind "$kind" --cells "$cells" --out "$output/$kind-$cells.json")
-  if [[ "$kind" == limited && "$cells" == 2000 ]]; then
+  if [[ "$kind" == diverted && "$cells" == 2000 ]]; then
     command+=(--perturbed)
   fi
   printf 'REVISION=%s TREE=%s COMMAND=%s\n' "$revision" "$root" "${command[*]}" > "$log"
@@ -39,5 +39,7 @@ for cells in 2000 5000 10000; do
   wait "$limited_pid" || failed=1
   wait "$diverted_pid" || failed=1
 done
+"$python" "$root/scripts/prototypes/read_route/render.py" "$output" \
+  "$root/docs/figures/converged-forward-solve/read-route/position-membership.svg" || failed=1
 printf 'EXIT=%s\n' "$failed"
 exit "$failed"

@@ -33,7 +33,11 @@ def main():
     figure, axes = plt.subplots(2, 1, figsize=(14, 11), sharex=True)
     colours = {"limited": "#427e7b", "diverted": "#856895"}
     for kind, colour in colours.items():
-        for representation, linestyle in (("sampled", "--"), ("kernel", "-")):
+        for representation, linestyle in (
+            ("sampled", "--"),
+            ("kernel", "-"),
+            ("jet", "-."),
+        ):
             rows = []
             for cells in (2000, 5000, 10000):
                 rows += [

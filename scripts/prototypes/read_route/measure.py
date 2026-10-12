@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass, replace
+from itertools import combinations
 import json
 import os
 from pathlib import Path
@@ -27,6 +28,7 @@ from nova.equilibrium import current, topology
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.prototypes.order2.read import batched_field
+from scripts.prototypes.read_route.jets import build_jet_matrix, read_with_jets
 from tests.equilibrium import test_topology_read as fixture
 
 
@@ -113,13 +115,24 @@ def sample_field(field, geometry):
     )
 
 
+def jet_reader(field, geometry, convention, policy):
+    return read_with_jets(*field, geometry, convention, policy)
+
+
 def read_row(
-    field, geometry, convention, policy, reference, uncertainty, axis, saddle, name
+    field,
+    geometry,
+    convention,
+    policy,
+    reference,
+    uncertainty,
+    axis,
+    saddle,
+    name,
+    reader=topology.read,
 ):
     started = perf_counter()
-    executable = (
-        jax.jit(topology.read).lower(field, geometry, convention, policy).compile()
-    )
+    executable = jax.jit(reader).lower(field, geometry, convention, policy).compile()
     cold = perf_counter() - started
     started = perf_counter()
     result = executable(field, geometry, convention, policy)
@@ -209,6 +222,24 @@ def main():
     rows = []
     analytic_row, analytic_read = read_row(analytic, *scoring, "closed_form")
     rows.append(analytic_row)
+    if args.cells in (2000, 5000):
+        golden = np.load(
+            ROOT
+            / "scripts/prototypes/ladder/compatibility"
+            / f"{args.kind}-{args.cells}.npz"
+        )
+        delta = float(
+            np.max(np.abs(np.asarray(analytic_read.membership) - golden["membership"]))
+        )
+        axis_delta = float(
+            np.linalg.norm(np.asarray(analytic_read.axis) - golden["axis"])
+        )
+        print(
+            f"LADDER_CONTROL membership_delta={delta:.12g} "
+            f"axis_delta_m={axis_delta:.12g}",
+            flush=True,
+        )
+        assert delta < 1e-9 and axis_delta < 1e-9
     sampled = sample_field(analytic, geometry)
     mesh_truth = np.asarray(topology._point_values(analytic, geometry.sample_points))
     mesh_reconstructed = np.asarray(
@@ -232,27 +263,6 @@ def main():
         )
         print(f"SAMPLED_SHIFT_CONTROL pitches={movement:.12g}", flush=True)
         assert 0.95 <= movement <= 1.05
-    reference = fixture._kernel_backed_field(args.kind, oracle, analytic, geometry)
-    kernel = batched_field(reference)
-    kernel_row, _ = read_row(kernel, *scoring, "kernel")
-    rows.append(kernel_row)
-    if not args.perturbed:
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(
-            json.dumps(
-                dict(
-                    kind=args.kind,
-                    cells=args.cells,
-                    rows=rows,
-                    batched_kernel=True,
-                    mesh_sample_peak_flux_error=mesh_reconstruction_error,
-                ),
-                indent=2,
-            )
-            + "\n"
-        )
-        print("ROW_COMPLETE " + str(args.out), flush=True)
-        return
     _, source, _ = certificate._case(
         "weak-rotation-reactor-static"
         if args.kind == "limited"
@@ -268,21 +278,95 @@ def main():
         current.Quadrature(sigma=convention.sigma, segments=64),
     )
     jax.block_until_ready(booking)
+    assert bool(booking.valid)
     print(
         f"BOOKING valid={bool(booking.valid)} raw={float(booking.raw_current)}",
         flush=True,
     )
-    perturbed = topology.TotalField(
-        ClippedCurrentMoments(*booking[:3]), reference.coupling, reference.exterior
+    moments = ClippedCurrentMoments(*booking[:3])
+    polygons = [
+        np.asarray(p)[: int(n)]
+        for p, n in zip(geometry.vertices, geometry.vertex_count, strict=True)
+    ]
+    coupling = topology.BiotMomentCoupling.from_polygons(polygons)
+    exterior = fixture.AnalyticExteriorField(analytic, coupling, moments)
+    reference = topology.TotalField(moments, coupling, exterior)
+    kernel = batched_field(reference)
+    kernel_row, _ = read_row(kernel, *scoring, "kernel")
+    rows.append(kernel_row)
+    matrix, exterior_jets, nodes, sample_index, build_wall = build_jet_matrix(
+        coupling, geometry, analytic, moments
     )
-    perturbed_sampled = sample_field(perturbed, geometry)
-    perturbed_kernel = batched_field(perturbed)
-    for name, field in (
-        ("picard_sampled", perturbed_sampled),
-        ("picard_kernel", perturbed_kernel),
-    ):
-        row, _ = read_row(field, *scoring, name)
-        rows.append(row)
+    jet_payload = (matrix, moments, exterior_jets, nodes, sample_index)
+    jet_row, _ = read_row(jet_payload, *scoring, "jet", reader=jet_reader)
+    jet_row["jet_build_seconds"] = build_wall
+    jet_row["jet_bytes"] = int(np.prod(matrix.shape) * matrix.dtype.itemsize)
+    jet_row["jet_shape"] = list(matrix.shape)
+    rows.append(jet_row)
+    if args.perturbed:
+        zero_hessian = matrix.at[..., 3:].set(0)
+        control, _ = read_row(
+            (zero_hessian, moments, exterior_jets, nodes, sample_index),
+            *scoring,
+            "jet_zero_hessian_control",
+            reader=jet_reader,
+        )
+        budget = (0.274714 if saddle is None else 2.1805365680219544) * (
+            jet_row["pitch_m"] / (6.2 if saddle is None else 1.7)
+        ) ** 2
+        control_fails = (
+            not control["valid"]
+            or not control["qualified"]
+            or (control["saddle_membership_error"] or 0.0) > budget
+        )
+        print(
+            f"JET_HESSIAN_CONTROL fails={control_fails} budget={budget:.12g}",
+            flush=True,
+        )
+        rows.append(control)
+        assert control_fails, "zeroing source Hessians did not fail saddle membership"
+        trial_booking = current.book(
+            psi,
+            sampled_read,
+            geometry,
+            source.core,
+            current.Quadrature(sigma=convention.sigma, segments=64),
+        )
+        jax.block_until_ready(trial_booking)
+        assert bool(trial_booking.valid)
+        trial_moments = ClippedCurrentMoments(*trial_booking[:3])
+        perturbed = topology.TotalField(trial_moments, coupling, exterior)
+        trial_payload = (matrix, trial_moments, exterior_jets, nodes, sample_index)
+        picard_reads = {}
+        for name, field, reader in (
+            (
+                "picard_sampled",
+                sample_field(batched_field(perturbed), geometry),
+                topology.read,
+            ),
+            ("picard_kernel", batched_field(perturbed), topology.read),
+            ("picard_jet", trial_payload, jet_reader),
+        ):
+            row, result = read_row(field, *scoring, name, reader=reader)
+            rows.append(row)
+            picard_reads[name] = result
+        disagreements = {}
+        for left, right in combinations(picard_reads, 2):
+            a, b = picard_reads[left], picard_reads[right]
+            disagreements[f"{left}/{right}"] = dict(
+                axis_pitches=float(
+                    np.linalg.norm(np.asarray(a.axis) - np.asarray(b.axis))
+                    / jet_row["pitch_m"]
+                ),
+                membership_median_cells=float(
+                    np.max(
+                        np.abs(np.asarray(a.membership) - np.asarray(b.membership))
+                        * np.asarray(geometry.full_area)
+                        / np.median(np.asarray(geometry.full_area))
+                    )
+                ),
+            )
+        print("PICARD_DISAGREEMENT " + json.dumps(disagreements), flush=True)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
         json.dumps(
@@ -292,8 +376,9 @@ def main():
                 rows=rows,
                 batched_kernel=True,
                 booking_valid=bool(booking.valid),
-                sampled_shift_control_pitches=movement,
+                sampled_shift_control_pitches=movement if args.perturbed else None,
                 mesh_sample_peak_flux_error=mesh_reconstruction_error,
+                picard_disagreement=disagreements if args.perturbed else None,
             ),
             indent=2,
         )

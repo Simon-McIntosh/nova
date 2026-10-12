@@ -1,0 +1,94 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite (base_gate.log, revision c054a721) fails two ids and after_suite (head_gate.log, revision 67f7b68bf) fails the same two ids, so head-minus-base is empty: added_failure_count 0.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261012T041906125895-polygon-moment-owner.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041906125895-polygon-moment-owner/census.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041906125895-polygon-moment-owner/negative_control.log"
+  ],
+  "blocking_finding_count": 2,
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:3436",
+    "nova/equilibrium/flux_surface_extraction.py:1117",
+    "nova/equilibrium/flux_surface_extraction.py:2039",
+    "nova/equilibrium/clip_quadrature.py:925"
+  ],
+  "commits_read": [
+    "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+    "67f7b68bf",
+    "f515e171c80b2188bd375ea3b1553342e1866cb5"
+  ],
+  "completed_at": "2026-10-12T04:57:27.417Z",
+  "dispatched_at": "2026-10-12T04:50:15Z",
+  "evidence_inputs": "Base c054a721 head f515e171c. Owner clip_quadrature._straight_edge_monomial_moments (max_abs 1.332e-15, max_rel_trim 4.777e-08). separatrix_clip._traced_polygon_moments deleted, five call sites rerouted via _centred_degree_two_moments. added_failure_count 0. Two blocking findings: clause (3) five reductions remain; clause (4) current.book rows unrun.",
+  "findings": [
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": "850",
+      "severity": "blocking",
+      "text": "done_when clause (3) is unmet: five parallel reductions remain (polygon_moments.polygon_monomial_moments and polygon_density_moments, stencil_mesh._polygon_monomial_integral, padded_polynomial_current_moments, _area_moments), so the duplication the consolidation targets is not removed; their deletion needs a scope extension over their callers."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041906125895-polygon-moment-owner/manifest.md",
+      "line": "14",
+      "severity": "blocking",
+      "text": "done_when clause (4) is unverified: the current.book certificate rows at 550/2000/5000 cells and the 1e-13 relative base-vs-head comparison named there were not run; the worker's own gate is the focused CPU suite only, so the reroute's effect on booked current is unmeasured."
+    },
+    {
+      "file": "tests/test_polygon_moment_owner.py",
+      "line": "137",
+      "severity": "follow-on",
+      "text": "the reappearance guard is a literal-name check for the deleted symbol in four modules; a degree-two reduction re-implemented under any other name leaves it green, so it guards a symbol rather than the capability."
+    },
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": "128",
+      "severity": "follow-on",
+      "text": "_area_moments still computes the same degree-two centred moments the new _centred_degree_two_moments now routes through the owner, so two implementations of one capability coexist in the same file."
+    }
+  ],
+  "gate_arms_note": "Both arms ran the same five-file focused CPU suite to their summary line (base 2 failed/68 passed; head 2 failed/68 passed); the two residual failures (test_equilibrium_stencil_mesh.py shared-nodes and conservation-receipts) are identical at base and head and unrelated to the landed diff.",
+  "item_verdicts": {
+    "diff": "read commit by commit against base c054a721: 67f7b68bf replaces the traced degree-two reduction with a delegating view and reroutes five call sites; f515e171c adds the fragment.",
+    "done_when": "partial: clauses (1),(2),(5),(6),(7) met and recorded; clause (3) unmet (five reductions remain); clause (4)'s current.book rows and 1e-13 comparison not run.",
+    "goal": "partial: selects clip_quadrature._straight_edge_monomial_moments as owner and deletes separatrix_clip._traced_polygon_moments, but five candidate reductions remain, so the consolidation onto one owner is incomplete.",
+    "manifest": "read: status complete, commits 67f7b68bf/f515e171c, base/head arms with identical two-failure ids, negative control 8 red by test id, census and logs named.",
+    "write_paths": "met: diff confined to separatrix_clip.py, tests/test_polygon_moment_owner.py and the fragment, all inside the four-source-plus-test-plus-fragment fence."
+  },
+  "justifications": {
+    "durability": "tests/test_polygon_moment_owner.py:110 asserts the degree-two view against an independent Fraction reference, but :137 only checks a literal name and would stay green on a re-implemented reduction.",
+    "evidence": "The census is strong and recorded (census.json, 600 polygons), but done_when clause (4) at 550/2000/5000 cells was never run, so the reroute's numeric effect on booked current is unmeasured.",
+    "fit": "The new _centred_degree_two_moments docstring at separatrix_clip.py:850 states the mechanism and carries no banned label or version suffix.",
+    "goal_fidelity": "nova/equilibrium/separatrix_clip.py:850 deletes one of six parallel reductions, so the single-owner goal the census was run to settle is not reached.",
+    "reuse": "The reroute extends clip_quadrature._straight_edge_monomial_moments, but _centred_degree_two_moments coexists with _area_moments at separatrix_clip.py:128, a second degree-two reduction the consolidation was to remove.",
+    "scope_discipline": "Every path in the diff (separatrix_clip.py, tests/test_polygon_moment_owner.py, the fragment) is inside the declared write paths; nothing outside is touched."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to consolidate the parallel polygon-moment reductions onto one owner chosen by an exact census; the landed change selects clip_quadrature._straight_edge_monomial_moments and deletes separatrix_clip._traced_polygon_moments only, so the consolidation is partial.\nVERDICT done_when: seven clauses; census (1) and negative control (5) are measured and recorded, but clause (3) is unmet (five reductions remain) and clause (4)'s current.book rows at 550/2000/5000 cells were not run.\nVERDICT write_paths: the fence is four nova/equilibrium sources plus tests/test_polygon_moment_owner.py, the fragment and a figures dir; the diff touches exactly separatrix_clip.py, the new test and the fragment, all inside it.\nVERDICT manifest: read; records status complete, commits 67f7b68bf and f515e171c, base/head arms with identical two-failure ids, the negative control (8 red by test id), and names the census and logs.\nVERDICT diff: read commit by commit against base c054a721; 67f7b68bf deletes the traced degree-two reduction and reroutes five call sites through _centred_degree_two_moments, f515e171c records the fragment.\nCALL_SITES: nova/equilibrium/forward_operator.py:3436, nova/equilibrium/flux_surface_extraction.py:1117, nova/equilibrium/flux_surface_extraction.py:2039, nova/equilibrium/clip_quadrature.py:925\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: nova/equilibrium/separatrix_clip.py:850 deletes one of six parallel reductions, so the single-owner goal the census was run to settle is not reached.\nSCORE evidence: 11\nJUSTIFICATION evidence: the census is strong and recorded (census.json, 600 polygons), but done_when clause (4) at 550/2000/5000 cells was never run, so the reroute's numeric effect on booked current is unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (separatrix_clip.py, tests/test_polygon_moment_owner.py, the fragment) is inside the declared write paths; nothing outside is touched.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_polygon_moment_owner.py:110 asserts the degree-two view against an independent Fraction reference, but :137 only checks a literal name and would stay green on a re-implemented reduction.\nSCORE fit: 18\nJUSTIFICATION fit: the new _centred_degree_two_moments docstring at separatrix_clip.py:850 states the mechanism and carries no banned label or version suffix.\nSCORE reuse: 12\nJUSTIFICATION reuse: the reroute extends clip_quadrature._straight_edge_monomial_moments, but _centred_degree_two_moments coexists with _area_moments at separatrix_clip.py:128, a second degree-two reduction the consolidation was to remove.\nFINDING nova/equilibrium/separatrix_clip.py:850 blocking: done_when clause (3) is unmet - five parallel reductions remain (polygon_moments.polygon_monomial_moments and polygon_density_moments, stencil_mesh._polygon_monomial_integral, padded_polynomial_current_moments, _area_moments), so the duplication the consolidation targets is not removed; their deletion needs a scope extension over their callers.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041906125895-polygon-moment-owner/manifest.md:14 blocking: done_when clause (4) is unverified - the current.book certificate rows at 550/2000/5000 cells and the 1e-13 relative base-vs-head comparison named there were not run; the worker's own gate is the focused CPU suite only, so the reroute's effect on booked current is unmeasured.\nFINDING tests/test_polygon_moment_owner.py:137 follow-on: the reappearance guard is a literal-name check for the deleted symbol in four modules; a degree-two reduction re-implemented under any other name leaves it green, so it guards a symbol rather than the marker.\nFINDING nova/equilibrium/separatrix_clip.py:128 follow-on: _area_moments still computes the same degree-two centred moments the new _centred_degree_two_moments now routes through the owner, so two implementations of one capability coexist in the same file.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T044949442062-review-of-polygon-moment-owner",
+  "reviewed_base_sha": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+  "reviewed_head_sha": "f515e171c80b2188bd375ea3b1553342e1866cb5",
+  "reviewed_revision": "f515e171c80b2188bd375ea3b1553342e1866cb5",
+  "reviewed_run_id": "r-20261012T041906125895-polygon-moment-owner",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/polygon-moment-owner",
+  "reviewer_node": "review-of-polygon-moment-owner",
+  "reviewer_run_id": "r-20261012T044949442062-review-of-polygon-moment-owner",
+  "scores": {
+    "durability": 14,
+    "evidence": 11,
+    "fit": 18,
+    "goal_fidelity": 12,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T04:56:00Z",
+  "total": 87,
+  "verdict": "fail"
+}

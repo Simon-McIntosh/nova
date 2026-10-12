@@ -87,6 +87,28 @@ def main():
                         linewidth=3 if arm == "bell_jet" else 2.6,
                         label=f"{kind} {labels[arm]}",
                     )
+        for kind in colours:
+            if metric.startswith("saddle") and kind == "limited":
+                continue
+            limits = sorted(
+                (cells, row["membership_bound"])
+                for (case, cells, arm), row in current.items()
+                if case == kind and arm == "closed_form"
+            )
+            if limits:
+                axis.plot(
+                    *np.asarray(limits).T, color="0.45", linestyle=":", linewidth=1.2
+                )
+                axis.annotate(
+                    f"{kind} budget",
+                    limits[-1],
+                    xytext=(6, 0),
+                    textcoords="offset points",
+                    color="0.35",
+                    fontsize=20,
+                    va="center",
+                    annotation_clip=False,
+                )
         axis.set(
             xscale="log",
             yscale="log",
@@ -94,6 +116,7 @@ def main():
             ylabel=("smooth" if metric.startswith("smooth") else "saddle")
             + " error [median cells]",
         )
+        axis.margins(x=0.45)
         axis.spines[["top", "right"]].set_visible(False)
         axis.grid(False)
         axis.legend(frameon=False, fontsize=20)

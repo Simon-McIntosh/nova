@@ -7,7 +7,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="proto-conforming-jets">
 <meta name="plan-title" content="Conforming cached-jet read measurements">
-<meta name="plan-summary" content="Both Bell curvature configurations fail the Picard saddle budget; higher-rung measurements remain pending">
+<meta name="plan-summary" content="Bell reproduces quartics and converges at orders five, four and three, but fails Picard and refined analytic saddle budgets">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s2">
 <title>Conforming cached-jet read measurements | nova</title>
@@ -35,9 +35,14 @@
 <tr><td>Curvature comparison</td><td>The inherited adapter finite-differences Hessians across a moving stencil; the native read differentiates the Bell polynomial within its selected triangle</td><td>Native polynomial curvature also fails: Picard saddle error 0.120694052048, versus 0.120678390300 with finite differences</td></tr>
 <tr><td>Native polynomial curvature at 2,000 diverted cells</td><td>Analytic saddle error 2.92612e-4; cold 17.3923 s; warm 6.85423 s; Picard warm 6.84859 s</td><td>Picard kernel disagreement lower bound 0.0923683219496; 92.2682 times the bound</td></tr>
 <tr><td>Native polynomial curvature at 2,000 limited cells</td><td>Smooth 6.97278e-5 against 9.00177e-5; cold 16.9037 s; warm 7.35348 s; peak RSS 3,674,880 KiB</td><td>Axis error 1.20146e-4 pitches; valid and qualified; persistent matrix reused</td></tr>
-<tr><td>Larger rows</td><td>H200 job 1283913, one allocation, rungs ordered 2,000, 5,000, 10,000</td><td>Pending; per-arm receipts and matrix build checkpoints persisted</td></tr>
+<tr><td>Native limited at 5,000 cells</td><td>Smooth 2.47636e-5 against 3.52633e-5; axis 9.18588e-5 pitches; membership passes</td><td>Cold 25.8095 s; warm 30.4132 s; peak RSS 15,150,472 KiB; valid and qualified</td></tr>
+<tr><td>Native diverted at 5,000 cells</td><td>Smooth 2.98281e-4; saddle 8.31905e-4 against 3.92750e-4; saddle fails by 2.11815 times</td><td>Axis/X errors 7.96657e-6 / 8.93364e-6 pitches; cold 25.6015 s; warm 27.2694 s; peak RSS 15,195,356 KiB; valid and qualified</td></tr>
+<tr><td>Picard at 5,000 cells</td><td>Saddle error against analytic fractions 0.785288; warm 27.7785 s</td><td>Diagnostic only: no pointwise kernel reference at this rung; no kernel rerun</td></tr>
+<tr><td>Closed-form reconstruction orders, 2,000 to 5,000 cells</td><td>Diverted value 4.98448; gradient 4.00593; Hessian 2.99910</td><td>Maximum errors at triangle centroids; limited quartic errors are roundoff, so their slopes are not truncation orders</td></tr>
+<tr><td>5,000-cell matrices</td><td>Limited 10,999,440,000 bytes / 1,045.316002 s; diverted 10,995,840,000 bytes / 893.887131 s</td><td>Both persisted; limited counter includes resumed build and load overhead</td></tr>
+<tr><td>10,000-cell recovery</td><td>Job 1283913 timed out after 02:30:03; diverted matrix complete, 43,754,400,000 bytes, but device load failed; limited 24,404/30,475 nodes persisted</td><td>Fresh-process retry job 1283982 is running on H200 and reuses these matrices</td></tr>
 <tr><td>Picard reference</td><td>Bell saddle error against analytic reference 0.120678390300; stored kernel 0.0283257300981; kernel-relative axis/X errors 2.43963e-5 / 6.29386e-5 pitches</td><td>Reverse triangle inequality: Bell–kernel saddle disagreement is at least 0.0923526602017, or 92.2525 times its 0.00100108526661 budget</td></tr>
-<tr><td>Decision</td><td>Reject the measured Bell read for production: both native polynomial and finite-difference curvature fail the required 2,000-cell Picard saddle bound</td><td>Prototype only; product APIs unchanged</td></tr>
+<tr><td>Decision</td><td>Reject the measured Bell read for production: both native polynomial and finite-difference curvature fail the required 2,000-cell Picard saddle bound; native diverted analytic also fails at 5,000 cells</td><td>Prototype only; product APIs unchanged</td></tr>
 <tr><td>Report</td><td colspan="2"><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-conforming-jets.md</code></td></tr>
 </tbody></table>
 <figure id="proto-conforming-jets-membership">

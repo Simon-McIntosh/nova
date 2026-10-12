@@ -26,6 +26,8 @@ def main():
     parser.add_argument("reference", type=Path)
     parser.add_argument("figure", type=Path)
     parser.add_argument("--prefix", type=Path)
+    parser.add_argument("--additional-rows", type=Path, action="append", default=[])
+    parser.add_argument("--comparison", type=Path)
     parser.add_argument("--report", type=Path)
     parser.add_argument(
         "--curvature", choices=("polynomial", "finite-difference"), default="polynomial"
@@ -40,7 +42,10 @@ def main():
                 if line.startswith("READ_ROW "):
                     row = json.loads(line.removeprefix("READ_ROW "))
                     rows[(kind, row["cells"], row["representation"])] = row
-    current = measured_rows(args.rows)
+    current = {}
+    directories = [args.rows, *args.additional_rows]
+    for directory in directories:
+        current.update(measured_rows(directory))
     rows.update(current)
     plt.style.use("data-ink")
     plt.rcParams["svg.hashsalt"] = "bell-membership"
@@ -104,8 +109,8 @@ def main():
             "",
             "The read contracts the runtime coupling matrix with the booked moments, adds the fixed exterior jets, and assembles the element inside the compiled read. Dense matrices are checkpointed under the GPFS evidence store by node/coupling/kernel digest.",
             "",
-            "|Case|Cells|Arm|Axis vs analytic [pitch]|X vs analytic [pitch]|Smooth|Saddle|Budget|Valid|Cold [s]|Warm [s]|Peak RSS [KiB]|",
-            "|---|---:|---|---:|---:|---:|---:|---:|---|---:|---:|---:|",
+            "|Case|Cells|Arm|Axis vs analytic [pitch]|X vs analytic [pitch]|Smooth|Saddle|Budget|Valid/qualified|Membership pass|Cold [s]|Warm [s]|Peak RSS [KiB]|",
+            "|---|---:|---|---:|---:|---:|---:|---:|---|---|---:|---:|---:|",
         ]
 
         def show(value):
@@ -124,7 +129,7 @@ def main():
                         "membership_bound",
                     )
                 )
-                + f"|{row['valid']}/{row['qualified']}|"
+                + f"|{row['valid']}/{row['qualified']}|{row['passes_membership']}|"
                 + "|".join(
                     show(row[key])
                     for key in ("cold_compile_seconds", "warm_seconds", "peak_rss_kib")
@@ -136,12 +141,14 @@ def main():
             "|Case|Cells|Matrix bytes|Build [s]|Quartic value / gradient / Hessian|Edge value / normal jump|",
             "|---|---:|---:|---:|---|---|",
         ]
-        receipts = []
-        for path in sorted(args.rows.glob("*.json")):
-            data = json.loads(path.read_text())
-            if "element_controls" not in data:
-                continue
-            receipts.append(data)
+        by_case = {}
+        for directory in directories:
+            for path in sorted(directory.glob("*.json")):
+                data = json.loads(path.read_text())
+                if "element_controls" in data:
+                    by_case[data["kind"], data["cells"]] = data
+        receipts = [by_case[key] for key in sorted(by_case)]
+        for data in receipts:
             control = data["element_controls"]
             lines.append(
                 f"|{data['kind']}|{data['cells']}|{data.get('jet_bytes', 'pending')}|{data.get('jet_build_seconds', 'pending')}|"
@@ -245,6 +252,49 @@ def main():
             "slopes above are not truncation orders.",
         ]
         lines += ["", f"Curvature treatment for these rows: **{args.curvature}**."]
+        if args.comparison:
+            lines += [
+                "",
+                "## Retained finite-difference comparison",
+                "",
+                "These earlier rows remain in their original receipt directory. "
+                "They use finite differences of Hessians for curvature, while the main "
+                "table differentiates the selected Bell polynomial. The same Picard "
+                "failure in both configurations rules out that adapter as its remedy.",
+                "",
+                "|Case|Cells|Arm|Smooth|Saddle|Warm [s]|",
+                "|---|---:|---|---:|---:|---:|",
+            ]
+            for (kind, cells, arm), row in sorted(
+                measured_rows(args.comparison).items()
+            ):
+                if arm not in ("bell_jet", "picard_bell"):
+                    continue
+                lines.append(
+                    f"|{kind}|{cells}|{arm}|"
+                    + "|".join(
+                        show(row[key])
+                        for key in (
+                            "smooth_membership_error",
+                            "saddle_membership_error",
+                            "warm_seconds",
+                        )
+                    )
+                    + "|"
+                )
+            lines += ["", f"Retained receipts: `{args.comparison}`."]
+        lines += [
+            "",
+            "## Receipt provenance",
+            "",
+            *[f"- Native rows: `{directory}`." for directory in directories],
+            f"- Reused kernel rows: `{args.reference}`.",
+            "",
+            "Matrix build counters include historical build time plus the current "
+            "resume or cache-load overhead. Per-rung progress files retain the "
+            "checkpointed construction wall separately. A reused Picard executable "
+            "can have near-zero compile time; its warm wall still includes the full read.",
+        ]
         args.report.write_text("\n".join(lines) + "\n")
 
 

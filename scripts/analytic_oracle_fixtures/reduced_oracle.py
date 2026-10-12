@@ -35,7 +35,9 @@ def measure_reduced_oracle() -> dict[str, object]:
     oracle_state = exact_state(case, coordinates)
 
     zero_exterior = forward_operator(case, machine)
-    exact_physical = exact_current_moments(case, zero_exterior, oracle_state)
+    exact_physical = exact_current_moments(
+        case, zero_exterior, oracle_state, support_arm="legacy"
+    )
     exact_coefficients = zero_exterior.coupling_current_moments(exact_physical)
     exact_internal = _internal_flux_image(zero_exterior, exact_coefficients)
     prescribed_exterior = oracle_state - exact_internal

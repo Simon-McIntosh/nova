@@ -231,7 +231,9 @@ def _prepare_operator(name: str):
     )
     oracle = fixture.exact_state(case, coordinates)
     empty = fixture.forward_operator(case, machine)
-    exact_physical = fixture.exact_current_moments(case, empty, oracle)
+    exact_physical = fixture.exact_current_moments(
+        case, empty, oracle, support_arm="legacy"
+    )
     exact_coefficients = empty.coupling_current_moments(exact_physical)
     exterior = oracle - fixture._internal_flux_image(empty, exact_coefficients)
     operator = fixture.forward_operator(case, machine, exterior)

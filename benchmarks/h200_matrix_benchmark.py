@@ -136,7 +136,7 @@ def _construct_workload(
     analytic_state = fixture.exact_state(case, coordinates)
     empty_operator = fixture.forward_operator(case, machine)
     physical_moments = fixture.exact_current_moments(
-        case, empty_operator, analytic_state
+        case, empty_operator, analytic_state, support_arm="legacy"
     )
     moment_coefficients = empty_operator.coupling_current_moments(physical_moments)
     internal_flux = fixture._internal_flux_image(  # noqa: SLF001 - fixture contract

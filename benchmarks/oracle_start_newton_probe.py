@@ -1447,7 +1447,7 @@ def run(output: Path, report_directory: Path) -> dict[str, Any]:
         analytic = certificate._exact_state(case_name, exact, coordinates)
         empty_operator = oracle_fixture.forward_operator(source_case, machine)
         exact_physical = oracle_fixture.exact_current_moments(
-            source_case, empty_operator, analytic
+            source_case, empty_operator, analytic, support_arm="legacy"
         )
         exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
         fixture_exact_internal = np.asarray(
@@ -1884,7 +1884,7 @@ def _build_newton_operator(
         source_case, machine
     ).with_clip_mode("chord")
     fixture_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, analytic
+        source_case, empty_operator, analytic, support_arm="legacy"
     )
     fixture_coefficients = empty_operator.coupling_current_moments(fixture_physical)
     fixture_internal = np.asarray(

@@ -1191,9 +1191,7 @@ def analytic_support_polygons(
     from scripts.prototypes.support.geometry import analytic_polygons
 
     cells = tuple(np.asarray(cell) for cell in operator.moment_geometry.polygons)
-    return analytic_polygons(
-        analytic, cells, points=points, subdivisions=subdivisions
-    )
+    return analytic_polygons(analytic, cells, points=points, subdivisions=subdivisions)
 
 
 def exact_current_moments(
@@ -1202,7 +1200,7 @@ def exact_current_moments(
     state: np.ndarray,
     *,
     analytic: object | None = None,
-    support_arm: str = EXTERIOR_SUPPORT_ARM,
+    support_arm: str,
 ) -> CellCurrentMoments:
     """Integrate analytic density over a declared analytic-support clip.
 
@@ -1213,9 +1211,12 @@ def exact_current_moments(
     image cancels the analytic-density image the certificate books on that same
     support; ``"legacy"`` keeps the production spline clip
     (:func:`_analytic_profile_support`) that seeds its support from analytic
-    topology.  The default is the exact support, so the name and the default
-    agree and the fixture's exterior and the certificate's own moment integral
-    share one arm.
+    topology.
+
+    The arm is required rather than defaulted: the two arms drive different
+    clips and different quadratures, so a caller that omitted the arm would
+    silently follow whatever the default happened to be.  Where the exact
+    support is what is meant, name it.
     """
     if support_arm not in EXTERIOR_SUPPORT_ARMS:
         raise ValueError(f"unknown exterior support arm: {support_arm!r}")
@@ -1226,9 +1227,7 @@ def exact_current_moments(
         polygons = analytic_support_polygons(source, operator)
         centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
         return analytic_moments(case, polygons, centres)
-    support = _analytic_profile_support(
-        source, operator, state
-    )
+    support = _analytic_profile_support(source, operator, state)
     counts = np.asarray(support.vertex_count)
     vertices = np.asarray(support.support_vertices)
     centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
@@ -1313,9 +1312,7 @@ def cached_fixture_exterior(
     support_arm: str = EXTERIOR_SUPPORT_ARM,
 ) -> tuple[CellCurrentMoments, np.ndarray, dict[str, object]]:
     """Load or build the analytic-clipped fixture exterior for one carrier."""
-    identity = _exterior_cache_identity(
-        case, analytic, machine, state, support_arm
-    )
+    identity = _exterior_cache_identity(case, analytic, machine, state, support_arm)
     store = ZarrStore(filename=EXTERIOR_CACHE_FILENAME, dirname=".nova")
     store.group = store.hash_attrs(identity)
     with _cache_lock(store) as lock_wait:

@@ -280,7 +280,9 @@ def _measure(requested_cells: int) -> dict[str, Any]:
     )
     analytic = fixture.exact_state(case, coordinates)
     empty_operator = fixture.forward_operator(case, machine)
-    exact_physical = fixture.exact_current_moments(case, empty_operator, analytic)
+    exact_physical = fixture.exact_current_moments(
+        case, empty_operator, analytic, support_arm="legacy"
+    )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = fixture._internal_flux_image(empty_operator, exact_coefficients)
     prescribed_exterior = analytic - exact_internal

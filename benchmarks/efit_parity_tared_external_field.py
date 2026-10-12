@@ -312,7 +312,9 @@ def _solovev_separation_row(fixture: str, requested_cells: int) -> dict[str, Any
     )
     reference = exact_state(case, coordinates)
     operator = analytic_forward_operator(case, machine)
-    analytic_physical = exact_current_moments(case, operator, reference)
+    analytic_physical = exact_current_moments(
+        case, operator, reference, support_arm="legacy"
+    )
 
     mesh = StencilMesh(machine.node, machine.stencil, machine.area)
     grid_reference = reference[: len(machine.node)]

@@ -281,7 +281,9 @@ def measure() -> dict[str, Any]:
     )
     exact_analytic = fixture.exact_state(case, coordinate)
     zero_exterior = fixture.forward_operator(case, machine)
-    exact_physical = fixture.exact_current_moments(case, zero_exterior, exact_analytic)
+    exact_physical = fixture.exact_current_moments(
+        case, zero_exterior, exact_analytic, support_arm="legacy"
+    )
     exact_coefficients = zero_exterior.coupling_current_moments(exact_physical)
     exact_internal = fixture._internal_flux_image(zero_exterior, exact_coefficients)
     operator = fixture.forward_operator(case, machine, exact_analytic - exact_internal)

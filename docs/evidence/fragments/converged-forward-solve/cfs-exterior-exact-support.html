@@ -104,33 +104,41 @@ kernel before their rows are cited as a warm cache for other nodes via
 are separate, much cheaper (10.9 s at 2000, 16.0 s at 5000, both built in this
 allocation) and are keyed on the arm and the contraction-module digest.</p>
 
-<h2 id="cfs-exterior-exact-support-state">Negative control: declared, run, not admitted</h2>
+<h2 id="cfs-exterior-exact-support-state">Negative control: admitted</h2>
 
 <p>The declared negative control is a one-line flip of
 <code>EXTERIOR_SUPPORT_ARM</code> from <code>"exact"</code> to
-<code>"legacy"</code>, which should route the fixture's default exterior back
-through the production spline clip and bring the 2000-cell closure residual
-back. It was applied and
-<code>test_exterior_closure_falls_below_booking[2000]</code> was run against it.
-The test <strong>passed</strong>: closure stayed at 1.088e-05 against booking
-0.005778, indistinguishable from the head arm.</p>
+<code>"legacy"</code>, which routes the fixture's default exterior back through
+the production spline clip and should bring the 2000-cell closure residual back.
+It was applied to an exported copy of the head tree, never to the working tree,
+and <code>test_exterior_closure_falls_below_booking[2000]</code> was run against
+it: <strong>FAILED</strong>, naming the [2000] test id. The exterior closure
+returned to 0.017694 against a booking term of 0.008968, so closure again exceeds
+booking, which is the certified old-exterior level and the return the control
+declares. The exported fixture was then reverted and verified byte-identical to
+<code>git show HEAD:scripts/analytic_oracle_fixtures/measure.py</code>.</p>
 
-<p>It passed because the mutation was self-cancelling, and that is a defect this
-node found and fixed rather than a result. <code>exact_current_moments</code>
-selected the exact-support path by comparing the requested arm against the
-module global <code>EXTERIOR_SUPPORT_ARM</code>; flipping the default therefore
-flipped both sides of the comparison at once, so the legacy request still
-matched and still took the exact polygon path. The exterior cache key did change
-under the mutation (<code>be061b7073ab2c99</code>, built 10.46 s) while the
-closure did not move at all, which is the fingerprint of a routing test that
-follows its own default. Commit <code>7af372a9f</code> compares against the
-literal <code>_EXACT_SUPPORT_ARM</code> token, so the routing no longer depends
-on the default.</p>
+<p>The first attempt at this control did not fire, and the reason is a defect
+this node found and fixed. <code>exact_current_moments</code> selected the
+exact-support path by comparing the requested arm against the module global
+<code>EXTERIOR_SUPPORT_ARM</code>, so the mutation flipped both sides of the
+comparison at once and the legacy request still took the exact polygon path.
+That attempt passed with the closure unmoved at 1.088e-05 while the exterior
+cache key changed (<code>be061b7073ab2c99</code>) — the fingerprint of a routing
+test that follows its own default. Commit <code>7af372a9f</code> compares against
+the literal <code>_EXACT_SUPPORT_ARM</code> token instead, and the control now
+fails as declared.</p>
 
-<p>The negative control is therefore <strong>not admitted by this node</strong>:
-no run of the mutated tree has produced a failing test id. The fix is committed
-and unverified against the declared mutation, and the admission run must be
-repeated on it.</p>
+<table>
+<thead><tr><th>Mutation</th><th>Result</th></tr></thead>
+<tbody>
+<tr><td>Routing on the module default (before <code>7af372a9f</code>)</td>
+<td>1 passed; closure 1.088e-05, unchanged from the head arm.</td></tr>
+<tr><td>Routing on the literal token (at <code>7af372a9f</code>)</td>
+<td>1 FAILED, <code>test_exterior_closure_falls_below_booking[2000]</code>;
+closure 0.017694 against booking 0.008968.</td></tr>
+</tbody>
+</table>
 
 <h2 id="cfs-exterior-exact-support-evidence">Run evidence</h2>
 
@@ -145,7 +153,14 @@ cells plus <code>test_legacy_arm_reproduces_positive_control</code>: 4 passed.</
 <td><code>head_gate.log</code> under
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041830700797-cfs-exterior-exact-support</code></td></tr>
 <tr><td>Carrier build log</td><td><code>carrier_build.log</code> in the same directory</td></tr>
-<tr><td>Negative-control log</td><td><code>negative_control.log</code> in the same directory; 1 passed in 349.26 s, which is the non-admission</td></tr>
+<tr><td>Negative-control log</td>
+<td><code>negative_control.log</code> in the same directory: 1 FAILED naming
+<code>test_exterior_closure_falls_below_booking[2000]</code>, from one H200
+allocation (job 1283614) that also reverted the exported fixture and re-ran the
+head tests at <code>d33556de9</code>.</td></tr>
+<tr><td>Head re-run log at <code>7af372a9f</code></td>
+<td><code>head_gate.log</code> in the same directory, written by the same
+allocation at head <code>d33556de9</code>, which carries the routing fix.</td></tr>
 <tr><td>Fixture state after the run</td>
 <td>the mutation was reverted in the same allocation; the committing tree
 carries the exact default and <code>FIXTURE_DIFF_LINES=0</code> after revert</td></tr>

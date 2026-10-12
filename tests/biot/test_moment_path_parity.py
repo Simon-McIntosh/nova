@@ -104,6 +104,23 @@ _ROWS = [
     },
 ]
 
+_NEAR_EDGE_ROW = {
+    "polygon": [
+        [4.91, -0.1],
+        [5.08, -0.14],
+        [5.17, 0.02],
+        [5.04, 0.15],
+        [4.88, 0.08],
+    ],
+    "target": [5.1290090247138025, 0.06117221140408553],
+    "expansion_point": [5.016810681068107, 0.002097209720972118],
+    "reference": [
+        2.394083456037712e-05,
+        2.024806550388612e-07,
+        9.092304981814128e-08,
+    ],
+}
+
 
 def _packed_inputs(rows):
     polygons = [np.asarray(row["polygon"], dtype=np.float64) for row in rows]
@@ -160,6 +177,30 @@ def test_flux_moments_match_independent_reference(path):
     print("MOMENT_REFERENCE", path, relative.tolist(), flush=True)
     assert np.all(relative <= 1e-12), relative
     np.testing.assert_array_equal(np.sign(actual[-2:, 1:]), np.sign(reference[-2:, 1:]))
+
+
+@pytest.mark.parametrize("path", ["host", "packed_numpy", "packed_device"])
+def test_near_edge_flux_moments_match_split_reference(path):
+    row = _NEAR_EDGE_ROW
+    if path == "host":
+        actual = np.asarray(
+            polygon_analytic_flux_moments(
+                *row["target"],
+                np.asarray(row["polygon"]),
+                expansion_point=row["expansion_point"],
+            )
+        )
+    else:
+        inputs = _packed_inputs([row])
+        if path == "packed_numpy":
+            actual = np.asarray(packed_analytic_moments(np, *inputs)[:3]).reshape(3)
+        else:
+            evaluate = jax.jit(lambda *args: packed_analytic_moments(jnp, *args)[:3])
+            actual = np.asarray(evaluate(*inputs)).reshape(3)
+    reference = np.asarray(row["reference"])
+    relative = np.abs(actual - reference) / np.abs(reference)
+    print("NEAR_EDGE_REFERENCE", path, relative.tolist(), flush=True)
+    assert np.all(relative <= 1e-12), relative
 
 
 def test_moment_reference_point_is_a_local_displacement():

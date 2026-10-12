@@ -1940,11 +1940,12 @@ def _flux_area_rule(near: bool):
     q, w = leggauss(64 if near else 12)
     q, w = (q + 1.0) / 2.0, w / 2.0
     if near:
+        angular, angular_weight = leggauss(128)
         return (
             q**4,
             4.0 * w * q**7,
-            np.concatenate((0.5 * q**4, 1.0 - 0.5 * q**4)),
-            np.concatenate((2.0 * w * q**3, 2.0 * w * q**3)),
+            (angular + 1.0) / 2.0,
+            angular_weight / 2.0,
         )
     return q, w * q, q, w
 
@@ -1952,7 +1953,13 @@ def _flux_area_rule(near: bool):
 def _flux_area_integral(
     xp, radius, height, edge, present, norm, centre, expansion, near, origin_mask=None
 ):
-    """Integrate local first moments over the signed fan of authored edges."""
+    """Integrate local first moments over the signed fan of authored edges.
+
+    Near an edge the filament logarithm forms a narrow angular peak at the
+    closest point on that edge. Its width is the perpendicular distance divided
+    by edge length. A sinh change of variable concentrates angular nodes there
+    while retaining the full signed triangle and its source-coordinate moments.
+    """
     from nova.biot.completeelliptic import complete_kind
     from nova.biot.greens import (
         _ELLIPTIC_CONDITIONED_LIMIT,
@@ -1962,7 +1969,6 @@ def _flux_area_integral(
 
     u, wu, v, wv = (xp.asarray(x) for x in _flux_area_rule(near))
     u, v = u[:, None, None], v[None, :, None]
-    quadrature = wu[:, None, None] * wv[None, :, None]
     origin_mask = near if origin_mask is None else origin_mask
     origin_r = xp.where(origin_mask, radius, centre[0])
     origin_z = xp.where(origin_mask, height, centre[1])
@@ -1976,8 +1982,30 @@ def _flux_area_integral(
         bz = edge[index, 3] - origin_z
         determinant = xp.where(present[index], ar * bz - az * br, 0.0)
         active = determinant != 0.0
-        dr = u * ((1.0 - v) * ar + v * br)
-        dz = u * ((1.0 - v) * az + v * bz)
+        if near:
+            delta_r, delta_z = br - ar, bz - az
+            length_squared = delta_r**2 + delta_z**2
+            held_length = xp.where(length_squared > 0.0, length_squared, 1.0)
+            peak = -(ar * delta_r + az * delta_z) / held_length
+            width = xp.maximum(xp.abs(determinant) / held_length, 1e-15)
+            lower = xp.arcsinh(-peak / width)
+            span_angle = xp.arcsinh((1.0 - peak) / width) - lower
+            angle = lower[None, None, :] + span_angle[None, None, :] * v
+            edge_coordinate = peak[None, None, :] + width[None, None, :] * xp.sinh(
+                angle
+            )
+            angular_weight = (
+                wv[None, :, None]
+                * span_angle[None, None, :]
+                * width[None, None, :]
+                * xp.cosh(angle)
+            )
+        else:
+            edge_coordinate = v
+            angular_weight = wv[None, :, None]
+        quadrature = wu[:, None, None] * angular_weight
+        dr = u * ((1.0 - edge_coordinate) * ar + edge_coordinate * br)
+        dz = u * ((1.0 - edge_coordinate) * az + edge_coordinate * bz)
         source_r = origin_r + dr
         vertical = origin_z - height + dz
         gap = (origin_r - radius + dr) ** 2 + vertical**2
@@ -2037,7 +2065,8 @@ def _conditioned_flux_moments(
     Each signed triangle uses local coordinates before weighting and sums its
     integral before the next edge. Nearby targets are the fan origin, keeping
     the filament distance as a local displacement even when it is below one
-    ulp of a machine coordinate. Distant targets use the area centroid as fan
+    ulp of a machine coordinate. The angular rule follows the logarithmic peak
+    at each edge's closest point. Distant targets use the area centroid as fan
     origin. The two rules integrate the same authored material and moments.
     """
     shape = signed.shape

@@ -64,6 +64,14 @@ BUILDER_PATHS = (BUILDER_HOST, BUILDER_DEVICE)
 BUILDER_ENVIRONMENT = "NOVA_ANALYTIC_ORACLE_BUILDER"
 EXTERIOR_CACHE_SCHEMA = "analytic-oracle-clipped-exterior"
 EXTERIOR_CACHE_FILENAME = "analytic_oracle_clipped_exterior"
+# The exterior cache key must name the support the analytic-density image was
+# integrated on: replacing the support while reusing a cached exterior would
+# silently measure the old clip.  The image itself is contracted through
+# nova.biot.polygonanalytic, so that module's revision belongs in the key too.
+EXTERIOR_SUPPORT_ARMS = ("exact", "legacy")
+EXTERIOR_SUPPORT_ARM = "exact"
+_LEGACY_SUPPORT_ARM = "legacy"
+POLYGONANALYTIC_SOURCE = "nova/biot/polygonanalytic.py"
 OUTPUT = Path(__file__).resolve().parent
 FORBIDDEN_IMPORT_PREFIXES = ("h5py", "imas")
 FORBIDDEN_PATH_FRAGMENTS = (".geqdsk", ".npz", "/archive/", "stored_reference")
@@ -1158,16 +1166,100 @@ def _analytic_profile_support(
     )
 
 
+def _polygonanalytic_revision() -> str:
+    """Return the content digest of the module that contracts the flux image."""
+    source = Path(__file__).resolve().parents[2] / POLYGONANALYTIC_SOURCE
+    return hashlib.sha256(source.read_bytes()).hexdigest()
+
+
+def _signed_ring_area(ring: np.ndarray) -> float:
+    """Return the twice-signed area of a ring, positive for a CCW exterior."""
+    following = np.roll(ring, -1, axis=0)
+    return float(
+        np.sum(ring[:, 0] * following[:, 1] - ring[:, 1] * following[:, 0])
+    )
+
+
+def analytic_support_polygons(
+    analytic: object,
+    operator: ForwardFluxOperator,
+    *,
+    points: int = 8193,
+    subdivisions: int = 0,
+) -> list:
+    """Clip every atomic cell against the independently declared analytic core.
+
+    The polygon clip is the certificate's own exact-support definition
+    (:func:`scripts.prototypes.support.geometry.analytic_polygons`), applied to
+    the cell polygons the moment geometry carries.  Sharing that definition is
+    what lets the fixture pose a prescribed exterior whose booked image matches
+    the analytic-density image the certificate books on the exact support.
+    """
+    from scripts.prototypes.support.geometry import analytic_polygons
+
+    cells = tuple(np.asarray(cell) for cell in operator.moment_geometry.polygons)
+    return analytic_polygons(
+        analytic, cells, points=points, subdivisions=subdivisions
+    )
+
+
+def _polygon_current_moments(
+    case: RotatingEquilibrium,
+    operator: ForwardFluxOperator,
+    polygons,
+) -> CellCurrentMoments:
+    """Integrate the analytic density over clipped polygons, holes included."""
+    from scripts.prototypes.support.geometry import polygon_rings
+
+    centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
+    values = np.zeros((3, len(centres)))
+    for cell, polygon in enumerate(polygons):
+        if polygon.is_empty:
+            continue
+        for ring in polygon_rings(polygon):
+            if len(ring) < 3:
+                continue
+            signed = _signed_ring_area(ring)
+            if signed == 0.0:
+                continue
+            sign = 1.0 if signed > 0.0 else -1.0
+            points, weights = _polygon_rule(ring)
+            density = np.asarray(
+                case.toroidal_current_density(points[:, 0], points[:, 1])
+            )
+            weighted = sign * weights * density
+            offset = points - centres[cell]
+            values[0, cell] += float(np.sum(weighted))
+            values[1, cell] += float(np.sum(weighted * offset[:, 0]))
+            values[2, cell] += float(np.sum(weighted * offset[:, 1]))
+    return CellCurrentMoments(*values)
+
+
 def exact_current_moments(
     case: RotatingEquilibrium,
     operator: ForwardFluxOperator,
     state: np.ndarray,
     *,
     analytic: object | None = None,
+    support_arm: str = _LEGACY_SUPPORT_ARM,
 ) -> CellCurrentMoments:
-    """Integrate analytic density over the analytic-separatrix clipped cells."""
+    """Integrate analytic density over a declared analytic-support clip.
+
+    ``support_arm`` selects the clip the density is integrated on.  ``"exact"``
+    uses the independent analytic-separatrix polygon intersection, so the
+    booked image cancels the analytic-density image the certificate books on
+    that same support; ``"legacy"`` keeps the production spline clip
+    (:func:`_analytic_profile_support`) that seeds its support from analytic
+    topology.
+    """
+    if support_arm not in EXTERIOR_SUPPORT_ARMS:
+        raise ValueError(f"unknown exterior support arm: {support_arm!r}")
+    source = case if analytic is None else analytic
+    if support_arm == EXTERIOR_SUPPORT_ARM:
+        polygons = analytic_support_polygons(source, operator)
+        return _polygon_current_moments(case, operator, polygons)
     support = _analytic_profile_support(
-        case if analytic is None else analytic, operator, state
+        source, operator, state
     )
     counts = np.asarray(support.vertex_count)
     vertices = np.asarray(support.support_vertices)
@@ -1216,8 +1308,11 @@ def _exterior_cache_identity(
     analytic: object,
     machine: OracleMachine,
     state: np.ndarray,
+    support_arm: str = EXTERIOR_SUPPORT_ARM,
 ) -> dict[str, object]:
-    """Return the geometry and analytic-field identity of one exterior."""
+    """Return the geometry, support and analytic-field identity of one exterior."""
+    if support_arm not in EXTERIOR_SUPPORT_ARMS:
+        raise ValueError(f"unknown exterior support arm: {support_arm!r}")
     return {
         "schema": EXTERIOR_CACHE_SCHEMA,
         "machine_semantic_key": machine.cache["semantic_key"],
@@ -1233,7 +1328,9 @@ def _exterior_cache_identity(
         "analytic_boundary_sha256_binary64": _float64_digest(
             _analytic_separatrix(analytic)
         ),
-        "clip": "production-spline-geometry-from-analytic-zero-level",
+        "support_arm": support_arm,
+        "polygonanalytic_revision": _polygonanalytic_revision(),
+        "clip": "instance:analytic-{}".format(support_arm),
         "moment_order": 1,
     }
 
@@ -1244,9 +1341,13 @@ def cached_fixture_exterior(
     machine: OracleMachine,
     operator: ForwardFluxOperator,
     state: np.ndarray,
+    *,
+    support_arm: str = EXTERIOR_SUPPORT_ARM,
 ) -> tuple[CellCurrentMoments, np.ndarray, dict[str, object]]:
     """Load or build the analytic-clipped fixture exterior for one carrier."""
-    identity = _exterior_cache_identity(case, analytic, machine, state)
+    identity = _exterior_cache_identity(
+        case, analytic, machine, state, support_arm
+    )
     store = ZarrStore(filename=EXTERIOR_CACHE_FILENAME, dirname=".nova")
     store.group = store.hash_attrs(identity)
     with _cache_lock(store) as lock_wait:
@@ -1270,7 +1371,9 @@ def cached_fixture_exterior(
             hit = True
             build_seconds = 0.0
         except FileNotFoundError, KeyError, OSError, ValueError:
-            moments = exact_current_moments(case, operator, state, analytic=analytic)
+            moments = exact_current_moments(
+                case, operator, state, analytic=analytic, support_arm=support_arm
+            )
             coefficients = operator.coupling_current_moments(moments)
             exterior = np.asarray(state) - _internal_flux_image(operator, coefficients)
             build_seconds = perf_counter() - started

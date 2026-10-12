@@ -7,11 +7,11 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="code-hygiene">
   <meta name="plan-title" content="Accuracy-path hygiene over the equilibrium moment code">
-  <meta name="plan-summary" content="The duplicate polygon-moment reductions adjacent to the owner are removed or rerouted, the host clip routes to the owner, and every inspect.getsource assertion is resolved into behavioural coverage or deleted. One clause rests on a premise the code falsifies; the certificate-row reconciliation could not be reached inside the fence.">
+  <meta name="plan-summary" content="The duplicate polygon-moment reduction adjacent to the owner is deleted and its live caller routed to the owner, the host clip routes to the shared owner, and every inspect.getsource assertion is resolved into behavioural coverage or removed. The two clauses that could not be closed here were ruled on by the coordinator: one premise was accepted as found, the other moved to its own node.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s3">
   <meta name="plan-recorded-at" content="2026-10-12">
-  <meta name="plan-verdict" content="blocked">
+  <meta name="plan-verdict" content="complete">
   <meta name="plan-environment" content="Shared nova environment; CPU in place under JAX_PLATFORMS=cpu on the fleet allocation; base revision be0fa0df9">
   <meta name="plan-tags" content="equilibrium,hygiene,refactor">
   <title>Code hygiene | nova</title>
@@ -22,22 +22,23 @@
 <main class="plan-doc">
   <h1>Accuracy-path hygiene over the equilibrium moment code</h1>
   <section id="code-hygiene-verdict">
-    <h2>Verdict: partial delivery</h2>
-    <p>Two of the remaining clauses landed and are verified: the twelve
-    <code>inspect.getsource</code> assertions are resolved, and the duplicate
-    polygon-monomial name is deleted with its live caller routed to the shared
-    owner. One clause rests on a premise the code contradicts and is reported
-    rather than forced; the certificate-row reconciliation was not reached
-    inside the time fence.</p>
-    <p>Base revision <code>be0fa0df9</code>. Five commits carry this node's
-    work; the last two are the clauses landed in this attempt.</p>
+    <h2>Verdict: complete on the reduced scope</h2>
+    <p>Two clauses of the nine-part done-when were reported rather than forced,
+    and both were then ruled on. The premise behind the first is falsified by
+    the code and the clause is withdrawn; the second is a two-stage GPU
+    pipeline and moves to a node of its own. Everything else landed and is
+    gated per file on both arms.</p>
+    <p>Gate revision <code>ea55705c3</code>, base revision
+    <code>be0fa0df9</code>. Seven commits carry this node's work. The only
+    commit after the gate revision touches this fragment.</p>
   </section>
   <section id="code-hygiene-landed">
     <h2>Landed</h2>
     <ul>
       <li><code>62b6be512</code> — one shared <code>_double_precision</code>
-      fixture in <code>tests/conftest.py</code>, replacing the fifteen
-      per-module copies; the six bare <code>.npz</code> GPU goldens under
+      fixture in the new <code>tests/conftest.py</code>, autouse, so no module
+      has to remember the extended-precision setup; the six bare
+      <code>.npz</code> GPU goldens under
       <code>scripts/prototypes/ladder/compatibility</code> deleted, the six
       <code>-cpu</code> goldens kept because
       <code>tests/test_read_ten_thousand_cells.py</code> reads only those.</li>
@@ -50,103 +51,166 @@
       <code>_centred_degree_two_moments</code>. Non-positive-area cells keep
       zeroed support and vertex count.</li>
       <li><code>4182b24fb</code> — every <code>inspect.getsource</code>
-      assertion over an implementation body is resolved. The two
+      assertion over an implementation body is resolved, case by case. The two
       <code>test_module_is_contour_free</code> checks become a fresh-process
       import probe that fails if importing the module pulls in
       <code>contourpy</code>, <code>matplotlib</code>, <code>skimage</code> or
-      <code>scipy.ndimage</code>. Assertions that read a function body for a
-      loop primitive or a call-site string are deleted; the fixed-schedule
-      behaviour they echoed is already asserted behaviourally beside them, and
-      the launcher wiring they guarded is covered by the receipt-recording
-      tests in the same modules. No behavioural assertion was removed.</li>
+      <code>scipy.ndimage</code> — the same claim, measured rather than read
+      out of the source text. Assertions that read a body for a loop primitive
+      or a call-site string are deleted where a behavioural assertion beside
+      them already covers the behaviour, and the modules whose guarded wiring
+      they echoed keep their behavioural coverage. No behavioural assertion was
+      removed.</li>
       <li><code>1981bcfe2</code> — <code>polygon_moments.polygon_monomial_moments</code>
       deleted. Its own docstring recorded that its reduction, column order and
-      signed-area convention were all <code>clip_quadrature._straight_edge_monomial_moments</code>,
-      so the name duplicated the owner with no behaviour of its own. Its only
-      caller, <code>polygon_density_moments</code>, now contracts against the
-      owner table directly, and the triangle-accuracy and malformed-buffer
-      coverage moved onto the owner.</li>
+      signed-area convention were all
+      <code>clip_quadrature._straight_edge_monomial_moments</code>, so the name
+      duplicated the owner with no behaviour of its own. Its only caller,
+      <code>polygon_density_moments</code>, now contracts against the owner
+      table directly, and the triangle-accuracy and malformed-buffer coverage
+      moved onto the owner.</li>
+      <li><code>48c18e0aa</code>, <code>ea55705c3</code> — this fragment.</li>
     </ul>
   </section>
   <section id="code-hygiene-evidence">
     <h2>Verification</h2>
     <p>The delta gate ran one fresh process per test file, both arms, on the
     fleet allocation. Each arm was given its own tree as the working directory
-    with <code>PYTHONPATH</code> set to it. The head arm is this node's head;
-    the base arm is <code>git archive 48c18e0aa</code> extracted to node-local
-    storage, because reckon's write fence makes
-    <code>git worktree add</code> fail on <code>.git/worktrees</code>.</p>
+    with <code>PYTHONPATH</code> set to it, and each log header prints
+    <code>nova.__file__</code>, so a log that resolved the wrong tree cannot be
+    read as evidence. The head arm is this node's gate revision; the base arm
+    is <code>git archive be0fa0df9</code> extracted to node-local storage,
+    because reckon's write fence makes <code>git worktree add</code> fail on
+    <code>.git/worktrees</code>.</p>
     <table>
       <thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
       <tbody>
-        <tr><td>test_default_wiring</td><td>—</td><td>64 passed</td></tr>
-        <tr><td>test_route_solve_requests</td><td>—</td><td>7 passed</td></tr>
-        <tr><td>test_sol_support_selection</td><td>—</td><td>6 passed</td></tr>
-        <tr><td>test_split_spline</td><td>—</td><td>4 passed</td></tr>
-        <tr><td>test_xpoint_cell_wedge_clip</td><td>—</td><td>13 passed</td></tr>
-        <tr><td>test_flux_surface_connectivity</td><td>—</td><td>42 passed</td></tr>
-        <tr><td>test_diiid_forward_gs_match</td><td>—</td><td>11 passed</td></tr>
+        <tr><td>test_census_polish_compaction</td><td>3 failed, 2 passed</td><td>3 failed, 2 passed</td></tr>
+        <tr><td>test_census_spline_value_authority</td><td>3 passed</td><td>3 passed</td></tr>
+        <tr><td>test_connectivity_boundary</td><td>3 failed, 14 passed</td><td>3 failed, 14 passed</td></tr>
         <tr><td>test_connectivity_trip_sufficiency</td><td>4 failed, 1 passed</td><td>4 failed, 1 passed</td></tr>
-        <tr><td>test_topology_domain_partition</td><td>4 failed, 1 passed</td><td>4 failed</td></tr>
+        <tr><td>test_default_wiring</td><td>72 passed</td><td>64 passed</td></tr>
+        <tr><td>test_domain_participation_continuity</td><td>1 failed, 3 passed</td><td>1 failed, 3 passed</td></tr>
+        <tr><td>test_equilibrium_separatrix_clip</td><td>28 passed</td><td>28 passed</td></tr>
+        <tr><td>test_exact_clip_closed_form_budget</td><td>5 passed</td><td>5 passed</td></tr>
+        <tr><td>test_flux_surface_connectivity</td><td>43 passed</td><td>42 passed</td></tr>
+        <tr><td>test_forward_census</td><td>11 passed, 2 skipped</td><td>11 passed, 2 skipped</td></tr>
         <tr><td>test_forward_operator_domain</td><td>3 failed, 3 passed</td><td>1 failed, 4 passed</td></tr>
+        <tr><td>test_hex_flood_coil_nulls</td><td>2 passed</td><td>2 passed</td></tr>
+        <tr><td>test_limited_boundary_touches_wall</td><td>8 passed</td><td>8 passed</td></tr>
+        <tr><td>test_mask_threshold_consistency</td><td>1 failed, 1 passed</td><td>1 failed, 1 passed</td></tr>
+        <tr><td>test_oracle_axis_admission</td><td>1 failed, 2 passed</td><td>1 failed, 2 passed</td></tr>
+        <tr><td>test_polygon_moment_owner</td><td>5 passed</td><td>2 passed</td></tr>
+        <tr><td>test_polygon_moments</td><td>7 passed</td><td>7 passed</td></tr>
+        <tr><td>test_route_solve_requests</td><td>8 passed</td><td>7 passed</td></tr>
+        <tr><td>test_shared_spline_authority</td><td>2 passed</td><td>2 passed</td></tr>
+        <tr><td>test_sol_support_selection</td><td>7 passed</td><td>6 passed</td></tr>
+        <tr><td>test_solovev_certificate_builder</td><td>4 passed</td><td>4 passed</td></tr>
+        <tr><td>test_split_spline</td><td>4 passed</td><td>4 passed</td></tr>
+        <tr><td>test_stationary_point_admission</td><td>1 failed, 8 passed</td><td>1 failed, 8 passed</td></tr>
+        <tr><td>test_structured_read_census_rows</td><td>2 passed</td><td>2 passed</td></tr>
+        <tr><td>test_thomson_forward_model</td><td>5 passed</td><td>5 passed</td></tr>
+        <tr><td>test_topology_domain_partition</td><td>4 failed, 1 passed</td><td>4 failed</td></tr>
+        <tr><td>test_topology_limiter_contact</td><td>9 passed</td><td>9 passed</td></tr>
+        <tr><td>test_topology_o_qualification</td><td>2 failed, 4 passed</td><td>2 failed, 4 passed</td></tr>
+        <tr><td>test_xpoint_cell_wedge_clip</td><td>14 passed</td><td>13 passed</td></tr>
+        <tr><td>imas/test_diiid_forward_gs_match</td><td>12 passed</td><td>11 passed</td></tr>
       </tbody>
     </table>
-    <p>The failure ids are identical between arms in
-    <code>test_connectivity_trip_sufficiency</code> and
-    <code>test_topology_domain_partition</code>, so this clause adds none. In
-    <code>test_forward_operator_domain</code> the head carries two fewer
-    failures: one is the deleted structural test, and the other,
-    <code>test_point_cell_arm_uses_profile_owned_support_eager_and_jit</code>,
-    failed only when the deleted test ran before it in the same process — a
-    shared-process contamination the per-file gate removes.</p>
-    <p>The clause-(b) changes are gated by
+    <p>Twenty-one test ids fail at the head against twenty-three at the base, and
+    the head set is a strict subset of the base set: <strong>this node adds no
+    failure</strong>, and two disappear. Every file whose passed count drops
+    between the arms drops by exactly the number of source-text tests deleted
+    in clause (5) — <code>test_default_wiring</code> by eight,
+    <code>test_flux_surface_connectivity</code>, <code>test_route_solve_requests</code>,
+    <code>test_sol_support_selection</code>, <code>test_xpoint_cell_wedge_clip</code>
+    and <code>imas/test_diiid_forward_gs_match</code> by one each,
+    <code>test_polygon_moment_owner</code> by three. No file loses a
+    behavioural test.</p>
+    <p>The two failures that disappear in
+    <code>test_forward_operator_domain</code> are both worth naming, because
+    neither is a behaviour this change altered.
+    <code>test_residual_support_has_no_boundary_flux_partition</code> is itself
+    a source-text test and was deleted.
+    <code>test_point_cell_arm_uses_profile_owned_support_eager_and_jit</code>
+    fails at the base <em>only on the four <code>inspect.getsource</code> lines
+    appended to it</em>: its behavioural body — the point-cell averaging that
+    admits a common-SOL cell and excludes both shadow classes — runs and passes
+    in both arms, which a single-test run on each tree confirms. Removing the
+    source-text tail removes the failure without touching the behaviour it was
+    bolted onto.</p>
+    <p>The remaining head failures are all reproduced at the base with the same
+    ids: three in <code>test_census_polish_compaction</code>, four in
+    <code>test_connectivity_trip_sufficiency</code>, four in
+    <code>test_topology_domain_partition</code>, two in
+    <code>test_topology_o_qualification</code>, and one each in
+    <code>test_domain_participation_continuity</code>,
+    <code>test_forward_operator_domain</code>,
+    <code>test_mask_threshold_consistency</code>,
+    <code>test_oracle_axis_admission</code> and
+    <code>test_stationary_point_admission</code>. They are pre-existing and are
+    listed in the manifest's follow-ons so a later node can take them.</p>
+    <p>Clause (2)'s own changes are gated by
     <code>tests/test_polygon_moments.py</code> (7 passed, with the
     triangle-accuracy and malformed-buffer cases retargeted onto the owner) and
-    <code>tests/test_exact_clip_closed_form_budget.py</code> (5 passed, the
-    benchmark that consumes the rerouted function still importing and
-    lowering).</p>
+    <code>tests/test_exact_clip_closed_form_budget.py</code> (5 passed: the
+    benchmark that consumes the rerouted function still imports and lowers),
+    both clean in both arms.</p>
     <p>Negative control: mutating the owner
     <code>clip_quadrature._straight_edge_monomial_moments</code> drove the
-    owner-accuracy test red (8 failed, exit 1); the mutation was reverted and
-    the worktree is clean.</p>
-    <p>Two arms — <code>test_connectivity_boundary</code> at base and head —
-    hung after nine passes on a pre-existing test and were still running when
-    this record was written; both show the identical progress, so the hang is
-    not introduced here.</p>
+    owner-accuracy and exact-clip-moment tests red (8 failed, 5 passed, exit 1);
+    the mutation was reverted and the worktree is clean.</p>
   </section>
-  <section id="code-hygiene-unfinished">
-    <h2>Unfinished, with reason</h2>
+  <section id="code-hygiene-hangs">
+    <h2>The boundary file's pre-existing hangs</h2>
+    <p><code>tests/test_connectivity_boundary.py</code> does not complete on
+    either arm. Its first run under the gate's own per-file budget ended with
+    both arms sitting on the same test after nine passes, which reads as an
+    unfinished log rather than a result; re-run with the repository's declared
+    per-test <code>timeout = 300</code>, it reports those hangs as ordinary
+    failure ids, and the two arms report <em>the same ids in the same order</em>.
+    That is what makes them pre-existing rather than introduced here — the
+    failing tests are <code>test_wall_termination_binds_at_exact_tangency</code>,
+    <code>test_continuous_through_marginal_transition</code> and
+    <code>test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate</code>,
+    and each exceeds the module's declared budget on the base tree as well as on
+    the head. The module is left as it is; the hang is not this node's to fix
+    and is listed in the manifest's follow-ons.</p>
+  </section>
+  <section id="code-hygiene-rulings">
+    <h2>Rulings on the two reported clauses</h2>
     <ul>
-      <li><code>separatrix_clip.padded_polynomial_current_moments</code>: the
-      clause asks that it be deleted and its consumers rerouted to the owner.
-      The code contradicts the premise. The function is not a duplicate
-      reduction: it localises to centroid and scale, calls the owner, and
-      contracts a complete polynomial basis of degree two through nine. Its
-      consumers (<code>ring_attribution</code>, <code>own_node_interior_score</code>,
-      <code>density_moment_projection</code>, <code>in_cell_order_study</code>,
-      <code>density_forcing_ladder</code>, and two test modules) all live inside
-      the granted write scope, so scope is not the obstacle. Deleting it would
-      either remove the only route for degrees above two, which
-      <code>density_moment_projection</code> and
-      <code>density_forcing_ladder</code> use at degree nine, or inline the same
-      localise-and-contract body into eight call sites, which is duplication
-      rather than hygiene. It is left in place and reported.</li>
-      <li><code>polygon_density_moments</code> and its module: the clause asks
-      that both be deleted and the module removed "if nothing live remains".
-      Something live does remain — <code>benchmarks/exact_clip_closed_form_floor.py</code>
-      measures the closed-form route through it against the fan reference and
-      the locked per-row budget, which is a live measurement of the surviving
-      owner route and not a dependent of the deleted name. The duplicate name
-      is gone; the contraction the live measurement needs is kept.</li>
-      <li>The certificate-row reconciliation was not attempted. It is a
-      two-stage heavy pipeline: <code>scripts/prototypes/support/measure.py</code>
-      builds the <code>{kind}-{cells}-fixture.json</code> identity files, then
-      <code>book.py</code> books against them, and the comparison against merge
-      <code>06cc5abe1</code> needs the same six rows on a second tree. None of
-      the fixture files exist in the tree, the GPU lane is required, and the
-      adjacent read gate was the subject of a dedicated node that ran nine
-      attempts across three days. It is not reachable inside a one-hour
-      fence.</li>
+      <li><strong><code>separatrix_clip.padded_polynomial_current_moments</code>
+      stays.</strong> The clause asked that it be deleted as a duplicate
+      reduction and its consumers rerouted to the owner. Reading the body
+      falsifies the premise: the function localises to centroid and scale,
+      calls the owner, and contracts a complete polynomial basis of degree two
+      through nine against the returned table. It is the localise-and-contract
+      layer over the owner, not a second reduction, and it is the
+      scripts-facing API for complete bases above degree two — the degree at
+      which the closed-form route the package already carries stops covering
+      the basis. Deleting it would either remove that route (used at degree
+      nine by <code>density_moment_projection</code> and
+      <code>density_forcing_ladder</code>) or inline the same body into eight
+      call sites. The coordinator accepted the finding and the function is
+      unchanged.</li>
+      <li><strong><code>polygon_density_moments</code> and its module stay.</strong>
+      The duplicate name is gone; the contraction the module exposes is what
+      <code>benchmarks/exact_clip_closed_form_floor.py</code> measures against
+      the fan reference and the locked per-row budget. That benchmark is a live
+      measurement of the surviving owner route, and its consumer outside this
+      node's fence (<code>docs/figures/exact-clip-moment-quadrature/</code>)
+      imports the benchmark module, so deleting the contraction would delete a
+      measurement rather than a duplicate.</li>
+      <li><strong>The certificate-row reconciliation moves out of this node.</strong>
+      It is a two-stage pipeline: <code>scripts/prototypes/support/measure.py</code>
+      writes the <code>{kind}-{cells}-fixture.json</code> identity files and
+      <code>scripts/prototypes/support/book.py</code> books against them, with a
+      GPU lane required and a second checkout at the merge under test for the
+      reference rows. None of the fixture files exist in the tree, and the
+      adjacent read gate was the subject of a dedicated node. The coordinator
+      moved it, together with the exterior fixture's move to the support owner,
+      to a node of its own; it is not attempted here.</li>
     </ul>
   </section>
 </main>

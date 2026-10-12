@@ -128,41 +128,31 @@ def _centroid(vertices: np.ndarray) -> np.ndarray:
 def _area_moments(
     vertices: np.ndarray, origin: np.ndarray
 ) -> tuple[float, np.ndarray, np.ndarray]:
-    """Return area and first two area moments about ``origin``."""
+    """Return area and first two area moments about ``origin``.
+
+    The moments are read from the shared owner
+    :func:`~nova.equilibrium.clip_quadrature._straight_edge_monomial_moments`
+    over the vertices shifted to ``origin``: its total-degree-two block is
+    exactly the area, the first moments and the second-moment tensor. A
+    degenerate polygon reports zero, as its caller expects.
+    """
     if len(vertices) < 3:
         return 0.0, np.zeros(2), np.zeros((2, 2))
-    local = vertices - origin
-    following = np.roll(local, -1, axis=0)
-    x, y = local.T
-    next_x, next_y = following.T
-    cross = x * next_y - next_x * y
-    area_twice = math.fsum(cross)
-    if area_twice == 0.0:
-        return 0.0, np.zeros(2), np.zeros((2, 2))
-    orientation = math.copysign(1.0, area_twice)
-    area = 0.5 * orientation * area_twice
-    first = orientation * np.asarray(
-        [
-            math.fsum((x + next_x) * cross) / 6.0,
-            math.fsum((y + next_y) * cross) / 6.0,
-        ]
-    )
-    radial_squared = (
-        orientation * math.fsum((x * x + x * next_x + next_x * next_x) * cross) / 12.0
-    )
-    vertical_squared = (
-        orientation * math.fsum((y * y + y * next_y + next_y * next_y) * cross) / 12.0
-    )
-    cross_moment = (
-        orientation
-        * math.fsum(
-            (2.0 * x * y + x * next_y + next_x * y + 2.0 * next_x * next_y) * cross
+    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
+
+    local = np.ascontiguousarray(vertices, dtype=np.float64) - origin
+    table = np.asarray(
+        _straight_edge_monomial_moments(
+            jnp.asarray(local)[None, :, :],
+            jnp.asarray([len(local)]),
+            max_degree=2,
         )
-        / 24.0
-    )
-    second = np.asarray(
-        [[radial_squared, cross_moment], [cross_moment, vertical_squared]]
-    )
+    )[0]
+    area = float(table[0])
+    if area == 0.0:
+        return 0.0, np.zeros(2), np.zeros((2, 2))
+    first = np.asarray([table[2], table[1]])
+    second = np.asarray([[table[5], table[4]], [table[4], table[3]]])
     return area, first, second
 
 
@@ -505,11 +495,13 @@ def padded_polynomial_current_moments(
 
     ``coefficients`` multiply total-degree monomials in coordinates centred on
     ``centroids`` and divided by ``coordinate_scale``. If ``powers`` is omitted,
-    the complete basis is inferred from the static coefficient width. The edge
-    reductions are closed simplex moments, so moving clip vertices remain
-    traced values and no quadrature nodes or data-dependent shapes enter an
-    iteration.
+    the complete basis is inferred from the static coefficient width. The
+    monomial moments come from the shared owner
+    :func:`~nova.equilibrium.clip_quadrature._straight_edge_monomial_moments`,
+    whose reduction is closed-form, so moving clip vertices remain traced values
+    and no quadrature nodes or data-dependent shapes enter an iteration.
     """
+    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
     from nova.jax.config import configure_dtypes
 
     configure_dtypes()
@@ -541,40 +533,15 @@ def padded_polynomial_current_moments(
         )
 
     local = (vertices - centre[:, None, :]) / scale[:, None, :]
-    slot = jnp.arange(capacity)
-    valid = slot[None, :] < count[:, None]
-    following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
-    following = jnp.take_along_axis(local, following_slot[..., None], axis=1)
-    cross = local[..., 0] * following[..., 1] - following[..., 0] * local[..., 1]
-    cross = jnp.where(valid, cross, 0.0)
-    orientation = jnp.where(jnp.sum(cross, axis=1) < 0.0, -1.0, 1.0)
     area_scale = scale[:, 0] * scale[:, 1]
+    maximum_degree = max(radial + vertical for radial, vertical in powers)
+    table = _straight_edge_monomial_moments(local, count, max_degree=maximum_degree + 1)
 
     def monomial_moment(radial_power, vertical_power):
-        edge_moment = jnp.zeros((cell_count, capacity), dtype=vertices.dtype)
         total_degree = radial_power + vertical_power
-        for radial_first in range(radial_power + 1):
-            radial_factor = (
-                math.comb(radial_power, radial_first)
-                * local[..., 0] ** radial_first
-                * following[..., 0] ** (radial_power - radial_first)
-            )
-            for vertical_first in range(vertical_power + 1):
-                first_degree = radial_first + vertical_first
-                simplex = (
-                    math.factorial(first_degree)
-                    * math.factorial(total_degree - first_degree)
-                    / math.factorial(total_degree + 2)
-                )
-                vertical_factor = (
-                    math.comb(vertical_power, vertical_first)
-                    * local[..., 1] ** vertical_first
-                    * following[..., 1] ** (vertical_power - vertical_first)
-                )
-                edge_moment = edge_moment + simplex * radial_factor * vertical_factor
-        return orientation * area_scale * jnp.sum(cross * edge_moment, axis=1)
+        column = total_degree * (total_degree + 1) // 2 + radial_power
+        return area_scale * table[:, column]
 
-    maximum_degree = max(radial + vertical for radial, vertical in powers)
     required_powers = tuple(
         (radial, vertical)
         for degree in range(maximum_degree + 2)

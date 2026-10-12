@@ -1,0 +1,102 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite (baseline_suite.log, revision c054a721f) is not-collected (exit 4: tests/test_certificate_exterior_support.py is absent at the base sha), so it names no failing ids; grep -c '^FAILED' gives 0. Reviewed after_suite (after_suite.log, revision d33556de9) ran to its summary line '4 passed in 2858.63s' with exit 0 and grep -c '^FAILED' 0. Head-minus-base is empty: added_failure_count 0, added_failure_ids [].",
+  "added_failure_ids": [],
+  "artifacts": [
+    "head_gate.log revision d33556de9: 4 collected, 4 passed in 2858.63s; exterior_closure_relative_sup 6.08e-15 / 1.0877e-05 / 4.3477e-06 below booking at 550/2098/5158 cells, decomposition_relative_sup 0.0 at each rung",
+    "after_suite.log revision d33556de9: 4 passed in 2858.63s (0:47:38)",
+    "negative_control.log revision d33556de9: test_exterior_closure_falls_below_booking[2000] FAILED, closure 0.017694 against booking 0.008968, last line EXIT=1",
+    "baseline_suite.log revision c054a721f: not-collected (exit 4), 0 items at the base sha where the gate file is absent",
+    "docs/evidence/fragments/converged-forward-solve/cfs-exterior-exact-support.html: reckon audit-doc OK this run"
+  ],
+  "blocking_finding_count": 0,
+  "call_site_count": 6,
+  "call_sites": [
+    "benchmarks/plasma_cell_map_fidelity.py:263",
+    "benchmarks/solovev_certificate.py:3763",
+    "scripts/prototypes/support/measure.py:107",
+    "scripts/prototypes/ladder/map.py:98",
+    "benchmarks/diverted_map_error_decomposition.py:164",
+    "benchmarks/plasma_cell_production_ladder.py:277"
+  ],
+  "commits_read": [
+    "24f6eef90",
+    "82dfa09f9",
+    "b6c198dec",
+    "7af372a9f",
+    "d33556de9",
+    "a7d8bb24e",
+    "06f82d636",
+    "3965f570b"
+  ],
+  "completed_at": "2026-10-12T07:26:43.816Z",
+  "dispatched_at": "2026-10-12T07:21:32Z",
+  "evidence_inputs": [
+    "The gate file is absent at the orientation base sha c054a721f, so the baseline arm is honestly not-collected; the head arm at d33556de9 is the readable arm and fails nothing.",
+    "The declared negative control (flip EXTERIOR_SUPPORT_ARM from _EXACT_SUPPORT_ARM to _LEGACY_SUPPORT_ARM) is admitted: it was applied to an exported copy of the head tree, ran test_exterior_closure_falls_below_booking[2000] to FAILED with the closure back at 0.017694 above booking 0.008968, and the exported fixture was reverted byte-identical.",
+    "The 2000 and 5000-cell carriers were built at this node's base kernel, predating acaea2c9c, and persist under /home/ITER/mcintos/.local/share/nova/0.11.0; they are an input to followup f-cfs-carrier-requalify.",
+    "Reuse: geometry.analytic_moments (scripts/prototypes/support/geometry.py:297) is the owner of the exact-support cell-moment integration the new _polygon_current_moments duplicates; the node's own test calls the owner at tests/test_certificate_exterior_support.py:103."
+  ],
+  "findings": [
+    {
+      "file": "scripts/prototypes/support/geometry.py",
+      "line": 297,
+      "severity": "follow-on",
+      "text": "the added _polygon_current_moments (scripts/analytic_oracle_fixtures/measure.py:1207) duplicates the capability scripts/prototypes/support/geometry.py:297 analytic_moments already owns - integrating the analytic density over the clipped polygon cells into the same three-component cell moments - and the two agree to the decomposition residual of 0.0, so the fixture could have delegated to the owner rather than adding a second order-15 integrator."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/cfs-exterior-exact-support.html",
+      "line": 15,
+      "severity": "follow-on",
+      "text": "the plan-commits meta lists 24f6eef90,82dfa09f9,7af372a9f,a7d8bb24e,06f82d636 and omits b6c198dec, d33556de9 and the head 3965f570b, yet the fragment's own measured-rows paragraph cites d33556de9, so the metadata contradicts the prose."
+    },
+    {
+      "file": "scripts/analytic_oracle_fixtures/measure.py",
+      "line": 1245,
+      "severity": "follow-on",
+      "text": "exact_current_moments defaults to _LEGACY_SUPPORT_ARM while cached_fixture_exterior (measure.py:1346) and _exterior_cache_identity (measure.py:1312) default to the exact arm, so the function named exact_current_moments returns the spline clip to its direct callers while the prescribed exterior is exact."
+    }
+  ],
+  "gate_arms_note": "The head code revision is d33556de9; the three later commits a7d8bb24e, 06f82d636 and 3965f570b are docs(evidence) only (the fragment), so the after_suite arm at d33556de9 covers the reviewed code head 3965f570b.",
+  "item_verdicts": {
+    "diff": "read commit by commit against c054a721f: eight commits over three files (+478/-6); the source commits add the exact support arm and thread support_arm through the exterior cache identity, and the later commits record the evidence fragment.",
+    "done_when": "met: clause (3) is asserted by tests/test_certificate_exterior_support.py:170-173 and recorded, clause (4) by :177-182, clause (2) by the support_arm and polygonanalytic_revision keys at measure.py:1330-1332 (the cache key changed under the control), clause (5) by the admitted negative control, clause (6) by the new test file, clause (7) by the fragment (reckon audit-doc OK, verified this run).",
+    "goal": "met: the exact support arm computes the prescribed exterior from the analytic density integrated on the independently clipped analytic-separatrix support (measure.py:1184,1259), and head_gate.log records exterior_closure_relative_sup 6.08e-15/1.088e-05/4.35e-06 below booking at 550/2098/5158 cells.",
+    "manifest": "read: status complete, eight commits named, head_gate.log/after_suite.log at d33556de9 record 4 passed, the admitted negative control is cited with its failing test id, and the prototype-consumer and carrier-requalification follow-ons are stated.",
+    "write_paths": "met: c054a721f..3965f570b touches only scripts/analytic_oracle_fixtures/measure.py, tests/test_certificate_exterior_support.py and docs/evidence/fragments/converged-forward-solve/cfs-exterior-exact-support.html, all inside the declared fence."
+  },
+  "justifications": {
+    "durability": "the exact-arm assertion at tests/test_certificate_exterior_support.py:170-173 reddened under the declared mutation (flipping EXTERIOR_SUPPORT_ARM to legacy), negative_control.log recording test_exterior_closure_falls_below_booking[2000] FAILED with closure 0.017694 above booking 0.008968, and the positive control at :181 compares against the independent constant POSITIVE_CONTROL_MAP_SUP.",
+    "evidence": "the gate at tests/test_certificate_exterior_support.py:168-182 asserts exactly the closure-below-booking and positive-control measures, and its results are recorded in head_gate.log, after_suite.log and the fragment, with the negative control admitted by log fact (EXIT=1, the [2000] id).",
+    "fit": "the added helpers follow the module's existing three-component accumulation idiom (measure.py:1297 whole_cell_current_moments) and carry mechanism names with no banned label; the new test file simply lacks a trailing newline.",
+    "goal_fidelity": "measure.py:1184-1261 builds the exterior from the analytic density integrated on geometry.analytic_polygons' exact clip and head_gate.log records the closure at 6.08e-15/1.088e-05/4.35e-06 against booking 2.386e-02/5.778e-03/2.794e-04 at 550/2098/5158 cells.",
+    "reuse": "measure.py:1207 _polygon_current_moments re-implements the same analytic-density-over-clipped-polygons cell-moment integration that scripts/prototypes/support/geometry.py:297 analytic_moments already owns and that this node's own test calls at tests/test_certificate_exterior_support.py:103, without extending that owner.",
+    "scope_discipline": "the diff's three paths (measure.py, the new test, the fragment html) are all inside the declared write paths and carry no out-of-scope edit."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to pose the certificate's prescribed exterior on the exact analytic support so the map-fidelity gate measures the map; scripts/analytic_oracle_fixtures/measure.py:1184 analytic_support_polygons integrates the analytic density on the exact analytic-separatrix polygon clip, and the exact arm's closure falls below booking at every rung.\nVERDICT done_when: read the seven clauses; tests/test_certificate_exterior_support.py:170-173 asserts the closure-below-booking and decomposition clauses, :177-182 the legacy positive control, measure.py:1330-1332 carries the support arm and polygonanalytic revision in the cache identity, and the declared negative control is admitted with test id test_exterior_closure_falls_below_booking[2000].\nVERDICT write_paths: the c054a721f..3965f570b diff touches only scripts/analytic_oracle_fixtures/measure.py, tests/test_certificate_exterior_support.py and docs/evidence/fragments/converged-forward-solve/cfs-exterior-exact-support.html, every one inside the declared fence.\nVERDICT manifest: read; status complete, eight commits named, head_gate.log/after_suite.log at d33556de9 record 4 passed, the admitted negative control is cited with its failing test id, and the prototype-consumer and carrier-requalification follow-ons are stated.\nVERDICT diff: read commit by commit against c054a721f; eight commits over three files (+478/-6), the source commits add the exact support arm and thread support_arm through the exterior cache identity, and the later commits record the evidence fragment.\nCALL_SITES: benchmarks/plasma_cell_map_fidelity.py:263, benchmarks/solovev_certificate.py:3763, scripts/prototypes/support/measure.py:107, scripts/prototypes/ladder/map.py:98, benchmarks/diverted_map_error_decomposition.py:164, benchmarks/plasma_cell_production_ladder.py:277\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: measure.py:1184-1261 builds the exterior from the analytic density integrated on geometry.analytic_polygons' exact clip and head_gate.log records the closure at 6.08e-15/1.088e-05/4.35e-06 against booking 2.386e-02/5.778e-03/2.794e-04 at 550/2098/5158 cells.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate at tests/test_certificate_exterior_support.py:168-182 asserts exactly the closure-below-booking and positive-control measures, and its results are recorded in head_gate.log, after_suite.log and the fragment, with the negative control admitted by log fact (EXIT=1, the [2000] id).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff's three paths (measure.py, the new test, the fragment html) are all inside the declared write paths and carry no out-of-scope edit.\nSCORE durability: 18\nJUSTIFICATION durability: the exact-arm assertion at tests/test_certificate_exterior_support.py:170-173 reddened under the declared mutation (flipping EXTERIOR_SUPPORT_ARM to legacy), negative_control.log recording test_exterior_closure_falls_below_booking[2000] FAILED with closure 0.017694 above booking 0.008968, and the positive control at :181 compares against the independent constant POSITIVE_CONTROL_MAP_SUP.\nSCORE fit: 18\nJUSTIFICATION fit: the added helpers follow the module's existing three-component accumulation idiom (measure.py:1297 whole_cell_current_moments) and carry mechanism names with no banned label; the new test file simply lacks a trailing newline.\nSCORE reuse: 5\nJUSTIFICATION reuse: measure.py:1207 _polygon_current_moments re-implements the same analytic-density-over-clipped-polygons cell-moment integration that scripts/prototypes/support/geometry.py:297 analytic_moments already owns and that this node's own test calls at tests/test_certificate_exterior_support.py:103, without extending that owner.\nFINDING scripts/prototypes/support/geometry.py:297 follow-on: the added _polygon_current_moments (measure.py:1207) duplicates the capability geometry.analytic_moments already owns - integrating the analytic density over the clipped polygon cells into the same three-component cell moments - and the two agree to the decomposition residual of 0.0, so the fixture could have delegated to the owner rather than adding a second order-15 integrator; the fragment's own prose calls them the same rule.\nFINDING docs/evidence/fragments/converged-forward-solve/cfs-exterior-exact-support.html:15 follow-on: the plan-commits meta lists 24f6eef90,82dfa09f9,7af372a9f,a7d8bb24e,06f82d636 and omits b6c198dec, d33556de9 and the head 3965f570b, yet the fragment's own measured-rows paragraph cites d33556de9 as the revision the rows were re-run at, so the metadata contradicts the prose and a reader cannot reconcile the fragment with the landed commits.\nFINDING scripts/analytic_oracle_fixtures/measure.py:1245 follow-on: exact_current_moments now defaults to _LEGACY_SUPPORT_ARM while cached_fixture_exterior (measure.py:1346) and _exterior_cache_identity (measure.py:1312) default to the exact arm, so the function named exact_current_moments returns the spline clip to its many direct callers while the prescribed exterior is exact - a silent divergence the fixture's naming obscures and the node records only for one prototype consumer under follow_ons.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T072110911725-review-of-cfs-exterior-exact-support",
+  "reviewed_base_sha": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+  "reviewed_head_sha": "3965f570b77b7882067496d8b9ed353e5a97f6b4",
+  "reviewed_revision": "3965f570b77b7882067496d8b9ed353e5a97f6b4",
+  "reviewed_run_id": "r-20261012T041830700797-cfs-exterior-exact-support",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-exterior-exact-support",
+  "reviewer_node": "review-of-cfs-exterior-exact-support",
+  "reviewer_run_id": "r-20261012T072110911725-review-of-cfs-exterior-exact-support",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "section": "\u00a76",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T07:40:00.000000+00:00",
+  "total": 96,
+  "verdict": "pass-with-follow-on"
+}

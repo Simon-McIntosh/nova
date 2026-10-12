@@ -25,7 +25,7 @@ from scripts.prototypes.read_route.bell import (
     read_bell,
     read_cached_bell,
 )
-from scripts.prototypes.read_route.check_element import controls
+from scripts.prototypes.read_route.check_element import controls, edge_controls
 from scripts.prototypes.read_route.jets import build_jet_matrix
 from scripts.prototypes.read_route.measure import read_row, jet_reader, sample_field
 from tests.equilibrium import test_topology_read as fixture
@@ -126,6 +126,13 @@ def run(args):
     receipt["jet_shape"] = list(matrix.shape)
     persist()
     jets = exterior + jnp.einsum("ncmq,cm->nq", matrix, jnp.stack(tuple(moments), -1))
+    if args.cells in (550, 2000):
+        booked_edges = edge_controls(field_from_jets(jets, built_indices, mesh), nodes)
+        print("BOOKED_EDGE_CONTROL " + json.dumps(booked_edges), flush=True)
+        receipt["booked_edges"] = booked_edges
+        persist()
+        assert booked_edges["value_jump"] < 1e-10
+        assert booked_edges["normal_jump"] < 1e-9
     # The nonconforming read is measured before the replacement on this state.
     if args.kind == "diverted" and args.cells in (550, 2000):
         row, _ = measure(

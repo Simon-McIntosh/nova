@@ -39,7 +39,7 @@ def main():
     current = measured_rows(args.rows)
     rows.update(current)
     plt.style.use("data-ink")
-    figure, axes = plt.subplots(1, 2, figsize=(14, 6.5), layout="constrained")
+    figure, axes = plt.subplots(1, 2, figsize=(14, 9), layout="constrained")
     colours = {"limited": "#427e7b", "diverted": "#856895"}
     styles = {
         "closed_form": ":",
@@ -85,7 +85,7 @@ def main():
         )
         axis.spines[["top", "right"]].set_visible(False)
         axis.grid(False)
-        axis.legend(frameon=False, fontsize=13)
+        axis.legend(frameon=False, fontsize=20)
     args.figure.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.figure)
     plt.close(figure)

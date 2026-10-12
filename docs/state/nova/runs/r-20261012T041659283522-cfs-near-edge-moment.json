@@ -1,0 +1,520 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "lane-change",
+  "backend": "codex",
+  "base_sha": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 30313216,
+      "cached_input_tokens_cumulative": 30313216,
+      "input_tokens": 30574851,
+      "input_tokens_cumulative": 30574851,
+      "output_tokens": 86871,
+      "output_tokens_cumulative": 86871,
+      "reasoning_output_tokens": 37605,
+      "reasoning_output_tokens_cumulative": 37605
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 232,
+    "files": 4,
+    "removed": 8
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "tangent",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 3572,
+        "name": "__init__",
+        "path": "nova/biot/polygonanalytic.py"
+      },
+      "window_line": 3594
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "44345de22b08373230ac73e6e84f93226dab49f0",
+    "49bd69d2bf372bd4ec820925dc59b021b28be7e1",
+    "c13eeecb92f3f5218fcaa42c8c7499f6c29edd51",
+    "d5a97599a3286bcc9db6429ba64c9b543d58c10a"
+  ],
+  "completed_at": "2026-10-12T04:55:58Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-12T04:17:17Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "passed",
+  "gate_check": {
+    "command": "env -u NOVA_POLYGON_BASE PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-near-edge-moment:/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-near-edge-moment/scripts/h200_test_lane TMPDIR=/tmp XLA_PYTHON_CLIENT_PREALLOCATE=false JAX_PLATFORMS=cuda,cpu OMP_NUM_THREADS=2 /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-near-edge-moment/tests/biot/test_moment_path_parity.py -q -rA --timeout=600 --basetemp=/tmp/nova-moment-parity.Xj7ZBq",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/final_head_parity.log"
+  },
+  "impl_move": {
+    "at_complete": 0.2857142857142857,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "the near-edge repair completes the moment kernel prerequisite of section 4; the section closes on gs.apply fidelity with read-driven support",
+    "verdict": "waived"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-12T05:16:59.603915+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-12T04:16:59Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 14,
+    "binding_observed": "unknown",
+    "detail": "lane document carries no numeric 'mean_context'",
+    "generating": 0,
+    "headroom": 12,
+    "mean_context": "unknown",
+    "observed_at": "2026-10-12T04:16:47Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 14,
+      "aggregate_tokens_per_second": 9.136,
+      "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": "2026-10-12T04:16:47Z",
+      "runs": 0.0,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-12T04:55:58Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-12T04:24:44Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "critical-risk kernel repair near the filament singularity; the hard tier belongs on codex per the lead directive of 2026-10-08",
+        "session": "fresh",
+        "session_id": "03741899-636e-4d17-835d-2fa9af374759",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261012T041659283522-cfs-near-edge-moment"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/manifest.md",
+  "member": "disposable-r-20261012T041659283522-cfs-near-edge-moment",
+  "model_key": "sol",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-host]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-packed_device]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-packed_numpy]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-host]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-packed_device]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-packed_numpy]"
+    ],
+    "baseline_failure_ids": [
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-host]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-packed_device]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-packed_numpy]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-host]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-packed_device]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-packed_numpy]"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-host]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-packed_device]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[edge_offset-packed_numpy]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-host]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-packed_device]",
+      "tests/biot/test_moment_path_parity.py::test_near_edge_flux_moments_match_split_reference[peak-packed_numpy]"
+    ],
+    "declaration": "restoring the merged kernel brings back the near-edge gap by test id",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/negative_control_rows.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/negative_control_rows.log",
+    "test_paths": [
+      "tests/biot/test_moment_path_parity.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "cfs-near-edge-moment",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 812,
+          "cached_input_tokens": 851401,
+          "input_tokens": 852215,
+          "output_tokens": 1725,
+          "reasoning_output_tokens": 605,
+          "total_tokens": 853940,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Repair the polygon moment kernel's near-edge accuracy, as followup f-cfs-near-edge-moment on converged-forward-solve states, under the lead's moment-kernel-repair decision (2026-10-11).\n\nThe conditioned kernel (merge 63411377f) matches an independent reference within 2.24e-14 on 251 pairs at least three source diameters from the filament. At a sharp angular peak near an edge, at target (5.1290090247138025, 0.06117221140408553) m, it still misses an independent split reference by 1.81e-6 (uniform), 2.40e-5 (radial) and 2.82e-5 (vertical). The split reference is retained at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T201559333857-cfs-moment-path-reconcile/logs/requalification/identity_split_reference.json, with its harness beside it.\n\nDone when:\n(1) Build an extended-precision split reference: adaptive subdivision at the angular peak, plus 50-digit checks. Use it for at least 300 near-edge and self-cell source-target pairs on the 550-cell certificate machine, including the peak case. Print the maxima per channel.\n(2) Repair the kernel in nova/biot/polygonanalytic.py, with the near-edge treatment stated in the docstring in terms of what the integral does there. All three channels must agree with the reference within 1e-12 norm-relative on the near-edge set, and the existing 251-pair agreement must stay within 1e-13.\n(3) Keep the point-jet expression bound of 22,000 equations; report the count.\n(4) Negative control: restoring the merged kernel brings back the near-edge gap by test id.\n(5) Extend tests/biot/test_moment_path_parity.py with near-edge rows. The tests covering polygonanalytic.py under tests/biot pass by delta on the H200 lane, run module by module as fresh processes with sized time and per-test timeouts.\n(6) Extend the evidence fragment docs/evidence/fragments/converged-forward-solve/cfs-moment-path-reconcile.html with a near-edge section; reckon audit-doc reports 0 errors.\n\nDo not edit nova/equilibrium or scripts/analytic_oracle_fixtures.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.",
+    "estimated_hours": 5.0,
+    "goal": "Bring the polygon moment kernel near-edge and self-cell coupling within 1e-12 of an extended-precision split reference",
+    "id": "cfs-near-edge-moment",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-12T04:16:59Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 14,
+      "binding_observed": "unknown",
+      "detail": "lane document carries no numeric 'mean_context'",
+      "generating": 0,
+      "headroom": 12,
+      "mean_context": "unknown",
+      "observed_at": "2026-10-12T04:16:47Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 14,
+        "aggregate_tokens_per_second": 9.136,
+        "detail": "lane document publishes no numeric 'mean_tokens_per_second' in its 'throughput' block",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": "2026-10-12T04:16:47Z",
+        "runs": 0.0,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/manifest.md",
+    "negative_control": "restoring the merged kernel brings back the near-edge gap by test id",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§4",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "nova/biot/polygonanalytic.py",
+      "tests/biot/test_moment_path_parity.py",
+      "docs/evidence/fragments/converged-forward-solve/cfs-moment-path-reconcile.html",
+      "docs/evidence/fragments/converged-forward-solve/cfs-near-edge-moment.html",
+      "docs/figures/converged-forward-solve/cfs-near-edge-moment"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "cfs-near-edge-moment",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-12T04:17:04.046164+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Critical-risk numerical kernel repair near the filament singularity with an extended-precision split reference and 1e-12 parity; hard, belongs on a strong lane",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.448,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "d5a97599a3286bcc9db6429ba64c9b543d58c10a",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+    "reviewed_head_sha": "d5a97599a3286bcc9db6429ba64c9b543d58c10a",
+    "scores": {
+      "durability": 18,
+      "evidence": 17,
+      "fit": 19,
+      "goal_fidelity": 20,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 114
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261012T041659283522-cfs-near-edge-moment",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§4",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a12e5b-2a95-7b63-94ee-a13b1f34700e",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 30313216,
+    "cumulative_input_tokens": 60888067,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 124476
+  },
+  "time_budget": "60m",
+  "tool_steps": 37.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "codex",
+        "budget_overrun": true,
+        "budget_overrun_cause": "unknown",
+        "budget_overrun_rate": null,
+        "budget_overrun_reference_rate": null,
+        "budget_overrun_reference_runs": 0,
+        "budget_overrun_reference_source": "recent committed runs, same backend and model",
+        "budget_overrun_seconds": 22520,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 26120,
+        "exit_record": {
+          "attempt": 2,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-11T21:12:37Z",
+          "last_record_type": "turn.completed",
+          "launched_at": "2026-10-11T21:01:45Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261011T210112084192-accuracy-floor-census",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 334,
+          "worker_pid": 931042
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "codex",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-11T21:12:37Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 25467,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "09aab7b82884e6fd935a7e5f53ce25a204ee7c5b5c797c76c6a1eebf46c55241",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261011T210112084192-accuracy-floor-census/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "sol",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --brief /home/ITER/mcintos/.config/reckon/crew/runs/r-20261011T210112084192-accuracy-floor-census/review-brief.md --plan converged-forward-solve --section '§6' --role review --spec-level exact --node review-of-accuracy-floor-census --goal 'attach an independent review to run r-20261011T210112084192-accuracy-floor-census' --done-when 'the review for r-20261011T210112084192-accuracy-floor-census re-runs the claims its report cites and stores a parsed record under the claims rubric: pick the three findings the report ranks highest, re-run each cited command or script from /home/ITER/mcintos/.config/reckon/crew/runs/r-20261011T210112084192-accuracy-floor-census, and emit one CLAIM line per finding recording reproduced, differs with both figures, or not-runnable with the reason; check the report'\"'\"'s own summary line against its table and emit it as a CLAIM_SUMMARY line. The record carries the claim verdicts and no suite-delta fields; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261011T210112084192-accuracy-floor-census.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261011T210112084192-accuracy-floor-census.at-d8748f19abde1038a59b165bf55d2012c90cc8f5.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --local",
+        "node": "accuracy-floor-census",
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261011T210112084192-accuracy-floor-census",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 25515,
+        "terminal_at": "2026-10-11T21:11:47Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/accuracy-floor-census"
+      }
+    ]
+  },
+  "wall_seconds": 2321,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-12T04:56:01Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-12T04:24:48Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261012T041659283522-cfs-near-edge-moment",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 7096,
+    "worker_pid": 1991712
+  },
+  "worker_seconds": 2321,
+  "worker_seconds_source": "wall_fallback",
+  "worktree_retention": null
+}

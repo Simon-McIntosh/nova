@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="cfs-exterior-exact-support">
+<meta name="plan-title" content="Certificate exterior on the exact analytic support">
+<meta name="plan-summary" content="Posed the prescribed exterior on the exact analytic-separatrix
+polygon support so the exterior closure term falls below the map booking term the
+fidelity gate measures">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s6">
+<meta name="plan-commits" content="24f6eef90,82dfa09f9">
+<meta name="plan-recorded-at" content="2026-10-12">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu); 2000 and 5000 rungs did not complete">
+<title>Certificate exterior on the exact analytic support | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="cfs-exterior-exact-support">Certificate exterior on the exact analytic support</h1>
+
+<p>The prescribed exterior is the analytic state minus the internal flux image of
+the analytic-density plasma current. When that image is integrated on the
+production spline clip, the exterior and the map's own booking disagree on the
+same support, and the disagreement appears as an exterior closure term that can
+exceed the booking error the map-fidelity gate exists to measure. The fixture now
+integrates that density on the independently computed analytic-separatrix polygon
+support instead, so the booked image cancels the analytic-density image the
+certificate books on the same support and the closure term falls to roundoff.</p>
+
+<p>Two pieces implement this. <code>analytic_support_polygons</code> reuses
+<code>scripts/prototypes/support/geometry.py:analytic_polygons</code>, the
+certificate's own exact-support definition, applied to the cell polygons the
+moment geometry carries; <code>_polygon_current_moments</code> integrates the
+analytic density over those clipped polygons with the fixture's order-15 fan
+rule, sign-correcting each ring so holes subtract. <code>exact_current_moments</code>
+selects that path through <code>support_arm</code>, and the exterior cache
+identity now carries both the support arm and the content digest of
+<code>nova/biot/polygonanalytic.py</code>, so replacing the support or the
+contraction module cannot silently reuse an exterior built on the old clip.</p>
+
+<h2 id="cfs-exterior-exact-support-row">Measured closure against booking</h2>
+
+<table>
+<thead>
+<tr>
+<th>Cells (realised)</th><th>Support arm</th><th>Map relative sup</th>
+<th>Booking image relative sup</th><th>Exterior closure relative sup</th>
+<th>Decomposition residual</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>550</td><td>exact</td><td>0.023862283762011</td><td>0.023862283762011</td>
+<td>7.06e-15</td><td>1.57e-02 (unmasked)</td></tr>
+<tr><td>550</td><td>legacy</td><td>not measured</td><td>not measured</td><td>not measured</td><td>not measured</td></tr>
+<tr><td>2000</td><td>exact</td><td>not measured</td><td>not measured</td><td>not measured</td><td>not measured</td></tr>
+<tr><td>5000</td><td>exact</td><td>not measured</td><td>not measured</td><td>not measured</td><td>not measured</td></tr>
+</tbody>
+</table>
+
+<p>At 550 cells the exact-support exterior closes at 7.06e-15, four orders below
+the 2.386e-02 booking term, and the map relative sup equals the booking term to
+every printed digit: the residual the map-fidelity gate now measures is the
+map's own booking error rather than the exterior mismatch. The same identity
+holds by construction at every rung, because the fixture's exact-support moment
+integral and the certificate's <code>analytic_moments</code> are the same
+order-15 fan rule evaluated on the same <code>analytic_polygons(exact, cells)</code>
+polygon set; that is an argument, not a measurement, and the 2000 and 5000 rows
+above remain unmeasured.</p>
+
+<p>The decomposition residual printed for the 550 row is the value obtained
+before the map's residual-shadow cells are zeroed. The map leaves those cells
+unevaluated, so both booked terms are masked there before the decomposition is
+required to reconstruct the map, which is how the prototype forms the same
+identity.</p>
+
+<h2 id="cfs-exterior-exact-support-state">What did not complete, and why</h2>
+
+<table>
+<thead><tr><th>Contract</th><th>Measured result</th></tr></thead>
+<tbody>
+<tr>
+<td>Closure below booking at 550 cells</td>
+<td>Met: closure 7.06e-15 against booking 2.386e-02.</td>
+</tr>
+<tr>
+<td>Closure below booking at 2000 and 5000 cells</td>
+<td>Not measured. Both rungs need the 2000-cell oracle carrier, which is absent
+from the fixture's machine cache and had to be built on this node. Under the
+peer load present (load average 84 on a 28-core allocation) the build did not
+complete inside the run budget, and the two runs that needed it were stopped at
+the 600-second background limit with the log ending mid-test.</td>
+</tr>
+<tr>
+<td>Legacy 550 positive control through the explicitly named legacy exterior</td>
+<td>Not measured. The legacy arm shares the 2000-cell carrier build only in the
+same gate invocation; run alone it needs its own exterior rebuild and did not
+fit the remaining budget.</td>
+</tr>
+<tr>
+<td>Negative control (spline-support exterior restores the closure residual at
+2000 cells)</td>
+<td>Not run. It exercises the same unbuilt 2000-cell carrier, so the mutation
+could not be observed. The mutation is the one-line flip of
+<code>EXTERIOR_SUPPORT_ARM</code> from <code>"exact"</code> to
+<code>"legacy"</code>, which routes the fixture's default exterior back through
+the production spline clip.</td>
+</tr>
+</tbody>
+</table>
+
+<p>The gate command and the measured row are the run's own log, and the cache
+identity that gated the exterior is recorded with the row:</p>
+
+<table>
+<thead><tr><th>Item</th><th>Value</th></tr></thead>
+<tbody>
+<tr>
+<td>Measurement driver</td>
+<td><code>measure-550.log</code> under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041830700797-cfs-exterior-exact-support</code></td>
+</tr>
+<tr>
+<td>Exterior cache identity key</td>
+<td><code>c3ff6de9912bd992</code>, hit</td>
+</tr>
+<tr>
+<td>Incomplete run logs</td>
+<td><code>gate-head.log</code> and <code>negative-control.log</code> in the same
+run directory; both end mid-run with no exit line.</td>
+</tr>
+</tbody>
+</table>
+
+</main>
+</body>
+</html>

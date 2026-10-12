@@ -11,10 +11,10 @@
 reductions, chosen by an exact-rational accuracy census">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s3">
-<meta name="plan-commits" content="67f7b68bf 32d463cf7 90bb6f21e 775370a7c 4523dc2f3">
+<meta name="plan-commits" content="67f7b68bf 32d463cf7 90bb6f21e 775370a7c 4523dc2f3 b12dacca4">
 <meta name="plan-recorded-at" content="2026-10-12">
 <meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="CPU, binary64; fleet allocation node 98dci4-clu-2002 job 1281970">
+<meta name="plan-environment" content="CPU, binary64; SLURM all_debug partition, 8 cores and 64 GB per job, job 1283603-1283610">
 <title>Consolidated polygon-moment reduction | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -135,11 +135,27 @@ comparison the owner agreeing with itself.
 <code>separatrix_clip._area_moments</code> was delegated and then reverted in
 <code>4523dc2f3</code>: <code>AtomicCellMesh.clip</code> calls it once per mesh
 cell inside a Python loop, and an eager traced call per cell turned that loop into
-a compile-and-dispatch per cell, taking
-<code>test_moving_separatrix_padded_contraction_traces_once</code> past the
-300&nbsp;s pytest timeout where the numpy closed form finishes in 6.25&nbsp;s. Its
-absolute error, 6.661e-16, is the smallest of any candidate, and it returns the
-same total-degree-two block of the same monomial integrals.</p>
+a compile-and-dispatch per cell. Its absolute error, 6.661e-16, is the smallest of
+any candidate, and it returns the same total-degree-two block of the same monomial
+integrals.</p>
+
+<p id="polygon-moment-owner-area-wall">The wall of
+<code>test_moving_separatrix_padded_contraction_traces_once</code>, the single test
+that exercises that loop, measured one process at a time on a dedicated
+<code>all_debug</code> node: <strong>152.72&nbsp;s</strong> with the delegated view
+and <strong>5.97&nbsp;s</strong> with the numpy closed form &mdash; a factor of 26.
+The delegation was first seen as a pytest <em>Timeout</em> at the 300&nbsp;s
+default, because that gate ran three heavy pytest processes against eight cores;
+the same 152&nbsp;s of per-cell dispatch crosses 300&nbsp;s under that contention.
+So the reverted commit removes a 26-fold wall inflation, and the control that
+measures it is the pair of walls above. The control specified for this repair
+&mdash; reverting <code>4523dc2f3</code> in an exported copy and requiring the
+test to fail or time out by id &mdash; was run and <strong>did not
+reproduce</strong>: on a dedicated node the reverted tree passes that test in
+152.72&nbsp;s, well inside the timeout, so the delegation degrades the wall rather
+than breaking the test. Logs: <code>negative_control_revert.log</code> (reverted
+tree, armed and verified delegated: 1 passed in 152.72&nbsp;s),
+<code>cert_head2.log</code> (head tree, same test: 1 passed in 5.97&nbsp;s).</p>
 
 <h2 id="polygon-moment-owner-certificate">Booked-current certificate rows</h2>
 
@@ -148,35 +164,94 @@ in clause (4) are <code>tests/test_read_ten_thousand_cells.py</code>, parametris
 over 550, 2000 and 5000 cells for both the limited and the diverted topology.
 Each carries a committed CPU golden whose comparison is exactly
 <code>atol=1e-13</code> on membership, axis, X-point validity, X-point position and
-boundary flux. Both arms were run on the fleet allocation node (job 1281970, CPU
-backend, <code>jax_enable_x64</code>):</p>
+boundary flux.</p>
+
+<p id="polygon-moment-owner-certificate-method">The rows must be read from the tree
+under test, and until this pass they were not.
+<code>python&nbsp;-m&nbsp;pytest</code> puts the working directory at the head of
+<code>sys.path</code> ahead of <code>PYTHONPATH</code>, and the shared environment
+at <code>~/Code/nova/.venv</code> carries an editable install pointing at the main
+checkout, so a run launched from the worktree without <code>PYTHONPATH</code>
+imports the main checkout's <code>nova</code>. The two arms recorded earlier (8
+passed, 576&nbsp;s and 578&nbsp;s) did exactly that: they measured the main
+checkout, which is why they agreed with the committed goldens. Each arm is now run
+with its own tree as its working directory, and the <code>-m</code> free
+<code>python</code> of the shared environment as the interpreter.</p>
 
 <table id="polygon-moment-owner-certificate-table">
 <caption>Certificate rows, six live cases per arm (the two 10 000-cell cases
-deselected by the clause).</caption>
+deselected by the clause), each arm run from its own tree.</caption>
 <thead>
 <tr><th>Arm</th><th>revision</th><th>result</th><th>wall</th></tr>
 </thead>
 <tbody>
-<tr><td>base</td><td><code>c054a721f</code></td><td>8 passed</td><td>576 s</td></tr>
-<tr><td>head</td><td><code>90bb6f21e</code> (delegated)</td><td>8 passed</td><td>578 s</td></tr>
+<tr><td>base</td><td><code>c054a721f</code></td><td>6 failed, 2 passed</td><td>386 s</td></tr>
+<tr><td>head</td><td><code>b12dacca4</code></td><td>6 failed, 2 passed</td><td>403 s</td></tr>
+<tr><td>base vs head, booked membership</td><td>the two trees above</td><td>bit-identical, max abs difference <code>0.0</code></td><td>&mdash;</td></tr>
 </tbody>
 </table>
 
-<p id="polygon-moment-owner-certificate-reading">Both arms pass identically, so the
-reroute leaves the booked current unchanged well inside the 1e-13 contract. The
-reason it cannot move it is a property of the path, and the control that shows it:
-<code>topology.read</code> books each cell's area from the atomised mesh's own
-shoelace sum (<code>nova/equilibrium/topology.py:2414</code>), not from the
-polygon-moment reductions, so a deliberate <code>1e-9</code> relative perturbation
-of the owner leaves all certificate rows green. The rows are therefore a guard
-that the reroute leaves the read path untouched, not a measurement of the
-reduction — the reduction's own accuracy is the census table above, anchored at
-<code>tests/test_exact_clip_moments.py</code>. The check does bite when the booked
-quantity itself moves: perturbing <code>limited-550-cpu.npz</code>'s membership by
-<code>1e-9</code> turns
+<p id="polygon-moment-owner-certificate-reading">The two arms carry the same six
+failures by test id, and the direct comparison is the clause's own instrument: the
+booked <code>membership</code> array at 550, 2000 and 5000 cells for both
+topologies is <strong>bit-identical</strong> between the pre-change tree and the
+delivered head, maximum absolute difference <code>0.0</code> and maximum relative
+difference <code>0.0</code> over all six cases
+(<code>membership_base.npz</code> vs <code>membership_head.npz</code>, compared in
+<code>cert_compare.log</code>). Clause (4) is therefore met exactly, not within a
+tolerance.</p>
+
+<p id="polygon-moment-owner-certificate-goldens">The six golden comparisons fail on
+<em>both</em> arms, by a maximum absolute difference of 6.15e-12, and that is a
+property of the base tree rather than of this node's change: the committed CPU
+snapshots pin the arithmetic of the main checkout at its current revision, and the
+node's base <code>c054a721f</code> differs from it at the twelfth digit. The
+earlier arms passed because they were the main checkout; the base arm fails
+identically, which is what shows the reroute is not the cause.</p>
+
+<p id="polygon-moment-owner-certificate-why">Why the reroute cannot move the booked
+current at all: <code>topology.read</code> books each cell's area from the
+atomised mesh's own shoelace sum (<code>nova/equilibrium/topology.py:2414</code>),
+not from the polygon-moment reductions. The rows are a guard that the reroute
+leaves the read path untouched, not a measurement of the reduction — the
+reduction's own accuracy is the census table above, anchored at
+<code>tests/test_exact_clip_moments.py</code>. The golden check does bite when the
+booked quantity itself moves: perturbing <code>limited-550-cpu.npz</code>'s
+membership by <code>1e-9</code> turns
 <code>test_closed_form_read_is_accurate_and_compatible[550-limited]</code> red at
 the 1e-13 assertion.</p>
+
+<h2 id="polygon-moment-owner-gate">Focused gate, one process per test file</h2>
+
+<p id="polygon-moment-owner-gate-body">Each file is run by a fresh interpreter
+in its own job on <code>all_debug</code> (8 cores, 64&nbsp;GB), with
+<code>--timeout=900</code> per test. The pre-change arm is the exported
+<code>c054a721f</code> tree; the head arm is the delivered head with its own tree
+as the working directory.</p>
+
+<table id="polygon-moment-owner-gate-table">
+<caption>Focused gate per test file.</caption>
+<thead>
+<tr><th>Test file</th><th>base <code>c054a721f</code></th><th>head <code>b12dacca4</code></th></tr>
+</thead>
+<tbody>
+<tr><td>tests/test_exact_clip_moments.py</td><td>12 passed, 1 failed</td><td>13 passed</td></tr>
+<tr><td>tests/test_polygon_moments.py</td><td>7 passed</td><td>7 passed</td></tr>
+<tr><td>tests/test_equilibrium_separatrix_clip.py</td><td>28 passed</td><td>28 passed</td></tr>
+<tr><td>tests/test_equilibrium_density_moments.py</td><td>3 passed</td><td>3 passed</td></tr>
+<tr><td>tests/test_equilibrium_stencil_mesh.py</td><td>18 passed, 1 failed</td><td>18 passed, 1 failed</td></tr>
+<tr><td>tests/test_polygon_moment_owner.py</td><td>absent at base</td><td>5 passed</td></tr>
+</tbody>
+</table>
+
+<p id="polygon-moment-owner-gate-reading">One failure is common to both arms and
+unrelated to this node: <code>test_the_conservation_receipts_agree_between_the_meshes</code>.
+The base arm's second failure,
+<code>test_order_study_receipt_carries_the_map_the_record_is_transcribed_from</code>,
+is an artefact of the exported tree: the receipt writer shells out to
+<code>git rev-parse HEAD</code>, and an exported tree is not a repository. Run
+from the worktree that test passes. So the head arm carries no failure the base
+arm does not, and adds one file of five new checks.</p>
 
 </main>
 </body>

@@ -26,6 +26,8 @@
 <tr><td>550-cell diverted smoke</td><td>Bell saddle error 6.9687e-4 against 3.8486e-3</td><td>Preassembled read, before coefficient conditioning</td></tr>
 <tr><td>550-cell Hessian mutation</td><td>Saddle error 0.712884; test_bell_saddle_membership fails; EXIT=1</td><td>All Hessian degrees of freedom zeroed</td></tr>
 <tr><td>Same-file gate delta</td><td>Baseline: 3 pass, 2 fail. Head: 5 pass, 0 fail</td><td>Quartic reproduction and shared-normal continuity distinguish the fields</td></tr>
+<tr><td>2,000-cell limited booked Bell</td><td>Smooth 6.97278e-5 against 9.00177e-5; axis 1.20146e-4 pitches; valid and qualified</td><td>Cold 21.9783 s; warm 7.51821 s including contraction; peak RSS 5,446,456 KiB</td></tr>
+<tr><td>2,000-cell limited coupling and edges</td><td>1,778,688,000 bytes; build 241.484637 s; booked value jump 5.68434e-14 and normal jump 3.37508e-14</td><td>GPFS matrix persisted; every interior edge measured</td></tr>
 <tr><td>Larger rows</td><td>H200 job 1283902, one allocation, rungs ordered 2,000, 5,000, 10,000</td><td>Pending; per-arm receipts and matrix build checkpoints persisted</td></tr>
 <tr><td>Picard reference</td><td>Stored live-kernel row contains scalar maxima but no membership array</td><td>Pointwise membership agreement remains unqualified</td></tr>
 <tr><td>Decision</td><td>Do not lock the read representation before the ladder and Picard comparison complete</td><td>Prototype only; product APIs unchanged</td></tr>
@@ -33,7 +35,7 @@
 </tbody></table>
 <figure id="proto-conforming-jets-membership">
 <img src="/nova/figures/converged-forward-solve/conforming-jets/membership.svg" alt="Smooth and saddle membership errors versus cells for the measured closed-form, kernel, nonconforming and Bell arms">
-<figcaption>Measured arms only; the kernel is reused at 2,000 cells. The Bell smoke point is at 550 cells; no missing rung is plotted as zero.</figcaption>
+<figcaption>Measured arms only; the kernel is reused at 2,000 cells. Bell has a 550-cell diverted smoke point and a complete 2,000-cell limited row; no missing rung is plotted as zero.</figcaption>
 </figure>
 </section>
 </main></body></html>

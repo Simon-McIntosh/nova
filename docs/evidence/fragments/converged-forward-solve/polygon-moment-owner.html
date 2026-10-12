@@ -202,12 +202,15 @@ difference <code>0.0</code> over all six cases
 tolerance.</p>
 
 <p id="polygon-moment-owner-certificate-goldens">The six golden comparisons fail on
-<em>both</em> arms, by a maximum absolute difference of 6.15e-12, and that is a
-property of the base tree rather than of this node's change: the committed CPU
+<em>both</em> arms, by at most 6.15e-12 absolute and 7.96e-11 relative, and that is
+a property of the base tree rather than of this node's change: the committed CPU
 snapshots pin the arithmetic of the main checkout at its current revision, and the
-node's base <code>c054a721f</code> differs from it at the twelfth digit. The
-earlier arms passed because they were the main checkout; the base arm fails
-identically, which is what shows the reroute is not the cause.</p>
+node's base <code>c054a721f</code> differs from it at the twelfth digit. The two
+arms report those differences to the last digit &mdash; the same six ids with the
+same per-case maxima, e.g. 4.83246776e-12 for <code>550-limited</code> and
+6.15343887e-12 for <code>5000-limited</code> &mdash; so the reroute adds no
+difference of its own. The earlier arms passed because they were the main
+checkout.</p>
 
 <p id="polygon-moment-owner-certificate-why">Why the reroute cannot move the booked
 current at all: <code>topology.read</code> books each cell's area from the

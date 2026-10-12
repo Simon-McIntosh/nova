@@ -11,7 +11,7 @@
 reductions, chosen by an exact-rational accuracy census">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s3">
-<meta name="plan-commits" content="67f7b68bf 32d463cf7 90bb6f21e">
+<meta name="plan-commits" content="67f7b68bf 32d463cf7 90bb6f21e 775370a7c 4523dc2f3">
 <meta name="plan-recorded-at" content="2026-10-12">
 <meta name="plan-verdict" content="partial">
 <meta name="plan-environment" content="CPU, binary64; fleet allocation node 98dci4-clu-2002 job 1281970">
@@ -119,19 +119,27 @@ not. In commit <code>32d463cf7</code>
 directly and its Green-theorem edge-weight machinery (<code>_edge_weights</code>,
 <code>_residual_exponents</code>, the binomial and exponent tables, 129 source
 lines) is deleted; <code>polygon_density_moments</code> contracts the density
-against that same table. <code>separatrix_clip._area_moments</code> reads the
-owner's total-degree-two block, and
+against that same table.
 <code>padded_polynomial_current_moments</code> reads the owner table at the
 degree its complete basis requires. Commit <code>90bb6f21e</code> holds the
-claim: each surviving reduction is required to reach the owner in its own source,
-and the numpy area view is required to reproduce the exact rational area, first
-and second moments.</p>
+claim: each surviving reduction on the traced path is required to reach the owner
+in its own source, and the numpy area view is required to reproduce the exact
+rational area, first and second moments.</p>
 
-<p id="polygon-moment-owner-oracle"><code>stencil_mesh._polygon_monomial_integral</code>
-is deliberately not routed through the owner. It is the independent signed-fan
-oracle that <code>scripts/clip_independent_representation/score_candidates.py</code>
-compares the production reductions against; making it call the owner would turn
-that comparison into the owner agreeing with itself.</p>
+<p id="polygon-moment-owner-oracle">Two reductions are deliberately kept, each for
+a measured reason. <code>stencil_mesh._polygon_monomial_integral</code> is the
+independent signed-fan oracle that
+<code>scripts/clip_independent_representation/score_candidates.py</code> compares
+the production reductions against, so making it call the owner would make that
+comparison the owner agreeing with itself.
+<code>separatrix_clip._area_moments</code> was delegated and then reverted in
+<code>4523dc2f3</code>: <code>AtomicCellMesh.clip</code> calls it once per mesh
+cell inside a Python loop, and an eager traced call per cell turned that loop into
+a compile-and-dispatch per cell, taking
+<code>test_moving_separatrix_padded_contraction_traces_once</code> past the
+300&nbsp;s pytest timeout where the numpy closed form finishes in 6.25&nbsp;s. Its
+absolute error, 6.661e-16, is the smallest of any candidate, and it returns the
+same total-degree-two block of the same monomial integrals.</p>
 
 <h2 id="polygon-moment-owner-certificate">Booked-current certificate rows</h2>
 

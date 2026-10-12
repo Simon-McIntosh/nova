@@ -12,10 +12,10 @@ polygon support so the exterior closure term falls below the map booking term th
 fidelity gate measures">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s6">
-<meta name="plan-commits" content="24f6eef90,82dfa09f9">
+<meta name="plan-commits" content="24f6eef90,82dfa09f9,7af372a9f">
 <meta name="plan-recorded-at" content="2026-10-12">
 <meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu); 2000 and 5000 rungs did not complete">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) on 98dci4-gpu-0003 inside one H200 allocation; host oracle-carrier builder">
 <title>Certificate exterior on the exact analytic support | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -55,87 +55,107 @@ contraction module cannot silently reuse an exterior built on the old clip.</p>
 </tr>
 </thead>
 <tbody>
-<tr><td>550</td><td>exact</td><td>0.023862283762011</td><td>0.023862283762011</td>
-<td>7.06e-15</td><td>1.57e-02 (unmasked)</td></tr>
-<tr><td>550</td><td>legacy</td><td>not measured</td><td>not measured</td><td>not measured</td><td>not measured</td></tr>
-<tr><td>2000</td><td>exact</td><td>not measured</td><td>not measured</td><td>not measured</td><td>not measured</td></tr>
-<tr><td>5000</td><td>exact</td><td>not measured</td><td>not measured</td><td>not measured</td><td>not measured</td></tr>
+<tr><td>550 (550)</td><td>exact</td><td>0.023862283762011</td><td>0.023862283762011</td>
+<td>7.064e-15</td><td>0.0</td></tr>
+<tr><td>2000 (2098)</td><td>exact</td><td>0.005789351198649</td><td>0.005778474116903</td>
+<td>1.088e-05</td><td>0.0</td></tr>
+<tr><td>5000 (5158)</td><td>exact</td><td>0.000279588794517</td><td>0.000279365986147</td>
+<td>4.348e-06</td><td>0.0</td></tr>
+<tr><td>550 (550)</td><td>legacy</td><td>0.197326978713212</td><td>0.193637465719250</td>
+<td>6.220e-03</td><td>0.0</td></tr>
 </tbody>
 </table>
 
-<p>At 550 cells the exact-support exterior closes at 7.06e-15, four orders below
-the 2.386e-02 booking term, and the map relative sup equals the booking term to
-every printed digit: the residual the map-fidelity gate now measures is the
-map's own booking error rather than the exterior mismatch. The same identity
-holds by construction at every rung, because the fixture's exact-support moment
-integral and the certificate's <code>analytic_moments</code> are the same
-order-15 fan rule evaluated on the same <code>analytic_polygons(exact, cells)</code>
-polygon set; that is an argument, not a measurement, and the 2000 and 5000 rows
-above remain unmeasured.</p>
+<p>At every rung the exact-support closure term is orders of magnitude below the
+booking term, and the map relative sup tracks the booking relative sup to every
+digit it shares: the residual the map-fidelity gate measures is the map's own
+booking error rather than the exterior mismatch. The mechanism is that the
+fixture's exact-support moment integral and the certificate's
+<code>analytic_moments</code> are the same order-15 fan rule on the map's own
+residual-shadow cells zeroed out of both booked terms before the decomposition
+is required to reconstruct the map.</p>
 
-<p>The decomposition residual printed for the 550 row is the value obtained
-before the map's residual-shadow cells are zeroed. The map leaves those cells
-unevaluated, so both booked terms are masked there before the decomposition is
-required to reconstruct the map, which is how the prototype forms the same
-identity.</p>
+<p>The legacy row is the positive control: with the default arm flipped to the
+spline clip at 550 diverted cells the map relative sup is 0.197326978713212
+against the certified prototype value 0.1973269787182143, a relative agreement
+of 2.5e-11, and the closure term rises to 6.220e-03 — above nothing here, because
+the booking term rises with it, but the absolute level is the certified one.</p>
 
-<h2 id="cfs-exterior-exact-support-state">What did not complete, and why</h2>
+<h2 id="cfs-exterior-exact-support-carriers">Oracle carriers built by this node</h2>
+
+<p>The 2000 and 5000-cell machine carriers were absent from the fixture's cache
+and were built once inside this node's allocation by the default host builder.
+They persist under <code>/home/ITER/mcintos/.local/share/nova/0.11.0</code> and
+are an input to followup <code>f-cfs-carrier-requalify</code>.</p>
 
 <table>
-<thead><tr><th>Contract</th><th>Measured result</th></tr></thead>
+<thead><tr><th>Cells (realised)</th><th>Build wall</th><th>Store wall</th><th>Cache identity</th></tr></thead>
 <tbody>
-<tr>
-<td>Closure below booking at 550 cells</td>
-<td>Met: closure 7.06e-15 against booking 2.386e-02.</td>
-</tr>
-<tr>
-<td>Closure below booking at 2000 and 5000 cells</td>
-<td>Not measured. Both rungs need the 2000-cell oracle carrier, which is absent
-from the fixture's machine cache and had to be built on this node. Under the
-peer load present (load average 84 on a 28-core allocation) the build did not
-complete inside the run budget, and the two runs that needed it were stopped at
-the 600-second background limit with the log ending mid-test.</td>
-</tr>
-<tr>
-<td>Legacy 550 positive control through the explicitly named legacy exterior</td>
-<td>Not measured. The legacy arm shares the 2000-cell carrier build only in the
-same gate invocation; run alone it needs its own exterior rebuild and did not
-fit the remaining budget.</td>
-</tr>
-<tr>
-<td>Negative control (spline-support exterior restores the closure residual at
-2000 cells)</td>
-<td>Not run. It exercises the same unbuilt 2000-cell carrier, so the mutation
-could not be observed. The mutation is the one-line flip of
-<code>EXTERIOR_SUPPORT_ARM</code> from <code>"exact"</code> to
-<code>"legacy"</code>, which routes the fixture's default exterior back through
-the production spline clip.</td>
-</tr>
+<tr><td>2000 (2098)</td><td>266.62 s</td><td>0.757 s</td><td><code>d3ce523850851c4b</code></td></tr>
+<tr><td>5000 (5158)</td><td>1283.90 s</td><td>1.793 s</td><td><code>8c0d8ee28e76b1ba</code></td></tr>
 </tbody>
 </table>
 
-<p>The gate command and the measured row are the run's own log, and the cache
-identity that gated the exterior is recorded with the row:</p>
+<p>These carriers were built at this node's base kernel, which predates the
+near-edge moment repair merged at <code>acaea2c9c</code>. That commit is not an
+ancestor of this node's HEAD, so the carriers must be rebuilt on the current
+kernel before their rows are cited as a warm cache for other nodes via
+<code>f-cfs-carrier-requalify</code>. The exterior entries the rows above used
+are separate, much cheaper (10.9 s at 2000, 16.0 s at 5000, both built in this
+allocation) and are keyed on the arm and the contraction-module digest.</p>
+
+<h2 id="cfs-exterior-exact-support-state">Negative control: declared, run, not admitted</h2>
+
+<p>The declared negative control is a one-line flip of
+<code>EXTERIOR_SUPPORT_ARM</code> from <code>"exact"</code> to
+<code>"legacy"</code>, which should route the fixture's default exterior back
+through the production spline clip and bring the 2000-cell closure residual
+back. It was applied and
+<code>test_exterior_closure_falls_below_booking[2000]</code> was run against it.
+The test <strong>passed</strong>: closure stayed at 1.088e-05 against booking
+0.005778, indistinguishable from the head arm.</p>
+
+<p>It passed because the mutation was self-cancelling, and that is a defect this
+node found and fixed rather than a result. <code>exact_current_moments</code>
+selected the exact-support path by comparing the requested arm against the
+module global <code>EXTERIOR_SUPPORT_ARM</code>; flipping the default therefore
+flipped both sides of the comparison at once, so the legacy request still
+matched and still took the exact polygon path. The exterior cache key did change
+under the mutation (<code>be061b7073ab2c99</code>, built 10.46 s) while the
+closure did not move at all, which is the fingerprint of a routing test that
+follows its own default. Commit <code>7af372a9f</code> compares against the
+literal <code>_EXACT_SUPPORT_ARM</code> token, so the routing no longer depends
+on the default.</p>
+
+<p>The negative control is therefore <strong>not admitted by this node</strong>:
+no run of the mutated tree has produced a failing test id. The fix is committed
+and unverified against the declared mutation, and the admission run must be
+repeated on it.</p>
+
+<h2 id="cfs-exterior-exact-support-evidence">Run evidence</h2>
 
 <table>
 <thead><tr><th>Item</th><th>Value</th></tr></thead>
 <tbody>
-<tr>
-<td>Measurement driver</td>
-<td><code>measure-550.log</code> under
-<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041830700797-cfs-exterior-exact-support</code></td>
-</tr>
-<tr>
-<td>Exterior cache identity key</td>
-<td><code>c3ff6de9912bd992</code>, hit</td>
-</tr>
-<tr>
-<td>Incomplete run logs</td>
-<td><code>gate-head.log</code> and <code>negative-control.log</code> in the same
-run directory; both end mid-run with no exit line.</td>
-</tr>
+<tr><td>Gate command</td>
+<td>one H200 allocation on <code>98dci4-gpu-0003</code>, job 1283592, running
+<code>tests/test_certificate_exterior_support.py</code> at 2000, 5000 and 550
+cells plus <code>test_legacy_arm_reproduces_positive_control</code>: 4 passed.</td></tr>
+<tr><td>Head gate log</td>
+<td><code>head_gate.log</code> under
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041830700797-cfs-exterior-exact-support</code></td></tr>
+<tr><td>Carrier build log</td><td><code>carrier_build.log</code> in the same directory</td></tr>
+<tr><td>Negative-control log</td><td><code>negative_control.log</code> in the same directory; 1 passed in 349.26 s, which is the non-admission</td></tr>
+<tr><td>Fixture state after the run</td>
+<td>the mutation was reverted in the same allocation; the committing tree
+carries the exact default and <code>FIXTURE_DIFF_LINES=0</code> after revert</td></tr>
 </tbody>
 </table>
+
+<p>This record carries no figure. A poloidal flux contour panel is required
+(project AGENTS.md) beside a terminal forward state, and rendering one needs a
+GPU-lane render budget this node did not carry; the record is table-only and
+says so.</p>
 
 </main>
 </body>

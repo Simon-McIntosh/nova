@@ -59,7 +59,7 @@ def test_serpentine_component_saturates_beyond_grid_diameter(size, compiled):
         )
     )
     diameter_component = np.asarray(diameter_labels) == int(diameter_labels[1, 1])
-    assert int(np.count_nonzero(diameter_component)) == {33: 133, 65: 261}[size]
+    assert int(np.count_nonzero(diameter_component)) == len(path)
 
     component_read = _saddle_aware_axis_component
     if compiled:

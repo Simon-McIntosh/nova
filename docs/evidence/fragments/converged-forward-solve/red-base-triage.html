@@ -79,6 +79,10 @@
     <p>The resumed CPU gate reused only completed per-file receipts and relaunched unfinished targets with <code>--timeout=900</code>, at no more than eight simultaneous processes. At 18:24 UTC, base has 57/58 complete and head has 56/58 complete; the 56 completed pairs contain 65 base failing IDs and 47 head failing IDs, with zero added and 18 removed. The two compile-identity processes produced only one progress mark each over 51 minutes; they were stopped and recorded as incomplete rather than treated as a passing gate. The head wall-margin test was still running at this checkpoint.</p>
     <p>Other expanded-importer failures with completed base and head receipts include 25 IDs in <code>test_equilibrium_forward_reference.py</code> and two in <code>test_exact_clip_memory.py</code>; each set matches between arms. Their detailed IDs are in the resumed suite logs. These findings are reported as found outside this node's declared repair scope.</p>
   </section>
+  <section id="red-base-triage-device-gate">
+    <h2>Compilation identity on H200</h2>
+    <p>The unfinished compilation-identity file is routed to one reserved H200 job, with the base and head tests run sequentially from their respective trees. Each row records its imported <code>nova.__file__</code>, working directory, double-precision setting, selected JAX device, test IDs and exit status. The device-qualified receipts will replace only the missing target in the 58-target comparison.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -9,11 +9,11 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 
+from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
 from nova.equilibrium.polygon_moments import (
     LOCAL_MONOMIAL_POWERS,
     QUADRATIC_POWERS,
     polygon_density_moments,
-    polygon_monomial_moments,
 )
 from nova.jax.config import configure_dtypes
 
@@ -101,7 +101,11 @@ def _observed(polygon: np.ndarray, capacity: int | None = None) -> np.ndarray:
 def test_monomial_closed_forms_match_the_rational_triangle() -> None:
     """The exact area moment of a monomial on the unit triangle is p! q!/(p+q+2)!."""
     triangle = np.array([[[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]]])
-    observed = np.asarray(polygon_monomial_moments(triangle, np.asarray([3])))[0]
+    observed = np.asarray(
+        _straight_edge_monomial_moments(
+            jnp.asarray(triangle), jnp.asarray([3]), max_degree=4
+        )
+    )[0]
     assert len(observed) == len(LOCAL_MONOMIAL_POWERS) == 15
     for value, (radial, vertical) in zip(observed, LOCAL_MONOMIAL_POWERS):
         exact = (
@@ -144,6 +148,10 @@ def test_a_mismatched_density_moves_the_reference() -> None:
 
 def test_a_malformed_vertex_buffer_is_refused() -> None:
     with pytest.raises(ValueError):
-        polygon_monomial_moments(np.zeros((2, 5, 3)), np.asarray([3, 3]))
+        _straight_edge_monomial_moments(
+            jnp.zeros((2, 5, 3)), jnp.asarray([3, 3]), max_degree=4
+        )
     with pytest.raises(ValueError):
-        polygon_monomial_moments(np.zeros((2, 5, 2)), np.asarray([3]))
+        _straight_edge_monomial_moments(
+            jnp.zeros((2, 5, 2)), jnp.asarray([3]), max_degree=4
+        )

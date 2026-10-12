@@ -31,7 +31,6 @@ __all__ = [
     "QUADRATIC_POWERS",
     "PolygonDensityMoments",
     "polygon_density_moments",
-    "polygon_monomial_moments",
 ]
 
 #: Exponent pairs of the monomial triangle through total degree four, in the
@@ -67,36 +66,25 @@ class PolygonDensityMoments(NamedTuple):
     vertical_squared: jax.Array
 
 
-def polygon_monomial_moments(vertices, count) -> jax.Array:
-    """Integrate the monomials through total degree four over each polygon.
-
-    ``vertices`` is a fixed-capacity ``(cells, capacity, 2)`` buffer of local
-    coordinates and ``count`` gives each cell's live vertex count; slots at or
-    past the count are exact-zero padding and contribute nothing. The result is
-    ``(cells, len(LOCAL_MONOMIAL_POWERS))``, entry ``(cell, m)`` being the exact
-    area moment ``integral of x**p y**q dA`` over that cell's polygon, ordered
-    as ``LOCAL_MONOMIAL_POWERS`` and signed by the polygon's traversal sense.
-
-    The reduction itself is the shared owner
-    ``clip_quadrature._straight_edge_monomial_moments``, whose columns are the
-    same ``(radial, total - radial)`` enumeration this module declares, so the
-    two agree column for column and this call is a rename of the owner's table.
-    """
-    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
-
-    degree = max(radial + vertical for radial, vertical in LOCAL_MONOMIAL_POWERS)
-    return _straight_edge_monomial_moments(vertices, count, max_degree=degree)
-
-
 def polygon_density_moments(vertices, count, coefficients) -> PolygonDensityMoments:
     """Integrate a quadratic local density over each polygon exactly.
 
+    ``vertices`` is a fixed-capacity ``(cells, capacity, 2)`` buffer of local
+    coordinates and ``count`` gives each cell's live vertex count; slots at or
+    past the count are exact-zero padding and contribute nothing.
     ``coefficients`` carries the six ``QUADRATIC_POWERS`` coefficients of the
     density in the same local coordinates as ``vertices``. Each returned moment
     is exact for that quadratic, so the polygon's vertex spacing, not any rule
     order, is what sets how closely the result tracks the region the clip books.
+
+    The monomial integrals come straight from the shared owner
+    ``clip_quadrature._straight_edge_monomial_moments``, whose columns are the
+    ``(radial, total - radial)`` enumeration ``LOCAL_MONOMIAL_POWERS`` declares.
     """
-    table = polygon_monomial_moments(vertices, count)
+    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
+
+    degree = max(radial + vertical for radial, vertical in LOCAL_MONOMIAL_POWERS)
+    table = _straight_edge_monomial_moments(vertices, count, max_degree=degree)
     coefficient = jnp.asarray(coefficients)
     if coefficient.shape != (len(vertices), len(QUADRATIC_POWERS)):
         raise ValueError("coefficients must have shape (cells, 6)")

@@ -40,14 +40,20 @@
 <tr><td>Picard at 5,000 cells</td><td>Saddle error against analytic fractions 0.785288; warm 27.7785 s</td><td>Diagnostic only: no pointwise kernel reference at this rung; no kernel rerun</td></tr>
 <tr><td>Closed-form reconstruction orders, 2,000 to 5,000 cells</td><td>Diverted value 4.98448; gradient 4.00593; Hessian 2.99910</td><td>Maximum errors at triangle centroids; limited quartic errors are roundoff, so their slopes are not truncation orders</td></tr>
 <tr><td>5,000-cell matrices</td><td>Limited 10,999,440,000 bytes / 1,045.316002 s; diverted 10,995,840,000 bytes / 893.887131 s</td><td>Both persisted; limited counter includes resumed build and load overhead</td></tr>
-<tr><td>10,000-cell recovery</td><td>Job 1283913 timed out after 02:30:03; diverted matrix complete, 43,754,400,000 bytes, but device load failed; limited 24,404/30,475 nodes persisted</td><td>Fresh-process cache-load retry also refused 40.75 GiB; job 1283982 continues only the limited matrix resume</td></tr>
-<tr><td>Picard reference</td><td>Bell saddle error against analytic reference 0.120678390300; stored kernel 0.0283257300981; kernel-relative axis/X errors 2.43963e-5 / 6.29386e-5 pitches</td><td>Reverse triangle inequality: Bell–kernel saddle disagreement is at least 0.0923526602017, or 92.2525 times its 0.00100108526661 budget</td></tr>
+<tr><td>Limited at 10,000 cells</td><td>Device allocation refused; Bell compile and warm read unavailable</td><td>Persisted 30,475 nodes; 43,884,000,000 bytes; checkpoint construction 3462.342559 s</td></tr>
+<tr><td>Limited closed form at 10,000 cells</td><td>Smooth 8.77108e-06; no saddle; budget 1.74369e-05; passes</td><td>Cold 17.5679 s; warm 79.3521 s; peak RSS 1,849,100 KiB</td></tr>
+<tr><td>Diverted at 10,000 cells</td><td>Device allocation refused; Bell compile and warm read unavailable</td><td>Persisted 30,385 nodes; 43,754,400,000 bytes; checkpoint construction 3360.200032 s</td></tr>
+<tr><td>Diverted closed form at 10,000 cells</td><td>Smooth 0.000102873; saddle 2.70229e-5; budget 0.000194926; passes</td><td>Cold 24.0745 s; warm 74.4219 s; peak RSS 1,947,616 KiB</td></tr>
+<tr><td>Storage scaling</td><td>2,000 to 10,000 cells: limited 24.6721 times, exponent 1.99180; diverted 24.6152 times, exponent 1.99036</td><td>Dense nodes × cells × 3 × 6 float64 tensor; current device-load path is the capacity binder</td></tr>
+<tr><td>Recovery</td><td>Job 1283913 timed out after 02:30:03; job 1283982 resumed saved matrices and ended FAILED after 00:24:21; batch peak RSS 42,511,852 KiB</td><td>Diverted fresh-process cache load reproduced the 40.75 GiB allocation refusal; both original and retry logs retained</td></tr>
+<tr><td>Picard reference, finite-difference curvature</td><td>Bell saddle error against analytic reference 0.120678390300; stored kernel 0.0283257300981; kernel-relative axis/X errors 2.43963e-5 / 6.29386e-5 pitches</td><td>Reverse triangle inequality: Bell–kernel saddle disagreement is at least 0.0923526602017, or 92.2525 times its 0.00100108526661 budget</td></tr>
+<tr><td>Native booked-field conformity at 2,000 cells</td><td>Maximum value jump 5.68434e-14; normal jump 3.37508e-14 across both cases</td><td>Every interior edge, five samples per edge; 11,825 limited and 11,829 diverted edges</td></tr>
 <tr><td>Decision</td><td>Reject the measured Bell read for production: both native polynomial and finite-difference curvature fail the required 2,000-cell Picard saddle bound; native diverted analytic also fails at 5,000 cells</td><td>Prototype only; product APIs unchanged</td></tr>
 <tr><td>Report</td><td colspan="2"><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-conforming-jets.md</code></td></tr>
 </tbody></table>
 <figure id="proto-conforming-jets-membership">
 <img src="/nova/figures/converged-forward-solve/conforming-jets/membership.svg" alt="Smooth and saddle membership errors versus cells for the measured closed-form, kernel, nonconforming and Bell arms">
-<figcaption>Measured arms only; the kernel is reused at 2,000 cells. Bell points show the native polynomial-curvature rows completed at this checkpoint. The finite-difference and smoke results are retained in the table and report; no missing rung is plotted as zero.</figcaption>
+<figcaption>Analytic-state membership errors; the kernel is reused at 2,000 cells. Bell points show completed native polynomial-curvature reads at 2,000 and 5,000 cells; no absent 10,000-cell Bell read is plotted. Grey dotted lines label the membership budgets. The finite-difference and smoke results are retained in the table and report; no missing rung is plotted as zero.</figcaption>
 </figure>
 </section>
 </main></body></html>

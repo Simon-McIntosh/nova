@@ -123,6 +123,9 @@ def main():
     args.figure.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(args.figure, metadata={"Date": None})
     plt.close(figure)
+    args.figure.write_text(
+        "\n".join(line.rstrip() for line in args.figure.read_text().splitlines()) + "\n"
+    )
     if args.report:
         lines = [
             "# Conforming cached-jet read",

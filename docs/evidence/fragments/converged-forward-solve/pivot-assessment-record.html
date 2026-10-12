@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="converged-forward-solve-pivot-assessment-record">
+<meta name="plan-title" content="Resolution-pivot assessment: support, not cell count, owns the certificate-map error">
+<meta name="plan-summary" content="The certificate-map fidelity failure comes from the support, not the resolution: diverted legacy relative sup is non-monotonic at 0.197327, 0.361706 and 0.086109 at 550, 2098 and 5158 cells, while the exact support leaves a booking-image residual of 0.0249260493 falling to 0.00437753058 in pitch order 1.5079302. The saddle normal form is needed at any resolution, because the quadratic-only read loses the diverted X-point at 2,000 cells (0.7280493) and breaks its membership budget at 5,000 (0.0010354238 against 0.00039275), while the current read stays below the bound at all three rungs. Compile cost is flat in cell count and comes from the kernel point jet: 827,553 expanded equations at 132 cells against 817,451 at 550, 98.529037% inside ten packed-kernel call sites, with a 932.887760 s cold compile halved to 477.653022 s by batching those sites into five. Three figures carry the evidence; the decision is refine-with-right-support.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="67ccfdf3a">
+<meta name="plan-recorded-at" content="2026-10-10">
+<meta name="plan-rows" content="converged-forward-solve-pivot-assessment-record">
+<title>Resolution-pivot assessment | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+
+<h1 id="pivot-assessment-record-heading">Resolution-pivot assessment: resolution is not the binder, support is</h1>
+
+<p id="pivot-assessment-record-question">The lead asked whether the certificate map's fidelity failure is a resolution failure or a support failure, and whether refinement alone can be trusted to converge it. This node answers that question from the eight resolution-pivot reports and their row receipts, and renders the answer as three figures whose every plotted number is read from a persisted receipt.</p>
+
+<p id="pivot-assessment-record-verdict">Verdict: the accuracy failure came from the support, not the resolution; the saddle normal form is needed at any resolution; compile cost is flat in cell count and comes from the kernel point jet; and refinement converges once the support is right. Decision: <strong>refine-with-right-support</strong> &mdash; carry accuracy on cell count from about 2,000 cells upward, keep the topology read with its saddle normal form, and stop the kernel-tangent and custom-rule route.</p>
+
+<h2 id="pivot-assessment-record-figures-heading">The three figures</h2>
+
+<figure id="pivot-assessment-record-figure-map">
+  <img src="/nova/figures/resolution-pivot/certificate-map-support.svg"
+       alt="Log-log plot of certificate-map relative sup against realised cells for diverted and limited cases under legacy and exact supports, with the exact arm's booking-image and exterior-closure terms dashed and the 0.01 bound dotted grey.">
+  <figcaption id="pivot-assessment-record-figure-map-caption">Certificate-map
+  relative sup against realised cells. The diverted legacy arm is non-monotonic,
+  0.197327 &rarr; 0.361706 &rarr; 0.086109 at 550, 2098 and 5158 cells, and fails
+  the 0.01 bound at every rung. The diverted exact arm falls from 0.018706 to
+  0.009409 with its booking image falling from 0.024926 to 0.004378, fitted order
+  in pitch 1.5079302. Limited legacy is flat near 0.00118. Receipts: the
+  <code>proto-support</code> row files for jobs 1283118, 1283120 and 1283126.</figcaption>
+</figure>
+
+<figure id="pivot-assessment-record-figure-read">
+  <img src="/nova/figures/resolution-pivot/topology-read-membership.svg"
+       alt="Log-log plot of diverted saddle membership error against cells for the current read and the quadratic-only arm, with the per-rung bound dotted and the lost X-point at 2,000 cells ringed.">
+  <figcaption id="pivot-assessment-record-figure-read-caption">Diverted saddle
+  membership error against cells. The current read stays below the per-rung bound
+  at 0.000277619, 0.0000273973 and 0.0000249206 against 0.0038486, 0.00100109 and
+  0.00039275. The quadratic-only arm loses its admitted X-point at 2,000 cells
+  (0.7280493, ringed) and breaks the budget at 5,000 (0.0010354238). Receipts: the
+  <code>proto-ladder</code> row files for jobs 1283085 and 1283100; the bound is
+  the run's own acceptance table, computed from each rung's logged pitch.</figcaption>
+</figure>
+
+<figure id="pivot-assessment-record-figure-kernel">
+  <img src="/nova/figures/resolution-pivot/kernel-expanded-equations.svg"
+       alt="Bar chart of expanded equations per packed-kernel call site grouped by read stage, native against batched at 132 cells, with both cold compile walls labelled.">
+  <figcaption id="pivot-assessment-record-figure-kernel-caption">Expanded
+  equations per packed-kernel call site at 132 cells. Native: ten sites, 827,553
+  expanded equations, 932.9 s cold compile. Batched: five sites, 419,939 expanded
+  equations, 477.7 s cold compile, identity-preserving with every reported
+  read-output difference zero. Per-site counts are near-invariant in cell count,
+  so the cost is a property of the kernel point jet, not the mesh. Receipts: the
+  attribution and row files under <code>proto-order2/shared-kernel-1283105</code>,
+  job 1283105.</figcaption>
+</figure>
+
+<h2 id="pivot-assessment-record-blockers-heading">The six blockers and their followups</h2>
+
+<table id="pivot-assessment-record-blockers">
+<caption>Each blocker left open, with the evidence that establishes it and the followup that owns it.</caption>
+<thead><tr><th>Blocker</th><th>Evidence</th><th>Followup</th></tr></thead>
+<tbody>
+<tr><td>Book the certificate current from the read's own fragments rather than the legacy fixed-design support.</td><td>Diverted legacy map 0.197327, 0.361706, 0.086109 at 550, 2098, 5158 cells; jobs 1283118, 1283120, 1283126.</td><td><code>f-cfs-book-read-fragments</code></td></tr>
+<tr><td>Carry the coupling blocks as runtime operands rather than program literals.</td><td>Serialized map executable about 359.7 MB limited and 360.2 MB diverted at roughly 2,000 cells against a 50 MB bound; clipped-moment <code>f64[~2100,1408,6]</code> stack about 142 MB; job 1283109.</td><td><code>f-cfs-map-runtime-operands</code></td></tr>
+<tr><td>Pose the certificate exterior on the exact support.</td><td>Exterior closure 0.00622043464, 0.0176941313, 0.0111257411 at 550, 2098, 5158 cells; jobs 1283118, 1283120, 1283126.</td><td><code>f-cfs-exterior-on-exact-support</code></td></tr>
+<tr><td>Choose the read's compile route.</td><td>Cold compile 932.887760 s native against 477.653022 s batched at 132 cells; ten sites against five; 827,553 against 419,939 expanded equations; job 1283105.</td><td><code>f-cfs-read-compile-route</code></td></tr>
+<tr><td>Make the read valid and near-linear at 10,000 cells.</td><td>Limited 10,000 cells returns <code>UNRESOLVED_COMPONENT</code> with a warm wall grown from 1.1 s to 80.6 s; the diverted 10,000-cell read does not complete; job 1283085.</td><td><code>f-cfs-read-ten-thousand</code></td></tr>
+<tr><td>Build the coupling blocks at 5,000 to 10,000 cells within minutes.</td><td>The diverted 5,000-cell map builder passed 30 minutes without completing and the job was cancelled at its budget boundary, scheduler elapsed 48 min 21 s, sampled peak RSS below 9 GB; job 1283109.</td><td><code>f-cfs-coupling-build-scale</code></td></tr>
+</tbody></table>
+
+<p id="pivot-assessment-record-dispatch">A seventh followup, <code>f-cfs-001</code>, dispatches the downstream nodes and is not a blocker this record raises. No plan state is changed by this fragment.</p>
+
+<h2 id="pivot-assessment-record-deliverables-heading">Deliverables and control</h2>
+
+<ul id="pivot-assessment-record-deliverables">
+  <li><code>docs/research/resolution-pivot-assessment.html</code> &mdash; the assessment record, audit-clean.</li>
+  <li><code>scripts/prototypes/pivot_figures.py</code> &mdash; the renderer, committed at <code>67ccfdf3a</code>.</li>
+  <li><code>docs/figures/resolution-pivot/</code> &mdash; the three SVGs above.</li>
+</ul>
+
+<p id="pivot-assessment-record-negative-control">The declared negative control is that the renderer refuses to draw when a cited receipt file is missing or a plotted value differs from the value stated in the run's report table. It is exercised on every run: the script asserts the diverted exact map at 2098 cells, the diverted legacy map at 5158 cells, the diverted exact booking at 550 cells, the diverted exact exterior at 5158 cells and both cold compile walls against the report values, and exits non-zero on any disagreement.</p>
+
+<p id="pivot-assessment-record-limits">No forward solve was run for this record, so no residual, convergence or force-balance claim is made. The claims cover the read, the certificate map and the compiled cost of both. The class of measurement is a receipt read plus a differentiable render on the login node; no scheduler job was submitted by this node.</p>
+
+</main></body></html>

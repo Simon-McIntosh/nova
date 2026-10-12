@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="resolution-pivot-assessment">
+  <meta name="plan-title" content="The resolution pivot: support, not cell count, owns the certificate map error, and the saddle normal form is load-bearing at every resolution">
+  <meta name="plan-summary" content="Three receipt-driven figures decide the resolution strategy. Refining the cell count does not buy certificate accuracy while the support is wrong: the production legacy support reads 0.197327, 0.361706 and 0.086109 relative sup at 550, 2098 and 5158 cells, non-monotonic, while the exact support's remaining residual is its booking image, 0.0249260493 falling to 0.00437753058 in pitch order 1.5079302. The saddle normal form is needed at any resolution: the quadratic-only read loses the diverted X-point at 2,000 cells and exceeds the saddle membership budget at 5,000, while the current read stays below the bound at all three rungs. Compile cost is flat in cell count and comes from the kernel point jet: 827,553 expanded equations at 132 cells against 817,451 at 550, 98.529037% of it in ten packed-kernel call sites, with a 932.887760 s cold compile that only halves, to 477.653022 s, when those ten sites are batched into five. The decision is to refine on the cell count with the right support and keep the topology read with its saddle normal form, and to stop the kernel-tangent and custom-rule route.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-10-10">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-informs" content="converged-forward-solve">
+  <meta name="plan-verdict" content="Resolution is not the binder for certificate-map accuracy; support is. The exact support removes the legacy arm's erratic, non-converging fidelity failure and leaves a booking-image residual that falls in pitch with fitted order 1.5079302, while the legacy arm is non-monotonic in cell count. The saddle normal form is required at every tested resolution, because the quadratic-only read loses the diverted X-point at 2,000 cells and breaks its membership budget at 5,000. Compile cost is flat in cell count and dominated by the polygon kernel point jet, so refinement is affordable in graph size but not yet in cold compile against the 60 s clause.">
+</head>
+<body>
+<main>
+
+  <h1>The resolution pivot: support, not cell count, owns the certificate-map error</h1>
+
+  <p class="note">This record answers one question and records the strategy it
+  settles. Every number below is read from a run receipt; the three figures are
+  drawn by <code>scripts/prototypes/pivot_figures.py</code>, which refuses to
+  draw if a cited receipt is missing or a plotted value disagrees with the value
+  stated in the run's report.</p>
+
+  <h2>The question</h2>
+
+  <p>The forward solve carries its accuracy on the topology read. The open
+  question was where the read's accuracy and cost actually come from, and
+  therefore what to spend next: more cells, a different support for the current
+  booking, a different derivative route through the polygon kernel, or a
+  different mathematical form for the separatrix. Posed directly, the lead asked
+  <em>whether the certificate map's fidelity failure is a resolution failure or a
+  support failure, and whether refinement alone can be trusted to converge it.</em></p>
+
+  <h2>The verdict and the decision</h2>
+
+  <p>The verdict is that the accuracy failure came from the support, not from the
+  resolution; that the saddle normal form is needed at any resolution; that the
+  compile cost is flat in cell count and comes from the kernel point jet; and that
+  refinement converges once the support is right. The decision is
+  <strong>refine-with-right-support</strong>: carry the accuracy on cell count from
+  about 2,000 cells upward, keep the topology read with its saddle normal form, and
+  stop the kernel-tangent and custom-rule route.</p>
+
+  <table>
+    <caption>Each claim, its number, the job that produced it and the report it
+    came from.</caption>
+    <thead>
+      <tr><th>Claim</th><th>Number</th><th>Job</th><th>Report</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Refinement does not buy fidelity while the support is wrong</td>
+        <td>Diverted legacy map relative sup 0.197327, then 0.361706, then
+        0.086109 at 550, 2098 and 5158 cells &mdash; non-monotonic</td>
+        <td>1283118, 1283120, 1283126</td>
+        <td><code>proto-support.md</code></td>
+      </tr>
+      <tr>
+        <td>The exact support converges in pitch once the support is right</td>
+        <td>Exact-support booking image 0.0249260493, 0.00896838926,
+        0.00437753058; fitted order in pitch 1.5079302</td>
+        <td>1283118, 1283120, 1283126</td>
+        <td><code>proto-support.md</code></td>
+      </tr>
+      <tr>
+        <td>The saddle normal form is load-bearing at every resolution</td>
+        <td>Quadratic-only diverted read: 0.7280493 at 2,000 cells with no
+        admitted X-point; 0.0010354238 at 5,000 against a 0.00039275 budget.
+        Current read: 0.000277619, 0.0000273973, 0.0000249206 against budgets
+        0.0038486, 0.00100109, 0.00039275</td>
+        <td>1283085 (current read), 1283100 (quadratic-only)</td>
+        <td><code>proto-ladder.md</code></td>
+      </tr>
+      <tr>
+        <td>Compile cost is flat in cell count</td>
+        <td>827,553 expanded equations at 132 cells against 817,451 at 550, a
+        1.22% fall; cold compile 932.887760 s against 854.907227 s, an 8.36%
+        fall</td>
+        <td>1283105</td>
+        <td><code>proto-order2.md</code></td>
+      </tr>
+      <tr>
+        <td>That cost comes from the kernel point jet</td>
+        <td>98.529037% of the read sits in ten packed-kernel call sites;
+        batching them into five cuts expanded equations to 419,939 and the cold
+        compile to 477.653022 s</td>
+        <td>1283105</td>
+        <td><code>proto-order2.md</code></td>
+      </tr>
+      <tr>
+        <td>The read is not yet valid at 10,000 cells</td>
+        <td>Limited 10,000 cells returns <code>UNRESOLVED_COMPONENT</code> and
+        its warm wall grows from 1.1 s to 80.6 s; the diverted 10,000-cell read
+        does not complete</td>
+        <td>1283085</td>
+        <td><code>proto-ladder.md</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Figure 1 &mdash; the certificate map against the realised cells</h2>
+
+  <p>The map's own fidelity, over the same three rungs, for the two support arms
+  in the diverted and limited cases. Each exact-arm point is decomposed into the
+  term that books the current onto the grid (dashed) and the term that closes the
+  prescribed exterior (dash-dotted), so the arm's remaining residual is visible
+  rather than inferred.</p>
+
+  <figure>
+    <img src="/nova/figures/resolution-pivot/certificate-map-support.svg"
+         alt="Log-log plot of certificate-map relative sup against realised cells for diverted and limited cases under legacy and exact supports, with the exact arm's booking-image and exterior-closure terms drawn dashed and the 0.01 bound as a dotted grey line.">
+    <figcaption>Certificate-map relative sup against realised cells. Solid lines
+    are the map fidelity for the legacy and exact supports in the diverted and
+    limited cases; the exact arm's booking-image and exterior-closure terms are
+    drawn dashed in their case colour; the dotted grey line is the 0.01 acceptance
+    bound. Diverted legacy is non-monotonic, 0.197327 &rarr; 0.361706 &rarr;
+    0.086109, and fails the bound at every rung. Diverted exact falls from
+    0.018706 to 0.009409 and its booking image falls from 0.024926 to 0.004378.
+    Limited legacy is flat at about 0.00118, a bias that refinement does not move,
+    and limited exact improves from 1.232e-05 to 3.262e-05 through a
+    7.088e-05 excursion. Receipts: the <code>proto-support</code> row files for
+    jobs 1283118, 1283120 and 1283126.</figcaption>
+  </figure>
+
+  <p>Two things in this figure carry the verdict. The legacy support is erratic:
+  its failure does not shrink monotonically as cells are added, so no amount of
+  refinement can be trusted to converge it. The exact support's dominant
+  remaining term is the booking image, and that term falls in pitch with fitted
+  order 1.5079302 &mdash; the half-order behaviour the saddle form is meant to
+  replace, on a support where the geometry is no longer the dominant error.</p>
+
+  <p>The exterior-closure term is not a support error and is not read as one.
+  It is a fixture artefact: the prescribed exterior subtracts an analytic-density
+  image integrated on production spline-clipped support seeded by analytic
+  topology, so replacing the support leaves a closure mismatch even at the
+  analytic state (0.00622043464, 0.0176941313, 0.0111257411 at 550, 2098 and
+  5158 cells). Posing that exterior on the exact support is its own node.</p>
+
+  <h2>Figure 2 &mdash; the topology read's saddle membership against cells</h2>
+
+  <p>Saddle membership error for the current read against the quadratic-only arm,
+  in the diverted case, with each rung's acceptance bound drawn as a dotted
+  line.</p>
+
+  <figure>
+    <img src="/nova/figures/resolution-pivot/topology-read-membership.svg"
+         alt="Log-log plot of diverted saddle membership error against cells for the current read and the quadratic-only arm, with the per-rung bound as a dotted line and the lost X-point at 2,000 cells ringed.">
+    <figcaption>Diverted saddle membership error against cells. The current read
+    stays below the per-rung bound at all three rungs: 0.000277619, 0.0000273973
+    and 0.0000249206 against 0.0038486, 0.00100109 and 0.00039275. The
+    quadratic-only arm passes at 550 cells but loses its admitted X-point at 2,000
+    (error 0.7280493, ringed) and breaks the membership budget at 5,000
+    (0.0010354238 against 0.00039275). Receipts: the <code>proto-ladder</code> row
+    files for jobs 1283085 and 1283100; the bound is the run's own acceptance
+    table. The bounds are the frozen acceptance formula, which the report computes
+    from each rung's logged pitch and its section coefficient.</figcaption>
+  </figure>
+
+  <p>This is the claim that the saddle normal form cannot be traded away for
+  resolution. The quadratic-only arm is not a slightly worse read that more cells
+  would repair: at 2,000 cells it does not admit the X-point at all, so the
+  refinement moves it further from the answer rather than toward it. The current
+  read's error, by contrast, is already three orders of magnitude below its bound
+  at 550 cells.</p>
+
+  <h2>Figure 3 &mdash; where the read's expanded equations live</h2>
+
+  <p>Expanded equations per packed-kernel call site, native against batched, at
+  132 cells, with the two cold compile walls labelled. One bar is one call site;
+  the sites are grouped by read stage.</p>
+
+  <figure>
+    <img src="/nova/figures/resolution-pivot/kernel-expanded-equations.svg"
+         alt="Bar chart of expanded equations per packed-kernel call site grouped by read stage, native against batched at 132 cells, with the native and batched cold compile walls labelled.">
+    <figcaption>Expanded equations per packed-kernel call site at 132 cells.
+    Native has ten sites and 827,553 expanded equations with a 932.9 s cold
+    compile; batching each stage's plasma and analytic-exterior operands into one
+    body gives five sites and 419,939 expanded equations with a 477.7 s cold
+    compile. Every reported read-output difference between the two is zero, so the
+    batching is identity-preserving. Receipts: the attribution and row files under
+    <code>proto-order2/shared-kernel-1283105</code>, job 1283105.</figcaption>
+  </figure>
+
+  <p>The per-site counts are near-invariant in cell count: the two
+  <code>_sampled_flux</code> sites enclose 47,610 equations each and the six
+  Hessian sites 104,155 each, and the totals move by about one percent between the
+  132-cell and 550-cell rungs. So the compile cost is a property of the kernel's
+  point jet, not of the mesh, and it does not shrink as the solve is refined. The
+  batching that halves the site count halves the compile wall, to 477.7 s, and
+  still stands about eight times over the 60 s clause &mdash; which is why the
+  compile route is a blocker in its own right rather than a resolution choice.</p>
+
+  <h2>What the three figures decide together</h2>
+
+  <p>Refinement is the right lever, but only on the right support. The exact
+  support turns a non-converging, order-0.54 legacy failure into a booking
+  residual that falls in pitch with order 1.5079302, and the topology read already
+  sits three orders below its bound at every tested rung and needs its saddle
+  normal form to stay there. Refining further is affordable in graph size, because
+  the expanded-equation count is flat in cell count, but it is not yet affordable
+  in cold compile, because the cost sits in the kernel point jet and halving the
+  call sites only halves it.</p>
+
+  <h2>The six blockers, each with the node that owns it</h2>
+
+  <table>
+    <caption>Every blocker this assessment leaves open, mapped to the followup
+    that carries it. No plan state is changed by this record.</caption>
+    <thead>
+      <tr><th>Blocker</th><th>Evidence</th><th>Followup</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Certificate fidelity must be booked from the read's own fragments
+        rather than from the legacy fixed-design support.</td>
+        <td>Diverted legacy map 0.197327, 0.361706, 0.086109 at 550, 2098, 5158
+        cells; jobs 1283118, 1283120, 1283126.</td>
+        <td><code>f-cfs-book-read-fragments</code></td>
+      </tr>
+      <tr>
+        <td>The coupling blocks must be carried as runtime operands rather than
+        program literals.</td>
+        <td>Serialized map executable about 359.7 MB limited and 360.2 MB
+        diverted at roughly 2,000 cells against a 50 MB bound; a clipped-moment
+        <code>f64[~2100,1408,6]</code> stack of about 142 MB; job 1283109.</td>
+        <td><code>f-cfs-map-runtime-operands</code></td>
+      </tr>
+      <tr>
+        <td>The certificate exterior must be posed on the exact support, since
+        its closure term is a fixture artefact rather than a support error.</td>
+        <td>Exterior closure 0.00622043464, 0.0176941313, 0.0111257411 at 550,
+        2098, 5158 cells; jobs 1283118, 1283120, 1283126.</td>
+        <td><code>f-cfs-exterior-on-exact-support</code></td>
+      </tr>
+      <tr>
+        <td>The read's compile route must be chosen, because batching halves the
+        wall and still leaves it about eight times over the 60 s clause.</td>
+        <td>Cold compile 932.887760 s native against 477.653022 s batched at 132
+        cells; ten sites against five; 827,553 against 419,939 expanded
+        equations; job 1283105.</td>
+        <td><code>f-cfs-read-compile-route</code></td>
+      </tr>
+      <tr>
+        <td>The read must be made valid and near-linear at 10,000 cells.</td>
+        <td>Limited 10,000 cells returns <code>UNRESOLVED_COMPONENT</code> with a
+        warm wall grown from 1.1 s to 80.6 s; the diverted 10,000-cell read does
+        not complete; job 1283085.</td>
+        <td><code>f-cfs-read-ten-thousand</code></td>
+      </tr>
+      <tr>
+        <td>Coupling blocks must be built at 5,000 to 10,000 cells within minutes;
+        construction is the wall, not host memory.</td>
+        <td>The diverted 5,000-cell map builder passed 30 minutes without
+        completing and the job was cancelled at its budget boundary, scheduler
+        elapsed 48 min 21 s, sampled peak RSS below 9 GB; job 1283109.</td>
+        <td><code>f-cfs-coupling-build-scale</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>A seventh followup, <code>f-cfs-001</code>, dispatches the downstream nodes
+  and is not a blocker this record raises.</p>
+
+  <h2>What this record rests on, and what it does not claim</h2>
+
+  <ul>
+    <li>Every number here is a read of a persisted row receipt or attribution
+    file from a completed H200 job; the three figures are regenerated from those
+    files by one committed script.</li>
+    <li>The figures carry a negative control: the script exits non-zero when a
+    cited receipt is missing or when a plotted value disagrees with the value the
+    run's report states, so a figure cannot silently drift from its receipt.</li>
+    <li>No forward solve was run for this record, so no residual, convergence or
+    force-balance claim is made. The claims are about the read, the certificate
+    map and the compiled cost of both.</li>
+    <li>The bound lines in figure 2 are the run's frozen acceptance formula
+    evaluated at each rung's logged pitch, not a re-derived tolerance.</li>
+  </ul>
+
+</main>
+</body>
+</html>

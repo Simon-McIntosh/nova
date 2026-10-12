@@ -69,8 +69,9 @@ EXTERIOR_CACHE_FILENAME = "analytic_oracle_clipped_exterior"
 # silently measure the old clip.  The image itself is contracted through
 # nova.biot.polygonanalytic, so that module's revision belongs in the key too.
 EXTERIOR_SUPPORT_ARMS = ("exact", "legacy")
-EXTERIOR_SUPPORT_ARM = "exact"
+_EXACT_SUPPORT_ARM = "exact"
 _LEGACY_SUPPORT_ARM = "legacy"
+EXTERIOR_SUPPORT_ARM = _EXACT_SUPPORT_ARM
 POLYGONANALYTIC_SOURCE = "nova/biot/polygonanalytic.py"
 OUTPUT = Path(__file__).resolve().parent
 FORBIDDEN_IMPORT_PREFIXES = ("h5py", "imas")
@@ -1255,7 +1256,7 @@ def exact_current_moments(
     if support_arm not in EXTERIOR_SUPPORT_ARMS:
         raise ValueError(f"unknown exterior support arm: {support_arm!r}")
     source = case if analytic is None else analytic
-    if support_arm == EXTERIOR_SUPPORT_ARM:
+    if support_arm == _EXACT_SUPPORT_ARM:
         polygons = analytic_support_polygons(source, operator)
         return _polygon_current_moments(case, operator, polygons)
     support = _analytic_profile_support(

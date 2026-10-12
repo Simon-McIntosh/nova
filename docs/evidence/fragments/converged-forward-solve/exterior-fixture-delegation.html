@@ -15,7 +15,7 @@ support-arm default that disagreed with its own name">
 <meta name="plan-commits" content="898553203">
 <meta name="plan-recorded-at" content="2026-10-12">
 <meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) for the local rule-equivalence check; the carrier and closure rows are H200 job 1283914 on 98dci4-gpu-0003 under reservation gpu_0003_grpA">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) for the local rule-equivalence check; the carrier and closure rows are H200 jobs 1283914/1283955 and the negative control is H200 job 1283965, on 98dci4-gpu-0003 under reservation gpu_0003_grpA">
 <title>Certificate exterior fixture on the shared moment owner | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -85,14 +85,117 @@ exterior on the exact analytic support</a>. One H200 job (1283914) holds the
 head gate, the negative control and the booking rows as phases of a single
 allocation.</p>
 
-<p><strong>Verdict: partial.</strong> Job 1283901, the first attempt, produced no
+<p><strong>Verdict: partial — the gate is green but the rows are not the
+recorded ones.</strong> Job 1283901, the first attempt, produced no
 SUPPORT_ARM_ROW line at all: the 2,000- and 5,000-cell carriers had to be
 rebuilt, which takes about 266 s and 1,283 s, and the repository's default
-300 s per-test bound killed the rebuild and reported it as a failed test. The
-first attempt therefore measured the test harness, not the closure. Job 1283914
-raises the bound to 5,400 s and re-runs all three phases; its rows are read on
-resume and this fragment is updated with them. Until then no closure row for
-this change has been observed.</p>
+300 s per-test bound killed the rebuild and reported it as a failed test. That
+attempt measured the test harness, not the closure. Job 1283914 raised the
+bound to 5,400 s and passed all four tests, but <code>-q</code> without
+<code>-s</code> captured the row prints; job 1283955 re-ran with
+<code>-s</code> and the rows below are from it, 4 passed in 295 s against the
+now-warm carriers.</p>
+
+<table>
+<thead><tr><th>Cells</th><th>Arm</th><th>Map relative sup</th>
+<th>Booking relative sup</th><th>Closure relative sup</th></tr></thead>
+<tbody>
+<tr><td>550</td><td>exact</td><td>0.0238622837606903</td><td>0.023862283760690297</td><td>2.278702636703162e-15</td></tr>
+<tr><td>2000 (2098)</td><td>exact</td><td>0.00578038429711403</td><td>0.005780384297113828</td><td>2.4306161458167065e-15</td></tr>
+<tr><td>5000 (5158)</td><td>exact</td><td>0.0002801417657464221</td><td>0.0002801417657463841</td><td>2.4306161458167065e-15</td></tr>
+<tr><td>550</td><td>legacy</td><td>0.1973269787123371</td><td>0.193637465718241</td><td>0.0062204346440881695</td></tr>
+</tbody>
+</table>
+
+<p>Against the <code>f68870f99</code> record, relative difference:</p>
+
+<table>
+<thead><tr><th>Cells</th><th>Arm</th><th>Map</th><th>Booking</th><th>Within 1e-13?</th></tr></thead>
+<tbody>
+<tr><td>550</td><td>exact</td><td>1.13e-13</td><td>1.13e-13</td><td>no, at the boundary</td></tr>
+<tr><td>550</td><td>legacy</td><td>1.06e-14</td><td>2.58e-14</td><td>yes</td></tr>
+<tr><td>2000</td><td>exact</td><td>1.55e-03</td><td>3.31e-04</td><td>no</td></tr>
+<tr><td>5000</td><td>exact</td><td>1.98e-03</td><td>2.78e-03</td><td>no</td></tr>
+</tbody>
+</table>
+
+<p>So the closure gate passes at every rung and is better than the record —
+roundoff, <code>2.43e-15</code>, where the recorded rows carry
+<code>1.0877e-05</code> at 2000 and <code>4.3477e-06</code> at 5000 — but the
+booking term that goes with it has moved by a part in 10<sup>3</sup> at those
+two rungs, and the recorded value is not reproduced. The 550 rows, which share
+the same fixture and the same carrier, do reproduce it. The identity clause of
+done-when (3) is therefore <strong>not met at 2000 and 5000</strong>, and the
+cause is not yet separated between this node's reroute and the carrier rebuild
+the identity digest forces; the 550 legacy row, which does not take the rerouted
+path and does reproduce to 2.6e-14, shows the carrier at 550 is unchanged.</p>
+
+<p>One thing about the difference is already visible in the numbers, and it is
+not a like-for-like comparison. The recorded closure at 2000 and 5000 was
+<code>1.0877e-05</code> and <code>4.3477e-06</code> — the recorded exterior did
+<em>not</em> close at those rungs, while it did at 550. At this node's head every
+rung closes to roundoff, <code>2.43e-15</code>, so the term that moved is the
+record's own unresolved closure defect, not a term the reroute is supposed to
+preserve. Between <code>f68870f99</code> and this node's base sit 45 commits,
+three of which rewrite the moment kernel and one of which
+(<code>4e63bc8e0</code>) routes the host clip to the shared moment owner:
+<code>4e63bc8e0</code>, <code>b5a7dab23</code> (drop the unused fan monomial
+integral and its dead scorer) and <code>1981bcfe2</code>. The near-edge repair
+that the record cites as post-dating its carriers, <code>acaea2c9c</code>, is
+already an ancestor of <code>f68870f99</code>.</p>
+
+<p>The negative control narrows it further. Run on the head tree with the arm
+forced to legacy, its 2000-cell row reads booking
+<code>0.008968389255064343</code> and closure <code>0.017694131251761665</code> —
+both equal to the record's own control values (<code>0.008968</code> and
+<code>0.017694</code>) at the precision the record carries. The legacy arm
+therefore still reproduces its recorded terms at 2000, and the discrepancy is
+confined to the <em>exact</em> arm's moment path. Candidates there are this
+node's reroute and the base-tree work that routed the host clip and
+<code>geometry.pack</code> to the shared moment owner (<code>4e63bc8e0</code>,
+<code>097f6ffd0</code>). A reroute between two rules measured to agree to
+<code>2.1e-16</code> on synthetic rings should not move a row by a part in
+10<sup>3</sup>, but those rings are not the fixture's own clipped near-edge
+cells, so the measurement does not reach the case at hand — and the growth of
+the difference with refinement (absent at 550, a part in 10<sup>3</sup> at 2000
+and 5000) fits a near-edge rule difference better than a global one. It is not
+settled here; the run that settles it is named under What remains.</p>
+
+<h2 id="negative-control">The declared negative control</h2>
+
+<p>The declared mutation sets <code>EXTERIOR_SUPPORT_ARM</code> to the legacy
+arm, restoring the default that <code>exact_current_moments</code> selected
+before this node. It must turn
+<code>test_exterior_closure_falls_below_booking[2000]</code> red while the head
+arm passes it.</p>
+
+<p>Three attempts, and the first two are recorded because a control that fails
+for the wrong reason is not a control. Job 1283914's control passed, but so did
+its head arm — the mutation was inert, because the overlay that carried it was
+shadowed: <code>python -m pytest</code> puts the working directory at
+<code>sys.path[0]</code>, ahead of <code>PYTHONPATH</code>, and with
+<code>tests/__init__.py</code> present the repository root is also pytest's
+rootdir, so a fixture module reached through <code>PYTHONPATH</code> alone never
+won the import. Job 1283963 made the overlay the rootdir and the mutation did
+take effect (<code>EFFECTIVE_ARM legacy</code>), but its variant tree held only
+<code>scripts</code> and <code>tests</code>, so the run died at
+<code>FileNotFoundError: nova/biot/polygonanalytic.py</code> — red for a
+missing-file reason, which is not evidence about the mutation. Job 1283965
+fixes both: the variant is the worktree with every top-level entry symlinked and
+<code>scripts</code> a real mutated copy, so the overlay wins the import and the
+rest of the package still resolves. Its header confirms both
+(<code>EFFECTIVE_ARM legacy /tmp/variant_legacy2_1283965/scripts/…</code>,
+<code>POLYGON_MODULE /tmp/variant_legacy2_1283965/nova/biot/polygonanalytic.py</code>).
+It is admitted: <code>1 failed, 2 deselected in 123.69s</code>, EXIT=1, failing
+<code>test_exterior_closure_falls_below_booking[2000]</code> on the closure
+clause itself — closure <code>0.017694</code> against booking
+<code>0.008968</code> — while the head arm passes the same test id in job
+1283955. The mutated exterior was built fresh under a new identity
+(<code>309fa44c936ca037</code>, <code>hit: false</code>), which is the
+independent sign that the legacy arm was really the one measured. The row's own
+<code>"arm": "exact"</code> field is the test's parameter label, not the
+fixture's effective arm, in both the head and control rows; it is read from the
+cache identity and the header instead.</p>
 
 <h2 id="certified-reads">The certified booking rows cannot be re-read</h2>
 
@@ -157,11 +260,27 @@ module that calls it.</p>
 <h2 id="follow-ons">What remains</h2>
 
 <ul>
-<li>Read job 1283914's SUPPORT_ARM_ROW rows and adjudicate the four closure rows
-against the <code>f68870f99</code> record, and its negative control against the
-head arm, then set this fragment's verdict.</li>
-<li>Decide how the certified carriers are to be re-read, and scope
-<code>builder_revision</code> to the coupling-assembly source.</li>
+<li><strong>The base-tree separation run.</strong> The decisive measurement is
+the same four rows from the base fixture (<code>HEAD~1</code>,
+<code>builder_revision</code> <code>e1987f9d1833a86f</code>) in one H200 job. It
+did not fit this node's 60-minute fence: the base fixture's
+<code>builder_revision</code> differs from the head's
+(<code>12d9a73b56af0fb7</code>), so every carrier is a cache miss, and the head's
+own cold pass of the same file took 2,750 s. Job 1283963 was submitting it as
+its second phase; its phase 1 is superseded by 1283965 and its phase-2 log
+(<code>head_base.log</code>) must be read with that job id, because an earlier
+cancelled job wrote a shadowed row into the same path. If the base reproduces
+the <code>f68870f99</code> rows the difference is this node's; if it reproduces
+the head's rows it is base-tree moment work, which the commit list above makes
+the likelier reading.</li>
+<li><strong>The booking rows cannot be re-read at all</strong> until the
+certified carriers' identity schema is decided — either <code>_from_dataset</code>
+learns to validate a recorded group, or the certified rows are committed as
+receipts and compared as numbers.</li>
+<li><strong>Scope <code>builder_revision</code> to the coupling-assembly
+source.</strong> It currently hashes <code>measure.py</code>'s own bytes, so any
+fixture edit invalidates every carrier and forces a rebuild inside the gate, and
+it is why the certified carriers were already unreachable at this node's base.</li>
 </ul>
 
 </main>

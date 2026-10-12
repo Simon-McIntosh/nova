@@ -8,14 +8,16 @@
 <meta name="plan-slug" content="exterior-fixture-delegation">
 <meta name="plan-title" content="Certificate exterior fixture on the shared moment owner">
 <meta name="plan-summary" content="Deleted the fixture-local analytic-density integrator so the exterior fixture
-and the certificate's own moment integral share one owner, and repaired the
-support-arm default that disagreed with its own name">
+and the certificate's own moment integral share one owner, made the support arm a
+required argument so no caller follows a default, and pinned the clipped-cell
+region moments the two quadratures disagree on to the shoelace region a
+closed-form control fixes">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s6">
-<meta name="plan-commits" content="898553203">
+<meta name="plan-commits" content="898553203,d48aaef5a,f7e94d844,df1cee65f">
 <meta name="plan-recorded-at" content="2026-10-12">
 <meta name="plan-verdict" content="pass">
-<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) for the local rule-equivalence check; the carrier and closure rows are H200 jobs 1283914/1283955 (head) and 1283976 (base), the negative control is H200 job 1283965, the base-versus-head book row is job 1283981, and the per-cell integrator comparison is job 1283985 (rerun after 1283983 density-weighted pass was voided by aliased accumulator arrays and 1283984 died on a NameError from the same edit), all on 98dci4-gpu-0003 under reservation gpu_0003_grpA; sibling shards shared the single free card because the node had seven of eight allocated">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) for the local rule-equivalence check and the caller gate; the carrier and closure rows are H200 jobs 1283914/1283955 (head) and 1283976 (base), the negative control is H200 job 1283965, the base-versus-head book row is job 1283981, and the per-cell integrator comparison is job 1283985 (rerun after 1283983 density-weighted pass was voided by aliased accumulator arrays and 1283984 died on a NameError from the same edit), all on 98dci4-gpu-0003 under reservation gpu_0003_grpA; sibling shards shared the single free card because the node had seven of eight allocated. The caller gate and the regression test ran inside the fleet allocation job 1281970 on 98dci4-clu-2002 (SLURM_JOB_ID set, so heavy work ran in place rather than on a *_debug partition)">
 <title>Certificate exterior fixture on the shared moment owner | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -42,18 +44,126 @@ implementations of one physical quantity. One owner now serves both:</p>
 deleted. <code>_polygon_rule</code> is kept: the legacy spline-clip arm and
 <code>whole_cell_current_moments</code> still integrate through it.</p>
 
-<h2 id="arm-default">The support arm now agrees with its own name</h2>
+<h2 id="exterior-fixture-delegation-arm-default">The support arm now agrees with its own name</h2>
 
 <p><code>exact_current_moments</code> defaulted to the legacy spline-clip arm
 while the fixture's exterior defaulted to the exact arm, so the function's name
-described the one arm its default did not select. The default is now the exact
-arm: <code>EXTERIOR_SUPPORT_ARM = _EXACT_SUPPORT_ARM</code>, read by the
-function signature, the fixture exterior and its cache identity, so a single
-constant governs the exterior, its identity and its moments. Callers that
-depended on the old default now receive the exact arm; that is the intended
-change and their rows are the ones measured below.</p>
+described the one arm its default did not select. The default was first flipped
+to the exact arm: <code>EXTERIOR_SUPPORT_ARM = _EXACT_SUPPORT_ARM</code>, read by
+the function signature, the fixture exterior and its cache identity, so a single
+constant governs the exterior, its identity and its moments.</p>
 
-<h2 id="equivalence">The two rules agree off the fixture's own cells</h2>
+<p>That flip was too quiet, and the coordinator's review caught it. Flipping a
+default moves every caller that does not name the arm, and the arm drives both
+the clip the density is integrated on and the quadrature it is integrated with,
+so an omitting caller silently changed which quantity it computed. At base
+<code>437a68db4</code> the parameter defaulted to
+<code>_LEGACY_SUPPORT_ARM</code>, so every omitting caller was on the legacy
+path; after the flip they were all on the exact path, with nothing in their own
+texts saying so.</p>
+
+<p><strong>The arm is therefore a required keyword argument, with no
+default.</strong> No caller can follow one. Every caller in the fence names the
+arm it received before this node — <code>support_arm="legacy"</code> — so
+behaviour there is unchanged, and a caller whose purpose is plainly the exact
+support names that instead. Where the exact support is what is meant, the code
+says so.</p>
+
+<p>The contract is now enforced rather than documented, and the enforcement is
+measured. On the head tree, <code>inspect.signature</code> reports
+<code>support_arm</code> as <code>KEYWORD_ONLY</code> with
+<code>inspect.Parameter.empty</code> as its default, and the omitted-arm call is
+refused before any body runs:</p>
+
+<pre><code>support_arm kind     : KEYWORD_ONLY
+support_arm default  : &lt;class 'inspect._empty'&gt;
+OMITTED_ARM_REFUSED: exact_current_moments() missing 1 required keyword-only argument: 'support_arm'
+UNKNOWN_ARM_REFUSED: unknown exterior support arm: 'nonsense'</code></pre>
+
+<p>That is the negative control for this half: at base the same call returned a
+legacy moment set, and at head it raises. The log is
+<code>arm_negative_control.log</code> in the run directory.</p>
+
+<h2 id="exterior-fixture-delegation-caller-sweep">Every caller names its arm, and the six test files are green</h2>
+
+<p>Twenty-six files were swept: twenty-one non-test callers and five test files
+outside the one held by a concurrent node. Twenty-one of the non-test callers are
+sixteen benchmark modules, four modules under <code>scripts/</code>
+(<code>accuracy_cost_ladder</code>, <code>oracle_rebaseline</code>,
+<code>moment_branch_integration</code>, <code>analytic_oracle_fixtures/reduced_oracle.py</code>)
+and <code>analytic_oracle_fixtures/measure.py</code> itself, whose internal
+self-call already threaded the argument through. Every one of the twenty-one
+imports cleanly at head (<code>BAD 0</code>; the run's own driver imports each by
+file path and reports per-file, so a single bad module cannot hide behind the
+others):</p>
+
+<pre><code>OK    benchmarks/analytic_operator_ladder.py
+OK    benchmarks/carrier_advance_diagnosis.py
+OK    benchmarks/carrier_arms.py
+OK    benchmarks/carrier_step_attribution.py
+OK    benchmarks/efit_parity_tared_external_field.py
+OK    benchmarks/frozen_current_flux_image_gate.py
+OK    benchmarks/h200_matrix_benchmark.py
+OK    benchmarks/limiter_read_resolution_audit.py
+OK    benchmarks/nan_tangent_localisation.py
+OK    benchmarks/oracle_start_newton_probe.py
+OK    benchmarks/portfolio_warm_start.py
+OK    benchmarks/solovev_certificate_current_pin.py
+OK    benchmarks/solovev_solver_discriminator.py
+OK    benchmarks/support_order_arms.py
+OK    benchmarks/two_branch_batch_cost.py
+OK    benchmarks/unit_amplitude_current_census.py
+OK    scripts/accuracy_cost_ladder/measure.py
+OK    scripts/analytic_oracle_fixtures/measure.py
+OK    scripts/analytic_oracle_fixtures/reduced_oracle.py
+OK    scripts/moment_branch_integration/measure.py
+OK    scripts/oracle_rebaseline/measure.py
+BAD 0</code></pre>
+
+<p>None of the twenty-one carries a dry-run flag, so the dry-run half of the gate
+has nothing to exercise; the three modules in <code>benchmarks/</code> that do
+carry one (<code>zero_residual_check.py</code>,
+<code>limited_row_shadow_census.py</code>, <code>wholecell_rows_reposed_fixture.py</code>)
+are not callers and were not touched.</p>
+
+<p>The six test files were run in fresh per-file processes, each named by its own
+file, at base <code>437a68db4</code> and at head, so a missing or wrong arm shows
+up as that file's own failure rather than as a collection error somewhere else.
+The base tree is the worktree overlaid with real copies of <code>scripts</code>
+and <code>tests</code> at the base revision and every other top-level entry a
+symlink, so the base fixture wins the import while the rest of the package still
+resolves; the overlay is checked for a non-inert <code>measure.py</code> before
+any row is reported.</p>
+
+<table>
+<thead><tr><th>File</th><th>Base <code>437a68db4</code></th><th>Head</th><th>Added failures</th></tr></thead>
+<tbody>
+<tr><td><code>test_two_class_recovery.py</code></td><td>5 failed</td><td>5 failed</td><td>0</td></tr>
+<tr><td><code>test_analytic_oracle_fixture_exterior.py</code></td><td>1 passed</td><td>2 passed</td><td>0</td></tr>
+<tr><td><code>test_forward_census.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
+<tr><td><code>test_forward_receipt_raster.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
+<tr><td><code>test_analytic_oracle_tangent.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
+<tr><td><code>test_forward_compile_identity.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
+</tbody>
+</table>
+
+<p>The one red row is red at base and red at head, which is what "no added
+failures" asks about. All five failures are the same exception from the same
+line — <code>ValueError: own-node null census requires the direct sampling flux
+values</code> at <code>nova/equilibrium/topology.py:1177</code>, reached through
+the fixture's own construction — and none of the five identifiers mentions a
+moment, an arm or a clipped cell. That file is on the red base, not on this
+node's change, and it is reported as a follow-on rather than triaged here: this
+gate measures only this node's own reroute.</p>
+
+<p>The one caller left un-updated is deliberate. <code>tests/test_oracle_axis_admission.py</code>
+still omits the arm at <code>line 34</code>; the file is held by the concurrent
+red-base triage node, so this node must not write it, and with the default gone
+it will raise <code>TypeError</code> when that node next runs it. It is listed in
+“What remains” for the node that owns it. No file inside the fence was left
+omitting the arm.</p>
+
+<h2 id="exterior-fixture-delegation-equivalence">The two rules agree off the fixture's own cells</h2>
 
 <p>The reroute is identity-preserving only if the deleted tensor-Duffy rule and
 the owner's signed-jacobian fan rule agree. Measured on the login node in
@@ -80,7 +190,7 @@ clipped cells include such cells at every rung, and on them the two rules part b
 up to a part in 10<sup>3</sup>. The measurement that establishes which rule is
 right is below.</p>
 
-<h2 id="which-integrator">Which integrator is right on the fixture's own cells</h2>
+<h2 id="exterior-fixture-delegation-which-integrator">Which integrator is right on the fixture's own cells</h2>
 
 <p>The base-versus-head comparison below locates the movement in the exact arm's
 moment path but does not say which of the two rules is the accurate one. That was
@@ -145,13 +255,39 @@ cells are not disagreements — they are flagged because the closed-form control
 denominator carries the sliver cancellation named above, and the two rules agree
 there to <code>2.7e-13</code> at worst.</p>
 
+<figure>
+<img src="/nova/figures/converged-forward-solve/exterior-fixture-delegation/fan-reversal.svg"
+alt="Three panels, one per disagreeing clipped cell (47, 50, 73) of the diverted
+2,000-cell fixture. Each panel draws the cell's ring and the triangle fan from
+its first vertex: the triangles whose orientation about that vertex is reversed
+are drawn in the accent colour, the rest in grey.">
+</figure>
+
+<p>The three disagreeing cells, one panel each, from the diverted 2,000-cell
+exact support. The fan is the one both rules share, drawn from each ring's first
+vertex. Triangles drawn in the accent colour are those whose orientation about
+that vertex is reversed; the grey ones are correctly oriented. Reading across the
+three panels, the reversal is not a near-edge accident of one cell — cells 47, 50
+and 73 are 13-, 43- and 33-vertex rings of three different areas, and their
+deleted-rule errors
+(<code>1.6e-03</code>, <code>2.3e-04</code>, <code>2.1e-05</code>) follow the
+accent area in each, which is what makes the error a region error rather than a
+quadrature one.</p>
+
 <p><strong>The shared owner is the accurate rule.</strong> Its region is exact
 and its error is roundoff; the rule this node deleted over-counts the region by
 up to <code>1.6e-03</code> relative on the fixture's own cells. The head rows are
 therefore the new record, and the closure at roundoff is the intended result of
 one integrator rather than a loss of accuracy.</p>
 
-<h2 id="identity-gate">The closure identity gate</h2>
+<h2 id="exterior-fixture-delegation-identity-gate">The closure identity gate</h2>
+
+<p><strong>Read this section with the ruling that follows it.</strong> The
+identity clause as it was written — head equal to the rows recorded at
+<code>f68870f99</code> — is not met, and the measurements below are what show it
+is the wrong clause rather than a failed one. The coordinator replaced it; the
+replacement, its three legs and the plan verdict are in “The coordinator's ruling
+on the closure clause” below.</p>
 
 <p>The gate is the exterior closure rows of
 <code>tests/test_certificate_exterior_support.py</code> at 550, 2,000 and 5,000
@@ -347,7 +483,93 @@ move. The constant must not be repinned to agree with the code under test — a
 reference adjusted to its subject is not a reference — and re-deriving it is a
 separate decision.</p>
 
-<h2 id="negative-control">The declared negative control</h2>
+<h2 id="exterior-fixture-delegation-closure-ruling">The coordinator's ruling on the closure clause</h2>
+
+<p>Done-when (3) asked head to reproduce the rows recorded at
+<code>f68870f99</code> within 1e-13. That clause cannot be met by an accurate
+fixture, because the recorded rows were produced <em>by the integrator this node
+deleted</em>: reproducing them exactly would require the owner to be as wrong as
+the rule it replaced. The identity clause is therefore retired, and the
+coordinator ruled it replaced by three references that do not depend on the
+deleted rule.</p>
+
+<ol>
+<li><strong>Region correctness.</strong> The owner's signed fan reproduces every
+clipped cell's shoelace area and first moments to about <code>1e-10</code>, while
+the deleted absolute-jacobian fan is not a decomposition of non-convex clipped
+rings and misstates three near-edge sliver cells at 2,000 cells — cells 47, 50
+and 73, by <code>1.6e-03</code>, <code>2.35e-04</code> and <code>2.09e-05</code>
+relative. The basis is the closed-form uniform-density control, where a
+triangle's moments are its signed area and that area times its vertex mean, so
+the comparison has no quadrature error in it anywhere. The two tables in “Which
+integrator is right on the fixture's own cells” are that reference, and the
+per-cell table is its citation: cell 47 <code>1.609e-03</code>,
+50 <code>2.327e-04</code>, 73 <code>2.065e-05</code> for the deleted rule against
+<code>1.1e-14</code>, <code>3.1e-16</code> and <code>1.8e-15</code> for the owner.
+<strong>This leg passes.</strong></li>
+<li><strong>Closure at roundoff at every rung.</strong> The head closure is
+<code>2.28e-15</code> at 550, <code>2.43e-15</code> at 2000 and
+<code>2.43e-15</code> at 5000, against the recorded rows'
+<code>1.0877e-05</code> and <code>4.3477e-06</code> at the two finer rungs. The
+base's own closure at those rungs is <code>1.09e-05</code> and
+<code>4.35e-06</code>: the roundoff at head is the intended result of one
+integrator sharing the shipped kernel, not a loss of accuracy.
+<strong>This leg passes.</strong></li>
+<li><strong>The legacy control still reproduces.</strong> The 550 legacy row,
+which does not traverse the rerouted path, agrees with the record to
+<code>1.06e-14</code> on the map and <code>2.58e-14</code> on booking, and
+between base and head to <code>1.84e-14</code> and <code>3.14e-14</code> — all
+inside the 1e-13 the clause asks for. So the change is confined to the exact
+path, and the path it does not touch is untouched. <strong>This leg
+passes.</strong></li>
+</ol>
+
+<p><strong>Plan verdict: pass, on this basis.</strong> The region-correctness
+control fixes the record, the closure is at roundoff at every rung, and the
+legacy control reproduces within 1e-13. The base's <code>1e-5</code> closure was
+that integrator's region error — <code>1.6e-03</code> on its own worst cell —
+and the head rows are the new record.</p>
+
+<p>Two consequences of the same ruling are recorded where they belong: the
+pinned constant in <code>book.py</code> was measured bit-identical at base and at
+head (job 1283981), so it is stale independently of this node and must not be
+repinned to agree with the code under test; and the certified proto-support
+carriers remain unreadable for a schema reason that predates this node. Both are
+in “What remains”.</p>
+
+<h2 id="exterior-fixture-delegation-regression-test">The clipped-cell region moments are now a test</h2>
+
+<p>The region table above was a measurement; the coordinator asked for it to
+become a standing guard, and it is one. The failure mode it guards is specific: a
+future edit that regrows an absolute-jacobian fan inside the fixture would agree
+with the conformance controls on every convex ring and disagree only on the
+non-convex clipped cells the independent analytic clip actually produces, so
+nothing else in the suite would notice.</p>
+
+<p>The test integrates a uniform density over a small thirteen-vertex non-convex
+ring of the cell-47 kind, translated to its own first vertex so the fixture is
+machine-independent, and compares against that ring's shoelace area and first
+moments in closed form. It also asserts the ring is non-convex about its first
+vertex, so a convex stand-in cannot slip through and leave the guard untested.
+The measured control is the same one the table rests on:</p>
+
+<table>
+<thead><tr><th>Rule</th><th>Max relative error vs closed form</th><th>Against the test's bound</th></tr></thead>
+<tbody>
+<tr><td>owner's signed fan</td><td>4.58e-15</td><td>passes 1e-12</td></tr>
+<tr><td>absolute-jacobian fan</td><td>1.00e-02</td><td><strong>fails</strong> 1e-12</td></tr>
+</tbody>
+</table>
+
+<p>The test additionally asserts the deleted names are absent
+(<code>hasattr(fixture, "_polygon_current_moments")</code> and
+<code>_signed_ring_area</code> both false), so the fixture-local rule cannot be
+quietly restored. It runs at
+<code>tests/test_analytic_oracle_fixture_exterior.py::test_clipped_region_moments_follow_the_signed_fan_on_a_non_convex_cell</code>
+and the file is green with it: <code>2 passed in 131.56s</code> at head, against
+<code>1 passed</code> for the same file at base.</p>
+
+<h2 id="exterior-fixture-delegation-negative-control">The declared negative control</h2>
 
 <p>The declared mutation sets <code>EXTERIOR_SUPPORT_ARM</code> to the legacy
 arm, restoring the default that <code>exact_current_moments</code> selected
@@ -383,7 +605,7 @@ independent sign that the legacy arm was really the one measured. The row's own
 fixture's effective arm, in both the head and control rows; it is read from the
 cache identity and the header instead.</p>
 
-<h2 id="certified-reads">The certified booking rows cannot be re-read</h2>
+<h2 id="exterior-fixture-delegation-certified-reads">The certified booking rows cannot be re-read</h2>
 
 <p>Done-when (3) also asks that the <code>current.book</code> rows equal those
 recorded at <code>06cc5abe1</code>, read from the certified cache of
@@ -420,7 +642,7 @@ receipt's machine key — was written, measured to still be refused downstream a
 <code>fixture._from_dataset</code>, and reverted rather than landed as a
 half-repair that weakens a guard without enabling the read.</p>
 
-<h2 id="carrier-identity">The carrier identity digest is over-broad</h2>
+<h2 id="exterior-fixture-delegation-carrier-identity">The carrier identity digest is over-broad</h2>
 
 <p>The same digest explains the carrier rebuild, and shows the certified cache
 was already unreachable before this node changed anything.
@@ -450,7 +672,33 @@ rung — the fixture's own edits invalidate the carrier cache. The digest should
 cover the assembly source it is documented to cover, not every byte of the
 module that calls it.</p>
 
-<h2 id="follow-ons">What remains</h2>
+<h2 id="exterior-fixture-delegation-follow-ons">What remains</h2>
+
+<p><strong>The support arm is required, and seven call sites outside this node's
+fence still omit it.</strong> They are listed here rather than edited, because
+writing them would reach into files the fence withholds. Each will raise
+<code>TypeError: exact_current_moments() missing 1 required keyword-only
+argument: 'support_arm'</code> the next time it runs. Six are figure and evidence
+scripts that need the arm named — the arm each received before the flip was
+legacy, but each site's own purpose should decide whether legacy or exact is
+meant:</p>
+
+<table>
+<thead><tr><th>Call site</th><th>Owner</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_oracle_axis_admission.py:34</code></td><td>the concurrent red-base triage node — held, not edited here</td></tr>
+<tr><td><code>docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py:50</code></td><td>outside this node's fence</td></tr>
+<tr><td><code>docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:42</code></td><td>outside this node's fence</td></tr>
+<tr><td><code>docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py:64</code></td><td>outside this node's fence</td></tr>
+<tr><td><code>docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:253</code></td><td>outside this node's fence</td></tr>
+<tr><td><code>docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:551</code></td><td>outside this node's fence</td></tr>
+<tr><td><code>docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:810</code></td><td>outside this node's fence</td></tr>
+</tbody>
+</table>
+
+<p>The several <code>docs/figures/cut-cell-current-attribution/*.log</code> files
+that also mention the call are recorded command output, not live callers, and
+were left alone.</p>
 
 <ul>
 <li><strong>Closed: which cells the two quadratures disagree on.</strong>
@@ -458,32 +706,42 @@ Named by the per-cell measurement above — cells 47, 50 and 73 of 1,273 at
 diverted 2,000, all single-ring clipped cells whose fan from the first vertex
 reverses orientation, with the deleted rule over-counting the region by
 1.6e-03, 2.3e-04 and 2.1e-05 relative — and the same measurement says the owner
-is the accurate rule. Both parts are settled; what remains is the separate
-decision of what the identity clause should compare against.</li>
-<li><strong>What the identity clause should compare against.</strong> The
-recorded <code>f68870f99</code> rows are reproduced exactly by the fixture code
+is the accurate rule. Closed, and now guarded by a standing
+test.</li>
+<li><strong>Closed: what the closure clause compares against.</strong> The
+recorded <code>f68870f99</code> rows are reproduced exactly by the integrator
 this node deleted, so they cannot be the reference for a fixture that no longer
-contains it, and head against base is a comparison the change is
-definitionally outside of. Either the clause is rewritten to compare head
-against the shipped kernel's own moments — the natural reference once the
-fixture shares that kernel — or it is dropped in favour of the closure's own
-value, which is now roundoff.</li>
-<li><strong>The book comparison is incomplete, and its first diverted rung
-failed a pinned reference.</strong> The rows are in <code>book_fresh.log</code>,
-attributed by the driver's <code># book label kind cells</code> markers, because
+contains it. The coordinator ruled the identity clause
+retired and replaced by the region-correctness control, closure at roundoff at
+every rung, and the legacy control reproducing within 1e-13; the plan verdict is
+pass on that basis. The ruling and its three measured legs are in “The
+coordinator's ruling on the closure clause”.</li>
+<li><strong>The book comparison is incomplete, and the pinned reference is
+stale.</strong> The rows are in <code>book_fresh.log</code>, attributed by the
+driver's <code># book label kind cells</code> markers, because
 <code>book.measure</code> prints an unlabelled <code>BOOKING_ROW</code>. Two
 rows landed (<code>head limited 550</code> and <code>head limited 2000</code>);
 <code>head diverted 550</code> then tripped the module's own guard at
 <code>book.py</code> <code>legacy_map</code> against the pinned
-<code>0.197327</code>, and no base-side row exists, so nothing was compared.
-Resubmit the ladder from the side that is missing — and treat the pinned
-constant as the open question, not the tolerance: it is a recorded reference
-value, and it must not be repinned to agree with the code under test.</li>
+<code>0.197327</code>. The base-side row was then measured and is
+<strong>bit-identical</strong> to the head value
+(<code>0.1946465024178517</code>), so the constant is stale independently of
+this node and the booking path is untouched by this change. Re-derive the
+constant rather than repinning it to agree with the code under test: a reference
+adjusted to its subject is not a reference. The remaining ladder rungs above
+<code>diverted 550</code> are still unrun.</li>
 <li><strong>Plan-owned, per the coordinator ruling:</strong> how the certified
 proto-support carriers are to be re-read, and scoping
 <code>builder_revision</code> to the coupling-assembly source it documents,
 since it currently hashes <code>measure.py</code>'s own bytes and so invalidates
 every carrier on any fixture edit.</li>
+<li><strong>Reported, not triaged:</strong> <code>tests/test_two_class_recovery.py</code>
+fails five tests at base <code>437a68db4</code> and at head alike, all on
+<code>ValueError: own-node null census requires the direct sampling flux values</code>
+at <code>nova/equilibrium/topology.py:1177</code>. That is the red base, outside
+this node's declared scope, and no arm, moment or clipped cell appears in any of
+the five. It belongs to the red-base triage node; this node records it only so
+the row is not read as a regression of the arm change.</li>
 </ul>
 
 </main>

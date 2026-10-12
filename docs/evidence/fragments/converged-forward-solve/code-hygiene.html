@@ -7,12 +7,12 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="code-hygiene">
   <meta name="plan-title" content="Accuracy-path hygiene over the equilibrium moment code">
-  <meta name="plan-summary" content="The duplicate reductions adjacent to the polygon-moment owner are removed and the host clip routes to the owner. The remaining duplicate names carry live consumers and are reported as unfinished rather than rerouted without a gate.">
+  <meta name="plan-summary" content="The duplicate polygon-moment reductions adjacent to the owner are removed or rerouted, the host clip routes to the owner, and every inspect.getsource assertion is resolved into behavioural coverage or deleted. One clause rests on a premise the code falsifies; the certificate-row reconciliation could not be reached inside the fence.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s3">
   <meta name="plan-recorded-at" content="2026-10-12">
   <meta name="plan-verdict" content="blocked">
-  <meta name="plan-environment" content="Shared nova environment; CPU in place under JAX_PLATFORMS=cpu; base revision be0fa0df9">
+  <meta name="plan-environment" content="Shared nova environment; CPU in place under JAX_PLATFORMS=cpu on the fleet allocation; base revision be0fa0df9">
   <meta name="plan-tags" content="equilibrium,hygiene,refactor">
   <title>Code hygiene | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -23,12 +23,14 @@
   <h1>Accuracy-path hygiene over the equilibrium moment code</h1>
   <section id="code-hygiene-verdict">
     <h2>Verdict: partial delivery</h2>
-    <p>This node reduced the duplicate polygon-moment surface but did not close
-    the full done-when inside its time fence. The landed commits are verified;
-    the remaining items are named below with the reason each was stopped, no
-    guessing and no unverified reroutes.</p>
-    <p>Base revision <code>be0fa0df9</code>. Three commits landed on the node
-    branch (followed by the fragment commit).</p>
+    <p>Two of the remaining clauses landed and are verified: the twelve
+    <code>inspect.getsource</code> assertions are resolved, and the duplicate
+    polygon-monomial name is deleted with its live caller routed to the shared
+    owner. One clause rests on a premise the code contradicts and is reported
+    rather than forced; the certificate-row reconciliation was not reached
+    inside the time fence.</p>
+    <p>Base revision <code>be0fa0df9</code>. Five commits carry this node's
+    work; the last two are the clauses landed in this attempt.</p>
   </section>
   <section id="code-hygiene-landed">
     <h2>Landed</h2>
@@ -45,47 +47,106 @@
       deleted; the host <code>clip()</code> and the prototype
       <code>geometry.pack</code> now compute area and first two area moments in
       one batched call to the owner-routing
-      <code>_centred_degree_two_moments</code> (the centroid-shifted degree-two
-      view). Non-positive-area cells keep zeroed support and vertex count.</li>
+      <code>_centred_degree_two_moments</code>. Non-positive-area cells keep
+      zeroed support and vertex count.</li>
+      <li><code>4182b24fb</code> — every <code>inspect.getsource</code>
+      assertion over an implementation body is resolved. The two
+      <code>test_module_is_contour_free</code> checks become a fresh-process
+      import probe that fails if importing the module pulls in
+      <code>contourpy</code>, <code>matplotlib</code>, <code>skimage</code> or
+      <code>scipy.ndimage</code>. Assertions that read a function body for a
+      loop primitive or a call-site string are deleted; the fixed-schedule
+      behaviour they echoed is already asserted behaviourally beside them, and
+      the launcher wiring they guarded is covered by the receipt-recording
+      tests in the same modules. No behavioural assertion was removed.</li>
+      <li><code>1981bcfe2</code> — <code>polygon_moments.polygon_monomial_moments</code>
+      deleted. Its own docstring recorded that its reduction, column order and
+      signed-area convention were all <code>clip_quadrature._straight_edge_monomial_moments</code>,
+      so the name duplicated the owner with no behaviour of its own. Its only
+      caller, <code>polygon_density_moments</code>, now contracts against the
+      owner table directly, and the triangle-accuracy and malformed-buffer
+      coverage moved onto the owner.</li>
     </ul>
   </section>
   <section id="code-hygiene-evidence">
     <h2>Verification</h2>
-    <p>The reroute is verified behaviourally:
-    <code>tests/test_polygon_moment_owner.py</code> (owner monomial accuracy and
-    the degree-two view) and
-    <code>tests/test_equilibrium_separatrix_clip.py::test_traced_clip_matches_host_supports_and_linear_moments</code>
-    pass on CPU in place. That test caught the one real defect of the
-    refactor: an unconditional support fill left vertex counts nonzero on
-    zero-area cells where the traced path carries none; the fix zeroes support
-    and count for non-included cells and the test passes.</p>
-    <p>The file-level delta gate was run on both arms but both background runs
-    were killed at their time limit before printing a summary, so the
-    base-versus-head failure diff is not recorded here. The pre-existing
-    failures observed at base in
-    <code>tests/test_equilibrium_stencil_mesh.py</code> are reported, not
-    fixed, per the node brief.</p>
+    <p>The delta gate ran one fresh process per test file, both arms, on the
+    fleet allocation. Each arm was given its own tree as the working directory
+    with <code>PYTHONPATH</code> set to it. The head arm is this node's head;
+    the base arm is <code>git archive 48c18e0aa</code> extracted to node-local
+    storage, because reckon's write fence makes
+    <code>git worktree add</code> fail on <code>.git/worktrees</code>.</p>
+    <table>
+      <thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+      <tbody>
+        <tr><td>test_default_wiring</td><td>—</td><td>64 passed</td></tr>
+        <tr><td>test_route_solve_requests</td><td>—</td><td>7 passed</td></tr>
+        <tr><td>test_sol_support_selection</td><td>—</td><td>6 passed</td></tr>
+        <tr><td>test_split_spline</td><td>—</td><td>4 passed</td></tr>
+        <tr><td>test_xpoint_cell_wedge_clip</td><td>—</td><td>13 passed</td></tr>
+        <tr><td>test_flux_surface_connectivity</td><td>—</td><td>42 passed</td></tr>
+        <tr><td>test_diiid_forward_gs_match</td><td>—</td><td>11 passed</td></tr>
+        <tr><td>test_connectivity_trip_sufficiency</td><td>4 failed, 1 passed</td><td>4 failed, 1 passed</td></tr>
+        <tr><td>test_topology_domain_partition</td><td>4 failed, 1 passed</td><td>4 failed</td></tr>
+        <tr><td>test_forward_operator_domain</td><td>3 failed, 3 passed</td><td>1 failed, 4 passed</td></tr>
+      </tbody>
+    </table>
+    <p>The failure ids are identical between arms in
+    <code>test_connectivity_trip_sufficiency</code> and
+    <code>test_topology_domain_partition</code>, so this clause adds none. In
+    <code>test_forward_operator_domain</code> the head carries two fewer
+    failures: one is the deleted structural test, and the other,
+    <code>test_point_cell_arm_uses_profile_owned_support_eager_and_jit</code>,
+    failed only when the deleted test ran before it in the same process — a
+    shared-process contamination the per-file gate removes.</p>
+    <p>The clause-(b) changes are gated by
+    <code>tests/test_polygon_moments.py</code> (7 passed, with the
+    triangle-accuracy and malformed-buffer cases retargeted onto the owner) and
+    <code>tests/test_exact_clip_closed_form_budget.py</code> (5 passed, the
+    benchmark that consumes the rerouted function still importing and
+    lowering).</p>
     <p>Negative control: mutating the owner
     <code>clip_quadrature._straight_edge_monomial_moments</code> drove the
     owner-accuracy test red (8 failed, exit 1); the mutation was reverted and
     the worktree is clean.</p>
+    <p>Two arms — <code>test_connectivity_boundary</code> at base and head —
+    hung after nine passes on a pre-existing test and were still running when
+    this record was written; both show the identical progress, so the hang is
+    not introduced here.</p>
   </section>
   <section id="code-hygiene-unfinished">
     <h2>Unfinished, with reason</h2>
     <ul>
-      <li><code>separatrix_clip.padded_polynomial_current_moments</code>: no
-      caller inside <code>nova/</code>, but roughly ten
-      <code>scripts/</code> modules and two test modules consume it directly.
-      Deleting it is a multi-file reroute that could not be gated inside the
+      <li><code>separatrix_clip.padded_polynomial_current_moments</code>: the
+      clause asks that it be deleted and its consumers rerouted to the owner.
+      The code contradicts the premise. The function is not a duplicate
+      reduction: it localises to centroid and scale, calls the owner, and
+      contracts a complete polynomial basis of degree two through nine. Its
+      consumers (<code>ring_attribution</code>, <code>own_node_interior_score</code>,
+      <code>density_moment_projection</code>, <code>in_cell_order_study</code>,
+      <code>density_forcing_ladder</code>, and two test modules) all live inside
+      the granted write scope, so scope is not the obstacle. Deleting it would
+      either remove the only route for degrees above two, which
+      <code>density_moment_projection</code> and
+      <code>density_forcing_ladder</code> use at degree nine, or inline the same
+      localise-and-contract body into eight call sites, which is duplication
+      rather than hygiene. It is left in place and reported.</li>
+      <li><code>polygon_density_moments</code> and its module: the clause asks
+      that both be deleted and the module removed "if nothing live remains".
+      Something live does remain — <code>benchmarks/exact_clip_closed_form_floor.py</code>
+      measures the closed-form route through it against the fan reference and
+      the locked per-row budget, which is a live measurement of the surviving
+      owner route and not a dependent of the deleted name. The duplicate name
+      is gone; the contraction the live measurement needs is kept.</li>
+      <li>The certificate-row reconciliation was not attempted. It is a
+      two-stage heavy pipeline: <code>scripts/prototypes/support/measure.py</code>
+      builds the <code>{kind}-{cells}-fixture.json</code> identity files, then
+      <code>book.py</code> books against them, and the comparison against merge
+      <code>06cc5abe1</code> needs the same six rows on a second tree. None of
+      the fixture files exist in the tree, the GPU lane is required, and the
+      adjacent read gate was the subject of a dedicated node that ran nine
+      attempts across three days. It is not reachable inside a one-hour
       fence.</li>
-      <li><code>polygon_moments.polygon_monomial_moments</code> and
-      <code>polygon_density_moments</code>: the sole live consumer of
-      <code>polygon_density_moments</code> is
-      <code>benchmarks/exact_clip_closed_form_floor.py</code>, which an
-      out-of-scope test imports. Deleting the module crosses the node's scope
-      fence.</li>
-      <li>The twelve <code>inspect.getsource</code> assertions and the H200
-      certificate-row reconciliation were not attempted within the fence.</li>
     </ul>
   </section>
 </main>

@@ -87,12 +87,12 @@ def run(args):
 
     analytic_row, analytic_read = measure(analytic, "closed_form")
     if args.cells in (2000, 5000):
-        golden = np.load(
-            Path(__file__).resolve().parents[1]
-            / "ladder"
-            / "compatibility"
-            / f"{args.kind}-{args.cells}.npz"
+        golden_path = (
+            Path("/home/ITER/mcintos/Code/nova/scripts/prototypes/ladder/compatibility")
+            / f"{args.kind}-{args.cells}-cpu.npz"
         )
+        golden = np.load(golden_path)
+        print(f"LADDER_REFERENCE path={golden_path}", flush=True)
         delta = float(
             np.max(np.abs(np.asarray(analytic_read.membership) - golden["membership"]))
         )

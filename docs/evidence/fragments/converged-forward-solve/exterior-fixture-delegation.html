@@ -216,13 +216,36 @@ correct on near-edge cells is a separate question, and it is not this node's.</p
 2000 and 5000 only, and it does not separate the fixture's own near-edge cells
 from its interior ones, so the mechanism above is inferred from where the
 difference sits rather than measured per cell. And the booking rows the ruling
-also asked for are only partly in: the shard built
-<code>head limited 550</code> (booking <code>16314773.310234185</code> against
-analytic <code>16314773.310234187</code>, net relative error
-<code>1.1e-16</code>, read image error <code>1.78e-05</code>) and was still
-working through <code>head limited 2000</code> when the fence fell, because its
-carrier builds are serial on the one card this job held. No base-side booking
-row exists yet, so nothing was compared on that path.</p>
+also asked for are only partly in — but what landed strengthens the account
+rather than merely truncating it. The shard built <code>head limited 550</code>
+(booking <code>16314773.310234185</code> against analytic
+<code>16314773.310234187</code>, net relative error <code>1.1e-16</code>, read
+image error <code>1.78e-05</code>) and <code>head limited 2000</code> (booking
+<code>16314773.310234271</code>, net relative error <code>0.0</code>, read image
+error <code>2.67e-06</code>), both <code>EXIT=0</code>, and then
+<code>head diverted 550</code> <strong>failed the module's own reference
+check</strong>.</p>
+
+<p>That failure is worth its own paragraph. <code>book.py</code> carries a
+guard, <code>assert abs(legacy_map / 0.197327 - 1) &lt; 5e-6</code>, applied
+when <code>kind == "diverted" and cells == 550</code>; the head tree produced
+<code>legacy_map</code> <code>0.1946465024178517</code>, off the pinned
+<code>0.197327</code> by 1.35&times;10<sup>-2</sup>. That term is
+<code>exterior + current_moment_image(legacy) - analytic</code>, so it is
+built from the fixture's exterior on one side and the shipped kernel's image
+on the other — the same seam as the closure, and the same seam this node
+moved. Its size is the informative part: the limited fixture at 550 moved by
+<code>1.02e-13</code>, while the diverted fixture at 550 — a single-null wall
+and the near-edge cells that come with it — moves by
+<code>1.35e-2</code>. The divergence grows with near-edge content, which is
+what the 550-versus-2000 gradient already suggested and what a global change
+of quadrature rule would not produce. Whether the pinned constant or the
+fixture moved is still not separable from the head side alone, and it must not
+be resolved by repinning the constant: a reference value adjusted to agree with
+the code under test stops being a reference. The remaining ladder
+(<code>head diverted 2000</code>, then the whole base side) did not fit the
+fence; the shard's carrier builds are serial on the one card this job held, and
+no base-side booking row exists, so nothing was compared on that path.</p>
 
 <h2 id="negative-control">The declared negative control</h2>
 
@@ -347,13 +370,17 @@ definitionally outside of. Either the clause is rewritten to compare head
 against the shipped kernel's own moments — the natural reference once the
 fixture shares that kernel — or it is dropped in favour of the closure's own
 value, which is now roundoff.</li>
-<li><strong>The book comparison is incomplete.</strong> Its rows are in
-<code>book_fresh.log</code>, attributed by the driver's
-<code># book label kind cells</code> markers, because
-<code>book.measure</code> prints an unlabelled <code>BOOKING_ROW</code>. Only
-<code>head limited 550</code> landed before the fence, and no base-side row
-exists, so nothing was compared on that path. Harvest what is there and resubmit
-the ladder from the side that is missing.</li>
+<li><strong>The book comparison is incomplete, and its first diverted rung
+failed a pinned reference.</strong> The rows are in <code>book_fresh.log</code>,
+attributed by the driver's <code># book label kind cells</code> markers, because
+<code>book.measure</code> prints an unlabelled <code>BOOKING_ROW</code>. Two
+rows landed (<code>head limited 550</code> and <code>head limited 2000</code>);
+<code>head diverted 550</code> then tripped the module's own guard at
+<code>book.py</code> <code>legacy_map</code> against the pinned
+<code>0.197327</code>, and no base-side row exists, so nothing was compared.
+Resubmit the ladder from the side that is missing — and treat the pinned
+constant as the open question, not the tolerance: it is a recorded reference
+value, and it must not be repinned to agree with the code under test.</li>
 <li><strong>Plan-owned, per the coordinator ruling:</strong> how the certified
 proto-support carriers are to be re-read, and scoping
 <code>builder_revision</code> to the coupling-assembly source it documents,

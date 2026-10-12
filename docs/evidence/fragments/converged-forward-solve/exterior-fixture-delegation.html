@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="exterior-fixture-delegation">
+<meta name="plan-title" content="Certificate exterior fixture on the shared moment owner">
+<meta name="plan-summary" content="Deleted the fixture-local analytic-density integrator so the exterior fixture
+and the certificate's own moment integral share one owner, and repaired the
+support-arm default that disagreed with its own name">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s6">
+<meta name="plan-commits" content="898553203">
+<meta name="plan-recorded-at" content="2026-10-12">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) for the local rule-equivalence check; the carrier and closure rows are H200 job 1283914 on 98dci4-gpu-0003 under reservation gpu_0003_grpA">
+<title>Certificate exterior fixture on the shared moment owner | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="exterior-fixture-delegation">Certificate exterior fixture on the shared moment owner</h1>
+
+<p>The exterior fixture carried its own integrator for the analytic density, so
+the fixture's exterior image and the certificate's own moment integral were two
+implementations of one physical quantity. One owner now serves both:</p>
+
+<div class="diff">
+<pre><code>-    polygons = analytic_support_polygons(source, operator)
+-    return _polygon_current_moments(case, operator, polygons)
++    from scripts.prototypes.support.geometry import analytic_moments
++
++    polygons = analytic_support_polygons(source, operator)
++    centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
++    return analytic_moments(case, polygons, centres)</code></pre>
+</div>
+
+<p><code>_signed_ring_area</code> and <code>_polygon_current_moments</code> are
+deleted. <code>_polygon_rule</code> is kept: the legacy spline-clip arm and
+<code>whole_cell_current_moments</code> still integrate through it.</p>
+
+<h2 id="arm-default">The support arm now agrees with its own name</h2>
+
+<p><code>exact_current_moments</code> defaulted to the legacy spline-clip arm
+while the fixture's exterior defaulted to the exact arm, so the function's name
+described the one arm its default did not select. The default is now the exact
+arm: <code>EXTERIOR_SUPPORT_ARM = _EXACT_SUPPORT_ARM</code>, read by the
+function signature, the fixture exterior and its cache identity, so a single
+constant governs the exterior, its identity and its moments. Callers that
+depended on the old default now receive the exact arm; that is the intended
+change and their rows are the ones measured below.</p>
+
+<h2 id="equivalence">The two rules are the same rule</h2>
+
+<p>The reroute is identity-preserving only if the deleted tensor-Duffy rule and
+the owner's signed-jacobian fan rule agree. Measured on the login node in
+binary64 over convex, non-convex, holed and overlapping rings, relative
+agreement in every moment component:</p>
+
+<table>
+<thead><tr><th>Ring set</th><th>Relative agreement</th></tr></thead>
+<tbody>
+<tr><td>convex square</td><td>2.077e-16</td></tr>
+<tr><td>L-shape, non-convex</td><td>1.527e-15</td></tr>
+<tr><td>square with a hole</td><td>7.472e-16</td></tr>
+</tbody>
+</table>
+
+<p>Both are the same order-15 Gauss-Legendre rule over the same clipped cells;
+one accumulates with an absolute jacobian and a per-ring sign, the other with a
+signed jacobian. The agreement is at the level of the quadrature's own
+summation error, so the deletion moves no value.</p>
+
+<h2 id="identity-gate">The closure identity gate</h2>
+
+<p>The gate is the exterior closure rows of
+<code>tests/test_certificate_exterior_support.py</code> at 550, 2,000 and 5,000
+cells plus the legacy positive control, compared within 1e-13 relative against
+the rows recorded at <code>f68870f99</code> in
+<a href="/nova/evidence/fragments/converged-forward-solve/cfs-exterior-exact-support.html">Certificate
+exterior on the exact analytic support</a>. One H200 job (1283914) holds the
+head gate, the negative control and the booking rows as phases of a single
+allocation.</p>
+
+<p><strong>Verdict: partial.</strong> Job 1283901, the first attempt, produced no
+SUPPORT_ARM_ROW line at all: the 2,000- and 5,000-cell carriers had to be
+rebuilt, which takes about 266 s and 1,283 s, and the repository's default
+300 s per-test bound killed the rebuild and reported it as a failed test. The
+first attempt therefore measured the test harness, not the closure. Job 1283914
+raises the bound to 5,400 s and re-runs all three phases; its rows are read on
+resume and this fragment is updated with them. Until then no closure row for
+this change has been observed.</p>
+
+<h2 id="certified-reads">The certified booking rows cannot be re-read</h2>
+
+<p>Done-when (3) also asks that the <code>current.book</code> rows equal those
+recorded at <code>06cc5abe1</code>, read from the certified cache of
+<code>r-20261009T181553786165-proto-support</code>. That read is refused by an
+identity guard, for a reason independent of this node's change.</p>
+
+<p><code>scripts/prototypes/support/book.py</code> rehydrates a recorded carrier
+through <code>fixture._from_dataset</code>, which requires the store's recorded
+<code>semantic_identity</code> attribute to equal a freshly recomputed identity
+(<code>measure.py:716-722</code>). The certified stores record a superseded
+schema. Read directly from
+<code>analytic_oracle_clipped_exterior.zarr</code>, group
+<code>ac098ff84d3cab83</code>:</p>
+
+<pre><code>{"schema": "analytic-oracle-clipped-exterior",
+ "machine_semantic_key": "4c818bdbed936090",
+ "clip": "production-spline-geometry-from-analytic-zero-level", ...}</code></pre>
+
+<p>There is no <code>builder_revision</code> key and no
+<code>closed_form_constants</code> block, so <code>fixture.cache_identity</code>
+emits a different shape today and the equality cannot hold at any revision at or
+after the schema change. All six booking rows failed this way in job 1283901's
+<code>book.log</code>, at <code>book.py:55</code>, before any measurement ran. A
+repaired read path — trust the receipt's recorded group, and corroborate it by
+requiring the exterior's recorded <code>machine_semantic_key</code> to equal the
+receipt's machine key — was written, measured to still be refused downstream at
+<code>fixture._from_dataset</code>, and reverted rather than landed as a
+half-repair that weakens a guard without enabling the read.</p>
+
+<h2 id="carrier-identity">The carrier identity digest is over-broad</h2>
+
+<p>The same digest explains the carrier rebuild, and shows the certified cache
+was already unreachable before this node changed anything.
+<code>fixture.builder_revision()</code> hashes <code>Path(__file__)</code> — the
+fixture module itself — together with <code>coupling_build</code>, and folds the
+result into every carrier and exterior identity. Its docstring says it digests
+"the coupling-assembly sources that define a carrier". Measured per revision, by
+hashing the two files as that function does:</p>
+
+<table>
+<thead><tr><th>Revision</th><th>builder_revision</th></tr></thead>
+<tbody>
+<tr><td>dcb4076156 (certified cache built here)</td><td>899eeebbf054dff5</td></tr>
+<tr><td>06cc5abe1 (rows recorded here)</td><td>899eeebbf054dff5</td></tr>
+<tr><td>f68870f99</td><td>e1987f9d1833a86f</td></tr>
+<tr><td>HEAD~1 (base of this node)</td><td>e1987f9d1833a86f</td></tr>
+<tr><td>HEAD (898553203)</td><td>12d9a73b56af0fb7</td></tr>
+</tbody>
+</table>
+
+<p>Two consequences. The certified carriers already carried a different identity
+at this node's base than at the revision that wrote them, so the booking
+comparison was not executable against the store before this node's change
+either. And because the fixture module is inside the digest, deleting an
+integrator from <code>measure.py</code> renames the carrier group for every
+rung — the fixture's own edits invalidate the carrier cache. The digest should
+cover the assembly source it is documented to cover, not every byte of the
+module that calls it.</p>
+
+<h2 id="follow-ons">What remains</h2>
+
+<ul>
+<li>Read job 1283914's SUPPORT_ARM_ROW rows and adjudicate the four closure rows
+against the <code>f68870f99</code> record, and its negative control against the
+head arm, then set this fragment's verdict.</li>
+<li>Decide how the certified carriers are to be re-read, and scope
+<code>builder_revision</code> to the coupling-assembly source.</li>
+</ul>
+
+</main>
+</body>
+</html>

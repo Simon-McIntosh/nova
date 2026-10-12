@@ -1,0 +1,67 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest (r-20261012T042612803730-proto-read-route/manifest.md) records both baseline_suite and after_suite as empty, and its test_logs are the H200 prototype row/diagnostic logs (fragment-negative-control.log, booked-rung-audit.log, jet-diagnosis.log, read-route-ladder.log), not pytest arms; the reviewed range adds one HTML fragment, no test file and no product source. With no base or head gate log to reduce, the added-failure count is unmeasured rather than zero and no added failure ids exist to name: added_failure_count null, added_failure_ids [].",
+  "added_failure_ids": [],
+  "blocking_finding_count": 0,
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "e41dd0bf0"
+  ],
+  "completed_at": "2026-10-12T14:28:11.800Z",
+  "dispatched_at": "2026-10-12T14:19:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/proto-read-route.html",
+      "line": "12",
+      "severity": "follow-on",
+      "text": "follow-on: the Diverted Batched kernel row reports \"4.106e-5 saddle\" under the \"Maximum relevant membership error\" column, but that row's larger membership error is its smooth component 5.374e-4 (rows-ladder/diverted-2000.json smooth_membership_error 0.00053737514137), so the column understates the kernel's diverted error even though both components remain below the 1.001e-3 bound."
+    }
+  ],
+  "gate_arms_note": "The reviewed change is prototype-only and adds an in-repo evidence fragment; its rows were produced by H200 jobs 1283635 (booked ladder, TIMEOUT after the two 2,000-cell rows) and 1283753 (jet diagnosis, EXIT=0). No pytest baseline/after pair was run.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 5add700371c6afa1831d56b0349d4b13e804dacb; the single gained commit e41dd0bf adds 22 lines to the one fragment file and changes nothing else.",
+    "done_when": "the done-when requires both representations feeding nova.equilibrium.topology.read at about 2,000, 5,000 and 10,000 cells plus one SVG; the fragment records the 2,000-cell rows and names the 5,000/10,000 gap instead of asserting a completed ladder.",
+    "goal": "the node goal is to measure topology.read on solve states through the sampled mesh field against the booked kernel field at 2,000, 5,000 and 10,000 cells; the gained fragment anchors the completed 2,000-cell result and states the 5,000/10,000 booked rungs are unmeasured, so the goal is not met but no longer misrepresented.",
+    "manifest": "read; status blocked, twelve commits named, and the cited fragment-negative-control.log and booked-rung-audit.log record that the fragment is new at the answering commit and that only the two 2,000-cell kernel rows completed against a 02:30:10 TIMEOUT.",
+    "write_paths": "the gained commit touches exactly docs/evidence/fragments/converged-forward-solve/proto-read-route.html, one of the fenced paths, and no other file."
+  },
+  "justifications": {
+    "durability": "the gained commit adds no assertion, so its content can regress unnoticed, and the only committed guard reaching the fragment is tests/test_artifacts_carry_no_worktree_paths.py.",
+    "evidence": "every value in proto-read-route.html:8-17 reconciles with rows-ladder/limited-2000.json and diverted-2000.json, and the 9.002e-5 and 1.001e-3 bounds compute from C(h/R0)^2 exactly, excepting the diverted kernel row named in the finding.",
+    "fit": "proto-read-route.html:1 uses the bare-section idiom of the sibling proto-support.html with node-prefixed element ids and a project-absolute figure src, introducing no banned label.",
+    "goal_fidelity": "proto-read-route.html:3 records the booked kernel meeting the bounds at \"one rung\", not the required 2,000/5,000/10,000 ladder, so the higher-rung goal is unmet though the artifact now says so.",
+    "reuse": "the change adds no definition and embeds the already-committed docs/figures/converged-forward-solve/read-route/position-membership.svg rather than duplicating a figure.",
+    "scope_discipline": "git diff 5add700371..e41dd0bf touches only docs/evidence/fragments/converged-forward-solve/proto-read-route.html (+22/-0), inside the fenced path."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to measure topology.read on solve states through the sampled mesh field against the booked kernel field at 2,000, 5,000 and 10,000 cells; the gained commit docs/evidence/fragments/converged-forward-solve/proto-read-route.html:3 anchors the completed 2,000-cell result and line 17 states the 5,000/10,000 booked rungs are unmeasured, so the goal is not met as an artifact but is no longer misrepresented as met.\nVERDICT done_when: the done-when requires both representations feeding nova.equilibrium.topology.read at about 2,000, 5,000 and 10,000 cells plus one SVG under docs/figures/converged-forward-solve/read-route/; the fragment's table at proto-read-route.html:8-13 records the 2,000-cell rows from rows-ladder/limited-2000.json and diverted-2000.json and its proto-read-route-missing paragraph names the 5,000/10,000 gap instead of asserting a completed ladder.\nVERDICT write_paths: the gained commit touches exactly docs/evidence/fragments/converged-forward-solve/proto-read-route.html, one of the five fenced paths, and no other file.\nVERDICT manifest: read; status blocked, twelve commits named, and the cited fragment-negative-control.log and booked-rung-audit.log record that the fragment is new at the answering commit and that only the two 2,000-cell kernel rows completed against a 02:30:10 TIMEOUT.\nVERDICT diff: read commit by commit against 5add700371c6afa1831d56b0349d4b13e804dacb; the single gained commit e41dd0bf0cd956f15e5ae53acafe91ebfa25f79a adds 22 lines to the one fragment file and changes nothing else.\nCALL_SITES: none\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: proto-read-route.html:3 records the booked kernel meeting the bounds at \"one rung\", not the required 2,000/5,000/10,000 ladder, so the higher-rung goal is unmet though the artifact now says so.\nSCORE evidence: 17\nJUSTIFICATION evidence: every value in proto-read-route.html:8-17 reconciles with rows-ladder/limited-2000.json and diverted-2000.json, and the 9.002e-5 and 1.001e-3 bounds compute from C(h/R0)^2 exactly, excepting the diverted kernel row named below.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff 5add700371..e41dd0bf touches only docs/evidence/fragments/converged-forward-solve/proto-read-route.html (+22/-0), inside the fenced path.\nSCORE durability: 10\nJUSTIFICATION durability: the gained commit adds no assertion, so its content can regress unnoticed, and the only committed guard reaching the fragment is tests/test_artifacts_carry_no_worktree_paths.py.\nSCORE fit: 18\nJUSTIFICATION fit: proto-read-route.html:1 uses the bare-section idiom of the sibling proto-support.html with node-prefixed element ids and a project-absolute figure src, introducing no banned label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change adds no definition and embeds the already-committed docs/figures/converged-forward-solve/read-route/position-membership.svg rather than duplicating a figure.\nFINDING docs/evidence/fragments/converged-forward-solve/proto-read-route.html:12 follow-on: the Diverted Batched kernel row reports \"4.106e-5 saddle\" under the \"Maximum relevant membership error\" column, but that row's larger membership error is its smooth component 5.374e-4 (rows-ladder/diverted-2000.json smooth_membership_error 0.00053737514137), so the column understates the kernel's diverted error even though both components remain below the 1.001e-3 bound.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T141921094098-review-of-proto-read-route",
+  "reviewed_base_sha": "5add700371c6afa1831d56b0349d4b13e804dacb",
+  "reviewed_head_sha": "e41dd0bf0cd956f15e5ae53acafe91ebfa25f79a",
+  "reviewed_revision": "e41dd0bf0cd956f15e5ae53acafe91ebfa25f79a",
+  "reviewed_run_id": "r-20261012T042612803730-proto-read-route",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-read-route",
+  "reviewer_node": "review-of-proto-read-route",
+  "reviewer_run_id": "r-20261012T141921094098-review-of-proto-read-route",
+  "scores": {
+    "durability": 10,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 14,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:29:00+00:00",
+  "total": 98,
+  "verdict": "approved"
+}

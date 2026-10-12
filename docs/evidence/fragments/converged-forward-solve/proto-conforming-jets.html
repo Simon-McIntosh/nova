@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="proto-conforming-jets">
+<meta name="plan-title" content="Conforming cached-jet read measurements">
+<meta name="plan-summary" content="Bell element controls and measured rows; larger ladder remains in progress">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s2">
+<title>Conforming cached-jet read measurements | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<section id="proto-conforming-jets-landing">
+<h2>Conforming cached-jet read: measured controls</h2>
+<table id="proto-conforming-jets-controls">
+<thead><tr><th>Measure</th><th>Result</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>Element</td><td>Reduced quintic Bell; 18 vertex degrees of freedom; cubic edge-normal trace</td><td>Four-triangle fan from the first existing hex vertex; no added nodes</td></tr>
+<tr><td>Quartic reproduction at 2,000 limited cells</td><td>Value 1.4211e-14; gradient 3.3751e-13; Hessian 1.7538e-11</td><td>H200, conditioned coefficients</td></tr>
+<tr><td>11,825 interior edges at 2,000 limited cells</td><td>Value jump 4.2633e-14; normal-derivative jump 4.1744e-14</td><td>Analytic nodal jets</td></tr>
+<tr><td>550-cell diverted smoke</td><td>Bell saddle error 6.9687e-4 against 3.8486e-3</td><td>Preassembled read, before coefficient conditioning</td></tr>
+<tr><td>550-cell Hessian mutation</td><td>Saddle error 0.712884; test_bell_saddle_membership fails; EXIT=1</td><td>All Hessian degrees of freedom zeroed</td></tr>
+<tr><td>Same-file gate delta</td><td>Baseline: 3 pass, 2 fail. Head: 5 pass, 0 fail</td><td>Quartic reproduction and shared-normal continuity distinguish the fields</td></tr>
+<tr><td>Larger rows</td><td>H200 job 1283902, one allocation, rungs ordered 2,000, 5,000, 10,000</td><td>Pending; per-arm receipts and matrix build checkpoints persisted</td></tr>
+<tr><td>Picard reference</td><td>Stored live-kernel row contains scalar maxima but no membership array</td><td>Pointwise membership agreement remains unqualified</td></tr>
+<tr><td>Decision</td><td>Do not lock the read representation before the ladder and Picard comparison complete</td><td>Prototype only; product APIs unchanged</td></tr>
+<tr><td>Report</td><td colspan="2"><a href="/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-conforming-jets.md">Quantitative report</a></td></tr>
+</tbody></table>
+<figure id="proto-conforming-jets-membership">
+<img src="/nova/figures/converged-forward-solve/conforming-jets/membership.svg" alt="Smooth and saddle membership errors versus cells for the measured closed-form, kernel, nonconforming and Bell arms">
+<figcaption>Measured arms only; the kernel is reused at 2,000 cells. The Bell smoke point is at 550 cells; no missing rung is plotted as zero.</figcaption>
+</figure>
+</section>
+</main></body></html>

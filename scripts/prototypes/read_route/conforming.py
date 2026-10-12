@@ -20,7 +20,11 @@ from nova.equilibrium import current, topology
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures.measure import analytic_profile
-from scripts.prototypes.read_route.bell import field_from_jets, read_bell
+from scripts.prototypes.read_route.bell import (
+    field_from_jets,
+    read_bell,
+    read_cached_bell,
+)
 from scripts.prototypes.read_route.check_element import controls
 from scripts.prototypes.read_route.jets import build_jet_matrix
 from scripts.prototypes.read_route.measure import read_row, jet_reader, sample_field
@@ -136,8 +140,8 @@ def run(args):
                 + str(row["saddle_membership_error"]),
                 flush=True,
             )
-    field = field_from_jets(jets, built_indices, mesh)
-    row, result = measure(field, "bell_jet", read_bell)
+    payload = (matrix, moments, exterior, built_indices, mesh)
+    row, result = measure(payload, "bell_jet", read_cached_bell)
     if args.kind == "diverted" and args.cells in (550, 2000):
         mutated = field_from_jets(jets.at[:, 3:].set(0), built_indices, mesh)
         negative, _ = measure(mutated, "bell_zero_hessian", read_bell)
@@ -171,11 +175,11 @@ def run(args):
         trial = current.book(psi, sampled_read, geometry, profile, quadrature)
         jax.block_until_ready(trial)
         assert bool(trial.valid)
-        trial_jets = exterior + jnp.einsum(
-            "ncmq,cm->nq", matrix, jnp.stack(tuple(trial[:3]), -1)
-        )
+        trial_moments = ClippedCurrentMoments(*trial[:3])
         picard, _ = measure(
-            field_from_jets(trial_jets, built_indices, mesh), "picard_bell", read_bell
+            (matrix, trial_moments, exterior, built_indices, mesh),
+            "picard_bell",
+            read_cached_bell,
         )
         receipt["picard_reference_note"] = (
             "Read against analytic fraction in this row; cached live-kernel scalar "

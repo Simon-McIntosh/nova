@@ -122,6 +122,10 @@ class BellField:
 
     def value(self, point):
         cell = jnp.argmin(jnp.sum((self.mesh.generators - point) ** 2, axis=-1))
+        return self.cell_value(cell, point)
+
+    def cell_value(self, cell, point):
+        """Select a fan triangle within a known hex cell."""
         local = (point - self.mesh.origins[cell]) / self.mesh.scales[cell, :, None]
         bary = jnp.einsum("tij,tj->ti", self.mesh.inverse_edges[cell], local)
         bary = jnp.concatenate(
@@ -153,6 +157,8 @@ def read_bell(field, geometry, convention, policy):
 
     def sampled_flux(field, geometry):
         values = field.jets[field.sample_index, 0]
+        centres = jax.vmap(field.cell_value)(jnp.arange(len(values)), geometry.centre)
+        values = values.at[:, 0].set(centres)
         return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values), values[:, 0]
 
     curvature = FunctionType(
@@ -168,3 +174,12 @@ def read_bell(field, geometry, convention, policy):
         ),
     )
     return adapted(field, geometry, convention, policy)
+
+
+def read_cached_bell(payload, geometry, convention, policy):
+    """Contract runtime source moments and form the Bell field inside the read."""
+    matrix, moments, exterior, sample_index, mesh = payload
+    jets = exterior + jnp.einsum("ncmq,cm->nq", matrix, jnp.stack(tuple(moments), -1))
+    return read_bell(
+        field_from_jets(jets, sample_index, mesh), geometry, convention, policy
+    )

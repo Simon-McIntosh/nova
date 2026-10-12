@@ -140,12 +140,26 @@ any row is reported.</p>
 <tbody>
 <tr><td><code>test_two_class_recovery.py</code></td><td>5 failed</td><td>5 failed</td><td>0</td></tr>
 <tr><td><code>test_analytic_oracle_fixture_exterior.py</code></td><td>1 passed</td><td>2 passed</td><td>0</td></tr>
-<tr><td><code>test_forward_census.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
-<tr><td><code>test_forward_receipt_raster.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
-<tr><td><code>test_analytic_oracle_tangent.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
-<tr><td><code>test_forward_compile_identity.py</code></td><td>passed</td><td>passed</td><td>0</td></tr>
+<tr><td><code>test_forward_census.py</code></td><td>11 passed</td><td>11 passed</td><td>0</td></tr>
+<tr><td><code>test_analytic_oracle_tangent.py</code></td><td>1 passed</td><td>1 passed</td><td>0</td></tr>
+<tr><td><code>test_forward_receipt_raster.py</code></td><td>timeout (&gt;1200 s)</td><td>timeout (&gt;1200 s)</td><td>timed out at both arms, no assertion reached</td></tr>
+<tr><td><code>test_forward_compile_identity.py</code></td><td>not reported</td><td>not reported</td><td>uncollected</td></tr>
 </tbody>
 </table>
+
+<p><strong>Four rows of six are a result. Two are not, and they are marked as
+such.</strong> The table above is read from the gate's own logs, cell by cell, by
+<code>gate_table_check.py</code> in the run directory, which derives each cell
+from the log file for that arm and fails when the document and the logs disagree.
+An arm that never wrote its <code>EXIT_…</code> line reads as
+<code>not reported</code>, and the check refuses a <code>0</code> in the
+added-failures column unless both arms actually reported one.</p>
+
+<p>The green rows say what they say. <code>test_forward_census.py</code> passes
+11 at both arms, <code>test_analytic_oracle_tangent.py</code> one at both, and
+the exterior file carries the new regression test and reads
+<code>1 passed</code> at base against <code>2 passed</code> at head — the extra
+test being the one this node added.</p>
 
 <p>The one red row is red at base and red at head, which is what "no added
 failures" asks about. All five failures are the same exception from the same
@@ -155,6 +169,32 @@ the fixture's own construction — and none of the five identifiers mentions a
 moment, an arm or a clipped cell. That file is on the red base, not on this
 node's change, and it is reported as a follow-on rather than triaged here: this
 gate measures only this node's own reroute.</p>
+
+<p><strong><code>test_forward_receipt_raster.py</code> is a timeout at both
+arms, not a pass, and the first version of this table recorded it as a pass.</strong>
+<code>pytest-timeout</code> fired at <code>&gt;1200.0 s</code> on
+<code>test_reduced_hex_request_receipt_records_absent_raster_flux</code> in both
+arms — <code>1 failed in 1593.54 s</code> at base <code>EXIT=1</code> and
+<code>1 failed in 1586.87 s</code> at head <code>EXIT=1</code>. The row therefore
+discriminates nothing: no assertion in either arm was reached, so it is evidence
+about the bound this gate set, not about the support arm. It needs its own
+allocation with a raised bound.</p>
+
+<p><strong><code>test_forward_compile_identity.py</code> never reported and is
+not a pass either.</strong> At the fence deadline both arms had run 34 minutes,
+each had printed exactly one passed test, and neither had written its
+<code>EXIT_…</code> line; the 1200 s bound did not fire even at 34 minutes. The
+gate was then stopped by resolved pid list, so the row is
+<strong>uncollected</strong>. The required-argument change is
+<strong>unverified</strong> against that file, and it is listed in “What
+remains” to be re-run.</p>
+
+<p>An earlier version of this table recorded all six rows as passes at both arms
+with zero added failures. That was wrong for the two rows above and is the
+subject of a review finding against this node: the table was written from the
+gate's intent before those arms had landed, and only the manifest was corrected
+when they did. The table now reads the logs, and
+<code>gate_table_check.py</code> is what keeps it reading them.</p>
 
 <p>The one caller left un-updated is deliberate. <code>tests/test_oracle_axis_admission.py</code>
 still omits the arm at <code>line 34</code>; the file is held by the concurrent

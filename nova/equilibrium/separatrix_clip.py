@@ -128,7 +128,14 @@ def _centroid(vertices: np.ndarray) -> np.ndarray:
 def _area_moments(
     vertices: np.ndarray, origin: np.ndarray
 ) -> tuple[float, np.ndarray, np.ndarray]:
-    """Return area and first two area moments about ``origin``."""
+    """Return area and first two area moments about ``origin``.
+
+    This stays a NumPy closed form rather than a call into the shared owner
+    reduction: its caller invokes it once per mesh cell in a Python loop, and an
+    eager traced call per cell turns that loop into a compile-and-dispatch per
+    cell. The moments it returns are the same total-degree-two block of the same
+    monomial integrals.
+    """
     if len(vertices) < 3:
         return 0.0, np.zeros(2), np.zeros((2, 2))
     local = vertices - origin
@@ -505,11 +512,13 @@ def padded_polynomial_current_moments(
 
     ``coefficients`` multiply total-degree monomials in coordinates centred on
     ``centroids`` and divided by ``coordinate_scale``. If ``powers`` is omitted,
-    the complete basis is inferred from the static coefficient width. The edge
-    reductions are closed simplex moments, so moving clip vertices remain
-    traced values and no quadrature nodes or data-dependent shapes enter an
-    iteration.
+    the complete basis is inferred from the static coefficient width. The
+    monomial moments come from the shared owner
+    :func:`~nova.equilibrium.clip_quadrature._straight_edge_monomial_moments`,
+    whose reduction is closed-form, so moving clip vertices remain traced values
+    and no quadrature nodes or data-dependent shapes enter an iteration.
     """
+    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
     from nova.jax.config import configure_dtypes
 
     configure_dtypes()
@@ -541,40 +550,15 @@ def padded_polynomial_current_moments(
         )
 
     local = (vertices - centre[:, None, :]) / scale[:, None, :]
-    slot = jnp.arange(capacity)
-    valid = slot[None, :] < count[:, None]
-    following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
-    following = jnp.take_along_axis(local, following_slot[..., None], axis=1)
-    cross = local[..., 0] * following[..., 1] - following[..., 0] * local[..., 1]
-    cross = jnp.where(valid, cross, 0.0)
-    orientation = jnp.where(jnp.sum(cross, axis=1) < 0.0, -1.0, 1.0)
     area_scale = scale[:, 0] * scale[:, 1]
+    maximum_degree = max(radial + vertical for radial, vertical in powers)
+    table = _straight_edge_monomial_moments(local, count, max_degree=maximum_degree + 1)
 
     def monomial_moment(radial_power, vertical_power):
-        edge_moment = jnp.zeros((cell_count, capacity), dtype=vertices.dtype)
         total_degree = radial_power + vertical_power
-        for radial_first in range(radial_power + 1):
-            radial_factor = (
-                math.comb(radial_power, radial_first)
-                * local[..., 0] ** radial_first
-                * following[..., 0] ** (radial_power - radial_first)
-            )
-            for vertical_first in range(vertical_power + 1):
-                first_degree = radial_first + vertical_first
-                simplex = (
-                    math.factorial(first_degree)
-                    * math.factorial(total_degree - first_degree)
-                    / math.factorial(total_degree + 2)
-                )
-                vertical_factor = (
-                    math.comb(vertical_power, vertical_first)
-                    * local[..., 1] ** vertical_first
-                    * following[..., 1] ** (vertical_power - vertical_first)
-                )
-                edge_moment = edge_moment + simplex * radial_factor * vertical_factor
-        return orientation * area_scale * jnp.sum(cross * edge_moment, axis=1)
+        column = total_degree * (total_degree + 1) // 2 + radial_power
+        return area_scale * table[:, column]
 
-    maximum_degree = max(radial + vertical for radial, vertical in powers)
     required_powers = tuple(
         (radial, vertical)
         for degree in range(maximum_degree + 2)
@@ -847,79 +831,32 @@ def _project_arc_to_cell(points, edge_start, edge_end, valid_edge):
     return jnp.where(inside[..., None], points, projected)
 
 
-def _traced_polygon_moments(vertices, count, centroids):
-    """Evaluate fixed-capacity polygon moments with traced reductions."""
-    import jax.numpy as jnp
+def _centred_degree_two_moments(vertices, count, centroids):
+    """Evaluate fixed-capacity polygon moments through the shared reduction.
 
-    capacity = vertices.shape[1]
-    slot = jnp.arange(capacity)
-    valid = slot[jnp.newaxis, :] < count[:, jnp.newaxis]
-    following_slot = jnp.where(
-        slot[jnp.newaxis, :] + 1 < count[:, jnp.newaxis],
-        slot[jnp.newaxis, :] + 1,
-        0,
+    The owner reduction integrates raw monomials about the origin; shifting the
+    vertices by the centroid republishes its total-degree-two block as the area,
+    first and second area moments this call's callers consume.
+    """
+    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
+
+    table = _straight_edge_monomial_moments(
+        vertices - centroids[:, None, :], count, max_degree=2
     )
-    following = jnp.take_along_axis(vertices, following_slot[..., None], axis=1)
-    local = vertices - centroids[:, None, :]
-    following_local = following - centroids[:, None, :]
-    radial, vertical = local[..., 0], local[..., 1]
-    following_radial = following_local[..., 0]
-    following_vertical = following_local[..., 1]
-    cross = radial * following_vertical - following_radial * vertical
-    cross = jnp.where(valid, cross, 0.0)
-    area_twice = jnp.sum(cross, axis=1)
-    orientation = jnp.where(area_twice < 0.0, -1.0, 1.0)
-    area = 0.5 * orientation * area_twice
-    first = orientation[:, None] * jnp.stack(
-        [
-            jnp.sum((radial + following_radial) * cross, axis=1) / 6.0,
-            jnp.sum((vertical + following_vertical) * cross, axis=1) / 6.0,
-        ],
-        axis=1,
-    )
-    radial_squared = (
-        orientation
-        * jnp.sum(
-            (radial**2 + radial * following_radial + following_radial**2) * cross,
-            axis=1,
-        )
-        / 12.0
-    )
-    vertical_squared = (
-        orientation
-        * jnp.sum(
-            (vertical**2 + vertical * following_vertical + following_vertical**2)
-            * cross,
-            axis=1,
-        )
-        / 12.0
-    )
-    cross_moment = (
-        orientation
-        * jnp.sum(
-            (
-                2.0 * radial * vertical
-                + radial * following_vertical
-                + following_radial * vertical
-                + 2.0 * following_radial * following_vertical
-            )
-            * cross,
-            axis=1,
-        )
-        / 24.0
-    )
+    area = table[..., 0]
+    first = jnp.stack([table[..., 2], table[..., 1]], axis=-1)
     second = jnp.stack(
         [
-            jnp.stack([radial_squared, cross_moment], axis=1),
-            jnp.stack([cross_moment, vertical_squared], axis=1),
+            jnp.stack([table[..., 5], table[..., 4]], axis=-1),
+            jnp.stack([table[..., 4], table[..., 3]], axis=-1),
         ],
-        axis=1,
+        axis=-2,
     )
     nonzero = area > 0.0
     return (
         jnp.where(nonzero, area, 0.0),
-        jnp.where(nonzero[:, None], first, 0.0),
-        jnp.where(nonzero[:, None, None], second, 0.0),
+        jnp.where(nonzero[..., None], first, 0.0),
+        jnp.where(nonzero[..., None, None], second, 0.0),
     )
 
 
@@ -1405,7 +1342,7 @@ def _clip_cell(
         )
         overflow = overflow | jnp.any(branch_overflow, axis=1)
 
-    full_area, _full_first, _full_second = _traced_polygon_moments(
+    full_area, _full_first, _full_second = _centred_degree_two_moments(
         cell_start_point, count, centre
     )
     flat_branch_support = branch_support.reshape(2 * cell_count, support_capacity, 2)
@@ -1413,7 +1350,7 @@ def _clip_cell(
     flat_centre = jnp.broadcast_to(centre[:, None, :], (cell_count, 2, 2)).reshape(
         2 * cell_count, 2
     )
-    branch_area, branch_first, branch_second = _traced_polygon_moments(
+    branch_area, branch_first, branch_second = _centred_degree_two_moments(
         flat_branch_support, flat_branch_count, flat_centre
     )
     branch_area = branch_area.reshape(cell_count, 2)
@@ -1725,7 +1662,7 @@ def _traced_saddle_wedges_from_edge_roots(
     flat_centre = jnp.broadcast_to(centre[:, None, :], (cell_count, 4, 2)).reshape(
         cell_count * 4, 2
     )
-    cyclic_area, cyclic_first, cyclic_second = _traced_polygon_moments(
+    cyclic_area, cyclic_first, cyclic_second = _centred_degree_two_moments(
         flat_vertices,
         flat_count,
         flat_centre,
@@ -1782,7 +1719,7 @@ def _traced_saddle_wedges_from_edge_roots(
     selected = saddle[:, None]
     vertices = jnp.where((selected[..., None] & live)[..., None], vertices, 0.0)
     vertex_count = jnp.where(selected, vertex_count, 0)
-    full_area, _full_first, _full_second = _traced_polygon_moments(
+    full_area, _full_first, _full_second = _centred_degree_two_moments(
         start,
         count,
         centre,
@@ -1954,7 +1891,7 @@ def _expand_spline_saddle_wedges(
     flat_centre = jnp.broadcast_to(
         wedges.centroids[:, None, :], (cell_count, 4, 2)
     ).reshape(4 * cell_count, 2)
-    area, first, second = _traced_polygon_moments(
+    area, first, second = _centred_degree_two_moments(
         flat_vertices, flat_count, flat_centre
     )
     area = area.reshape(cell_count, 4)

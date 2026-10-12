@@ -1,0 +1,106 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite (base_gate_split.log, revision c054a721f) fails two ids: tests/test_equilibrium_stencil_mesh.py::test_the_conservation_receipts_agree_between_the_meshes and tests/test_exact_clip_moments.py::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from. Reviewed after_suite (focused_gate.log, revision b12dacca4) fails one id: tests/test_equilibrium_stencil_mesh.py::test_the_conservation_receipts_agree_between_the_meshes. Both lists were grep-confirmed against the logs' FAILED lines. Head-minus-base is empty: added_failure_count 0, added_failure_ids [].",
+  "added_failure_ids": [],
+  "artifacts": [
+    "census JSON (600 polygons) /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041906125895-polygon-moment-owner/census.json",
+    "focused_gate.log revision b12dacca4: 5 passed tests/test_polygon_moment_owner.py, 74 passed 1 failed overall",
+    "base_gate_split.log revision c054a721f: 68 passed 2 failed",
+    "cert_compare.log: booked membership bit-identical base c054a721f vs head b12dacca4, max_rel 0.0 WITHIN_1E-13_RELATIVE=True",
+    "negative_control.log: raising inside the owner, 8 failed in tests/test_exact_clip_moments.py EXIT=1",
+    "negative_control_delegation.log: reversing 32d463cf7 reddens test_polygon_moment_owner 2 failed EXIT=1"
+  ],
+  "blocking_finding_count": 0,
+  "call_site_count": 8,
+  "call_sites": [
+    "nova/equilibrium/polygon_moments.py:99",
+    "nova/equilibrium/separatrix_clip.py:1345",
+    "nova/equilibrium/separatrix_clip.py:1353",
+    "nova/equilibrium/separatrix_clip.py:1665",
+    "nova/equilibrium/separatrix_clip.py:1722",
+    "nova/equilibrium/separatrix_clip.py:1894",
+    "nova/equilibrium/separatrix_clip.py:2255",
+    "nova/equilibrium/clip_quadrature.py:249"
+  ],
+  "commits_read": [
+    "67f7b68bf",
+    "f515e171c",
+    "32d463cf7",
+    "90bb6f21e",
+    "775370a7c",
+    "4523dc2f3",
+    "b12dacca4",
+    "84d18f011",
+    "31fea0487"
+  ],
+  "completed_at": "2026-10-12T06:29:35.344Z",
+  "dispatched_at": "2026-10-12T06:23:25Z",
+  "evidence_inputs": [
+    "census.json candidate ranking: owner clip_quadrature._straight_edge_monomial_moments max_rel 2.824e-07 / max_rel_trimmed 4.777e-08 / max_abs 1.332e-15; rejected polygon_moments.polygon_monomial_moments max_rel 1.287e-05 (worst).",
+    "Owner chosen on outlier-trimmed and absolute error; on raw max_rel separatrix_clip._area_moments (1.216e-07) and padded_polynomial_current_moments (1.447e-07) are smaller but _area_moments covers degree<=2 only.",
+    "separatrix_clip._centred_degree_two_moments column mapping verified against the owner's documented 'total degree then increasing radial exponent' order: first=[x,y], second=[[x2,xy],[xy,y2]].",
+    "The two blocking findings of the prior review (r-20261012T054551110722) are repaired: cert_base2/cert_head2 name c054a721f/b12dacca4 and focused_gate.log names b12dacca4, each arm its own cwd."
+  ],
+  "findings": [
+    {
+      "file": "tests/test_polygon_moment_owner.py",
+      "line": 155,
+      "severity": "follow-on",
+      "text": "test_every_remaining_polygon_reduction_delegates_to_the_owner asserts \"_straight_edge_monomial_moments\" in inspect.getsource(reduction); the docstrings of polygon_monomial_moments (nova/equilibrium/polygon_moments.py:81) and padded_polynomial_current_moments (nova/equilibrium/separatrix_clip.py:517) already contain that literal, so the assertion passes even if the delegation body is reverted to recompute the moments while the docstring survives."
+    },
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": 128,
+      "severity": "follow-on",
+      "text": "done_when clause (3) requires the other implementations deleted; _area_moments is a numpy reimplementation of the owner's total-degree-two block (census.json gives it max_abs 6.661e-16 for degree<=2), and it sits in a file inside the fence, so the duplicate reduction was retained rather than routed."
+    },
+    {
+      "file": "nova/equilibrium/stencil_mesh.py",
+      "line": 574,
+      "severity": "follow-on",
+      "text": "the file is in the declared write path but the diff does not touch it: _polygon_monomial_integral remains a second signed-fan monomial reduction, and the named candidate fixed_profile_current_moments at :480 does not appear in census.json, so clause (1)'s 'measure each candidate' is unmet for it."
+    }
+  ],
+  "gate_arms_note": "The head code revision is b12dacca4; the two later commits 84d18f011 and 31fea0487 are docs(evidence) only (1 file each, the fragment), so the focused gate and certificate arms at b12dacca4 cover the reviewed code head.",
+  "item_verdicts": {
+    "diff": "read commit by commit against c054a721f: 67f7b68bf/f515e171c/32d463cf7/90bb6f21e reroute the reductions (polygon_moments.py Green machinery removed, separatrix_clip _traced_polygon_moments renamed to the delegating _centred_degree_two_moments), 4523dc2f3 restores the numpy area view, 775370a7c/b12dacca4/84d18f011/31fea0487 record the evidence.",
+    "done_when": "partial: clauses (1),(2),(4),(5),(6),(7) are met and recorded (census.json, cert_compare.log, focused_gate.log, negative_control.log, net source -47); clause (3) is unmet because the surviving reduction names are still present in nova/ and scripts/; the two evidence gaps of the prior review are repaired.",
+    "goal": "partial: nova/equilibrium/polygon_moments.py:88 and nova/equilibrium/separatrix_clip.py:843 route their moments through the census-chosen owner clip_quadrature._straight_edge_monomial_moments and the Green-theorem machinery and _traced_polygon_moments are deleted, but nova/equilibrium/separatrix_clip.py:128 _area_moments and nova/equilibrium/stencil_mesh.py:574 _polygon_monomial_integral remain independent reductions.",
+    "manifest": "read: status complete, nine commits named, focused_gate.log at b12dacca4 and cert_head2/cert_base2 at b12dacca4/c054a721f, the non-reproduction of the area-view control disclosed, clause (3) residual reported under follow_ons.",
+    "write_paths": "met: the diff is confined to nova/equilibrium/polygon_moments.py, nova/equilibrium/separatrix_clip.py, tests/test_polygon_moment_owner.py and docs/evidence/fragments/converged-forward-solve/polygon-moment-owner.html, all inside the declared fence."
+  },
+  "justifications": {
+    "durability": "tests/test_polygon_moment_owner.py:113 and :131 compare the owner and the degree-two view against an independent Fraction reference and the reversal control reddens by id, but :155 only asserts a literal name appears in inspect.getsource, which the delegation docstrings already contain.",
+    "evidence": "the census (census.json, 600 polygons) records per-candidate per-degree error, cert_compare.log shows booked membership bit-identical (max_rel 0.0) between base c054a721f and head b12dacca4, and focused_gate.log/base_gate_split.log carry the clip-moment arms at those revisions; clause (3) is only partially met.",
+    "fit": "the added name _centred_degree_two_moments at nova/equilibrium/separatrix_clip.py:834 states its mechanism and carries no banned label, though the intake makes a leading-underscore helper the package-wide owner.",
+    "goal_fidelity": "nova/equilibrium/polygon_moments.py:88 and nova/equilibrium/separatrix_clip.py:843 both return the census owner clip_quadrature._straight_edge_monomial_moments, consolidating two of the four reductions, while nova/equilibrium/stencil_mesh.py:574 and nova/equilibrium/separatrix_clip.py:128 keep independent reductions in the fenced files.",
+    "reuse": "the reroute extends clip_quadrature._straight_edge_monomial_moments, but nova/equilibrium/separatrix_clip.py:128 and nova/equilibrium/stencil_mesh.py:574 remain two further reductions over the same capability.",
+    "scope_discipline": "the c054a721f..31fea0487 diff touches only nova/equilibrium/polygon_moments.py, nova/equilibrium/separatrix_clip.py, tests/test_polygon_moment_owner.py and the evidence fragment, every one inside the declared write paths."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to consolidate the parallel polygon-moment reductions onto the single census-selected owner; nova/equilibrium/polygon_moments.py:88 and nova/equilibrium/separatrix_clip.py:843 now return clip_quadrature._straight_edge_monomial_moments, deleting the Green-theorem machinery and _traced_polygon_moments, though nova/equilibrium/separatrix_clip.py:128 _area_moments and nova/equilibrium/stencil_mesh.py:574 _polygon_monomial_integral still reduce independently.\nVERDICT done_when: clauses (1),(2),(4),(5),(6),(7) are met and recorded (census.json, cert_compare.log, focused_gate.log, negative_control.log, net source -47); clause (3) is unmet because the surviving reduction names remain present under nova/ and scripts/, and the two evidence gaps of the prior review are now repaired.\nVERDICT write_paths: the diff touches only nova/equilibrium/polygon_moments.py, nova/equilibrium/separatrix_clip.py, tests/test_polygon_moment_owner.py and the evidence fragment, all inside the declared fence.\nVERDICT manifest: read; status complete, nine commits named, focused_gate.log at b12dacca4 and cert_base2/cert_head2 at c054a721f/b12dacca4, and it discloses that the area-view reversion control did not reproduce.\nVERDICT diff: read commit by commit against c054a721f; nine commits, source net -47 lines, residual duplicates retained in fenced files.\nCALL_SITES: nova/equilibrium/polygon_moments.py:99, nova/equilibrium/separatrix_clip.py:1345, nova/equilibrium/separatrix_clip.py:1353, nova/equilibrium/separatrix_clip.py:1665, nova/equilibrium/separatrix_clip.py:1722, nova/equilibrium/separatrix_clip.py:1894, nova/equilibrium/separatrix_clip.py:2255, nova/equilibrium/clip_quadrature.py:249\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: nova/equilibrium/polygon_moments.py:88 and nova/equilibrium/separatrix_clip.py:843 both return the census owner clip_quadrature._straight_edge_monomial_moments, consolidating two of the four reductions, while nova/equilibrium/stencil_mesh.py:574 and nova/equilibrium/separatrix_clip.py:128 keep independent reductions in the fenced files.\nSCORE evidence: 16\nJUSTIFICATION evidence: the census (census.json, 600 polygons) records per-candidate per-degree error, cert_compare.log shows booked membership bit-identical (max_rel 0.0) between base c054a721f and head b12dacca4, and focused_gate.log/base_gate_split.log carry the clip-moment arms at those revisions.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the c054a721f..31fea0487 diff touches only nova/equilibrium/polygon_moments.py, nova/equilibrium/separatrix_clip.py, tests/test_polygon_moment_owner.py and the evidence fragment, every one inside the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_polygon_moment_owner.py:113 and :131 compare the owner and the degree-two view against an independent Fraction reference and the reversal control reddens by id, but :155 only asserts a literal name appears in inspect.getsource, which the delegation docstrings already contain.\nSCORE fit: 18\nJUSTIFICATION fit: the added name _centred_degree_two_moments at nova/equilibrium/separatrix_clip.py:834 states its mechanism and carries no banned label, though the intake makes a leading-underscore helper the package-wide owner.\nSCORE reuse: 16\nJUSTIFICATION reuse: the reroute extends clip_quadrature._straight_edge_monomial_moments, but nova/equilibrium/separatrix_clip.py:128 and nova/equilibrium/stencil_mesh.py:574 remain two further reductions over the same capability.\nFINDING tests/test_polygon_moment_owner.py:155 follow-on: test_every_remaining_polygon_reduction_delegates_to_the_owner asserts \"_straight_edge_monomial_moments\" in inspect.getsource(reduction); the docstrings of polygon_monomial_moments (nova/equilibrium/polygon_moments.py:81) and padded_polynomial_current_moments (nova/equilibrium/separatrix_clip.py:517) already contain that literal, so the assertion passes even if the delegation body is reverted to recompute the moments while the docstring survives.\nFINDING nova/equilibrium/separatrix_clip.py:128 follow-on: done_when clause (3) requires the other implementations deleted; _area_moments is a numpy reimplementation of the owner's total-degree-two block (census.json gives it max_abs 6.661e-16 for degree<=2), and it sits in a file inside the fence, so the duplicate reduction was retained rather than routed.\nFINDING nova/equilibrium/stencil_mesh.py:574 follow-on: the file is in the declared write path but the diff does not touch it: _polygon_monomial_integral remains a second signed-fan monomial reduction, and the named candidate fixed_profile_current_moments at :480 does not appear in census.json, so clause (1)'s 'measure each candidate' is unmet for it.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T062308488339-review-of-polygon-moment-owner",
+  "reviewed_base_sha": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+  "reviewed_head_sha": "31fea048759dd5d87199bfe4328598dede24960f",
+  "reviewed_revision": "31fea048759dd5d87199bfe4328598dede24960f",
+  "reviewed_run_id": "r-20261012T041906125895-polygon-moment-owner",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/polygon-moment-owner",
+  "reviewer_node": "review-of-polygon-moment-owner",
+  "reviewer_run_id": "r-20261012T062308488339-review-of-polygon-moment-owner",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 15,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T06:38:00.000000+00:00",
+  "total": 100,
+  "verdict": "pass-with-follow-on"
+}

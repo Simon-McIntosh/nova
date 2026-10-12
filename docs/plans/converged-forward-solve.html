@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="182">
+<meta name="plan-version" content="183">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -800,7 +800,10 @@
     <div class="r-comment-body"><p>Reviewed node cfs-exterior-exact-support (base c054a721f, head 3965f570b): the diff poses the prescribed exterior on the exact analytic-separatrix polygon support, threads the support arm and the polygonanalytic.py digest into the exterior cache identity, and keeps the legacy arm as the positive control; the declared negative control is admitted (test_exterior_closure_falls_below_booking[2000] FAILED, closure 0.017694 above booking 0.008968, EXIT=1). Scored goal_fidelity 18, evidence 17, scope_discipline 20, durability 18, fit 18, reuse 5; three follow-on findings, no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T182138910315-review-of-exterior-fixture-delegation" data-who="reckon-build" data-when="2026-10-12T18:29:26.449Z">
-    <div class="r-comment-body"><p>Independent review of r-20261012T143631303990-exterior-fixture-delegation stored at reviewed_base_sha 437a68db4ee910dbd9029408f03068688aff0cce / reviewed_head_sha d48aaef5a48359692495583db1d3fef4136387b0; six dimensions scored 16/11/18/9/13/20 (total 87), four findings, two blocking: exact_current_moments&#x27;s default flip silently changes the support arm for every caller that omits support_arm with no caller updated (measure.py:1205), and the node&#x27;s own done-when (3) identity clause is unmet yet recorded as superseded with a pass verdict (fragment:211).</p></div>
+    <div class="r-comment-body"><p>Independent review of r-20261012T143631303990-exterior-fixture-delegation stored at reviewed_base_sha 437a68db4ee910dbd9029408f03068688aff0cce / reviewed_head_sha d48aaef5a48359692495583db1d3fef4136387b0; six dimensions scored 16/11/18/9/13/20 (total 87), four findings, two blocking: exact_current_moments's default flip silently changes the support arm for every caller that omits support_arm with no caller updated (measure.py:1205), and the node's own done-when (3) identity clause is unmet yet recorded as superseded with a pass verdict (fragment:211).</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261012T193216757515-review-of-exterior-fixture-delegation" data-who="reckon-build" data-when="2026-10-12T19:42:41.618Z">
+    <div class="r-comment-body"><p>Independent review of the three commits f7e94d844/df1cee65f/c772b1154 gained since the prior review at d48aaef5a: the arm-default and identity-clause findings are addressed, and one blocking finding remains -- the fragment&#x27;s caller-gate table records two rows as passed that the reviewed run&#x27;s own logs show timed out or never reported.</p></div>
 </div>
 </section>
 </main>

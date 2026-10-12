@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own base/head caller-gate arms at base 437a68db4 and head c772b1154: the six log pairs callers_base-<file>.log / callers_head-<file>.log under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation. Base failing ids: test_two_class_recovery.py (5 failed) and test_forward_receipt_raster.py (1 failed, timeout). Head failing ids: the same two, identical ids. Head-only (added) failures: none, so added_failure_count 0. The reviewed manifest records no baseline_suite/after_suite keys, so the log pair above is the gate pair; note that receipt_raster failed at both arms by pytest-timeout (>1200 s) and compile_identity produced no summary at either arm, so those two rows discriminate no arm and contribute no failing id to either side.",
+  "added_failure_ids": [],
+  "blocking_finding_count": 1,
+  "call_site_count": 6,
+  "call_sites": [
+    "scripts/analytic_oracle_fixtures/reduced_oracle.py:38",
+    "scripts/accuracy_cost_ladder/measure.py:234",
+    "scripts/oracle_rebaseline/measure.py:549",
+    "scripts/moment_branch_integration/measure.py:58",
+    "benchmarks/analytic_operator_ladder.py:283",
+    "benchmarks/frozen_current_flux_image_gate.py:810"
+  ],
+  "commits_read": [
+    "f7e94d844",
+    "df1cee65f",
+    "c772b1154"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T14:36:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html",
+      "line": "120",
+      "severity": "blocking",
+      "text": "blocking: the caller-gate table records test_forward_receipt_raster.py and test_forward_compile_identity.py as \"passed / passed / 0 added failures\", but the reviewed run's own logs show the receipt_raster row FAILED at both arms (pytest-timeout, 1593.54s base and 1586.87s head, EXIT=1) and the compile_identity arms printed one dot and never reached a summary or EXIT line, so the landed evidence document claims a verification the gate did not deliver."
+    },
+    {
+      "file": "tests/test_analytic_oracle_fixture_exterior.py",
+      "line": "153",
+      "severity": "follow-on",
+      "text": "follow-on: the guard against the fixture regrowing its own integrator is name-bound -- hasattr(fixture, \"_polygon_current_moments\") and _signed_ring_area -- so a differently-named reimplementation of the absolute-jacobian fan inside the fixture passes every test, because the region comparison at line 151 pins geometry.analytic_moments (the owner) and not the fixture's routing to it."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html",
+      "line": "497",
+      "severity": "follow-on",
+      "text": "follow-on: the fragment rests its plan-verdict pass on a \"coordinator's ruling\" retiring done-when (3), but plan nova:converged-forward-solve section 6 records no such ruling -- its newest comment is the prior review -- so the authority the pass now rests on is asserted in the fragment and manifest but is not readable in the plan."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's gate is the six-file caller sweep plus the regression test tests/test_analytic_oracle_fixture_exterior.py. The head2 re-run of the exterior file reads 2 passed in 131.56s (EXIT=0) against 1 passed at base, the added pass coinciding with the non-convex region test.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base d48aaef5a; f7e94d844 removes the support_arm default and names the arm at 25 callers, df1cee65f adds the non-convex-region regression test, c772b1154 rewrites the fragment with the closure ruling, the caller sweep and the figure.",
+    "done_when": "clauses (1),(2),(4),(5) remain met and clause (3), the identity clause, is retired by a ruling the fragment attributes to the coordinator; the caller gate varies each of six test files at base 437a68db4 and at head in fresh per-process arms (callers_base-*/callers_head-*), and the regression test's own control (signed fan 4.58e-15 pass, absolute-jacobian-control 1.00e-02 fail at a 1e-12 bound) satisfies the region-correctness leg.",
+    "goal": "the node goal is to route the certificate exterior fixture through the shared moment owner; the three commits gained since the prior review (f7e94d844, df1cee65f, c772b1154) keep that routing and close the prior review's two blocking findings -- scripts/analytic_oracle_fixtures/measure.py:1203 now makes support_arm a required keyword-only argument and every in-fence caller names its arm, so the goal's reroute stands while the silent-default defect is removed.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation/manifest.md; status complete, nine commits listed, both baseline_suite and after_suite are absent, and its tests field honestly records that receipt_raster is a timeout at both arms and compile_identity never reported.",
+    "write_paths": "the manifest declares scripts/analytic_oracle_fixtures, scripts/prototypes/support, six named test files, scripts/accuracy_cost_ladder, scripts/oracle_rebaseline, scripts/moment_branch_integration, benchmarks, the fragment and the figures directory; git diff --name-status d48aaef5a..c772b1154 returns 29 paths, every one inside that set, nothing outside."
+  },
+  "justifications": {
+    "durability": "tests/test_analytic_oracle_fixture_exterior.py:151 compares geometry.analytic_moments against an independent shoelace closed form and its control reddens on an absolute-jacobian fan, but the fixture-routing guard at tests/test_analytic_oracle_fixture_exterior.py:153 is a hasattr on two deleted names.",
+    "evidence": "the landed fragment docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html tables test_forward_receipt_raster.py and test_forward_compile_identity.py as passed/passed/0 while the reviewed run's own logs callers_base-/head-test_forward_receipt_raster.log read \"1 failed\" (timeout) and callers_*-test_forward_compile_identity.log carry no summary or EXIT line, so the sweep's recorded result overstates its own gate.",
+    "fit": "the rebuilt fragment docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html now prefixes its element ids with the node id (e.g. exterior-fixture-delegation-arm-default), and no symbol or comment carries a plan or stage label.",
+    "goal_fidelity": "scripts/analytic_oracle_fixtures/measure.py:1225 still routes the exact arm through scripts/prototypes/support/geometry.py:307 analytic_moments, and the added test tests/test_analytic_oracle_fixture_exterior.py:113 pins that owner's region on a non-convex ring.",
+    "reuse": "the diff adds no production definition and instead requires the shared owner scripts/prototypes/support/geometry.py:307; the only added helpers are test-local, and a search over nova/biot and scripts/ found no other shoelace cell-moment owner for the clipped-support path.",
+    "scope_discipline": "git diff --name-status d48aaef5a..c772b1154 returns only the declared fragment, figure, scripts, benchmarks and tests paths, with nothing outside the manifest's fenced set."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to route the certificate exterior fixture through the shared moment owner; the three commits gained since the prior review (f7e94d844, df1cee65f, c772b1154) keep that routing and close the prior review's two blocking findings -- scripts/analytic_oracle_fixtures/measure.py:1203 now makes support_arm a required keyword-only argument and every in-fence caller names its arm, so the goal's reroute stands while the silent-default defect is removed.\nVERDICT done_when: clauses (1),(2),(4),(5) remain met and clause (3), the identity clause, is retired by a ruling the fragment attributes to the coordinator; the caller gate varies each of six test files at base 437a68db4 and at head in fresh per-process arms (callers_base-*/callers_head-*), and the regression test's own control (signed fan 4.58e-15 pass, absolute-jacobian fan 1.00e-02 fail at a 1e-12 bound) satisfies the region-correctness leg.\nVERDICT write_paths: the manifest declares scripts/analytic_oracle_fixtures, scripts/prototypes/support, six named test files, scripts/accuracy_cost_ladder, scripts/oracle_rebaseline, scripts/moment_branch_integration, benchmarks, the fragment and the figures directory; git diff --name-status d48aaef5a..c772b1154 returns 29 paths, every one inside that set, nothing outside.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation/manifest.md; status complete, nine commits listed, both baseline_suite and after_suite are absent, and its tests field honestly records that receipt_raster is a timeout at both arms and compile_identity never reported.\nVERDICT diff: read commit by commit against base d48aaef5a; f7e94d844 removes the support_arm default and names the arm at 25 callers, df1cee65f adds the non-convex-region regression test, c772b1154 rewrites the fragment with the closure ruling, the caller sweep and the figure.\nCALL_SITES: scripts/analytic_oracle_fixtures/reduced_oracle.py:38, scripts/accuracy_cost_ladder/measure.py:234, scripts/oracle_rebaseline/measure.py:549, scripts/moment_branch_integration/measure.py:58, benchmarks/analytic_operator_ladder.py:283, benchmarks/frozen_current_flux_image_gate.py:810\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: scripts/analytic_oracle_fixtures/measure.py:1225 still routes the exact arm through scripts/prototypes/support/geometry.py:307 analytic_moments, and the added test tests/test_analytic_oracle_fixture_exterior.py:113 pins that owner's region on a non-convex ring.\nSCORE evidence: 11\nJUSTIFICATION evidence: the landed fragment docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html tables test_forward_receipt_raster.py and test_forward_compile_identity.py as passed/passed/0 while the reviewed run's own logs callers_base-/head-test_forward_receipt_raster.log read \"1 failed\" (timeout) and callers_*-test_forward_compile_identity.log carry no summary or EXIT line, so the sweep's recorded result overstates its own gate.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status d48aaef5a..c772b1154 returns only the declared fragment, figure, scripts, benchmarks and tests paths, with nothing outside the manifest's fenced set.\nSCORE durability: 15\nJUSTIFICATION durability: tests/test_analytic_oracle_fixture_exterior.py:151 compares geometry.analytic_moments against an independent shoelace closed form and its control reddens on an absolute-jacobian fan, but the fixture-routing guard at tests/test_analytic_oracle_fixture_exterior.py:153 is a hasattr on two deleted names.\nSCORE fit: 16\nJUSTIFICATION fit: the rebuilt fragment docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html now prefixes its element ids with the node id (e.g. exterior-fixture-delegation-arm-default), and no symbol or comment carries a plan or stage label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the diff adds no production definition and instead requires the shared owner scripts/prototypes/support/geometry.py:307; the only added helpers are test-local, and a search over nova/biot and scripts/ found no other shoelace cell-moment owner for the clipped-support path.\nFINDING docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:120 blocking: the caller-gate table records test_forward_receipt_raster.py and test_forward_compile_identity.py as \"passed / passed / 0 added failures\", but the reviewed run's own logs show the receipt_raster row FAILED at both arms (pytest-timeout, 1593.54s base and 1586.87s head, EXIT=1) and the compile_identity arms printed one dot and never reached a summary or EXIT line, so the landed evidence document claims a verification the gate did not deliver.\nFINDING tests/test_analytic_oracle_fixture_exterior.py:153 follow-on: the guard against the fixture regrowing its own integrator is name-bound -- hasattr(fixture, \"_polygon_current_moments\") and _signed_ring_area -- so a differently-named reimplementation of the absolute-jacobian fan inside the fixture passes every test, because the region comparison at line 151 pins geometry.analytic_moments (the owner) and not the fixture's routing to it.\nFINDING docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:497 follow-on: the fragment rests its plan-verdict pass on a \"coordinator's ruling\" retiring done-when (3), but plan nova:converged-forward-solve section 6 records no such ruling -- its newest comment is the prior review -- so the authority the pass now rests on is asserted in the fragment and manifest but is not readable in the plan.\n",
+  "review_kind": "independent review",
+  "review_run_id": "legacy-4bd3ab2a14dd",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "d48aaef5a48359692495583db1d3fef4136387b0",
+  "reviewed_head_sha": "c772b115476215739c7e6dd76042d5bc635f98d7",
+  "reviewed_revision": "c772b115476215739c7e6dd76042d5bc635f98d7",
+  "reviewed_run_id": "r-20261012T143631303990-exterior-fixture-delegation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/exterior-fixture-delegation",
+  "reviewer_node": "review-of-exterior-fixture-delegation",
+  "reviewer_run_id": "r-20261012T193216757515-review-of-exterior-fixture-delegation",
+  "scores": {
+    "durability": 15,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "section": "\u00a76",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T19:41:22.513917+00:00",
+  "total": 97,
+  "verdict": "blocked-by-findings"
+}

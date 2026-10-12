@@ -31,9 +31,22 @@
       "finding": "wiring-1",
       "reason": "gs.apply has been on main since merge 599339edf (cfs-gs-runtime-operands), so section 3 wiring does not wait on unbuilt section 4 work; followup f-cfs-wire-current-book is dispatched against that head.",
       "when": "2026-10-12T04:24:03.612285+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s21-nova",
+      "finding": "reasoning-1",
+      "reason": "The plan records that the strong-1000 state fails both the map and the boundary clauses (job 1280644). For the centroid rows the boundary and position clause still applies, so the joint acceptance refuses that state, while a residual-only acceptance admits it. The control stands without a text change.",
+      "when": "2026-10-12T04:24:11.358526+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "The plan records that the strong-1000 state fails both the map and the boundary clauses (job 1280644). For the centroid rows the boundary and position clause still applies, so the joint acceptance refuses that state, while a residual-only acceptance admits it. The control stands without a text change.",
+      "when": "2026-10-12T04:24:11.358526+00:00"
+    },
     "wiring-1": {
       "action": "declined",
       "by": "s21-nova",

@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="170">
+<meta name="plan-version" content="171">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -210,10 +210,11 @@
     <div class="r-fu-body"><p>The map's serialized executable is 30 MB at 550 cells, 360 MB at 2,100 and 2.1 GB at 5,158, beyond the 2 GiB serialization limit; the solve embeds 2.89 GiB at 1,072. Dense interaction matrices are baked into the compiled program. gs.apply takes them as traced operands, as §4 already requires. Done when the executable stays at or below 50 MB at 5,000 and 10,000 cells and one compiled program serves two geometries of one shape.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §4</pre>
     </article>
-<article class="r-fu" data-id="f-cfs-exterior-on-exact-support" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-10" data-recommends-skill="/reckon-build converged-forward-solve §6" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cfs-exterior-on-exact-support" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-10" data-recommends-skill="/reckon-build converged-forward-solve §6" data-resolved-at="2026-10-12T07:28:03+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Pose the certificate exterior on the exact support (§6)</h4>
     <div class="r-fu-body"><p>The certificate's prescribed exterior subtracts an analytic-density image integrated on the production spline-clipped support, so it leaves a closure residual of 0.006 to 0.018 even with exact support. That residual masks the map's own convergence. Done when the exterior closure term falls below the booking term at every rung, so the map-fidelity gate measures the map.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §6</pre>
+    <p class="r-fu-outcome"><p>Landed at merge f68870f99 (run r-20261012T041830700797, review 96, pass-with-follow-on). The fixture poses the prescribed exterior on the exact analytic-separatrix support, and its cache identity carries the support arm and the polygon-kernel digest. Exterior closure against the booking term: 7.1e-15 vs 2.4e-2 at 550 cells, 1.1e-5 vs 5.8e-3 at 2,098, and 4.3e-6 vs 2.8e-4 at 5,158. Negative control: the legacy arm raises the 2,000-cell closure to 0.0177 against booking 0.0090 and fails the test. Evidence fragment <code>cfs-exterior-exact-support</code>.</p></p>
     </article>
 <article class="r-fu" data-id="f-cfs-coupling-build-scale" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-10" data-recommends-skill="/reckon-build converged-forward-solve §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Build the coupling blocks at 5,000 to 10,000 cells within minutes (§4)</h4>
@@ -275,6 +276,11 @@
     <h4 class="r-fu-title">Delete the remaining duplicate polygon-moment code, its dead-code tests and the test-helper debt (§3)</h4>
     <div class="r-fu-body"><p>The health review (code-98773e8b1367) and the consolidation node (polygon-moment-owner) leave three duplicates and two kinds of test debt. The duplicates are the parallel polygon-moment reductions that survive beside the owner <code>clip_quadrature._straight_edge_monomial_moments</code>: <code>polygon_moments.polygon_monomial_moments</code> and <code>polygon_density_moments</code>, the degree-two specialisations in <code>separatrix_clip</code>, and <code>stencil_mesh._polygon_monomial_integral</code>. The test debt is a <code>_double_precision</code> helper copied into 15 test modules, and tests that assert on <code>inspect.getsource</code> text instead of behaviour. Lead direction 2026-10-12: do not keep or port tests for dead code. Done when every surviving duplicate is deleted and its live callers are routed to the owner; tests, benchmarks and scripts that only exercise deleted code are deleted rather than ported; the dtype helper lives once in the shared test configuration; each source-text assertion is replaced by a behavioural test or deleted where the structure it guarded is gone; and the suites covering the touched modules pass by delta with a negative net line count.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-exterior-fixture-delegation" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-written-by="reckon-build" data-written-at="2026-10-12" data-recommends-skill="/reckon-build converged-forward-solve §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Route the exterior fixture&#x27;s cell moments through the support owner (§6)</h4>
+    <div class="r-fu-body"><p>Review follow-ons on the exact-support exterior (review 96, reuse 5).</p><ul><li><code>scripts/analytic_oracle_fixtures/measure.py</code> adds <code>_polygon_current_moments</code>, a second order-15 integrator of the analytic density over the clipped cells. It duplicates <code>scripts/prototypes/support/geometry.py</code> <code>analytic_moments</code>, which agrees with it to a decomposition residual of 0.0.</li><li><code>exact_current_moments</code> defaults to the legacy spline-clip arm, while the exterior defaults to the exact arm.</li></ul><p>Done when the fixture delegates to the support owner, the misleading default is removed, and the 550, 2,000 and 5,000-cell closure rows are unchanged within 1e-13 relative.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §6</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

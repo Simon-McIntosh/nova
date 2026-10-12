@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 import os
 from pathlib import Path
@@ -20,6 +20,7 @@ configure_dtypes()
 import jax
 import jax.numpy as jnp
 import numpy as np
+from scipy.interpolate import CloughTocher2DInterpolator, NearestNDInterpolator
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, topology
@@ -88,9 +89,25 @@ def sample_field(field, geometry):
         ),
         axis=-1,
     )
-    samples = topology._point_values(field, jnp.asarray(grid)).reshape(tuple(counts))
-    jax.block_until_ready(samples)
-    return SampledField(samples, jnp.asarray(lo), jnp.asarray(pitch))
+    mesh_points = np.asarray(geometry.sample_points).reshape(-1, 2)
+    mesh_values = np.asarray(
+        topology._point_values(field, geometry.sample_points)
+    ).reshape(-1)
+    unique, indices = np.unique(
+        np.round(mesh_points, decimals=12), axis=0, return_index=True
+    )
+    measured = mesh_values[indices]
+    cubic = CloughTocher2DInterpolator(unique, measured)
+    samples = cubic(grid.reshape(-1, 2))
+    missing = ~np.isfinite(samples)
+    if np.any(missing):
+        samples[missing] = NearestNDInterpolator(unique, measured)(
+            grid.reshape(-1, 2)[missing]
+        )
+    assert np.isfinite(samples).all() and np.ptp(measured) > 0
+    return SampledField(
+        jnp.asarray(samples.reshape(tuple(counts))), jnp.asarray(lo), jnp.asarray(pitch)
+    )
 
 
 def read_row(
@@ -190,8 +207,19 @@ def main():
     analytic_row, analytic_read = read_row(analytic, *scoring, "closed_form")
     rows.append(analytic_row)
     sampled = sample_field(analytic, geometry)
-    sampled_row, _ = read_row(sampled, *scoring, "sampled")
+    sampled_row, sampled_read = read_row(sampled, *scoring, "sampled")
     rows.append(sampled_row)
+    if args.perturbed:
+        pitch = sampled_row["pitch_m"]
+        displaced = replace(sampled, origin=sampled.origin + jnp.asarray((0.0, pitch)))
+        shifted = jax.jit(topology.read)(displaced, geometry, convention, policy)
+        jax.block_until_ready(shifted)
+        movement = float(
+            np.linalg.norm(np.asarray(shifted.axis) - np.asarray(sampled_read.axis))
+            / pitch
+        )
+        print(f"SAMPLED_SHIFT_CONTROL pitches={movement:.12g}", flush=True)
+        assert 0.95 <= movement <= 1.05
     reference = fixture._kernel_backed_field(args.kind, oracle, analytic, geometry)
     kernel = batched_field(reference)
     kernel_row, _ = read_row(kernel, *scoring, "kernel")
@@ -246,6 +274,7 @@ def main():
                 rows=rows,
                 batched_kernel=True,
                 booking_valid=bool(booking.valid),
+                sampled_shift_control_pitches=movement,
             ),
             indent=2,
         )

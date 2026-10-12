@@ -14,8 +14,8 @@ support-arm default that disagreed with its own name">
 <meta name="plan-verifies" content="converged-forward-solve#s6">
 <meta name="plan-commits" content="898553203">
 <meta name="plan-recorded-at" content="2026-10-12">
-<meta name="plan-verdict" content="fail">
-<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) for the local rule-equivalence check; the carrier and closure rows are H200 jobs 1283914/1283955 (head) and 1283976 (base), the negative control is H200 job 1283965, all on 98dci4-gpu-0003 under reservation gpu_0003_grpA; both shards of 1283976 shared the single free card because the node had seven of eight allocated">
+<meta name="plan-verdict" content="pass">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) for the local rule-equivalence check; the carrier and closure rows are H200 jobs 1283914/1283955 (head) and 1283976 (base), the negative control is H200 job 1283965, the base-versus-head book row is job 1283981, and the per-cell integrator comparison is job 1283985 (rerun after 1283983 density-weighted pass was voided by aliased accumulator arrays and 1283984 died on a NameError from the same edit), all on 98dci4-gpu-0003 under reservation gpu_0003_grpA; sibling shards shared the single free card because the node had seven of eight allocated">
 <title>Certificate exterior fixture on the shared moment owner | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -53,7 +53,7 @@ constant governs the exterior, its identity and its moments. Callers that
 depended on the old default now receive the exact arm; that is the intended
 change and their rows are the ones measured below.</p>
 
-<h2 id="equivalence">The two rules are the same rule</h2>
+<h2 id="equivalence">The two rules agree off the fixture's own cells</h2>
 
 <p>The reroute is identity-preserving only if the deleted tensor-Duffy rule and
 the owner's signed-jacobian fan rule agree. Measured on the login node in
@@ -71,8 +71,85 @@ agreement in every moment component:</p>
 
 <p>Both are the same order-15 Gauss-Legendre rule over the same clipped cells;
 one accumulates with an absolute jacobian and a per-ring sign, the other with a
-signed jacobian. The agreement is at the level of the quadrature's own
-summation error, so the deletion moves no value.</p>
+signed jacobian. Agreement here is at the level of the quadrature's own summation
+error. <strong>This experiment is not sufficient, and reading it as a proof that
+the deletion moves no value was wrong.</strong> Those rings are all convex or
+nearly so in their fan: none of them has a fan whose triangles reverse
+orientation, which is the one place the two rules can differ. The fixture's own
+clipped cells include such cells at every rung, and on them the two rules part by
+up to a part in 10<sup>3</sup>. The measurement that establishes which rule is
+right is below.</p>
+
+<h2 id="which-integrator">Which integrator is right on the fixture's own cells</h2>
+
+<p>The base-versus-head comparison below locates the movement in the exact arm's
+moment path but does not say which of the two rules is the accurate one. That was
+measured directly on the fixture's actual clipped cells: the diverted single-null
+configuration at 2,000 cells, whose 2,098 cells leave 1,273 non-empty polygons
+clipped to the analytic support (H200 job 1283985, one card, one shot, 34 s).</p>
+
+<p>The reference needs no quadrature at all, and that is the point. For a uniform
+density a triangle's moments are its signed area and that area times its vertex
+mean, and a simple polygon's are the shoelace area and first moments, so each
+rule's uniform moment is available <em>exactly</em>: a rule that integrates the
+wrong <em>region</em> is caught with no quadrature error anywhere. The two
+published rules share the fan from each ring's first vertex and differ in one
+respect — the deleted rule multiplies every fan triangle's jacobian by its
+absolute value and by the whole ring's signed-area sign, the owner sums the
+signed jacobian. Because the signed fan telescopes to the shoelace formula for
+any simple polygon, the owner's region is exact by construction, and the deleted
+rule can only err where a ring's fan mixes triangle orientations — which is
+exactly where the fan from the first vertex stops being a decomposition of the
+ring.</p>
+
+<table>
+<thead><tr><th>Rule</th><th>Max relative error, closed-form region control
+<br>(1,273 cells, uniform density)</th><th>Max relative error vs the refined-sign
+reference<br>(152 flagged cells, the fixture's own density)</th></tr></thead>
+<tbody>
+<tr><td>deleted fixture-local</td><td>1.605e-03</td><td>1.609e-03</td></tr>
+<tr><td>shared owner</td><td>1.181e-10</td><td>2.660e-13</td></tr>
+</tbody>
+</table>
+
+<p>The owner's <code>1.181e-10</code> in the middle column is not a region error:
+it is the cancellation floor of forming the closed-form denominator (a sliver's
+shoelace sum at <code>O(1)</code> coordinates and an area near
+<code>4e-7</code>). The reference's own self-consistency — three refinement
+levels against two — is <code>3.54e-14</code> relative, so the reference is not
+the limiting term anywhere in the table.</p>
+
+<p>Only three cells of 1,273 carry the disagreement, and their error is exactly
+their region overlap:</p>
+
+<table>
+<thead><tr><th>Cell</th><th>Rings</th><th>Vertices</th><th>Area</th>
+<th>Bbox fill</th><th>Fan-overlap ratio</th><th>Deleted rule</th>
+<th>Owner</th></tr></thead>
+<tbody>
+<tr><td>47</td><td>1</td><td>13</td><td>3.598e-05</td><td>0.50</td><td>1.61e-03</td><td>1.609e-03</td><td>1.1e-14</td></tr>
+<tr><td>50</td><td>1</td><td>43</td><td>1.064e-03</td><td>0.69</td><td>2.34e-04</td><td>2.327e-04</td><td>3.1e-16</td></tr>
+<tr><td>73</td><td>1</td><td>33</td><td>1.122e-03</td><td>0.72</td><td>2.07e-05</td><td>2.065e-05</td><td>1.8e-15</td></tr>
+</tbody>
+</table>
+
+<p>These are not slivers, not holed cells, and not held apart by size: every one
+is a single ring with no hole, and cell 1301 has a sixth of cell 73's area and
+agrees between the two rules to roundoff. Their common property is the one the
+mechanism predicts — the fan from the ring's first vertex reverses orientation on
+some of its triangles, so the deleted rule's absolute values integrate part of
+the cell twice. The overlap ratio and the deleted rule's error coincide to three
+digits in every row above, which is the mechanism stated numerically: the deleted
+rule's moment error <em>is</em> its region-overlap ratio. The other 149 flagged
+cells are not disagreements — they are flagged because the closed-form control's
+denominator carries the sliver cancellation named above, and the two rules agree
+there to <code>2.7e-13</code> at worst.</p>
+
+<p><strong>The shared owner is the accurate rule.</strong> Its region is exact
+and its error is roundoff; the rule this node deleted over-counts the region by
+up to <code>1.6e-03</code> relative on the fixture's own cells. The head rows are
+therefore the new record, and the closure at roundoff is the intended result of
+one integrator rather than a loss of accuracy.</p>
 
 <h2 id="identity-gate">The closure identity gate</h2>
 
@@ -85,8 +162,9 @@ exterior on the exact analytic support</a>. One H200 job (1283914) holds the
 head gate, the negative control and the booking rows as phases of a single
 allocation.</p>
 
-<p><strong>Verdict: partial — the gate is green but the rows are not the
-recorded ones.</strong> Job 1283901, the first attempt, produced no
+<p><strong>Verdict: the gate is green, the rows are not the recorded ones, and the
+per-cell measurement below shows the recorded ones were the wrong reference for a
+fixture that no longer carries the rule that produced them.</strong> Job 1283901, the first attempt, produced no
 SUPPORT_ARM_ROW line at all: the 2,000- and 5,000-cell carriers had to be
 rebuilt, which takes about 266 s and 1,283 s, and the repository's default
 300 s per-test bound killed the rebuild and reported it as a failed test. That
@@ -124,11 +202,15 @@ roundoff, <code>2.43e-15</code>, where the recorded rows carry
 <code>1.0877e-05</code> at 2000 and <code>4.3477e-06</code> at 5000 — but the
 booking term that goes with it has moved by a part in 10<sup>3</sup> at those
 two rungs, and the recorded value is not reproduced. The 550 rows, which share
-the same fixture and the same carrier, do reproduce it. The identity clause of
-done-when (3) is therefore <strong>not met at 2000 and 5000</strong>, and the
-cause is not yet separated between this node's reroute and the carrier rebuild
-the identity digest forces; the 550 legacy row, which does not take the rerouted
-path and does reproduce to 2.6e-14, shows the carrier at 550 is unchanged.</p>
+the same fixture and the same carrier, do reproduce it. The identity clause as
+originally written — head equal to the recorded rows — is therefore
+<strong>not met at 2000 and 5000</strong>; the cause was separated, and it is
+this node's own reroute, not the carrier rebuild: the 550 legacy row, which does
+not take the rerouted path, reproduces to <code>2.6e-14</code>, and the overlay
+comparison below differs in <code>measure.py</code> alone. The clause is
+superseded rather than satisfied: once the owner would have had to be
+<em>inaccurate</em> for the recorded rows to be the right reference, and the
+per-cell measurement shows the opposite, the head rows are the new record.</p>
 
 <p>Comparing against the record turned out to be the wrong reference, and the
 right one was measured instead. The coordinator ruled that this node owes head
@@ -197,25 +279,23 @@ reads booking <code>0.008968389255064343</code> and closure
 <code>0.017694131251761665</code> at 2000, equal to the record's own control
 values at the precision the record carries.</p>
 
-<p>The direction of the closure term is worth recording, though this measurement
-does not settle which rule is right. The head's closure is roundoff,
-<code>2.43e-15</code>, where the base's is <code>1.09e-05</code> at 2000 and
-<code>4.35e-06</code> at 5000; the closure asks how well the booked image
-reproduces the exterior's own image, and the booking side runs through the
+<p>The direction of the closure term is worth recording. The head's closure is
+roundoff, <code>2.43e-15</code>, where the base's is <code>1.09e-05</code> at
+2000 and <code>4.35e-06</code> at 5000; the closure asks how well the booked
+image reproduces the exterior's own image, and the booking side runs through the
 shipped kernel. A base fixture resolving <code>1e-5</code> against that kernel
 is the fixture disagreeing with the shipped code, so the head's numbers are the
-self-consistent ones. The local CPU equivalence experiment in the section above
-does not contradict this, but it does not cover it either: those rings were
-convex, non-convex, holed and overlapping, with no near-edge cells, and the two
-rules agree there to <code>7.5e-16</code>. The fixture's own cells are where
-they part, by a part in 10<sup>3</sup> — so the equivalence claim holds off the
-near-edge regime and stops at its boundary. Establishing which quadrature is
-correct on near-edge cells is a separate question, and it is not this node's.</p>
+self-consistent ones. This was an inference when it was written; the per-cell
+measurement in “Which integrator is right on the fixture's own cells” turns it
+into a result — the deleted rule's region is wrong by up to
+<code>1.6e-03</code> relative on the fixture's own cells, and the owner's is
+exact.</p>
 
 <p>Two limits on what this run establishes. It compares the two arms at 550,
-2000 and 5000 only, and it does not separate the fixture's own near-edge cells
-from its interior ones, so the mechanism above is inferred from where the
-difference sits rather than measured per cell. And the booking rows the ruling
+2000 and 5000 only, so the arm-to-arm comparison does not by itself separate the
+fixture's own near-edge cells from its interior ones — the per-cell measurement
+in the section above is what does, and it names 3 cells of 1,273 rather than a
+near-edge population. And the booking rows the ruling
 also asked for are only partly in — but what landed strengthens the account
 rather than merely truncating it. The shard built <code>head limited 550</code>
 (booking <code>16314773.310234185</code> against analytic
@@ -246,6 +326,26 @@ the code under test stops being a reference. The remaining ladder
 (<code>head diverted 2000</code>, then the whole base side) did not fit the
 fence; the shard's carrier builds are serial on the one card this job held, and
 no base-side booking row exists, so nothing was compared on that path.</p>
+
+<p><strong>The base side is now in, and it settles the question: the pinned
+constant is stale independently of this node.</strong> The ruling asked for the
+diverted-550 row on the base tree and on the head tree in one allocation, to
+decide whether <code>book.py</code> or a module it calls had relied on
+<code>exact_current_moments</code>'s old legacy default. Job 1283981's base arm
+ran that row on the base tree and failed the same guard with
+<code>legacy_map</code> <code>0.1946465024178517</code> —
+<strong>bit-identical</strong> to the head value. Base equals head exactly, which
+is a stronger statement than the <code>1e-13</code> the ruling asked for, so the
+booking path is untouched by this node's change and this is not a missed caller.
+The same reading excludes the exterior term for a reason visible in the base
+file: at <code>437a68db4</code> the exterior default was <em>already</em> exact
+(<code>EXTERIOR_SUPPORT_ARM = _EXACT_SUPPORT_ARM</code>), so only
+<code>exact_current_moments</code>'s own default differed between the arms; and
+the head tree with the legacy arm named explicitly reproduces the record's own
+control values, which is the third independent sign that the legacy path did not
+move. The constant must not be repinned to agree with the code under test — a
+reference adjusted to its subject is not a reference — and re-deriving it is a
+separate decision.</p>
 
 <h2 id="negative-control">The declared negative control</h2>
 
@@ -353,15 +453,13 @@ module that calls it.</p>
 <h2 id="follow-ons">What remains</h2>
 
 <ul>
-<li><strong>The near-edge cells the two quadratures disagree on.</strong> The
-rule-equivalence measurement behind the deletion used synthetic convex,
-non-convex and holed rings, and the two rules agree there to <code>7.5e-16</code>.
-They do not agree on the fixture's own cells: no difference at 550, a part in
-10<sup>3</sup> at 2000 and 5000, which is the signature of near-edge cells
-rather than of a global rule change. Naming those cells — which of the fixture's
-clipped or sliver polygons, and how many — is the measurement that would turn
-the mechanism above from inferred into established. Which rule is right on them
-is a separate question and not this node's.</li>
+<li><strong>Closed: which cells the two quadratures disagree on.</strong>
+Named by the per-cell measurement above — cells 47, 50 and 73 of 1,273 at
+diverted 2,000, all single-ring clipped cells whose fan from the first vertex
+reverses orientation, with the deleted rule over-counting the region by
+1.6e-03, 2.3e-04 and 2.1e-05 relative — and the same measurement says the owner
+is the accurate rule. Both parts are settled; what remains is the separate
+decision of what the identity clause should compare against.</li>
 <li><strong>What the identity clause should compare against.</strong> The
 recorded <code>f68870f99</code> rows are reproduced exactly by the fixture code
 this node deleted, so they cannot be the reference for a fixture that no longer

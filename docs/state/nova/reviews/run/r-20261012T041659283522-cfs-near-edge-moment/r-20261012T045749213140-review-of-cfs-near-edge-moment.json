@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite (final_baseline_parity.log, revision c054a721) fails six ids (peak and edge_offset on host/packed_numpy/packed_device) and after_suite (final_head_parity.log, revision c13eeecb) fails none, so head-minus-base is empty: added_failure_count 0. final_gate_summary.json records added_failure_ids [].",
+  "added_failure_ids": [],
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261012T041659283522-cfs-near-edge-moment.json",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/near_reference.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/final_baseline_parity.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/final_head_parity.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/negative_control_rows.log"
+  ],
+  "blocking_finding_count": 0,
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/topology.py:2299",
+    "nova/biot/tiledassembly.py:845",
+    "nova/biot/polysection.py:241",
+    "nova/equilibrium/extraction_lattice.py:201"
+  ],
+  "commits_read": [
+    "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+    "44345de22b08373230ac73e6e84f93226dab49f0",
+    "49bd69d2bf372bd4ec820925dc59b021b28be7e1",
+    "c13eeecb92f3f5218fcaa42c8c7499f6c29edd51",
+    "d5a97599a3286bcc9db6429ba64c9b543d58c10a"
+  ],
+  "completed_at": "2026-10-12T05:10:58.065Z",
+  "dispatched_at": "2026-10-12T04:58:05Z",
+  "evidence_inputs": "Base c054a721 head d5a97599. Kernel nova/biot/polygonanalytic.py:1974-1997 warps the near-fan angular rule by arcsinh/sinh around each edge's closest point. 301-pair near-edge maxima 1.28784e-14/1.08504e-13/1.28676e-13; retained 251-pair maxima 3.02909e-16/1.63335e-14/2.02332e-14; point-jet equations 21261 <= 22000. added_failure_count 0. One follow-on finding: the committed guard covers three rows, not the 301-pair set. audit-doc 0 errors on both fragments (re-verified).",
+  "findings": [
+    {
+      "file": "tests/biot/test_moment_path_parity.py",
+      "line": "234",
+      "severity": "follow-on",
+      "text": "the committed guard asserts 1e-12 on three hand-picked rows (peak, self_cell, edge_offset) while done-when clause (2) bounds the whole >=300-pair near-edge set; the 301-pair check lives only in the unasserted run-directory harness near_reference.py (which asserts only len(rows)==300), so a regression confined to near pairs outside the three named classes would pass the committed test."
+    }
+  ],
+  "gate_arms_note": "Both arms ran tests/biot/test_moment_path_parity.py to its summary line; baseline 6 failed/9 passed (exit 1) with the base kernel restored via baseline_environment, head 15 passed (exit 0). The base peak reproduces the recorded defect (1.80940e-6/2.39753e-5/2.81508e-5). The lone follow-on failure in the H200 module wave is test_point_jet_identity, which fails in both arms and is outside this node's scope (reported under follow_ons).",
+  "item_verdicts": {
+    "diff": "read commit by commit against base c054a721: 44345de2 rewrites the near angular rule and adds the near rows, c13eeecb pins self-cell and edge-offset rows, 49bd69d2 and d5a97599 add the fragments.",
+    "done_when": "met: six clauses, each measured and logged - 301-pair split reference with 50-digit checks, all three channels <=1e-12 and the 251-pair set at 2.023e-14, 21261 <= 22000, negative control 6 red ids, H200 delta baseline 6 failed/head 15 passed, and both fragments audit-doc 0 errors (verified).",
+    "goal": "met: nova/biot/polygonanalytic.py:1985 rewrites the near angular quadrature and the 301-pair maxima (1.28784e-14/1.08504e-13/1.28676e-13) are all inside 1e-12.",
+    "manifest": "read: status complete, commits 44345de2/49bd69d2/c13eeecb/d5a97599, base/head parity arms, negative control, expression bound and audit-doc result named.",
+    "write_paths": "met: diff confined to polygonanalytic.py, test_moment_path_parity.py and the two fragments, all inside the fence."
+  },
+  "justifications": {
+    "durability": "tests/biot/test_moment_path_parity.py:234 asserts three rows against hardcoded split-reference literals and reddens on the base kernel (negative_control_rows.log), but done-when clause (2)'s >=300-pair set is guarded by only those three rows.",
+    "evidence": "Each done-when figure is recorded in a named log (near_reference.log, cpu_expression.log, negative_control_rows.log), but the 301-pair <=1e-12 bound stands as a printed REFERENCE_SUMMARY rather than an asserted gate (near_reference.py:108 asserts only len(rows)==300).",
+    "fit": "The added block at nova/biot/polygonanalytic.py:1985 follows the module's xp-array idiom and its docstring at polygonanalytic.py:1956 states the mechanism. No banned label or version suffix.",
+    "goal_fidelity": "nova/biot/polygonanalytic.py:1985 warps the near-fan angular rule to the edge's closest point and the worst recorded 301-pair maximum (near_reference.log) is 1.286763104e-13, inside 1e-12.",
+    "reuse": "The change extends the existing owners _flux_area_rule/_flux_area_integral in place; a capability search of nova/biot (arcsinh, sinh, adaptive, leggauss) found only arc.py's arc-geometry arcsinh and unrelated target-section rules.",
+    "scope_discipline": "Every path in the diff (polygonanalytic.py, test_moment_path_parity.py and the two fragments) is inside the declared write paths; nothing outside is touched."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to bring the polygon moment kernel's near-edge and self-cell coupling within 1e-12 of an extended-precision split reference; nova/biot/polygonanalytic.py:1985 warps the near-fan angular rule to each edge's closest point and the recorded 301-pair maxima are 1.28784e-14/1.08504e-13/1.28676e-13, all inside 1e-12.\nVERDICT done_when: all six clauses are measured and recorded - near_reference.log REFERENCE_SUMMARY (301 pairs, peak reproduced at 1.80940e-6/2.39753e-5/2.81508e-5), mp_check.log 50-digit checks, off_reference.log 251-pair maxima 2.02332e-14, cpu_expression.log 21261 <= 22000, negative_control_rows.log six red ids, and the paired H200 parity arms (baseline 6 failed/9 passed, head 15 passed).\nVERDICT write_paths: the fence is nova/biot/polygonanalytic.py, tests/biot/test_moment_path_parity.py, two evidence fragments and a figures dir; the diff touches the kernel, the test and both fragments, all inside it, and writes no figure because the done-when names no artifact.\nVERDICT manifest: read; records status complete, four commits, base/head gate arms, the negative control log, the expression bound and the audit-doc result, and names every log.\nVERDICT diff: read commit by commit against base c054a721; 44345de2 rewrites the near angular quadrature and adds the near rows, c13eeecb pins the self-cell and edge-offset rows, 49bd69d2 and d5a97599 record the two fragments.\nCALL_SITES: nova/equilibrium/topology.py:2299 packed_analytic_moments, nova/biot/tiledassembly.py:845 packed_analytic_moments, nova/biot/polysection.py:241 polygon_analytic_flux_moments, nova/equilibrium/extraction_lattice.py:201 polygon_analytic_flux_moments\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: nova/biot/polygonanalytic.py:1985 warps the near-fan angular rule to the edge's closest point and the worst recorded 301-pair maximum (near_reference.log) is 1.286763104e-13, inside 1e-12.\nSCORE evidence: 17\nJUSTIFICATION evidence: each done-when figure is recorded in a named log (near_reference.log, cpu_expression.log, negative_control_rows.log), but the 301-pair <=1e-12 bound stands as a printed REFERENCE_SUMMARY rather than an asserted gate.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (polygonanalytic.py, test_moment_path_parity.py and the two fragments) is inside the declared write paths and nothing outside is touched.\nSCORE durability: 18\nJUSTIFICATION durability: tests/biot/test_moment_path_parity.py:234 asserts three rows against hardcoded split-reference literals and reddens on the base kernel (negative_control_rows.log), but done-when clause (2)'s >=300-pair set is guarded by only those three rows.\nSCORE fit: 19\nJUSTIFICATION fit: the added block at nova/biot/polygonanalytic.py:1985 follows the module's xp-array idiom and its docstring at polygonanalytic.py:1956 states the mechanism with no banned label or version suffix.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing owners _flux_area_rule/_flux_area_integral in place; a search of nova/biot for an existing peak-clustering quadrature (arcsinh, sinh, adaptive, leggauss) found only arc.py's arc-geometry arcsinh and unrelated target-section rules.\nFINDING tests/biot/test_moment_path_parity.py:234 follow-on: the committed guard asserts 1e-12 on three hand-picked rows while done-when clause (2) bounds the whole >=300-pair near-edge set, and the 301-pair check lives only in the unasserted run-directory harness, so a regression confined to near pairs outside the three named classes would pass the committed test.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T045749213140-review-of-cfs-near-edge-moment",
+  "reviewed_base_sha": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+  "reviewed_head_sha": "d5a97599a3286bcc9db6429ba64c9b543d58c10a",
+  "reviewed_revision": "d5a97599a3286bcc9db6429ba64c9b543d58c10a",
+  "reviewed_run_id": "r-20261012T041659283522-cfs-near-edge-moment",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-near-edge-moment",
+  "reviewer_node": "review-of-cfs-near-edge-moment",
+  "reviewer_run_id": "r-20261012T045749213140-review-of-cfs-near-edge-moment",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a74",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T05:12:00Z",
+  "total": 114,
+  "verdict": "pass"
+}

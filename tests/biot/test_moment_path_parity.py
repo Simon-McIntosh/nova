@@ -104,22 +104,52 @@ _ROWS = [
     },
 ]
 
-_NEAR_EDGE_ROW = {
-    "polygon": [
-        [4.91, -0.1],
-        [5.08, -0.14],
-        [5.17, 0.02],
-        [5.04, 0.15],
-        [4.88, 0.08],
-    ],
-    "target": [5.1290090247138025, 0.06117221140408553],
-    "expansion_point": [5.016810681068107, 0.002097209720972118],
-    "reference": [
-        2.394083456037712e-05,
-        2.024806550388612e-07,
-        9.092304981814128e-08,
-    ],
-}
+_NEAR_ROWS = [
+    {
+        "polygon": [
+            [4.91, -0.1],
+            [5.08, -0.14],
+            [5.17, 0.02],
+            [5.04, 0.15],
+            [4.88, 0.08],
+        ],
+        "target": [5.1290090247138025, 0.06117221140408553],
+        "expansion_point": [5.016810681068107, 0.002097209720972118],
+        "reference": [
+            2.394083456037712e-05,
+            2.024806550388612e-07,
+            9.092304981814128e-08,
+        ],
+    },
+    {
+        "polygon": [
+            [1.4179135893070476, -0.9486594854063461],
+            [1.421376631128132, -0.9546576497892003],
+            [1.4134458738249347, -0.9486594854063461],
+        ],
+        "target": [1.4175786980867047, -0.9506588735339642],
+        "expansion_point": [1.4175786980867047, -0.9506588735339642],
+        "reference": [
+            1.2291661383500823e-05,
+            -2.9647828309200699e-11,
+            2.592600921932894e-10,
+        ],
+    },
+    {
+        "polygon": [
+            [1.4179135893070476, -0.9486594854063461],
+            [1.421376631128132, -0.9546576497892003],
+            [1.4134458738249347, -0.9486594854063461],
+        ],
+        "target": [1.4174052543121505, -0.9516664983550764],
+        "expansion_point": [1.4175786980867047, -0.9506588735339642],
+        "reference": [
+            1.1911979372233187e-05,
+            2.7060483469036357e-10,
+            -3.219402317816962e-10,
+        ],
+    },
+]
 
 
 def _packed_inputs(rows):
@@ -180,8 +210,8 @@ def test_flux_moments_match_independent_reference(path):
 
 
 @pytest.mark.parametrize("path", ["host", "packed_numpy", "packed_device"])
-def test_near_edge_flux_moments_match_split_reference(path):
-    row = _NEAR_EDGE_ROW
+@pytest.mark.parametrize("row", _NEAR_ROWS, ids=["peak", "self_cell", "edge_offset"])
+def test_near_edge_flux_moments_match_split_reference(path, row):
     if path == "host":
         actual = np.asarray(
             polygon_analytic_flux_moments(
@@ -198,7 +228,8 @@ def test_near_edge_flux_moments_match_split_reference(path):
             evaluate = jax.jit(lambda *args: packed_analytic_moments(jnp, *args)[:3])
             actual = np.asarray(evaluate(*inputs)).reshape(3)
     reference = np.asarray(row["reference"])
-    relative = np.abs(actual - reference) / np.abs(reference)
+    channel_peak = np.max(np.abs([one["reference"] for one in _NEAR_ROWS]), axis=0)
+    relative = np.abs(actual - reference) / channel_peak
     print("NEAR_EDGE_REFERENCE", path, relative.tolist(), flush=True)
     assert np.all(relative <= 1e-12), relative
 

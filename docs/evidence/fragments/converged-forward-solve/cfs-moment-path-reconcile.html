@@ -393,13 +393,42 @@
     magnitude. On the existing 251 off-singularity pairs the repaired host's
     three maxima remain
     <code>3.029089928e-16 / 1.633354771e-14 / 2.023318664e-14</code>,
-    below the <code>1e-13</code> retention bound.</p>
+    below the <code>1e-13</code> retention bound. The packed NumPy kernel
+    reproduces the same maxima on both the 301-pair near set and the retained
+    251-pair set.</p>
+    <p>H200 job <code>1283578</code> ran the moment parity, traced section
+    moments and point-jet compile-cost modules as separate processes in both
+    arms, with a 600-second per-test bound. The base arm has four failing ids:
+    three new peak-path checks and the already failing
+    <code>test_point_jet_identity</code>. The repaired arm retains only that
+    identity failure, so the module gate adds no failing id. The new H200
+    device peak row differs from the split reference by at most
+    <code>2.009e-14</code> across the three channels. The point jet contains
+    <code>21,261</code> equations, under the <code>22,000</code> bound.</p>
+    <p>Three regression geometries now pin the recorded angular peak, a
+    certificate self-cell, and a certificate edge-offset target. Restoring
+    the base kernel fails six peak and edge-offset test ids while leaving
+    the three self-cell ids green. Each test path uses the same
+    channel-normalized reference bound; the two certificate values are
+    independently checked at 50 digits. After those rows were added, H200
+    job <code>1283584</code> ran the final parity module in fresh baseline
+    and repaired processes with the repository conftest and a 600-second
+    per-test bound. The baseline has six failing ids and nine passing tests;
+    the repaired arm has <code>15 passed</code> and no failing id. The H200
+    packed-device errors for the recorded peak are at most
+    <code>2.009e-14</code>; the two certificate rows are below
+    <code>1e-15</code> on every channel in that test's common normalization.</p>
     <p>The retained scripts and receipts are
     <code>near_reference.py</code>, <code>near_reference.json</code>,
     <code>near_reference.log</code>, <code>mp_check.py</code>,
     <code>mp_checks.json</code>, <code>mp_check.log</code>,
-    <code>off_reference.py</code>, <code>off_reference.log</code> and
-    <code>negative_control.log</code> under
+    <code>off_reference.py</code>, <code>off_reference.log</code>,
+    <code>off_packed_reference.py</code>,
+    <code>off_packed_reference.log</code>,
+    <code>packed_reference.py</code>, <code>packed_reference.log</code>,
+    <code>gate_summary.json</code>, <code>final_gate_summary.json</code>,
+    the H200 module logs and
+    <code>negative_control_rows.log</code> under
     <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/</code>.
     The raw 301-pair receipt remains outside git.</p>
   </section>

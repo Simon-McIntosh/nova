@@ -31,7 +31,12 @@
     1.286763104e-13</code>. Three independent 50-digit checks validate
     the split instrument. The unchanged 251 off-singularity pairs remain
     within <code>2.024e-14</code> across all channels. Restoring the base
-    kernel makes the new peak test fail on all three evaluation paths.</p>
+    kernel makes the peak and edge-offset rows fail on all three evaluation
+    paths. The first paired H200 module gate adds no failing test id and
+    measures <code>21,261</code> point-jet equations against the
+    <code>22,000</code> bound. The final H200 parity gate runs all three
+    50-digit-pinned geometries: its baseline has six failing ids and its
+    repaired arm passes all 15 tests.</p>
     <p>The extended source evidence and exact measurement paths are in
     <code>docs/evidence/fragments/converged-forward-solve/cfs-moment-path-reconcile.html#cfs-near-edge-moment-qualification</code>.
     The full 301-pair receipt stays in this worker run directory.</p>

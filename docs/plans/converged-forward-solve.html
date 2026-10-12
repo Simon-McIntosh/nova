@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="183">
+<meta name="plan-version" content="184">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -803,7 +803,10 @@
     <div class="r-comment-body"><p>Independent review of r-20261012T143631303990-exterior-fixture-delegation stored at reviewed_base_sha 437a68db4ee910dbd9029408f03068688aff0cce / reviewed_head_sha d48aaef5a48359692495583db1d3fef4136387b0; six dimensions scored 16/11/18/9/13/20 (total 87), four findings, two blocking: exact_current_moments's default flip silently changes the support arm for every caller that omits support_arm with no caller updated (measure.py:1205), and the node's own done-when (3) identity clause is unmet yet recorded as superseded with a pass verdict (fragment:211).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T193216757515-review-of-exterior-fixture-delegation" data-who="reckon-build" data-when="2026-10-12T19:42:41.618Z">
-    <div class="r-comment-body"><p>Independent review of the three commits f7e94d844/df1cee65f/c772b1154 gained since the prior review at d48aaef5a: the arm-default and identity-clause findings are addressed, and one blocking finding remains -- the fragment&#x27;s caller-gate table records two rows as passed that the reviewed run&#x27;s own logs show timed out or never reported.</p></div>
+    <div class="r-comment-body"><p>Independent review of the three commits f7e94d844/df1cee65f/c772b1154 gained since the prior review at d48aaef5a: the arm-default and identity-clause findings are addressed, and one blocking finding remains -- the fragment's caller-gate table records two rows as passed that the reviewed run's own logs show timed out or never reported.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-s21-exterior-integrator-ruling" data-who="reckon-build" data-when="2026-10-12T20:00:00Z">
+    <div class="r-comment-body"><p>Coordinator ruling on <code>exterior-fixture-delegation</code>, done-when clause 3 (row identity).</p><ul><li>Routing the certificate exterior through the shared moment owner changes the 2,000 and 5,000-cell rows by about 1e-3 relative. The base fixture reproduces the f68870f99 record exactly, so the change is this node's.</li><li>Region control on the diverted 2,000-cell exact support (job 1283983): the owner's signed fan reproduces every clipped cell's shoelace area and first moments to about 1e-10. The deleted fixture-local integrator's absolute-jacobian fan does not decompose non-convex clipped rings, and misstates three near-edge sliver cells (47, 50, 73) by 1.6e-3, 2.35e-4 and 2.09e-5.</li><li>The f68870f99 closure of 1.1e-5 (2,000 cells) and 4.3e-6 (5,000 cells) was therefore that integrator's region error. The head rows replace them: closure about 2e-15 at every rung, and the legacy control within 1e-13.</li><li>Clause 3 is satisfied by the region control, by the closure, and by the legacy control.</li></ul></div>
 </div>
 </section>
 </main>

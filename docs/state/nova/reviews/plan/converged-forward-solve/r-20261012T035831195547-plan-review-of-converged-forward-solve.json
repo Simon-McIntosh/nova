@@ -31,9 +31,22 @@
       "finding": "wiring-1",
       "reason": "",
       "when": "2026-10-12T04:07:36.844561+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s21-nova",
+      "finding": "anchors_resolve-1",
+      "reason": "The reviewer marks this as not changing the plan: the chord-default claim is true and the cited files resolve, and only the line pointers drifted. Followup bodies are structured state and cannot be text-edited in place; the node will locate the default by searching for the chord clip mode.",
+      "when": "2026-10-12T04:07:50.272883+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "The reviewer marks this as not changing the plan: the chord-default claim is true and the cited files resolve, and only the line pointers drifted. Followup bodies are structured state and cannot be text-edited in place; the node will locate the default by searching for the chord clip mode.",
+      "when": "2026-10-12T04:07:50.272883+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "s21-nova",

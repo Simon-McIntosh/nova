@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed manifest names no base gate log, so the added-failure count was not taken",
+  "base_log_revision": null,
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-12T04:06:58.419Z",
+  "dispatched_at": "2026-10-12T03:59:24Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/pivot_figures.py",
+      "line": "286",
+      "severity": "follow-on",
+      "text": "follow-on: the declared negative control promises the script refuses when a plotted value disagrees with the run's report, but the report cross-check exists only in figure_certificate_map (three needle substrings of proto-support.md); figure_topology_read and figure_kernel_equations compare their receipts only against in-script literals at lines 360-369 and 479-480 and never against proto-ladder.md or proto-order2.md, so those two figures can drift from their cited report while still drawing."
+    },
+    {
+      "file": "scripts/prototypes/pivot_figures.py",
+      "line": "274",
+      "severity": "follow-on",
+      "text": "follow-on: the value-drift refusal printed at _assert_matches:92-95 names the report as the comparison source (\"disagrees with report 0.0861086001\") while the comparison is against the literal typed at line 274, so a reader is told a report cross-check fired where only a hardcoded constant did."
+    }
+  ],
+  "head_log_revision": null,
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against base b86bfc7284bf89bce864e3062dbaa537b5277ba7 \u2014 three commits (67ccfdf3a figure renderer and three SVGs, 9ddba7535 the research record, 9e4064136 the evidence fragment), 6 files, 5522 insertions, all inside the declared scope.",
+    "done_when": "all five clauses are met \u2014 the claim table at docs/research/resolution-pivot-assessment.html:49-104 carries each claim's number, job id and report; the three figures exist under docs/figures/resolution-pivot/; scripts/prototypes/pivot_figures.py:44 uses plt.style.use(\"data-ink\") and reads every plotted series from a receipt; the six-blocker table is at lines 211-264; and the manifest records audit-doc OK and filepath relativize clean.",
+    "goal": "the node goal is to write the resolution-pivot assessment as a research document with three receipt-driven figures; docs/research/resolution-pivot-assessment.html:39-47 states the lead question, the verdict and the decision, and the three SVGs referenced at lines 115, 151 and 178 are present, so the goal is delivered.",
+    "manifest": "read; it reports status complete, names the renderer, the two declared negative-control logs and the audit-doc/filepath checks, and lists commits 67ccfdf3a, 9ddba7535, 9e4064136.",
+    "write_paths": "read the source manifest's declared paths (docs/research/resolution-pivot-assessment.html, docs/figures/resolution-pivot, scripts/prototypes/pivot_figures.py, docs/evidence/fragments/converged-forward-solve/pivot-assessment-record.html, docs/figures/converged-forward-solve/pivot-assessment-record); the base..head diff touches only files inside them."
+  },
+  "justifications": {
+    "durability": "the renderer's refusals at scripts/prototypes/pivot_figures.py:75-77 and :88-95 are exercised by two red logs, but the report cross-check that the declared control promises fires for figure 1 only, so figures 2 and 3 (lines 360-369, 479-480) have no guard tying them to their cited report.",
+    "evidence": "the plotted values reconcile with their receipts \u2014 I read diverted-2000-exact map_relative_sup 0.0194733, diverted-5000-legacy 0.0861086 and the 5158-cell exterior 0.0111257 from the proto-support rows at scripts/prototypes/pivot_figures.py:266-285, which match docs/research/resolution-pivot-assessment.html:57-75.",
+    "fit": "scripts/prototypes/pivot_figures.py:44-72 applies the shared data-ink sheet, despines at :178-181 and direct-labels at :165-175 as the guidelines require, and no added name carries a plan or ticket identifier.",
+    "goal_fidelity": "docs/research/resolution-pivot-assessment.html:41-47 records the verdict (support, not resolution, owns the certificate-map error; saddle form needed at any resolution; compile cost flat in cell count) and the refine-with-right-support decision, matching the goal's deliverable.",
+    "reuse": "no repository owner exists for drawing a research figure from run receipts; the repo's figure-style owner nova/media/ink.py was searched and holds imas-ink constants for poloidal figures rather than a data-ink apply path, so the script forks nothing and uses the shared style sheet the brief prescribed.",
+    "scope_discipline": "every path in the diff (the research html, the fragment, the three SVGs and the renderer) is inside the write paths the source prompt.txt:68-73 declares."
+  },
+  "node": "review-of-pivot-assessment-record",
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to write the resolution-pivot assessment as a research document with three receipt-driven figures; docs/research/resolution-pivot-assessment.html:39-47 states the lead question, the verdict and the decision, and the three SVGs referenced at lines 115, 151 and 178 are present, so the goal is delivered.\nVERDICT done_when: all five clauses are met \u2014 the claim table at docs/research/resolution-pivot-assessment.html:49-104 carries each claim's number, job id and report; the three figures exist under docs/figures/resolution-pivot/; scripts/prototypes/pivot_figures.py:44 uses plt.style.use(\"data-ink\") and reads every plotted series from a receipt; the six-blocker table is at lines 211-264; and the manifest records audit-doc OK and filepath relativize clean.\nVERDICT write_paths: read the source manifest's declared paths (docs/research/resolution-pivot-assessment.html, docs/figures/resolution-pivot, scripts/prototypes/pivot_figures.py, docs/evidence/fragments/converged-forward-solve/pivot-assessment-record.html, docs/figures/converged-forward-solve/pivot-assessment-record); the base..head diff touches only files inside them.\nVERDICT manifest: read; it reports status complete, names the renderer, the two declared negative-control logs and the audit-doc/filepath checks, and lists commits 67ccfdf3a, 9ddba7535, 9e4064136.\nVERDICT diff: read commit by commit against base b86bfc7284bf89bce864e3062dbaa537b5277ba7 \u2014 three commits (67ccfdf3a figure renderer and three SVGs, 9ddba7535 the research record, 9e4064136 the evidence fragment), 6 files, 5522 insertions, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/research/resolution-pivot-assessment.html:41-47 records the verdict (support, not resolution, owns the certificate-map error; saddle form needed at any resolution; compile cost flat in cell count) and the refine-with-right-support decision, matching the goal's deliverable.\nSCORE evidence: 18\nJUSTIFICATION evidence: the plotted values reconcile with their receipts \u2014 I read diverted-2000-exact map_relative_sup 0.0194733, diverted-5000-legacy 0.0861086 and the 5158-cell exterior 0.0111257 from the proto-support rows at scripts/prototypes/pivot_figures.py:266-285, which match docs/research/resolution-pivot-assessment.html:57-75.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff (the research html, the fragment, the three SVGs and the renderer) is inside the write paths the source prompt.txt:68-73 declares.\nSCORE durability: 15\nJUSTIFICATION durability: the renderer's refusals at scripts/prototypes/pivot_figures.py:75-77 and :88-95 are exercised by two red logs, but the report cross-check that the declared control promises fires for figure 1 only, so figures 2 and 3 (lines 360-369, 479-480) have no guard tying them to their cited report.\nSCORE fit: 19\nJUSTIFICATION fit: scripts/prototypes/pivot_figures.py:44-72 applies the shared data-ink sheet, despines at :178-181 and direct-labels at :165-175 as the guidelines require, and no added name carries a plan or ticket identifier.\nSCORE reuse: 18\nJUSTIFICATION reuse: no repository owner exists for drawing a research figure from run receipts; the repo's figure-style owner nova/media/ink.py was searched and holds imas-ink constants for poloidal figures rather than a data-ink apply path, so the script forks nothing and uses the shared style sheet the brief prescribed.\nFINDING scripts/prototypes/pivot_figures.py:286 follow-on: the declared negative control promises the script refuses when a plotted value disagrees with the run's report, but the report cross-check exists only in figure_certificate_map (three needle substrings of proto-support.md); figure_topology_read and figure_kernel_equations compare their receipts only against in-script literals at lines 360-369 and 479-480 and never against proto-ladder.md or proto-order2.md, so those two figures can drift from their cited report while still drawing.\nFINDING scripts/prototypes/pivot_figures.py:274 follow-on: the value-drift refusal printed at _assert_matches:92-95 names the report as the comparison source (\"disagrees with report 0.0861086001\") while the comparison is against the literal typed at line 274, so a reader is told a report cross-check fired where only a hardcoded constant did.",
+  "review_run_id": "r-20261012T035901173453-review-of-pivot-assessment-record",
+  "reviewed_base_sha": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "reviewed_commits": [
+    "67ccfdf3acb732350ed016c206a671786319fbf1",
+    "9ddba7535dedf60cdd5d5cc3769f6bd7e5e6d305",
+    "9e406413636c6ca60ffe62f5d56da7f172c9d868"
+  ],
+  "reviewed_head_sha": "9e406413636c6ca60ffe62f5d56da7f172c9d868",
+  "reviewed_run_id": "r-20261010T184438984120-pivot-assessment-record",
+  "reviewer_node": "review-of-pivot-assessment-record",
+  "reviewer_run_id": "r-20261012T035901173453-review-of-pivot-assessment-record",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T04:05:32.500495+00:00",
+  "total": 109,
+  "verdict": "pass"
+}

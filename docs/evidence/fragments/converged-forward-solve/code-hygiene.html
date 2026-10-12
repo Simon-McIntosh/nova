@@ -29,9 +29,10 @@
     pipeline and moves to a node of its own. Everything else landed and is
     gated per file on both arms.</p>
     <p>Gate revision <code>ea55705c3</code>, base revision
-    <code>be0fa0df9</code>. The commits carrying this node's work are listed in
-    the run manifest; the only commits after the gate revision touch this
-    fragment and no tested path.</p>
+    <code>be0fa0df9</code>, with the head arm's <code>tests/test_equilibrium_stencil_mesh.py</code>
+    run at <code>3d531184c</code>; the two revisions differ only under
+    <code>docs/</code>, so they are the same tested code. The commits carrying
+    this node's work are listed in the run manifest.</p>
   </section>
   <section id="code-hygiene-landed">
     <h2>Landed</h2>
@@ -94,6 +95,7 @@
         <tr><td>test_default_wiring</td><td>72 passed</td><td>64 passed</td></tr>
         <tr><td>test_domain_participation_continuity</td><td>1 failed, 3 passed</td><td>1 failed, 3 passed</td></tr>
         <tr><td>test_equilibrium_separatrix_clip</td><td>28 passed</td><td>28 passed</td></tr>
+        <tr><td>test_equilibrium_stencil_mesh</td><td>2 failed, 17 passed</td><td>2 failed, 17 passed</td></tr>
         <tr><td>test_exact_clip_closed_form_budget</td><td>5 passed</td><td>5 passed</td></tr>
         <tr><td>test_flux_surface_connectivity</td><td>43 passed</td><td>42 passed</td></tr>
         <tr><td>test_forward_census</td><td>11 passed, 2 skipped</td><td>11 passed, 2 skipped</td></tr>
@@ -119,7 +121,7 @@
         <tr><td>imas/test_diiid_forward_gs_match</td><td>12 passed</td><td>11 passed</td></tr>
       </tbody>
     </table>
-    <p>Twenty-one test ids fail at the head against twenty-three at the base, and
+    <p>Twenty-three test ids fail at the head against twenty-five at the base, and
     the head set is a strict subset of the base set: <strong>this node adds no
     failure</strong>, and two disappear. Every file whose passed count drops
     between the arms drops by exactly the number of source-text tests deleted
@@ -141,17 +143,31 @@
     in both arms, which a single-test run on each tree confirms. Removing the
     source-text tail removes the failure without touching the behaviour it was
     bolted onto.</p>
+    <p>The module whose deletion this node's largest code change made,
+    <code>nova/equilibrium/stencil_mesh.py</code>, is covered by
+    <code>tests/test_equilibrium_stencil_mesh.py</code>, and that file is in the
+    gate on both arms: two failures at each, the same two ids —
+    <code>test_moment_geometry_shared_nodes_reproduce_a_quadratic_flux_map</code>
+    and <code>test_the_conservation_receipts_agree_between_the_meshes</code>.
+    Both were failing at the base before the deleted symbol was touched, so the
+    deletion of <code>stencil_mesh._polygon_monomial_integral</code> adds
+    nothing, and a search for that name across <code>nova/</code>,
+    <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code>
+    returns no reference at all.</p>
     <p>The remaining head failures are all reproduced at the base with the same
     ids: three in <code>test_census_polish_compaction</code>, four in
     <code>test_connectivity_trip_sufficiency</code>, four in
     <code>test_topology_domain_partition</code>, two in
-    <code>test_topology_o_qualification</code>, and one each in
+    <code>test_topology_o_qualification</code>, two in
+    <code>test_equilibrium_stencil_mesh</code>, and one each in
     <code>test_domain_participation_continuity</code>,
     <code>test_forward_operator_domain</code>,
     <code>test_mask_threshold_consistency</code>,
     <code>test_oracle_axis_admission</code> and
-    <code>test_stationary_point_admission</code>. They are pre-existing and are
-    listed in the manifest's follow-ons so a later node can take them.</p>
+    <code>test_stationary_point_admission</code>, plus the three in
+    <code>test_connectivity_boundary</code> described above. They are
+    pre-existing and are listed in the manifest's follow-ons so a later node can
+    take them.</p>
     <p>Clause (2)'s own changes are gated by
     <code>tests/test_polygon_moments.py</code> (7 passed, with the
     triangle-accuracy and malformed-buffer cases retargeted onto the owner) and
@@ -214,6 +230,27 @@
       moved it, together with the exterior fixture's move to the support owner,
       to a node of its own; it is not attempted here.</li>
     </ul>
+  </section>
+  <section id="code-hygiene-repair">
+    <h2>Repair round</h2>
+    <p>A review of <code>3d531184c</code> found that the per-file gate ran thirty
+    test files but not <code>tests/test_equilibrium_stencil_mesh.py</code>, the
+    suite covering <code>nova/equilibrium/stencil_mesh.py</code> — one of the
+    four production modules this node changed, where
+    <code>_polygon_monomial_integral</code> was deleted. Neither arm's gate log
+    contained the name <code>stencil</code>, and the table above listed no row
+    for it, so the clause requiring the suites covering every touched module to
+    pass by delta was unmet for that module even though the deletion itself was
+    sound.</p>
+    <p>The file now runs on both arms, one fresh process each, and is in the
+    table above, in both arm logs and in the manifest's failure ids: two
+    failures at each arm with the same two ids, both of which were already
+    failing at the base. The deletion is safe — a search for
+    <code>_polygon_monomial_integral</code> across <code>nova/</code>,
+    <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code>
+    returns no reference — so the repair closes an evidentiary gap rather than
+    a code defect, and the head failure set remains a strict subset of the
+    base's at twenty-three against twenty-five.</p>
   </section>
 </main>
 </body>

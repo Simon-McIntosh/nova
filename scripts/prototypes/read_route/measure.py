@@ -284,18 +284,24 @@ def main():
         flush=True,
     )
     moments = ClippedCurrentMoments(*booking[:3])
-    polygons = [
-        np.asarray(p)[: int(n)]
-        for p, n in zip(geometry.vertices, geometry.vertex_count, strict=True)
-    ]
-    coupling = topology.BiotMomentCoupling.from_polygons(polygons)
-    exterior = fixture.AnalyticExteriorField(analytic, coupling, moments)
+    reference = fixture._kernel_backed_field(args.kind, oracle, analytic, geometry)
+    coupling = reference.coupling
+    exterior = reference.exterior
+    reference_moments = reference.moments
+    print("EXTERIOR_REFERENCE exact analytic density quadrature", flush=True)
+    booked_values = np.stack(tuple(np.asarray(value) for value in moments))
+    exact_values = np.stack(tuple(np.asarray(value) for value in reference_moments))
+    moment_delta = float(
+        np.max(np.abs(booked_values - exact_values)) / np.max(np.abs(exact_values))
+    )
+    print(f"BOOKED_REFERENCE_DELTA relative_sup={moment_delta:.12g}", flush=True)
+    assert moment_delta > 0.0
     reference = topology.TotalField(moments, coupling, exterior)
     kernel = batched_field(reference)
     kernel_row, _ = read_row(kernel, *scoring, "kernel")
     rows.append(kernel_row)
     matrix, exterior_jets, nodes, sample_index, build_wall = build_jet_matrix(
-        coupling, geometry, analytic, moments
+        coupling, geometry, analytic, reference_moments
     )
     jet_payload = (matrix, moments, exterior_jets, nodes, sample_index)
     jet_row, _ = read_row(jet_payload, *scoring, "jet", reader=jet_reader)
@@ -376,6 +382,7 @@ def main():
                 rows=rows,
                 batched_kernel=True,
                 booking_valid=bool(booking.valid),
+                booked_reference_moment_relative_sup=moment_delta,
                 sampled_shift_control_pitches=movement if args.perturbed else None,
                 mesh_sample_peak_flux_error=mesh_reconstruction_error,
                 picard_disagreement=disagreements if args.perturbed else None,

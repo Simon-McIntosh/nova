@@ -3,6 +3,7 @@
 # ruff: noqa: E501
 import argparse
 import json
+import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -138,20 +139,37 @@ def main():
             )
         lines += [
             "",
-            "|Case|Cells|Matrix bytes|Build [s]|Quartic value / gradient / Hessian|Edge value / normal jump|",
-            "|---|---:|---:|---:|---|---|",
+            "|Case|Cells|Matrix bytes|Build counter [s]|Persisted nodes|Quartic value / gradient / Hessian|Edge value / normal jump|",
+            "|---|---:|---:|---:|---|---|---|",
         ]
         by_case = {}
         for directory in directories:
             for path in sorted(directory.glob("*.json")):
                 data = json.loads(path.read_text())
                 if "element_controls" in data:
+                    data["receipt_path"] = path
                     by_case[data["kind"], data["cells"]] = data
         receipts = [by_case[key] for key in sorted(by_case)]
+        stores = []
         for data in receipts:
             control = data["element_controls"]
+            log = data["receipt_path"].with_suffix(".log").read_text()
+            paths = [
+                Path(line.split("path=", 1)[1].split()[0])
+                for line in log.splitlines()
+                if line.startswith("JET_STORE ")
+            ]
+            progress = {}
+            if paths:
+                progress = json.loads(paths[-1].with_name("progress.json").read_text())
+                stores.append((data["kind"], data["cells"], paths[-1], progress))
+            size = data.get("jet_bytes", progress.get("bytes", "pending"))
+            wall = data.get(
+                "jet_build_seconds", progress.get("build_seconds", "pending")
+            )
+            persisted = progress.get("nodes_complete", "pending")
             lines.append(
-                f"|{data['kind']}|{data['cells']}|{data.get('jet_bytes', 'pending')}|{data.get('jet_build_seconds', 'pending')}|"
+                f"|{data['kind']}|{data['cells']}|{size}|{wall}|{persisted}|"
                 + " / ".join(
                     show(control["quartic"][key])
                     for key in ("value", "gradient", "hessian")
@@ -162,6 +180,59 @@ def main():
                 )
                 + "|"
             )
+        lines += [
+            "",
+            "Matrix files and construction checkpoints:",
+            "",
+            *[
+                f"- {kind}, {cells} cells: `{path}`; "
+                f"checkpoint construction wall {progress['build_seconds']:.9g} s."
+                for kind, cells, path, progress in stores
+            ],
+            "",
+            "A persisted matrix is not evidence that its device load or read succeeded. "
+            "When a read receipt is absent, the build counter above is the "
+            "checkpointed construction time only; persisted-node count identifies "
+            "a partial build. Matrix bytes exclude the small NumPy header.",
+        ]
+        lines += ["", "## Capacity and scaling", ""]
+        for kind in colours:
+            sizes = {
+                cells: progress["bytes"]
+                for case, cells, _, progress in stores
+                if case == kind
+            }
+            if {2000, 10000} <= sizes.keys():
+                ratio = sizes[10000] / sizes[2000]
+                exponent = math.log(ratio) / math.log(5)
+                lines.append(
+                    f"{kind.capitalize()} dense coupling storage grows by {ratio:.6g} "
+                    f"times from 2,000 to 10,000 cells (measured exponent {exponent:.6g} "
+                    "against cell count). The matrix shape is nodes × cells × 3 × 6, "
+                    "with eight bytes per entry."
+                )
+                lines.append("")
+        for directory in directories:
+            for path in sorted(directory.glob("*-10000.log")):
+                errors = [
+                    line
+                    for line in path.read_text().splitlines()
+                    if line.startswith("jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED")
+                ]
+                if errors:
+                    lines += [
+                        f"Device-load refusal in `{path}`:",
+                        "",
+                        f"> {errors[-1]}",
+                        "",
+                    ]
+        lines += [
+            "The 10,000-cell capacity exception is a device-allocation failure, "
+            "not a measured read. No Bell compile or warm-read wall is inferred for "
+            "a row that stopped before the read. A fresh-process cache retry preserves "
+            "the first failure log and avoids repeating completed matrix construction.",
+            "",
+        ]
         lines += ["", "|Case|Error|Order from 2,000 to 5,000 cells|", "|---|---|---:|"]
         for kind in colours:
             pair = {data["cells"]: data for data in receipts if data["kind"] == kind}
@@ -291,7 +362,8 @@ def main():
             f"- Reused kernel rows: `{args.reference}`.",
             "",
             "Matrix build counters include historical build time plus the current "
-            "resume or cache-load overhead. Per-rung progress files retain the "
+            "resume or cache-load overhead when the load completed. Peak RSS is the "
+            "process high-water mark, not device memory. Per-rung progress files retain the "
             "checkpointed construction wall separately. A reused Picard executable "
             "can have near-zero compile time; its warm wall still includes the full read.",
         ]

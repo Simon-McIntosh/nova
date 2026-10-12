@@ -29,7 +29,11 @@ from nova.equilibrium import current, topology
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
 from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.prototypes.order2.read import batched_field
-from scripts.prototypes.read_route.jets import build_jet_matrix, read_with_jets
+from scripts.prototypes.read_route.jets import (
+    HermiteField,
+    build_jet_matrix,
+    read_with_jets,
+)
 from tests.equilibrium import test_topology_read as fixture
 
 
@@ -145,6 +149,43 @@ def reused_rows(directory, kind, cells):
     return measured, content
 
 
+def _prepared_field(field, geometry):
+    if not isinstance(field, tuple):
+        return field
+    matrix, moments, exterior, nodes, sample_index = field
+    jets = exterior + jnp.einsum("ncmq,cm->nq", matrix, jnp.stack(tuple(moments), -1))
+    return HermiteField(jets, nodes, sample_index, geometry.centre, geometry.pitch)
+
+
+def _sample_stage(field, geometry):
+    prepared = _prepared_field(field, geometry)
+    if not isinstance(field, tuple):
+        return topology._sampled_flux(prepared, geometry)
+    values = prepared.jets[prepared.sample_index, 0]
+    return (
+        jnp.einsum("nij,nj->ni", geometry.fit_inverse, values),
+        prepared.jets[prepared.sample_index[:, 0], 0],
+    )
+
+
+def _wall_stage(field, geometry, convention, policy):
+    return topology._wall_events(
+        _prepared_field(field, geometry), geometry, policy, convention.sigma
+    )
+
+
+def _probe_stage(function, *args):
+    started = perf_counter()
+    executable = jax.jit(function).lower(*args).compile()
+    compile_wall = perf_counter() - started
+    walls = []
+    for _ in range(2):
+        started = perf_counter()
+        jax.block_until_ready(executable(*args))
+        walls.append(perf_counter() - started)
+    return dict(cold_compile_seconds=compile_wall, warm_seconds=min(walls))
+
+
 def read_row(
     field,
     geometry,
@@ -160,14 +201,14 @@ def read_row(
     started = perf_counter()
     executable = jax.jit(reader).lower(field, geometry, convention, policy).compile()
     cold = perf_counter() - started
-    started = perf_counter()
-    result = executable(field, geometry, convention, policy)
-    jax.block_until_ready(result)
-    warm = perf_counter() - started
-    started = perf_counter()
-    again = executable(field, geometry, convention, policy)
-    jax.block_until_ready(again)
-    warm = min(warm, perf_counter() - started)
+    trials = []
+    for _ in range(2):
+        started = perf_counter()
+        result = executable(field, geometry, convention, policy)
+        dispatch = perf_counter() - started
+        jax.block_until_ready(result)
+        trials.append((perf_counter() - started, dispatch))
+    warm, warm_dispatch = min(trials)
     area = np.asarray(geometry.full_area)
     pitch = float(np.median(np.asarray(geometry.pitch)))
     error = np.abs(np.asarray(result.membership) - reference) * area / np.median(area)
@@ -204,9 +245,37 @@ def read_row(
         reason=int(result.reason),
         cold_compile_seconds=cold,
         warm_seconds=warm,
+        warm_dispatch_seconds=warm_dispatch,
         serialized_executable_bytes=executable_bytes,
         peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     )
+    if (
+        os.getenv("READ_ROUTE_PROFILE") == "1"
+        and len(area) == 2000
+        and saddle is not None
+        and name in ("kernel", "jet")
+    ):
+        probes = {}
+        for stage, function, operands in (
+            ("sample", _sample_stage, (field, geometry)),
+            ("wall", _wall_stage, (field, geometry, convention, policy)),
+            (
+                "labels",
+                topology._connected_fragment_labels,
+                (
+                    result.fragment_area,
+                    result.edge_interval,
+                    geometry,
+                    policy.edge_tolerance,
+                ),
+            ),
+        ):
+            try:
+                probes[stage] = _probe_stage(function, *operands)
+            except Exception as error:
+                probes[stage] = {"error": repr(error)}
+        row["stage_probes"] = probes
+        print("STAGE_PROBES " + json.dumps(probes), flush=True)
     print("READ_ROW " + json.dumps(row), flush=True)
     return row, result
 

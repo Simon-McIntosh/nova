@@ -32,10 +32,11 @@
 <tr><td>2,000-cell diverted coupling and edges</td><td>1,777,536,000 bytes; build 249.500911 s; value jump 4.85723e-17; normal jump 3.95517e-16 over 11,829 edges</td><td>Contracted booked field, not just analytic jets</td></tr>
 <tr><td>Nonconforming reproduction</td><td>NONCONFORMING_REPRODUCED saddle=0.22115872869025716</td><td>2,000-cell diverted row, unchanged interpolation</td></tr>
 <tr><td>2,000-cell Hessian mutation</td><td>valid=false, qualified=false, reason=3; test_bell_saddle_membership FAILED, EXIT=1</td><td>The unmodified Bell row passes the same test</td></tr>
+<tr><td>Curvature comparison</td><td>The inherited adapter finite-differences Hessians across a moving stencil; the native read differentiates the Bell polynomial within its selected triangle</td><td>The failed configuration is retained; native derivative rows are being measured from the persisted coupling matrices</td></tr>
 <tr><td>Larger rows</td><td>H200 job 1283902, one allocation, rungs ordered 2,000, 5,000, 10,000</td><td>Pending; per-arm receipts and matrix build checkpoints persisted</td></tr>
-<tr><td>Picard reference</td><td>Bell saddle error against analytic reference 0.120678390300; stored kernel 0.0283257300981</td><td>Reverse triangle inequality: Bell–kernel saddle disagreement is at least 0.0923526602017, or 92.2525 times its 0.00100108526661 budget</td></tr>
-<tr><td>Decision</td><td>Reject this Bell read as the production representation: the required 2,000-cell Picard row fails</td><td>Prototype only; product APIs unchanged</td></tr>
-<tr><td>Report</td><td colspan="2"><a href="/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-conforming-jets.md">Quantitative report</a></td></tr>
+<tr><td>Picard reference</td><td>Bell saddle error against analytic reference 0.120678390300; stored kernel 0.0283257300981; kernel-relative axis/X errors 2.43963e-5 / 6.29386e-5 pitches</td><td>Reverse triangle inequality: Bell–kernel saddle disagreement is at least 0.0923526602017, or 92.2525 times its 0.00100108526661 budget</td></tr>
+<tr><td>Decision</td><td>The finite-difference Bell curvature configuration fails the required 2,000-cell Picard row; the native polynomial-derivative comparison is pending</td><td>Prototype only; product APIs unchanged</td></tr>
+<tr><td>Report</td><td colspan="2"><code>/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-conforming-jets.md</code></td></tr>
 </tbody></table>
 <figure id="proto-conforming-jets-membership">
 <img src="/nova/figures/converged-forward-solve/conforming-jets/membership.svg" alt="Smooth and saddle membership errors versus cells for the measured closed-form, kernel, nonconforming and Bell arms">

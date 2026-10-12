@@ -183,17 +183,9 @@ def read_bell(field, geometry, convention, policy):
         values = values.at[:, 0].set(centres)
         return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values), values[:, 0]
 
-    curvature = FunctionType(
-        topology._curvature_derivatives.__code__,
-        dict(topology._curvature_derivatives.__globals__, TotalField=BellField),
-    )
     adapted = FunctionType(
         topology.read.__code__,
-        dict(
-            topology.read.__globals__,
-            _sampled_flux=sampled_flux,
-            _curvature_derivatives=curvature,
-        ),
+        dict(topology.read.__globals__, _sampled_flux=sampled_flux),
     )
     return adapted(field, geometry, convention, policy)
 

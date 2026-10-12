@@ -40,6 +40,7 @@ def main():
     current = measured_rows(args.rows)
     rows.update(current)
     plt.style.use("data-ink")
+    plt.rcParams["svg.hashsalt"] = "bell-membership"
     figure, axes = plt.subplots(1, 2, figsize=(14, 9), layout="constrained")
     colours = {"limited": "#427e7b", "diverted": "#856895"}
     styles = {
@@ -88,7 +89,7 @@ def main():
         axis.grid(False)
         axis.legend(frameon=False, fontsize=20)
     args.figure.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(args.figure)
+    figure.savefig(args.figure, metadata={"Date": None})
     plt.close(figure)
     if args.report:
         lines = [
@@ -100,7 +101,7 @@ def main():
             "",
             "The read contracts the runtime coupling matrix with the booked moments, adds the fixed exterior jets, and assembles the element inside the compiled read. Dense matrices are checkpointed under the GPFS evidence store by node/coupling/kernel digest.",
             "",
-            "|Case|Cells|Arm|Axis [pitch]|X [pitch]|Smooth|Saddle|Budget|Valid|Cold [s]|Warm [s]|Peak RSS [KiB]|",
+            "|Case|Cells|Arm|Axis vs analytic [pitch]|X vs analytic [pitch]|Smooth|Saddle|Budget|Valid|Cold [s]|Warm [s]|Peak RSS [KiB]|",
             "|---|---:|---|---:|---:|---:|---:|---:|---|---:|---:|---:|",
         ]
 
@@ -182,9 +183,23 @@ def main():
                 candidate["saddle_membership_error"]
                 - reference["saddle_membership_error"]
             )
+            upper = (
+                candidate["saddle_membership_error"]
+                + reference["saddle_membership_error"]
+            )
+            axis_difference = (
+                np.linalg.norm(np.asarray(candidate["axis"]) - reference["axis"])
+                / candidate["pitch_m"]
+            )
+            x_difference = (
+                np.linalg.norm(
+                    np.asarray(candidate["x_points"]) - reference["x_points"]
+                )
+                / candidate["pitch_m"]
+            )
             bound = candidate["membership_bound"]
             lines[2] = (
-                "**Decision to lock: reject this Bell read as the production representation. "
+                "**Decision to lock: reject the measured Bell curvature configuration as the production representation. "
                 "At 2,000 cells its Picard saddle disagreement with the live-kernel "
                 f"reference is at least {lower:.9g}, or {lower / bound:.4g} times the budget.**"
             )
@@ -201,6 +216,10 @@ def main():
                 f"Bell saddle error against A: {candidate['saddle_membership_error']:.12g}; "
                 f"kernel: {reference['saddle_membership_error']:.12g}; "
                 f"disagreement lower bound: {lower:.12g}; budget: {bound:.12g}.",
+                "",
+                f"The kernel-relative axis and X-point errors are {axis_difference:.12g} "
+                f"and {x_difference:.12g} pitches. The same norms also give an upper bound "
+                f"of {upper:.12g} on saddle disagreement; its exact value is not stored.",
                 "",
                 "The X-point is restored and both reads are valid, but that does not qualify "
                 "their saddle membership. Roundoff continuity and quartic completeness "

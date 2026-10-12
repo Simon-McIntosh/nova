@@ -1,0 +1,78 @@
+{
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T035931836920-review-of-accuracy-floor-census/scratch/rank1-reference-atbase.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T035931836920-review-of-accuracy-floor-census/scratch/reference_probe_atbase.py",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T035931836920-review-of-accuracy-floor-census/scratch/rank1-reference-rerun-worktree.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T035931836920-review-of-accuracy-floor-census/scratch/report-rerun.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T035931836920-review-of-accuracy-floor-census/scratch/proto-support-rerun.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T035931836920-review-of-accuracy-floor-census/scratch/rank2-measure-rerun.log"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: the cited host_reference.log:16-18 figures re-emit exactly at the reviewed base revision \u2014 packed first-moment kernel norm_relative [2.1738197137190713e-06, 0.012013277920833173, 0.005484079211129772] (0.0120133 radial, 0.00548408 vertical) against the independent 251-pair dense reference, with reference_peak [5.592656325443431e-06, 2.7094029754116442e-09, 2.412059801250414e-09] and all nine BLOCK lines byte-identical; the cited script reference_probe.py is not runnable as cited (its peer module cfs-coupling-build-scale worktree is deleted and the report directory is not a git repo), so a faithful host-mode variant was run at worktree HEAD d8748f19.",
+    "CLAIM 2: reproduced: re-running scripts/prototypes/support/report.py over the same ordered receipt directory produced a byte-identical copy of proto-support.md, whose table carries legacy exact-mode spline support 0.197326979 / 0.361705771 / 0.0861086001 versus exact analytic support 0.0187056146614 / 0.0194733185172 / 0.00940927557639 at 550 / 2098 / 5158 cells \u2014 matching the ranking line's 0.197/0.362/0.086 versus 0.0187/0.0195/0.00941.",
+    "CLAIM 3: reproduced: the same byte-identical re-render gives exterior closure 0.00622043464 / 0.0176941313 / 0.0111257411 and exact-support booking 0.0249260493 / 0.00896838926 / 0.00437753058 at 550 / 2098 / 5158 cells, so at the finer rungs the booking error (0.008968, 0.004378) sits below 0.009 and below the exterior closure at the same rung (0.017694, 0.011126), confirming that the 0.006-0.018 exterior closure masks booking error below 0.009.",
+    "CLAIM_SUMMARY: agrees: the report has no dedicated numeric summary line; its opening abstract (line 3) quotes no figure, and every numeric restatement of its top-three findings agrees with its ranked table (lines 109-118) \u2014 section 6 line 67 gives 0.0120133 radial / 0.00548408 vertical (= row 1), sections 4 and 7 give 0.1973/0.3617/0.0861 versus 0.0187/0.0195/0.00941 (= row 2), and section 8 gives exterior 0.006220/0.017694/0.011126 against booking 0.024926/0.008968/0.004378 (= row 3); all three rows reproduced under re-run."
+  ],
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T201559333857-cfs-moment-path-reconcile/logs/host_reference.log:16-18; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T201559333857-cfs-moment-path-reconcile/manifest.md:25",
+      "detail": "The cited host line reads {\"norm_relative\": [2.1738197137190713e-06, 0.012013277920833173, 0.005484079211129772], \"max_absolute\": [1.2157426572304591e-11, 3.254881094315241e-11, 1.3227927012039205e-11], \"reference_peak\": [5.592656325443431e-06, 2.7094029754116442e-09, 2.412059801250414e-09]}. The cited script cannot be run as cited (report dir is not a git repo; its peer module worktree is deleted), so a faithful host-mode variant was run against the reviewed-run worktree at HEAD d8748f19. Its `REFERENCE host` line is byte-identical to the cited line (diff clean): norm_relative [2.1738197137190713e-06, 0.012013277920833173, 0.005484079211129772], max_absolute [1.2157426572304591e-11, 3.254881094315241e-11, 1.3227927012039205e-11], elementwise_relative [1.552360922081027e-05, 14092745.708606787, 35836494.100768864], reference_peak [5.592656325443431e-06, 2.7094029754116442e-09, 2.412059801250414e-09]. All nine BLOCK lines (grid 0-2, wall 0-2, sample 0-2) also match the cited log exactly in every norm_relative, max_abs_difference and host_peak value; only the SECONDS wall-clock differ, as expected across machines. QUADRATURE_CONVERGENCE [1.5145449639034287e-16, 3.800984467701982e-14, 4.572158985304093e-14] SAMPLES 251. The 0.0120133 / 0.00548408 figures and the ~2.17e-6 uniform figure all reproduce at the reviewed base revision. The sliver-sign claim cites manifest.md:25 (50-digit checks) and was not separately re-derived here.",
+      "finding": "At this base, packed first-moment kernel differs from independent truth: 0.0120133 radial, 0.00548408 vertical, with wrong sliver signs",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-support.md:1-7",
+      "detail": "The cited report is generated by scripts/prototypes/support/report.py over the ordered receipt directory runs/r-20261009T181553786165-proto-support/ordered. Re-running that command with --report pointed at a scratch path (the cited report path is outside the write fence) produced a file byte-identical to the cited proto-support.md (diff clean). The cited table values reproduce exactly: legacy relative sup 0.197326979 / 0.361705771 / 0.0861086001 and exact analytic support 0.0187056146614 / 0.0194733185172 / 0.00940927557639 at 550 / 2098 / 5158 realised cells. The report's stated fitted map order 0.54392 and booking terms 0.0249260493 / 0.00896838926 / 0.00437753058 also re-emit identically. The ranking line's rounded figures (0.197/0.362/0.086 versus 0.0187/0.0195/0.00941) match the table it summarises.",
+      "finding": "Legacy exact-mode spline support sets a large, nonconvergent map floor: legacy 0.197/0.362/0.086 versus exact-support 0.0187/0.0195/0.00941",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-support.md:1-11",
+      "detail": "Same byte-identical report.py re-render as CLAIM 2. The cited exterior closure terms reproduce exactly: 0.00622043464 at 550 cells, 0.0176941313 at 2098 cells, 0.0111257411 at 5158 cells (the stated 0.006-0.018 band). The exact-support booking contributions at the finer rungs are 0.00896838926 at 2098 and 0.00437753058 at 5158, both below 0.009 and both below the exterior closure at the same rung (0.0176941313 and 0.0111257411), so the claim that the exterior closure masks booking error below 0.009 at the finer rungs holds on the cited table. Line 11 attributes the effect to the fixture (exterior integrated on production spline-clipped support), consistent with the recomputed rows.",
+      "finding": "Certificate exterior closure 0.006-0.018 masks booking error below 0.009 at finer rungs",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report carries no dedicated numeric summary line; its opening statement (line 3) is a scope/method abstract that quotes no figure, and its ranked table at lines 109-118 is where the numbers live. Compared against that table, the report's own restatements of its top-three findings all agree: section 6 line 67 states the packed kernel at '0.0120133 radial', '0.00548408 vertical' and '2.17382e-6 uniform' norm-relative, which is exactly ranked-table row 1 ('0.0120133 radial, 0.00548408 vertical'); sections 4 (line 47) and 7 (line 77) state legacy 0.197326979 / 0.361705771 / 0.0861086001 versus exact 0.0187056 / 0.0194733 / 0.0094093, exactly ranked-table row 2 ('0.197/0.362/0.086 versus 0.0187/0.0195/0.00941'); and section 8 (line 87) states exterior closure 0.006220 / 0.017694 / 0.011126 against booking 0.024926 / 0.008968 / 0.004378, exactly ranked-table row 3 ('0.006-0.018 masks booking error below 0.009'). Every figure the report leads with is consistent with its ranked table, and all three rows reproduce under re-run.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "runs/r-20261010T201559333857-cfs-moment-path-reconcile/logs/host_reference.log:16-18; manifest.md:25",
+      "rank": 1,
+      "report_figure": "packed first-moment kernel vs independent 251-pair dense reference: 0.0120133 radial, 0.00548408 vertical, 2.17382e-6 uniform norm-relative; wrong sliver signs",
+      "rerun_figure": "REFERENCE host byte-identical at reviewed base d8748f19: norm_relative [2.1738197137190713e-06, 0.012013277920833173, 0.005484079211129772], reference_peak [5.592656325443431e-06, 2.7094029754116442e-09, 2.412059801250414e-09]; all nine BLOCK lines also byte-identical (only SECONDS differ). Cited script itself unrunnable as cited (deleted peer worktree / non-git report dir); reproduced via a faithful host-mode variant at d8748f19.",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-support.md:1-7",
+      "rank": 2,
+      "report_figure": "legacy exact-mode spline support 0.197326979 / 0.361705771 / 0.0861086001 versus exact analytic support 0.0187056146614 / 0.0194733185172 / 0.00940927557639 at 550 / 2098 / 5158 cells",
+      "rerun_figure": "report.py re-render byte-identical to cited proto-support.md; table re-emits legacy 0.197326979 / 0.361705771 / 0.0861086001 and exact 0.0187056146614 / 0.0194733185172 / 0.00940927557639; fitted order 0.54392 and booking 0.0249260493 / 0.00896838926 / 0.00437753058 identical",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-support.md:1-11",
+      "rank": 3,
+      "report_figure": "certificate exterior closure 0.00622043464 / 0.0176941313 / 0.0111257411 at 550 / 2098 / 5158 cells masks booking error below 0.009 at finer rungs",
+      "rerun_figure": "same byte-identical re-render: exterior 0.00622043464 / 0.0176941313 / 0.0111257411; booking 0.0249260493 / 0.00896838926 / 0.00437753058 \u2014 both finer-rung booking terms (0.008968, 0.004378) sit below 0.009 and below the same-rung exterior (0.017694, 0.011126)",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T04:25:57.998Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T03:59:55Z",
+  "method": "The reviewed run is read-only (census node); its report quotes accuracy numbers from cited evidence artifacts rather than from commands it ran, so the review re-ran each cited artifact's generating script against the same inputs. The report's own directory (/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/) is not a git repository. The still-present reviewed-run worktree (/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/accuracy-floor-census) has HEAD exactly d8748f19abde1038a59b165bf55d2012c90cc8f5, so every re-run was pointed at that revision's source via PYTHONPATH and read the identical inputs. Rank 1's generating script (runs/r-20261010T201559333857-cfs-moment-path-reconcile/logs/reference_probe.py) is NOT runnable as cited: run from the report directory it aborts on `git rev-parse HEAD` (not a git repo), and run from its own run directory it aborts with FileNotFoundError on peer module cfs-coupling-build-scale/scripts/analytic_oracle_fixtures/coupling_build.py because that peer worktree has been deleted. A faithful host-mode variant (same kernel nova.biot.polygonanalytic, same fixture cache analytic_oracle_hex_machine_550.zarr group d990cde70becc203, same 251-pair dense reference plus 50-digit mp_reference) was run at the reviewed base revision and reproduced the cited log byte-for-byte. Ranks 2 and 3 are generated by report.py; it was re-run on the same 'ordered' receipt directory with --report pointed at a scratch path (the cited report path is outside the write fence) and the output diffed against the cited proto-support.md.",
+  "project": "nova",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/accuracy-floor-census.md",
+  "review_run_id": "r-20261012T035931836920-review-of-accuracy-floor-census",
+  "reviewed_base_sha": "d8748f19abde1038a59b165bf55d2012c90cc8f5",
+  "reviewed_head_sha": "d8748f19abde1038a59b165bf55d2012c90cc8f5",
+  "reviewed_run_id": "r-20261011T210112084192-accuracy-floor-census",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run ran no gate suite (read-only census node).",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T04:24:44.084511+00:00"
+}

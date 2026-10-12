@@ -132,58 +132,97 @@ path and does reproduce to 2.6e-14, shows the carrier at 550 is unchanged.</p>
 
 <p>Comparing against the record turned out to be the wrong reference, and the
 right one was measured instead. The coordinator ruled that this node owes head
-against its own base, not against <code>f68870f99</code>, on the reading that
-the record was measured on a base predating the near-edge kernel repair. H200
-job 1283976 measured the base fixture in one allocation (job 1283955's head rows
-are the other half):</p>
+against its own base, not against <code>f68870f99</code>. H200 job 1283976
+measured the base fixture in one allocation, over a variant tree that is the
+worktree with every top-level entry symlinked and <code>scripts</code> the only
+real copy, so that exactly one file differs between the two arms:
+<code>scripts/analytic_oracle_fixtures/measure.py</code> at <code>437a68db4</code>.
+Job 1283955's head rows below are the other half of the comparison.</p>
 
 <table>
-<thead><tr><th>Cells</th><th>Arm</th><th>Map relative sup</th>
-<th>Booking relative sup</th><th>Closure relative sup</th></tr></thead>
+<thead><tr><th>Cells</th><th>Arm</th><th>Base map relative sup</th>
+<th>Map diff vs head</th><th>Booking diff vs head</th><th>Base closure</th>
+<th>Within 1e-13?</th></tr></thead>
 <tbody>
-<tr><td>2000 (2098)</td><td>exact</td><td>0.0057893511986392265</td><td>0.0057784741168929715</td><td>1.0877081746254862e-05</td></tr>
-<tr><td>5000 (5158)</td><td>exact</td><td>0.00027958879451736867</td><td>0.0002793659861466832</td><td>4.3477167884741074e-06</td></tr>
+<tr><td>550</td><td>exact</td><td>0.023862283760692733</td><td>1.019e-13</td><td>1.018e-13</td><td>6.0765403645417656e-15</td><td>no, marginally</td></tr>
+<tr><td>2000 (2098)</td><td>exact</td><td>0.0057893511986392265</td><td>1.549e-03</td><td>3.305e-04</td><td>1.0877081746254862e-05</td><td>no</td></tr>
+<tr><td>5000 (5158)</td><td>exact</td><td>0.00027958879451736867</td><td>1.974e-03</td><td>2.769e-03</td><td>4.3477167884741074e-06</td><td>no</td></tr>
+<tr><td>550</td><td>legacy</td><td>0.19732697871233346</td><td>1.843e-14</td><td>3.139e-14</td><td>0.006220434644037126</td><td>yes</td></tr>
 </tbody>
 </table>
 
-<p>Those base rows equal the <code>f68870f99</code> record to every digit it
-prints — <code>0.005789351198639</code>, <code>0.005778474116893</code>,
-<code>1.0877e-05</code> at 2000 and <code>0.000279588794519</code>,
-<code>0.000279365986148</code>, <code>4.3477e-06</code> at 5000. So the record's
-own reference was not stale: the base fixture code reproduces it exactly, and
-the head does not. The identity this node owes therefore <strong>fails</strong>:
-base and head disagree at 2000 and 5000 by a part in 10<sup>3</sup>, and at 550
-they agree only just — base map <code>0.023862283760692733</code> against head
-<code>0.0238622837606903</code> and base booking
-<code>0.023862283760692726</code> against head
-<code>0.023862283760690297</code>, a relative <code>1.02e-13</code> on both,
-both closures at roundoff (<code>6.077e-15</code> base, <code>2.279e-15</code>
-head) with the base value matching the record's own <code>6.077e-15</code>. So
-even the rung that is closest to agreement lands marginally outside the 1e-13
-bound this clause asks for, not comfortably inside it.</p>
+<p>Every one of those base rows was computed fresh — all four exterior caches
+report <code>hit: false</code> under their own identities
+(<code>40a3f8e7006d0698</code>, <code>78309231d1ccc0d3</code>,
+<code>a5a0ea1db56f327d</code>, <code>31472f31e880f2de</code>) — so this is not a
+cache being replayed. The rows equal the <code>f68870f99</code> record to every
+digit it prints: <code>0.005789351198639</code>, <code>0.005778474116893</code>
+and <code>1.0877e-05</code> at 2000, <code>0.000279588794519</code>,
+<code>0.000279365986148</code> and <code>4.3477e-06</code> at 5000. So the
+record's own reference was not stale. The identity this node owes therefore
+<strong>fails</strong>: head and its own base disagree at 2000 and 5000 by a
+part in 10<sup>3</sup>, and at 550 only marginally — a relative
+<code>1.02e-13</code> on both map and booking, which is outside the bound this
+clause asks for even though it is close.</p>
 
-<p>That pair does not, on its own, say which change moved the row, and the
-measurement is worth stating precisely because it differs in two ways at once.
-The base run loaded the record's own
-carrier bytes — its machine identity carries
-<code>builder_revision</code> <code>e1987f9d1833a86f</code>, the value the
-fixture computes at <code>f68870f99</code> — while the head run rebuilt the
-carrier under <code>12d9a73b56af0fb7</code>. Its exterior was computed fresh
-either way (base <code>78309231d1ccc0d3</code>, head
-<code>12c1d4c9496255fd</code>), so the fixture code and the carrier's provenance
-both differ between the two rows. Separating them needs a cross cell: the base
-code over a <em>rebuilt</em> carrier, which a fresh data root forces, or the
-head code over the record's carrier, which the identity guard refuses. Neither
-ran: the node was at eight allocated cards of eight, so no second allocation
-could start, and both shards shared the one card this job held.</p>
+<p><strong>What the overlay does and does not isolate.</strong> The comparison
+is clean in one direction and it contradicts the ruling's premise. Because the
+variant symlinks every top-level entry and copies only <code>scripts</code>,
+overwriting one file, the base arm differs from the head arm in
+<code>measure.py</code> and nothing else: same <code>nova/</code>, same
+<code>scripts/prototypes/support/</code>, same <code>tests/</code>, same
+<code>benchmarks/</code>. The part-in-10<sup>3</sup> movement is therefore
+produced by <em>this node's own edit</em>, not by base-tree work, and no
+commit sitting between the record and this base moved these rows. The
+coordinator's reading was that a near-edge kernel repair now in the base had
+shifted the record's reference; the measurement says otherwise, and it says why.
+The repair landed in <code>nova/biot/polygonanalytic.py</code>, which the
+deleted fixture-local integrator never called, so it could not have reached
+these rows — while the head's routed path does call it. What moved is the
+fixture crossing from its own quadrature onto the shared kernel.</p>
 
-<p>The negative control does narrow the field. Run on the head tree with the arm
-forced to legacy, its 2000-cell row reads booking
-<code>0.008968389255064343</code> and closure <code>0.017694131251761665</code> —
-both equal to the record's own control values (<code>0.008968</code> and
-<code>0.017694</code>) at the precision the record carries. The legacy arm still
-reproduces its recorded terms at 2000, so the movement sits in the exact arm's
-moment path, where this node's reroute and the carrier rebuild both land.</p>
+<p>Both arms build the machine and the exterior through the same
+<code>support</code> module and the same identity machinery, so carrier
+provenance is not a second variable here: the machine identity carries
+<code>builder_revision</code> <code>e1987f9d1833a86f</code> in the base arm, the
+value the fixture computes at <code>f68870f99</code>, and
+<code>12d9a73b56af0fb7</code> at head — which is the fixture's own digest moving
+because this node edited the fixture, not the store being read differently.</p>
+
+<p>The movement is confined to the exact arm's moment path, and one row says so
+independently. The 550 legacy control, which does not traverse that path,
+reproduces between base and head to <code>1.8e-14</code> on the map and
+<code>3.1e-14</code> on booking; and the head tree with the arm forced to legacy
+reads booking <code>0.008968389255064343</code> and closure
+<code>0.017694131251761665</code> at 2000, equal to the record's own control
+values at the precision the record carries.</p>
+
+<p>The direction of the closure term is worth recording, though this measurement
+does not settle which rule is right. The head's closure is roundoff,
+<code>2.43e-15</code>, where the base's is <code>1.09e-05</code> at 2000 and
+<code>4.35e-06</code> at 5000; the closure asks how well the booked image
+reproduces the exterior's own image, and the booking side runs through the
+shipped kernel. A base fixture resolving <code>1e-5</code> against that kernel
+is the fixture disagreeing with the shipped code, so the head's numbers are the
+self-consistent ones. The local CPU equivalence experiment in the section above
+does not contradict this, but it does not cover it either: those rings were
+convex, non-convex, holed and overlapping, with no near-edge cells, and the two
+rules agree there to <code>7.5e-16</code>. The fixture's own cells are where
+they part, by a part in 10<sup>3</sup> — so the equivalence claim holds off the
+near-edge regime and stops at its boundary. Establishing which quadrature is
+correct on near-edge cells is a separate question, and it is not this node's.</p>
+
+<p>Two limits on what this run establishes. It compares the two arms at 550,
+2000 and 5000 only, and it does not separate the fixture's own near-edge cells
+from its interior ones, so the mechanism above is inferred from where the
+difference sits rather than measured per cell. And the booking rows the ruling
+also asked for are only partly in: the shard built
+<code>head limited 550</code> (booking <code>16314773.310234185</code> against
+analytic <code>16314773.310234187</code>, net relative error
+<code>1.1e-16</code>, read image error <code>1.78e-05</code>) and was still
+working through <code>head limited 2000</code> when the fence fell, because its
+carrier builds are serial on the one card this job held. No base-side booking
+row exists yet, so nothing was compared on that path.</p>
 
 <h2 id="negative-control">The declared negative control</h2>
 
@@ -274,7 +313,7 @@ hashing the two files as that function does:</p>
 <tr><td>dcb4076156 (certified cache built here)</td><td>899eeebbf054dff5</td></tr>
 <tr><td>06cc5abe1 (rows recorded here)</td><td>899eeebbf054dff5</td></tr>
 <tr><td>f68870f99</td><td>e1987f9d1833a86f</td></tr>
-<tr><td>HEAD~1 (base of this node)</td><td>e1987f9d1833a86f</td></tr>
+<tr><td>437a68db4 (base of this node)</td><td>e1987f9d1833a86f</td></tr>
 <tr><td>HEAD (898553203)</td><td>12d9a73b56af0fb7</td></tr>
 </tbody>
 </table>
@@ -291,26 +330,30 @@ module that calls it.</p>
 <h2 id="follow-ons">What remains</h2>
 
 <ul>
-<li><strong>The cross-cell run that separates the two changes.</strong> The base
-and head rows differ in two ways at once: the fixture code, and the carrier's
-provenance, because the base loaded the record's own carrier bytes while the
-head rebuilt one. The decisive cells are the base fixture over a
-<em>rebuilt</em> carrier — which a fresh data root forces — and, if the guard can
-be satisfied legitimately, the head fixture over the record's carrier. It did
-not run here: the node was at eight allocated cards of eight, so no second
-allocation could start, and the single card this job held already carried both
-shards. Order 2000 first, the cheapest rung that moves.</li>
-<li><strong>Re-examine the reroute against the fixture's own near-edge
-cells.</strong> The rule-equivalence measurement behind the deletion used
-synthetic convex, non-convex and holed rings; those are not the fixture's
-clipped near-edge cells, which is where a difference that grows with refinement
-— absent at 550, a part in 10<sup>3</sup> at 2000 and 5000 — would live. Until
-the cross cell is measured, the reroute is not cleared.</li>
+<li><strong>The near-edge cells the two quadratures disagree on.</strong> The
+rule-equivalence measurement behind the deletion used synthetic convex,
+non-convex and holed rings, and the two rules agree there to <code>7.5e-16</code>.
+They do not agree on the fixture's own cells: no difference at 550, a part in
+10<sup>3</sup> at 2000 and 5000, which is the signature of near-edge cells
+rather than of a global rule change. Naming those cells — which of the fixture's
+clipped or sliver polygons, and how many — is the measurement that would turn
+the mechanism above from inferred into established. Which rule is right on them
+is a separate question and not this node's.</li>
+<li><strong>What the identity clause should compare against.</strong> The
+recorded <code>f68870f99</code> rows are reproduced exactly by the fixture code
+this node deleted, so they cannot be the reference for a fixture that no longer
+contains it, and head against base is a comparison the change is
+definitionally outside of. Either the clause is rewritten to compare head
+against the shipped kernel's own moments — the natural reference once the
+fixture shares that kernel — or it is dropped in favour of the closure's own
+value, which is now roundoff.</li>
 <li><strong>The book comparison is incomplete.</strong> Its rows are in
 <code>book_fresh.log</code>, attributed by the driver's
 <code># book label kind cells</code> markers, because
-<code>book.measure</code> prints an unlabelled <code>BOOKING_ROW</code>. Harvest
-what is there before resubmitting.</li>
+<code>book.measure</code> prints an unlabelled <code>BOOKING_ROW</code>. Only
+<code>head limited 550</code> landed before the fence, and no base-side row
+exists, so nothing was compared on that path. Harvest what is there and resubmit
+the ladder from the side that is missing.</li>
 <li><strong>Plan-owned, per the coordinator ruling:</strong> how the certified
 proto-support carriers are to be re-read, and scoping
 <code>builder_revision</code> to the coupling-assembly source it documents,

@@ -70,6 +70,7 @@ class BellMesh:
     transforms: jax.Array
     inverse_edges: jax.Array
     generators: jax.Array
+    local_vertices: jax.Array
 
 
 def build_mesh(nodes, sample_index, geometry):
@@ -95,6 +96,7 @@ def build_mesh(nodes, sample_index, geometry):
                 transforms,
                 np.linalg.inv(edges),
                 nodes[indices[:, 1:]].mean(axis=1),
+                local,
             )
         )
     )
@@ -147,8 +149,28 @@ def field_from_jets(jets, sample_index, mesh):
     factors = jnp.stack(
         (jnp.ones_like(scale), scale, scale, scale**2, scale**2, scale**2), axis=-1
     )
-    dofs = (jets[mesh.triangles] * factors[:, :, None, :]).reshape((*scale.shape, 18))
-    coefficients = jnp.einsum("ctij,ctj->cti", mesh.transforms, dofs)
+    scaled = jets[mesh.triangles] * factors[:, :, None, :]
+    anchor = scaled[:, :, 0]
+    x, y = mesh.local_vertices[..., 0], mesh.local_vertices[..., 1]
+    f, gx, gy, hxx, hxy, hyy = (anchor[..., k, None] for k in range(6))
+    taylor = jnp.stack(
+        (
+            f + gx * x + gy * y + 0.5 * hxx * x * x + hxy * x * y + 0.5 * hyy * y * y,
+            gx + hxx * x + hxy * y,
+            gy + hxy * x + hyy * y,
+            jnp.broadcast_to(hxx, x.shape),
+            jnp.broadcast_to(hxy, x.shape),
+            jnp.broadcast_to(hyy, x.shape),
+        ),
+        axis=-1,
+    )
+    # Removing a complete quadratic preserves the Bell space while avoiding
+    # cancellation between the flux offset and the higher polynomial terms.
+    residual = (scaled - taylor).reshape((*scale.shape, 18))
+    coefficients = jnp.einsum("ctij,ctj->cti", mesh.transforms, residual)
+    coefficients = coefficients.at[..., :6].add(
+        anchor * jnp.asarray((1.0, 1.0, 1.0, 0.5, 1.0, 0.5))
+    )
     return BellField(coefficients, mesh, jets, sample_index)
 
 

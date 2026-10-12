@@ -140,6 +140,7 @@ def controls(geometry, analytic):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cells", type=int, default=550)
+    parser.add_argument("--kind", choices=("limited", "diverted"), default="diverted")
     args = parser.parse_args()
-    _, analytic, wall, _, _ = fixture._analytic_inputs("diverted")
+    _, analytic, wall, _, _ = fixture._analytic_inputs(args.kind)
     controls(fixture._realised_hex_geometry(wall, args.cells), analytic)

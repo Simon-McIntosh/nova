@@ -1,0 +1,95 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": null,
+  "added_failure_derivation": "The reviewed manifest (r-20261012T042612803730-proto-read-route/manifest.md:21-22) records both baseline_suite and after_suite as empty, and its test_logs are the H200 prototype row/diagnostic logs (jet-diagnosis.log, read-route-ladder.log, rows-ladder/*), not pytest arms; the reviewed diff adds no test file and no product source. With no base or head gate log to reduce, the added-failure count is unmeasured rather than zero and no added failure ids exist to name: added_failure_count null, added_failure_ids [].",
+  "added_failure_ids": [],
+  "blocking_finding_count": 2,
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "7e17d7ed8",
+    "e28c623a5",
+    "ebf900799",
+    "0f2ea4661",
+    "8a4b199e4",
+    "691d67538",
+    "679425bd0",
+    "4ddc5286a",
+    "c396e6e6d",
+    "3d4eaf0ac",
+    "5add700371"
+  ],
+  "completed_at": "2026-10-12T10:46:00.788Z",
+  "dispatched_at": "2026-10-12T10:39:41Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/proto-read-route.html",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the node's landing contract requires its evidence fragment under docs/evidence/fragments/<plan>/<node-id>.html in the final commit and its fence declares that path, but the file exists at no commit in 7175784c..5add700371, so the plan section receives only a landing line with no in-repo evidence anchor while sibling nodes such as cfs-exterior-exact-support.html carry theirs."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-read-route.md",
+      "line": "3",
+      "severity": "blocking",
+      "text": "blocking: done-when clause (1) requires both representations at about 2,000, 5,000 and 10,000 cells, but the kernel arm has no 5,000/10,000-cell row because the ladder job 1283635 (read-route-ladder.log) was CANCELLED on TIME LIMIT after only the two 2,000-cell rows produced a kernel READ_ROW, yet the manifest sets status complete and the decision rests on a single rung for the arm it recommends as the semantic authority."
+    },
+    {
+      "file": "scripts/prototypes/read_route/diagnose.py",
+      "line": "48",
+      "severity": "follow-on",
+      "text": "follow-on: _local_value re-implements the Taylor-plus-Shepard cell blend that jets.py:143 HermiteField.value already owns, differing only in reading a named cell rather than the argmin cell, so a change to the element's interpolation must be made in two places."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T042612803730-proto-read-route/manifest.md",
+      "line": "21",
+      "severity": "follow-on",
+      "text": "follow-on: the reviewed manifest records neither baseline_suite nor after_suite although its done-when asked for them as single-line JSON, so the reviewed run carries no suite delta and its evidence rests solely on the H200 prototype logs."
+    }
+  ],
+  "gate_arms_note": "The reviewed change is prototype-only; its rows were produced by H200 job 1283753 (diagnose.py, EXIT=0, revision 5add700371) and the earlier ladder job 1283635 (CANCELLED on TIME LIMIT after the two 2,000-cell rows). No pytest baseline/after pair was run.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 7175784c761bd334cc68ce54156ea76b75b0f9de; eleven commits over six files (+3053/-0), all new, adding the four prototype modules, the runner, the diagnostic and the one SVG.",
+    "done_when": "the done-when names the report plus one SVG; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-read-route.md is present and its 2,000-cell numbers reconcile with the receipts, and docs/figures/converged-forward-solve/read-route/position-membership.svg is committed, but clause (1)'s 5,000/10,000-cell kernel rows are unmeasured.",
+    "goal": "the node's goal is to measure topology.read on solve states through the sampled mesh field against the kernel field of the producing booking at 2,000, 5,000 and 10,000 cells; scripts/prototypes/read_route/measure.py:329-444 reads both arms and rows-ladder/limited-2000.json and diverted-2000.json carry a kernel row at 2,000 cells, but no 5,000- or 10,000-cell kernel row exists.",
+    "manifest": "read; status complete, eleven commits named, tests field names H200 job 1283753 (EXIT=0) and ladder job 1283635 (CANCELLED on TIME LIMIT), it honestly records the 5,000/10,000-cell kernel rows as unmeasured, and baseline_suite and after_suite are empty.",
+    "write_paths": "read the manifest's declared paths; the diff touches only scripts/prototypes/read_route/* and docs/figures/converged-forward-solve/read-route/, all inside the fence, but the declared fragment docs/evidence/fragments/converged-forward-solve/proto-read-route.html was never written at any commit in the range."
+  },
+  "justifications": {
+    "durability": "no committed test references the prototypes; the guards are runtime asserts in scripts/prototypes/read_route/measure.py:348 (closed-form ladder control against the archived npz, delta < 1e-9) and measure.py:466 (zero-source-Hessian negative control), which run only inside an H200 prototype job.",
+    "evidence": "the gate is the H200 row runner scripts/prototypes/read_route/run.sh:20 invoking measure.py with results in rows-ladder/*.json and jet-diagnosis.log, and the reviewed manifest.md:21-22 record neither baseline_suite nor after_suite so no suite delta exists.",
+    "fit": "the modules follow the prototype idiom of scripts/prototypes/order2 with the module-level configure_dtypes() ordering of measure.py:19, and the helpers carry mechanism names (HermiteField, SampledField, build_jet_matrix) with no banned label.",
+    "goal_fidelity": "measure.py:434 reads the batched-kernel arm and rows-ladder/limited-2000.json records kernel smooth membership 7.16625e-05 below the 9.00177e-05 bound, but no 5,000- or 10,000-cell kernel row exists so the goal's three-rung comparison is complete only at 2,000 cells.",
+    "reuse": "read_with_jets at scripts/prototypes/read_route/jets.py:186 rebinds topology.read's own code object to the new field type instead of forking it and reuses current.book, batched_field and packed_analytic_moments, though diagnose.py:48 _local_value re-implements HermiteField.value's Taylor-plus-Shepard blend.",
+    "scope_discipline": "git diff 7175784c..5add700371 touches only scripts/prototypes/read_route/ and docs/figures/converged-forward-solve/read-route/position-membership.svg, but the declared fragment docs/evidence/fragments/converged-forward-solve/proto-read-route.html is absent from every commit in the range."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to measure topology.read on solve states through the sampled mesh field against the kernel field of the producing booking at 2,000, 5,000 and 10,000 cells; scripts/prototypes/read_route/measure.py:329-444 reads both arms and rows-ladder/limited-2000.json and diverted-2000.json carry a kernel row at 2,000 cells, but no 5,000- or 10,000-cell kernel row exists.\nVERDICT done_when: the done-when names the report plus one SVG; the report at /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-read-route.md is present and its 2,000-cell numbers reconcile with the receipts, and docs/figures/converged-forward-solve/read-route/position-membership.svg is committed, but clause (1)'s 5,000/10,000-cell kernel rows are unmeasured.\nVERDICT write_paths: read the manifest's declared paths; the diff touches only scripts/prototypes/read_route/* and docs/figures/converged-forward-solve/read-route/, all inside the fence, but the declared fragment docs/evidence/fragments/converged-forward-solve/proto-read-route.html was never written at any commit in the range.\nVERDICT manifest: read; status complete, eleven commits named, tests field names H200 job 1283753 (EXIT=0) and ladder job 1283635 (CANCELLED on TIME LIMIT), it honestly records the 5,000/10,000-cell kernel rows as unmeasured, and baseline_suite and after_suite are empty.\nVERDICT diff: read commit by commit against 7175784c761bd334cc68ce54156ea76b75b0f9de; eleven commits over six files (+3053/-0), all new, adding the four prototype modules, the runner, the diagnostic and the one SVG.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: measure.py:434 reads the batched-kernel arm and rows-ladder/limited-2000.json records kernel smooth membership 7.16625e-05 below the 9.00177e-05 bound, but no 5,000- or 10,000-cell kernel row exists so the goal's three-rung comparison is complete only at 2,000 cells.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate is the H200 row runner scripts/prototypes/read_route/run.sh:20 invoking measure.py with results in rows-ladder/*.json and jet-diagnosis.log, and the reviewed manifest.md:21-22 record neither baseline_suite nor after_suite so no suite delta exists.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: git diff 7175784c..5add700371 touches only scripts/prototypes/read_route/ and docs/figures/converged-forward-solve/read-route/position-membership.svg, but the declared fragment docs/evidence/fragments/converged-forward-solve/proto-read-route.html is absent from every commit in the range.\nSCORE durability: 13\nJUSTIFICATION durability: no committed test references the prototypes; the guards are runtime asserts in scripts/prototypes/read_route/measure.py:348 (closed-form ladder control against the archived npz, delta < 1e-9) and measure.py:466 (zero-source-Hessian negative control), which run only inside an H200 prototype job.\nSCORE fit: 16\nJUSTIFICATION fit: the modules follow the prototype idiom of scripts/prototypes/order2 with the module-level configure_dtypes() ordering of measure.py:19, and the helpers carry mechanism names (HermiteField, SampledField, build_jet_matrix) with no banned label.\nSCORE reuse: 16\nJUSTIFICATION reuse: read_with_jets at scripts/prototypes/read_route/jets.py:186 rebinds topology.read's own code object to the new field type instead of forking it and reuses current.book, batched_field and packed_analytic_moments, though diagnose.py:48 _local_value re-implements HermiteField.value's Taylor-plus-Shepard blend.\nFINDING docs/evidence/fragments/converged-forward-solve/proto-read-route.html:1 blocking: the node's landing contract requires its evidence fragment under docs/evidence/fragments/<plan>/<node-id>.html in the final commit and its fence declares that path, but the file exists at no commit in 7175784c..5add700371, so the plan section receives only a landing line with no in-repo evidence anchor while sibling nodes such as cfs-exterior-exact-support.html carry theirs.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-read-route.md:3 blocking: done-when clause (1) requires both representations at about 2,000, 5,000 and 10,000 cells, but the kernel arm has no 5,000/10,000-cell row because the ladder job 1283635 (read-route-ladder.log) was CANCELLED on TIME LIMIT after only the two 2,000-cell rows produced a kernel READ_ROW, yet the manifest sets status complete and the decision rests on a single rung for the arm it recommends as the semantic authority.\nFINDING scripts/prototypes/read_route/diagnose.py:48 follow-on: _local_value re-implements the Taylor-plus-Shepard cell blend that jets.py:143 HermiteField.value already owns, differing only in reading a named cell rather than the argmin cell, so a change to the element's interpolation must be made in two places.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T042612803730-proto-read-route/manifest.md:21 follow-on: the reviewed manifest records neither baseline_suite nor after_suite although its done-when asked for them as single-line JSON, so the reviewed run carries no suite delta and its evidence rests solely on the H200 prototype logs.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T103916527713-review-of-proto-read-route",
+  "reviewed_base_sha": "7175784c761bd334cc68ce54156ea76b75b0f9de",
+  "reviewed_head_sha": "5add700371c6afa1831d56b0349d4b13e804dacb",
+  "reviewed_revision": "5add700371c6afa1831d56b0349d4b13e804dacb",
+  "reviewed_run_id": "r-20261012T042612803730-proto-read-route",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-read-route",
+  "reviewer_node": "review-of-proto-read-route",
+  "reviewer_run_id": "r-20261012T103916527713-review-of-proto-read-route",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 16,
+    "scope_discipline": 14
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T10:45:23.943514+00:00",
+  "total": 85,
+  "verdict": "changes-requested"
+}

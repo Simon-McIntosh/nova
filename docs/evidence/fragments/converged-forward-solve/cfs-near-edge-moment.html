@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="cfs-near-edge-moment">
+  <meta name="plan-title" content="Near-edge polygon moment qualification">
+  <meta name="plan-summary" content="Angular quadrature resolves the recorded peak and 301 near-edge or self-cell pairs within the moment bound.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s4">
+  <meta name="plan-recorded-at" content="2026-10-12">
+  <meta name="plan-verdict" content="measured">
+  <meta name="plan-environment" content="Shared nova environment; CPU split reference and reserved H200 module gate">
+  <meta name="plan-tags" content="biot,moments,near-edge">
+  <title>Near-edge polygon moments | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Near-edge polygon moments</h1>
+  <section id="cfs-near-edge-moment-landing">
+    <h2>Angular peak and self-cell qualification</h2>
+    <p>The near-target triangle integral now clusters angular nodes at each
+    edge's closest point to the filament. The split reference covers 100
+    self-cell and 200 near-edge certificate pairs plus the recorded peak.
+    Maximum norm-relative differences in uniform, radial and vertical
+    moments are <code>1.287841458e-14 / 1.085037831e-13 /
+    1.286763104e-13</code>. Three independent 50-digit checks validate
+    the split instrument. The unchanged 251 off-singularity pairs remain
+    within <code>2.024e-14</code> across all channels. Restoring the base
+    kernel makes the new peak test fail on all three evaluation paths.</p>
+    <p>The extended source evidence and exact measurement paths are in
+    <code>docs/evidence/fragments/converged-forward-solve/cfs-moment-path-reconcile.html#cfs-near-edge-moment-qualification</code>.
+    The full 301-pair receipt stays in this worker run directory.</p>
+  </section>
+</main>
+</body>
+</html>

@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="cfs-moment-path-reconcile">
   <meta name="plan-title" content="Moment-path conditioning and independent reference">
-  <meta name="plan-summary" content="Final-head reference and all 18 blocks pass; the full module delta adds no failing ids. A near-edge accuracy defect is a separate repair follow-on; scope metadata blocks administrative completion.">
+  <meta name="plan-summary" content="The 251-pair and 18-block checks pass. A subsequent angular quadrature repair resolves the near-edge peak; the original node's scope metadata remains blocked.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s4">
   <meta name="plan-recorded-at" content="2026-10-11">
@@ -354,6 +354,54 @@
     quadrature refinements supply its independent reference. Carrier
     regeneration should account for that repair before relying on the
     resulting carriers.</p>
+  </section>
+  <section id="cfs-near-edge-moment-qualification">
+    <h2>Near-edge and self-cell angular qualification</h2>
+    <p>The subsequent repair changes the near-target source-area quadrature in
+    <code>nova/biot/polygonanalytic.py</code>. For each signed triangle it maps
+    the edge coordinate through a hyperbolic sine centred on the closest point
+    to the target. The mapping places nodes in the narrow angular peak of the
+    filament logarithm while integrating the full triangle and both source
+    coordinate moments. The distant-target rule is retained.</p>
+    <p>The earlier peak at <code>(5.1290090247138025,
+    0.06117221140408553) m</code> reproduces on the recorded base with
+    uniform, radial and vertical relative errors of
+    <code>1.809402216e-6 / 2.397527635e-5 / 2.815081336e-5</code>.
+    Restoring that base makes all three new
+    <code>test_near_edge_flux_moments_match_split_reference</code> paths fail;
+    the negative-control log ends in <code>EXIT=1</code>.</p>
+    <p>The independent reference splits each triangle edge at its angular
+    closest point and at geometrically spaced offsets from that point. It
+    integrates each resulting panel with fourth-power radial grading and
+    long-double geometry; SciPy's elliptic values use double precision.
+    The 550-cell certificate cache supplies 100 source polygons, each tested
+    at its own centroid and at targets on both sides of a nearby edge.
+    The recorded peak is an additional pair, for 301 distinct pairs total.
+    The reference itself is checked at orders 24 and 48, and the peak, one
+    self-cell and one near-edge pair receive independent 50-digit mpmath
+    checks at orders 12 and 20.</p>
+    <table><thead><tr><th>Channel</th><th>Repaired host maximum norm-relative error, 301 pairs</th><th>Reference order difference</th><th>Repaired host error, recorded peak</th></tr></thead><tbody>
+      <tr><td>Uniform</td><td>1.287841458e-14</td><td>7.925178202e-15</td><td>2.122815590e-15</td></tr>
+      <tr><td>Radial moment</td><td>1.085037831e-13</td><td>6.287990320e-14</td><td>1.215765280e-14</td></tr>
+      <tr><td>Vertical moment</td><td>1.286763104e-13</td><td>7.671087737e-14</td><td>1.834074108e-14</td></tr>
+    </tbody></table>
+    <p>Each channel divides its largest absolute error by the largest
+    absolute reference value among the 301 pairs. Those reference peaks
+    are <code>2.394083456e-5 / 2.024806550e-7 / 9.092304982e-8</code>.
+    The 50-digit values agree with the split long-double result within
+    <code>1.10e-14</code> relative to each checked pair's uniform reference
+    magnitude. On the existing 251 off-singularity pairs the repaired host's
+    three maxima remain
+    <code>3.029089928e-16 / 1.633354771e-14 / 2.023318664e-14</code>,
+    below the <code>1e-13</code> retention bound.</p>
+    <p>The retained scripts and receipts are
+    <code>near_reference.py</code>, <code>near_reference.json</code>,
+    <code>near_reference.log</code>, <code>mp_check.py</code>,
+    <code>mp_checks.json</code>, <code>mp_check.log</code>,
+    <code>off_reference.py</code>, <code>off_reference.log</code> and
+    <code>negative_control.log</code> under
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T041659283522-cfs-near-edge-moment/</code>.
+    The raw 301-pair receipt remains outside git.</p>
   </section>
   <section id="cfs-moment-path-reconcile-scope-metadata">
     <h2>Remaining administrative scope update</h2>

@@ -55,30 +55,38 @@ contraction module cannot silently reuse an exterior built on the old clip.</p>
 </tr>
 </thead>
 <tbody>
-<tr><td>550 (550)</td><td>exact</td><td>0.023862283762011</td><td>0.023862283762011</td>
-<td>7.064e-15</td><td>0.0</td></tr>
-<tr><td>2000 (2098)</td><td>exact</td><td>0.005789351198649</td><td>0.005778474116903</td>
-<td>1.088e-05</td><td>0.0</td></tr>
-<tr><td>5000 (5158)</td><td>exact</td><td>0.000279588794517</td><td>0.000279365986147</td>
-<td>4.348e-06</td><td>0.0</td></tr>
-<tr><td>550 (550)</td><td>legacy</td><td>0.197326978713212</td><td>0.193637465719250</td>
+<tr><td>550 (550)</td><td>exact</td><td>0.023862283760693</td><td>0.023862283760693</td>
+<td>6.077e-15</td><td>0.0</td></tr>
+<tr><td>2000 (2098)</td><td>exact</td><td>0.005789351198639</td><td>0.005778474116893</td>
+<td>1.0877e-05</td><td>0.0</td></tr>
+<tr><td>5000 (5158)</td><td>exact</td><td>0.000279588794519</td><td>0.000279365986148</td>
+<td>4.3477e-06</td><td>0.0</td></tr>
+<tr><td>550 (550)</td><td>legacy</td><td>0.197326978712335</td><td>0.193637465718236</td>
 <td>6.220e-03</td><td>0.0</td></tr>
 </tbody>
 </table>
 
+<p>These are the rows from the re-run at <code>d33556de9</code>, the head carrying
+the arm-routing fix; the same four tests were first measured at
+<code>b6c198dec</code> and the two agree to the eleventh significant digit and
+differ only in the trailing digits, which is why the table carries the fixed
+head's values.</p>
+
 <p>At every rung the exact-support closure term is orders of magnitude below the
 booking term, and the map relative sup tracks the booking relative sup to every
 digit it shares: the residual the map-fidelity gate measures is the map's own
-booking error rather than the exterior mismatch. The mechanism is that the
+booking error rather than the exterior mismatch.</p>
+
+<p>The mechanism is that the
 fixture's exact-support moment integral and the certificate's
 <code>analytic_moments</code> are the same order-15 fan rule on the map's own
 residual-shadow cells zeroed out of both booked terms before the decomposition
 is required to reconstruct the map.</p>
 
 <p>The legacy row is the positive control: with the default arm flipped to the
-spline clip at 550 diverted cells the map relative sup is 0.197326978713212
+spline clip at 550 diverted cells the map relative sup is 0.197326978712335
 against the certified prototype value 0.1973269787182143, a relative agreement
-of 2.5e-11, and the closure term rises to 6.220e-03 — above nothing here, because
+of 3.0e-11, and the closure term rises to 6.220e-03 — above nothing here, because
 the booking term rises with it, but the absolute level is the certified one.</p>
 
 <h2 id="cfs-exterior-exact-support-carriers">Oracle carriers built by this node</h2>
@@ -160,7 +168,8 @@ allocation (job 1283614) that also reverted the exported fixture and re-ran the
 head tests at <code>d33556de9</code>.</td></tr>
 <tr><td>Head re-run log at <code>7af372a9f</code></td>
 <td><code>head_gate.log</code> in the same directory, written by the same
-allocation at head <code>d33556de9</code>, which carries the routing fix.</td></tr>
+allocation at head <code>d33556de9</code>, which carries the routing fix: 4
+passed in 2858.63 s, and the phase exited 0.</td></tr>
 <tr><td>Fixture state after the run</td>
 <td>the mutation was reverted in the same allocation; the committing tree
 carries the exact default and <code>FIXTURE_DIFF_LINES=0</code> after revert</td></tr>

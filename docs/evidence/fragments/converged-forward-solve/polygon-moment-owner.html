@@ -11,7 +11,7 @@
 reductions, chosen by an exact-rational accuracy census">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s3">
-<meta name="plan-commits" content="67f7b68bf">
+<meta name="plan-commits" content="67f7b68bf 32d463cf7 90bb6f21e">
 <meta name="plan-recorded-at" content="2026-10-12">
 <meta name="plan-verdict" content="partial">
 <meta name="plan-environment" content="CPU, binary64; fleet allocation node 98dci4-clu-2002 job 1281970">
@@ -108,6 +108,67 @@ write: <code>polygon_monomial_moments</code> and
 <code>_polygon_monomial_integral</code> in
 <code>scripts/clip_independent_representation/score_candidates.py</code>.
 Completing clause (3) requires a scope extension over those paths.</p>
+
+<h2 id="polygon-moment-owner-delegation">Every surviving reduction routes through
+the owner</h2>
+
+<p id="polygon-moment-owner-delegation-body">The names above survive because their
+callers live outside this node's write fence, but the reductions they named do
+not. In commit <code>32d463cf7</code>
+<code>polygon_moments.polygon_monomial_moments</code> returns the owner table
+directly and its Green-theorem edge-weight machinery (<code>_edge_weights</code>,
+<code>_residual_exponents</code>, the binomial and exponent tables, 129 source
+lines) is deleted; <code>polygon_density_moments</code> contracts the density
+against that same table. <code>separatrix_clip._area_moments</code> reads the
+owner's total-degree-two block, and
+<code>padded_polynomial_current_moments</code> reads the owner table at the
+degree its complete basis requires. Commit <code>90bb6f21e</code> holds the
+claim: each surviving reduction is required to reach the owner in its own source,
+and the numpy area view is required to reproduce the exact rational area, first
+and second moments.</p>
+
+<p id="polygon-moment-owner-oracle"><code>stencil_mesh._polygon_monomial_integral</code>
+is deliberately not routed through the owner. It is the independent signed-fan
+oracle that <code>scripts/clip_independent_representation/score_candidates.py</code>
+compares the production reductions against; making it call the owner would turn
+that comparison into the owner agreeing with itself.</p>
+
+<h2 id="polygon-moment-owner-certificate">Booked-current certificate rows</h2>
+
+<p id="polygon-moment-owner-certificate-body">The read-driven certificate rows named
+in clause (4) are <code>tests/test_read_ten_thousand_cells.py</code>, parametrised
+over 550, 2000 and 5000 cells for both the limited and the diverted topology.
+Each carries a committed CPU golden whose comparison is exactly
+<code>atol=1e-13</code> on membership, axis, X-point validity, X-point position and
+boundary flux. Both arms were run on the fleet allocation node (job 1281970, CPU
+backend, <code>jax_enable_x64</code>):</p>
+
+<table id="polygon-moment-owner-certificate-table">
+<caption>Certificate rows, six live cases per arm (the two 10 000-cell cases
+deselected by the clause).</caption>
+<thead>
+<tr><th>Arm</th><th>revision</th><th>result</th><th>wall</th></tr>
+</thead>
+<tbody>
+<tr><td>base</td><td><code>c054a721f</code></td><td>8 passed</td><td>576 s</td></tr>
+<tr><td>head</td><td><code>90bb6f21e</code> (delegated)</td><td>8 passed</td><td>578 s</td></tr>
+</tbody>
+</table>
+
+<p id="polygon-moment-owner-certificate-reading">Both arms pass identically, so the
+reroute leaves the booked current unchanged well inside the 1e-13 contract. The
+reason it cannot move it is a property of the path, and the control that shows it:
+<code>topology.read</code> books each cell's area from the atomised mesh's own
+shoelace sum (<code>nova/equilibrium/topology.py:2414</code>), not from the
+polygon-moment reductions, so a deliberate <code>1e-9</code> relative perturbation
+of the owner leaves all certificate rows green. The rows are therefore a guard
+that the reroute leaves the read path untouched, not a measurement of the
+reduction — the reduction's own accuracy is the census table above, anchored at
+<code>tests/test_exact_clip_moments.py</code>. The check does bite when the booked
+quantity itself moves: perturbing <code>limited-550-cpu.npz</code>'s membership by
+<code>1e-9</code> turns
+<code>test_closed_form_read_is_accurate_and_compatible[550-limited]</code> red at
+the 1e-13 assertion.</p>
 
 </main>
 </body>

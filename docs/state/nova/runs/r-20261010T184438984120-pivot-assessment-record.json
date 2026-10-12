@@ -1,0 +1,1438 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 14859125,
+      "input_tokens_cumulative": 14859125,
+      "output_tokens": 61324,
+      "output_tokens_cumulative": 61324,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 5522,
+    "files": 6,
+    "removed": 0
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_cases",
+        "path": "tests/biot/test_edge_term_tangents.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "_baseline_kernel",
+        "path": "tests/biot/test_kernel_compile_cost.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_shot_to_shot_state_flips_are_preserved_not_averaged",
+        "path": "tests/calibrate/test_pair_state.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 107
+    },
+    {
+      "existing_function": {
+        "line": 13,
+        "name": "test_banked_inputs_align_on_every_frame_identity",
+        "path": "tests/imas/test_diiid_circuit_ensemble_assessment.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 107
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_wiring_and_passive_leaf_count",
+        "path": "tests/imas/test_diiid_machine_ids.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_preregistration_declares_all_discriminators",
+        "path": "tests/imas/test_diiid_unclaimed_current_origin.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 255,
+        "name": "_source_geometry_arrays",
+        "path": "tests/measure_exact_section_routes.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_stagnation_exit_preserves_the_full_loop_result_and_executed_receipts",
+        "path": "tests/test_active_set_stagnation.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_select_exports_are_explicit_and_retired_module_is_absent",
+        "path": "tests/test_biot_import_without_jax.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 162,
+        "name": "test_plasma_assemblies_request_kernel_axis_companions",
+        "path": "tests/test_biotpolysection.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 265,
+        "name": "test_channel_label_rules_find_parents_and_updown_pairs",
+        "path": "tests/test_circuit_resistance.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "_large_support",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 324,
+        "name": "test_compact_reduction_work_arrays_stay_below_one_gibibyte",
+        "path": "tests/test_clipped_support_quadrature.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_result_round_trips_declared_dd_fields",
+        "path": "tests/test_contour_tree_conventions.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_batched_tree_is_identical_to_per_field_tree",
+        "path": "tests/test_contour_tree_merge.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_flux_surface_assembly_has_one_equilibrium_owned_implementation",
+        "path": "tests/test_current_diffusion.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_default_cad_source_fields",
+        "path": "tests/test_datasource.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "test_receipt_has_positive_values_for_the_frozen_six",
+        "path": "tests/test_derived_convergence_criterion.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 70,
+        "name": "test_nulls_and_markers_are_keyed",
+        "path": "tests/test_edge_constraint_render.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_all_missing_comparator_inputs_remain_one_strict_json_bank_row",
+        "path": "tests/test_efit_topology_corroboration.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_package_marches_six_member_batched_windows",
+        "path": "tests/test_ensemble_twin_truth.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_exact_reference",
+        "path": "tests/test_equilibrium_flux_surface_geometry.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 1133,
+        "name": "test_the_package_publishes_the_continuation_and_geometry_names",
+        "path": "tests/test_equilibrium_sol.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 626,
+        "name": "test_real_equilibrium_reference_gates",
+        "path": "tests/test_flux_surface_extraction.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 86,
+        "name": "bank_census_receipt",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 107
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_forward_census_has_eager_jit_vmap_parity",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 623,
+        "name": "_slice_process",
+        "path": "tests/test_forward_profile_corsica.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_insert_insert_label_switch",
+        "path": "tests/test_framelink.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 432,
+        "name": "test_aggregate_baseline_keys_unchanged",
+        "path": "tests/test_labeller_receipt.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 74,
+        "name": "test_receipt_keeps_every_fitted_shot_unknown_without_can_evidence",
+        "path": "tests/test_mast_coil_case_temperature.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 199,
+        "name": "test_published_revision_verifies_but_is_not_operator_ready",
+        "path": "tests/test_mast_provisional_ids.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "test_seeded_ledger_states_every_field_it_touches",
+        "path": "tests/test_mast_seed_parameters.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 643,
+        "name": "_label_geometry",
+        "path": "tests/test_media.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_committed_receipt_totals_match_the_evidence_fragment",
+        "path": "tests/test_outboard_census_receipt_consistency.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_ten_keys_push_every_bound_column_shaped_as_its_glyph_binds",
+        "path": "tests/test_playable_camera.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_launch_arguments_supply_session_defaults",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "test_request_url_arguments_override_every_launch_default",
+        "path": "tests/test_playable_server.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 434,
+        "name": "test_pushed_columns_match_renderer_bindings",
+        "path": "tests/test_playable_session.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 349,
+        "name": "test_fiducial_polyline_geometry_segments",
+        "path": "tests/test_polyline.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 664,
+        "name": "test_a_traced_target_decides_what_a_captured_one_decides",
+        "path": "tests/test_reduced_newton_constraints.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_traced_support_contract_is_additive_and_keeps_existing_shapes",
+        "path": "tests/test_saddle_partition.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_a_refused_row_replays_without_the_target_as_its_terminal_combination",
+        "path": "tests/test_shafranov_pair_receipt.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_frame_columns",
+        "path": "tests/test_shellgrid.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 156,
+        "name": "_assert_dimensionless_receipts_invariant",
+        "path": "tests/test_split_polish_nulls.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 168,
+        "name": "_synthetic_geometry_fields",
+        "path": "tests/test_steering_frames.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 257,
+        "name": "test_waveform_carries_the_excitation_amplitudes",
+        "path": "tests/test_sultan.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 170,
+        "name": "test_transport_sweep_matches_the_equivalent_interpolated_facade_interval",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 107
+    },
+    {
+      "existing_function": {
+        "line": 593,
+        "name": "test_converged_and_cap_one_windows_share_one_measured_coupling_axis",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_shape_residual_stays_visible_without_blocking_convergence",
+        "path": "tests/test_transport_coupled_window.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 176,
+        "name": "_numeric_receipt",
+        "path": "tests/test_transport_ensemble.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 107
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_direct_adapter_matches_torax_reader_run",
+        "path": "tests/test_transport_geometry.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "test_exported_coupling_schema_matches_the_live_contract_field_for_field",
+        "path": "tests/test_transport_public_surface.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    },
+    {
+      "existing_function": {
+        "line": 322,
+        "name": "test_banked_diverted_state_is_a_machine_precision_pinned_root",
+        "path": "tests/test_two_class_recovery.py"
+      },
+      "run_function": {
+        "line": 98,
+        "name": "support_rows",
+        "path": "scripts/prototypes/pivot_figures.py"
+      },
+      "window_line": 100
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "67ccfdf3acb732350ed016c206a671786319fbf1",
+    "9ddba7535dedf60cdd5d5cc3769f6bd7e5e6d305",
+    "9e406413636c6ca60ffe62f5d56da7f172c9d868"
+  ],
+  "completed_at": "2026-10-10T19:08:39.187Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-10T18:45:03Z",
+  "disposition": "still-working",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [],
+  "gate": "not-run",
+  "gate_check": null,
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.16666666666666666,
+    "plan": "converged-forward-solve",
+    "reason": "gate-not-passing",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-10T19:44:41.475185+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-10T18:44:41Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 25,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 6,
+    "mean_context": 152000,
+    "observed_at": "2026-10-10T18:44:16Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 25,
+      "aggregate_tokens_per_second": 277.069,
+      "detail": "",
+      "mean_tokens_per_second": 60.232,
+      "observed_at": "2026-10-10T18:44:16Z",
+      "runs": 4.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-10T19:08:39.187Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184438984120-pivot-assessment-record/manifest.md",
+  "member": "disposable-r-20261010T184438984120-pivot-assessment-record",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "pivot-assessment-record",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 522,
+          "cached_input_tokens": 504674,
+          "input_tokens": 505198,
+          "output_tokens": 884,
+          "reasoning_output_tokens": 224,
+          "total_tokens": 506082,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Write the record of the resolution-pivot assessment as docs/research/resolution-pivot-assessment.html, a reckon research document with plan-informs converged-forward-solve and plan-evidence-for converged-forward-solve. It must read on its own for someone who missed the session.\n\nSources: the eight reports under /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/ (pivot-census, pivot-gpucost, pivot-archaeology, pivot-critique, proto-ladder, proto-order2, proto-taylor, proto-support), their row receipts in the run directories those reports cite, and the resolution-strategy decision on the plan.\n\nDone when:\n(1) The document states the lead's question, the verdict (accuracy failure came from support, not resolution; the saddle normal form is needed at any resolution; compile cost is flat in cell count and comes from the kernel point jet; refinement converges once the support is right) and the decision, each claim with its number, job id and report.\n(2) It includes three figures under docs/figures/resolution-pivot/, one SVG each, drawn with matplotlib on the data-ink style (plt.style.use(\"data-ink\"); no grid, no title, despined, direct labels; sizes and colour rules as in the global agent guidelines):\n- certificate map relative sup against realised cells, log-log, for the legacy and exact supports in the diverted and limited cases, with the exact arm's booking and exterior terms dashed and the 0.01 bound dotted grey;\n- the topology read's diverted saddle membership error against cells for the current read and the quadratic-only arm, with the bound as a dotted line and the lost X-point at 2,000 cells marked;\n- the kernel-backed read's expanded equations by call site, native against batched, with the cold compile walls labelled.\n(3) Every number in a figure is read from a receipt file, never typed in, and the plotting script is committed under scripts/prototypes/pivot_figures.py.\n(4) It ends with a table of the six blockers, each mapped to its followup id.\n(5) reckon audit-doc reports 0 errors, figures use project-absolute src (/nova/figures/resolution-pivot/...), and filepath relativize is run over the document before committing. Plotting is light work and may run in place on the fleet allocation with the shared interpreter /home/ITER/mcintos/Code/nova/.venv/bin/python and PYTHONPATH set to the worktree. Commit with conventional subjects and bodies; the manifest commits line lists every commit; status is complete, blocked or failed.",
+    "estimated_hours": 1.5,
+    "goal": "Write the resolution-pivot assessment as a research document with three receipt-driven figures",
+    "id": "pivot-assessment-record",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-10T18:44:41Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 25,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 6,
+      "mean_context": 152000,
+      "observed_at": "2026-10-10T18:44:16Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 25,
+        "aggregate_tokens_per_second": 277.069,
+        "detail": "",
+        "mean_tokens_per_second": 60.232,
+        "observed_at": "2026-10-10T18:44:16Z",
+        "runs": 4.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T184438984120-pivot-assessment-record/manifest.md",
+    "negative_control": "the figure script refuses to draw when a cited receipt file is missing or a plotted value differs from the report table",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "docs/research/resolution-pivot-assessment.html",
+      "docs/figures/resolution-pivot",
+      "scripts/prototypes/pivot_figures.py",
+      "docs/evidence/fragments/converged-forward-solve/pivot-assessment-record.html",
+      "docs/figures/converged-forward-solve/pivot-assessment-record"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3651694.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "pivot-assessment-record",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-10T18:44:45.199505+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "route",
+    "answering_model": "typesafe/jev-1.13-20260917",
+    "backend": "clive",
+    "comment": "Documentation with receipt-driven figures; moderate difficulty",
+    "confidence": 0.62,
+    "decision_source": "jev",
+    "effort": "high",
+    "excluded": [
+      {
+        "availability": "not-probed",
+        "backend": "native",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": null,
+        "context": null,
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "in-harness",
+        "local": false,
+        "model": null,
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reasons": [
+          "in-harness-backend"
+        ],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": null
+      }
+    ],
+    "fallback_reason": null,
+    "family": "local",
+    "jev_latency_ms": 485.334,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 4764.206,
+    "model": "deepseek-v4.1-flash",
+    "offered": [
+      {
+        "availability": "unknown",
+        "backend": "claude",
+        "budget_age_s": 385196.040543,
+        "budget_reason": null,
+        "burn_multiple": 0.7395557219790269,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 16.6,
+          "peak_utilisation_p90_pct": 19.7,
+          "peak_utilisation_runs": 6,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.46904914880787035,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-sonnet-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 1,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3410000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-haiku",
+        "budget_age_s": 385196.040543,
+        "budget_reason": null,
+        "burn_multiple": 0.7395557219790269,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.46904914880787035,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-haiku-4-5-20251001",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3410000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "claude-opus",
+        "budget_age_s": 385196.040543,
+        "budget_reason": null,
+        "burn_multiple": 0.7395557219790269,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": 29.8,
+          "peak_utilisation_p90_pct": 36.4,
+          "peak_utilisation_runs": 4,
+          "window_tokens": null
+        },
+        "days_to_reset": 0.46904914880787035,
+        "effort": "high",
+        "family": "claude",
+        "local": false,
+        "model": "claude-opus-5-5",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.3410000000000001,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-11T06:00:00+00:00",
+        "stale": true,
+        "utilisation_pct": 69.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "served",
+        "backend": "clive",
+        "budget_age_s": null,
+        "budget_reason": null,
+        "burn_multiple": null,
+        "congestion": {
+          "admission_verdict": "open",
+          "running": 4,
+          "slots_state": "measured",
+          "stale": false,
+          "waiting": 0
+        },
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": 78.1,
+          "peak_utilisation_p50_pct": 57.5,
+          "peak_utilisation_p90_pct": 84.0,
+          "peak_utilisation_runs": 105,
+          "window_tokens": 230144
+        },
+        "days_to_reset": null,
+        "effort": "high",
+        "family": "local",
+        "local": true,
+        "model": "deepseek-v4.1-flash",
+        "outcomes": {
+          "failed": 2,
+          "not-run": 13,
+          "passed": 70,
+          "unknown": 0
+        },
+        "pace_allowance": null,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": null,
+        "stale": null,
+        "utilisation_pct": null,
+        "worker_slots": 5
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex",
+        "budget_age_s": 488.367543,
+        "budget_reason": null,
+        "burn_multiple": 1.6113594107198836,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.4377875747337963,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-sol",
+        "outcomes": {
+          "failed": 4,
+          "not-run": 2,
+          "passed": 4,
+          "unknown": 0
+        },
+        "pace_allowance": 0.5597757979996695,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 82.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-astra",
+        "budget_age_s": 488.367543,
+        "budget_reason": null,
+        "burn_multiple": 1.6113594107198836,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.4377875747337963,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-astra",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 2,
+          "unknown": 0
+        },
+        "pace_allowance": 0.5597757979996695,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 82.0,
+        "worker_slots": null
+      },
+      {
+        "availability": "unknown",
+        "backend": "codex-luna",
+        "budget_age_s": 488.367543,
+        "budget_reason": null,
+        "burn_multiple": 1.6113594107198836,
+        "congestion": null,
+        "context": {
+          "estimated_tokens": 50392,
+          "headroom_pct": null,
+          "peak_utilisation_p50_pct": null,
+          "peak_utilisation_p90_pct": null,
+          "peak_utilisation_runs": null,
+          "window_tokens": null
+        },
+        "days_to_reset": 3.4377875747337963,
+        "effort": "high",
+        "family": "codex",
+        "local": false,
+        "model": "gpt-6-luna",
+        "outcomes": {
+          "failed": 0,
+          "not-run": 0,
+          "passed": 0,
+          "unknown": 0
+        },
+        "pace_allowance": 0.5597757979996695,
+        "reason": "eligible",
+        "reasons": [],
+        "resets_at": "2026-10-14T05:14:59+00:00",
+        "stale": true,
+        "utilisation_pct": 82.0,
+        "worker_slots": null
+      }
+    ],
+    "probabilities": {
+      "claude:claude-haiku-4-5-20251001": 0,
+      "claude:claude-opus-5-5": 0.07,
+      "claude:claude-sonnet-5-5": 0.12,
+      "codex:gpt-6-astra": 0.05,
+      "codex:gpt-6-luna": 0,
+      "codex:gpt-6-sol": 0.04,
+      "hold": 0.05,
+      "local:deepseek-v4.1-flash": 0.67
+    },
+    "rendered_token_estimate": 2447,
+    "usage": {
+      "cost": 0.00025095,
+      "input_tokens": 5975,
+      "output_tokens": 150
+    }
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.16666666666666666,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "9e406413636c6ca60ffe62f5d56da7f172c9d868",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "b86bfc7284bf89bce864e3062dbaa537b5277ba7",
+    "reviewed_head_sha": "9e406413636c6ca60ffe62f5d56da7f172c9d868",
+    "scores": {
+      "durability": 15,
+      "evidence": 18,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 109
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "picker",
+  "run_id": "r-20261010T184438984120-pivot-assessment-record",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "9bd2c59e-884f-4c20-8e16-957ebb79cb1c",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 15056936,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1403.936,
+    "generated_tokens": 67102,
+    "generation_seconds": 1040.968,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 85.4,
+    "machine_seconds": 362.968,
+    "peak_input_tokens": 196511,
+    "tokens_per_second": 64.46,
+    "wall_tokens_per_second": 47.8
+  },
+  "time_budget": "60m",
+  "tool_steps": 113.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": [
+      {
+        "backend": "clive",
+        "budget_overrun": false,
+        "budget_overrun_seconds": 0,
+        "budget_seconds": 3600,
+        "classification": "scoring",
+        "commits_beyond_base": 0,
+        "detail": "the worker manifest reports completion, but no independent review is attached; an independent review must be produced before promotion",
+        "effective_phase": "complete",
+        "elapsed_seconds": 2264,
+        "exit_record": {
+          "attempt": 1,
+          "ended_during": "working",
+          "exit_code": 0,
+          "exited_at": "2026-10-10T18:27:37Z",
+          "last_record_type": "result",
+          "launched_at": "2026-10-10T18:07:09Z",
+          "recorded_by": "supervisor",
+          "run_id": "r-20261010T180645483384-pivot-wave-scout",
+          "signal": null,
+          "signal_name": null,
+          "stream_records_seen": 12059,
+          "worker_pid": 1432343
+        },
+        "external_wait": null,
+        "fleet_verdict": {
+          "detail": "",
+          "lifting_condition": null,
+          "recovery": "review",
+          "recovery_classification": "scoring",
+          "stall_base_detail": null,
+          "stall_base_state": null,
+          "stall_pause_reason": null,
+          "stall_process_state": null,
+          "stall_quiet_seconds": null,
+          "stall_window_seconds": 900,
+          "state": "completed_unpromoted"
+        },
+        "interruption": null,
+        "lane": "clive",
+        "lane_cause": null,
+        "lane_ended_at": "2026-10-10T18:27:37Z",
+        "lane_event": null,
+        "lifting_condition": null,
+        "liveness_proven": true,
+        "log_age_seconds": 1029,
+        "log_fresh": false,
+        "manifest_commits": [],
+        "manifest_derived": false,
+        "manifest_digest": "c6c5e4fcf4e65d8afea5575be52568c053a6952dac759a98fec2f5196a47ae9e",
+        "manifest_error": null,
+        "manifest_file_present": true,
+        "manifest_fresh": true,
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261010T180645483384-pivot-wave-scout/manifest.md",
+        "manifest_present": true,
+        "manifest_reported_status": "complete",
+        "manifest_status": "complete",
+        "marker": null,
+        "model_key": "flash",
+        "needs_help_complete": null,
+        "next_action": "reckon crew dispatch --project nova --plan converged-forward-solve --section '§2' --role review --spec-level exact --node review-of-pivot-wave-scout --goal 'attach an independent review to run r-20261010T180645483384-pivot-wave-scout' --done-when 'the review for r-20261010T180645483384-pivot-wave-scout stores a parsed record scoring all 6 dimensions in the range 0..20, recording the revision it read as reviewed_base_sha and reviewed_head_sha, and carrying added_failure_count and added_failure_ids derived from the reviewed run'\"'\"'s own baseline_suite and after_suite gate logs; the turn ends once that record is stored and the manifest reads complete' --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261010T180645483384-pivot-wave-scout.json --write-path /home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261010T180645483384-pivot-wave-scout.at-163d07eeb52ea58fcfe005173f32912dec836e83.json --time-budget 60m --session s21-nova --allow-unreconciled-runs --local",
+        "node": "pivot-wave-scout",
+        "phase": "complete",
+        "plan": "converged-forward-solve",
+        "process_alive": false,
+        "process_descendant_alive": null,
+        "project": "nova",
+        "recovery": "review",
+        "recovery_classification": "scoring",
+        "resets_at": null,
+        "review_error": null,
+        "review_present": false,
+        "review_status": null,
+        "run_id": "r-20261010T180645483384-pivot-wave-scout",
+        "session": "s21-nova",
+        "stored_phase": "complete",
+        "terminal_age_seconds": 1098,
+        "terminal_at": "2026-10-10T18:26:24Z",
+        "wait_age_seconds": null,
+        "wait_condition_state": null,
+        "wait_key_defect": null,
+        "wait_observed": null,
+        "wait_overdue": null,
+        "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pivot-wave-scout"
+      }
+    ]
+  },
+  "wall_seconds": 1416,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-10T19:08:42Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-10T18:45:11Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261010T184438984120-pivot-assessment-record",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9167,
+    "worker_pid": 1746169
+  },
+  "worker_seconds": 1372,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

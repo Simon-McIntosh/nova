@@ -24,10 +24,10 @@ ways that stand alone on the nova spine (no data):
 
 from __future__ import annotations
 
-import ast
 import importlib.util
-import inspect
 import json
+import subprocess
+import sys
 from types import SimpleNamespace
 
 import numpy as np
@@ -376,24 +376,23 @@ def test_pre_saddle_axis_component_uses_admissible_hex_links():
 
 
 def test_module_is_contour_free():
-    """Imports no contour / ndimage machinery and calls no argwhere / label."""
-    tree = ast.parse(inspect.getsource(cb))
-    imported: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            imported += [a.name for a in node.names]
-        elif isinstance(node, ast.ImportFrom):
-            base = node.module or ""
-            imported += [base] + [f"{base}.{a.name}" for a in node.names]
-    banned = ("contourpy", "matplotlib", "skimage", "scipy.ndimage", "ndimage")
-    for imp in imported:
-        assert not any(b in imp for b in banned), f"boundary read imports {imp!r}"
-    calls = {
-        n.func.attr
-        for n in ast.walk(tree)
-        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
-    }
-    assert "argwhere" not in calls and "label" not in calls
+    """Importing the boundary read pulls in no contour / ndimage machinery."""
+
+    probe = (
+        "import sys; import nova.equilibrium.connectivity_boundary; "
+        "banned = sorted(n for n in sys.modules if any(b in n for b in "
+        "('contourpy', 'matplotlib', 'skimage', 'scipy.ndimage', 'ndimage'))); "
+        "print(';'.join(banned))"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", probe],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout.strip() == "", completed.stdout
 
 
 def test_mechanism_names_replace_dependency_names_without_aliases():

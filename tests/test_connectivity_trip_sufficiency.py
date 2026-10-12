@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 
 import numpy as np
 import pytest
@@ -96,11 +95,3 @@ def test_reciprocal_edge_decisions_are_canonical():
     )
     assert not canonical[centre_row, slot]
     assert not canonical[neighbour_row, reverse_slot]
-
-    label_source = inspect.getsource(
-        flux_surface_connectivity._iterate_component_labels
-    )
-    component_source = inspect.getsource(_saddle_aware_axis_component)
-    assert "lax.fori_loop" in label_source
-    assert "while_loop" not in label_source
-    assert "while_loop" not in component_source

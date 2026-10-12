@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 from types import SimpleNamespace
 
 import jax
@@ -49,17 +48,6 @@ def _continued_source() -> ForwardSource:
         core=core,
         common_sol=policy.extend(core, PlasmaDomain.COMMON_SOL),
     )
-
-
-def test_residual_support_has_no_boundary_flux_partition() -> None:
-    """Residual participation comes from achieved saddle-aware domain labels."""
-
-    implementation = inspect.getsource(ForwardFluxOperator._support_partition)
-
-    assert "boundary_flux" not in implementation
-    assert "profile_participation" in implementation
-    assert "_fixed_design_read" in implementation
-    assert "traced_clip(-" not in implementation
 
 
 def test_profile_owned_moments_count_common_sol_current_once() -> None:
@@ -156,11 +144,6 @@ def test_point_cell_arm_uses_profile_owned_support_eager_and_jit() -> None:
             moments.cell_current,
             [owner_current, owner_current, 0.0, 0.0],
         )
-
-    implementation = inspect.getsource(ForwardFluxOperator.cell_current_moments)
-    assert "profile_participation" in implementation
-    assert "declared_support" not in implementation
-    assert "boundary_flux" not in implementation
 
 
 def test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit() -> None:

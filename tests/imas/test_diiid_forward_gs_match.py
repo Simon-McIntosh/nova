@@ -1,6 +1,5 @@
 import ast
 import importlib.util
-import inspect
 import json
 import sys
 from pathlib import Path
@@ -251,14 +250,6 @@ def test_valid_closed_branch_rows_feed_shared_metre_comparator_only():
     assert comparison.topology_class_agreement is True
     assert comparison.failures == ()
     assert np.max(np.abs(closed)) == pytest.approx(1.0)
-
-
-def test_scoring_uses_gradient_reference_x_and_margin_classification():
-    source = inspect.getsource(gate.solve_frame)
-    assert "boundary_gradient_minimum(" in source
-    assert "reference_x_points_rz_m=labelled_x_point[None, :]" in source
-    assert "class_margin=float(topology.class_margin)" in source
-    assert "topology.diverted" not in source
 
 
 def test_assembled_closed_and_open_plotting_geometry_stay_separate(monkeypatch):

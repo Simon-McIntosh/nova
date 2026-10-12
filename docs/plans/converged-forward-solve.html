@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="185">
+<meta name="plan-version" content="186">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -579,6 +579,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261012T141921094098-review-of-proto-read-route" data-who="reckon-build" data-when="2026-10-12T14:28:11.800Z">
     <div class="r-comment-body"><p>Stored a parsed independent review of the commits r-20261012T042612803730-proto-read-route gained since 5add700371c6afa1831d56b0349d4b13e804dacb (the single fragment commit e41dd0bf); all six dimensions scored 0..20 with reviewed_base_sha/reviewed_head_sha recorded and one follow-on finding, no blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261012T202333466794-review-of-red-base-triage" data-who="reckon-build" data-when="2026-10-12T20:42:23.880Z">
+    <div class="r-comment-body"><p>approved — six dimensions scored in 0..20 (goal_fidelity 15, evidence 17, scope_discipline 17, durability 18, fit 15, reuse 19; total 101), reviewed_base_sha 437a68db4ee910dbd9029408f03068688aff0cce, reviewed_head_sha 3664332431591307dea6d7c6f74b8abbb112a979, added_failure_count 0 over the 57 paired per-file targets, 19 base failures removed; no blocking findings, four follow-ons recorded</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

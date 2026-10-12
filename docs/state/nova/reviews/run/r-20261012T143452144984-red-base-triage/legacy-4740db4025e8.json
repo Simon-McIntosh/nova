@@ -1,0 +1,108 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own arms in r-20261012T143452144984-red-base-triage/manifest.md: baseline_suite (revision 437a68db4ee910dbd9029408f03068688aff0cce, log resumed-base-suite.log, completed false, 67 failure_ids) and after_suite (revision 8f2df48debf917282711ed005dfb43348926023e, log resumed-head-suite.log, completed false, 48 failure_ids). after_ids minus base_ids is empty (added_failure_count 0, added_failure_ids []); 19 ids are removed. Both arms cover the same 57 completed per-file targets and both record the unfinished tests/test_forward_compile_identity.py as a synthetic incomplete id, so the paired comparison is over 57 targets and neither arm declares itself complete.",
+  "added_failure_ids": [],
+  "blocking_finding_count": 0,
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:2474",
+    "nova/equilibrium/forward_operator.py:3394",
+    "nova/equilibrium/forward_operator.py:3953",
+    "nova/equilibrium/stencil_mesh.py:404"
+  ],
+  "commits_read": [
+    "61be97d8c",
+    "5dfee4d62",
+    "7107f08e6",
+    "bc6e333e2",
+    "332b0a88e",
+    "30181f6cd",
+    "19e90b158",
+    "49e94917c",
+    "c199578f9",
+    "3cb810221",
+    "07344cf91",
+    "5472a47b5",
+    "8f2df48de",
+    "92150c857",
+    "b69413a32",
+    "05e9ff357",
+    "a2a6ddaed",
+    "366433243"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T14:35:10Z",
+  "findings": [
+    {
+      "file": "tests/test_mask_threshold_consistency.py",
+      "line": "138",
+      "severity": "follow-on",
+      "text": "follow-on: a debug print(\"active-set evidence\", np.asarray(fixed.active_set_mask_differences), float(fixed.residual), flush=True) is committed in the test body; it writes to captured output on every run and should be removed."
+    },
+    {
+      "file": "nova/equilibrium/stencil_mesh.py",
+      "line": "313",
+      "severity": "follow-on",
+      "text": "follow-on: this production file was edited although the brief's scope clause directs stopping and naming, rather than editing, when a defect's fix lies in another production file; nova/equilibrium/stencil_mesh.py appears in the node's orientation_write_paths but not in the prompt's FENCE-SCOPE list, so the dispatch's two scope lists disagree and a later reader cannot tell from the brief alone that the edit was granted."
+    },
+    {
+      "file": "tests/test_topology_domain_partition.py",
+      "line": "71",
+      "severity": "follow-on",
+      "text": "follow-on: the committed (core, private_flux) count golden and its parametrized literals (160,0)/(162,0) were deleted rather than regenerated at this base, so no committed assertion pins those counts anywhere now; item (2)(a) permits deletion, but tests/test_topology_o_qualification.py:102 lost its committed_axis golden the same way, so two operand goldens are unpinned."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/red-base-triage.html",
+      "line": "60",
+      "severity": "follow-on",
+      "text": "follow-on: the adjacent-failure table lists tests/test_exact_clip_moments.py::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from among out-of-scope base failures left visible, but the head arm removes it, so the anchor-centred summation in nova/equilibrium/stencil_mesh.py:313 fixed a test outside the declared repair scope without the fragment remarking it."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's head arm ran at 8f2df48debf917282711ed005dfb43348926023e, the last commit in the range touching source or tests; the five later commits (92150c857 through 05e9ff357 to 366433243) edit docs/evidence/fragments/converged-forward-solve/red-base-triage.html only, so the arm's revision carries every source/test change at the reviewed head. The H200 job 1283988 timed out in the base compilation-identity row before the head row started, so the GPU identity clause is unmeasured and the node reports it under blockers.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "nova/equilibrium/forward_operator.py:2474, :3394, :3953 and nova/equilibrium/stencil_mesh.py:404 reach the changed code",
+    "diff": "read commit by commit against 437a68db4ee910dbd9029408f03068688aff0cce; 18 commits land, only 61be97d8c/7107f08e6/bc6e333e2/30181f6cd/19e90b158/3cb810221 touch source or tests, and the five commits after the head arm's 8f2df48de (92150c857, b69413a32, 05e9ff357, a2a6ddaed, 366433243) edit the fragment only.",
+    "done_when": "the done-when (prompt.txt:114-126) asks for a per-file re-measure of the 25 fails, a classification table with tracebacks and introducing commits, the two nova/equilibrium/separatrix_clip.py clip fixes plus a three-vertex test, the tests/conftest.py precision guard, a head-base delta with no added failure, and an audit-clean fragment; docs/evidence/fragments/converged-forward-solve/red-base-triage.html:31-51 carries the classification table and :75-79 the guard, and resumed-base-suite.log/resumed-head-suite.log carry the two arms.",
+    "goal": "the node goal is to return the topology, connectivity and forward-operator test modules to green on main; the diff repairs or re-baselines nine of the eleven named modules and leaves the census and oracle modules red, delegated and visible.",
+    "manifest": "read; status blocked, 19 commits named, baseline_suite and after_suite both present as single-line JSON whose commands carry absolute paths and no placeholder, and negative_control_log names negative-control.log alone.",
+    "write_paths": "git diff 437a68db4ee910dbd9029408f03068688aff0cce..3664332431591307dea6d7c6f74b8abbb112a979 touches 14 files; every one (tests/test_topology_domain_partition.py, tests/test_connectivity_trip_sufficiency.py, tests/test_connectivity_boundary.py, tests/test_forward_operator_domain.py, tests/test_census_polish_compaction.py, tests/test_equilibrium_stencil_mesh.py, tests/test_topology_o_qualification.py, tests/test_domain_participation_continuity.py, tests/test_mask_threshold_consistency.py, tests/test_stationary_point_admission.py, tests/conftest.py, nova/equilibrium/separatrix_clip.py, tests/test_equilibrium_separatrix_clip.py, docs/evidence/fragments/converged-forward-solve/red-base-triage.html) is inside the granted set."
+  },
+  "justifications": {
+    "durability": "negative-control.log fails tests/test_equilibrium_separatrix_clip.py::test_degenerate_excluded_cell_has_zero_area_moments by id at EXIT=1 and stencil-negative-control.log fails tests/test_equilibrium_stencil_mesh.py::test_moment_geometry_shared_nodes_reproduce_a_quadratic_flux_map by id when the centring is reverted.",
+    "evidence": "the gate records one fresh process per file per arm in resumed-base-suite.log and resumed-head-suite.log with literal commands, revisions and log_paths; their failure_ids reduce to added_failure_count 0 over the 57 paired targets, with both arms completed:false (tests/test_forward_compile_identity.py unfinished).",
+    "fit": "tests/test_mask_threshold_consistency.py:138 leaves a debug print(\"active-set evidence\", ...) with flush=True in a committed test body.",
+    "goal_fidelity": "of the eleven modules the goal names, nine are green at head while tests/test_census_polish_compaction.py and tests/test_oracle_axis_admission.py remain red and are reported blocked rather than green.",
+    "reuse": "the added test assembles its raw moments through the existing owners nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments and nova/equilibrium/separatrix_clip.py:_centred_degree_two_moments rather than re-deriving them.",
+    "scope_discipline": "every path in git diff 437a68db4ee910dbd9029408f03068688aff0cce..3664332431591307dea6d7c6f74b8abbb112a979 is inside the granted list, but nova/equilibrium/stencil_mesh.py:313 is granted only through orientation_write_paths and is absent from the brief's FENCE-SCOPE block."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to return the topology, connectivity and forward-operator test modules to green on main; git diff 437a68db4ee910dbd9029408f03068688aff0cce..3664332431591307dea6d7c6f74b8abbb112a979 repairs or re-baselines nine of the eleven named modules (test_topology_domain_partition, test_connectivity_trip_sufficiency, test_connectivity_boundary, test_forward_operator_domain, test_equilibrium_stencil_mesh, test_topology_o_qualification, test_domain_participation_continuity, test_mask_threshold_consistency, test_stationary_point_admission) and leaves test_census_polish_compaction.py and test_oracle_axis_admission.py red, delegated and named in the manifest follow_ons.\nVERDICT done_when: the done-when (prompt.txt:114-126) asks for a fresh per-file re-measure of the 25 fails, a classification table with tracebacks and introducing commits, the two nova/equilibrium/separatrix_clip.py clip fixes plus a three-vertex test, the tests/conftest.py precision guard, a head-base delta with no added failure, and an audit-clean fragment; docs/evidence/fragments/converged-forward-solve/red-base-triage.html:31-51 carries the classification table and :75-79 the guard, and resumed-base-suite.log/resumed-head-suite.log carry the two arms.\nVERDICT write_paths: git diff 437a68db..366433243 touches 14 files; every one (tests/test_topology_domain_partition.py, tests/test_connectivity_trip_sufficiency.py, tests/test_connectivity_boundary.py, tests/test_forward_operator_domain.py, tests/test_census_polish_compaction.py, tests/test_equilibrium_stencil_mesh.py, tests/test_topology_o_qualification.py, tests/test_domain_participation_continuity.py, tests/test_mask_threshold_consistency.py, tests/test_stationary_point_admission.py, tests/conftest.py, nova/equilibrium/separatrix_clip.py, tests/test_equilibrium_separatrix_clip.py, docs/evidence/fragments/converged-forward-solve/red-base-triage.html) is inside the granted set.\nVERDICT manifest: read; status blocked, 19 commits named, baseline_suite and after_suite present as single-line JSON whose commands carry absolute paths and no placeholder, and negative_control_log names negative-control.log alone.\nVERDICT diff: read commit by commit against 437a68db4ee910dbd9029408f03068688aff0cce; 18 commits land, only 61be97d8c, 7107f08e6, bc6e333e2, 30181f6cd, 19e90b158 and 3cb810221 touch source or tests, and the five commits after the head arm's 8f2df48de (92150c857, b69413a32, 05e9ff357, a2a6ddaed, 366433243) edit docs/evidence/fragments/converged-forward-solve/red-base-triage.html alone.\nCALL_SITES: nova/equilibrium/forward_operator.py:2474, nova/equilibrium/forward_operator.py:3394, nova/equilibrium/forward_operator.py:3953, nova/equilibrium/stencil_mesh.py:404\nSCORE goal_fidelity: 15\nSCORE evidence: 17\nSCORE scope_discipline: 17\nSCORE durability: 18\nSCORE fit: 15\nSCORE reuse: 19\nJUSTIFICATION goal_fidelity: of the eleven modules the goal names, nine are green at head while tests/test_census_polish_compaction.py and tests/test_oracle_axis_admission.py remain red and are reported blocked rather than green.\nJUSTIFICATION evidence: the gate records one fresh process per file per arm in resumed-base-suite.log and resumed-head-suite.log with literal commands, revisions and log_paths; their failure_ids reduce to added_failure_count 0 over the 57 paired targets, with both arms completed:false (tests/test_forward_compile_identity.py unfinished).\nJUSTIFICATION scope_discipline: every path in git diff 437a68db4ee910dbd9029408f03068688aff0cce..3664332431591307dea6d7c6f74b8abbb112a979 is inside the granted list, but nova/equilibrium/stencil_mesh.py:313 is granted only through orientation_write_paths and is absent from the brief's FENCE-SCOPE block.\nJUSTIFICATION durability: negative-control.log fails tests/test_equilibrium_separatrix_clip.py::test_degenerate_excluded_cell_has_zero_area_moments by id at EXIT=1 and stencil-negative-control.log fails tests/test_equilibrium_stencil_mesh.py::test_moment_geometry_shared_nodes_reproduce_a_quadratic_flux_map by id when the centring is reverted.\nJUSTIFICATION fit: tests/test_mask_threshold_consistency.py:138 leaves a debug print(\"active-set evidence\", ...) with flush=True in a committed test body.\nJUSTIFICATION reuse: the added test assembles its raw moments through the existing owners nova/equilibrium/clip_quadrature.py:_straight_edge_monomial_moments and nova/equilibrium/separatrix_clip.py:_centred_degree_two_moments rather than re-deriving them.\nFINDING tests/test_mask_threshold_consistency.py:138 follow-on: a debug print(\"active-set evidence\", np.asarray(fixed.active_set_mask_differences), float(fixed.residual), flush=True) is committed in the test body; it writes to captured output on every run and should be removed.\nFINDING nova/equilibrium/stencil_mesh.py:313 follow-on: this production file was edited although the brief's scope clause directs stopping and naming, rather than editing, when a defect's fix lies in another production file; nova/equilibrium/stencil_mesh.py appears in the node's orientation_write_paths but not in the prompt's FENCE-SCOPE list, so the dispatch's two scope lists disagree and a later reader cannot tell from the brief alone that the edit was granted.\nFINDING tests/test_topology_domain_partition.py:71 follow-on: the committed (core, private_flux) count golden and its parametrized literals (160,0)/(162,0) were deleted rather than regenerated at this base, so no committed assertion pins those counts anywhere now; item (2)(a) permits deletion, but tests/test_topology_o_qualification.py:102 lost its committed_axis golden the same way, so two operand goldens are unpinned.\nFINDING docs/evidence/fragments/converged-forward-solve/red-base-triage.html:60 follow-on: the adjacent-failure table lists tests/test_exact_clip_moments.py::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from among out-of-scope base failures left visible, but the head arm removes it, so the anchor-centred summation in nova/equilibrium/stencil_mesh.py:313 fixed a test outside the declared repair scope without the fragment remarking it.\n",
+  "review_kind": "independent review",
+  "review_run_id": "legacy-4740db4025e8",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "437a68db4ee910dbd9029408f03068688aff0cce",
+  "reviewed_head_sha": "3664332431591307dea6d7c6f74b8abbb112a979",
+  "reviewed_revision": "3664332431591307dea6d7c6f74b8abbb112a979",
+  "reviewed_run_id": "r-20261012T143452144984-red-base-triage",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/red-base-triage",
+  "reviewer_node": "review-of-red-base-triage",
+  "reviewer_run_id": "r-20261012T202333466794-review-of-red-base-triage",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 15,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "section": "\u00a72",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:37:00+00:00",
+  "total": 101,
+  "verdict": "approved"
+}

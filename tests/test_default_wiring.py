@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-import ast
 from collections.abc import Callable
 from dataclasses import dataclass
-import inspect
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-import textwrap
 from types import SimpleNamespace
 
 import jax.numpy as jnp
@@ -260,32 +257,6 @@ def test_every_production_receipt_resolves_declared_default_on(
         assert default_name not in resolved_defaults["deviations"]
 
 
-@pytest.mark.parametrize(
-    "entry_point",
-    tuple(route for route in PRODUCTION_ENTRY_POINTS if route.launcher is not None),
-    ids=lambda route: route.name,
-)
-def test_launchers_leave_declared_defaults_to_the_public_seam(entry_point) -> None:
-    """Reject launchers that bypass the declared table with boolean controls."""
-
-    source = textwrap.dedent(inspect.getsource(entry_point.launcher))
-    tree = ast.parse(source)
-    solve_calls = [
-        node
-        for node in ast.walk(tree)
-        if isinstance(node, ast.Call)
-        and isinstance(node.func, ast.Attribute)
-        and node.func.attr
-        in {"solve", "solve_branch", "solve_portfolio", "solve_batch"}
-    ]
-
-    assert solve_calls, f"{entry_point.name} does not cross a public solve seam"
-    for call in solve_calls:
-        keyword_names = {keyword.arg for keyword in call.keywords}
-        assert None not in keyword_names
-        assert not (keyword_names & set(REQUIRED_DEFAULTS))
-
-
 def test_production_routes_forward_the_prescribed_current() -> None:
     """Every route hands its prescribed current through the seam unchanged."""
 
@@ -307,27 +278,3 @@ def test_production_routes_forward_the_prescribed_current() -> None:
     assert mast_request.current is None
     assert diiid_request.current is not None
     assert jnp.array_equal(diiid_request.current, jnp.zeros(2))
-
-
-@pytest.mark.parametrize(
-    "entry_point",
-    tuple(route for route in PRODUCTION_ENTRY_POINTS if route.private_solver_kernels),
-    ids=lambda route: route.name,
-)
-def test_production_routes_call_no_private_solver_kernel(entry_point) -> None:
-    """Reject a route that reaches a private kernel instead of the public seam."""
-
-    source_path = inspect.getsourcefile(entry_point.launcher)
-    assert source_path is not None
-    source = Path(source_path).read_text(encoding="utf-8")
-    assert entry_point.route_module is not None
-    for caller_name in entry_point.seam_callers:
-        caller = getattr(entry_point.route_module, caller_name)
-        caller_source = textwrap.dedent(inspect.getsource(caller))
-        assert any(marker in caller_source for marker in entry_point.seam_markers), (
-            f"{entry_point.name}::{caller_name} does not cross the public seam"
-        )
-    for kernel in entry_point.private_solver_kernels:
-        assert kernel not in source, (
-            f"{entry_point.name} calls the private solver kernel {kernel}"
-        )

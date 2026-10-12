@@ -14,7 +14,6 @@ from nova.biot.null import Null1D, Null2D
 from nova.equilibrium.domain import PlasmaDomain
 from nova.equilibrium.topology import Topology, TopologyClass
 from nova.geometry.hexstencil import hex_stencil
-from nova.jax.config import configure_dtypes
 
 
 @dataclass(frozen=True)
@@ -57,12 +56,6 @@ STACK = ManufacturedCoilStack(
     ),
     coil_current=5.0e4,
 )
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match the precision used by the production topology read."""
-    configure_dtypes()
 
 
 def _fixture(shape: tuple[int, int]):

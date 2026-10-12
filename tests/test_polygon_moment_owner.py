@@ -10,10 +10,8 @@ reductions that were deleted do not reappear.
 
 from __future__ import annotations
 
-import inspect
 import math
 from fractions import Fraction
-from pathlib import Path
 
 import numpy as np
 
@@ -25,13 +23,6 @@ import jax.numpy as jnp  # noqa: E402
 
 from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments  # noqa: E402
 from nova.equilibrium.separatrix_clip import _centred_degree_two_moments  # noqa: E402
-
-_MODULES = (
-    "nova/equilibrium/clip_quadrature.py",
-    "nova/equilibrium/separatrix_clip.py",
-    "nova/equilibrium/polygon_moments.py",
-    "nova/equilibrium/stencil_mesh.py",
-)
 
 # total degree -> the (p, q) exponent pairs in the owner's column order.
 _POWERS = [(total, radial) for total in range(5) for radial in range(total + 1)]
@@ -135,46 +126,3 @@ def test_degree_two_view_reproduces_area_first_and_second_moments():
         [[raw[(2, 0)], raw[(1, 1)]], [raw[(1, 1)], raw[(0, 2)]]],
         atol=1e-13,
     )
-
-
-def test_the_deleted_parallel_reduction_does_not_reappear():
-    root = Path(__file__).resolve().parent.parent
-    for relative in _MODULES:
-        text = (root / relative).read_text()
-        assert "_traced_polygon_moments" not in text
-    assert "_edge_weights" not in (root / _MODULES[2]).read_text()
-
-
-def test_every_remaining_polygon_reduction_delegates_to_the_owner():
-    """Each surviving reduction reads the owner table rather than recomputing it."""
-    from nova.equilibrium.polygon_moments import polygon_monomial_moments
-    from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
-
-    for reduction in (padded_polynomial_current_moments, polygon_monomial_moments):
-        source = inspect.getsource(reduction)
-        assert "_straight_edge_monomial_moments" in source, reduction.__name__
-
-
-def test_the_area_and_monomial_views_reproduce_the_rational_reference():
-    """The numpy area view and the owner table agree with the rational reference."""
-    from nova.equilibrium.polygon_moments import polygon_monomial_moments
-    from nova.equilibrium.separatrix_clip import _area_moments
-
-    ring = np.asarray([[0.2, -0.4], [1.3, -0.4], [1.3, 0.8], [0.2, 0.8]])
-    origin = np.asarray([0.75, 0.2])
-    area, first, second = _area_moments(ring, origin)
-    exact = _exact_monomials(ring - origin)
-    assert abs(area - exact[(0, 0)]) < 1e-13
-    np.testing.assert_allclose(first, [exact[(1, 0)], exact[(0, 1)]], atol=1e-13)
-    np.testing.assert_allclose(
-        second,
-        [[exact[(2, 0)], exact[(1, 1)]], [exact[(1, 1)], exact[(0, 2)]]],
-        atol=1e-13,
-    )
-
-    vertices = jnp.asarray((ring - origin)[None, :, :])
-    count = jnp.asarray([4])
-    table = np.asarray(polygon_monomial_moments(vertices, count))[0]
-    for column, (total, radial) in enumerate(_POWERS):
-        power = (radial, total - radial)
-        assert abs(table[column] - exact[power]) < 1e-13

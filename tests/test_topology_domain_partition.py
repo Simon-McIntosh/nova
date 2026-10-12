@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 from pathlib import Path
 
 import numpy as np
@@ -19,21 +18,13 @@ with skip_import("jax"):
         axis_connected_component,
         classify_domains,
     )
-    from nova.equilibrium.topology import Topology
     from nova.geometry.hexstencil import hex_stencil
-    from nova.jax.config import configure_dtypes
 
 
 OPERANDS = (
     Path(__file__).parents[1]
     / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
 )
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match the precision policy used to publish the committed operands."""
-    configure_dtypes()
 
 
 def _cached_partition(row: int, *, compiled: bool):
@@ -105,13 +96,3 @@ def test_committed_partition_uses_the_axis_hex_component(
         core_count,
         private_count,
     )
-
-
-def test_topology_read_routes_connectivity_through_the_shared_component_kernel():
-    """The production read has no half-plane connectivity authority."""
-    read_source = inspect.getsource(Topology.read_with_connectivity)
-    component_source = inspect.getsource(axis_connected_component)
-
-    assert "x_mask" not in read_source
-    assert "axis_component" in read_source
-    assert "label_saddle_aware_hex_connected_components" in component_source

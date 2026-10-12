@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import dataclasses
-import inspect
 import json
 
 import jax
@@ -217,11 +216,3 @@ def test_direct_certificate_request_is_bit_identical_to_the_keyword_fixture():
     np.testing.assert_array_equal(requested.state, keyword.state)
     np.testing.assert_array_equal(requested.trace, keyword.trace)
     np.testing.assert_array_equal(requested.residual, keyword.residual)
-
-
-def test_topology_replay_emits_the_request_policy_block():
-    source = inspect.getsource(topology_replay.run)
-    compact = "".join(source.split())
-
-    assert '"resolved_defaults"' in source
-    assert "ResolvedForwardSolveDefaults.from_policy(request.policy)" in compact

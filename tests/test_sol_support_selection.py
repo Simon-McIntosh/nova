@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-import inspect
-
 import jax
 import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium.continuation import SeparatrixContinuation
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
-from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.observation import current_ledger, declared_pressure
 from nova.equilibrium.sol_closure import EichSolClosure, EichWidth, SolDecayVariant
 from nova.equilibrium.source import (
@@ -189,16 +186,3 @@ def test_measured_sol_closure_uses_the_same_live_support():
 
     assert float(current[0]) != 0.0
     assert float(current[1]) == 0.0
-
-
-def test_solve_paths_do_not_route_on_the_common_sol_label():
-    """Production evaluation seams contain no common component-label branch."""
-
-    implementations = (
-        inspect.getsource(ForwardSource.current_density),
-        inspect.getsource(ForwardSource.current_moments),
-        inspect.getsource(ForwardSource.declared_support),
-        inspect.getsource(ForwardFluxOperator._support_partition),
-    )
-    assert all("COMMON_SOL" not in implementation for implementation in implementations)
-    assert not hasattr(ForwardFluxOperator, "shared_domain_masks")

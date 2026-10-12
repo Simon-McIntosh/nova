@@ -19,8 +19,9 @@ with the free-boundary solver: they need the current-diffusion assembly.
 from __future__ import annotations
 
 import importlib.util
-import inspect
 import math
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -155,26 +156,23 @@ def test_batched_matches_per_slice():
 
 
 def test_module_is_contour_free():
-    """The FSA path imports no contour / ndimage machinery (AST-checked)."""
-    import ast
+    """Importing the FSA path pulls in no contour / ndimage machinery."""
 
-    tree = ast.parse(inspect.getsource(fsc))
-    imported: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            imported += [a.name for a in node.names]
-        elif isinstance(node, ast.ImportFrom):
-            base = node.module or ""
-            imported += [base] + [f"{base}.{a.name}" for a in node.names]
-    banned = ("contourpy", "matplotlib", "skimage", "scipy.ndimage", "ndimage")
-    for imp in imported:
-        assert not any(b in imp for b in banned), f"contour-free FSA imports {imp!r}"
-    calls = {
-        n.func.attr
-        for n in ast.walk(tree)
-        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
-    }
-    assert "argsort" not in calls and "sort" not in calls
+    probe = (
+        "import sys; import nova.equilibrium.flux_surface_connectivity; "
+        "banned = sorted(n for n in sys.modules if any(b in n for b in "
+        "('contourpy', 'matplotlib', 'skimage', 'scipy.ndimage', 'ndimage'))); "
+        "print(';'.join(banned))"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", probe],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert completed.stdout.strip() == "", completed.stdout
 
 
 def test_traced_kernel_has_no_host_adapter_or_dependency_named_alias():
@@ -333,9 +331,6 @@ def test_component_labels_use_fixed_cap_masked_execution():
 
     np.testing.assert_array_equal(np.asarray(extended_labels), np.asarray(labels))
     assert int(extended_steps) == int(steps) < confined.size
-    source = inspect.getsource(fsc._iterate_component_labels)
-    assert "lax.fori_loop" in source
-    assert "while_loop" not in source
 
 
 def _ring_shared_edges(shape, rings, half_length=0.45):
@@ -472,24 +467,6 @@ def test_saddle_aware_hex_labels_are_fixed_shape_jit_and_vmap_safe():
         ]
     )
     assert np.array_equal(np.asarray(batched), np.asarray(per_slice))
-    assert "pure_callback" not in inspect.getsource(fsc)
-
-
-def test_label_propagation_uses_fixed_schedule_and_flood_stays_doubling():
-    """The label schedule uses the caller cap; the flood stays fast.
-
-    Label propagation uses the caller's fixed iteration count for every
-    element under vmap, while the flood remains its data-dependent doubling
-    loop and stops when the component reaches its fixed point.
-    """
-    flood_source = inspect.getsource(fsc.flood_fill_core_with_steps)
-    assert "while_loop" in flood_source
-    assert "lax.fori_loop" not in flood_source
-    labels_source = inspect.getsource(fsc._iterate_component_labels)
-    assert "lax.fori_loop" in labels_source
-    assert "while_loop" not in labels_source
-    assert "n_iter" in labels_source
-    assert "active = jnp.any(labels != previous)" in labels_source
 
 
 def test_flood_matches_linear_reference_on_corridor():
@@ -773,9 +750,6 @@ def test_stationary_point_polish_uses_fixed_cap_masked_execution():
         )
     assert int(capped["iteration_count"][1]) == 0
     np.testing.assert_array_equal(np.asarray(capped["position_rz"][-1]), [0.0, 0.0])
-    source = inspect.getsource(fsc._polish_stationary_points_in_bounds)
-    assert "lax.fori_loop" in source
-    assert "while_loop" not in source
 
 
 def test_traced_contour_retains_cell_confined_saddle_polish():

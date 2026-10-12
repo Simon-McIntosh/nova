@@ -51,7 +51,6 @@ uses direct pre-clip sample rows and never consumes that reconstruction.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import math
 from typing import NamedTuple
 
 import jax
@@ -569,40 +568,6 @@ def _direct_profile_current_moments(
         jnp.where(included, current, 0.0),
         jnp.where(included[:, None], first, 0.0),
     )
-
-
-def _polygon_monomial_integral(
-    vertices: np.ndarray, radial_power: int, vertical_power: int
-) -> float:
-    """Return one exact signed-fan monomial integral on a local polygon."""
-    total_degree = radial_power + vertical_power
-    total = 0.0
-    area_twice = 0.0
-    for first, second in zip(vertices, np.roll(vertices, -1, axis=0), strict=True):
-        cross = first[0] * second[1] - second[0] * first[1]
-        area_twice += cross
-        edge = 0.0
-        for radial_first in range(radial_power + 1):
-            radial = (
-                math.comb(radial_power, radial_first)
-                * first[0] ** radial_first
-                * second[0] ** (radial_power - radial_first)
-            )
-            for vertical_first in range(vertical_power + 1):
-                first_degree = radial_first + vertical_first
-                simplex = (
-                    math.factorial(first_degree)
-                    * math.factorial(total_degree - first_degree)
-                    / math.factorial(total_degree + 2)
-                )
-                vertical = (
-                    math.comb(vertical_power, vertical_first)
-                    * first[1] ** vertical_first
-                    * second[1] ** (vertical_power - vertical_first)
-                )
-                edge += simplex * radial * vertical
-        total += cross * edge
-    return math.copysign(1.0, area_twice) * total
 
 
 def _normalised_ring(coordinate: np.ndarray, stencil: np.ndarray):

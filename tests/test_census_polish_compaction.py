@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import jax.numpy as jnp
 import numpy as np
-import pytest
 
 from nova.biot.null import Null2D
 from nova.equilibrium.conservation import FluxLattice
@@ -15,13 +14,6 @@ from nova.equilibrium.flux_surface_connectivity import (
     polish_stationary_points,
 )
 from nova.geometry.hexstencil import hex_stencil
-from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Exercise the precision used by production forward maps."""
-    configure_dtypes()
 
 
 def _locator(radial: np.ndarray, vertical: np.ndarray) -> _FixedDesignNull2D:

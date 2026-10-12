@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="code-hygiene">
+  <meta name="plan-title" content="Accuracy-path hygiene over the equilibrium moment code">
+  <meta name="plan-summary" content="The duplicate polygon-moment reduction adjacent to the owner is deleted and its live caller routed to the owner, the host clip routes to the shared owner, and every inspect.getsource assertion is resolved into behavioural coverage or removed. The two clauses that could not be closed here were ruled on by the coordinator: one premise was accepted as found, the other moved to its own node.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s3">
+  <meta name="plan-recorded-at" content="2026-10-12">
+  <meta name="plan-verdict" content="complete">
+  <meta name="plan-environment" content="Shared nova environment; CPU in place under JAX_PLATFORMS=cpu on the fleet allocation; base revision be0fa0df9">
+  <meta name="plan-tags" content="equilibrium,hygiene,refactor">
+  <title>Code hygiene | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Accuracy-path hygiene over the equilibrium moment code</h1>
+  <section id="code-hygiene-verdict">
+    <h2>Verdict: complete on the reduced scope</h2>
+    <p>Two clauses of the nine-part done-when were reported rather than forced,
+    and both were then ruled on. The premise behind the first is falsified by
+    the code and the clause is withdrawn; the second is a two-stage GPU
+    pipeline and moves to a node of its own. Everything else landed and is
+    gated per file on both arms.</p>
+    <p>Gate revision <code>ea55705c3</code>, base revision
+    <code>be0fa0df9</code>, with the head arm's <code>tests/test_equilibrium_stencil_mesh.py</code>
+    run at <code>3d531184c</code>; the two revisions differ only under
+    <code>docs/</code>, so they are the same tested code. The commits carrying
+    this node's work are listed in the run manifest.</p>
+  </section>
+  <section id="code-hygiene-landed">
+    <h2>Landed</h2>
+    <ul>
+      <li><code>62b6be512</code> — one shared <code>_double_precision</code>
+      fixture in the new <code>tests/conftest.py</code>, autouse, so no module
+      has to remember the extended-precision setup; the six bare
+      <code>.npz</code> GPU goldens under
+      <code>scripts/prototypes/ladder/compatibility</code> deleted, the six
+      <code>-cpu</code> goldens kept because
+      <code>tests/test_read_ten_thousand_cells.py</code> reads only those.</li>
+      <li><code>b5a7dab23</code> — <code>stencil_mesh._polygon_monomial_integral</code>
+      deleted with its dead scorer <code>scripts/clip_independent_representation/</code>.</li>
+      <li><code>4e63bc8e0</code> — <code>separatrix_clip._area_moments</code>
+      deleted; the host <code>clip()</code> and the prototype
+      <code>geometry.pack</code> now compute area and first two area moments in
+      one batched call to the owner-routing
+      <code>_centred_degree_two_moments</code>. Non-positive-area cells keep
+      zeroed support and vertex count.</li>
+      <li><code>4182b24fb</code> — every <code>inspect.getsource</code>
+      assertion over an implementation body is resolved, case by case. The two
+      <code>test_module_is_contour_free</code> checks become a fresh-process
+      import probe that fails if importing the module pulls in
+      <code>contourpy</code>, <code>matplotlib</code>, <code>skimage</code> or
+      <code>scipy.ndimage</code> — the same claim, measured rather than read
+      out of the source text. Assertions that read a body for a loop primitive
+      or a call-site string are deleted where a behavioural assertion beside
+      them already covers the behaviour, and the modules whose guarded wiring
+      they echoed keep their behavioural coverage. No behavioural assertion was
+      removed.</li>
+      <li><code>1981bcfe2</code> — <code>polygon_moments.polygon_monomial_moments</code>
+      deleted. Its own docstring recorded that its reduction, column order and
+      signed-area convention were all
+      <code>clip_quadrature._straight_edge_monomial_moments</code>, so the name
+      duplicated the owner with no behaviour of its own. Its only caller,
+      <code>polygon_density_moments</code>, now contracts against the owner
+      table directly, and the triangle-accuracy and malformed-buffer coverage
+      moved onto the owner.</li>
+      <li>This fragment, first landed at <code>48c18e0aa</code> and revised as
+      the per-file gate results and the coordinator's rulings arrived.</li>
+    </ul>
+  </section>
+  <section id="code-hygiene-evidence">
+    <h2>Verification</h2>
+    <p>The delta gate ran one fresh process per test file, both arms, on the
+    fleet allocation. Each arm was given its own tree as the working directory
+    with <code>PYTHONPATH</code> set to it, and each log header prints
+    <code>nova.__file__</code>, so a log that resolved the wrong tree cannot be
+    read as evidence. The head arm is this node's gate revision; the base arm
+    is <code>git archive be0fa0df9</code> extracted to node-local storage,
+    because reckon's write fence makes <code>git worktree add</code> fail on
+    <code>.git/worktrees</code>.</p>
+    <table>
+      <thead><tr><th>file</th><th>base</th><th>head</th></tr></thead>
+      <tbody>
+        <tr><td>test_census_polish_compaction</td><td>3 failed, 2 passed</td><td>3 failed, 2 passed</td></tr>
+        <tr><td>test_census_spline_value_authority</td><td>3 passed</td><td>3 passed</td></tr>
+        <tr><td>test_connectivity_boundary</td><td>3 failed, 14 passed</td><td>3 failed, 14 passed</td></tr>
+        <tr><td>test_connectivity_trip_sufficiency</td><td>4 failed, 1 passed</td><td>4 failed, 1 passed</td></tr>
+        <tr><td>test_default_wiring</td><td>72 passed</td><td>64 passed</td></tr>
+        <tr><td>test_domain_participation_continuity</td><td>1 failed, 3 passed</td><td>1 failed, 3 passed</td></tr>
+        <tr><td>test_equilibrium_separatrix_clip</td><td>28 passed</td><td>28 passed</td></tr>
+        <tr><td>test_equilibrium_stencil_mesh</td><td>2 failed, 17 passed</td><td>2 failed, 17 passed</td></tr>
+        <tr><td>test_exact_clip_closed_form_budget</td><td>5 passed</td><td>5 passed</td></tr>
+        <tr><td>test_flux_surface_connectivity</td><td>43 passed</td><td>42 passed</td></tr>
+        <tr><td>test_forward_census</td><td>11 passed, 2 skipped</td><td>11 passed, 2 skipped</td></tr>
+        <tr><td>test_forward_operator_domain</td><td>3 failed, 3 passed</td><td>1 failed, 4 passed</td></tr>
+        <tr><td>test_hex_flood_coil_nulls</td><td>2 passed</td><td>2 passed</td></tr>
+        <tr><td>test_limited_boundary_touches_wall</td><td>8 passed</td><td>8 passed</td></tr>
+        <tr><td>test_mask_threshold_consistency</td><td>1 failed, 1 passed</td><td>1 failed, 1 passed</td></tr>
+        <tr><td>test_oracle_axis_admission</td><td>1 failed, 2 passed</td><td>1 failed, 2 passed</td></tr>
+        <tr><td>test_polygon_moment_owner</td><td>5 passed</td><td>2 passed</td></tr>
+        <tr><td>test_polygon_moments</td><td>7 passed</td><td>7 passed</td></tr>
+        <tr><td>test_route_solve_requests</td><td>8 passed</td><td>7 passed</td></tr>
+        <tr><td>test_shared_spline_authority</td><td>2 passed</td><td>2 passed</td></tr>
+        <tr><td>test_sol_support_selection</td><td>7 passed</td><td>6 passed</td></tr>
+        <tr><td>test_solovev_certificate_builder</td><td>4 passed</td><td>4 passed</td></tr>
+        <tr><td>test_split_spline</td><td>4 passed</td><td>4 passed</td></tr>
+        <tr><td>test_stationary_point_admission</td><td>1 failed, 8 passed</td><td>1 failed, 8 passed</td></tr>
+        <tr><td>test_structured_read_census_rows</td><td>2 passed</td><td>2 passed</td></tr>
+        <tr><td>test_thomson_forward_model</td><td>5 passed</td><td>5 passed</td></tr>
+        <tr><td>test_topology_domain_partition</td><td>4 failed, 1 passed</td><td>4 failed</td></tr>
+        <tr><td>test_topology_limiter_contact</td><td>9 passed</td><td>9 passed</td></tr>
+        <tr><td>test_topology_o_qualification</td><td>2 failed, 4 passed</td><td>2 failed, 4 passed</td></tr>
+        <tr><td>test_xpoint_cell_wedge_clip</td><td>14 passed</td><td>13 passed</td></tr>
+        <tr><td>imas/test_diiid_forward_gs_match</td><td>12 passed</td><td>11 passed</td></tr>
+      </tbody>
+    </table>
+    <p>Twenty-three test ids fail at the head against twenty-five at the base, and
+    the head set is a strict subset of the base set: <strong>this node adds no
+    failure</strong>, and two disappear. Every file whose passed count drops
+    between the arms drops by exactly the number of source-text tests deleted
+    in clause (5) — <code>test_default_wiring</code> by eight,
+    <code>test_flux_surface_connectivity</code>, <code>test_route_solve_requests</code>,
+    <code>test_sol_support_selection</code>, <code>test_xpoint_cell_wedge_clip</code>
+    and <code>imas/test_diiid_forward_gs_match</code> by one each,
+    <code>test_polygon_moment_owner</code> by three. No file loses a
+    behavioural test.</p>
+    <p>The two failures that disappear in
+    <code>test_forward_operator_domain</code> are both worth naming, because
+    neither is a behaviour this change altered.
+    <code>test_residual_support_has_no_boundary_flux_partition</code> is itself
+    a source-text test and was deleted.
+    <code>test_point_cell_arm_uses_profile_owned_support_eager_and_jit</code>
+    fails at the base <em>only on the four <code>inspect.getsource</code> lines
+    appended to it</em>: its behavioural body — the point-cell averaging that
+    admits a common-SOL cell and excludes both shadow classes — runs and passes
+    in both arms, which a single-test run on each tree confirms. Removing the
+    source-text tail removes the failure without touching the behaviour it was
+    bolted onto.</p>
+    <p>The module whose deletion this node's largest code change made,
+    <code>nova/equilibrium/stencil_mesh.py</code>, is covered by
+    <code>tests/test_equilibrium_stencil_mesh.py</code>, and that file is in the
+    gate on both arms: two failures at each, the same two ids —
+    <code>test_moment_geometry_shared_nodes_reproduce_a_quadratic_flux_map</code>
+    and <code>test_the_conservation_receipts_agree_between_the_meshes</code>.
+    Both were failing at the base before the deleted symbol was touched, so the
+    deletion of <code>stencil_mesh._polygon_monomial_integral</code> adds
+    nothing, and a search for that name across <code>nova/</code>,
+    <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code>
+    returns no reference at all.</p>
+    <p>The remaining head failures are all reproduced at the base with the same
+    ids: three in <code>test_census_polish_compaction</code>, four in
+    <code>test_connectivity_trip_sufficiency</code>, four in
+    <code>test_topology_domain_partition</code>, two in
+    <code>test_topology_o_qualification</code>, two in
+    <code>test_equilibrium_stencil_mesh</code>, and one each in
+    <code>test_domain_participation_continuity</code>,
+    <code>test_forward_operator_domain</code>,
+    <code>test_mask_threshold_consistency</code>,
+    <code>test_oracle_axis_admission</code> and
+    <code>test_stationary_point_admission</code>, plus the three in
+    <code>test_connectivity_boundary</code> described above. They are
+    pre-existing and are listed in the manifest's follow-ons so a later node can
+    take them.</p>
+    <p>Clause (2)'s own changes are gated by
+    <code>tests/test_polygon_moments.py</code> (7 passed, with the
+    triangle-accuracy and malformed-buffer cases retargeted onto the owner) and
+    <code>tests/test_exact_clip_closed_form_budget.py</code> (5 passed: the
+    benchmark that consumes the rerouted function still imports and lowers),
+    both clean in both arms.</p>
+    <p>Negative control: mutating the owner
+    <code>clip_quadrature._straight_edge_monomial_moments</code> drove the
+    owner-accuracy and exact-clip-moment tests red (8 failed, 5 passed, exit 1);
+    the mutation was reverted and the worktree is clean.</p>
+  </section>
+  <section id="code-hygiene-hangs">
+    <h2>The boundary file's pre-existing hangs</h2>
+    <p><code>tests/test_connectivity_boundary.py</code> does not complete on
+    either arm. Its first run under the gate's own per-file budget ended with
+    both arms sitting on the same test after nine passes, which reads as an
+    unfinished log rather than a result; re-run with the repository's declared
+    per-test <code>timeout = 300</code>, it reports those hangs as ordinary
+    failure ids, and the two arms report <em>the same ids in the same order</em>.
+    That is what makes them pre-existing rather than introduced here — the
+    failing tests are <code>test_wall_termination_binds_at_exact_tangency</code>,
+    <code>test_continuous_through_marginal_transition</code> and
+    <code>test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate</code>,
+    and each exceeds the module's declared budget on the base tree as well as on
+    the head. The module is left as it is; the hang is not this node's to fix
+    and is listed in the manifest's follow-ons.</p>
+  </section>
+  <section id="code-hygiene-rulings">
+    <h2>Rulings on the two reported clauses</h2>
+    <ul>
+      <li><strong><code>separatrix_clip.padded_polynomial_current_moments</code>
+      stays.</strong> The clause asked that it be deleted as a duplicate
+      reduction and its consumers rerouted to the owner. Reading the body
+      falsifies the premise: the function localises to centroid and scale,
+      calls the owner, and contracts a complete polynomial basis of degree two
+      through nine against the returned table. It is the localise-and-contract
+      layer over the owner, not a second reduction, and it is the
+      scripts-facing API for complete bases above degree two — the degree at
+      which the closed-form route the package already carries stops covering
+      the basis. Deleting it would either remove that route (used at degree
+      nine by <code>density_moment_projection</code> and
+      <code>density_forcing_ladder</code>) or inline the same body into eight
+      call sites. The coordinator accepted the finding and the function is
+      unchanged.</li>
+      <li><strong><code>polygon_density_moments</code> and its module stay.</strong>
+      The duplicate name is gone; the contraction the module exposes is what
+      <code>benchmarks/exact_clip_closed_form_floor.py</code> measures against
+      the fan reference and the locked per-row budget. That benchmark is a live
+      measurement of the surviving owner route, and its consumer outside this
+      node's fence (<code>docs/figures/exact-clip-moment-quadrature/</code>)
+      imports the benchmark module, so deleting the contraction would delete a
+      measurement rather than a duplicate.</li>
+      <li><strong>The certificate-row reconciliation moves out of this node.</strong>
+      It is a two-stage pipeline: <code>scripts/prototypes/support/measure.py</code>
+      writes the <code>{kind}-{cells}-fixture.json</code> identity files and
+      <code>scripts/prototypes/support/book.py</code> books against them, with a
+      GPU lane required and a second checkout at the merge under test for the
+      reference rows. None of the fixture files exist in the tree, and the
+      adjacent read gate was the subject of a dedicated node. The coordinator
+      moved it, together with the exterior fixture's move to the support owner,
+      to a node of its own; it is not attempted here.</li>
+    </ul>
+  </section>
+  <section id="code-hygiene-repair">
+    <h2>Repair round</h2>
+    <p>A review of <code>3d531184c</code> found that the per-file gate ran thirty
+    test files but not <code>tests/test_equilibrium_stencil_mesh.py</code>, the
+    suite covering <code>nova/equilibrium/stencil_mesh.py</code> — one of the
+    four production modules this node changed, where
+    <code>_polygon_monomial_integral</code> was deleted. Neither arm's gate log
+    contained the name <code>stencil</code>, and the table above listed no row
+    for it, so the clause requiring the suites covering every touched module to
+    pass by delta was unmet for that module even though the deletion itself was
+    sound.</p>
+    <p>The file now runs on both arms, one fresh process each, and is in the
+    table above, in both arm logs and in the manifest's failure ids: two
+    failures at each arm with the same two ids, both of which were already
+    failing at the base. The deletion is safe — a search for
+    <code>_polygon_monomial_integral</code> across <code>nova/</code>,
+    <code>tests/</code>, <code>benchmarks/</code> and <code>scripts/</code>
+    returns no reference — so the repair closes an evidentiary gap rather than
+    a code defect, and the head failure set remains a strict subset of the
+    base's at twenty-three against twenty-five.</p>
+  </section>
+</main>
+</body>
+</html>

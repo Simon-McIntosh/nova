@@ -19,14 +19,7 @@ with skip_import("jax"):
         _diverted_geometry_row,
         _exact_state,
     )
-    from nova.jax.config import configure_dtypes
     from scripts.analytic_oracle_fixtures import measure as oracle_fixture
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match the precision used by the production certificate."""
-    configure_dtypes()
 
 
 def _diverted_exact_read(requested_cells):

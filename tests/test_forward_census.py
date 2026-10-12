@@ -18,13 +18,6 @@ from nova.equilibrium.forward_operator import _FixedDesignNull2D
 from nova.equilibrium.flux_surface_connectivity import fit_tensor_spline
 from nova.equilibrium.topology import Topology
 from nova.geometry.hexstencil import hex_stencil
-from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Exercise the precision used by production forward maps."""
-    configure_dtypes()
 
 
 def _locator(

@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="red-base-triage">
   <meta name="plan-title" content="Red base test triage">
-  <meta name="plan-summary" content="The scoped repairs pass at their original tolerances. Resumed base and head gates have no added failures among 56 completed pairs; compile identity remains incomplete after 51 minutes in both arms. Census and oracle failures remain visible under delegated followups.">
+  <meta name="plan-summary" content="The scoped repairs pass at their original tolerances. The base and head CPU gates have zero added failing IDs among 57 completed pairs. A 90-minute H200 job timed out in the remaining base row, before the head row began; the 58-target comparison remains incomplete. Census and oracle failures stay visible under delegated followups.">
   <meta name="plan-evidence-for" content="converged-forward-solve">
   <meta name="plan-verifies" content="converged-forward-solve#s2">
   <meta name="plan-recorded-at" content="2026-10-12">
@@ -76,12 +76,12 @@
   </section>
   <section id="red-base-triage-expanded-gate">
     <h2>Expanded per-target gate</h2>
-    <p>The resumed CPU gate reused only completed per-file receipts and relaunched unfinished targets with <code>--timeout=900</code>, at no more than eight simultaneous processes. At 18:24 UTC, base has 57/58 complete and head has 56/58 complete; the 56 completed pairs contain 65 base failing IDs and 47 head failing IDs, with zero added and 18 removed. The two compile-identity processes produced only one progress mark each over 51 minutes; they were stopped and recorded as incomplete rather than treated as a passing gate. The head wall-margin test was still running at this checkpoint.</p>
+    <p>The resumed CPU gate reused only completed per-file receipts and relaunched unfinished targets with <code>--timeout=900</code>, at no more than eight simultaneous processes. Both arms ultimately completed 57/58 targets. Across those 57 paired files, the base has 66 failing IDs and the head has 47: zero added and 19 removed. The remaining compilation-identity processes produced only one progress mark each over 51 minutes; they were stopped and recorded as incomplete rather than treated as a passing gate.</p>
     <p>Other expanded-importer failures with completed base and head receipts include 25 IDs in <code>test_equilibrium_forward_reference.py</code> and two in <code>test_exact_clip_memory.py</code>; each set matches between arms. Their detailed IDs are in the resumed suite logs. These findings are reported as found outside this node's declared repair scope.</p>
   </section>
   <section id="red-base-triage-device-gate">
     <h2>Compilation identity on H200</h2>
-    <p>The unfinished compilation-identity file is routed to one reserved H200 job, with the base and head tests run sequentially from their respective trees. Each row records its imported <code>nova.__file__</code>, working directory, double-precision setting, selected JAX device, test IDs and exit status. The device-qualified receipts will replace only the missing target in the 58-target comparison.</p>
+    <p>One reserved H200 job, <code>1283988</code>, ran the base and head compilation-identity rows sequentially. Its scheduler state is <code>TIMEOUT</code> after 01:30:18; the job error log records cancellation at the time limit. The base log confirms revision <code>437a68db4ee910dbd9029408f03068688aff0cce</code>, resolved cwd <code>/tmp/nova-red-h200-base.0gk10M</code>, imported <code>nova.__file__</code> under that same tree, <code>jax_enable_x64: True</code>, <code>jax.default_backend: gpu</code> and <code>CudaDevice(id=0)</code>. It then prints a pytest timeout stack and <code>F</code>, but no pytest summary or final <code>EXIT=</code>. The head row never started: the job output has no row-completion marker and its head log does not exist. Neither GPU row is a complete receipt, so no same-device failure-ID comparison or 58/58 claim is made.</p>
   </section>
 </main>
 </body>

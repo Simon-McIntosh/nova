@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own gate arms in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/manifest.md: baseline_suite revision be0fa0df9d7d9552846049628e0a396e0366879f, completed true, exit_status 1, failure_count 25 with 25 failure_ids; after_suite revision 3d531184ce3de68987a73e32362af749ce9a807f, completed true, exit_status 1, failure_count 23 with 23 failure_ids. The after set is a strict subset of the base set: after - base is empty, so added_failure_count 0 and added_failure_ids []; base - after is the two test_forward_operator_domain ids removed by 4182b24fb. Both logs exist at the paths the manifest names and their tail summaries reconcile with those counts.",
+  "added_failure_ids": [],
+  "blocking_finding_count": 0,
+  "call_site_count": 4,
+  "call_sites": [
+    "apps/pulsedesign/poloidal_view.py:373",
+    "nova/equilibrium/stencil_mesh.py:365",
+    "scripts/prototypes/support/geometry.py:63",
+    "benchmarks/exact_clip_closed_form_floor.py:191"
+  ],
+  "commits_read": [
+    "62b6be512",
+    "b5a7dab23",
+    "4e63bc8e0",
+    "48c18e0aa",
+    "4182b24fb",
+    "1981bcfe2",
+    "ea55705c3",
+    "91411b9d8",
+    "2c38b2ac5",
+    "3d531184c",
+    "7c58fa547"
+  ],
+  "completed_at": "2026-10-12T14:30:44.837Z",
+  "dispatched_at": "2026-10-12T14:19:30Z",
+  "findings": [
+    {
+      "file": "tests/conftest.py",
+      "line": "18",
+      "severity": "follow-on",
+      "text": "the assertion cannot fail on the regression the fixture exists to guard - nova/jax/config.py:267 sets jax_enable_x64 True unconditionally and module-latched, so the call on line 17 guarantees line 18 is true, and no test reddens if the autouse fixture is removed and the fifteen per-module copies deleted in 62b6be512 are not restored, leaving the extended-precision ordering the copies provided unguarded."
+    },
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": "2162",
+      "severity": "follow-on",
+      "text": "origin is still unpacked from the zip(self.cell_nodes, self.cell_vertex_count, self.centroids) after _area_moments, its only consumer, was deleted at 4e63bc8e0, so the clip loop carries a dead binding and a third iterable it no longer reads."
+    },
+    {
+      "file": "nova/equilibrium/separatrix_clip.py",
+      "line": "2216",
+      "severity": "follow-on",
+      "text": "the batched owner now returns first_area_moment and second_area_moment for every cell and only area is used to mask, so an excluded cell (nova/equilibrium/separatrix_clip.py:2224 included = area > 0.0) can carry a nonzero first or second moment where the deleted _area_moments returned zeros for every cell it excluded; a degenerate clipped polygon of three or more vertices with zero signed area is the reachable case and no test covers it."
+    }
+  ],
+  "gate_arms_note": "The after arm runs at 3d531184c, the commit before head; the only difference between 3d531184c and the reviewed head 7c58fa547 is docs/evidence/fragments/... (git show --stat 7c58fa547 reports one docs file, +44/-7), so the tested code is the reviewed code. The negative control log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/negative-control.log ends EXIT=1 with 8 failing tests/test_exact_clip_moments.py ids.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base be0fa0df9d7d9552846049628e0a396e0366879f; named 62b6be512, b5a7dab23, 4e63bc8e0, 48c18e0aa, 4182b24fb, 1981bcfe2, ea55705c3, 91411b9d8, 2c38b2ac5, 3d531184c, 7c58fa547 - four code/test commits and seven docs/evidence commits, the last seven touching only docs/evidence/fragments/converged-forward-solve/code-hygiene.html.",
+    "done_when": "the done-when's quantitative clause (6) requires the suites covering every touched module to pass by delta against the base with a negative net line delta; the per-file gate in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/head-gate-perfile.log and base-gate-perfile.log asserts exactly that (23 head failure ids against 25 base, strict subset) and the repair commit 7c58fa547 adds tests/test_equilibrium_stencil_mesh.py, the suite for the touched module nova/equilibrium/stencil_mesh.py, to both arms, which closes the gap that left clause (6) unmet for that module; the net delta is negative (114 insertions against 1656 deletions over nova/ tests/ benchmarks/ scripts/). Clause (8)'s H200 certificate rows are reported as moved to their own node, not measured here.",
+    "goal": "the goal is the accuracy-path hygiene treatment over the equilibrium moment code, its tests, benchmarks and scripts; the landed diff deletes the duplicate reductions and routes every live caller to clip_quadrature._straight_edge_monomial_moments (nova/equilibrium/polygon_moments.py, nova/equilibrium/separatrix_clip.py:2155, nova/equilibrium/stencil_mesh.py), consolidates the precision fixture (tests/conftest.py) and removes the dead scorer, but it delivers the nine-clause done-when on a reduced scope: clause (8)'s certificate rows are absent and one clause's premise is withdrawn by coordinator ruling recorded at docs/evidence/fragments/converged-forward-solve/code-hygiene.html.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/manifest.md; status complete, eleven commits listed, baseline_suite and after_suite both completed:true, and negative_control_log names the host path of a log whose last line is EXIT=1.",
+    "write_paths": "read the manifest's declared write paths (nova/equilibrium/{clip_quadrature,separatrix_clip,polygon_moments,stencil_mesh}.py, the fenced tests/, benchmarks/, scripts/ subtrees, and docs/evidence/fragments/converged-forward-solve/code-hygiene.html); all 41 paths in git diff be0fa0df9..7c58fa547 lie inside them, and the two files above 300,000 bytes are deletions inside scripts/prototypes/ladder/compatibility/ and scripts/clip_independent_representation/."
+  },
+  "justifications": {
+    "durability": "deleting nova/equilibrium/separatrix_clip.py's _area_moments and tests/test_polygon_moment_owner.py:131's reappearance guard at 4182b24fb leaves no assertion that reddens if either reduction is reintroduced, and tests/conftest.py:18's assertion is not independent of the configure_dtypes() call above it.",
+    "evidence": "head-gate-perfile.log records twenty-three head failure ids against twenty-five at the base with the head set a strict subset and the header naming revision=3d531184c tree=<worktree as cwd>, so the delta the done-when asserts is measured and recorded, and the audit of the landed fragment reports 0 violations.",
+    "fit": "the reroutes follow the module idiom, but nova/equilibrium/separatrix_clip.py:2162 still unpacks origin in the clip loop after the deletion removed its only use, leaving a dead binding in a hygiene change.",
+    "goal_fidelity": "nova/equilibrium/polygon_moments.py:69 deletes polygon_monomial_moments and contracts polygon_density_moments against clip_quadrature._straight_edge_monomial_moments directly, so the duplicate name is gone and the surviving entry routes to the owner.",
+    "reuse": "every routing targets an existing owner (nova/equilibrium/clip_quadrature.py:155 and nova/equilibrium/separatrix_clip.py:786) and no new definition re-implements a mechanism the repository already owns; the search over nova/equilibrium found no other polygon-moment reduction.",
+    "scope_discipline": "git diff --name-only be0fa0df9..7c58fa547 returns 41 paths, every one inside the manifest's declared write paths, with no out-of-fence edit."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is the accuracy-path hygiene treatment over the equilibrium moment code, its tests, benchmarks and scripts; the landed diff deletes the duplicate reductions and routes every live caller to clip_quadrature._straight_edge_monomial_moments (nova/equilibrium/polygon_moments.py, nova/equilibrium/separatrix_clip.py:2155, nova/equilibrium/stencil_mesh.py), consolidates the precision fixture (tests/conftest.py) and removes the dead scorer, but it delivers the nine-clause done-when on a reduced scope: clause (8)'s certificate rows are absent and one clause's premise is withdrawn by coordinator ruling recorded at docs/evidence/fragments/converged-forward-solve/code-hygiene.html.\nVERDICT done_when: the done-when's quantitative clause (6) requires the suites covering every touched module to pass by delta against the base with a negative net line delta; the per-file gate in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/head-gate-perfile.log and base-gate-perfile.log asserts exactly that (23 head failure ids against 25 base, strict subset) and the repair commit 7c58fa547 adds tests/test_equilibrium_stencil_mesh.py, the suite for the touched module nova/equilibrium/stencil_mesh.py, to both arms, which closes the gap that left clause (6) unmet for that module; the net delta is negative (114 insertions against 1656 deletions over nova/ tests/ benchmarks/ scripts/). Clause (8)'s H200 certificate rows are reported as moved to their own node, not measured here.\nVERDICT write_paths: read the manifest's declared write paths (nova/equilibrium/{clip_quadrature,separatrix_clip,polygon_moments,stencil_mesh}.py, the fenced tests/, benchmarks/, scripts/ subtrees, and docs/evidence/fragments/converged-forward-solve/code-hygiene.html); all 41 paths in git diff be0fa0df9..7c58fa547 lie inside them, and the two large-data files above 300,000 bytes are deletions inside scripts/prototypes/ladder/compatibility/ and scripts/clip_independent_representation/.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T063317936507-code-hygiene/manifest.md; status complete, eleven commits listed, baseline_suite and after_suite both completed:true, and negative_control_log names the host path of a log whose last line is EXIT=1.\nVERDICT diff: read commit by commit against base be0fa0df9d7d9552846049628e0a396e0366879f; named 62b6be512, b5a7dab23, 4e63bc8e0, 48c18e0aa, 4182b24fb, 1981bcfe2, ea55705c3, 91411b9d8, 2c38b2ac5, 3d531184c, 7c58fa547 - four code/test commits and seven docs/evidence commits, the last seven touching only docs/evidence/fragments/converged-forward-solve/code-hygiene.html.\nCALL_SITES: apps/pulsedesign/poloidal_view.py:373, nova/equilibrium/stencil_mesh.py:365, scripts/prototypes/support/geometry.py:63, benchmarks/exact_clip_closed_form_floor.py:191\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: nova/equilibrium/polygon_moments.py:69 deletes polygon_monomial_moments and contracts polygon_density_moments against clip_quadrature._straight_edge_monomial_moments directly, so the duplicate name is gone and the surviving entry routes to the owner.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-gate-perfile.log records twenty-three head failure ids against twenty-five at the base with the head set a strict subset and the header naming revision=3d531184c tree=<worktree as cwd>, so the delta the done-when asserts is measured and recorded, and the audit of the landed fragment reports 0 violations.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-only be0fa0df9..7c58fa547 returns 41 paths, every one inside the manifest's declared write paths, with no out-of-fence edit.\nSCORE durability: 13\nJUSTIFICATION durability: deleting nova/equilibrium/separatrix_clip.py's _area_moments and tests/test_polygon_moment_owner.py:131's reappearance guard at 4182b24fb leaves no assertion that reddens if either reduction is reintroduced, and tests/conftest.py:18's assertion is not independent of the configure_dtypes() call above it.\nSCORE fit: 16\nJUSTIFICATION fit: the reroutes follow the module idiom, but nova/equilibrium/separatrix_clip.py:2162 still unpacks origin in the clip loop after the deletion removed its only use, leaving a dead binding in a hygiene change.\nSCORE reuse: 20\nJUSTIFICATION reuse: every routing targets an existing owner (nova/equilibrium/clip_quadrature.py:155 and nova/equilibrium/separatrix_clip.py:786) and no new definition re-implements a mechanism the repository already owns; the search over nova/equilibrium found no other polygon-moment reduction.\nFINDING tests/conftest.py:18 follow-on: the assertion cannot fail on the regression the fixture exists to guard - nova/jax/config.py:267 sets jax_enable_x64 True unconditionally and module-latched, so the call on line 17 guarantees line 18 is true, and no test reddens if the autouse fixture is removed and the fifteen per-module copies deleted in 62b6be512 are not restored, leaving the extended-precision ordering the copies provided unguarded.\nFINDING nova/equilibrium/separatrix_clip.py:2162 follow-on: origin is still unpacked from the zip(self.cell_nodes, self.cell_vertex_count, self.centroids) after _area_moments, its only consumer, was deleted at 4e63bc8e0, so the clip loop carries a dead binding and a third iterable it no longer reads.\nFINDING nova/equilibrium/separatrix_clip.py:2216 follow-on: the batched owner now returns first_area_moment and second_area_moment for every cell and only area is used to mask, so an excluded cell (nova/equilibrium/separatrix_clip.py:2224 included = area > 0.0) can carry a nonzero first or second moment where the deleted _area_moments returned zeros for every cell it excluded; a degenerate clipped polygon of three or more vertices with zero signed area is the reachable case and no test covers it.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261012T141914422960-review-of-code-hygiene",
+  "reviewed_base_sha": "be0fa0df9d7d9552846049628e0a396e0366879f",
+  "reviewed_head_sha": "7c58fa547fd1e6220ca5235c3635b871f094e52b",
+  "reviewed_revision": "7c58fa547fd1e6220ca5235c3635b871f094e52b",
+  "reviewed_run_id": "r-20261012T063317936507-code-hygiene",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/code-hygiene",
+  "reviewer_node": "review-of-code-hygiene",
+  "reviewer_run_id": "r-20261012T141914422960-review-of-code-hygiene",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T14:52:00+00:00",
+  "total": 102,
+  "verdict": "pass-with-follow-on"
+}

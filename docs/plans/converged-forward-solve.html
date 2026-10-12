@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="179">
+<meta name="plan-version" content="180">
 <meta name="plan-modified" content="2026-10-12">
 </head>
 <body>
@@ -737,7 +737,10 @@
     <div class="r-comment-body"><p>review of run r-20261012T063317936507-code-hygiene stored at both fenced review paths; scores goal_fidelity 17, evidence 13, scope_discipline 19, durability 12, fit 17, reuse 20 (total 98); reviewed_base_sha be0fa0df9d7d9552846049628e0a396e0366879f, reviewed_head_sha 3d531184ce3de68987a73e32362af749ce9a807f</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261012T063317936507-code-hygiene" data-who="reckon-build" data-when="2026-10-12T11:08:33.234Z">
-    <div class="r-comment-body"><p>{&#x27;fragment&#x27;: &#x27;docs/evidence/fragments/converged-forward-solve/code-hygiene.html&#x27;, &#x27;plan_meta&#x27;: &#x27;converged-forward-solve#s3&#x27;, &#x27;audit_doc&#x27;: &#x27;docs/evidence/fragments/converged-forward-solve/code-hygiene.html: OK&#x27;, &#x27;relativize&#x27;: &#x27;filepath relativize applied before commit; no worktree path in the fragment&#x27;}</p></div>
+    <div class="r-comment-body"><p>{'fragment': 'docs/evidence/fragments/converged-forward-solve/code-hygiene.html', 'plan_meta': 'converged-forward-solve#s3', 'audit_doc': 'docs/evidence/fragments/converged-forward-solve/code-hygiene.html: OK', 'relativize': 'filepath relativize applied before commit; no worktree path in the fragment'}</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261012T141914422960-review-of-code-hygiene" data-who="reckon-build" data-when="2026-10-12T14:30:44.837Z">
+    <div class="r-comment-body"><p>independent re-review of r-20261012T063317936507-code-hygiene at base be0fa0df9..head 7c58fa547 stored as a parsed six-dimension record, total 102/120 (goal_fidelity 17, evidence 17, scope_discipline 19, durability 13, fit 16, reuse 20), added_failure_count 0 with empty ids derived from the reviewed run&#x27;s own completed per-file gate arms (23 head ids against 25 base, strict subset), no blocking finding and three follow-ons</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261010T203842322123-review-of-cfs-coupling-build-scale" data-who="reckon-build" data-when="2026-10-10T20:53:30.671Z">
     <div class="r-comment-body"><p>Independent review of run r-20261010T184700018486-cfs-coupling-build-scale at head e5e794122. Scores goal_fidelity 18, evidence 18, scope_discipline 17, durability 17, fit 18, reuse 19 (total 107). The node meets its goal (device builds baked into the carriers: 5,000 cells 151.2 s, 10,000 cells 271.3 s at 75% GPU) and lands all four clauses of the resumed ruling; this review reproduced the head gate (6 passed, EXIT=0) and re-derived the negative control at head (uniform row gap 1.361e-10 over the 1e-10 bound, EXIT=1, matching the run's own log to all digits) and verified the persisted-carrier and wall-hash claims directly against the stores. One regression: _flux_blocks gained a required keyword-only builder with no default, so scripts/accuracy_cost_ladder/measure.py:140 now raises TypeError, which falsifies the ruling's 'no existing caller changes behaviour' clause and was invisible to the delta lane. Follow-ons: the fragment's reproduce command no longer selects the device path at head, a module docstring overstates measured agreement, and the ruling's diverted half was not measurable in this fixture.</p></div>

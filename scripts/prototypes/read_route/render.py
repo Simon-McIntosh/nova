@@ -24,10 +24,32 @@ def _completed_rows(directory: Path, kind: str, cells: int) -> list[dict]:
     ]
 
 
+def _prefix_rows(directory: Path, kind: str, cells: int) -> list[dict]:
+    log = directory / f"{kind}-{cells}.log"
+    if not log.exists():
+        return []
+    lines = log.read_text().splitlines()
+    if not (
+        lines[-1] == "EXIT=1"
+        and any(
+            "AttributeError: 'RotatingEquilibrium' object has no attribute 'core'"
+            in line
+            for line in lines
+        )
+    ):
+        return []
+    return [
+        json.loads(line.removeprefix("READ_ROW "))
+        for line in lines
+        if line.startswith("READ_ROW ")
+    ]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("rows", type=Path)
     parser.add_argument("figure", type=Path)
+    parser.add_argument("--prefix", type=Path)
     args = parser.parse_args()
     plt.style.use("data-ink")
     figure, axes = plt.subplots(2, 1, figsize=(14, 11), sharex=True)
@@ -40,10 +62,11 @@ def main():
         ):
             rows = []
             for cells in (2000, 5000, 10000):
+                measured = _completed_rows(args.rows, kind, cells)
+                if not measured and args.prefix is not None:
+                    measured = _prefix_rows(args.prefix, kind, cells)
                 rows += [
-                    row
-                    for row in _completed_rows(args.rows, kind, cells)
-                    if row["representation"] == representation
+                    row for row in measured if row["representation"] == representation
                 ]
             if not rows:
                 continue
@@ -75,6 +98,7 @@ def main():
                 )
     axes[0].axhline(1, color="0.5", linewidth=1.2, linestyle=":")
     axes[0].set_ylabel("Null position error [pitches]")
+    axes[0].set_yscale("log")
     axes[1].set_ylabel("Maximum membership error [median cell area]")
     axes[1].set_xlabel("Realised cells")
     axes[1].set_yscale("log")

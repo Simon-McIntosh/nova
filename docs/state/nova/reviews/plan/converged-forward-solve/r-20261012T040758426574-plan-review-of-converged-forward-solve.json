@@ -69,6 +69,13 @@
       "finding": "single_goal-1",
       "reason": "Section 6 sequences its two halves rather than bundling them: the retirement is conditioned on the acceptance table passing on every row (\"When section 5 passes the table on every row ... deleted\"), and they are dispatched as separate nodes, the acceptance rows by each section node and the deletion only after. The section split is a presentation change the lead has not asked for.",
       "when": "2026-10-12T04:15:17.006058+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s21-nova",
+      "finding": "wiring-1",
+      "reason": "The reviewer marks this as not changing the plan: the ordering and prerequisites are stated in followups f-cfs-001, f-cfs-wire-current-book and f-cfs-exterior-on-exact-support. Section-level depends-on edges inside one plan are not part of the plan schema used here.",
+      "when": "2026-10-12T04:15:29.929298+00:00"
     }
   ],
   "responses": {
@@ -89,6 +96,12 @@
       "by": "s21-nova",
       "reason": "Section 6 sequences its two halves rather than bundling them: the retirement is conditioned on the acceptance table passing on every row (\"When section 5 passes the table on every row ... deleted\"), and they are dispatched as separate nodes, the acceptance rows by each section node and the deletion only after. The section split is a presentation change the lead has not asked for.",
       "when": "2026-10-12T04:15:17.006058+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "The reviewer marks this as not changing the plan: the ordering and prerequisites are stated in followups f-cfs-001, f-cfs-wire-current-book and f-cfs-exterior-on-exact-support. Section-level depends-on edges inside one plan are not part of the plan schema used here.",
+      "when": "2026-10-12T04:15:29.929298+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/nova/docs/state/nova/reviews/plan/converged-forward-solve/r-20261012T040758426574-plan-review-of-converged-forward-solve.json",

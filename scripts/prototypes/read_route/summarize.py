@@ -28,7 +28,8 @@ def main():
     parser.add_argument("--prefix", type=Path)
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
-    rows = measured_rows(args.reference)
+    reference_rows = measured_rows(args.reference)
+    rows = dict(reference_rows)
     if args.prefix:
         for path in args.prefix.glob("*.log"):
             kind = path.stem.split("-")[0]
@@ -171,6 +172,48 @@ def main():
             "[Bell element definition](https://defelement.org/elements/bell.html).",
             "",
             "The figure includes measured rows only. A missing rung is unmeasured, never a zero. Kernel points are reused solely at 2,000 cells.",
+        ]
+        candidate = current.get(("diverted", 2000, "picard_bell"))
+        reference = reference_rows.get(("diverted", 2000, "picard_kernel"))
+        if candidate is not None and reference is not None:
+            assert candidate["cells"] == reference["cells"]
+            assert candidate["pitch_m"] == reference["pitch_m"]
+            lower = abs(
+                candidate["saddle_membership_error"]
+                - reference["saddle_membership_error"]
+            )
+            bound = candidate["membership_bound"]
+            lines[2] = (
+                "**Decision to lock: reject this Bell read as the production representation. "
+                "At 2,000 cells its Picard saddle disagreement with the live-kernel "
+                f"reference is at least {lower:.9g}, or {lower / bound:.4g} times the budget.**"
+            )
+            lines += [
+                "",
+                "## Picard qualification",
+                "",
+                "For the same 2,000-cell carrier, saddle set, area normalization and analytic "
+                "reference A, the reverse triangle inequality gives "
+                "‖Bell − kernel‖∞ ≥ |‖Bell − A‖∞ − ‖kernel − A‖∞|. "
+                "Thus the saved error maxima suffice to establish a failure, even though "
+                "they do not determine the exact pointwise disagreement.",
+                "",
+                f"Bell saddle error against A: {candidate['saddle_membership_error']:.12g}; "
+                f"kernel: {reference['saddle_membership_error']:.12g}; "
+                f"disagreement lower bound: {lower:.12g}; budget: {bound:.12g}.",
+                "",
+                "The X-point is restored and both reads are valid, but that does not qualify "
+                "their saddle membership. Roundoff continuity and quartic completeness "
+                "are established; the production solve-state bound is not. Higher rungs "
+                "still quantify the scaling and cannot erase the failed required rung.",
+            ]
+        lines += [
+            "",
+            "The 550-cell smoke predates coefficient conditioning and times a "
+            "preassembled field. The larger ladder includes runtime moment contraction "
+            "and coefficient assembly in its read wall. Limited-field approximation "
+            "errors are at roundoff because that analytic field is quartic; its raw "
+            "slopes above are not truncation orders.",
         ]
         args.report.write_text("\n".join(lines) + "\n")
 

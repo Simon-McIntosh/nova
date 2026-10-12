@@ -76,9 +76,22 @@
       "finding": "wiring-1",
       "reason": "The reviewer marks this as not changing the plan: the ordering and prerequisites are stated in followups f-cfs-001, f-cfs-wire-current-book and f-cfs-exterior-on-exact-support. Section-level depends-on edges inside one plan are not part of the plan schema used here.",
       "when": "2026-10-12T04:15:29.929298+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "s21-nova",
+      "finding": "anchors_resolve-1",
+      "reason": "Not changing the plan: the chord-support claim is true, one of the two anchors is correct, and followup bodies are structured state that cannot be text-edited in place.",
+      "when": "2026-10-12T04:15:42.124237+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "s21-nova",
+      "reason": "Not changing the plan: the chord-support claim is true, one of the two anchors is correct, and followup bodies are structured state that cannot be text-edited in place.",
+      "when": "2026-10-12T04:15:42.124237+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "s21-nova",

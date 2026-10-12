@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_derivation": "Derived from the reviewed run's own base/head caller-gate arms at base 437a68db4 and head 54b939251: the log pairs callers_base-<file>.log / callers_head-<file>.log under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation. Base failing ids: test_two_class_recovery.py (5) and test_forward_receipt_raster.py (1, pytest-timeout >1200 s). Head failing ids: the same five plus the same timeout id, identical. Head-only (added) failures: none, so added_failure_count 0. The reviewed manifest records no baseline_suite/after_suite keys, so this log pair is the gate pair the derivation rests on; receipt_raster failed at both arms by pytest-timeout and compile_identity reported no summary at either arm, so neither contributes a failing id to either side.",
+  "added_failure_ids": [],
+  "blocking_finding_count": 1,
+  "call_site_count": 0,
+  "call_sites": [],
+  "commits_read": [
+    "54b939251"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-12T14:36:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html",
+      "line": "190",
+      "severity": "blocking",
+      "text": "the added sentence says test_forward_compile_identity.py \"is listed in 'What remains' to be re-run\", but the \"What remains\" section (line 715 ff.) lists no entry for it nor for test_forward_receipt_raster.py, so the unverified required-argument change is reported as tracked for re-run when nothing owns it, and the commit message's claim that the two non-result rows are \"pointed at the follow-on that owns them\" is not supported by the fragment."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html",
+      "line": "152",
+      "severity": "follow-on",
+      "text": "the guard the paragraph names for the table, gate_table_check.py, is not committed and resolves the fragment path from the run worktree, so the checker that \"keeps it reading them\" does not survive the run-directory archival the plan retires the node into and plan section 6's versioned-test requirement is unmet for this evidence."
+    }
+  ],
+  "gate_arms_note": "The reviewed run's gate is the six-file caller sweep plus the regression test tests/test_analytic_oracle_fixture_exterior.py. The head2 re-run of the exterior file reads 2 passed in 131.56s (EXIT=0) against 0 passed/1 passed at base. The commit under review, 54b939251, changes only the evidence fragment and adds no gate arm of its own; the reviewed run's manifest is a caller-gate log at base 437a68db4 with no baseline_suite/after_suite keys.",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against base c772b1154; one commit (54b939251) changes one file, rewriting four caller-gate rows to the pytest summaries the logs printed and adding prose naming a run-directory checker.",
+    "done_when": "clause (5) requires the fragment with 0 audit-doc errors and a negative net line delta; this commit edits only docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html (+44/-4) so clauses (1)-(4) rest on already-reviewed commits, while the added prose claims a \"What remains\" entry the section does not contain.",
+    "goal": "the node goal is to route the certificate exterior fixture through the shared moment owner; the single commit gained since the prior review (54b939251) adds no code and corrects the evidence fragment's caller-gate table, so it does not advance the routing itself but keeps the node's record of that routing honest.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation/manifest.md; status complete with ten commits including 54b939251, and its tests field honestly records receipt_raster as a >1200 s timeout at both arms and compile_identity as uncollected.",
+    "write_paths": "read the manifest's declared set; the commit touches exactly one path inside it, docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html, confirmed by git show --stat."
+  },
+  "justifications": {
+    "durability": "no committed test fails if the table regresses; the only guard is gate_table_check.py, which lives in the run directory with its fragment path hard-coded to the worktree, so it cannot run once the worktree is removed.",
+    "evidence": "the corrected cells at exterior-fixture-delegation.html:143-146 match callers_base-/head-*.log (11 passed, 1 passed, timeout, not reported) and gate_table_check.py exits 0 on the landed fragment, but the added line 190 asserts a \"What remains\" entry that does not exist.",
+    "fit": "the added prose at exterior-fixture-delegation.html:150-197 keeps the fragment's node-id-prefixed element ids and carries no plan or stage label.",
+    "goal_fidelity": "docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:141-146 now reports the gate rows the logs show, supporting the node's routing claim rather than overstating it.",
+    "reuse": "the increment adds no repository definition at all; the checker is a run-dir script and a search over reckon audit-doc and the test tree found no existing evidence-table-versus-log validator to extend.",
+    "scope_discipline": "git show --stat 54b939251 lists one file, docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html, inside the declared write paths and nothing else."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to route the certificate exterior fixture through the shared moment owner; the single commit gained since the prior review (54b939251) adds no code and corrects the evidence fragment's caller-gate table, so it does not advance the routing itself but keeps the node's record of that routing honest.\nVERDICT done_when: clause (5) requires the fragment with 0 audit-doc errors and a negative net line delta; this commit edits only docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html (+44/-4) so clauses (1)-(4) rest on already-reviewed commits, while the added prose claims a \"What remains\" entry the section does not contain.\nVERDICT write_paths: read the manifest's declared set; the commit touches exactly one path inside it, docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html, confirmed by git show --stat.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T143631303990-exterior-fixture-delegation/manifest.md; status complete with ten commits including 54b939251, and its tests field honestly records receipt_raster as a >1200 s timeout at both arms and compile_identity as uncollected.\nVERDICT diff: read commit by commit against base c772b1154; one commit (54b939251) changes one file, rewriting four caller-gate rows to the pytest summaries the logs printed and adding prose naming a run-directory checker.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:141-146 now reports the gate rows the logs show, supporting the node's routing claim rather than overstating it.\nSCORE evidence: 15\nJUSTIFICATION evidence: the corrected cells at exterior-fixture-delegation.html:143-146 match callers_base-/head-*.log (11 passed, 1 passed, timeout, not reported) and gate_table_check.py exits 0 on the landed fragment, but the added line 190 asserts a \"What remains\" entry that does not exist.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 54b939251 lists one file, docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html, inside the declared write paths and nothing else.\nSCORE durability: 9\nJUSTIFICATION durability: no committed test fails if the table regresses; the only guard is gate_table_check.py, which lives in the run directory with its fragment path hard-coded to the worktree, so it cannot run once the worktree is removed.\nSCORE fit: 18\nJUSTIFICATION fit: the added prose at exterior-fixture-delegation.html:150-197 keeps the fragment's node-id-prefixed element ids and carries no plan or stage label.\nSCORE reuse: 19\nJUSTIFICATION reuse: the increment adds no repository definition at all; the checker is a run-dir script and a search over reckon audit-doc and the test tree found no existing evidence-table-versus-log validator to extend.\nFINDING docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:190 blocking: the added sentence says test_forward_compile_identity.py \"is listed in 'What remains' to be re-run\", but the \"What remains\" section (line 715 ff.) lists no entry for it nor for test_forward_receipt_raster.py, so the unverified required-argument change is reported as tracked for re-run when nothing owns it, and the commit message's claim that the two non-result rows are \"pointed at the follow-on that owns them\" is not supported by the fragment.\nFINDING docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html:152 follow-on: the guard the paragraph names for the table, gate_table_check.py, is not committed and resolves the fragment path from the run worktree, so the checker that \"keeps it reading them\" does not survive the run-directory archival the plan retires the node into and plan section 6's versioned-test requirement is unmet for this evidence.",
+  "review_kind": "independent review",
+  "review_run_id": "legacy-b39faebc05c5",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "c772b115476215739c7e6dd76042d5bc635f98d7",
+  "reviewed_head_sha": "54b939251e5275dae94076e6692f49c8423406d6",
+  "reviewed_revision": "54b939251e5275dae94076e6692f49c8423406d6",
+  "reviewed_run_id": "r-20261012T143631303990-exterior-fixture-delegation",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/exterior-fixture-delegation",
+  "reviewer_node": "review-of-exterior-fixture-delegation",
+  "reviewer_run_id": "r-20261012T202217748558-review-of-exterior-fixture-delegation",
+  "scores": {
+    "durability": 9,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "section": "\u00a76",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T20:34:01.890122+00:00",
+  "total": 99,
+  "verdict": "blocked-by-findings"
+}

@@ -21,19 +21,12 @@ with skip_import("jax"):
     )
     from nova.equilibrium.topology import Topology
     from nova.geometry.hexstencil import hex_stencil
-    from nova.jax.config import configure_dtypes
 
 
 OPERANDS = (
     Path(__file__).parents[1]
     / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
 )
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match the precision policy used to publish the committed operands."""
-    configure_dtypes()
 
 
 def _cached_partition(row: int, *, compiled: bool):

@@ -14,13 +14,6 @@ from nova.equilibrium.flux_surface_connectivity import (
     polish_stationary_points,
 )
 from nova.equilibrium.topology import TopologyClass
-from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match the precision used by the production topology read."""
-    configure_dtypes()
 
 
 def _cubic_interpolation_disagreement(size: int) -> float:

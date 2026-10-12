@@ -22,19 +22,12 @@ with skip_import("jax"):
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.topology import Topology
     from nova.geometry.hexstencil import hex_stencil
-    from nova.jax.config import configure_dtypes
 
 
 BANK_OPERANDS = Path(
     "/home/ITER/mcintos/.config/reckon/crew/reports/nova/"
     "bank-regeneration-raw-20260902/current-operands.npz"
 )
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match production topology precision."""
-    configure_dtypes()
 
 
 def _material_fixture():

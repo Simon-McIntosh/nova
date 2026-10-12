@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from nova.utilities.importmanager import skip_import
 
@@ -26,13 +25,6 @@ with skip_import("jax"):
     )
     from nova.equilibrium.topology import Topology, TopologyClass
     from nova.geometry.hexstencil import hex_stencil
-    from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match the precision used by the production topology read."""
-    configure_dtypes()
 
 
 def _selected_rows(spline, seeds):

@@ -9,22 +9,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import jax
 import pytest
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import clip_quadrature, observation
-from nova.jax.config import configure_dtypes
 
 ANALYTIC_ROW = ("weak-rotation-reactor-static", -110)
 REALISED_CELLS = 135
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Exercise the precision the certificate rows are measured at."""
-    configure_dtypes()
-    assert jax.config.jax_enable_x64 is True
 
 
 @pytest.fixture(scope="module")

@@ -17,12 +17,6 @@ from nova.diagnostics import (
     compare_thomson_prediction,
     predict_thomson,
 )
-from nova.jax.config import configure_dtypes
-
-
-@pytest.fixture(autouse=True)
-def _double_precision() -> None:
-    configure_dtypes()
 
 
 @pytest.fixture

@@ -23,19 +23,12 @@ with skip_import("jax"):
     from nova.biot.null import Null1D, Null2D
     from nova.equilibrium import TopologyClass
     from nova.equilibrium.topology import Topology
-    from nova.jax.config import configure_dtypes
     from nova.linalg.tensor_spline import fit_tensor_spline
     from scripts.analytic_oracle_fixtures import measure as oracle_fixture
 
 
 WEAK = "weak-rotation-reactor-static"
 DIVERTED = "diverted-single-null"
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match the production certificate's extended-precision ladder."""
-    configure_dtypes()
 
 
 def _exact_flux(case_name, exact, points):

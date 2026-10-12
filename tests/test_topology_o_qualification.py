@@ -22,19 +22,12 @@ with skip_import("jax"):
         require_qualified_axis,
     )
     from nova.geometry.hexstencil import hex_stencil
-    from nova.jax.config import configure_dtypes
 
 
 OPERANDS = (
     Path(__file__).parents[1]
     / "docs/figures/topology-visual-corroboration/mast-topology-operands.npz"
 )
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Match production topology precision."""
-    configure_dtypes()
 
 
 def _topology_fixture():

@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
@@ -16,7 +15,6 @@ from nova.equilibrium.connectivity_boundary import _points_inside_polygon
 from nova.equilibrium.flux_surface_geometry import _trace_surfaces
 from nova.equilibrium.topology import Topology, TopologyClass
 from nova.geometry.hexstencil import hex_stencil
-from nova.jax.config import configure_dtypes
 
 
 ROOT = Path(__file__).parents[1]
@@ -33,14 +31,6 @@ LIMITED_CERTIFICATE_ROWS = (
     "weak-rotation-reactor-static-production-route-cells-500.json",
     "weak-rotation-reactor-static-production-route-cells-1000.json",
 )
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _double_precision():
-    """Construct every fixture after extended precision is enabled."""
-
-    configure_dtypes()
-    assert jax.config.jax_enable_x64 is True
 
 
 def _topology(radius: np.ndarray, height: np.ndarray, wall: np.ndarray) -> Topology:

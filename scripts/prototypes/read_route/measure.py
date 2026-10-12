@@ -24,6 +24,7 @@ import numpy as np
 from scipy.interpolate import CloughTocher2DInterpolator
 
 from benchmarks import solovev_certificate as certificate
+from scripts.analytic_oracle_fixtures.measure import analytic_profile
 from nova.equilibrium import current, topology
 from nova.equilibrium.clip_quadrature import ClippedCurrentMoments
 from nova.equilibrium.solve_request import TopologyPolicy
@@ -119,6 +120,31 @@ def jet_reader(field, geometry, convention, policy):
     return read_with_jets(*field, geometry, convention, policy)
 
 
+def reused_rows(directory, kind, cells):
+    """Read only measured prefix rows from the known profile-lookup failure."""
+    log = directory / f"{kind}-{cells}.log"
+    content = log.read_text()
+    failed_access = (
+        "AttributeError: 'RotatingEquilibrium' object has no attribute 'core'"
+    )
+    if failed_access not in content:
+        raise RuntimeError(f"prefix log lacks its expected failure: {log}")
+    measured = {
+        row["representation"]: row
+        for line in content.splitlines()
+        if line.startswith("READ_ROW ")
+        for row in (json.loads(line.removeprefix("READ_ROW ")),)
+    }
+    if not {"closed_form", "sampled"} <= measured.keys():
+        raise RuntimeError(f"prefix log lacks a measured arm: {log}")
+    for row in measured.values():
+        if row["cells"] != cells:
+            raise RuntimeError(f"prefix row cell count differs: {log}")
+        row["reused_from"] = str(log)
+    print(f"REUSED_PREFIX log={log} arms=closed_form,sampled", flush=True)
+    return measured, content
+
+
 def read_row(
     field,
     geometry,
@@ -191,6 +217,7 @@ def main():
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--perturbed", action="store_true")
+    parser.add_argument("--reuse-prefix", type=Path)
     args = parser.parse_args()
     revision = subprocess.check_output(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
@@ -220,7 +247,17 @@ def main():
         saddle,
     )
     rows = []
-    analytic_row, analytic_read = read_row(analytic, *scoring, "closed_form")
+    reused, prior_log = (
+        reused_rows(args.reuse_prefix, args.kind, args.cells)
+        if args.reuse_prefix is not None
+        else ({}, "")
+    )
+    if reused:
+        analytic_read = jax.jit(topology.read)(analytic, geometry, convention, policy)
+        jax.block_until_ready(analytic_read)
+        analytic_row = reused["closed_form"]
+    else:
+        analytic_row, analytic_read = read_row(analytic, *scoring, "closed_form")
     rows.append(analytic_row)
     if args.cells in (2000, 5000):
         golden = np.load(
@@ -240,27 +277,53 @@ def main():
             flush=True,
         )
         assert delta < 1e-9 and axis_delta < 1e-9
-    sampled = sample_field(analytic, geometry)
-    mesh_truth = np.asarray(topology._point_values(analytic, geometry.sample_points))
-    mesh_reconstructed = np.asarray(
-        topology._point_values(sampled, geometry.sample_points)
-    )
-    mesh_reconstruction_error = float(np.max(np.abs(mesh_reconstructed - mesh_truth)))
-    print(
-        f"MESH_SAMPLE_CONTROL peak_flux_error={mesh_reconstruction_error:.12g}",
-        flush=True,
-    )
-    sampled_row, sampled_read = read_row(sampled, *scoring, "sampled")
+    sampled = sample_field(analytic, geometry) if not reused or args.perturbed else None
+    if reused:
+        sampled_row = reused["sampled"]
+        sample_line = next(
+            line
+            for line in prior_log.splitlines()
+            if line.startswith("MESH_SAMPLE_CONTROL peak_flux_error=")
+        )
+        mesh_reconstruction_error = float(sample_line.split("=")[-1])
+        if args.perturbed:
+            sampled_read = jax.jit(topology.read)(sampled, geometry, convention, policy)
+            jax.block_until_ready(sampled_read)
+    else:
+        mesh_truth = np.asarray(
+            topology._point_values(analytic, geometry.sample_points)
+        )
+        mesh_reconstructed = np.asarray(
+            topology._point_values(sampled, geometry.sample_points)
+        )
+        mesh_reconstruction_error = float(
+            np.max(np.abs(mesh_reconstructed - mesh_truth))
+        )
+        print(
+            f"MESH_SAMPLE_CONTROL peak_flux_error={mesh_reconstruction_error:.12g}",
+            flush=True,
+        )
+        sampled_row, sampled_read = read_row(sampled, *scoring, "sampled")
     rows.append(sampled_row)
     if args.perturbed:
-        pitch = sampled_row["pitch_m"]
-        displaced = replace(sampled, origin=sampled.origin + jnp.asarray((0.0, pitch)))
-        shifted = jax.jit(topology.read)(displaced, geometry, convention, policy)
-        jax.block_until_ready(shifted)
-        movement = float(
-            np.linalg.norm(np.asarray(shifted.axis) - np.asarray(sampled_read.axis))
-            / pitch
-        )
+        if reused:
+            shift_line = next(
+                line
+                for line in prior_log.splitlines()
+                if line.startswith("SAMPLED_SHIFT_CONTROL pitches=")
+            )
+            movement = float(shift_line.split("=")[-1])
+        else:
+            pitch = sampled_row["pitch_m"]
+            displaced = replace(
+                sampled, origin=sampled.origin + jnp.asarray((0.0, pitch))
+            )
+            shifted = jax.jit(topology.read)(displaced, geometry, convention, policy)
+            jax.block_until_ready(shifted)
+            movement = float(
+                np.linalg.norm(np.asarray(shifted.axis) - np.asarray(sampled_read.axis))
+                / pitch
+            )
         print(f"SAMPLED_SHIFT_CONTROL pitches={movement:.12g}", flush=True)
         assert 0.95 <= movement <= 1.05
     _, source, _ = certificate._case(
@@ -269,12 +332,13 @@ def main():
         else "diverted-single-null",
         clip_mode="exact",
     )
+    profile = analytic_profile(source)
     psi = jax.vmap(jax.vmap(analytic.value))(geometry.sample_points)
     booking = current.book(
         psi,
         analytic_read,
         geometry,
-        source.core,
+        profile,
         current.Quadrature(sigma=convention.sigma, segments=64),
     )
     jax.block_until_ready(booking)
@@ -335,7 +399,7 @@ def main():
             psi,
             sampled_read,
             geometry,
-            source.core,
+            profile,
             current.Quadrature(sigma=convention.sigma, segments=64),
         )
         jax.block_until_ready(trial_booking)

@@ -18,6 +18,9 @@ run_case() {
   local -a command
   log="$output/$kind-$cells.log"
   command=("$python" "$root/scripts/prototypes/read_route/measure.py" --kind "$kind" --cells "$cells" --out "$output/$kind-$cells.json")
+  if [[ -n "${READ_ROUTE_REUSE_PREFIX:-}" ]]; then
+    command+=(--reuse-prefix "$READ_ROUTE_REUSE_PREFIX")
+  fi
   if [[ "$kind" == diverted && "$cells" == 2000 ]]; then
     command+=(--perturbed)
   fi
@@ -31,7 +34,8 @@ run_case() {
 }
 
 failed=0
-for cells in 2000 5000 10000; do
+read -r -a rung_cells <<< "${READ_ROUTE_CELLS:-2000 5000 10000}"
+for cells in "${rung_cells[@]}"; do
   run_case limited "$cells" &
   limited_pid=$!
   run_case diverted "$cells" &
@@ -39,7 +43,9 @@ for cells in 2000 5000 10000; do
   wait "$limited_pid" || failed=1
   wait "$diverted_pid" || failed=1
 done
-"$python" "$root/scripts/prototypes/read_route/render.py" "$output" \
-  "$root/docs/figures/converged-forward-solve/read-route/position-membership.svg" || failed=1
+if [[ "${READ_ROUTE_RENDER:-1}" == 1 ]]; then
+  "$python" "$root/scripts/prototypes/read_route/render.py" "$output" \
+    "$root/docs/figures/converged-forward-solve/read-route/position-membership.svg" || failed=1
+fi
 printf 'EXIT=%s\n' "$failed"
 exit "$failed"

@@ -2159,8 +2159,8 @@ class AtomicCellMesh:
         crossing_point: dict[tuple[int, ...], np.ndarray] = {}
         segments: set[frozenset[tuple[int, ...]]] = set()
 
-        for cell_index, (packed_nodes, count, origin) in enumerate(
-            zip(self.cell_nodes, self.cell_vertex_count, self.centroids, strict=True)
+        for cell_index, (packed_nodes, count) in enumerate(
+            zip(self.cell_nodes, self.cell_vertex_count, strict=True)
         ):
             indices = packed_nodes[:count]
             polygon: list[np.ndarray] = []

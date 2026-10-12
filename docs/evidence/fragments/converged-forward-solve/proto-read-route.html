@@ -1,0 +1,22 @@
+<section id="proto-read-route">
+  <h2>Booked-field topology read: measured rungs and open decision</h2>
+  <p id="proto-read-route-landing">At 2,000 realised cells, the source-batched booked kernel meets the analytic membership bounds in both cases, while sampled flux and the seven-node jet reconstruction do not. This establishes a fidelity reference at one rung, not a qualified solve-state representation across the required 2,000, 5,000 and 10,000-cell ladder. The live kernel takes 1,055–1,118 seconds per warm analytic read at 2,000 cells; no production read is selected by these measurements.</p>
+  <table id="proto-read-route-two-thousand">
+    <caption>Completed 2,000-cell analytic reads; membership error is in median-cell areas.</caption>
+    <thead><tr><th>Case</th><th>Field</th><th>Maximum relevant membership error</th><th>Bound</th><th>Warm read</th></tr></thead>
+    <tbody>
+      <tr><td>Limited</td><td>Sampled</td><td>2.438e-4 smooth</td><td>9.002e-5</td><td>88.12 s</td></tr>
+      <tr><td>Limited</td><td>Batched kernel</td><td>7.166e-5 smooth</td><td>9.002e-5</td><td>1,117.83 s</td></tr>
+      <tr><td>Limited</td><td>Nodal jet</td><td>7.067e-5 smooth</td><td>9.002e-5</td><td>7.59 s</td></tr>
+      <tr><td>Diverted</td><td>Sampled</td><td>8.534e-2 saddle</td><td>1.001e-3</td><td>6.83 s</td></tr>
+      <tr><td>Diverted</td><td>Batched kernel</td><td>4.106e-5 saddle</td><td>1.001e-3</td><td>1,055.42 s</td></tr>
+      <tr><td>Diverted</td><td>Nodal jet</td><td>2.212e-1 saddle</td><td>1.001e-3</td><td>6.98 s</td></tr>
+    </tbody>
+  </table>
+  <p id="proto-read-route-control">The closed-form resolution-ladder controls reproduce at 2,000 and 5,000 cells. A one-pitch shift of the sampled field moves the admitted null one pitch. On both the analytic and one Picard state, precomputed nodal jets agree with direct booked-kernel jets to at most 2.44e-15. Fifty points within the X-point hex cell expose Picard interpolation errors up to 0.5185 Wb/m² in Hessian, and adjacent hex cells show value and gradient jumps; the seven-node quadratic/Shepard reconstruction is not C1. The Picard jet admits no X-point and differs from the Picard kernel by one median cell in maximum membership.</p>
+  <p id="proto-read-route-missing">H200 ladder job 1283635 reached its 02:30:10 time limit after the two complete 2,000-cell booked rows. The 5,000-cell processes emitted bookings but no kernel read receipt; 10,000-cell booked processes did not start. Consequently neither booked arm has a measured 5,000- or 10,000-cell read cost or bound. The 5,000-cell dense jet matrix size, 10,995,840,000 bytes, is computed from its node count and is not a completed read. The full-rung representation decision remains blocked.</p>
+  <figure id="proto-read-route-errors">
+    <img src="/nova/figures/converged-forward-solve/read-route/position-membership.svg" alt="Measured null-position and membership errors against cell count for sampled, booked-kernel and nodal-jet fields in limited and diverted cases">
+    <figcaption>Only measured read rows are plotted. Kernel and jet have 2,000-cell points only; sampled and closed-form controls continue through 5,000 and 10,000 cells.</figcaption>
+  </figure>
+</section>

@@ -14,6 +14,7 @@ under an explicitly named legacy exterior, which is the positive control.
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
@@ -35,8 +36,9 @@ CASE = "diverted-single-null"
 # 5,000 solver cells after boundary qualification.
 RUNG_REQUESTS = {550: -500, 2000: -2000, 5000: -5000}
 POSITIVE_CONTROL_MAP_SUP = 0.1973269787182143
-# The certified machines and exteriors are read in place; anything not already
-# present is rebuilt into the default writable carrier cache.
+# Carriers are loaded from the fixture's default segmented cache and rebuilt
+# on a miss.  The certified 5,000-cell carrier and exterior from the reference
+# run are staged into that cache before this gate runs.
 CERTIFIED_CACHE = Path(
     "/home/ITER/mcintos/.config/reckon/crew/runs/"
     "r-20261009T181553786165-proto-support/ordered/rows/cache"
@@ -50,8 +52,7 @@ _MEASUREMENTS: dict[tuple[int, str], dict[str, object]] = {}
 
 
 def _cache_dir(cells: int) -> Path:
-    if cells == 5000 and CERTIFIED_CACHE.is_dir():
-        return CERTIFIED_CACHE
+    del cells
     return DEFAULT_CACHE
 
 
@@ -135,6 +136,13 @@ def _arm_measurement(cells: int, arm: str) -> dict[str, object]:
     exterior_closure = np.asarray(exterior + reference_image - np.asarray(analytic))[
         :grid
     ]
+    # The map leaves residual-shadow cells unevaluated, so both booked terms
+    # are zeroed there before the decomposition is required to reconstruct it.
+    shadow = np.asarray(
+        jax.jit(lambda state: operator.residual_shadow_mask(state, BRANCH))(analytic)
+    )[:grid]
+    booking_delta = np.where(shadow, 0.0, booking_delta)
+    exterior_closure = np.where(shadow, 0.0, exterior_closure)
     result = {
         "cells": cells,
         "realised_cells": len(machine.node),
@@ -158,6 +166,7 @@ def _arm_measurement(cells: int, arm: str) -> dict[str, object]:
 def test_exterior_closure_falls_below_booking(cells: int) -> None:
     """The exact-support exterior closes below the map's own booking term."""
     measured = _arm_measurement(cells, "exact")
+    print("SUPPORT_ARM_ROW " + json.dumps(measured, default=str))
     assert measured["decomposition_relative_sup"] < 1.0e-10, measured
     assert (
         measured["exterior_closure_relative_sup"]
@@ -168,5 +177,6 @@ def test_exterior_closure_falls_below_booking(cells: int) -> None:
 def test_legacy_arm_reproduces_positive_control() -> None:
     """The named legacy exterior keeps the certified 550-cell map error."""
     measured = _arm_measurement(550, "legacy")
+    print("SUPPORT_ARM_ROW " + json.dumps(measured, default=str))
     delta = abs(measured["map_relative_sup"] / POSITIVE_CONTROL_MAP_SUP - 1.0)
     assert delta <= 1.0e-9, (measured, delta)

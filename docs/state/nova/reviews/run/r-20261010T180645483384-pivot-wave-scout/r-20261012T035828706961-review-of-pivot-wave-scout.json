@@ -1,0 +1,74 @@
+{
+  "artifacts": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261012T035828706961-review-of-pivot-wave-scout/claim-reruns.log",
+    "/home/ITER/mcintos/.config/reckon/crew/reviews/nova/r-20261010T180645483384-pivot-wave-scout.json"
+  ],
+  "claim_lines": [
+    "CLAIM 1: reproduced: re-run from the report's own directory at 163d07eeb matches every location the report cites for the map-operand finding \u2014 forward.py:2012 is `def _accelerated_history_program(`, :2088 and :2119 are `operator=self.operator,` (the default-argument capture), :2137 is `program = jax.jit(solve)`, the program cache is read at :2062 and stored at :2139, and the program-cache key/specialisation block is at forward_operator.py:2596/:2637 (with traced_flux_map :4017, internal :3818, cell_current_moments :3588).",
+    "CLAIM 2: reproduced: re-run from the report's own directory at 163d07eeb matches the exterior-cache finding \u2014 measure.py:1133 is `def _exterior_cache_identity(`, the string at :1155 is verbatim `\"clip\": \"production-spline-geometry-from-analytic-zero-level\"`, and the exterior block is _analytic_profile_support :1028 / cached_fixture_exterior :1160 / _internal_flux_image :1225, so the stale-cache trap the report describes is present.",
+    "CLAIM 3: reproduced: re-run from the report's own directory at 163d07eeb matches the read-growth finding \u2014 topology.py:2737 is `def _connected_fragment_labels(area, intervals, geometry, tolerance)`, :2754 is `sentinel = cells * capacity`, :2761 is `return changed & (iteration < sentinel)`, :1480 is `UNRESOLVED_COMPONENT = 7`, and `def read(field, geometry, convention, policy)` is at :2923.",
+    "CLAIM_SUMMARY: agrees: the report's summary line (section 7, line 462) reads 'Parallel width 4 lanes: A, B, C1->C2, D1->D2' and the table alongside it (lines 453-460) carries 6 node rows (Lane A, B, C1, C2, D1, D2) whose 'shares a file with' column documents exactly the two pairings the summary folds (C1 with C2 on measure.py, D1 with D2 on topology.py), so 6 nodes = 4 parallel lanes reconcile; the report has no numbered 'Findings: N' summary line and the summary sentence sits below its table rather than above it."
+  ],
+  "claim_verdicts": {
+    "CLAIM 1": {
+      "cites": "nova/equilibrium/forward.py:2012, 2062, 2088, 2119, 2137, 2139; nova/equilibrium/forward_operator.py:2596-2641 (specialisation :2631-2641)",
+      "detail": "Re-ran the report's cited check by direct grep/read from the report's own directory (the reviewed run's worktree, /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/pivot-wave-scout) at revision 163d07eeb52ea58fcfe005173f32912dec836e83. forward.py:2012 defines `_accelerated_history_program(`; :2085 and :2116 define `def solve(` and :2088 / :2119 carry `operator=self.operator,` as a default argument; :2137 is `program = jax.jit(solve)`; the cache is read at :2062 (`_accelerated_program_cache.get(key)`) and stored at :2139; forward_operator.py:2596 begins the type digest and :2637 begins `geometry[\"specialisation\"] = {`. Every line the report states is present and matches. The supporting size figures the report quotes (map 30 MB @550 / 360 MB @2,100 / 2.1 GB @5,158 cells; solve 2.89 GiB @1,072) are attributed in the report to the gpucost run, not to a command reproducible from this directory, so they were not re-measured here (a compile-size measurement needs the reserved H200 and the report supplies no invocation).",
+      "finding": "f-cfs-map-runtime-operands: the map/solve executable is inflated because the operator is captured by default argument in the jitted closure, and the program cache is keyed on the operator geometry digest",
+      "verdict": "reproduced"
+    },
+    "CLAIM 2": {
+      "cites": "scripts/analytic_oracle_fixtures/measure.py:1133 (identity), :1155 (hard-coded label); :1028/:1160/:1225 (the exterior block)",
+      "detail": "Re-ran from the report's own directory at 163d07eeb. measure.py:1133 is `def _exterior_cache_identity(`; the identity dict built at :1140 carries the literal entry at :1155 reading `\"clip\": \"production-spline-geometry-from-analytic-zero-level\"`; the surrounding block resolves as _analytic_profile_support :1028, cached_fixture_exterior :1160, _internal_flux_image :1225, exactly as the report states. The trap the report names (a support-arm switch that leaves this string unchanged reuses a stale cached exterior) is therefore present. The report's closure-residual figures (0.00622043464 / 0.0176941313 / 0.0111257411 at 550 / 2,098 / 5,158 cells) are quoted from the proto-support report, not reproducible from this directory without the H200 fixture run, so they were not re-measured.",
+      "finding": "f-cfs-exterior-on-exact-support: the exterior cache identity hard-codes the production spline-clip label, so changing the support arm silently reuses a stale exterior (a stale-cache trap)",
+      "verdict": "reproduced"
+    },
+    "CLAIM 3": {
+      "cites": "nova/equilibrium/topology.py:2737 (:2754 sentinel cells*capacity, :2761 loop condition), :1480 UNRESOLVED_COMPONENT = 7, :2923 read",
+      "detail": "Re-ran from the report's own directory at 163d07eeb. topology.py:2737 is `def _connected_fragment_labels(area, intervals, geometry, tolerance):`; :2754 is `sentinel = cells * capacity`; :2756 initialises the label field through `jnp.arange(sentinel)`; :2759-2761 define the while-loop condition `changed & (iteration < sentinel)`; :1480 is `UNRESOLVED_COMPONENT = 7`; and the functional `read(field, geometry, capability...)` is at :2923. The sentinel-bounded propagation the report names as the growth mechanism is present and matches. Also confirmed the report's companion claim that the functional read has no production caller inside nova/ (a grep for `topology.read(` finds none; current.py / gs.py / solve.py do not exist at this revision; all `.read(` sites in nova/ are the legacy methods). The read's 10,000-cell validity failure and the wall figures (1.1 s @550 -> 81 s @10,000, ladder job 1283085) are quoted from that job and were not re-run here.",
+      "finding": "f-cfs-read-ten-thousand: the 10,000-cell topology read is invalid and its warm wall grows because component labelling is sentinel-bounded fixed-point propagation (_connected_fragment_labels)",
+      "verdict": "reproduced"
+    },
+    "CLAIM_SUMMARY": {
+      "detail": "The report carries no numbered 'Findings: N' summary line; its only summary sentence adjacent to a table is section 7 line 462, 'Parallel width 4 lanes: A, B, C1->C2, D1->D2' (it sits directly BELOW its table at lines 453-460, not above it as the rubric assumes). The table carries 6 rows (Lane A, B, C1, C2, D1, D2 = 6 nodes) and its last column names the two pairings the summary folds (C1 shared with C2 on scripts/analytic_oracle_fixtures/measure.py; D1 shared with D2 on nova/equilibrium/topology.py), so the summary's 4 parallel lanes and the table's 6 node rows reconcile (6 nodes = 4 lanes). No other summary-with-table pairing exists: the lead abstract (lines 9-14) enumerates the decision's clauses but quotes no figure over a table, and the per-followup 'Existing code' tables (lines 109, 183, 245, 298, 355, 420) have no summary line above them.",
+      "verdict": "agrees"
+    }
+  },
+  "claims": [
+    {
+      "cites": "nova/equilibrium/forward.py:2088, 2119, 2137, 2062, 2139; nova/equilibrium/forward_operator.py:2596-2641",
+      "rank": 1,
+      "report_figure": "operator captured by default argument at forward.py:2088/:2119 (jit :2137; cache key = operator geometry digest forward_operator.py:2596-2641); map 30 MB@550 / 360 MB@2,100 / 2.1 GB@5,158",
+      "rerun_figure": "forward.py:2088 and :2119 both read `operator=self.operator,`; :2137 `program = jax.jit(solve)`; :2062/:2139 cache read/store; forward_operator.py:2596 digest, :2637 specialisation (line citations reproduced; size figures not re-measured)",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "scripts/analytic_oracle_fixtures/measure.py:1133, 1155",
+      "rank": 2,
+      "report_figure": "measure.py:1133 _exterior_cache_identity hard-codes \"clip\": \"production-spline-geometry-from-analytic-zero-level\"; residual 0.00622043464/0.0176941313/0.0111257411 @550/2098/5158",
+      "rerun_figure": "measure.py:1133 `def _exterior_cache_identity(`; :1155 verbatim `\"clip\": \"production-spline-geometry-from-analytic-zero-level\"` (trap reproduced; residual figures not re-measured)",
+      "verdict": "reproduced"
+    },
+    {
+      "cites": "nova/equilibrium/topology.py:2737, 2754, 2761, 1480, 2923",
+      "rank": 3,
+      "report_figure": "_connected_fragment_labels at topology.py:2737 with cells*capacity sentinel at :2754, UNRESOLVED_COMPONENT=7 at :1480; warm wall 1.1 s@550 -> 81 s@10,000 (job 1283085)",
+      "rerun_figure": "topology.py:2737 `def _connected_fragment_labels(...)`; :2754 `sentinel = cells * capacity`; :2761 `return changed & (iteration < sentinel)`; :1480 `UNRESOLVED_COMPONENT = 7`; read at :2923 (citations reproduced; wall figures not re-measured)",
+      "verdict": "reproduced"
+    }
+  ],
+  "completed_at": "2026-10-12T04:08:26.737Z",
+  "dimensions": null,
+  "dispatched_at": "2026-10-12T03:58:53Z",
+  "method": "The reviewed run is read-only (role investigate; manifest commits: [] and changed_paths names only its report), so there is no diff and no gate suite. Each of the three highest-ranked findings was re-run against the revision's own source by direct grep/read from the report's own directory (the reviewed run's worktree, still present at 163d07eeb52ea58fcfe005173f32912dec836e83), so the re-run reads the same code the run did. Each finding's cited code locations were re-checked and compared with the figure the report states. Where a finding also quotes a measured figure from a separate H200 job (executable sizes, closure residuals, warm walls), that figure is attributed in the report to that job and the report supplies no invocation reproducible from this directory, so it was not re-measured; this is stated per claim.",
+  "project": "nova",
+  "report_path": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/pivot-wave-scout.md",
+  "review_run_id": "r-20261012T035828706961-review-of-pivot-wave-scout",
+  "reviewed_base_sha": "163d07eeb52ea58fcfe005173f32912dec836e83",
+  "reviewed_head_sha": "163d07eeb52ea58fcfe005173f32912dec836e83",
+  "reviewed_run_id": "r-20261010T180645483384-pivot-wave-scout",
+  "rubric": "claims",
+  "status": "parsed",
+  "suite_delta_fields_omitted": "added_failure_count and added_failure_ids are intentionally absent: the reviewed run ran no gate suite (read-only investigate node).",
+  "times_source": "run-record",
+  "timestamp": "2026-10-12T04:07:53.966668+00:00"
+}

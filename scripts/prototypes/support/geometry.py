@@ -10,7 +10,7 @@ from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 from nova.equilibrium import topology
-from nova.equilibrium.separatrix_clip import _area_moments
+from nova.equilibrium.separatrix_clip import _centred_degree_two_moments
 from scripts.analytic_oracle_fixtures import measure as fixture
 
 
@@ -49,23 +49,33 @@ def pack(polygons, template):
     size = max(24, max((len(ring) for cell in arrays for ring in cell), default=0))
     vertices = np.zeros((len(arrays), ring_count, size, 2))
     count = np.zeros((len(arrays), ring_count), dtype=np.int32)
-    area = np.zeros(len(arrays))
-    first = np.zeros((len(arrays), 2))
-    second = np.zeros((len(arrays), 2, 2))
     centres = np.asarray(template.centroids)
+    sign = np.zeros(len(arrays) * ring_count)
     for index, rings in enumerate(arrays):
         for slot, points in enumerate(rings):
             vertices[index, slot, : len(points)] = points
             count[index, slot] = len(points)
             local = points - centres[index]
             following = np.roll(local, -1, axis=0)
-            sign = np.sign(
+            sign[index * ring_count + slot] = np.sign(
                 np.sum(local[:, 0] * following[:, 1] - local[:, 1] * following[:, 0])
             )
-            measure = _area_moments(points, centres[index])
-            area[index] += sign * measure[0]
-            first[index] += sign * measure[1]
-            second[index] += sign * measure[2]
+    ring_area, ring_first, ring_second = _centred_degree_two_moments(
+        jnp.asarray(vertices).reshape(-1, size, 2),
+        jnp.asarray(count).reshape(-1),
+        jnp.asarray(np.repeat(centres, ring_count, axis=0)),
+    )
+    area = (np.asarray(ring_area) * sign).reshape(len(arrays), ring_count).sum(axis=1)
+    first = (
+        (np.asarray(ring_first) * sign[:, None])
+        .reshape(len(arrays), ring_count, 2)
+        .sum(axis=1)
+    )
+    second = (
+        (np.asarray(ring_second) * sign[:, None, None])
+        .reshape(len(arrays), ring_count, 2, 2)
+        .sum(axis=1)
+    )
     included = area > 0
     full = np.asarray(template.full_area)
     boundary = included & (area < full * (1 - 1e-10))

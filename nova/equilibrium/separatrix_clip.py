@@ -125,54 +125,6 @@ def _centroid(vertices: np.ndarray) -> np.ndarray:
     ) / (3.0 * area_twice)
 
 
-def _area_moments(
-    vertices: np.ndarray, origin: np.ndarray
-) -> tuple[float, np.ndarray, np.ndarray]:
-    """Return area and first two area moments about ``origin``.
-
-    This stays a NumPy closed form rather than a call into the shared owner
-    reduction: its caller invokes it once per mesh cell in a Python loop, and an
-    eager traced call per cell turns that loop into a compile-and-dispatch per
-    cell. The moments it returns are the same total-degree-two block of the same
-    monomial integrals.
-    """
-    if len(vertices) < 3:
-        return 0.0, np.zeros(2), np.zeros((2, 2))
-    local = vertices - origin
-    following = np.roll(local, -1, axis=0)
-    x, y = local.T
-    next_x, next_y = following.T
-    cross = x * next_y - next_x * y
-    area_twice = math.fsum(cross)
-    if area_twice == 0.0:
-        return 0.0, np.zeros(2), np.zeros((2, 2))
-    orientation = math.copysign(1.0, area_twice)
-    area = 0.5 * orientation * area_twice
-    first = orientation * np.asarray(
-        [
-            math.fsum((x + next_x) * cross) / 6.0,
-            math.fsum((y + next_y) * cross) / 6.0,
-        ]
-    )
-    radial_squared = (
-        orientation * math.fsum((x * x + x * next_x + next_x * next_x) * cross) / 12.0
-    )
-    vertical_squared = (
-        orientation * math.fsum((y * y + y * next_y + next_y * next_y) * cross) / 12.0
-    )
-    cross_moment = (
-        orientation
-        * math.fsum(
-            (2.0 * x * y + x * next_y + next_x * y + 2.0 * next_x * next_y) * cross
-        )
-        / 24.0
-    )
-    second = np.asarray(
-        [[radial_squared, cross_moment], [cross_moment, vertical_squared]]
-    )
-    return area, first, second
-
-
 def _line_key(start: np.ndarray, end: np.ndarray) -> tuple[float, float, float]:
     """Return an orientation-independent key for one supporting line."""
     direction = end - start
@@ -2203,11 +2155,7 @@ class AtomicCellMesh:
         cell_count = len(self.cell_nodes)
         support = np.zeros((cell_count, self.support_capacity, 2), dtype=np.float64)
         vertex_count = np.zeros(cell_count, dtype=np.intp)
-        included = np.zeros(cell_count, dtype=bool)
-        boundary = np.zeros(cell_count, dtype=bool)
-        area = np.zeros(cell_count)
-        first = np.zeros((cell_count, 2))
-        second = np.zeros((cell_count, 2, 2))
+        crossed = np.zeros(cell_count, dtype=bool)
         crossing_point: dict[tuple[int, ...], np.ndarray] = {}
         segments: set[frozenset[tuple[int, ...]]] = set()
 
@@ -2252,14 +2200,8 @@ class AtomicCellMesh:
             array = np.asarray(vertices, dtype=np.float64).reshape(-1, 2)
             if len(array) > self.support_capacity:
                 raise RuntimeError("clipped support exceeded its fixed mesh capacity")
-            cell_area, cell_first, cell_second = _area_moments(array, origin)
-            if cell_area > 0.0:
-                included[cell_index] = True
-                support[cell_index, : len(array)] = array
-                vertex_count[cell_index] = len(array)
-                area[cell_index] = cell_area
-                first[cell_index] = cell_first
-                second[cell_index] = cell_second
+            support[cell_index, : len(array)] = array
+            vertex_count[cell_index] = len(array)
 
             unique_crossings = list(dict.fromkeys(crossing_keys))
             if len(unique_crossings) > 2:
@@ -2269,7 +2211,20 @@ class AtomicCellMesh:
                 )
             if len(unique_crossings) == 2:
                 segments.add(frozenset(unique_crossings))
-                boundary[cell_index] = cell_area > 0.0
+                crossed[cell_index] = True
+
+        area, first, second = _centred_degree_two_moments(
+            jnp.asarray(support),
+            jnp.asarray(vertex_count),
+            jnp.asarray(self.centroids),
+        )
+        area = np.asarray(area)
+        first = np.asarray(first)
+        second = np.asarray(second)
+        included = area > 0.0
+        support[~included] = 0.0
+        vertex_count[~included] = 0
+        boundary = crossed & included
 
         contour, closed = self._contour(crossing_point, segments)
         contour_count = len(contour)

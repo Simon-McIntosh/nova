@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="red-base-triage">
+  <meta name="plan-title" content="Red base test triage">
+  <meta name="plan-summary" content="Fresh per-file CPU runs reproduced twenty failures in ten completed modules. The remaining module did not complete before triage reached an out-of-scope analytic support defect. A zero-area clip guard and early precision setup landed with a failing masking control.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-12">
+  <meta name="plan-verdict" content="blocked">
+  <meta name="plan-environment" content="Fleet CPU allocation; one fresh pytest process per file; JAX_PLATFORMS=cpu; base 437a68db4ee910dbd9029408f03068688aff0cce">
+  <meta name="plan-tags" content="equilibrium,topology,tests">
+  <title>Red base triage | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Red base test triage</h1>
+  <section id="red-base-triage-verdict">
+    <h2>Blocked after a scoped guard repair</h2>
+    <p>The base revision is <code>437a68db4ee910dbd9029408f03068688aff0cce</code>. Ten test files reached a pytest summary in separate processes, reproducing 20 failing test instances. <code>test_connectivity_boundary.py</code> printed nine passes, one failure and two further passes, then stalled; its process was terminated after the out-of-scope blocker was established, so it supplies no completed-suite count or traceback. This run does not claim a green base or a completed head delta.</p>
+    <p>The blocking case is <code>test_coarse_diverted_exact_field_admits_axis_and_saddle</code>. The diverted certificate gives <code>exact_current_moments</code> a synthetic rotating source whose limited-surface constructor yields a non-finite analytic separatrix. The exact-support path added in <code>24f6eef90</code> then calls <code>Polygon</code> on one surviving point and raises <code>ValueError: A linearring requires at least 4 coordinates</code>. The needed repair is outside this node's write grant: pass the diverted reference's exact separatrix as support geometry to <code>scripts/analytic_oracle_fixtures/measure.py</code> from <code>benchmarks/solovev_certificate.py</code>, leaving the rotating source to supply current density.</p>
+  </section>
+  <section id="red-base-triage-classification">
+    <h2>Classification at the stop point</h2>
+    <p>Each completed log begins with the base revision, its worktree, a runnable command and <code>nova.__file__</code>. Commit references below come from the test and exercised-source histories; entries marked provisional still need an independent head gate before a test change is justified.</p>
+    <table>
+      <thead><tr><th>Module and failing instances</th><th>Base traceback or measurement</th><th>Class and provenance</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_topology_domain_partition.py</code> (4)</td><td>Core/private counts are (250, 38) and (244, 32), versus (160, 0) and (162, 0); mask-to-component assertions pass.</td><td>Stale committed counts after operand bank update <code>e399e522f</code>; regenerate from that bank.</td></tr>
+        <tr><td><code>test_connectivity_trip_sufficiency.py</code> (4)</td><td>The 2×width pass labels all 961 or 3969 interior cells, versus expected partial counts 133 or 261.</td><td>Stale trip-count assumption after parallel component read <code>40f569226</code>; test complete reachability under the current bound.</td></tr>
+        <tr><td><code>test_connectivity_boundary.py</code> (incomplete)</td><td>One failure printed before a later test stalled; no traceback or summary was emitted.</td><td>Unclassified; run named tests separately with the same per-test timeout after the blocker is resolved.</td></tr>
+        <tr><td><code>test_forward_operator_domain.py</code> (1)</td><td>Mock exterior lambda accepts one argument; the operator calls it with current and prescribed current.</td><td>Stale mock after the two-argument call introduced by <code>7b8b295883</code>; update the test callable.</td></tr>
+        <tr><td><code>test_census_polish_compaction.py</code> (3)</td><td>Authority key set differs; over-capacity candidate counts are (62, 52) versus (59, 31), and uncertainty differs on 176 of 255 origins.</td><td>Stale independent authority, provisional: production uses local-fit seed representatives from <code>08dd0dda16</code> and a pitch term from <code>a1f4717e8a</code>; the test authority still uses raw ring origins and omits that term. Rebuild the authority before judging production.</td></tr>
+        <tr><td><code>test_equilibrium_stencil_mesh.py</code> (2)</td><td>One quadratic node differs by 9.95e-14 at flux 57.13 against an 8e-14 absolute tolerance; checked-cell ratio is exactly 1 versus required less than 1.</td><td>Provisional stale numerical and mesh-count expectations; no source correction is supported by these tracebacks alone.</td></tr>
+        <tr><td><code>test_topology_o_qualification.py</code> (2)</td><td>Stored axis is (0.898355, 0.027144), versus literal (0.897136, 0.023243), before qualification runs.</td><td>Stale coordinate golden after operand bank update <code>e399e522f</code>; regenerate or remove the duplicate literal.</td></tr>
+        <tr><td><code>test_domain_participation_continuity.py</code> (1)</td><td>Epsilon-doubling ratios are 0.99998 versus 2; the test passes a core-only support while its centroid sample crosses the undeclared common-SOL closure.</td><td>Provisional stale test input after pointwise flux selection in <code>a493a1f4f</code>; construct a consistent sample-flux and support pair before interpreting continuity.</td></tr>
+        <tr><td><code>test_mask_threshold_consistency.py</code> (1)</td><td>Initial shadow count is 37 versus literal 28; earlier analytic state and private count assertions pass.</td><td>Provisional stale count; inspect shadow semantics before regenerating the literal.</td></tr>
+        <tr><td><code>test_oracle_axis_admission.py</code> (1)</td><td>Non-finite separatrix reaches Shapely and raises the linearring error before topology admission.</td><td>Defect in out-of-scope analytic support wiring introduced by <code>24f6eef90</code>, as described above.</td></tr>
+        <tr><td><code>test_stationary_point_admission.py</code> (1)</td><td>Minimal fake grid lacks <code>node_number</code> required by <code>null_flux_pool</code>.</td><td>Stale fake after direct sampling was added by <code>08dd0dda16</code>; supply the current grid contract in the test.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section id="red-base-triage-guard">
+    <h2>Guard landed and verified</h2>
+    <p>Commit <code>61be97d8c93b690f08fd5de41f0eb8b47e26b179</code> removes the dead third host-clip zip value, adds a three-vertex collinear support case, and configures x64 before pytest collects test modules. The fixture then refuses a test body if collection has disabled x64. Its claim is limited to that point; it does not claim to detect arrays made by plugins before pytest configuration.</p>
+    <p>The clip test observes three vertices and a raw degree-two reduction with nonzero roundoff despite zero area, then requires zero first and second moments after exclusion. It passed at the committed head. Reverting the existing excluded-cell moment mask made that exact test fail, with <code>EXIT=1</code> and the new test id in the negative-control log. A separate precision probe disabled x64 after configuration and observed the fixture refusal. The committed source delta is +45 net lines across three files; this fragment is separate.</p>
+  </section>
+</main>
+</body>
+</html>

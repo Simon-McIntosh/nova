@@ -20,7 +20,7 @@ configure_dtypes()
 import jax
 import jax.numpy as jnp
 import numpy as np
-from scipy.interpolate import CloughTocher2DInterpolator, NearestNDInterpolator
+from scipy.interpolate import CloughTocher2DInterpolator
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium import current, topology
@@ -79,13 +79,14 @@ class SampledField:
 
 def sample_field(field, geometry):
     pitch = float(np.median(np.asarray(geometry.pitch)))
+    step = pitch / 4
     vertices = np.asarray(geometry.vertices).reshape(-1, 2)
     lo = np.min(vertices, axis=0) - 4 * pitch
     hi = np.max(vertices, axis=0) + 4 * pitch
-    counts = np.ceil((hi - lo) / pitch).astype(int) + 1
+    counts = np.ceil((hi - lo) / step).astype(int) + 1
     grid = np.stack(
         np.meshgrid(
-            *(lo[d] + pitch * np.arange(counts[d]) for d in range(2)), indexing="ij"
+            *(lo[d] + step * np.arange(counts[d]) for d in range(2)), indexing="ij"
         ),
         axis=-1,
     )
@@ -101,12 +102,14 @@ def sample_field(field, geometry):
     samples = cubic(grid.reshape(-1, 2))
     missing = ~np.isfinite(samples)
     if np.any(missing):
-        samples[missing] = NearestNDInterpolator(unique, measured)(
-            grid.reshape(-1, 2)[missing]
+        # The sampled carrier has no exterior cells; continue with its declared
+        # exterior evaluator instead of a nearest-value wall plateau.
+        samples[missing] = np.asarray(
+            topology._point_values(field, jnp.asarray(grid.reshape(-1, 2)[missing]))
         )
     assert np.isfinite(samples).all() and np.ptp(measured) > 0
     return SampledField(
-        jnp.asarray(samples.reshape(tuple(counts))), jnp.asarray(lo), jnp.asarray(pitch)
+        jnp.asarray(samples.reshape(tuple(counts))), jnp.asarray(lo), jnp.asarray(step)
     )
 
 
@@ -207,6 +210,15 @@ def main():
     analytic_row, analytic_read = read_row(analytic, *scoring, "closed_form")
     rows.append(analytic_row)
     sampled = sample_field(analytic, geometry)
+    mesh_truth = np.asarray(topology._point_values(analytic, geometry.sample_points))
+    mesh_reconstructed = np.asarray(
+        topology._point_values(sampled, geometry.sample_points)
+    )
+    mesh_reconstruction_error = float(np.max(np.abs(mesh_reconstructed - mesh_truth)))
+    print(
+        f"MESH_SAMPLE_CONTROL peak_flux_error={mesh_reconstruction_error:.12g}",
+        flush=True,
+    )
     sampled_row, sampled_read = read_row(sampled, *scoring, "sampled")
     rows.append(sampled_row)
     if args.perturbed:
@@ -228,7 +240,13 @@ def main():
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(
             json.dumps(
-                dict(kind=args.kind, cells=args.cells, rows=rows, batched_kernel=True),
+                dict(
+                    kind=args.kind,
+                    cells=args.cells,
+                    rows=rows,
+                    batched_kernel=True,
+                    mesh_sample_peak_flux_error=mesh_reconstruction_error,
+                ),
                 indent=2,
             )
             + "\n"
@@ -275,6 +293,7 @@ def main():
                 batched_kernel=True,
                 booking_valid=bool(booking.valid),
                 sampled_shift_control_pitches=movement,
+                mesh_sample_peak_flux_error=mesh_reconstruction_error,
             ),
             indent=2,
         )

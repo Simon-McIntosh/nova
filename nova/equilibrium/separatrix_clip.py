@@ -130,29 +130,46 @@ def _area_moments(
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Return area and first two area moments about ``origin``.
 
-    The moments are read from the shared owner
-    :func:`~nova.equilibrium.clip_quadrature._straight_edge_monomial_moments`
-    over the vertices shifted to ``origin``: its total-degree-two block is
-    exactly the area, the first moments and the second-moment tensor. A
-    degenerate polygon reports zero, as its caller expects.
+    This stays a NumPy closed form rather than a call into the shared owner
+    reduction: its caller invokes it once per mesh cell in a Python loop, and an
+    eager traced call per cell turns that loop into a compile-and-dispatch per
+    cell. The moments it returns are the same total-degree-two block of the same
+    monomial integrals.
     """
     if len(vertices) < 3:
         return 0.0, np.zeros(2), np.zeros((2, 2))
-    from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
-
-    local = np.ascontiguousarray(vertices, dtype=np.float64) - origin
-    table = np.asarray(
-        _straight_edge_monomial_moments(
-            jnp.asarray(local)[None, :, :],
-            jnp.asarray([len(local)]),
-            max_degree=2,
-        )
-    )[0]
-    area = float(table[0])
-    if area == 0.0:
+    local = vertices - origin
+    following = np.roll(local, -1, axis=0)
+    x, y = local.T
+    next_x, next_y = following.T
+    cross = x * next_y - next_x * y
+    area_twice = math.fsum(cross)
+    if area_twice == 0.0:
         return 0.0, np.zeros(2), np.zeros((2, 2))
-    first = np.asarray([table[2], table[1]])
-    second = np.asarray([[table[5], table[4]], [table[4], table[3]]])
+    orientation = math.copysign(1.0, area_twice)
+    area = 0.5 * orientation * area_twice
+    first = orientation * np.asarray(
+        [
+            math.fsum((x + next_x) * cross) / 6.0,
+            math.fsum((y + next_y) * cross) / 6.0,
+        ]
+    )
+    radial_squared = (
+        orientation * math.fsum((x * x + x * next_x + next_x * next_x) * cross) / 12.0
+    )
+    vertical_squared = (
+        orientation * math.fsum((y * y + y * next_y + next_y * next_y) * cross) / 12.0
+    )
+    cross_moment = (
+        orientation
+        * math.fsum(
+            (2.0 * x * y + x * next_y + next_x * y + 2.0 * next_x * next_y) * cross
+        )
+        / 24.0
+    )
+    second = np.asarray(
+        [[radial_squared, cross_moment], [cross_moment, vertical_squared]]
+    )
     return area, first, second
 
 

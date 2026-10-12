@@ -148,22 +148,15 @@ def test_the_deleted_parallel_reduction_does_not_reappear():
 def test_every_remaining_polygon_reduction_delegates_to_the_owner():
     """Each surviving reduction reads the owner table rather than recomputing it."""
     from nova.equilibrium.polygon_moments import polygon_monomial_moments
-    from nova.equilibrium.separatrix_clip import (
-        _area_moments,
-        padded_polynomial_current_moments,
-    )
+    from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
 
-    for reduction in (
-        _area_moments,
-        padded_polynomial_current_moments,
-        polygon_monomial_moments,
-    ):
+    for reduction in (padded_polynomial_current_moments, polygon_monomial_moments):
         source = inspect.getsource(reduction)
         assert "_straight_edge_monomial_moments" in source, reduction.__name__
 
 
-def test_the_delegated_area_moments_reproduce_the_exact_monomials():
-    """The numpy wrapper and the monomial table agree with the rational reference."""
+def test_the_area_and_monomial_views_reproduce_the_rational_reference():
+    """The numpy area view and the owner table agree with the rational reference."""
     from nova.equilibrium.polygon_moments import polygon_monomial_moments
     from nova.equilibrium.separatrix_clip import _area_moments
 

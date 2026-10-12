@@ -583,6 +583,21 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "5c3e1a8fdf2aebbca536a84b346751eaac3f0869",
+  "release": {
+    "process_signalled": false,
+    "scratch_bytes": 5026,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261012T044949442062-review-of-polygon-moment-owner",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5026,
+        "path": "/tmp/reckon-crew-scratch/r-20261012T044949442062-review-of-polygon-moment-owner"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_released": false,
+    "worktree_withheld": "run 'r-20261012T044949442062-review-of-polygon-moment-owner' release step raised: Command '['git', '-C', '/home/ITER/mcintos/Code/nova', 'worktree', 'remove', '/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/review-of-polygon-moment-owner']' timed out after 180 seconds"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

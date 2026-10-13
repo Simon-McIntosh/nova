@@ -13,7 +13,7 @@ current source, replaced the stale diverted booking pin with the value its measu
 run reports, and corrected a coarse ladder assertion that predated contained-saddle admission">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s6">
-<meta name="plan-commits" content="34561f8ecdfae49ac57c9722d83fe775ff6d8101 19b882c8cf4c814fd3e97db36199cc4f7f4f7b9f b5401b15b40273232ba0282ea6e93494aa4a8dd6 ac2f3bf617e869ae075da105ba98453ba1fd8e4c">
+<meta name="plan-commits" content="34561f8ecdfae49ac57c9722d83fe775ff6d8101 19b882c8cf4c814fd3e97db36199cc4f7f4f7b9f b5401b15b40273232ba0282ea6e93494aa4a8dd6 ac2f3bf617e869ae075da105ba98453ba1fd8e4c f8bae04cb981e05fa9a3b1458129d49a76104bf5">
 <meta name="plan-recorded-at" content="2026-10-13">
 <meta name="plan-verdict" content="pass">
 <meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) inside the fleet allocation job 1281970 on 98dci4-clu-2002, so the heavy rows ran in place. Every run named the worktree on PYTHONPATH and used /home/ITER/mcintos/Code/nova/.venv/bin/python directly; uv was never invoked on the compute node.">
@@ -118,9 +118,12 @@ bit-identically, and recorded in
 <p>The pinned literal was <code>0.197327</code>; job 1283981 measures
 <code>0.1946465024178517</code> on the base tree and on the head tree, a relative
 departure of <code>1.36e-2</code> against a <code>5e-6</code> tolerance, so the
-assertion could only ever fail. This is a stale pin rather than a moved physical
-quantity, which is why the value is recorded beside it rather than the pin being
-loosened. The row itself did not run on this node: its machine and exterior fixture
+assertion could only ever fail. The quantity moved: the current-book record
+measured the same diverted 550-cell legacy map error at <code>0.197326978718</code>
+on 2026-10-10, before the near-edge kernel repair (44345de22) reached main, and
+the base tree of this node already reads <code>0.1946465024178517</code>. The pin
+follows the measured value rather than being loosened, and which merge moved it is
+left to the certificate requalification. The row itself did not run on this node: its machine and exterior fixture
 receipts are absent here, so the harness row raises <code>FileNotFoundError</code>
 before booking and prints no value.</p>
 

@@ -134,3 +134,22 @@ def test_a_saddle_offered_as_the_axis_is_refused(route):
     support, booked = step(operands, cache, swapped + 0.03 * pitch, swapped)
     assert not bool(support.valid)
     assert not bool(booked.valid)
+
+
+def test_a_row_miss_at_the_x_point_alone_does_not_read_as_limited(route):
+    kind, operands, cache, roots, pitch, step, _reference, _axis, _result = route
+    if kind != "diverted":
+        pytest.skip("a limited state has no X-point to miss")
+    nodes = np.asarray(operands.nodes)
+    near = np.linalg.norm(nodes - np.asarray(roots[1]), axis=-1) < 1.0 * float(pitch)
+    far = np.linalg.norm(nodes - np.asarray(roots[0]), axis=-1) > 2.0 * float(pitch)
+    assert near.any() and far[near].all()
+    lookup = jnp.where(jnp.asarray(near), -1, cache.lookup)
+    support, booked = step(
+        operands, replace(cache, lookup=lookup), roots + 0.03 * pitch, roots
+    )
+    status = np.asarray(support.stationary.status)
+    assert status[0] == fixed_points.FixedPointStatus.CONVERGED
+    assert status[1] == fixed_points.FixedPointStatus.NEEDS_ROWS
+    assert not bool(support.valid)
+    assert not bool(booked.valid)

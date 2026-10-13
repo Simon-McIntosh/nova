@@ -152,10 +152,11 @@ def membership_measure(
         )
     )
     matrix = np.empty((len(nodes), len(geometry.centre), 3))
-    for first in range(0, len(nodes), 4):
-        points = nodes[first : first + 4]
+    batch = 16
+    for first in range(0, len(nodes), batch):
+        points = nodes[first : first + batch]
         padded = np.concatenate(
-            (points, np.repeat(points[-1:], 4 - len(points), axis=0))
+            (points, np.repeat(points[-1:], batch - len(points), axis=0))
         )
         matrix[first : first + len(points)] = np.asarray(
             evaluate(jnp.asarray(padded), reference.coupling)

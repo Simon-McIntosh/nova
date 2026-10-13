@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import argparse
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -46,11 +47,25 @@ def persist(path, value):
     path.write_text(json.dumps(value, indent=2, allow_nan=True) + "\n")
 
 
-def cached_matrix(nodes, coupling):
+def cached_matrix(nodes, coupling, cache_revision):
     digest = hashlib.sha256(nodes.tobytes())
     for operand in jax.tree_util.tree_leaves(coupling):
         digest.update(np.asarray(operand).tobytes())
-    digest.update(Path(jet_module.__file__).read_bytes())
+    source = subprocess.check_output(
+        ["git", "show", f"{cache_revision}:scripts/prototypes/read_route/jets.py"]
+    )
+
+    def kernel_ast(text):
+        tree = ast.parse(text)
+        function = next(
+            item
+            for item in tree.body
+            if isinstance(item, ast.FunctionDef) and item.name == "_source_jets"
+        )
+        return ast.dump(function)
+
+    assert kernel_ast(source) == kernel_ast(Path(jet_module.__file__).read_bytes())
+    digest.update(source)
     digest.update(Path(polygonanalytic.__file__).read_bytes())
     directory = (
         Path("/work/projects/imas_gpu/sophelio/evidence/conforming-jets")
@@ -152,7 +167,7 @@ def run(args):
         assert abs(straight_row["saddle_error"] - target) < 1e-8, straight_row
     print("REFERENCE_COUPLING_START", flush=True)
     reference = fixture._kernel_backed_field(args.kind, oracle, analytic, geometry)
-    matrix = cached_matrix(nodes, reference.coupling)
+    matrix = cached_matrix(nodes, reference.coupling, args.cache_revision)
     _, source, _ = certificate._case(
         "weak-rotation-reactor-static" if saddle is None else "diverted-single-null",
         clip_mode="exact",
@@ -294,6 +309,7 @@ def main():
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--cache-revision", required=True)
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(

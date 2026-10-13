@@ -1,0 +1,640 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 3,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "ab54cccac16558c7a27ab9e93a6aa65c489c7671",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 7238556,
+      "input_tokens_cumulative": 7238556,
+      "output_tokens": 30307,
+      "output_tokens_cumulative": 30307,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 213,
+    "files": 7,
+    "removed": 20
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier",
+        "path": "tests/test_exact_clip_seed_bracket.py"
+      },
+      "run_function": {
+        "line": 30,
+        "name": "_certificate_row",
+        "path": "docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py"
+      },
+      "window_line": 60
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "_certificate_row",
+        "path": "tests/test_forward_compile_identity.py"
+      },
+      "run_function": {
+        "line": 30,
+        "name": "_certificate_row",
+        "path": "docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py"
+      },
+      "window_line": 33
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_reduced_hex_request_receipt_records_absent_raster_flux",
+        "path": "tests/test_forward_receipt_raster.py"
+      },
+      "run_function": {
+        "line": 30,
+        "name": "_certificate_row",
+        "path": "docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py"
+      },
+      "window_line": 50
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_static_oracle_current_moment_jvp_is_finite",
+        "path": "tests/test_analytic_oracle_tangent.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "_build_certificate_case",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 262
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "_diverted_oracle_read",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "_build_certificate_case",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 243
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "_certificate_row",
+        "path": "tests/test_forward_compile_identity.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "_build_certificate_case",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 278
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "_diverted_exact_read",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "run_function": {
+        "line": 241,
+        "name": "_build_certificate_case",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 255
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_static_oracle_current_moment_jvp_is_finite",
+        "path": "tests/test_analytic_oracle_tangent.py"
+      },
+      "run_function": {
+        "line": 538,
+        "name": "_build_diverted_terminal",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 564
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_exact_seed_finds_a_finite_bracket_on_the_342_cell_carrier",
+        "path": "tests/test_exact_clip_seed_bracket.py"
+      },
+      "run_function": {
+        "line": 538,
+        "name": "_build_diverted_terminal",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 574
+    },
+    {
+      "existing_function": {
+        "line": 350,
+        "name": "_diverted_oracle_read",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 538,
+        "name": "_build_diverted_terminal",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 541
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "_certificate_row",
+        "path": "tests/test_forward_compile_identity.py"
+      },
+      "run_function": {
+        "line": 538,
+        "name": "_build_diverted_terminal",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 574
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_reduced_hex_request_receipt_records_absent_raster_flux",
+        "path": "tests/test_forward_receipt_raster.py"
+      },
+      "run_function": {
+        "line": 538,
+        "name": "_build_diverted_terminal",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 572
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "_diverted_exact_read",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "run_function": {
+        "line": 538,
+        "name": "_build_diverted_terminal",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 555
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_static_oracle_current_moment_jvp_is_finite",
+        "path": "tests/test_analytic_oracle_tangent.py"
+      },
+      "run_function": {
+        "line": 801,
+        "name": "_cold_start_data",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 827
+    },
+    {
+      "existing_function": {
+        "line": 14,
+        "name": "test_reduced_hex_request_receipt_records_absent_raster_flux",
+        "path": "tests/test_forward_receipt_raster.py"
+      },
+      "run_function": {
+        "line": 801,
+        "name": "_cold_start_data",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 802
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "_diverted_exact_read",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "run_function": {
+        "line": 801,
+        "name": "_cold_start_data",
+        "path": "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py"
+      },
+      "window_line": 818
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_arm_measurement",
+        "path": "tests/test_certificate_exterior_support.py"
+      },
+      "run_function": {
+        "line": 85,
+        "name": "measure",
+        "path": "scripts/prototypes/support/book.py"
+      },
+      "window_line": 196
+    },
+    {
+      "existing_function": {
+        "line": 389,
+        "name": "test_forward_census_exact_diverted_oracle",
+        "path": "tests/test_forward_census.py"
+      },
+      "run_function": {
+        "line": 56,
+        "name": "test_coarse_diverted_exact_field_admits_axis_and_saddle",
+        "path": "tests/test_oracle_axis_admission.py"
+      },
+      "window_line": 60
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "34561f8ecdfae49ac57c9722d83fe775ff6d8101",
+    "5dd343c52885a3a0695069641b313db21ffb8e68",
+    "19b882c8cf4c814fd3e97db36199cc4f7f4f7b9f",
+    "8e1d0e37f7226e31475ae2e69c559248dcb705d4",
+    "b5401b15b40273232ba0282ea6e93494aa4a8dd6",
+    "ac2f3bf617e869ae075da105ba98453ba1fd8e4c",
+    "f8bae04cb981e05fa9a3b1458129d49a76104bf5"
+  ],
+  "completed_at": "2026-10-13T06:31:08.498Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-10-13T04:23:38Z",
+  "disposition": "handed-off",
+  "dispute_count": 0,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "scripts/prototypes/support/measure.py",
+    "scripts/prototypes/support/book.py:91",
+    "NOVA_BOOK_CACHE>.parent/{kind}-550-fixture.json",
+    "NOVA_BOOK_CACHE=<cache-dir>/cache",
+    "/home/ITER/mcintos/Code/nova/.venv/bin/python",
+    "tests/test_current_book_fragments.py::test_analytic_certificate_moments"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "/home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider tests/test_oracle_axis_admission.py tests/test_analytic_oracle_fixture_exterior.py tests/test_certificate_exterior_support.py -k 550",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042304376799-caller-arm-repair/logs/gate_h200_head.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-13T05:23:04.760249+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-13T04:23:04Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 27,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 2,
+    "headroom": 10,
+    "mean_context": 160000,
+    "observed_at": "2026-10-13T04:22:42Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 27,
+      "aggregate_tokens_per_second": 256.744,
+      "detail": "",
+      "mean_tokens_per_second": 98.748,
+      "observed_at": "2026-10-13T04:22:42Z",
+      "runs": 2.6,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-13T06:31:08.498Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042304376799-caller-arm-repair/manifest.md",
+  "member": "disposable-r-20261013T042304376799-caller-arm-repair",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [],
+    "baseline_failure_ids": [
+      "tests/test_oracle_axis_admission.py::test_coarse_diverted_exact_field_admits_axis_and_saddle"
+    ],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [],
+    "declaration": "restoring the rotating-source hand-off turns tests/test_oracle_axis_admission.py red by test id",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042304376799-caller-arm-repair/logs/negative_control_repair.log",
+    "reason": "The declared mutation's control is in logs/negative_control.log: restoring the rotating-source hand-off fails tests/test_oracle_axis_admission.py::test_coarse_diverted_exact_field_admits_axis_and_saddle, 1 failed, EXIT=1. The manifest's negative_control_log names the later provenance-repair control, which checks the fragment rather than running pytest.",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042304376799-caller-arm-repair/logs/negative_control_repair.log",
+    "test_paths": [
+      "tests/test_oracle_axis_admission.py"
+    ],
+    "verdict": "waived"
+  },
+  "no_commit": null,
+  "node": "caller-arm-repair",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 628,
+          "cached_input_tokens": 600409,
+          "input_tokens": 601039,
+          "output_tokens": 2737,
+          "reasoning_output_tokens": 841,
+          "total_tokens": 603776,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Carry out followup f-cfs-caller-arm-repair on converged-forward-solve. Merge c3c95a467 made support_arm a required keyword of scripts/analytic_oracle_fixtures/measure.py exact_current_moments. Seven call sites outside that node's fence still omit it and raise TypeError:\n- tests/test_oracle_axis_admission.py:34;\n- docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py:50;\n- docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:42;\n- docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py:64;\n- docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py at lines 253, 551 and 810.\n\nDone when:\n(1) Each call site passes the arm its own purpose needs. Before the change every one received the legacy spline-clip arm. Keep legacy unless the script's documented purpose is the exact analytic support, and state the reason in the fragment, case by case. Each script imports, and lowers or runs its dry-run path, without error.\n(2) tests/test_oracle_axis_admission.py passes. It also carries a defect introduced at 24f6eef90: the exact-support fixture hands it a rotating current source with no finite closed separatrix, so Shapely raises a linearring error before admission runs. Pass the diverted exact separatrix separately from the rotating current source through benchmarks/solovev_certificate.py and scripts/analytic_oracle_fixtures/measure.py. Negative control: restoring the rotating-source hand-off turns that test red by id.\n(3) scripts/prototypes/support/book.py pins a stale legacy-map constant: its assertion expects 0.197327, while base and head both measure 0.1946465024178517. Re-derive the constant at this base, with the command and revision in a comment, or replace the pin with a comparison against a value measured in the same run. Say which, and why.\n(4) Gate: tests/test_oracle_axis_admission.py, tests/test_analytic_oracle_fixture_exterior.py and tests/test_certificate_exterior_support.py at 550 cells (deselect 2,000 and 5,000), in fresh per-file processes at base and head, with no added failures. The book harness's diverted and limited 550-cell rows run cleanly at head.\n(5) Write the evidence fragment docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html with plan-evidence-for converged-forward-solve; reckon audit-doc must report 0 errors.\nDo not edit scripts/prototypes/read_route or scripts/prototypes/fixed_points, which the split-read prototype owns.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.\n\nImport provenance: run each arm with its own tree as the working directory and print nova.__file__ in each log header. On the fleet allocation (SLURM_JOB_ID set), run the CPU gates in place.",
+    "estimated_hours": 2.0,
+    "goal": "Repair the callers left behind by the required support arm",
+    "id": "caller-arm-repair",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-13T04:23:04Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 27,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 2,
+      "headroom": 10,
+      "mean_context": 160000,
+      "observed_at": "2026-10-13T04:22:42Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 27,
+        "aggregate_tokens_per_second": 256.744,
+        "detail": "",
+        "mean_tokens_per_second": 98.748,
+        "observed_at": "2026-10-13T04:22:42Z",
+        "runs": 2.6,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042304376799-caller-arm-repair/manifest.md",
+    "negative_control": "restoring the rotating-source hand-off turns tests/test_oracle_axis_admission.py red by test id",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "tests/test_oracle_axis_admission.py",
+      "docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py",
+      "docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py",
+      "docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py",
+      "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py",
+      "benchmarks/solovev_certificate.py",
+      "scripts/analytic_oracle_fixtures",
+      "scripts/prototypes/support/book.py",
+      "docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html",
+      "docs/figures/converged-forward-solve/caller-arm-repair"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 3244875.0,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "caller-arm-repair",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-13T04:23:18.952648+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Mechanical caller repair plus one fixture defect and a stale constant; moderate difficulty",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.398,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "f8bae04cb981e05fa9a3b1458129d49a76104bf5",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "8e1d0e37f7226e31475ae2e69c559248dcb705d4",
+    "reviewed_head_sha": "f8bae04cb981e05fa9a3b1458129d49a76104bf5",
+    "scores": {
+      "durability": 15,
+      "evidence": 17,
+      "fit": 18,
+      "goal_fidelity": 18,
+      "reuse": 20,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 108
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261013T042304376799-caller-arm-repair",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "s21-nova",
+  "session_harness": "claude",
+  "session_id": "9beecc2d-b939-4c9a-a8d6-15b812e37795",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 39623090,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1232.289,
+    "generated_tokens": 195461,
+    "generation_seconds": 1003.595,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 84.8,
+    "machine_seconds": 228.694,
+    "peak_input_tokens": 195275,
+    "tokens_per_second": 194.76,
+    "wall_tokens_per_second": 158.62
+  },
+  "time_budget": "60m",
+  "tool_steps": 158.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 7650,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 3,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-13T06:31:12Z",
+    "last_record_type": "result",
+    "launched_at": "2026-10-13T06:10:33Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T042304376799-caller-arm-repair",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 36209,
+    "worker_pid": 948807
+  },
+  "worker_seconds": 7585,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}

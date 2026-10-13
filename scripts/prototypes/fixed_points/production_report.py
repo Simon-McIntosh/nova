@@ -37,11 +37,14 @@ def main():
         for kind in ("diverted", "limited")
         for cells in (2000, 5000, 10000)
     ]
-    assert all(row["complete"] for row in rows)
+    assert all(
+        row["complete"] and row["p99_seconds"] < 0.001 and row["failures"] == 0
+        for row in rows
+    )
     tail = json.loads((args.run / "tail-rows/diverted-2000.json").read_text())
     assert tail["complete"]
-    head = json.loads((args.run / "contracts-physical/head.json").read_text())
-    negative = json.loads((args.run / "contracts-physical/negative.json").read_text())
+    head = json.loads((args.run / "contracts-complete/head.json").read_text())
+    negative = json.loads((args.run / "contracts-complete/negative.json").read_text())
     assert head["completed"] and head["exit_status"] == 0
     assert negative["completed"] and negative["exit_status"] != 0
     commits = subprocess.check_output(
@@ -254,7 +257,7 @@ def main():
                 "Earlier 1.638275 ms tail",
                 (
                     "Original Picard receipt has 100 calls, all three Newton updates."
-                    " Adjacent calls 58 and 59 took 6.135145 and 1.592852 ms; one sam"
+                    " Adjacent calls 58 and 59 took 6.135 and 1.593 ms; one sam"
                     "pled device trace totals 91.424 microseconds. This rules out var"
                     "iable iteration count; external scheduling is an inference, not "
                     "an attributed cause. The exact-workload replay above measures 10"

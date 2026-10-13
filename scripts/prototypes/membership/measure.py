@@ -26,7 +26,6 @@ from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures.measure import analytic_profile
 from scripts.prototypes.fixed_points.solve import (
     CachedField,
-    KernelField,
     select_cache_nodes,
     solve,
 )
@@ -230,7 +229,7 @@ def run(args):
             start = perf_counter()
             jax.block_until_ready(executable(*operands, jnp.asarray(1.0)))
             walls.append(perf_counter() - start)
-        row = record(
+        record(
             state + "_curved",
             result[0],
             result[1],
@@ -262,8 +261,10 @@ def run(args):
                 represented=np.asarray(result[3]),
             )
         if state == "picard":
-            kernel = KernelField(
-                analytic, reference.coupling, ClippedCurrentMoments(*difference.T)
+            kernel = topology.TotalField(
+                ClippedCurrentMoments(*moments.T),
+                reference.coupling,
+                reference.exterior,
             )
             live = jax.jit(topology.read)(
                 batched_field(kernel), geometry, convention, policy
@@ -296,12 +297,13 @@ def main():
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
-        f"REVISION={revision} TREE={ROOT} COMMAND={sys.executable} -m scripts.prototypes.membership.measure "
-        + " ".join(sys.argv[1:]),
+        f"REVISION={revision} TREE={ROOT} COMMAND={sys.executable} "
+        "-m scripts.prototypes.membership.measure " + " ".join(sys.argv[1:]),
         flush=True,
     )
     print(
-        f"NOVA_MODULE={nova.__file__} MODULE={__file__} CWD={Path.cwd().resolve()} DEVICES={jax.devices()}",
+        f"NOVA_MODULE={nova.__file__} MODULE={__file__} "
+        f"CWD={Path.cwd().resolve()} DEVICES={jax.devices()}",
         flush=True,
     )
     assert jax.default_backend() == "gpu"

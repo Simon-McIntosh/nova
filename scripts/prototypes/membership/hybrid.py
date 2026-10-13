@@ -15,7 +15,9 @@ def neighbour_mask(geometry, point):
     return owner | jnp.any(adjacent & (geometry.neighbour >= 0), axis=1)
 
 
-def connected_support(geometry, coefficient, sigma, level, axis, form, represented):
+def connected_support(
+    geometry, coefficient, sigma, level, axis, form, represented, return_fragments=False
+):
     """Reuse the read's conic fragments, curved sectors and connectivity owner."""
     policy = TopologyPolicy()
     vertices = (geometry.vertices - geometry.centre[:, None]) / geometry.pitch[
@@ -25,20 +27,23 @@ def connected_support(geometry, coefficient, sigma, level, axis, form, represent
     fragments = jax.vmap(topology.quadratic_cell_fragments, in_axes=(0, 0, 0, None))(
         vertices, geometry.vertex_count, signed, policy.fragment_capacity
     )
-    saddle = jax.vmap(topology._normal_form_cell_fragments, in_axes=(0, 0, None, None))(
-        geometry.vertices, geometry.vertex_count, form, policy.edge_tolerance
+    areas = fragments.area * geometry.pitch[:, None] ** 2
+    intervals = jnp.pad(
+        fragments.edge_interval, ((0, 0), (0, 0), (0, 0), (0, 10), (0, 0))
     )
-    sectors = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
-    areas = jnp.where(
-        represented[:, None],
-        saddle.area[:, sectors],
-        fragments.area * geometry.pitch[:, None] ** 2,
-    )
-    intervals = jnp.where(
-        represented[:, None, None, None, None],
-        saddle.edge_interval[:, sectors],
-        jnp.pad(fragments.edge_interval, ((0, 0), (0, 0), (0, 0), (0, 10), (0, 0))),
-    )
+    valid = jnp.all(fragments.valid)
+    if form is not None:
+        saddle = jax.vmap(
+            topology._normal_form_cell_fragments, in_axes=(0, 0, None, None)
+        )(geometry.vertices, geometry.vertex_count, form, policy.edge_tolerance)
+        sectors = jnp.nonzero(form.positive, size=2, fill_value=0)[0]
+        areas = jnp.where(represented[:, None], saddle.area[:, sectors], areas)
+        intervals = jnp.where(
+            represented[:, None, None, None, None],
+            saddle.edge_interval[:, sectors],
+            intervals,
+        )
+        valid = jnp.all(jnp.where(represented, saddle.valid, fragments.valid))
     labels, _ = topology._connected_fragment_labels(
         areas, intervals, geometry, policy.edge_tolerance
     )
@@ -58,9 +63,10 @@ def connected_support(geometry, coefficient, sigma, level, axis, form, represent
     )
     fragment = fragments.slice_labels[cell, strip, interval]
     selected = (labels == labels[cell, jnp.maximum(fragment, 0)]) & (areas > 0)
-    valid = jnp.all(jnp.where(represented, saddle.valid, fragments.valid))
     valid &= jnp.any(axis_cells) & (fragment >= 0)
     membership = jnp.sum(jnp.where(selected, areas, 0), axis=1) / geometry.full_area
+    if return_fragments:
+        return membership, valid, selected, areas, intervals
     return membership, valid, selected
 
 

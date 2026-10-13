@@ -11,10 +11,10 @@
 program, replacing the sequential scan">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s3">
-<meta name="plan-commits" content="adeff8346,486d369ad,f2a831d4d">
+<meta name="plan-commits" content="adeff8346,486d369ad,f2a831d4d,f2a831d4d">
 <meta name="plan-recorded-at" content="2026-10-13">
 <meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="CPU binary64 identity at 1 to 2000 cells with warm walls; fresh H200 2000-cell machines built, carrier cost comparison pending">
+<meta name="plan-environment" content="H200 base-versus-head booking walls at 2000 and 5000 cells on the analytic certificate state, with identity, compile and peak-memory columns; the one-Picard-image state is not reported">
 
 <title>Cell-batched current booking | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
@@ -63,9 +63,11 @@ toy fixture, and they run against the batched form: the sequential reference is
 <code>jax.lax.cond</code>, which a <code>vmap</code> lowers to a batched select
 that evaluates every branch for every cell, where the <code>scan</code> takes one
 branch per cell. That is a property of this fixture's control flow, not of the
-certificate carrier, whose booking wall is what the H200 rows below measure. The
-CPU walls are reported because they were measured, and they do not support a
-speed-up claim on their own.</p>
+certificate carrier: on the carrier the batched program is faster at every
+measured rung, see the H200 rows below. The two lanes disagree because the
+fixture's cells are uniform and tiny, so the batched select costs more than it
+saves, while the carrier's cells carry the real support work. The CPU walls are
+reported because they were measured, and they are not evidence about the H200.</p>
 </section>
 
 <section id="vectorize-booking-negative">
@@ -114,21 +116,48 @@ this head's, because <code>current.py</code> is the only file that differs
 between the trees, so a second machine would measure the builder rather than the
 booking. Each booking is taken on the analytic certificate state and on one
 Picard image of it, the state the flux map returns.</p>
-<p id="vectorize-booking-rung-fresh">The fresh machines build and the four 2,000-cell combinations are
-measured; the 5,000-cell combinations were still building at the fence. Both
-2,000-cell machines built on the device in this allocation
-(<code>diverted</code>: 2,098 cells, 245.0 s; <code>limited</code>: 2,105 cells,
-244.1 s) with no cache hit, and the sequential booking on each took 9.08 s and
-9.07 s of device wall, normalising to the closed-form current to 2.2e-16 and
-1.0e-7 relative. The 5,000-cell pairs and the base-versus-head comparison persist
-under the run directory at <code>h200/fresh/</code>
-(<code>compare-summary.json</code>) and are read from there when the allocation
-finishes.</p>
-<p id="vectorize-booking-rung-pending">The 10,000-cell rung is not attempted: its
-machine is being built by the carrier-requalify node, whose cache held an
-<code>analytic_oracle_hex_machine_10000.zarr</code> lock at
-<code>2026-10-13T19:53Z</code> and no store, so 10,000 cells stays pending on
-that device store.</p>
+<p id="vectorize-booking-rung-carrier">One H200 allocation (job <code>1284869</code>,
+<code>--gres=gpu:1</code>, <code>--time 02:00:00</code>), built each machine once
+and booked it twice: once with the base tree's sequential
+<code>current.book</code> and once with this head's <code>current.book</code>. The
+2000-cell machines realised 2098 cells (diverted) and 2105 (limited); the
+5000-cell machines realised 5158 and 5167. Both arms book the same analytic
+certificate state, so the only difference between them is the program.</p>
+<table id="vectorize-booking-rung-table">
+<thead><tr><th>Kind</th><th>Cells</th><th>scan wall [s]</th><th>vmap wall [s]</th><th>ratio</th><th>scan compile [s]</th><th>vmap compile [s]</th><th>scan peak [GB]</th><th>vmap peak [GB]</th></tr></thead>
+<tbody>
+<tr><td>limited</td><td>2,000</td><td>2.339</td><td>1.220</td><td>1.92x</td><td>2.470</td><td>2.637</td><td>0.71</td><td>7.78</td></tr>
+<tr><td>limited</td><td>5,000</td><td>4.610</td><td>3.032</td><td>1.52x</td><td>2.342</td><td>3.972</td><td>2.98</td><td>22.24</td></tr>
+<tr><td>diverted</td><td>2,000</td><td>1.233</td><td>1.170</td><td>1.05x</td><td>2.401</td><td>2.827</td><td>0.74</td><td>7.75</td></tr>
+<tr><td>diverted</td><td>5,000</td><td>4.433</td><td>3.428</td><td>1.29x</td><td>2.513</td><td>3.140</td><td>3.03</td><td>23.71</td></tr>
+</tbody>
+</table>
+<p id="vectorize-booking-rung-identity">The two arms book the same state, and their
+booked moments agree to floating-point reassociation: at 2,000 cells the largest
+difference is 3.6e-12 on the cell current (4.5e-16 relative) for the limited
+machine and 1.4e-14 (6.2e-16 relative) for the diverted one; at 5,000 cells it is
+1.8e-12 (4.4e-16) and 7.1e-15 (6.9e-16). This is the certificate carrier's
+counterpart of the bit-identical result on the tiled CPU fixture.</p>
+<p id="vectorize-booking-rung-cost">The speed-up is real at every rung, and it is
+paid for in device memory: the batched program's peak is 7.8 to 10.6 times the
+sequential program's at 2,000 cells (7.75-7.78 GB against 0.71-0.74 GB) and 7.4
+to 8.0 times at 5,000 cells (22.24-23.71 GB against 2.98-3.03 GB), and it compiles
+1.1 to 1.7 times slower. The measurement is taken on one device per process, so
+the two peaks come from the same machine load and differ only by the program.
+Extrapolated to the 10,000-cell rung the batched peak would be tens of gigabytes,
+which fits the H200's 141 GB but is the binding constraint on how far the
+batching scales.</p>
+<p id="vectorize-booking-rung-picard">The one-Picard-image state is not reported.
+The flux map returns its image on the operator's own sample block (5,137 flux
+values for the 2,098-cell diverted machine, one sample row per cell), while
+<code>current.book</code> consumes flux on the topology read's per-cell stencil
+(14,686 values, seven points per cell), so the image cannot be booked through this
+seam without the operator's own partition reconstruction. The reconstruction this
+node wrote failed its own check: applied to the analytic state, which it must
+reproduce, it disagreed with the closed-form flux at the sample points by 1.0
+times the flux span for the limited machine and 0.90 times for the diverted one.
+A state produced by that recipe is not the Picard image, so no number from it is
+quoted. The four rows above are on the analytic state.</p>
 </section>
 </main>
 </body>

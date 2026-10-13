@@ -736,6 +736,43 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "fbcf4f29b6ee513f935f8446a82ee9712bea6104",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 20076,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T080937054811-proto-membership-hybrid",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 20076,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T080937054811-proto-membership-hybrid"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-membership-hybrid",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],

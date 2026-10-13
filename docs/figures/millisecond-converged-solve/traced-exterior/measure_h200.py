@@ -14,7 +14,6 @@ import numpy as np
 
 from benchmarks import solovev_certificate as certificate
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.forward_operator import set_support_clip_mode, support_clip_mode
 from nova.equilibrium.stencil_mesh import StencilMesh
 from nova.jax.config import configure_dtypes
 
@@ -69,16 +68,14 @@ def _certificate_row(case_name: str):
         seed,
         target_current,
         carrier_identity=f"solovev:{case_name}:{REQUESTED_CELLS}",
+        clip_mode="chord",
     )
     return profile, request
 
 
 def _configure() -> None:
-    print("STAGE configure H200 extended precision and whole-cell clip", flush=True)
+    print("STAGE configure H200 extended precision", flush=True)
     configure_dtypes()
-    set_support_clip_mode("chord")
-    if support_clip_mode() != "chord":
-        raise RuntimeError("production whole-cell clip mode was not selected")
 
 
 def _solve(case_name: str, output: Path) -> int:
@@ -95,7 +92,7 @@ def _solve(case_name: str, output: Path) -> int:
     np.savez(output, terminal_flux=state, residual=residual)
     metadata = {
         "case": case_name,
-        "clip_mode": support_clip_mode(),
+        "clip_mode": request.clip_mode,
         "requested_cells": REQUESTED_CELLS,
         "wall_seconds": wall_seconds,
         "terminal_residual": float(residual),
@@ -269,7 +266,7 @@ def _timing(output: Path) -> int:
         output.write_text(
             json.dumps(
                 {
-                    "clip_mode": support_clip_mode(),
+                    "clip_mode": request.clip_mode,
                     "requested_cells": REQUESTED_CELLS,
                     "rows": rows,
                 },

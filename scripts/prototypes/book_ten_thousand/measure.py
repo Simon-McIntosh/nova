@@ -22,15 +22,23 @@ from scripts.analytic_oracle_fixtures.measure import analytic_profile
 from scripts.prototypes.support.geometry import analytic_moments, analytic_polygons
 from tests.equilibrium.test_topology_read import (
     _analytic_inputs,
+    _kernel_backed_field,
     _realised_hex_geometry,
 )
 
 
-def measure(cells: int, output: Path) -> dict:
+def measure(cells: int, output: Path, fixture_only: bool = False) -> dict:
     """Compare the read, book, and exact support without a coupling build."""
     oracle, field, wall, _, saddle = _analytic_inputs("diverted")
     geometry = _realised_hex_geometry(wall, cells)
     print(f"GEOMETRY_READY {len(geometry.centre)}", flush=True)
+    fixture = (
+        _kernel_backed_field("diverted", oracle, field, geometry)
+        if fixture_only
+        else None
+    )
+    if fixture_only:
+        print("REFERENCE_READY", flush=True)
     convention = topology.TopologyConvention.from_cocos(17, 1.0)
     policy = TopologyPolicy(normal_form_radius=0.054806712567833996)
     reading = jax.jit(topology.read)(field, geometry, convention, policy)
@@ -50,6 +58,27 @@ def measure(cells: int, output: Path) -> dict:
     )(samples, reading, geometry)
     jax.block_until_ready(booked)
     print(f"BOOK_READY valid={bool(booked.valid)}", flush=True)
+    output.mkdir(parents=True, exist_ok=True)
+    if fixture_only:
+        reference = np.stack(tuple(map(np.asarray, fixture.moments)))
+        booked_values = np.stack(tuple(map(np.asarray, booked[:3])))
+        ratio = float(
+            np.max(np.abs(booked_values - reference)) / np.max(np.abs(reference))
+        )
+        np.savez_compressed(
+            output / f"diverted-{cells}-combined.npz",
+            reference=reference,
+            booked=booked_values,
+            membership=np.asarray(reading.membership),
+            fragment_area=np.asarray(reading.fragment_area),
+            fragment_selected=np.asarray(reading.fragment_selected),
+            read_axis=np.asarray(reading.axis),
+            read_x_points=np.asarray(reading.x_points),
+            read_x_point_valid=np.asarray(reading.x_point_valid),
+            centre=np.asarray(geometry.centre),
+        )
+        print(f"COMBINED_RATIO={ratio:.15g}", flush=True)
+        return {"relative_max": ratio}
     polygons = analytic_polygons(
         exact,
         [
@@ -119,6 +148,9 @@ def measure(cells: int, output: Path) -> dict:
         wall=np.asarray(wall),
         axis=np.asarray(oracle.magnetic_axis),
         saddle=np.asarray(saddle),
+        read_axis=np.asarray(reading.axis),
+        read_x_points=np.asarray(reading.x_points),
+        read_x_point_valid=np.asarray(reading.x_point_valid),
     )
     (output / f"diverted-{cells}.json").write_text(json.dumps(result, indent=2) + "\n")
     print("RESULT " + json.dumps(result), flush=True)
@@ -129,6 +161,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cells", nargs="+", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--fixture-only", action="store_true")
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
@@ -140,7 +173,7 @@ def main() -> None:
     assert jax.config.jax_enable_x64 is True
     assert jax.default_backend() == "gpu"
     for cells in args.cells:
-        measure(cells, args.out)
+        measure(cells, args.out, fixture_only=args.fixture_only)
 
 
 if __name__ == "__main__":

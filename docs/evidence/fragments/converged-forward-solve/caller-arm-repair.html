@@ -98,26 +98,31 @@ are recorded as the two different instruments they are. The fine rung keeps its 
 tighter assertion at the fine pitch.</p>
 
 <p id="caller-arm-repair-book-pin">The diverted booking pin at
-<code>scripts/prototypes/support/book.py</code> was re-derived rather than replaced
-with a same-run comparison, and the reason is the shape of the guard. The pin is a
-relative tolerance of <code>5e-6</code> on a measured map booking error, so it can
-catch a small regression in the legacy arm's booking. A same-run comparison would
-have to be made against a differently-scaled quantity from the same row — the
-exact arm's image error — which would convert a tight numeric pin into an
-order-of-magnitude claim and lose exactly the sensitivity the pin exists for. The
-constant is the value the diverted 550-cell booking row reports for
-<code>legacy_map_error</code>, measured on the frozen required-arm revision
-<code>ab54cccac</code> with the row the harness itself runs:</p>
+<code>scripts/prototypes/support/book.py</code> was kept as a literal rather than
+replaced with a same-run comparison, and the reason is the shape of
+the guard. The pin is a relative tolerance of <code>5e-6</code> on a measured map
+booking error, so it can catch a small regression in the legacy arm's booking. A
+same-run comparison would have to be made against a differently-scaled quantity
+from the same row — the exact arm's image error — which would convert a tight
+numeric pin into an order-of-magnitude claim and lose exactly the sensitivity the
+pin exists for. The constant is the value the diverted 550-cell booking row reports
+for <code>legacy_map_error</code>, measured by job 1283981, whose base arm ran the
+row on the base tree (<code>437a68db4</code>) and whose head arm reproduced it
+bit-identically, and recorded in
+<code>docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html</code>:</p>
 
-<pre id="caller-arm-repair-book-command"><code>NOVA_BOOK_RESULTS=&lt;rows&gt; NOVA_BOOK_CACHE=&lt;certified rows cache&gt; \
-  /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -s \
-  'tests/test_current_book_fragments.py::test_analytic_certificate_moments[550-diverted]'</code></pre>
+<pre id="caller-arm-repair-book-command"><code>booking row, diverted 550, legacy arm — job 1283981 on 98dci4-gpu-0003
+  base tree 437a68db4 and the head tree both report
+  legacy_map_error = 0.1946465024178517</code></pre>
 
-<p>The pinned literal was <code>0.197327</code>; base and head both measure
-<code>0.1946465024178517</code>, a relative departure of <code>1.36e-2</code>
-against a <code>5e-6</code> tolerance, so the assertion could only ever fail. This
-is a stale pin, not a moved physical quantity, which is why the derivation is
-recorded beside it rather than the pin being loosened.</p>
+<p>The pinned literal was <code>0.197327</code>; job 1283981 measures
+<code>0.1946465024178517</code> on the base tree and on the head tree, a relative
+departure of <code>1.36e-2</code> against a <code>5e-6</code> tolerance, so the
+assertion could only ever fail. This is a stale pin rather than a moved physical
+quantity, which is why the value is recorded beside it rather than the pin being
+loosened. The row itself did not run on this node: its machine and exterior fixture
+receipts are absent here, so the harness row raises <code>FileNotFoundError</code>
+before booking and prints no value.</p>
 
 <p id="caller-arm-repair-negative-control">The declared negative control restores
 the rotating-source hand-off, and the log it produced is named in the manifest's

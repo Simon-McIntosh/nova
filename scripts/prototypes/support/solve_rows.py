@@ -294,6 +294,14 @@ def main():
                 flux_error=float(jnp.max(jnp.abs(solved.flux - analytic)) / span),
                 history=np.asarray(result.residual_history).tolist(),
                 accepted=np.asarray(result.accepted).tolist(),
+                linear_residual_history=np.asarray(
+                    result.linear_residual_history
+                ).tolist(),
+                step_factors=np.asarray(result.step_factors).tolist(),
+                stationary_status=np.asarray(solved.support.stationary.status).tolist(),
+                stationary_positions=np.asarray(
+                    solved.support.stationary.position
+                ).tolist(),
                 execution=solved.execution,
                 device_memory=jax.devices()[0].memory_stats(),
                 host_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,

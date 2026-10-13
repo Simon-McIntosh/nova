@@ -377,3 +377,35 @@ def test_vectorised_booking_matches_sequential_scan(cells):
 @pytest.mark.slow
 def test_vectorised_booking_matches_sequential_scan_on_a_large_lattice():
     _compare(2000)
+
+
+def test_booking_does_not_scan_over_cells():
+    """A ring reduction may scan, but the cell axis must remain parallel."""
+    cells = 17
+    psi, read, geometry, profile = _cells(cells)
+    traced = jax.make_jaxpr(
+        lambda samples: book(samples, read, geometry, profile, Quadrature(segments=8))
+    )(psi)
+
+    visited = set()
+
+    def scan_lengths(value):
+        if id(value) in visited:
+            return
+        visited.add(id(value))
+        if hasattr(value, "eqns"):
+            for equation in value.eqns:
+                if equation.primitive.name == "scan":
+                    yield equation.params["length"]
+                yield from scan_lengths(equation.params)
+        elif hasattr(value, "jaxpr"):
+            yield from scan_lengths(value.jaxpr)
+        elif isinstance(value, dict):
+            for item in value.values():
+                yield from scan_lengths(item)
+        elif isinstance(value, list | tuple):
+            for item in value:
+                yield from scan_lengths(item)
+
+    lengths = tuple(scan_lengths(traced))
+    assert cells not in lengths, f"booking has a sequential cell scan: {lengths}"

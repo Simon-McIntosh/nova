@@ -78,17 +78,29 @@ def _carrier(kind: str):
     return carrier, wall
 
 
-def _build(carrier, requested: int, wall, builder: str):
-    """Build one carrier on the requested path."""
-    started = perf_counter()
-    machine = fixture.cached_machine(
-        carrier,
-        requested,
-        wall_nodes=fixture.WALL_POINT_COUNT,
-        wall=wall,
-        builder=builder,
-    )
-    wall_seconds = perf_counter() - started
+def _build(carrier, requested: int, wall, builder: str, platforms: str):
+    """Build one carrier on the requested path.
+
+    The platform is set per call because it is part of the carrier's cache
+    identity: assembling the host blocks with the device platform enabled names
+    a different carrier and re-assembles blocks already on disk.  The host path
+    is what the certificate rows assemble, so it is built on the CPU platform
+    they use and only the device path runs on the GPU.
+    """
+    previous = os.environ.get("JAX_PLATFORMS", "cuda,cpu")
+    os.environ["JAX_PLATFORMS"] = platforms
+    try:
+        started = perf_counter()
+        machine = fixture.cached_machine(
+            carrier,
+            requested,
+            wall_nodes=fixture.WALL_POINT_COUNT,
+            wall=wall,
+            builder=builder,
+        )
+        wall_seconds = perf_counter() - started
+    finally:
+        os.environ["JAX_PLATFORMS"] = previous
     return {
         "builder": builder,
         "wall_seconds": float(machine.cache.get("build_seconds", wall_seconds)),
@@ -127,8 +139,8 @@ def main() -> None:
         cells = int(cells_text)
         requested = -500 if cells == 550 else -cells
         carrier, wall = _carrier(kind)
-        host = _build(carrier, requested, wall, fixture.BUILDER_HOST)
-        device = _build(carrier, requested, wall, fixture.BUILDER_DEVICE)
+        host = _build(carrier, requested, wall, fixture.BUILDER_HOST, "cpu")
+        device = _build(carrier, requested, wall, fixture.BUILDER_DEVICE, "cuda,cpu")
         comparison = {
             name: _relative(
                 getattr(host["machine"], name), getattr(device["machine"], name)

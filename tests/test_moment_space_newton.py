@@ -189,21 +189,19 @@ def test_moment_request_resolves_exact_support(route):
         replace(request, clip_mode="chord")
 
 
-def test_operator_constructor_keeps_exterior_inputs_distinct(monkeypatch):
-    """Dataclass construction delivers each exterior input to its own operand."""
-    import inspect
-
+def test_operator_constructor_keeps_exterior_inputs_distinct():
+    """Operator specialisations retain their prescribed-current constructor seam."""
     from nova.equilibrium.forward_operator import ForwardFluxOperator
 
-    signature = inspect.signature(ForwardFluxOperator.__post_init__)
     sections, prescribed = object(), object()
     captured = {}
 
-    def capture(*args):
-        captured.update(signature.bind(*args).arguments)
+    class CapturingOperator(ForwardFluxOperator):
+        def __post_init__(self, prescribed_current_field):
+            captured["sections"] = self.conductor_sections
+            captured["prescribed"] = prescribed_current_field
 
-    monkeypatch.setattr(ForwardFluxOperator, "__post_init__", capture)
-    ForwardFluxOperator(
+    CapturingOperator(
         grid=None,
         wall=None,
         source=None,
@@ -212,5 +210,5 @@ def test_operator_constructor_keeps_exterior_inputs_distinct(monkeypatch):
         conductor_sections=sections,
         prescribed_current_field=prescribed,
     )
-    assert captured["conductor_sections"] is sections
-    assert captured["prescribed_current_field"] is prescribed
+    assert captured["sections"] is sections
+    assert captured["prescribed"] is prescribed

@@ -2349,7 +2349,7 @@ class ForwardFluxOperator:
     moment_row_cache: object | None = field(repr=False, default=None)
     exterior_jet_response: object | None = field(repr=False, default=None)
     prescribed_current_field: InitVar[PrescribedCurrentField | None] = None
-    conductor_sections: InitVar[object | None] = None
+    conductor_sections: object | None = field(repr=False, default=None)
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
     )
@@ -2362,7 +2362,6 @@ class ForwardFluxOperator:
     def __post_init__(
         self,
         prescribed_current_field: PrescribedCurrentField | None,
-        conductor_sections=None,
     ):
         """Build the topology read and default the material mask."""
         if self.clip_mode not in {"chord", "exact", "chord_cells"}:
@@ -2590,8 +2589,8 @@ class ForwardFluxOperator:
         for name in self._dynamic_extra_names():
             setattr(self, name, jnp.asarray(getattr(self, name)))
         self._geometry_identity = self._compute_geometry_identity()
-        if conductor_sections is not None:
-            self.build_conductor_support(conductor_sections)
+        if self.conductor_sections is not None:
+            self.build_conductor_support(self.conductor_sections)
 
     def bind_moment_support(self, operands, roots, *, exterior_response=None):
         """Bind the locked support read and its exact exterior as operands."""
@@ -2823,6 +2822,7 @@ class ForwardFluxOperator:
             "source",
             "external_current",
             "prescribed_field",
+            "conductor_sections",
             *dynamic_state_names,
             *dynamic_extra_names,
         }

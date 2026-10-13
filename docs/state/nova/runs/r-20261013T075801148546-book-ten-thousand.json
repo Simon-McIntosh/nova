@@ -1,0 +1,446 @@
+{
+  "agent": {
+    "alias": "sol6",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 9,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "6fce3ebfc2f6b46fb1a53db17c31d293699455cd",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 19137408,
+      "cached_input_tokens_cumulative": 19137408,
+      "input_tokens": 19380496,
+      "input_tokens_cumulative": 19380496,
+      "output_tokens": 61154,
+      "output_tokens_cumulative": 61154,
+      "reasoning_output_tokens": 25663,
+      "reasoning_output_tokens_cumulative": 25663
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 1087,
+    "files": 9,
+    "removed": 6
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 1982,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 409,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 409
+    },
+    {
+      "existing_function": {
+        "line": 409,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 1982,
+        "name": "evaluate",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 1982
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "kernel_compile_budget",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "run_function": {
+        "line": 2427,
+        "name": "_isolated_kernel_compile",
+        "path": "tests/equilibrium/test_topology_read.py"
+      },
+      "window_line": 2483
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "c54438e9b56d1cfb4c33de7e04dc34fc24b85a18",
+    "e29cc3fee1e2e3affdc7aef79046ce55132a5037",
+    "918c7741f801c56a9d696ed30ae616409912a749",
+    "77b032c15af92fb7d2bac86ca797f47b04722027",
+    "0f40d3547d3220fba8df3b388f31ee2bb99ae887",
+    "5597c7652f48bdccc0ad98db3c4147eb2ced2e8f",
+    "8c719b06e99e7c27210712ed62dc4b18190b5ae4",
+    "1265cf0dd65044f26471f2f8aa02cf569e19c342",
+    "48142ec9c7dec8d09cc1f470ebb872787348d1aa",
+    "0cfd2a7567f76c1e69d2e90c876c6eaff8875abe",
+    "08d19883724b49d3c2d25d01e092802ec117e44e",
+    "e81561bee914f862b9fc8cc60b7f201f314339cb",
+    "41784f8873559cfbadf772b3fde6e8ea5e4afc9c",
+    "1f497fbba56e0a773534e71dd62208c0354cd4c1",
+    "02a78968989354134852399996cdec4d77314190"
+  ],
+  "completed_at": "2026-10-13T13:29:58Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-13T07:58:22Z",
+  "disposition": "handed-off",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": "pre-existing-failure",
+  "follow_on_paths": [],
+  "gate": "failed",
+  "gate_check": {
+    "command": "bash -c 'exec env TMPDIR=/tmp JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/book-ten-thousand /home/ITER/mcintos/Code/nova/.venv/bin/python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T075801148546-book-ten-thousand/run_sequential_retries.py'",
+    "exit_status": 1,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T075801148546-book-ten-thousand/sharded-head-corrected.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-13T08:58:01.466150+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-13T07:58:01Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 24,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 7,
+    "headroom": 3,
+    "mean_context": 138182,
+    "observed_at": "2026-10-13T07:57:39Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 24,
+      "aggregate_tokens_per_second": 387.082,
+      "detail": "",
+      "mean_tokens_per_second": 41.179,
+      "observed_at": "2026-10-13T07:57:39Z",
+      "runs": 9.4,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-13T13:29:58Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-13T07:58:47Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "deep root-cause investigation of a 72 percent booking discrepancy at 10,000 cells; the lead directs deep critical nodes to codex",
+        "session": "fresh",
+        "session_id": "20bcc083-7606-42f1-bb0f-53861c1276d3",
+        "session_source": "stream",
+        "to_backend": "codex",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261013T075801148546-book-ten-thousand"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T075801148546-book-ten-thousand/manifest.md",
+  "member": "disposable-r-20261013T075801148546-book-ten-thousand",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "gate-not-passing",
+    "test_paths": [
+      "tests/equilibrium/test_topology_read.py",
+      "tests/test_book_ten_thousand.py"
+    ],
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "book-ten-thousand",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 1005,
+          "cached_input_tokens": 681156,
+          "input_tokens": 682163,
+          "output_tokens": 2316,
+          "reasoning_output_tokens": 534,
+          "total_tokens": 684479,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Carry out followup f-cfs-book-ten-thousand on converged-forward-solve. The split-read prototype's harness (worktree s21-nova/proto-split-read, scripts/prototypes/fixed_points/measure.py around line 339, readable but not yours to edit) books the analytic diverted state with nova.equilibrium.current.book from topology.read's reading. It compares the booked moments with the exact-support moments as max|booked - exact| / max|exact|. That ratio is 3.2e-4 at about 2,000 cells and 1.7e-4 at 5,000, but 0.7199 at 10,000, while booked.valid is True. Receipt: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/batched-rows/diverted-10000.json.\n\nDone when:\n(1) Reproduce the 0.72 at 10,000 diverted cells from main, using current.book and topology.read directly, or scripts/prototypes/support/book.py at 10,000 cells. Also reproduce the 2,000 and 5,000 values as controls.\n(2) Localise it cell by cell. Report:\n- which cells carry the largest differences, by count and share of the total;\n- their location: near the X-point, on the separatrix legs, at the wall or in the interior;\n- for each, the read's membership and fragment area against the exact-support area fraction, and the booked against the exact moment.\nSay whether the error is in the reading (membership or fragment polygons), in current.book's quadrature or composition of those fragments, or in the reference exact-support moments at 10,000 cells.\n(3) Name the mechanism, e.g. a membership flip, a fragment polygon defect, a quadrature edge case, a roundoff-overfill admission from merge 6150b000d gone wrong, or a reference defect. Add one minimal reproducing test that fails by id on main. If the fix lies in nova/equilibrium/topology.py or nova/equilibrium/clip_quadrature.py, make it, with a negative control. If it lies in nova/equilibrium/current.py, stop and name the fix: a paused wiring node holds that file.\n(4) Check that valid=True is honest. If the read or the booking should have refused this state, say what check would have caught it.\n(5) Write the evidence fragment docs/evidence/fragments/converged-forward-solve/book-ten-thousand.html with plan-evidence-for converged-forward-solve; reckon audit-doc must report 0 errors. Include one SVG under docs/figures/converged-forward-solve/book-ten-thousand: a poloidal panel with the per-cell booked-minus-exact difference, the wall and both null sets, following the plotting rules in AGENTS.md.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.\n\nImport provenance: run from your own tree as the working directory and print nova.__file__ in each log header. 10,000-cell reads run on the H200 lane in one job with --time sized to finish, up to 02:30:00.",
+    "estimated_hours": 3.0,
+    "goal": "Locate the cause of the 72 percent booked-moment difference at 10,000 diverted cells",
+    "id": "book-ten-thousand",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-13T07:58:01Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 24,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 7,
+      "headroom": 3,
+      "mean_context": 138182,
+      "observed_at": "2026-10-13T07:57:39Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 24,
+        "aggregate_tokens_per_second": 387.082,
+        "detail": "",
+        "mean_tokens_per_second": 41.179,
+        "observed_at": "2026-10-13T07:57:39Z",
+        "runs": 9.4,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T075801148546-book-ten-thousand/manifest.md",
+    "negative_control": "reverting the fix turns the new 10,000-cell booking test red by test id",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§3",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/book_ten_thousand",
+      "nova/equilibrium/topology.py",
+      "nova/equilibrium/clip_quadrature.py",
+      "tests/test_book_ten_thousand.py",
+      "docs/figures/converged-forward-solve/book-ten-thousand",
+      "docs/evidence/fragments/converged-forward-solve/book-ten-thousand.html",
+      "tests/equilibrium/test_topology_read.py"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "book-ten-thousand",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-13T07:58:08.684829+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Root-cause investigation of a large booking discrepancy at 10,000 cells: cell-level localisation in the topology read and current booking; deep reasoning, critical risk",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.392,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "02a78968989354134852399996cdec4d77314190",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "6fce3ebfc2f6b46fb1a53db17c31d293699455cd",
+    "reviewed_head_sha": "02a78968989354134852399996cdec4d77314190",
+    "scores": {
+      "durability": 18,
+      "evidence": 16,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "reuse": 5,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 94
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261013T075801148546-book-ten-thousand",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§3",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a13445-7cab-7231-a7f7-97eae1d648a5",
+  "session_model": "gpt-6-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 19137408,
+    "cumulative_input_tokens": 38517904,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 86817
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 19896,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 8,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-13T13:30:00Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-13T12:51:26Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T075801148546-book-ten-thousand",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 2890,
+    "worker_pid": 256584
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": {
+    "classification": "retained-for-resume",
+    "retained_at": "2026-10-13T13:29:58Z",
+    "session_id": "01a13445-7cab-7231-a7f7-97eae1d648a5",
+    "session_source": "stream",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/book-ten-thousand"
+  }
+}

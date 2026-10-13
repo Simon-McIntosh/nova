@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="191">
+<meta name="plan-version" content="192">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -853,6 +853,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261012T143631303990-exterior-fixture-delegation" data-who="reckon-build" data-when="2026-10-12T19:55:12.511Z">
     <div class="r-comment-body"><p>Route the certificate exterior fixture through the shared moment owner: delete the fixture-local polygon integrator and call geometry.analytic_moments, make the support arm a required keyword argument so no caller follows a default, and guard the clipped-cell region moments with a shoelace reference test.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261013T055937860761-review-of-caller-arm-repair-8e1d0e37f722" data-who="reckon-build" data-when="2026-10-13T06:14:27.635Z">
+    <div class="r-comment-body"><p>reviewed the caller-arm-repair node at base ab54cccac and head 8e1d0e37f; scores goal_fidelity 18, evidence 13, scope_discipline 20, durability 14, fit 18, reuse 20 (total 103); four findings, two blocking — the book-pin provenance at scripts/prototypes/support/book.py:253 and its fragment restatement at caller-arm-repair.html:109 assert a measurement the run did not make, since the book 550-cell row never ran (FileNotFoundError) — and two follow-on — the manifest status/blocker disagreement and the unflagged deviation from the done_when (2) file vehicle at tests/test_oracle_axis_admission.py:38.</p></div>
 </div>
 </section>
 </main>

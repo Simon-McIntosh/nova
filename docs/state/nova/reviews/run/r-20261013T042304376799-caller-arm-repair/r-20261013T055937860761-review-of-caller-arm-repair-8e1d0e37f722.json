@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: the reviewed run's own gate logs give baseline_suite (ab54cccac, 1 failed / 2 passed / 2 passed) and after_suite (19b882c8c, 3 passed / 2 passed / 2 passed 2 deselected) at the same three files at 550 cells; the head failure set is empty and the base failure set is [tests/test_oracle_axis_admission.py::test_coarse_diverted_exact_field_admits_axis_and_saddle], so no failure is added.",
+  "call_site_count": 7,
+  "call_sites": [
+    "scripts/prototypes/support/book.py:88",
+    "docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py:50",
+    "docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:41",
+    "docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py:64",
+    "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:253",
+    "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:551",
+    "docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:814"
+  ],
+  "completed_at": "2026-10-13T06:14:27.635Z",
+  "dispatched_at": "2026-10-13T05:59:56Z",
+  "findings": [
+    {
+      "file": "scripts/prototypes/support/book.py",
+      "line": "253",
+      "severity": "blocking",
+      "text": "blocking: the comment states the pin was \"re-derived at base revision ab54cccac by the row the harness runs\", but that row never ran \u2014 the manifest's blockers:27 records FileNotFoundError from the absent fixture receipts and the worker's own transcript concedes the number came from the dispatch brief \u2014 so the landed comment asserts a measurement that did not occur and the 0.1946465024178517 literal at book.py:261 is unverified."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html",
+      "line": "109",
+      "severity": "blocking",
+      "text": "blocking: the fragment states the constant was \"measured on the frozen required-arm revision ab54cccac with the row the harness itself runs\", the same false provenance as book.py:253 \u2014 the row is recorded unrun in the manifest, so the evidence record claims a measurement the run did not make."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042304376799-caller-arm-repair/manifest.md",
+      "line": "5",
+      "severity": "follow-on",
+      "text": "follow-on: status:5 reads complete while blockers:27 records the two book 550-cell rows of done_when (4) unrun, so the record's headline state and its own blocker disagree; the worker reported the gap honestly, but a reader keying on status sees a clean completion."
+    },
+    {
+      "file": "tests/test_oracle_axis_admission.py",
+      "line": "38",
+      "severity": "follow-on",
+      "text": "follow-on: done_when (2) directed the separated diverted separatrix through benchmarks/solovev_certificate.py and scripts/analytic_oracle_fixtures/measure.py, but neither file was touched and the deviation from an exact spec is explained in the fragment yet never flagged as a deviation; the call-site analytic=exact reaches the same behaviour, so this is recorded rather than held."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against ab54cccac; 34561f8ec repairs the seven call sites, the admission test and the book pin, 5dd343c52 and 8e1d0e37f write the evidence fragment, 19b882c8c moves the clip mode from the process-global accessor to the solve request; seven files, +206/-20, every path inside the declared scope.",
+    "done_when": "done_when (4) names the three test files at 550 cells at base and head with no added failures plus the book 550 rows clean; the manifest records the H200 job (baseline_suite ab54cccac, after_suite 19b882c8c, no added failures) and its negative control, but the book diverted/limited 550 rows did not run (logs/gate_h200.log:199 FileNotFoundError), so four of the five clauses are asserted and the book-row clause is not.",
+    "goal": "the goal is to repair the callers the required support arm left behind; at head every site named in the done_when passes an arm \u2014 tests/test_oracle_axis_admission.py:38, docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py:50, docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:41, docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py:64 and docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:253/:551/:814 \u2014 and the four diverted sites also pass analytic=exact, so the required keyword no longer raises TypeError anywhere.",
+    "manifest": "read; status complete, changed_paths and commits match the diff, tests/baseline_suite/after_suite/negative_control_log are filled, but its status:5 reads complete while blockers:27 records the book rows unrun, and the pin provenance it relies on (book.py:253) is backed by no command output in the run.",
+    "write_paths": "the declared scope is the seven source/figure paths, scripts/analytic_oracle_fixtures and its receipts dir, the fragment and its figures dir; git diff --name-only ab54cccac..8e1d0e37f lists exactly seven files, every one inside that declaration and nothing outside it."
+  },
+  "justifications": {
+    "durability": "the declared mutation in logs/negative_control.log reddens tests/test_oracle_axis_admission.py by id, and the new assertions compare the read against X_POINT_M (benchmarks/solovev_certificate) rather than a value the test supplies, but the pin guard at scripts/prototypes/support/book.py:261 cannot execute in any tree reachable here and its literal was never measured.",
+    "evidence": "the head arm in logs/gate_h200_head.log records 3 passed / 2 passed / 2 passed 2 deselected against a red base in logs/gate_h200_base.log (1 failed), so no failure is added, but done_when (3)'s re-derivation is asserted only at book.py:253 with no command output behind it and the book-row clause of done_when (4) is unrun.",
+    "fit": "the repair follows the surrounding idiom of naming keyword arms at each call site (docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:41) and introduces no plan, stage or ticket token.",
+    "goal_fidelity": "the seven call sites at tests/test_oracle_axis_admission.py:38 and the five figure scripts each pass support_arm to scripts/analytic_oracle_fixtures/measure.py:1197, so the required keyword no longer raises at any of them.",
+    "reuse": "the diff adds no function, class or module; it extends the existing arm vocabulary (scripts/analytic_oracle_fixtures/measure.py:71 EXTERIOR_SUPPORT_ARMS) and the existing read operator.null_flux_pool (nova/equilibrium/forward_operator.py:2977).",
+    "scope_discipline": "git diff --name-only ab54cccac..8e1d0e37f lists tests/test_oracle_axis_admission.py, the four figure scripts, scripts/prototypes/support/book.py and the evidence fragment, all inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the goal is to repair the callers the required support arm left behind; at head every site named in the done_when passes an arm \u2014 tests/test_oracle_axis_admission.py:38, docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py:50, docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:41, docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py:64 and docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:253/:551/:814 \u2014 and the four diverted sites also pass analytic=exact, so the required keyword no longer raises TypeError anywhere.\nVERDICT done_when: done_when (4) names the three test files at 550 cells at base and head with no added failures plus the book 550 rows clean; the manifest records the H200 job (baseline_suite ab54cccac 1 failed 2 passed/2/2, after_suite 19b882c8c 3 passed/2/2, no added failures) and its negative control, but the book diverted/limited 550 rows did not run (logs/gate_h200.log:199 FileNotFoundError), so four of the five clauses are asserted and the book-row clause is not.\nVERDICT write_paths: the declared scope is the seven source/figure paths, scripts/analytic_oracle_fixtures and its receipts dir, the fragment and its figures dir; git diff --name-only ab54cccac..8e1d0e37f lists exactly seven files, every one inside that declaration and nothing outside it.\nVERDICT manifest: read; status complete, changed_paths and commits match the diff, tests/baseline_suite/after_suite/negative_control_log are filled, but its status:5 reads complete while blockers:27 records the book rows unrun, and the pin provenance it relies on (book.py:253) is backed by no command output in the run.\nVERDICT diff: read commit by commit against ab54cccac; 34561f8ec repairs the call sites, the admission test and the book pin, 5dd343c52 and 8e1d0e37f write the evidence fragment, 19b882c8c moves the clip mode from the process-global accessor to the solve request; seven files, +206/-20, every path inside the declared scope.\nCALL_SITES: scripts/prototypes/support/book.py:88, docs/figures/millisecond-converged-solve/diverted-oracle-census/regenerate.py:50, docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:41, docs/figures/null-identification-authority/gs-contour-evidence/render_contour_evidence.py:64, docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:253, docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:551, docs/figures/null-identification-authority/mechanism-evidence/render_mechanism_evidence.py:814\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the seven call sites at tests/test_oracle_axis_admission.py:38 and the five figure scripts each pass support_arm to scripts/analytic_oracle_fixtures/measure.py:1197, so the required keyword no longer raises at any of them; reduced because the book-pin literal was applied unverified.\nSCORE evidence: 13\nJUSTIFICATION evidence: the head arm in logs/gate_h200_head.log records 3 passed / 2 passed / 2 passed 2 deselected against a red base, but done_when (3)'s re-derivation is asserted only at book.py:253 with no command output behind it and the book-row clause of done_when (4) is unrun.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only ab54cccac..8e1d0e37f lists tests/test_oracle_axis_admission.py, the four figure scripts, scripts/prototypes/support/book.py and the evidence fragment, all inside the declared write paths.\nSCORE durability: 14\nJUSTIFICATION durability: the declared mutation in logs/negative_control.log reddens tests/test_oracle_axis_admission.py by id and the new assertions compare the read against X_POINT_M, but the pin guard at scripts/prototypes/support/book.py:261 cannot execute in any tree reachable here and its literal was never measured.\nSCORE fit: 18\nJUSTIFICATION fit: the repair follows the surrounding idiom of naming keyword arms at each call site (docs/figures/millisecond-converged-solve/traced-exterior/measure_h200.py:41) and introduces no plan, stage or ticket token.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; it extends the existing arm vocabulary (scripts/analytic_oracle_fixtures/measure.py:71 EXTERIOR_SUPPORT_ARMS) and the existing read operator.null_flux_pool (nova/equilibrium/forward_operator.py:2977).\nFINDING scripts/prototypes/support/book.py:253 blocking: the comment states the pin was \"re-derived at base revision ab54cccac by the row the harness runs\", but that row never ran \u2014 the manifest's blockers:27 records FileNotFoundError from the absent fixture receipts and the worker's own transcript concedes the number came from the dispatch brief \u2014 so the landed comment asserts a measurement that did not occur and the 0.1946465024178517 literal at book.py:261 is unverified.\nFINDING docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html:109 blocking: the fragment states the constant was \"measured on the frozen required-arm revision ab54cccac with the row the harness itself runs\", the same false provenance as book.py:253 \u2014 the row is recorded unrun in the manifest, so the evidence record claims a measurement the run did not make.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042304376799-caller-arm-repair/manifest.md:5 follow-on: status reads complete while blockers:27 records the two book 550-cell rows of done_when (4) unrun, so the record's headline state and its own blocker disagree.\nFINDING tests/test_oracle_axis_admission.py:38 follow-on: done_when (2) directed the separated diverted separatrix through benchmarks/solovev_certificate.py and scripts/analytic_oracle_fixtures/measure.py, but neither file was touched and the deviation from an exact spec is explained yet never flagged as a deviation; the call-site analytic=exact reaches the same behaviour, so this is recorded rather than held.\n",
+  "review_run_id": "r-20261013T055937860761-review-of-caller-arm-repair-8e1d0e37f722",
+  "reviewed_base_sha": "ab54cccac16558c7a27ab9e93a6aa65c489c7671",
+  "reviewed_head_sha": "8e1d0e37f7226e31475ae2e69c559248dcb705d4",
+  "reviewed_run_id": "r-20261013T042304376799-caller-arm-repair",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T06:08:32.401622+00:00",
+  "total": 103
+}

@@ -3,31 +3,36 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="moment-space-newton">
-<meta name="plan-title" content="Implicit stationary-point tangents and forward migration dependency">
-<meta name="plan-summary" content="Stationary-point tangent repair verified; moment-space forward integration blocked on exterior jets">
+<meta name="plan-title" content="Cell-moment Newton implementation and measured controls">
+<meta name="plan-summary" content="Explicit device routes and implicit root tangents verified locally; physical H200 gates pending">
 <meta name="plan-evidence-for" content="converged-forward-solve">
-<meta name="plan-commits" content="4d4c29724816c41a1e256ec93bc142f95d1ed819">
+<meta name="plan-commits" content="4d4c29724816c41a1e256ec93bc142f95d1ed819,01db38182b775ddfd2de912913da808d1b080bda,ea1998797dbb6d5fb048710eb7dbeedb67fa536d,5c7c40dd50bb8683a9e1ff93b3f2f4a7bb108246">
 <meta name="plan-recorded-at" content="2026-10-13"><meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="CPU x64, shared root virtual environment, fleet allocation">
-<title>Implicit stationary-point tangents | nova</title>
+<meta name="plan-environment" content="CPU x64, fleet allocation; H200 job submitted">
+<title>Cell-moment Newton controls | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
 </head><body><main class="plan-doc">
-<h1 id="moment-space-newton-outcome">Implicit stationary-point tangents</h1>
+<h1 id="moment-space-newton-outcome">Cell-moment Newton implementation and measured controls</h1>
 <table><thead><tr><th>Item</th><th>Recorded result</th></tr></thead><tbody>
-<tr><td>Product change</td><td><code>fixed_points._adaptive</code> has a custom JVP using −H⁻¹ times the field-gradient tangent at the converged point. Jet tangents include both field and point motion. Root stationarity is bounded by 64 machine eps times pitch.</td></tr>
-<tr><td>Zero-step defect reproduced</td><td>Unmodified code returned zero position JVP against vertical central differences +0.5000000000157655 and −0.49999999997829553.</td></tr>
-<tr><td>Baseline</td><td><code>tests/test_fixed_points.py</code>: 17 passed, 2 failed; both zero-step regression cases failed. Base <code>2be7601fdd73557e87fce380a859aaf58d184209</code>, before the product edit.</td></tr>
-<tr><td>Repair gate</td><td>19 passed in 50.72 s. Analytic and normalized one-cell <code>current.book</code> states; zero and four Newton steps; position and all jet entries agree with central differences at rtol 1e-6, atol 1e-8. These polynomial controls are not the 2,000-cell analytic and Picard-image gate.</td></tr>
-<tr><td>Gate logs</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/fixed-baseline.log</code>; <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/fixed-polished.log</code>. Both record import provenance. The repair gate ran on the working-tree changes before commit.</td></tr>
-<tr><td>Intermediate failure</td><td>The first implicit-tangent gate passed the zero-step cases but exposed approximately 1.3e-8 central-difference noise in the stationary gradient after multi-step termination. Tightening primal stationarity fixed it; test tolerances were retained.</td></tr>
-<tr><td>Required input dependency</td><td><code>scripts/analytic_oracle_fixtures/measure.py:958</code>, <code>forward_operator()</code>, passes only sampled exterior flux through <code>_target()</code> into <code>FluxTarget.source_target</code>. The locked Bell read requires exterior gradients and Hessians too. The operator owns neither an exterior evaluator nor conductor geometry from which those derivatives can be built. This producer belongs to the concurrent carrier scope.</td></tr>
-<tr><td>Forward migration</td><td>Not implemented. No legacy path deleted or routed. Staged retirement keeps the legacy read until its consumers migrate. Production default unchanged.</td></tr>
-<tr><td>Unmeasured gates</td><td>Membership and booking JVP at scale; dense/Krylov H200 comparison; analytic and production-seed convergence; full forward-module delta; legacy-reinstatement negative control; Newton residual and converged-flux figure. No H200 job submitted.</td></tr>
+<tr><td>Product equation</td><td>Explicit moment_dense and moment_krylov requests solve F(m) = m − book(read(exterior + Gm)), with three moments per cell. The locked support_read produces the field from nodal jet coupling rows and exterior jets; gs.apply reconstructs output flux from booked moments.</td></tr>
+<tr><td>Zero-step defect reproduced</td><td>Unmodified fixed_points returned zero position JVP against central differences +0.5000000000157655 and −0.49999999997829553. The implicit tangent uses −H⁻¹ d(grad psi)/d(input) at the converged stationary point, independent of warm-start iteration count.</td></tr>
+<tr><td>Root tangent gate</td><td>Analytic and normalized current.book controls, at zero and multiple Newton steps: 19 passed. Position and all jet entries agree with central differences at rtol 1e-6, atol 1e-8. Primal stationarity was tightened to 64 machine eps times pitch; test tolerances were retained.</td></tr>
+<tr><td>Exact exterior operands</td><td>ForwardFluxOperator accepts conductor sections at construction and builds value, gradient and Hessian responses using existing nova.biot filament/cylinder point kernels and autograd. Coil currents remain runtime operands. scripts/prototypes/support/exterior.py binds closed-form jets minus the exact-support moment image and refuses a sampled-value mismatch. The analytic helper physical-row check is still pending.</td></tr>
+<tr><td>Constructor control</td><td>Distinct sentinels exposed an InitVar positional swap between conductor sections and prescribed current. The control failed before repair and passed after (1 passed in 5.50 s).</td></tr>
+<tr><td>Moving-support derivative controls</td><td>At 50 cells, with a synthetic nonzero field-coupling column and actual support_read/current.book, limited JVP max errors were 1.87e-10 and 2.04e-10 at analytic and first Picard-image states; diverted errors were 7.03e-10 and 1.26e-9. Booking-response norms were 0.00260 (limited) and 0.1687/0.1758 (diverted). These are local controls, not the required physical 2,000-cell certificate gate.</td></tr>
+<tr><td>Difference-step instrument</td><td>The log retains central differences at 1e-3, 1e-4, 1e-5 and 1e-6. The asserted 1e-5 estimates are in the resolved range; 1e-6 exposes cancellation as large as 6.95e-5 in first moments. The first Picard image is explicitly checked to move the field.</td></tr>
+<tr><td>Device Newton controls</td><td>Dense jacfwd with device LU and device GMRES on JVP both solve a six-variable nonlinear control with backtracking. Eager, jit and mapped answers agree; scalar batching preserves Krylov arithmetic. All 8 original moment tests passed in 396.53 s. This does not certify physical equilibrium convergence.</td></tr>
+<tr><td>Routing reinstatement negative control</td><td>The isolated scratch arm inserts self.operator._support_partition(request.seed_policy.state) into _solve_moment_request. test_moment_forward_path_uses_only_the_locked_read fails (EXIT=1, 1 failed in 9.23 s), while the head arm passes. Its AST control also requires newton_moments, moment_residual and apply, so an empty route cannot pass.</td></tr>
+<tr><td>Six-module delta</td><td>Fresh process per file, same root conftest and test files in both arms: fixed_points, support_read, gs_booked_moments, forward_operator_domain, route_solve_requests, default_wiring. Baseline has the two reproduced zero-step tangent failures; head has zero failures. The baseline scratch initially omitted a figure Python dependency needed at collection; that scaffolding omission was repaired and only that module rerun.</td></tr>
+<tr><td>H200 submission</td><td>One real betelgeuse job, 1284806, with limited/diverted rows at requested 2,000, 5,000 and 10,000 cells. It remains PENDING (Priority) as of 20:07 UTC. No H200 speed, memory, accuracy or convergence figure is claimed.</td></tr>
+<tr><td>Migration state and deletions</td><td>No legacy read is deleted, per the staged-retirement ruling. The explicit moment route avoids it. The default newton_krylov forward path and constrained path have not yet migrated; default remains unchanged pending the physical gates. No SciPy replacement claim is made for the default.</td></tr>
+<tr><td>Remaining implementation and evidence</td><td>Physical at-scale JVP; dense/Krylov solve comparison including separate Jacobian/factor timings; closed-form accuracy; production-seed constrained rows; complete forward-file delta on the H200; route selection/default migration; and the required residual plus diverted-flux SVG remain open.</td></tr>
+<tr><td>Differentiability limit</td><td>Discrete topology selection, fragment admission and stationary-point qualification remain piecewise decisions. Local active-set controls pass. Convergence across changing discrete selections has not yet been demonstrated.</td></tr>
+<tr><td>Live legacy consumers</td><td>batched_labeller.py:612 and :695; reduced_newton.py:2372 remain unchanged. The complete reference inventory below includes definitions, aliases, mocks and strings as well as calls so indirect migration obligations remain visible.</td></tr>
+<tr><td>Logs</td><td>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/moment-verified.log; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/legacy-reinstatement.log; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/baseline-suite.log; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/after-suite.log; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/exterior-construction-red.log; /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/exterior-construction-green.log.</td></tr>
 </tbody></table>
 <h2 id="moment-space-newton-migration">Remaining legacy migration inventory</h2>
-<table><thead><tr><th>Inventory definition</th><th>Scope</th></tr></thead><tbody>
-<tr><td>292 references</td><td>All Python matches of <code>_support_partition</code>, <code>_fixed_design_read</code> and <code>_fixed_design_topology</code> under nova, tests, benchmarks and scripts at the tangent-repair head. Calls, aliases, mocks, definitions and textual references are retained so indirect consumers are not lost. This is an inventory before forward-path migration, not a claim that every row is a call.</td></tr>
-</tbody></table>
+<table><thead><tr><th>Inventory</th><th>Definition</th></tr></thead><tbody><tr><td>294 references</td><td>All Python matches of _support_partition, _fixed_design_read and _fixed_design_topology under nova, tests, benchmarks and scripts, at the current implementation head. A reference is not necessarily a call.</td></tr></tbody></table>
 <table><thead><tr><th>Path and line</th><th>Reference</th></tr></thead><tbody>
 <tr><td><code>benchmarks/axis_seed_census.py:102</code></td><td><code>operator._fixed_design_topology.read_with_connectivity(</code></td></tr>
 <tr><td><code>benchmarks/axis_seed_census.py:117</code></td><td><code>_vmap_o, vmap_x = operator._fixed_design_topology.grid(grid_flux)</code></td></tr>
@@ -184,37 +189,37 @@
 <tr><td><code>benchmarks/zero_converged_block_census.py:410</code></td><td><code>topology = operator._fixed_design_topology</code></td></tr>
 <tr><td><code>nova/equilibrium/batched_labeller.py:612</code></td><td><code>free_admitted = self.operator._fixed_design_read(</code></td></tr>
 <tr><td><code>nova/equilibrium/batched_labeller.py:695</code></td><td><code>selected_admitted = self.operator._fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward.py:1469</code></td><td><code>_o_candidates, x_candidates = self.operator._fixed_design_topology.grid(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward.py:2757</code></td><td><code>reader = getattr(self.operator, &quot;_fixed_design_topology&quot;, None)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward.py:1482</code></td><td><code>_o_candidates, x_candidates = self.operator._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward.py:2939</code></td><td><code>reader = getattr(self.operator, &quot;_fixed_design_topology&quot;, None)</code></td></tr>
 <tr><td><code>nova/equilibrium/forward_operator.py:254</code></td><td><code>&quot;_fixed_design_topology&quot;,</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:263</code></td><td><code>_TOPOLOGY_STATE_NAMES = (&quot;topology&quot;, &quot;_fixed_design_topology&quot;)</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:2493</code></td><td><code>self._fixed_design_topology = _host_tree(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:2981</code></td><td><code>if self._fixed_design_topology.grid.direct_sample_count:</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:2993</code></td><td><code>_axis_rows, saddles = self._fixed_design_topology.grid(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:2997</code></td><td><code>qualified = self._fixed_design_topology.contained_x_candidates(saddles) &amp; (</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3004</code></td><td><code>def _fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3008</code></td><td><code>initial = self._fixed_design_topology.read_qualification(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3015</code></td><td><code>grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map(physical)</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3016</code></td><td><code>vmap_o, _vmap_x = self._fixed_design_topology.grid(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3021</code></td><td><code>result = self._fixed_design_topology.read_qualification(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3091</code></td><td><code>and not self._fixed_design_topology.connectivity_radius.size</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3093</code></td><td><code>emergent = self._fixed_design_read(physical)[1]</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3105</code></td><td><code>_vmap_o, vmap_x = self._fixed_design_topology.grid(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3154</code></td><td><code>_vmap_o, vmap_x = self._fixed_design_topology.grid(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3158</code></td><td><code>topology = self._fixed_design_read(physical)[1]</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3159</code></td><td><code>admitted = self._fixed_design_topology.contained_x_candidates(vmap_x)</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3181</code></td><td><code>_masks, topology, _connected, admitted = self._fixed_design_read(physical)</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3190</code></td><td><code>masks, topology, _connected, admitted = self._fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3327</code></td><td><code>def _support_partition(self, psi, requested_class=None):</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3332</code></td><td><code>masks, topology, _connected, admitted = self._fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3611</code></td><td><code>masks, _topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3616</code></td><td><code>self._support_partition(psi, requested_class)</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3672</code></td><td><code>partition = self._support_partition(psi, requested_class)</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3684</code></td><td><code>partition = self._support_partition(psi, requested_class)</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3724</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3728</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3790</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
-<tr><td><code>nova/equilibrium/forward_operator.py:3794</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:267</code></td><td><code>_TOPOLOGY_STATE_NAMES = (&quot;topology&quot;, &quot;_fixed_design_topology&quot;)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:2506</code></td><td><code>self._fixed_design_topology = _host_tree(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3069</code></td><td><code>if self._fixed_design_topology.grid.direct_sample_count:</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3081</code></td><td><code>_axis_rows, saddles = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3085</code></td><td><code>qualified = self._fixed_design_topology.contained_x_candidates(saddles) &amp; (</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3092</code></td><td><code>def _fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3096</code></td><td><code>initial = self._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3103</code></td><td><code>grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3104</code></td><td><code>vmap_o, _vmap_x = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3109</code></td><td><code>result = self._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3179</code></td><td><code>and not self._fixed_design_topology.connectivity_radius.size</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3181</code></td><td><code>emergent = self._fixed_design_read(physical)[1]</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3193</code></td><td><code>_vmap_o, vmap_x = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3242</code></td><td><code>_vmap_o, vmap_x = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3246</code></td><td><code>topology = self._fixed_design_read(physical)[1]</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3247</code></td><td><code>admitted = self._fixed_design_topology.contained_x_candidates(vmap_x)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3269</code></td><td><code>_masks, topology, _connected, admitted = self._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3278</code></td><td><code>masks, topology, _connected, admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3415</code></td><td><code>def _support_partition(self, psi, requested_class=None):</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3420</code></td><td><code>masks, topology, _connected, admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3699</code></td><td><code>masks, _topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3704</code></td><td><code>self._support_partition(psi, requested_class)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3760</code></td><td><code>partition = self._support_partition(psi, requested_class)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3772</code></td><td><code>partition = self._support_partition(psi, requested_class)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3812</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3816</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3878</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3882</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
 <tr><td><code>nova/equilibrium/reduced_newton.py:2372</code></td><td><code>_masks, _topology, _connected, axis_admitted = operator._fixed_design_read(</code></td></tr>
 <tr><td><code>scripts/analytic_oracle_fixtures/measure.py:1254</code></td><td><code>)._support_partition(jnp.asarray(state))</code></td></tr>
 <tr><td><code>scripts/analytic_oracle_fixtures/measure.py:1391</code></td><td><code>masks, _topology, sample_flux, profile_support = operator._support_partition(</code></td></tr>
@@ -273,6 +278,8 @@
 <tr><td><code>tests/test_limiter_spline_minimum.py:162</code></td><td><code>grid_flux, wall_flux = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
 <tr><td><code>tests/test_mask_threshold_consistency.py:76</code></td><td><code>masks, state, _connected, admitted = profile.operator._fixed_design_read(</code></td></tr>
 <tr><td><code>tests/test_mask_threshold_consistency.py:79</code></td><td><code>initial = profile.operator._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>tests/test_moment_space_newton.py:162</code></td><td><code>&quot;_support_partition&quot;,</code></td></tr>
+<tr><td><code>tests/test_moment_space_newton.py:163</code></td><td><code>&quot;_fixed_design_read&quot;,</code></td></tr>
 <tr><td><code>tests/test_null_generator_admission.py:27</code></td><td><code>grid = operator._fixed_design_topology.grid</code></td></tr>
 <tr><td><code>tests/test_null_generator_admission.py:111</code></td><td><code>actual, _topology, _connected, admitted = operator._fixed_design_read(state)</code></td></tr>
 <tr><td><code>tests/test_null_generator_admission.py:170</code></td><td><code>expected = operator._fixed_design_topology.grid.candidate_table_status(</code></td></tr>

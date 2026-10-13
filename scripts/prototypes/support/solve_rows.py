@@ -59,7 +59,8 @@ def main():
         flush=True,
     )
     assert jax.config.jax_enable_x64 is True
-    assert jax.default_backend() == "gpu"
+    if not args.prepare_only:
+        assert jax.default_backend() == "gpu"
     fixture.ZarrStore = lambda *, filename, dirname, group=None: ZarrStore(
         filename=filename, dirname=args.out / "cache", group=group
     )

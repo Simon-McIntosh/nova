@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 from dataclasses import dataclass
+from time import perf_counter
 from types import SimpleNamespace
 
 import jax
@@ -320,14 +321,23 @@ def _reference_book(psi, read, geometry, profile, quadrature=Quadrature()):
     )
 
 
-@pytest.mark.parametrize("cells", [1, 64, 200])
-def test_vectorised_booking_matches_sequential_scan(cells):
+def _compare(cells):
+    """Return the batched, reference bookings and each program's warm wall."""
     psi, read, geometry, profile = _cells(cells)
     quadrature = Quadrature(segments=64)
-    batched = jax.jit(lambda: book(psi, read, geometry, profile, quadrature))()
-    reference = jax.jit(
+    batched_program = jax.jit(lambda: book(psi, read, geometry, profile, quadrature))
+    reference_program = jax.jit(
         lambda: _reference_book(psi, read, geometry, profile, quadrature)
-    )()
+    )
+    batched_program(), reference_program()
+    start = perf_counter()
+    batched = batched_program()
+    jax.block_until_ready(batched)
+    batched_seconds = perf_counter() - start
+    start = perf_counter()
+    reference = reference_program()
+    jax.block_until_ready(reference)
+    reference_seconds = perf_counter() - start
     maximum = 0.0
     relative = 0.0
     for batched_value, reference_value in zip(batched[:3], reference[:3], strict=True):
@@ -343,7 +353,11 @@ def test_vectorised_booking_matches_sequential_scan(cells):
                 )
             ),
         )
-    print(f"IDENTITY cells={cells} max_abs={maximum:.3e} max_rel={relative:.3e}")
+    print(
+        f"IDENTITY cells={cells} max_abs={maximum:.3e} max_rel={relative:.3e} "
+        f"batched_seconds={batched_seconds:.6g} scan_seconds={reference_seconds:.6g}",
+        flush=True,
+    )
     np.testing.assert_array_equal(
         np.asarray(batched.valid), np.asarray(reference.valid)
     )
@@ -352,3 +366,14 @@ def test_vectorised_booking_matches_sequential_scan(cells):
         np.asarray(batched.normalization), np.asarray(reference.normalization)
     )
     assert maximum <= 1e-11
+    return maximum, relative
+
+
+@pytest.mark.parametrize("cells", [1, 64, 200])
+def test_vectorised_booking_matches_sequential_scan(cells):
+    _compare(cells)
+
+
+@pytest.mark.slow
+def test_vectorised_booking_matches_sequential_scan_on_a_large_lattice():
+    _compare(2000)

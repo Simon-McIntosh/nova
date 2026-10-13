@@ -736,6 +736,17 @@ meant:</p>
 </tbody>
 </table>
 
+<p><strong>Two caller test files have no result in either arm, so the
+required-argument change is unverified there.</strong> Both pass the legacy arm
+they received before the change. Neither file reaches a pytest summary inside
+the gate's bounds, at base or at head, so both are environment-class items. The
+plan records them under <code>f-cfs-slow-caller-tests</code>, the followup that
+owns a run of them on the H200 lane with a wall-clock bound.</p>
+<ul>
+<li><code>tests/test_forward_receipt_raster.py</code> timed out at about 1,590 s in both arms;</li>
+<li><code>tests/test_forward_compile_identity.py</code> never reported, here or in the red-base triage's 90-minute H200 attempt.</li>
+</ul>
+
 <p>The several <code>docs/figures/cut-cell-current-attribution/*.log</code> files
 that also mention the call are recorded command output, not live callers, and
 were left alone.</p>

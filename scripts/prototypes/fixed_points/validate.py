@@ -99,7 +99,7 @@ raise SystemExit(pytest.main(arguments))
         )
         log = args.out.resolve() / f"{args.arm}.log"
         with log.open("w") as stream:
-            stream.write(f"REVISION={revision} TREE={tree} COMMAND={command}\n")
+            stream.write(f"revision={revision} tree={tree} command={command}\n")
             stream.write(
                 "INNER_COMMAND=" + shlex.join([sys.executable, "-c", payload]) + "\n"
             )

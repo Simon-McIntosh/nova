@@ -310,9 +310,10 @@ class SharedNodeFluxStencil:
         flux = jnp.asarray(cell_flux)
         if flux.shape != (self.cell_count,):
             raise ValueError("cell_flux must carry one value per cell centroid")
-        return jnp.sum(
-            jnp.asarray(self.weight, dtype=flux.dtype) * flux[self.gather_index],
-            axis=1,
+        gathered = flux[self.gather_index]
+        anchor = gathered[:, :1]
+        return anchor[:, 0] + jnp.sum(
+            jnp.asarray(self.weight, dtype=flux.dtype) * (gathered - anchor), axis=1
         )
 
 

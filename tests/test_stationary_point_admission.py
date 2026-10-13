@@ -269,6 +269,13 @@ def test_independent_second_pass_rescues_an_empty_first_qualification():
     class _QualificationSequence:
         def __init__(self):
             self.calls = 0
+            self.grid = self._Grid()
+
+        class _Grid:
+            direct_sample_count = 0
+
+            def __call__(self, _grid_flux):
+                return jnp.asarray([[1.7, 0.0, 1.0, 1.0]]), jnp.empty((0, 4))
 
         def read_qualification(self, *_args):
             result = initial if self.calls == 0 else recovered
@@ -279,16 +286,12 @@ def test_independent_second_pass_rescues_an_empty_first_qualification():
         def split_flux_map(physical):
             return physical, jnp.empty(0)
 
-        @staticmethod
-        def grid(_grid_flux):
-            return jnp.asarray([[1.7, 0.0, 1.0, 1.0]]), jnp.empty((0, 4))
-
     operator = object.__new__(ForwardFluxOperator)
     operator._fixed_design_topology = _QualificationSequence()
     operator.polarity = 1
     operator.inside_material = jnp.asarray([True])
     operator._material_centroid = jnp.asarray([1.7, 0.0])
-    operator.grid = SimpleNamespace(coordinate=jnp.asarray([[1.7, 0.0]]))
+    operator.grid = SimpleNamespace(coordinate=jnp.asarray([[1.7, 0.0]]), node_number=1)
 
     masks, state, connected, admitted = operator._fixed_design_read(jnp.asarray([0.0]))
 

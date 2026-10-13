@@ -550,7 +550,7 @@ def test_wall_termination_binds_at_exact_tangency():
     grid.wall_r, grid.wall_z = wall_r, wall_z
     out = cb.host_boundary_read(psi, grid, axis, wall_psi=wall_psi)
     surface = cb.fit_tensor_spline(jnp.asarray(rg), jnp.asarray(zg), jnp.asarray(psi))
-    _, dense_r, dense_z = cb._sample_wall_polyline(
+    _, dense_r, dense_z, _segment = cb._sample_wall_polyline(
         jnp.asarray(wall_r), jnp.asarray(wall_z), 100_000
     )
     truth = float(jnp.max(surface(dense_r, dense_z)))

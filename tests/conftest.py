@@ -6,13 +6,12 @@ import pytest
 from nova.jax.config import configure_dtypes
 
 
+def pytest_configure():
+    """Enable extended precision before test modules construct arrays."""
+    configure_dtypes()
+
+
 @pytest.fixture(autouse=True)
 def _double_precision():
-    """Enable the extended precision every production forward map assumes.
-
-    Arrays constructed before this runs are silently single precision, so it is
-    autouse: no test module has to remember it, and the assertion here fails
-    loudly rather than letting a test measure at the wrong precision.
-    """
-    configure_dtypes()
+    """Refuse a test body when collection has disabled extended precision."""
     assert jax.config.jax_enable_x64 is True

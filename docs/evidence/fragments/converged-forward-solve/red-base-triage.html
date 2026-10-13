@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="red-base-triage">
+  <meta name="plan-title" content="Red base test triage">
+  <meta name="plan-summary" content="The scoped repairs pass at their original tolerances. The base and head CPU gates have zero added failing IDs among 57 completed pairs. A 90-minute H200 job timed out in the remaining base row, before the head row began; the 58-target comparison remains incomplete. Census and oracle failures stay visible under delegated followups.">
+  <meta name="plan-evidence-for" content="converged-forward-solve">
+  <meta name="plan-verifies" content="converged-forward-solve#s2">
+  <meta name="plan-recorded-at" content="2026-10-12">
+  <meta name="plan-verdict" content="blocked">
+  <meta name="plan-environment" content="Fleet CPU allocation; one fresh pytest process per file; JAX_PLATFORMS=cpu; base 437a68db4ee910dbd9029408f03068688aff0cce">
+  <meta name="plan-tags" content="equilibrium,topology,tests">
+  <title>Red base triage | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>Red base test triage</h1>
+  <section id="red-base-triage-verdict">
+    <h2>Scoped repairs with delegated census and oracle failures</h2>
+    <p>The base revision is <code>437a68db4ee910dbd9029408f03068688aff0cce</code>. Ten test files reached a pytest summary in separate processes, reproducing 20 failing test instances. <code>test_connectivity_boundary.py</code> printed nine passes, one failure and two further passes, then stalled; its process was terminated after the out-of-scope blocker was established, so it supplies no completed-suite count or traceback. This run does not claim a green base or a completed head delta.</p>
+    <p>The oracle fixture failure is assigned to <code>exterior-fixture-delegation</code> by the coordinator and stays failing and visible here. The diverted certificate gives <code>exact_current_moments</code> a synthetic rotating source whose limited-surface constructor yields a non-finite analytic separatrix. The exact-support path added in <code>24f6eef90</code> calls <code>Polygon</code> on one surviving point and raises <code>ValueError: A linearring requires at least 4 coordinates</code>. That node owns the fixture repair; this node does not xfail the test.</p>
+    <p>The shared-node quadratic failure was cancellation: the failing node at (8.76, 0.16165808) differed from its analytic flux by 9.947598300641403e-14. The gathered weights sum to 1.000000000000002 and carry an absolute sum of 4.666666666666673. Commit <code>30181f6cd</code> subtracts one gathered flux before weighted summation and adds it afterward, reducing whole-map maximum error from 1.1368683772161603e-13 to 2.1316282072803006e-14. The original 8e-14 tolerance is unchanged; all 19 stencil tests pass. Reverting centring fails the exactness test by id with <code>EXIT=1</code>.</p>
+    <p>The census test authority still differs from production after two distinct attempts to update its local-fit seed and uncertainty rules. The latest traceback first differs by one ULP in <code>cell_width</code> for an analytic field and in <code>candidate</code> for an over-capacity noisy field. Both attempts reached the tested code and failed the same test IDs. The coordinator delegated that authority reconciliation; the fixture patch and both tracebacks remain in the run directory. The final base/head gate has not yet reached a complete receipt.</p>
+    <p>The first 58-target base pass reached every target, but a helper-level 970 s file cutoff interrupted three long modules after they had passed tests. A corrected retry uses <code>--timeout=900</code> per test without that file cutoff. The head arm uses the same target inventory in fresh per-file processes. Each log names its revision, imported <code>nova.__file__</code>, resolved working directory, command and exit status; the run directory carries target-level progress until both arms reach summaries.</p>
+  </section>
+  <section id="red-base-triage-classification">
+    <h2>Classification at the stop point</h2>
+    <p>Each completed log begins with the base revision, its worktree, a runnable command and <code>nova.__file__</code>. Commit references below come from the test and exercised-source histories; entries marked provisional still need an independent head gate before a test change is justified.</p>
+    <table>
+      <thead><tr><th>Module and failing instances</th><th>Base traceback or measurement</th><th>Class and provenance</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_topology_domain_partition.py</code> (4)</td><td>Core/private counts are (250, 38) and (244, 32), versus (160, 0) and (162, 0); mask-to-component assertions pass.</td><td>Stale literal removed; behavioral assertions pass. The row values changed in <code>68cfe15ce</code>, then <code>e399e522f</code> republished the bank without changing those rows.</td></tr>
+        <tr><td><code>test_connectivity_trip_sufficiency.py</code> (4)</td><td>The 2×width pass labels all 961 or 3969 interior cells, versus expected partial counts 133 or 261.</td><td>Stale trip-count assumption after exact parallel component read <code>40f569226</code>; complete reachability now passes.</td></tr>
+        <tr><td><code>test_connectivity_boundary.py</code> (isolated)</td><td>The tangency test unpacked three values from a four-value wall sampler; its fixed form passes. <code>test_continuous_through_marginal_transition</code> passed alone in 389 s. <code>test_forward_topology_margin_tracks_reachable_wall_and_terminal_gate</code> passed alone in 750.08 s under <code>--timeout=900</code>, but reached the 900 s bound in the concurrent six-process base gate.</td><td>The sampler call was stale after <code>fd2580545d</code>. The margin test is a measured slow CPU case, and its original 19/17/17 sweeps remain intact. The concurrent timeout is a gate-load effect; the isolated passing receipt verifies its behavior.</td></tr>
+        <tr><td><code>test_forward_operator_domain.py</code> (1)</td><td>Mock exterior lambda accepts one argument; the operator calls it with current and prescribed current.</td><td>Stale mock after the two-argument call introduced by <code>7b8b295883</code>; updated test passes.</td></tr>
+        <tr><td><code>test_census_polish_compaction.py</code> (3)</td><td>Authority key set differs; over-capacity candidate counts are (62, 52) versus (59, 31), and uncertainty differs on 176 of 255 origins. Two local-fit authority revisions each leave the analytic and over-capacity comparisons red, most recently by one-ULP <code>cell_width</code> and <code>candidate</code> differences.</td><td>Open: authority reconciliation, two attempts. Production uses local-fit seed representatives from <code>08dd0dda16</code> and a pitch term from <code>a1f4717e8a</code>. The coordinator moved this test to a separate followup; it remains failing and visible here.</td></tr>
+        <tr><td><code>test_equilibrium_stencil_mesh.py</code> (2)</td><td>One quadratic node differs by 9.95e-14 at flux 57.13 against an 8e-14 absolute tolerance; checked-cell ratio is exactly 1 versus required less than 1. A mask probe shows equal 2788-cell supports, with zero cells exclusive to either mesh.</td><td>Defect in weighted summation fixed by <code>30181f6cd</code>; stale strict count inequality replaced by equality in <code>19e90b158</code>. Full module: 19 passed.</td></tr>
+        <tr><td><code>test_topology_o_qualification.py</code> (2)</td><td>Stored axis is (0.898355, 0.027144), versus literal (0.897136, 0.023243), before qualification runs.</td><td>Duplicate literal removed; the refusal still fires and passes. The row changed in <code>68cfe15ce</code>, not the later <code>e399e522f</code> republish.</td></tr>
+        <tr><td><code>test_domain_participation_continuity.py</code> (1)</td><td>Epsilon-doubling ratios are 0.99998 versus 2; the test passed a core-only support while its callback ignored the sampled flux.</td><td>Stale callback after pointwise flux selection in <code>a493a1f4f</code>; a core-side sample varying through the centroid-label flip restores the intended continuity test, now passing.</td></tr>
+        <tr><td><code>test_mask_threshold_consistency.py</code> (1)</td><td>Initial shadow count is 37 versus 28: 23 private-grid cells plus 14 wall nodes. Removing the first literal exposed an active-set difference of 24 versus 29 and residual 0.003492851288148042 versus 0.004976402498594305. The provenance CPU command passed both module tests in 286.09 s.</td><td>Stale goldens after flux-owned wall flags in <code>635195df8</code>. Commit <code>3cb810221</code> pins the three measured values, preserves the residual's 2e-15 absolute tolerance and records the measuring command in the test.</td></tr>
+        <tr><td><code>test_oracle_axis_admission.py</code> (1)</td><td>Non-finite separatrix reaches Shapely and raises the linearring error before topology admission.</td><td>Defect in analytic support wiring introduced by <code>24f6eef90</code>; handed to <code>exterior-fixture-delegation</code> and left failing.</td></tr>
+        <tr><td><code>test_stationary_point_admission.py</code> (1)</td><td>Minimal fake grid lacks <code>node_number</code> required by <code>null_flux_pool</code>.</td><td>Stale fake after direct sampling was added by <code>08dd0dda16</code>; current grid contract supplied and test passes.</td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section id="red-base-triage-adjacent-failures">
+    <h2>Pre-existing failures in adjacent stencil importers</h2>
+    <p>The expanded 58-target base gate also found the following failures outside this node's repair scope. They are recorded from their completed base process logs and left visible for their owners; this table does not classify their causes.</p>
+    <table>
+      <thead><tr><th>Module</th><th>Failing base test IDs</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_current_book_fragments.py</code> (6)</td><td><code>test_analytic_certificate_moments[550-limited]</code>, <code>[550-diverted]</code>, <code>[2000-limited]</code>, <code>[2000-diverted]</code>, <code>[5000-limited]</code>, <code>[5000-diverted]</code></td></tr>
+        <tr><td><code>test_two_class_recovery.py</code> (5)</td><td><code>test_cold_limited_branch_recovers_each_banked_root[coarse]</code>, <code>[fine]</code>; <code>test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap</code>; <code>test_diverted_near_basin_perturbation_ladder_recovers_banked_root</code>; <code>test_banked_diverted_state_is_a_machine_precision_pinned_root</code></td></tr>
+        <tr><td><code>test_exact_clip_moments.py</code> (1)</td><td><code>test_order_study_receipt_carries_the_map_the_record_is_transcribed_from</code></td></tr>
+        <tr><td><code>test_equilibrium_forward_constrained.py</code> (1)</td><td><code>test_public_map_enforces_the_exact_declared_current</code></td></tr>
+        <tr><td><code>test_batched_operator_boundary.py</code> (2)</td><td><code>test_equivalent_diiid_bank_operators_stack_into_one_program</code>; <code>test_width_twelve_mast_batch_has_no_member_constants_and_matches_width_one</code></td></tr>
+        <tr><td><code>test_solve_path_census_inputs.py</code> (1)</td><td><code>test_solve_path_prefix_slices_do_not_feed_the_null_census</code></td></tr>
+        <tr><td><code>test_forward_receipt_raster.py</code> (1)</td><td><code>test_reduced_hex_request_receipt_records_absent_raster_flux</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section id="red-base-triage-guard">
+    <h2>Guard landed and verified</h2>
+    <p>Commit <code>61be97d8c93b690f08fd5de41f0eb8b47e26b179</code> removes the dead third host-clip zip value, adds a three-vertex collinear support case, and configures x64 before pytest collects test modules. The fixture then refuses a test body if collection has disabled x64. Its claim is limited to that point; it does not claim to detect arrays made by plugins before pytest configuration.</p>
+    <p>The clip test observes three vertices and a raw degree-two reduction with nonzero roundoff despite zero area, then requires zero first and second moments after exclusion. It passed at the committed head. Reverting the existing excluded-cell moment mask made that exact test fail, with <code>EXIT=1</code> and the new test id in the negative-control log. A separate precision probe disabled x64 after configuration and observed the fixture refusal. The committed source delta is +45 net lines across three files; this fragment is separate.</p>
+  </section>
+  <section id="red-base-triage-resume">
+    <h2>Scoped progress after coordinator ruling</h2>
+    <p>Commit <code>7107f08e6</code> updates five stale test modules; all five pass in separate CPU processes. Commit <code>bc6e333e2</code> repairs the pointwise-flux continuity fixture and wall-sampler unpacking; the continuity module and isolated tangency test pass. Commits <code>30181f6cd</code> and <code>19e90b158</code> repair the stencil arithmetic and checked-support assertion. Commit <code>3cb810221</code> refreshes the mask-threshold goldens without widening their tolerance. The census authority has no committed change; the oracle test remains enabled. The final per-file base/head gate remains incomplete in this record.</p>
+  </section>
+  <section id="red-base-triage-expanded-gate">
+    <h2>Expanded per-target gate</h2>
+    <p>The resumed CPU gate reused only completed per-file receipts and relaunched unfinished targets with <code>--timeout=900</code>, at no more than eight simultaneous processes. Both arms ultimately completed 57/58 targets. Across those 57 paired files, the base has 66 failing IDs and the head has 47: zero added and 19 removed. The remaining compilation-identity processes produced only one progress mark each over 51 minutes; they were stopped and recorded as incomplete rather than treated as a passing gate.</p>
+    <p>Other expanded-importer failures with completed base and head receipts include 25 IDs in <code>test_equilibrium_forward_reference.py</code> and two in <code>test_exact_clip_memory.py</code>; each set matches between arms. Their detailed IDs are in the resumed suite logs. These findings are reported as found outside this node's declared repair scope.</p>
+  </section>
+  <section id="red-base-triage-device-gate">
+    <h2>Compilation identity on H200</h2>
+    <p>One reserved H200 job, <code>1283988</code>, ran the base and head compilation-identity rows sequentially. Its scheduler state is <code>TIMEOUT</code> after 01:30:18; the job error log records cancellation at the time limit. The base log confirms revision <code>437a68db4ee910dbd9029408f03068688aff0cce</code>, resolved cwd <code>/tmp/nova-red-h200-base.0gk10M</code>, imported <code>nova.__file__</code> under that same tree, <code>jax_enable_x64: True</code>, <code>jax.default_backend: gpu</code> and <code>CudaDevice(id=0)</code>. It then prints a pytest timeout stack and <code>F</code>, but no pytest summary or final <code>EXIT=</code>. The head row never started: the job output has no row-completion marker and its head log does not exist. Neither GPU row is a complete receipt, so no same-device failure-ID comparison or 58/58 claim is made.</p>
+  </section>
+</main>
+</body>
+</html>

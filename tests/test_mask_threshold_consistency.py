@@ -108,7 +108,17 @@ def test_spline_boundary_deadband_preserves_the_first_active_set_trip():
     assert int(np.asarray(initial.boundary_uncertain).sum()) == 1
     assert bool(admitted)
     assert int(np.asarray(masks.private_flux).sum()) == 23
-    assert int(np.asarray(initial_shadow).sum()) == 28
+    # Flux-owned wall flags from 635195df8 contribute 14 shadowed wall nodes.
+    # Golden source revision: c199578f903e99c28f41bd7cbcfb0b80b58b2a5e.
+    # Regenerated with: JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false
+    # PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -q
+    # -s -p no:cacheprovider -m 'slow or not slow' --timeout=900
+    # tests/test_mask_threshold_consistency.py
+    grid_count = profile.operator.grid.node_number
+    physical_count = profile.operator.physical_node_number
+    assert int(np.asarray(initial_shadow).sum()) == 37
+    assert int(np.asarray(initial_shadow[:grid_count]).sum()) == 23
+    assert int(np.asarray(initial_shadow[grid_count:physical_count]).sum()) == 14
 
     prescribed_current = jnp.asarray(profile.operator.prescribed_field.current)
     solved = profile.solve_branch(
@@ -124,11 +134,17 @@ def test_spline_boundary_deadband_preserves_the_first_active_set_trip():
         active_set_steps=1,
     )
     fixed = solved.equilibrium.fixed_point
+    print(
+        "active-set evidence",
+        np.asarray(fixed.active_set_mask_differences),
+        float(fixed.residual),
+        flush=True,
+    )
 
     assert int(fixed.active_set_iterations) == 1
     np.testing.assert_array_equal(
-        np.asarray(fixed.active_set_mask_differences), np.asarray([29])
+        np.asarray(fixed.active_set_mask_differences), np.asarray([24])
     )
     assert float(fixed.residual) == pytest.approx(
-        0.004976402498594305, rel=0.0, abs=2.0e-15
+        0.003492851288148042, rel=0.0, abs=2.0e-15
     )

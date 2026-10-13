@@ -750,9 +750,8 @@ def test_the_conservation_receipts_agree_between_the_meshes():
         abs(float(ring.relative_force) / float(raster.relative_force) - 1.0)
         < FORCE_AGREEMENT
     )
-    # the ring erosion trims a different shell than the four-neighbour one, so
-    # the checked sets differ in size while both stay well inside the border
-    assert 0.9 < float(ring.checked_cells) / float(raster.checked_cells) < 1.0
+    # Both meshes read the same eroded support on this tensor raster.
+    assert int(ring.checked_cells) == int(raster.checked_cells)
 
 
 def test_stencil_mesh_divergence_floor_is_truncation_and_falls_under_refinement():

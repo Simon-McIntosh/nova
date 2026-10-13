@@ -46,9 +46,9 @@ def _participation_sweep():
     def density_gradient(density):
         return density[:, None] * gradient_scale
 
-    def support_moments(profile, centroid_flux, _sample_flux, support):
+    def support_moments(profile, _centroid_flux, sample_flux, support):
         centroid_density = profile.current_density(
-            jnp.asarray([centre[0]]), centroid_flux
+            jnp.asarray([centre[0]]), sample_flux
         )
         current, first = support.linear_current_moments(
             centroid_density, density_gradient(centroid_density)
@@ -80,7 +80,7 @@ def _participation_sweep():
             support_moments,
             core_support,
             common_support,
-            sample_flux=jnp.asarray([psi_norm]),
+            sample_flux=jnp.asarray([0.999 + displacement]),
         )
         vector = np.asarray(jnp.stack(moments))[:, 0]
         states.append(

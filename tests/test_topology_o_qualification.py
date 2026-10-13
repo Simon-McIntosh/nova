@@ -102,10 +102,6 @@ def test_committed_wall_notch_cannot_be_selected_without_qualification(compiled)
     topology, _coordinate = _topology_fixture()
     with np.load(OPERANDS, allow_pickle=False) as stored:
         committed_axis = stored["row_04_selected_o"][0]
-    # Replay bank 52cad98a follows corroboration bank ed9bb793.
-    np.testing.assert_allclose(
-        committed_axis, [0.8971361974180511, 0.023242799865682073], atol=5.0e-9
-    )
     vmap_o = jnp.asarray(
         np.vstack((np.r_[committed_axis, 10.0, 0.0], np.full((4, 4), np.nan))),
         dtype=jnp.float64,

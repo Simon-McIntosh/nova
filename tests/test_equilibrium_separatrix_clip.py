@@ -7,6 +7,8 @@ import pytest
 from scipy import integrate
 import jax.numpy as jnp
 
+import nova.equilibrium.separatrix_clip as separatrix_clip
+from nova.equilibrium.clip_quadrature import _straight_edge_monomial_moments
 from nova.equilibrium.separatrix_clip import (
     AtomicCellMesh,
     _traced_level_arc,
@@ -215,6 +217,50 @@ def test_exact_zero_shared_corner_has_one_contour_vertex():
     assert len(np.unique(contour, axis=0)) == 4
     assert clipped.patch_area_sum == pytest.approx(2.0, rel=0.0, abs=1.0e-12)
     assert clipped.contour_area == pytest.approx(2.0, rel=0.0, abs=1.0e-12)
+
+
+def test_degenerate_excluded_cell_has_zero_area_moments(monkeypatch):
+    """A three-vertex line has no measure even when reduction leaves roundoff."""
+    cell = np.asarray(
+        [
+            [0.0, 0.0],
+            [0.10329404911394112, 0.0],
+            [0.6447779661688666, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
+        ]
+    )
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.41, 0.39]]))
+    flux = np.full(len(mesh.node_coordinates), -1.0)
+    for point, value in zip(cell[:3], (0.0, 1.0, 0.0), strict=True):
+        node = np.flatnonzero(np.all(mesh.node_coordinates == point, axis=1))
+        assert len(node) == 1
+        flux[node[0]] = value
+
+    original = separatrix_clip._centred_degree_two_moments
+    captured = {}
+
+    def record_polygon(vertices, count, centroids):
+        captured["count"] = np.asarray(count)
+        captured["raw"] = np.asarray(
+            _straight_edge_monomial_moments(
+                vertices - centroids[:, None, :], count, max_degree=2
+            )
+        )
+        return original(vertices, count, centroids)
+
+    monkeypatch.setattr(separatrix_clip, "_centred_degree_two_moments", record_polygon)
+    clipped = mesh.clip(flux)
+
+    assert captured["count"][0] == 3
+    assert captured["raw"][0, 0] == 0.0
+    assert np.any(captured["raw"][0, 1:] != 0.0)
+    assert not clipped.included[0]
+    assert clipped.vertex_count[0] == 0
+    np.testing.assert_array_equal(clipped.area, [0.0])
+    np.testing.assert_array_equal(clipped.first_area_moment, [[0.0, 0.0]])
+    np.testing.assert_array_equal(clipped.second_area_moment, np.zeros((1, 2, 2)))
 
 
 def test_linear_current_moments_use_the_clipped_support_about_fixed_centroid():

@@ -162,7 +162,7 @@ def test_shadow_cell_has_zero_residual_sensitivity_eager_and_jit() -> None:
         psi_norm=jnp.zeros(4),
     )
     operator = _point_cell_operator(masks)
-    operator.external = lambda _current=None: jnp.zeros(4)
+    operator.external = lambda _current=None, _prescribed_current=None: jnp.zeros(4)
     operator.internal = lambda psi, *_args: 2.0 * psi
     operator.residual_shadow_mask = lambda _psi, _requested=None: masks.private_flux
     state = jnp.arange(4, dtype=jnp.float64)

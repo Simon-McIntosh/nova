@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="190">
+<meta name="plan-version" content="191">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -616,6 +616,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261012T143323188558-proto-conforming-jets" data-who="reckon-build" data-when="2026-10-12T18:37:14Z">
     <div class="r-comment-body"><p>Bell conformity and quartic controls pass; diverted value/gradient/Hessian orders are 4.98448/4.00593/2.99910. Reject production qualification: Picard at 2000 cells disagrees with the kernel by at least 92.2682 times the saddle budget; diverted analytic at 5000 fails by 2.11815 times. Both 10000-cell matrices are saved (43.75/43.88 GB), but device allocation is refused. [Measurements](/nova/evidence/fragments/converged-forward-solve/proto-conforming-jets.html#proto-conforming-jets-landing).</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261013T040247699230-review-of-proto-conforming-jets" data-who="reckon-build" data-when="2026-10-13T04:15:41.958Z">
+    <div class="r-comment-body"><p>Independent review of r-20261012T143323188558-proto-conforming-jets at head 16f01e466 stored: goal_fidelity 15, evidence 16, scope_discipline 18, durability 16, fit 17, reuse 11; no blocking findings; three follow-ons (read seam duplicated from read_with_jets, report artifact prefixed with a NEEDS-HELP block, gate revision 6cec8434f predates the head 16f01e466).</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

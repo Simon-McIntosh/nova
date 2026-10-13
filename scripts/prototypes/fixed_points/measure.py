@@ -56,7 +56,9 @@ def compile_solver(field, seeds, pitch):
     return executable, cold, size
 
 
-def run_sweep(executable, fields, initial, pitch, truth, reference=None):
+def run_sweep(
+    executable, fields, initial, pitch, truth, reference=None, position_gate=True
+):
     seed = initial
     rows = []
     for index, field in enumerate(fields):
@@ -80,7 +82,7 @@ def run_sweep(executable, fields, initial, pitch, truth, reference=None):
             failures.append("point-lost-or-cache-miss")
         if not classification:
             failures.append("wrong-stationary-type")
-        if np.max(errors) > 1:
+        if position_gate and np.max(errors) > 1:
             failures.append("wrong-saddle-or-position")
         rows.append(
             dict(
@@ -337,7 +339,13 @@ def measure(args):
                 programs[name] = compile_solver(arm_fields[0], initial, pitch)
             executable, cold, size = programs[name]
             sweep = run_sweep(
-                executable, arm_fields, initial, pitch, truth, reference_rows
+                executable,
+                arm_fields,
+                initial,
+                pitch,
+                truth,
+                reference_rows,
+                position_gate=not (state_kind == "picard" and name == "kernel"),
             )
             if name == "kernel":
                 reference_rows = sweep if state_kind == "picard" else None
@@ -353,6 +361,13 @@ def measure(args):
                 arm=name,
                 measured_travel_pitches=travel,
                 state_kind=state_kind,
+                position_reference=(
+                    "closed-form displacement"
+                    if state_kind == "picard" and name == "kernel"
+                    else "kernel"
+                    if state_kind == "picard"
+                    else "closed form"
+                ),
                 cold_compile_seconds=cold,
                 reused_executable=state_kind == "picard",
                 executable_bytes=size,

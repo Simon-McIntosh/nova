@@ -49,6 +49,9 @@ def render(row, directory, destination):
     ):
         figure, axes = plt.subplots(1, 2, figsize=(14, 6.5), dpi=100)
         trace_axes(axes[0])
+        axes[0].tick_params(labelsize=20, width=1.2)
+        for side in ("left", "bottom"):
+            axes[0].spines[side].set_linewidth(1.2)
         poloidal_axes(axes[1])
         for name in ("krylov", "dense"):
             values = routes[name]

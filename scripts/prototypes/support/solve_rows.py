@@ -244,17 +244,20 @@ def main():
         print("DERIVATIVE " + json.dumps(derivative), flush=True)
         state = state - value
     span = abs(float(fixture._analytic_axis_flux(exact)))
-    production_seed, _, seed_receipt = certificate._production_seed(
-        profile, name, target, centroid, current_receipt
-    )
-    seed_receipt["constraint_rows"] = (
-        "unconstrained; augmented constraints retained separately"
-    )
-    row["production_seed"] = seed_receipt
     row["production_routes"] = {}
-    write(destination, row)
-    for method in ("krylov", "dense"):
-        for seed_name, seed in (("analytic", initial), ("production", production_seed)):
+    for seed_name in ("analytic", "production"):
+        if seed_name == "analytic":
+            seed = initial
+        else:
+            seed, _, seed_receipt = certificate._production_seed(
+                profile, name, target, centroid, current_receipt
+            )
+            seed_receipt["constraint_rows"] = (
+                "unconstrained; augmented constraints retained separately"
+            )
+            row["production_seed"] = seed_receipt
+            write(destination, row)
+        for method in ("krylov", "dense"):
             collection = (
                 row["routes"] if seed_name == "analytic" else row["production_routes"]
             )

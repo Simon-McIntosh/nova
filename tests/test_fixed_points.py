@@ -247,3 +247,32 @@ def test_closed_form_equilibrium_on_small_hex_mesh(kind):
     assert np.max(np.linalg.norm(np.asarray(result.position - roots), axis=-1)) < float(
         pitch
     )
+
+
+def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
+    first = polynomial_cache(True)
+    first_nodes = np.asarray(first.nodes)
+    nodes = np.concatenate((first_nodes, first_nodes + (1.5, 0.0)))
+    mesh = fixed._build_mesh(
+        nodes, np.arange(14).reshape(2, 7), SimpleNamespace(pitch=np.ones(2))
+    )
+    jets = fixed._stack_jet(
+        jax.vmap(Polynomial(True).evaluate)(
+            jnp.asarray(first_nodes) - jnp.asarray((1.5, 0.0))
+        )
+    )
+    lookup = jnp.concatenate((jnp.arange(7), jnp.full(7, -1, dtype=jnp.int32)))
+    cache = fixed.RowCache(
+        mesh, jnp.asarray(nodes), lookup, jnp.zeros((7, 1, 3, 6)), jets
+    )
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("row build inside Newton")
+
+    monkeypatch.setattr(fixed, "_row_program", forbidden)
+    seed = jnp.asarray(((0.2, -0.21),))
+    result = fixed.solve(cache, jnp.zeros((1, 3)), seed, seed, jnp.asarray(1.0))
+    assert result.iterations[0] == 1
+    assert result.position[0, 0] > 0.75
+    assert not result.valid[0]
+    assert result.status[0] == fixed.FixedPointStatus.NEEDS_ROWS

@@ -220,7 +220,7 @@ def main():
             [
                 "Fast CPU head",
                 (
-                    "14 passed with root conftest, including quartic jets and limited"
+                    "15 passed with root conftest, including quartic jets and limited"
                     "/diverted analytic 50-cell states."
                 ),
             ],

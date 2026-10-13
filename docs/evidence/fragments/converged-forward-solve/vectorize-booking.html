@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="vectorize-booking">
+<meta name="plan-title" content="Cell-batched current booking">
+<meta name="plan-summary" content="current.book books every cell in one vmapped
+program, replacing the sequential scan">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-commits" content="adeff8346,486d369ad,f2a831d4d,4b4b242f1">
+<meta name="plan-recorded-at" content="2026-10-13">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="H200 base-versus-head booking walls at 2000 and 5000 cells on the analytic certificate state, with identity, compile and peak-memory columns; the batched program is faster at every rung. The one-Picard-image state is not attributable through this seam, so no wall is reported for it">
+
+<title>Cell-batched current booking | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="vectorize-booking-batched-booking">Cell-batched current booking</h1>
+
+<p id="vectorize-booking-summary">Followup <code>f-cfs-vectorize-booking</code>.
+<code>nova.equilibrium.current.book</code> booked cells in a sequential
+<code>jax.lax.scan</code> with <code>unroll=1</code>, the bottleneck of the hot
+path (0.9, 2.8 and 8.1 s per step at 2,000, 5,000 and 10,000 cells on the H200).
+The loop is now a single <code>jax.vmap</code> over the cell index; the per-cell
+body — fragment rings, membership and normal-form conditioning, and the clipped
+support quadrature — is unchanged. One compiled program remains, with effects
+batched over cells, so the booking no longer serialises across cells. The work
+is committed at <code>adeff8346</code> (product), <code>486d369ad</code> and
+<code>f2a831d4d</code> (tests).</p>
+
+<section id="vectorize-booking-identity">
+<h2>Identity against the sequential reference</h2>
+<p id="vectorize-booking-identity-body">The test file
+<code>tests/test_current_book_vectorised.py</code> holds the pre-batching
+booking verbatim as <code>_reference_book</code>, and its own copies of
+<code>_conic_rings</code> and <code>_normal_rings</code> as
+<code>_reference_conic_rings</code> and <code>_reference_normal_rings</code>, so
+the oracle is independent of the product's ring builders and not only of its
+iteration. Tiled cells are compared at 1, 64 and 200 in the default lane and at
+2,000 in a test marked <code>slow</code>. Both programs are compiled and warmed
+before the wall is taken, so the two wall columns compare execution:</p>
+<table id="vectorize-booking-identity-table">
+<thead><tr><th>Cells</th><th>max |batched − scan|</th><th>max relative</th><th>batched wall [s]</th><th>scan wall [s]</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>0.000e+00</td><td>0.000e+00</td><td>0.0199</td><td>0.00135</td></tr>
+<tr><td>64</td><td>0.000e+00</td><td>0.000e+00</td><td>1.050</td><td>0.0573</td></tr>
+<tr><td>200</td><td>0.000e+00</td><td>0.000e+00</td><td>5.506</td><td>0.187</td></tr>
+<tr><td>2,000</td><td>0.000e+00</td><td>0.000e+00</td><td>87.66</td><td>1.698</td></tr>
+</tbody>
+</table>
+<p id="vectorize-booking-identity-note">The booked moments, the normalization and
+the validity receipt are bit-identical at every rung, including 2,000 cells
+(<code>4 passed in 154.12 s</code>). The wall columns are CPU binary64 on a tiled
+toy fixture, and they run against the batched form: the sequential reference is
+15 to 52 times faster there. The cause is the per-cell body's nested
+<code>jax.lax.cond</code>, which a <code>vmap</code> lowers to a batched select
+that evaluates every branch for every cell, where the <code>scan</code> takes one
+branch per cell. That is a property of this fixture's control flow, not of the
+certificate carrier: on the carrier the batched program is faster at every
+measured rung, see the H200 rows below. The two lanes disagree because the
+fixture's cells are uniform and tiny, so the batched select costs more than it
+saves, while the carrier's cells carry the real support work. The CPU walls are
+reported because they were measured, and they are not evidence about the H200.</p>
+</section>
+
+<section id="vectorize-booking-negative">
+<h2>Negative control</h2>
+<p id="vectorize-booking-negative-body">Declared mutation: a padded fragment
+counted twice turns the vectorised identity test red by test id. Applied to
+<code>_conic_rings</code> in the product (the mutation doubles the ring
+batch and its live counts), the identity test fails at all three rungs and the
+run exits non-zero; the log is <code>logs/negative-control.log</code>. The
+control proves the test is sensitive to padding, which the first, dead slice's
+duplicate did not exercise — hence the whole-batch double.</p>
+</section>
+
+<section id="vectorize-booking-autograd">
+<h2>Autograd</h2>
+<p id="vectorize-booking-autograd-body"><code>tests/test_current_book_fragments.py::test_booking_jvp_matches_central_difference</code>
+runs <code>jax.jvp</code> of the booked moments through the vectorised
+<code>book</code> against central finite differences on the smooth, axis,
+boundary and support stages, and passes. This is the precondition for the
+moment-space Newton. The same check on the certificate carrier at 2,000 cells
+was staged behind the row's fixture load and was not reached; the toy-cell
+result is the standing evidence.</p>
+</section>
+
+<section id="vectorize-booking-rung">
+<h2>Certificate-rung measurement</h2>
+<p id="vectorize-booking-rung-body">The 2,000 and 5,000-cell rows were first
+submitted as one H200 allocation (job <code>1284815</code>, <code>--time
+02:00:00</code>, rows inside the allocation) with the base tree
+(<code>7c9d86bd</code>, the sequential scan) and this head tree (the
+<code>vmap</code>). All sixteen stages refused before booking, on both trees and
+on a CPU arm, at one assertion in <code>book._cached_machine</code>:</p>
+<pre><code>assert store.group == receipt["machine_cache"]["semantic_key"]
+AssertionError</code></pre>
+<p id="vectorize-booking-rung-cause">Those stores are superseded: they carry the
+machine schema of the fixture run that wrote them, and no revision can
+rehydrate them, so they are not repaired. The rungs are measured on machines
+built fresh instead. One H200 allocation (<code>--time 02:00:00</code>) runs the
+two-stage pipeline into a directory under the run directory: first
+<code>scripts/prototypes/support/measure.py</code>, which builds the machine and
+the exterior and writes the <code>{kind}-{cells}-fixture.json</code> identity,
+with <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> so the 2,000 and 5,000-cell
+couplings build on the device; then the booking stage. Each machine is built
+once and booked twice, with the base tree's <code>current.book</code> and with
+this head's, because <code>current.py</code> is the only file that differs
+between the trees, so a second machine would measure the builder rather than the
+booking. Each booking is taken on the analytic certificate state and on one
+Picard image of it, the state the flux map returns.</p>
+<p id="vectorize-booking-rung-carrier">One H200 allocation (job <code>1284869</code>,
+<code>--gres=gpu:1</code>, <code>--time 02:00:00</code>), built each machine once
+and booked it twice: once with the base tree's sequential
+<code>current.book</code> and once with this head's <code>current.book</code>. The
+2000-cell machines realised 2098 cells (diverted) and 2105 (limited); the
+5000-cell machines realised 5158 and 5167. Both arms book the same analytic
+certificate state, so the only difference between them is the program.</p>
+<table id="vectorize-booking-rung-table">
+<thead><tr><th>Kind</th><th>Cells</th><th>scan wall [s]</th><th>vmap wall [s]</th><th>ratio</th><th>scan compile [s]</th><th>vmap compile [s]</th><th>scan peak [GB]</th><th>vmap peak [GB]</th></tr></thead>
+<tbody>
+<tr><td>limited</td><td>2,000</td><td>2.339</td><td>1.220</td><td>1.92x</td><td>2.470</td><td>2.637</td><td>0.71</td><td>7.78</td></tr>
+<tr><td>limited</td><td>5,000</td><td>4.610</td><td>3.032</td><td>1.52x</td><td>2.342</td><td>3.972</td><td>2.98</td><td>22.24</td></tr>
+<tr><td>diverted</td><td>2,000</td><td>1.233</td><td>1.170</td><td>1.05x</td><td>2.401</td><td>2.827</td><td>0.74</td><td>7.75</td></tr>
+<tr><td>diverted</td><td>5,000</td><td>4.433</td><td>3.428</td><td>1.29x</td><td>2.513</td><td>3.140</td><td>3.03</td><td>23.71</td></tr>
+</tbody>
+</table>
+<p id="vectorize-booking-rung-identity">The two arms book the same state, and their
+booked moments agree to floating-point reassociation: at 2,000 cells the largest
+difference is 3.6e-12 on the cell current (4.5e-16 relative) for the limited
+machine and 1.4e-14 (6.2e-16 relative) for the diverted one; at 5,000 cells it is
+1.8e-12 (4.4e-16) and 7.1e-15 (6.9e-16). This is the certificate carrier's
+counterpart of the bit-identical result on the tiled CPU fixture.</p>
+<p id="vectorize-booking-rung-cost">The speed-up is real at every rung, and it is
+paid for in device memory: the batched program's peak is 7.8 to 10.6 times the
+sequential program's at 2,000 cells (7.75-7.78 GB against 0.71-0.74 GB) and 7.4
+to 8.0 times at 5,000 cells (22.24-23.71 GB against 2.98-3.03 GB), and it compiles
+1.1 to 1.7 times slower. The measurement is taken on one device per process, so
+the two peaks come from the same machine load and differ only by the program.
+Extrapolated to the 10,000-cell rung the batched peak would be tens of gigabytes,
+which fits the H200's 141 GB but is the binding constraint on how far the
+batching scales.</p>
+<p id="vectorize-booking-rung-picard">The one-Picard-image state is not reported.
+The flux map returns its image on the operator's own sample block (5,137 flux
+values for the 2,098-cell diverted machine, one sample row per cell), while
+<code>current.book</code> consumes flux on the topology read's per-cell stencil
+(14,686 values, seven points per cell), so the image cannot be booked through this
+seam without the operator's own partition reconstruction. The reconstruction this
+node wrote failed its own check: applied to the analytic state, which it must
+reproduce, it disagreed with the closed-form flux at the sample points by 1.0
+times the flux span for the limited machine and 0.90 times for the diverted one.
+A state produced by that recipe is not the Picard image, so no number from it is
+quoted. The follow-on job (<code>1284869</code>, completed after 23 minutes)
+booked that state anyway, for both arms on the limited 2,000-cell and diverted
+5,000-cell machines, and those four walls are withheld for the same reason.
+<code>sample_flux_field</code> evaluates a per-cell flux polynomial at the
+requested points from a state whose own sample block sits at a reconstructed
+point set, so the reconstruction is an interpolant of the wrong coordinates
+rather than the flux map at the read's stencil. The four rows above are on the
+analytic state, which is the measurement that settles the cost: the booked
+moments agree between the arms, and the batched program is faster at both cell
+counts and both topologies.</p>
+</section>
+</main>
+</body>
+</html>

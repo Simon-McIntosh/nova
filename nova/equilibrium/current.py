@@ -196,7 +196,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
     signed = quadrature.sigma * read.field_coefficients
     signed = signed.at[:, 0].add(-quadrature.sigma * read.boundary_flux)
 
-    def cell(_carry, index):
+    def cell(index):
         centre = geometry.centre[index]
         vertices, count = geometry.vertices[index], geometry.vertex_count[index]
         field = FluxFieldPolynomial(
@@ -267,9 +267,9 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
             lambda _: ClippedCurrentMoments(*(jnp.zeros(1) for _ in range(3))),
             None,
         )
-        return None, jax.tree.map(lambda value: value[0], moments)
+        return jax.tree.map(lambda value: value[0], moments)
 
-    _, moments = jax.lax.scan(cell, None, jnp.arange(len(geometry.centre)), unroll=1)
+    moments = jax.vmap(cell)(jnp.arange(len(geometry.centre)))
     raw = jnp.sum(moments.cell_current)
     valid = read.valid & read.qualified & (span != 0) & jnp.isfinite(raw)
     if quadrature.target_current is None:

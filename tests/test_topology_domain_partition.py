@@ -66,11 +66,29 @@ def _cached_partition(row: int, *, compiled: bool):
     return cached_label, np.asarray(connected), masks
 
 
-@pytest.mark.parametrize("row", [0, 1])
+@pytest.mark.parametrize(
+    ("row", "component_counts"),
+    [
+        # Core/private operand counts, packed (core, private_flux).
+        # Golden source revision: 533409ea253672da2cfb9d4b391a2f613b70724c.
+        # Regenerated with:
+        #   JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false \
+        #   PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python -m \
+        #     pytest -s -q -p no:cacheprovider -m 'slow or not slow' \
+        #     --timeout=900 tests/test_topology_domain_partition.py
+        # plus the count probe in the run directory regenerate_goldens.py at
+        # that revision.
+        pytest.param(0, (250, 38), id="21978-35-pure"),
+        pytest.param(1, (244, 32), id="21978-35-mixed"),
+    ],
+)
 @pytest.mark.parametrize("compiled", [False, True], ids=["eager", "jit"])
-def test_committed_partition_uses_the_axis_hex_component(row, compiled):
+def test_committed_partition_uses_the_axis_hex_component(
+    row, component_counts, compiled
+):
     """The published core/private split is the cached axis component exactly."""
     cached_label, connected, masks = _cached_partition(row, compiled=compiled)
+    core_count, private_count = component_counts
     np.testing.assert_array_equal(np.asarray(masks.core), connected)
     np.testing.assert_array_equal(
         np.asarray(masks.private_flux),
@@ -79,4 +97,8 @@ def test_committed_partition_uses_the_axis_hex_component(row, compiled):
             (int(PlasmaDomain.CORE), int(PlasmaDomain.PRIVATE_FLUX)),
         )
         & ~connected,
+    )
+    assert (int(np.sum(masks.core)), int(np.sum(masks.private_flux))) == (
+        core_count,
+        private_count,
     )

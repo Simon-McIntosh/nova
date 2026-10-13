@@ -102,6 +102,18 @@ def test_committed_wall_notch_cannot_be_selected_without_qualification(compiled)
     topology, _coordinate = _topology_fixture()
     with np.load(OPERANDS, allow_pickle=False) as stored:
         committed_axis = stored["row_04_selected_o"][0]
+    # Committed axis operand golden, read from row_04.selected_o.
+    # Golden source revision: 533409ea253672da2cfb9d4b391a2f613b70724c.
+    # Regenerated with:
+    #   JAX_PLATFORMS=cpu XLA_PYTHON_CLIENT_PREALLOCATE=false \
+    #   PYTHONPATH=. /home/ITER/mcintos/Code/nova/.venv/bin/python -m \
+    #     pytest -q -p no:cacheprovider -m 'slow or not slow' \
+    #     --timeout=900 tests/test_topology_o_qualification.py
+    # plus the axis probe in the run directory regenerate_goldens.py at that
+    # revision.
+    np.testing.assert_allclose(
+        committed_axis, [0.8983553247853762, 0.02714390630076316], atol=5.0e-9
+    )
     vmap_o = jnp.asarray(
         np.vstack((np.r_[committed_axis, 10.0, 0.0], np.full((4, 4), np.nan))),
         dtype=jnp.float64,

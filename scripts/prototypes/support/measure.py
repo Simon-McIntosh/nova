@@ -263,6 +263,8 @@ def measure(args):
         exterior_cache=exterior_cache,
     )
     write(args.out / f"{args.kind}-{args.cells}-fixture.json", identity)
+    if args.prepare_only:
+        return []
     legacy_partition, legacy_wall = stage(
         "legacy-support",
         lambda: jax.jit(lambda state: operator._support_partition(state, branch))(
@@ -444,6 +446,8 @@ def measure(args):
             completed=True,
         )
         if arm == "legacy" and args.kind == "diverted" and args.cells == 550:
+            if args.control is None:
+                raise ValueError("the diverted legacy control requires its receipt")
             control = json.loads(args.control.read_text())["map_relative_sup"]
             row["positive_control_expected"] = control
             row["positive_control_relative_delta"] = abs(
@@ -571,7 +575,8 @@ def main():
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--cache", type=Path, required=True)
-    parser.add_argument("--control", type=Path, required=True)
+    parser.add_argument("--control", type=Path)
+    parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument(
         "--arms",
         nargs="+",

@@ -2,25 +2,59 @@
 #SBATCH --partition=betelgeuse
 #SBATCH --reservation=gpu_0003_grpA
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=128G
-#SBATCH --time=00:28:00
+#SBATCH --time=02:30:00
 #SBATCH --job-name=moment-newton
-export TMPDIR=/tmp XLA_PYTHON_CLIENT_PREALLOCATE=false JAX_PLATFORMS=cuda
-export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=2
+export TMPDIR=/tmp XLA_PYTHON_CLIENT_PREALLOCATE=false JAX_PLATFORMS=cuda,cpu
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=4
 export PYTHONPATH="$PWD"
+export NOVA_ANALYTIC_ORACLE_BUILDER=device
+export NOVA_MEASUREMENT_REVISION="$(git rev-parse HEAD)"
 run_dir="$1"
-cache_dir="$2"
+mkdir -p "$run_dir/support" "$run_dir/newton"
 failed=0
-for row in "limited 2000" "diverted 2000" "limited 5000" "diverted 5000" "limited 10000" "diverted 10000"; do
+run_stage() {
+    local log="$1"
+    shift
+    {
+        printf 'revision=%s TREE=%s COMMAND=' "$NOVA_MEASUREMENT_REVISION" "$PWD"
+        printf '%q ' "$@"
+        printf '\n'
+        /home/ITER/mcintos/Code/nova/.venv/bin/python -c 'import os,nova; print("NOVA_MODULE="+nova.__file__+" CWD="+os.getcwd(), flush=True)'
+        "$@"
+        result=$?
+        echo "EXIT=$result"
+        return "$result"
+    } > "$log" 2>&1
+}
+for row in "limited 300" "limited 110" "limited 2000" "diverted 2000" "limited 5000" "diverted 5000"; do
     read -r kind cells <<< "$row"
-    log="$run_dir/moments-$kind-$cells.log"
-    timeout --verbose 260s /home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.support.solve_rows \
-        --kind "$kind" --cells "$cells" --out "$run_dir/moment-rows" --cache "$cache_dir" > "$log" 2>&1
-    result=$?
-    echo "EXIT=$result" >> "$log"
-    echo "ROW=$kind-$cells EXIT=$result LOG=$log"
-    if [ "$result" -ne 0 ]; then failed=1; fi
+    if ! run_stage "$run_dir/support-$kind-$cells.log" timeout --verbose 1200s \
+        /home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.support.measure \
+        --kind "$kind" --cells "$cells" --out "$run_dir/support" \
+        --cache "$run_dir/support/cache" --prepare-only; then
+        echo "PREPARATION_FAILED=$kind-$cells"
+        failed=1
+        continue
+    fi
+    if ! run_stage "$run_dir/newton-$kind-$cells.log" timeout --verbose 2400s \
+        /home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.support.solve_rows \
+        --kind "$kind" --cells "$cells" --out "$run_dir/newton" \
+        --cache "$run_dir/support/cache" --require-cache; then
+        echo "NEWTON_FAILED=$kind-$cells"
+        failed=1
+    fi
 done
+if ! run_stage "$run_dir/forward-gates.log" \
+    /home/ITER/mcintos/Code/nova/.venv/bin/python -m scripts.prototypes.support.gate_rows \
+    --base 2be7601fdd73557e87fce380a859aaf58d184209 --out "$run_dir/gates" \
+    tests/test_equilibrium_forward_solve.py tests/test_solve_program_size.py \
+    tests/test_solve_receipt_topology.py tests/test_solve_trips_are_a_scan.py \
+    tests/test_solve_path_census_inputs.py tests/test_forward_constraints.py \
+    tests/test_forward_secondary_null.py tests/test_forward_census.py \
+    tests/test_compiled_slice_cache.py tests/test_production_solver_receipt_trip_alignment.py; then
+    failed=1
+fi
 echo "EXIT=$failed"
 exit "$failed"

@@ -84,8 +84,51 @@ def linear_timings(equation, operator, initial, arguments, result, method):
                     jacobian_bytes=matrix.nbytes,
                 )
             )
+        refusal = []
+        if not bool(result.converged):
+            state = (result.moments / scale).reshape(-1)
+            matrix = jacobian_program(operator, state, scale, arguments)
+            right = scaled(operator, state, scale, arguments)
+            delta = dense.lu_solve(factor_program(matrix), -right)
+
+            @jax.jit
+            def inspect_trial(operator, moments, arguments):
+                operands, cache, roots, convention, policy, quadrature = arguments
+                value, (support, booked) = gs.moment_residual(
+                    moments,
+                    operands,
+                    cache,
+                    roots,
+                    convention,
+                    policy,
+                    operator.source.core,
+                    quadrature,
+                )
+                return (
+                    value,
+                    support.stationary.status,
+                    support.reading.reason,
+                    booked.valid,
+                )
+
+            for exponent in range(32):
+                factor_value = 2.0**-exponent
+                moments = (state + factor_value * delta).reshape(scale.shape) * scale
+                value, stationary, reason, valid = inspect_trial(
+                    operator, moments, arguments
+                )
+                refusal.append(
+                    dict(
+                        factor=factor_value,
+                        norm=float(jnp.max(jnp.abs(value / scale))),
+                        stationary_status=np.asarray(stationary).tolist(),
+                        support_reason=int(reason),
+                        booking_valid=bool(valid),
+                    )
+                )
         return dict(
             basis="replayed accepted linearizations",
+            refusal_trials=refusal,
             rows=rows,
             jacobian_compile_seconds=jacobian_compile,
             factor_compile_seconds=factor_compile,

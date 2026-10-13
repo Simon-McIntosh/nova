@@ -139,3 +139,17 @@ def test_outside_fragments_are_byte_identical():
         assert row["outside_area_byte_identical"]
         assert row["outside_edge_byte_identical"]
         assert row["outside_selection_changes"] == 0
+
+
+def test_outside_mismatch_is_local_fragment_geometry():
+    receipt, _ = _receipt()
+    diagnosis = receipt["outside_diagnosis"]
+    assert not diagnosis["immediate_patch"]
+    assert diagnosis["bell_normal_form"]
+    assert (
+        abs(diagnosis["conic_fraction_at_bell_level"] - diagnosis["conic_fraction"])
+        < 1e-13
+    )
+    assert abs(diagnosis["conic_fraction"] - diagnosis["bell_fraction"]) > 1e-5
+    assert max(diagnosis["conic_area"]) > 0
+    assert max(diagnosis["bell_area"]) > 0

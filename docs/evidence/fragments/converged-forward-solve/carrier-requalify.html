@@ -98,6 +98,49 @@ booked-moment deviation of about 1.7e-4. The limited legacy figure has moved
 from 0.00118349 to 1.183879015537567e-3 at 5,000 cells, which is the same
 quantity read at a different rung and therefore not a like-for-like delta.</p>
 
+<h2 id="carrier-requalify-attribution">Attribution of the diverted 550-cell legacy map error</h2>
+
+<p>The same quantity read 0.197327 in the current-book record of 2026-10-10 and
+0.1946465024178517 at main. Each revision was measured by running the diverted
+550-cell legacy certificate row from its own extracted tree, with
+<code>nova.__file__</code> resolving inside that tree so the row is computed by
+the revision under test rather than by the calling worktree. All three read the
+same value to the last digit:</p>
+
+<table>
+  <thead><tr><th>revision</th><th>what it is</th><th>map_relative_sup</th></tr></thead>
+  <tbody>
+    <tr><td><code>63411377f</code></td><td>conditioning merge (cfs-moment-path-reconcile)</td><td>0.1973269787169759</td></tr>
+    <tr><td><code>67e6da3cf</code></td><td>first parent of the near-edge repair merge</td><td>0.1973269787169759</td></tr>
+    <tr><td><code>acaea2c9c</code></td><td>near-edge moment kernel repair merge</td><td>0.1973269787169759</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Neither named merge moved it.</strong> The near-edge repair
+(<code>acaea2c9c</code>) reproduces the 2026-10-10 book value exactly, and the
+conditioning merge reproduces it exactly as well, so both are excluded by
+measurement rather than by inference. The three rows differ only in the last
+two digits of the booking-image error (0.19363746572287618, 0.19363746572287982,
+0.1936374657228774), which is binary64 noise and not a kernel change.</p>
+
+<p>The move therefore happened after <code>acaea2c9c</code>. The plan records
+that the caller-arm repair (<code>30c84c3b3</code>) measured this same quantity
+identically at its base and head, so the mover sits between the near-edge repair
+and that repair's base. Two merges touch the kernel, the support machinery or
+the certificate fixture in that range, and the exterior-fixture delegation
+(<code>c3c95a467</code>) is the one that replaces the fixture's own integrator
+with the shared moment owner &mdash; the change most able to move this row. It is
+measured against its first parent in this run and reported in the manifest's
+follow-ons.</p>
+
+<p>Two notes on how these rows were produced. The extracted trees refuse the row
+through their own positive-control pin, which is a caller-supplied expectation
+for exactly this case, arm and rung: the row is written before that assertion
+and carries <code>completed: true</code>, so the value is a real measurement, but
+the process exits nonzero and the pin is not a check on the attribution. And the
+row driver requires a GPU even for the legacy arm, so all of these rows ran on
+the H200 lane; the fleet allocation carries no card.</p>
+
 <h2 id="carrier-requalify-outstanding">Not completed in this run</h2>
 
 <p>Three items of the followup's done-when are not measured in this record and
@@ -114,22 +157,21 @@ are carried as follow-ons rather than reported as met:</p>
   interchangeable.</li>
   <li><strong>The 10,000-cell rung, both carrier and rows.</strong> The 5,000-cell
   host assembly took about 2,077 to 2,122 s in job 1284720, and the 10,000-cell
-  assembly did not finish before that job's 2.5-hour ceiling: the run left a
-  lock beside the 5,000-cell store and no 10,000-cell store. A 10,000-cell host
-  assembly therefore does not fit one H200 allocation at the observed rate, and
-  the rung needs either a longer allocation than the lane grants, or an
-  assembly cost measured across the rungs so the ceiling is sized from a
-  measurement rather than a guess.</li>
-  <li><strong>The three-revision attribution.</strong> The diverted 550-cell
-  legacy map error is not measured at <code>acaea2c9c</code>, its first parent
-  <code>67e6da3cf</code> or the conditioning merge <code>63411377f</code> in this
-  record; the GPU job carrying those three rows was still queued when the run
-  ended. The question the attribution answers is unchanged and is now
-  narrower: the same quantity read 0.197327 in the current-book record of
-  2026-10-10 and 0.1946465024178517 at main, the latter measured identically at
-  the base and head of the caller-arm repair (merge <code>30c84c3b3</code>), so
-  the move happened before that repair and the near-edge and conditioning
-  merges are the two candidates it must be split between.</li>
+  host assembly did not finish before that job's 2.5-hour ceiling: the run left
+  a lock beside the 5,000-cell store and no 10,000-cell store. That path is not
+  required for the rung. The device coupling builder is what the finest rungs
+  are built with, and a 10,000-cell run on that builder, re-running the
+  legacy, exact and read rows on both certificate cases, is submitted as
+  <code>--time 02:30:00</code> with its store written under the GPFS oracle
+  cache root rather than the tracked tree. Its build wall is reported in the
+  manifest's follow-ons once the job lands. This repository has no
+  evidence-root resolver in <code>nova/database/filepath.py</code> to resolve
+  through, so the store is placed on the existing GPFS cache root
+  <code>/work/projects/imas_gpu/analytic_oracle_cache</code> and named there.</li>
+  <li><strong>The three-revision attribution.</strong> Measured, and it
+  excludes both candidate merges &mdash; see the section below. The value did
+  not move at any of the three revisions named, so the merge that moved it lies
+  later in history than <code>acaea2c9c</code>.</li>
 </ul>
 
 </main>

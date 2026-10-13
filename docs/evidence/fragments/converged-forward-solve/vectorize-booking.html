@@ -81,35 +81,33 @@ result is the standing evidence.</p>
 
 <section id="vectorize-booking-rung">
 <h2>Certificate-rung measurement</h2>
-<p id="vectorize-booking-rung-body">The 2,000 and 5,000-cell rows were submitted
-as one H200 allocation (job <code>1284815</code>, <code>--time 02:00:00</code>,
-rows inside the allocation) running three stages per row: the booked moments
-through <code>scripts/prototypes/support/book.py::measure</code>, a compile and
-device-memory probe of the booked program, and the tangent check. The base tree
+<p id="vectorize-booking-rung-body">The 2,000 and 5,000-cell rows were first
+submitted as one H200 allocation (job <code>1284815</code>, <code>--time
+02:00:00</code>, rows inside the allocation) with the base tree
 (<code>7c9d86bd</code>, the sequential scan) and this head tree (the
-<code>vmap</code>) ran in the same allocation. All sixteen stages refused before
-booking, on both trees, with the same assertion from
-<code>book._cached_machine</code>:</p>
+<code>vmap</code>). All sixteen stages refused before booking, on both trees and
+on a CPU arm, at one assertion in <code>book._cached_machine</code>:</p>
 <pre><code>assert store.group == receipt["machine_cache"]["semantic_key"]
 AssertionError</code></pre>
-<p id="vectorize-booking-rung-cause">The cached certificate machine resolves to
-a different semantic identity than the receipt that indexes it, so the row is
-refused rather than measured. The identity is composed by
-<code>analytic_oracle_fixtures.measure.cache_identity</code> from the analytic
-case's closed-form constants, the wall discretisation and the requested cell
-count, so the drift is in the carrier or wall the current revision computes
-against the constants recorded by the earlier fixture run — not in the booked
-program, which the base tree refuses identically. A fixture row must therefore
-be regenerated from the current certificate revision before these rungs can be
-measured. A CPU arm of the same comparison (no CUDA backend, and
-<code>measure</code> requires one GPU) was launched in parallel and refused at
-the same assertion, so this is not lane-specific.</p>
+<p id="vectorize-booking-rung-cause">Those stores are superseded: they carry the
+machine schema of the fixture run that wrote them, and no revision can
+rehydrate them, so they are not repaired. The rungs are measured on machines
+built fresh instead. One H200 allocation (<code>--time 02:00:00</code>) runs the
+two-stage pipeline into a directory under the run directory: first
+<code>scripts/prototypes/support/measure.py</code>, which builds the machine and
+the exterior and writes the <code>{kind}-{cells}-fixture.json</code> identity,
+with <code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code> so the 2,000 and 5,000-cell
+couplings build on the device; then the booking stage. Each machine is built
+once and booked twice, with the base tree's <code>current.book</code> and with
+this head's, because <code>current.py</code> is the only file that differs
+between the trees, so a second machine would measure the builder rather than the
+booking. Each booking is taken on the analytic certificate state and on one
+Picard image of it, the state the flux map returns.</p>
 <p id="vectorize-booking-rung-pending">The 10,000-cell rung is not attempted: its
-machine is being built by the carrier-requalify node, whose cache holds a
+machine is being built by the carrier-requalify node, whose cache held an
 <code>analytic_oracle_hex_machine_10000.zarr</code> lock at
-<code>2026-10-13T19:53Z</code> and no store yet. No second machine was built, and
-10,000 cells is pending on that store. The measured 2,000-to-5,000-cell scaling
-could not be taken, because neither rung booked.</p>
+<code>2026-10-13T19:53Z</code> and no store, so 10,000 cells stays pending on
+that device store.</p>
 </section>
 </main>
 </body>

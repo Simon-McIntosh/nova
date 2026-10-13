@@ -97,3 +97,16 @@ def test_curved_saddle_beats_both_references():
     )
     assert measured["valid"]
     assert measured["saddle_error"] < target
+
+
+def test_curvature_contributes_to_saddle_improvement():
+    _, rows = _receipt()
+    arm = os.environ.get("MEMBERSHIP_ARM", "booked_curved")
+    measured = rows[arm]
+    straight = rows["booked_zero_third"]
+    print(
+        f"CURVATURE_CONTRIBUTION arm={arm} error={measured['saddle_error']} "
+        f"zero_third={straight['saddle_error']}"
+    )
+    assert measured["valid"] and straight["valid"]
+    assert measured["saddle_error"] < straight["saddle_error"]

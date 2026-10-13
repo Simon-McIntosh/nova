@@ -748,6 +748,64 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "c9c9a6cd58fd812f0b051de0cd5a24fdcaabb358",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'failed' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 206120709,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261013T152703052139-wire-current-book",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 206120709,
+        "path": "/tmp/reckon-crew-scratch/r-20261013T152703052139-wire-current-book"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "c9c9a6cd58fd812f0b051de0cd5a24fdcaabb358",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/wire-current-book",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-13T18:52:51.961Z",
+            "session_id": "cde1dfb6-1e46-46ae-9643-ea50c8da8706",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/wire-current-book"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session cde1dfb6-1e46-46ae-9643-ea50c8da8706"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_withheld": "gate verdict 'failed' is not passing; worktree retained for recovery"
+  },
   "resume_waiver": {
     "reason": "the remaining work (legacy partition removal and the solve over moments) belongs to the moment-space-newton node by lead ruling c-s21-moment-space-ruling; resuming this session would duplicate it",
     "session_id": "cde1dfb6-1e46-46ae-9643-ea50c8da8706",

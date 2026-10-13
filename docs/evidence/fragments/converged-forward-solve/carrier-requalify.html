@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="carrier-requalify">
+<meta name="plan-title" content="Requalify the fine certificate carriers on the repaired kernel">
+<meta name="plan-summary" content="The carrier cache identity now hashes the packed polygon moment kernel and the coupling-assembly source instead of the fixture's own bytes, so a carrier assembled by the pre-repair kernel is refused rather than warm-loaded">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-commits" content="5f7456b62,b83358808">
+<meta name="plan-recorded-at" content="2026-10-13">
+<meta name="plan-verdict" content="pass-with-follow-on">
+<meta name="plan-environment" content="Identity and refuse check on CPU x64 binary64 (JAX_PLATFORMS=cpu). The fine-rung carrier rebuild and certificate rows run as one H200 job 1284720 on 98dci4-gpu-0003 under reservation gpu_0003_grpA;">
+<title>Requalify the fine certificate carriers on the repaired kernel | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="carrier-requalify">Requalify the fine certificate carriers on the repaired kernel</h1>
+
+<p>The carrier cache identity hashed the fixture module and the coupling-assembly
+module, so a carrier assembled by an earlier version of the packed polygon
+moment kernel reused the same cache group and the near-edge repair could not
+invalidate a warm-load. <code>builder_revision</code> now hashes the
+coupling-assembly source and the packed polygon moment kernel it contracts
+through, and no longer hashes the fixture's own bytes.</p>
+
+<h2 id="carrier-requalify-identity">Which files the identity now hashes</h2>
+
+<p>The carrier semantic identity's <code>builder_revision</code> field is the
+digest of exactly two files:</p>
+<ul>
+  <li><code>scripts/analytic_oracle_fixtures/coupling_build.py</code> &mdash; the
+  coupling-assembly module the docstring names;</li>
+  <li><code>nova/biot/polygonanalytic.py</code> &mdash; the packed polygon moment
+  kernel the assembly contracts through, resolved through the same
+  <code>POLYGONANALYTIC_SOURCE</code> constant the exterior identity already
+  used.</li>
+</ul>
+
+<p><code>measure.py</code>'s own bytes were dropped from the digest: editing the
+fixture changes how a carrier is measured, not the blocks a carrier carries, so
+it must not invalidate every cached carrier.</p>
+
+<h2 id="carrier-requalify-refusal">Negative control &mdash; the old-kernel carrier is refused</h2>
+
+<p>Recomputing the digest with the pre-repair kernel bytes gives a different
+<code>builder_revision</code>, so the carrier cache group key moves and the
+warm-load is refused. Measured on CPU:</p>
+
+<table>
+  <thead><tr><th>kernel source</th><th>builder_revision</th></tr></thead>
+  <tbody>
+    <tr><td>HEAD <code>nova/biot/polygonanalytic.py</code> (digest 0425598d0de19a99)</td><td><code>ae1403eb01611aaf</code></td></tr>
+    <tr><td>pre-repair kernel bytes at <code>acaea2c9c^</code> (digest 14573967e239d850)</td><td><code>26844a3699fae418</code></td></tr>
+    <tr><td>former scoping, <code>measure.py</code> + coupling source</td><td><code>7251d86d2206d8ed</code></td></tr>
+  </tbody>
+</table>
+
+<p>The two kernel revisions produce distinct cache groups, so a carrier built on
+the pre-repair kernel is a different carrier and is reloaded from the repaired
+build rather than replayed.</p>
+
+<h2 id="carrier-requalify-fine-rungs">Fine-rung carriers and rows (in flight)</h2>
+
+<p>The 5,000 and 10,000-cell host and device carriers are rebuilt on the
+repaired kernel and the certificate map rows re-run at both rungs by H200 job
+1284720, which was submitted at 2026-10-13T16:47Z and is running at the time of
+this record. Its receipt <code>requalify-carriers.json</code> names each path's
+build wall and persisted bytes and the block-by-block norm-relative agreement
+against a 1e-12 bound; the row receipts are written beside the fixture receipts
+under the run directory's <code>rows/</code>.</p>
+
+<p>The three-revision attribution of the diverted 550-cell legacy map error
+(<code>acaea2c9c</code>, its first parent <code>67e6da3cf</code>, and the
+conditioning merge <code>63411377f</code>) is not measured in this record; the
+<code>63411377f</code> merge is an ancestor of <code>acaea2c9c^</code>, so the
+pair brackets what the conditioning merge and the near-edge merge each moved.</p>
+
+</main>
+</body>
+</html>

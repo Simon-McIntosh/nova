@@ -31,7 +31,7 @@ def main():
             )
             for arm, colour, style in [
                 ("cached-jet", "0.15", "-"),
-                ("kernel", "0.45", "--"),
+                ("cached-adaptive", "0.45", "--"),
             ]:
                 points = sorted(
                     (
@@ -42,7 +42,9 @@ def main():
                     for receipt in receipts
                     if receipt["kind"] == kind
                     for item in receipt["rows"]
-                    if item["arm"] == arm and item["state_kind"] == state
+                    if item["arm"] == arm
+                    and item["state_kind"] == state
+                    and item["median_seconds"] is not None
                 )
                 if not points:
                     continue
@@ -58,7 +60,7 @@ def main():
                 )
                 axis.vlines(cells, median, high, colors=colour, linewidth=1.2)
                 axis.annotate(
-                    arm,
+                    "Six updates" if arm == "cached-jet" else "Adaptive",
                     (cells[-1], median[-1]),
                     xytext=(-4, 8),
                     textcoords="offset points",

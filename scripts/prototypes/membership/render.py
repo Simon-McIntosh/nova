@@ -27,7 +27,8 @@ def main():
     data = np.load(args.receipt)
     _, analytic, _, _, _ = fixture._analytic_inputs("diverted")
     fixed, truth = data["fixed"], data["truth_nulls"]
-    selected = data["represented"]
+    represented = data["represented"]
+    selected = represented | data["near"]
     vertices, counts = data["vertices"], data["counts"]
     patch = np.concatenate(
         [v[:n] for v, n in zip(vertices[selected], counts[selected], strict=True)]
@@ -61,7 +62,12 @@ def main():
     for index in np.flatnonzero(selected):
         polygon = vertices[index, : counts[index]]
         polygon = np.vstack((polygon, polygon[0]))
-        axes.plot(*polygon.T, color="0.65", linewidth=1.2)
+        axes.plot(
+            *polygon.T,
+            color="0.65",
+            linewidth=1.2,
+            linestyle="-" if represented[index] else ":",
+        )
         axes.text(
             *data["centre"][index],
             f"{data['error'][index]:+.2e}",
@@ -96,7 +102,7 @@ def main():
     )
     axes.text(
         0.02,
-        0.99,
+        1.08,
         "Curved legs: solid\nClosed-form separatrix: dashed",
         transform=axes.transAxes,
         va="top",
@@ -119,7 +125,7 @@ def main():
     )
     context.text(
         0.5,
-        -0.05,
+        -0.18,
         "Wall and both null sets\nGrey: closed form\nBlack: cached Bell",
         transform=context.transAxes,
         ha="center",

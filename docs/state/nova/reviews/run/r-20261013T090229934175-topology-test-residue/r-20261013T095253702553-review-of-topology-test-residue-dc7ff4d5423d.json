@@ -1,0 +1,54 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-13T10:03:40.364Z",
+  "dispatched_at": "2026-10-13T09:53:15Z",
+  "findings": [
+    {
+      "anchor": "docs/evidence/fragments/converged-forward-solve/red-base-triage.html:29",
+      "cites": "logs/exact-clip-order-study.log [revision_disagreement].",
+      "class": "revision_provenance_mismatch",
+      "id": "provenance-1",
+      "item": "provenance",
+      "severity": "follow-on",
+      "text": "the added paragraph states the exact-clip test passes 'at the head revision 533409ea2', but 533409ea2 is this node's base and the only exact-clip measurement, logs/exact-clip-order-study.log, records the run at head dc7ff4d54; the claim holds only because nova source is byte-identical across the two revisions (git diff --stat -- nova/ empty), so the cited provenance disagrees with its own log."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call site reaches the landed change: it is confined to three test modules and one docs fragment, so production runtime code cannot reach it; CALL_SITES is emitted as none.",
+    "diff": "read commit by commit against base %s: a six-line print deletion, a count golden parametrization with provenance.",
+    "done_when": "the done_when asserts 12 passed / 0 failed per arm with no added failures; logs/base-suite.log (2+4+6 passed, EXIT=0) and logs/head-suite.log (2+4+6 passed, EXIT=0) each reach a summary with no FAILED id, so the gate asserts the measure.",
+    "goal": "the node goal is to clear the red-base triage \u00a72 residue; the diff removes the debug print (tests/test_mask_threshold_consistency.py), re-pins both operand goldens with provenance (tests/test_topology_domain_partition.py:80, tests/test_topology_o_qualification.py:105) and notes the cleared exact-clip test (docs/evidence/fragments/converged-forward-solve/red-base-triage.html:29); all four done_when items are present.",
+    "manifest": "read; status complete; commit dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e present at the reviewed worktree HEAD; baseline_suite and after_suite both completed true at 12/0; negative_control_log named and reproduced; blockers none; the two declared-but-unwritten paths are consistent with the diff.",
+    "write_paths": "the manifest declares four changed paths; git diff --stat 533409ea253672da2cfb9d4b391a2f613b70724c dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e lists exactly those four and nothing else, all within the grant; the reviewed worktree is clean at HEAD dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e."
+  },
+  "justifications": {
+    "durability": "the added assertion at tests/test_topology_domain_partition.py:101 compares masks.core/masks.private_flux against an independent literal, and logs/negative-control-domain-partition.log shows mutating row-0 core 250->249 reddens both the eager and jit ids at EXIT=1; the axis assertion at tests/test_topology_o_qualification.py:113 is likewise independent of the operand it reads.",
+    "evidence": "logs/base-suite.log and logs/head-suite.log each name their revision, module.__file__ and cwd and reach a summary at 12 passed / 0 failed / EXIT=0, so added_failure_count is 0, but the fragment at red-base-triage.html:29 cites revision 533409ea2 for the exact-clip pass while its only measurement log logs/exact-clip-order-study.log records the run at head dc7ff4d54.",
+    "fit": "the additions follow the surrounding pytest idiom and carry the revision-plus-command provenance the done_when requires; no plan, sprint or ticket identifier and no version suffix enters the changed files.",
+    "goal_fidelity": "all four done_when items land (tests/test_mask_threshold_consistency.py print gone; both goldens in tests/test_topology_domain_partition.py:80 and tests/test_topology_o_qualification.py:105 pinned with revision and command; docs/evidence/fragments/converged-forward-solve/red-base-triage.html:29 notes the cleared test).",
+    "reuse": "the diff adds no function, class or module, so nothing forks a repository capability; the assertions extend the existing tests/test_topology_domain_partition.py and tests/test_topology_o_qualification.py goldens rather than introducing new machinery.",
+    "scope_discipline": "every path in the diff (tests/test_mask_threshold_consistency.py, tests/test_topology_domain_partition.py, tests/test_topology_o_qualification.py, red-base-triage.html) is inside the manifest's declared write paths and the reviewed worktree is clean at HEAD dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to clear the red-base triage review residue on \u00a72; the diff removes the debug print in tests/test_mask_threshold_consistency.py, re-pins both operand goldens in tests/test_topology_domain_partition.py and tests/test_topology_o_qualification.py with their provenance, and notes the cleared exact-clip test in docs/evidence/fragments/converged-forward-solve/red-base-triage.html.\nVERDICT done_when: the done_when claims 12 passed / 0 failed each arm; the reviewed logs/head-suite.log and logs/base-suite.log each reach a summary at 2+4+6 passed, FILE_EXIT 0 per file, EXIT=0, with no FAILED line, so the measure is asserted and recorded.\nVERDICT write_paths: the reviewed manifest declares four changed paths; git diff --stat 533409ea253672da2cfb9d4b391a2f613b70724c dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e lists exactly those four (test_mask_threshold_consistency.py, test_topology_domain_partition.py, test_topology_o_qualification.py, red-base-triage.html), all inside the declared grant.\nVERDICT manifest: read; status complete; it names commit dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e, both gate arms, the negative-control log, and the two unused declared write paths (topology-test-residue.html and the figures directory) are legitimately absent because the node wrote neither.\nVERDICT diff: read in full against base 533409ea253672da2cfb9d4b391a2f613b70724c; the change is the six-line print removal, the parametrized count golden (250, 38)/(244, 32) with a provenance comment, the axis golden assertion to [0.8983553247853762, 0.02714390630076316] (atol 5.0e-9) with a provenance comment, and the fragment paragraph and table-row edit.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: all four done_when items land (tests/test_mask_threshold_consistency.py print gone; both goldens in tests/test_topology_domain_partition.py:80 and tests/test_topology_o_qualification.py:105 pinned with revision and command; docs/evidence/fragments/converged-forward-solve/red-base-triage.html:29 notes the cleared test).\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/base-suite.log and logs/head-suite.log each name their revision, module.__file__ and cwd and reach a summary at 12 passed / 0 failed / EXIT=0, so added_failure_count is 0, but the fragment at red-base-triage.html:29 cites revision 533409ea2 for the exact-clip pass while its only measurement log logs/exact-clip-order-study.log records the run at head dc7ff4d54.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (tests/test_mask_threshold_consistency.py, tests/test_topology_domain_partition.py, tests/test_topology_o_qualification.py, red-base-triage.html) is inside the manifest's declared write paths and the reviewed worktree is clean at HEAD dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e.\nSCORE durability: 18\nJUSTIFICATION durability: the added assertion at tests/test_topology_domain_partition.py:101 compares masks.core/masks.private_flux against an independent literal, and logs/negative-control-domain-partition.log shows mutating row-0 core 250->249 reddens both the eager and jit ids at EXIT=1; the axis assertion at tests/test_topology_o_qualification.py:113 is likewise independent of the operand it reads.\nSCORE fit: 18\nJUSTIFICATION fit: the additions follow the surrounding pytest idiom and carry the revision-plus-command provenance the done_when requires; no plan, sprint or ticket identifier and no version suffix enters the changed files.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, so nothing forks a repository capability; the assertions extend the existing tests/test_topology_domain_partition.py and tests/test_topology_o_qualification.py goldens rather than introducing new machinery.\nFINDING docs/evidence/fragments/converged-forward-solve/red-base-triage.html:29 follow-on: the added paragraph states the exact-clip test passes 'at the head revision 533409ea2', but 533409ea2 is this node's base and the only exact-clip measurement, logs/exact-clip-order-study.log, records the run at head dc7ff4d54; the claim holds only because nova source is byte-identical across the two revisions (git diff --stat -- nova/ is empty), so the cited provenance disagrees with its own log.",
+  "review_run_id": "r-20261013T095253702553-review-of-topology-test-residue-dc7ff4d5423d",
+  "reviewed_base_sha": "533409ea253672da2cfb9d4b391a2f613b70724c",
+  "reviewed_head_sha": "dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e",
+  "reviewed_run_id": "r-20261013T090229934175-topology-test-residue",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T10:02:00+00:00",
+  "total": 111
+}

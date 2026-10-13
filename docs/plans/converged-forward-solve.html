@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="203">
+<meta name="plan-version" content="204">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -657,6 +657,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261013T081627759784-fixed-point-production" data-who="reckon-build" data-when="2026-10-13T09:01:32Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/converged-forward-solve/fixed-point-production.html#fixed-point-production-landing — production bounded-row adaptive Newton with root-type retry; 15 CPU tests passed, guard-disabled replay 7 failures; H200 2520 scale calls through 10000 cells, worst p99 0.704926 ms, zero refusals/wrong roots; full-current diverted replay p99 0.427020 ms.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261013T095253702553-review-of-topology-test-residue-dc7ff4d5423d" data-who="reckon-build" data-when="2026-10-13T10:03:40.364Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261013T090229934175-topology-test-residue stored a parsed record scoring all six dimensions (goal_fidelity 19, evidence 17, scope_discipline 19, durability 18, fit 18, reuse 20; total 111), reviewed_base_sha 533409ea253672da2cfb9d4b391a2f613b70724c, reviewed_head_sha dc7ff4d5423d05b3fd8aaa24b72d05834a01e44e, added_failure_count 0, added_failure_ids [], and one follow-on finding on the red-base-triage fragment&#x27;s exact-clip revision citation.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

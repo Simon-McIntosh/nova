@@ -63,7 +63,7 @@ from nova.equilibrium.flux_surface_connectivity import (
     fit_tensor_spline,
     polish_stationary_points,
 )
-from nova.equilibrium import gs
+from nova.equilibrium import gs, support_read
 from nova.equilibrium.observation import ClippedIntegralMeasure
 from nova.equilibrium.separatrix_clip import (
     _SPLINE_BOUNDARY_SEGMENTS,
@@ -258,6 +258,10 @@ _DYNAMIC_OPERATOR_STATE_NAMES = (
     "_support_moment_stencils",
     "_support_curve_centre",
     "_support_curve_scale",
+    "moment_support",
+    "moment_roots",
+    "moment_row_cache",
+    "exterior_jet_response",
 )
 
 _TOPOLOGY_STATE_NAMES = ("topology", "_fixed_design_topology")
@@ -2340,6 +2344,11 @@ class ForwardFluxOperator:
     wall_unit_closed: object = field(repr=False, default=None)
     wall_unit_kinds: tuple[str, ...] | None = field(repr=False, default=None)
     clip_mode: str = field(repr=False, default="chord")
+    moment_support: object | None = field(repr=False, default=None)
+    moment_roots: object | None = field(repr=False, default=None)
+    moment_row_cache: object | None = field(repr=False, default=None)
+    exterior_jet_response: object | None = field(repr=False, default=None)
+    conductor_sections: InitVar[object | None] = None
     prescribed_current_field: InitVar[PrescribedCurrentField | None] = None
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
@@ -2350,7 +2359,11 @@ class ForwardFluxOperator:
         super().__init_subclass__(**kwargs)
         jax.tree_util.register_pytree_node_class(cls)
 
-    def __post_init__(self, prescribed_current_field: PrescribedCurrentField | None):
+    def __post_init__(
+        self,
+        prescribed_current_field: PrescribedCurrentField | None,
+        conductor_sections=None,
+    ):
         """Build the topology read and default the material mask."""
         if self.clip_mode not in {"chord", "exact", "chord_cells"}:
             raise ValueError(f"unknown support clip mode {self.clip_mode!r}")
@@ -2577,6 +2590,81 @@ class ForwardFluxOperator:
         for name in self._dynamic_extra_names():
             setattr(self, name, jnp.asarray(getattr(self, name)))
         self._geometry_identity = self._compute_geometry_identity()
+        if conductor_sections is not None:
+            self.build_conductor_support(conductor_sections)
+
+    def bind_moment_support(self, operands, roots, *, exterior_response=None):
+        """Bind the locked support read and its exact exterior as operands."""
+        if operands.rows.shape[1:3] != (self.grid.node_number, 3):
+            raise ValueError("support rows must carry three moments per plasma cell")
+        roots = jnp.asarray(roots)
+        if roots.ndim != 2 or roots.shape[1] != 2 or roots.shape[0] < 1:
+            raise ValueError(
+                "stationary seeds must contain an axis followed by saddles"
+            )
+        self.moment_support = operands
+        self.moment_roots = roots
+        self.moment_row_cache = support_read.row_window(operands, roots)
+        self.exterior_jet_response = exterior_response
+
+    def build_conductor_support(self, sections):
+        """Construct plasma and conductor jet rows once from exact kernels."""
+        from nova.equilibrium import topology
+
+        if self.moment_geometry is None or self.moment_roots is None:
+            raise ValueError(
+                "conductor support requires cell geometry and stationary seeds"
+            )
+        wall = np.asarray(self.wall.coordinate)
+        units = tuple(
+            wall[start:stop]
+            for start, stop in zip(
+                self.wall_unit_offsets[:-1], self.wall_unit_offsets[1:], strict=True
+            )
+        )
+        geometry = topology.TopologyGeometry.from_cells(
+            self.moment_geometry.polygons, self.moment_geometry.sampling_vertices, units
+        )
+        samples = np.asarray(geometry.sample_points)
+        nodes, inverse = np.unique(
+            np.round(samples.reshape(-1, 2), 12), axis=0, return_inverse=True
+        )
+        coupling = topology.BiotMomentCoupling.from_polygons(
+            self.moment_geometry.polygons
+        )
+        rows = support_read.coupling_rows(nodes, coupling)
+        response = support_read.conductor_jet_rows(nodes, sections)
+        if response.shape[1] != self.external_current.size:
+            raise ValueError("one conductor section is required per exterior current")
+        exterior = jnp.einsum("ncq,c->nq", response, self.external_current)
+        operands = support_read.SupportOperands.from_rows(
+            geometry, rows, exterior, nodes, inverse.reshape(samples.shape[:-1])
+        )
+        self.bind_moment_support(
+            operands, self.moment_roots, exterior_response=response
+        )
+
+    def moment_operands(self, current=None):
+        """Resolve the same current operand in the exterior value and its jets."""
+        from dataclasses import replace
+
+        if self.moment_support is None or self.moment_row_cache is None:
+            raise ValueError("moment solve requires exact exterior nodal jets")
+        operands, cache = self.moment_support, self.moment_row_cache
+        if self.exterior_jet_response is not None:
+            values = self.external_current if current is None else jnp.asarray(current)
+            exterior = jnp.einsum("ncq,c->nq", self.exterior_jet_response, values)
+            operands = replace(operands, exterior=exterior)
+            slots = cache.lookup
+            window = (
+                jnp.zeros_like(cache.exterior)
+                .at[jnp.maximum(slots, 0)]
+                .add(jnp.where(slots[:, None] >= 0, exterior, 0.0))
+            )
+            cache = replace(cache, exterior=window)
+        elif current is not None:
+            raise ValueError("a prescribed exterior jet field has no current response")
+        return operands, cache
 
     def _dynamic_extra_names(self) -> tuple[str, ...]:
         """Return specialised member scalars that must enter the trace as data."""

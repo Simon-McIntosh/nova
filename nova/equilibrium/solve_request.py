@@ -31,6 +31,8 @@ SolveRoute = Literal[
     "anderson",
     "newton_krylov",
     "reduced_newton",
+    "moment_dense",
+    "moment_krylov",
 ]
 SupportClipMode = Literal["chord", "exact", "chord_cells"]
 JsonScalar = str | int | float | bool | None
@@ -341,6 +343,8 @@ class ForwardSolvePolicy:
             "anderson",
             "newton_krylov",
             "reduced_newton",
+            "moment_dense",
+            "moment_krylov",
         }:
             raise ValueError(f"unknown forward solve route {self.route!r}")
         for name in (
@@ -369,6 +373,12 @@ class ForwardSolvePolicy:
     def kernel_options(self) -> dict[str, JsonScalar]:
         """Translate this policy into the selected route's public keywords."""
 
+        if self.route in {"moment_dense", "moment_krylov"}:
+            return {
+                "newton_steps": self.newton_steps,
+                "gmres_iterations": self.gmres_iterations,
+                "tolerance": self.kernel_tolerance,
+            }
         if self.route == "newton_krylov":
             return {
                 "newton_steps": self.newton_steps,
@@ -467,7 +477,7 @@ def resolve_forward_solve_policy(
 
 @dataclass(frozen=True, slots=True)
 class ExplicitSolveSeed:
-    """An explicitly supplied total-flux state used as the solve seed."""
+    """An explicit solver state: total flux or three cell moments per cell."""
 
     state: object
 
@@ -589,6 +599,11 @@ class ForwardSolveRequest:
         object.__setattr__(self, "enforce", tuple(self.enforce))
         if self.clip_mode not in {"chord", "exact", "chord_cells"}:
             raise ValueError(f"unknown support clip mode {self.clip_mode!r}")
+        if (
+            self.route in {"moment_dense", "moment_krylov"}
+            and self.clip_mode != "exact"
+        ):
+            raise ValueError("moment routes use the locked exact support read")
 
     @classmethod
     def from_defaults(
@@ -610,6 +625,8 @@ class ForwardSolveRequest:
         policy = declared_forward_solve_policy(nova_version)
         if policy_overrides:
             policy = replace(policy, **dict(policy_overrides))
+        if policy.route in {"moment_dense", "moment_krylov"}:
+            inputs.setdefault("clip_mode", "exact")
         return cls(
             carrier_identity=carrier_identity,
             source_profile=source_profile,

@@ -351,6 +351,19 @@ class ForwardEquilibrium(NamedTuple):
     constraint_outer: ConstraintOuterTrace | None = None
 
 
+class MomentForwardEquilibrium(NamedTuple):
+    """Terminal moment state, its physical flux and the locked support read."""
+
+    flux: jax.Array
+    cell_current: jax.Array
+    booked_moments: CellCurrentMoments
+    topology: object
+    fixed_point: object
+    support: object
+    execution: dict
+    constraints: tuple = ()
+
+
 class ForwardBranchReceipt(NamedTuple):
     """One topology-pinned branch and its terminal convergence qualification."""
 
@@ -2604,6 +2617,8 @@ class ForwardProfile:
     ) -> ForwardSolveReceipt:
         """Resolve one typed request whose constraint targets remain fixed."""
         active = self._with_source(request.source_profile, clip_mode=request.clip_mode)
+        if request.route in {"moment_dense", "moment_krylov"}:
+            return active._solve_moment_request(request)
         if request.constraint_pairs and request.route not in _CONSTRAINABLE:
             raise ValueError(
                 "augmented constraints require a route carrying a compensating "
@@ -2704,6 +2719,173 @@ class ForwardProfile:
                 policy,
                 compilation_cache_directory=cache_directory,
                 clip_mode=request.clip_mode,
+            ),
+            seed_provenance=request.seed_policy.provenance(),
+        )
+
+    def _solve_moment_request(self, request):
+        """Run device Newton exclusively through the cell-moment support read."""
+        from nova.equilibrium import current as booking, gs, topology
+
+        request_started = time.perf_counter()
+        if request.constraint_pairs:
+            raise ValueError("moment Newton requires moment-space constraint rows")
+        if request.prescribed_current is not None:
+            raise ValueError(
+                "prescribed currents require matching exterior jet responses"
+            )
+        if not request.policy.exact_kernels:
+            raise ValueError("moment Newton requires exact coupling kernels")
+        if not request.policy.current_pin and request.target_current is not None:
+            raise ValueError("target_current requires the current-pin policy")
+        operands, cache = self.operator.moment_operands(request.current)
+        roots = self.operator.moment_roots
+        initial = jnp.asarray(
+            request.seed_policy.resolve(self, current=request.current)
+        )
+        cells = len(operands.geometry.centre)
+        if initial.shape != (cells, 3):
+            raise ValueError(
+                "moment Newton seed must carry three physical moments per cell"
+            )
+        signed_current = float(jnp.sum(initial[:, 0]))
+        convention = topology.TopologyConvention.from_cocos(17, signed_current)
+        quadrature = booking.Quadrature(
+            sigma=convention.sigma, target_current=request.target_current, segments=64
+        )
+        method = "dense" if request.route == "moment_dense" else "krylov"
+
+        def solve(
+            operator,
+            initial,
+            operands,
+            cache,
+            roots,
+            convention,
+            topology_policy,
+            quadrature,
+        ):
+            return gs.newton_moments(
+                initial,
+                operands,
+                cache,
+                roots,
+                convention,
+                topology_policy,
+                operator.source.core,
+                quadrature,
+                method=method,
+                steps=request.policy.newton_steps,
+                tolerance=request.policy.kernel_tolerance,
+                krylov_size=request.policy.gmres_iterations,
+            )
+
+        key = (
+            "moments",
+            method,
+            request.policy.newton_steps,
+            request.policy.kernel_tolerance,
+            request.policy.gmres_iterations,
+        )
+        cache_hit = key in self._accelerated_program_cache
+        program = self._accelerated_program_cache.setdefault(key, jax.jit(solve))
+        arguments = (
+            self.operator,
+            initial,
+            operands,
+            cache,
+            roots,
+            convention,
+            request.policy.topology,
+            quadrature,
+        )
+        started = time.perf_counter()
+        executable = program.lower(*arguments).compile()
+        compile_seconds = time.perf_counter() - started
+        started = time.perf_counter()
+        result = executable(*arguments)
+        jax.block_until_ready(result)
+        solve_seconds = time.perf_counter() - started
+        memory = executable.memory_analysis()
+        code_size = getattr(
+            executable.runtime_executable(), "size_of_generated_code_in_bytes", None
+        )
+        execution = dict(
+            compile_seconds=compile_seconds,
+            solve_seconds=solve_seconds,
+            temporary_bytes=memory.temp_size_in_bytes,
+            argument_bytes=memory.argument_size_in_bytes,
+            output_bytes=memory.output_size_in_bytes,
+            executable_bytes=None if code_size is None else code_size(),
+        )
+
+        def terminal_read(
+            operator, moments, operands, cache, roots, convention, policy, quadrature
+        ):
+            return gs.moment_residual(
+                moments,
+                operands,
+                cache,
+                roots,
+                convention,
+                policy,
+                operator.source.core,
+                quadrature,
+            )
+
+        residual, (support, booked) = jax.jit(terminal_read)(
+            self.operator,
+            result.moments,
+            operands,
+            cache,
+            roots,
+            convention,
+            request.policy.topology,
+            quadrature,
+        )
+        moments = CellCurrentMoments(*(result.moments[:, index] for index in range(3)))
+        exterior = self.operator.external(request.current)
+        flux = gs.apply(
+            jnp.zeros_like(exterior),
+            exterior,
+            self.operator,
+            moments=moments,
+            shadow=jnp.zeros_like(exterior, dtype=bool),
+        )
+        terminal = MomentForwardEquilibrium(
+            flux,
+            moments.cell_current,
+            moments,
+            support.reading,
+            result,
+            support,
+            execution,
+        )
+        qualified = (
+            support.valid
+            & booked.valid
+            & result.converged
+            & jnp.all(jnp.isfinite(residual))
+            & (result.residual <= request.policy.qualification_tolerance)
+        )
+        jax.block_until_ready((qualified, flux))
+        return ForwardSolveReceipt(
+            terminal_state=terminal,
+            qualified=qualified,
+            termination_reason=result.termination_reason,
+            residual_history=result.residual_history,
+            mask_history=jnp.zeros_like(result.accepted, dtype=jnp.int32),
+            globalisation_decisions=(result.accepted, result.step_factors),
+            amplitude_history=jnp.atleast_1d(booked.normalization),
+            topology_read=support.reading,
+            polish_receipt={
+                "iterations": support.stationary.iterations,
+                "status": support.stationary.status,
+            },
+            compilation_cache_hit=cache_hit,
+            wall_seconds=time.perf_counter() - request_started,
+            resolved_defaults=ResolvedForwardSolveDefaults.from_policy(
+                request.policy, clip_mode="exact", compilation_cache_directory=None
             ),
             seed_provenance=request.seed_policy.provenance(),
         )

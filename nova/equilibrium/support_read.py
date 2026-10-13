@@ -75,6 +75,87 @@ def nodal_jets(operands: SupportOperands, moments) -> jax.Array:
     return operands.exterior + jnp.einsum("ncmq,cm->nq", operands.rows, stacked)
 
 
+def conductor_jet_rows(nodes, sections):
+    """Build exact nodal response jets for rectangular coils or filaments.
+
+    Each section is ``(radius, height, radial_width, vertical_width)``; two
+    zero widths select a filament. Currents are contracted after this geometry
+    construction and remain runtime operands. A row is value, two gradient
+    entries and three symmetric Hessian entries, per ampere.
+    """
+    from nova.biot.greens import traced_cylinder_greens, traced_filament_greens
+
+    sections = np.asarray(sections, dtype=np.float64)
+    if sections.ndim != 2 or sections.shape[1] != 4:
+        raise ValueError("conductor sections must have shape (conductors, 4)")
+    widths = sections[:, 2:]
+    if np.any(widths < 0) or np.any((widths[:, 0] == 0) != (widths[:, 1] == 0)):
+        raise ValueError("conductor widths must both be positive or both zero")
+
+    def one(point, section):
+        def gradient_with_value(target):
+            value, radial, vertical = jax.lax.cond(
+                section[2] == 0,
+                lambda _: traced_filament_greens(
+                    jnp, target[0], target[1], section[0], section[1]
+                ),
+                lambda _: traced_cylinder_greens(jnp, target[0], target[1], *section),
+                None,
+            )
+            gradient = 2 * jnp.pi * target[0] * jnp.stack((vertical, -radial))
+            return gradient, (value, gradient)
+
+        hessian, (value, gradient) = jax.jacfwd(gradient_with_value, has_aux=True)(
+            point
+        )
+        return fixed_points.stack_jet(topology.FieldJet(value, gradient, hessian))
+
+    return jax.jit(jax.vmap(jax.vmap(one, in_axes=(None, 0)), in_axes=(0, None)))(
+        jnp.asarray(nodes), jnp.asarray(sections)
+    )
+
+
+def coupling_rows(nodes, coupling, *, batch_size=3):
+    """Build value and derivative rows from the existing exact source kernel."""
+    return jax.jit(
+        lambda nodes, coupling: jax.lax.map(
+            lambda point: fixed_points._source_jets(point, coupling),
+            nodes,
+            batch_size=batch_size,
+        )
+    )(jnp.asarray(nodes), coupling)
+
+
+def row_window(operands, previous, *, margin=None, capacity=512):
+    """Select a bounded stationary-point window from already-built nodal rows."""
+    nodes = np.asarray(operands.nodes)
+    triangles = np.asarray(operands.mesh.triangles)
+    centres = np.asarray(operands.mesh.generators)
+    if margin is None:
+        margin = 2 * float(np.median(operands.geometry.pitch))
+    distance = np.min(
+        np.linalg.norm(centres[:, None] - np.asarray(previous)[None], axis=-1), axis=1
+    )
+    radius = np.max(
+        np.linalg.norm(nodes[triangles] - centres[:, None, None], axis=-1), axis=(1, 2)
+    )
+    chosen = np.unique(triangles[distance <= margin + radius])
+    if not len(chosen) or len(chosen) > capacity:
+        raise ValueError(
+            f"row window needs {len(chosen)} nodes; capacity is {capacity}"
+        )
+    lookup = np.full(len(nodes), -1, dtype=np.int32)
+    lookup[chosen] = np.arange(len(chosen))
+    padding = capacity - len(chosen)
+    return fixed_points.RowCache(
+        operands.mesh,
+        operands.nodes,
+        jnp.asarray(lookup),
+        jnp.pad(operands.rows[chosen], ((0, padding), (0, 0), (0, 0), (0, 0))),
+        jnp.pad(operands.exterior[chosen], ((0, padding), (0, 0))),
+    )
+
+
 def read(
     operands: SupportOperands,
     cache: fixed_points.RowCache,

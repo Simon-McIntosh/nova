@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="200">
+<meta name="plan-version" content="201">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -329,10 +329,11 @@
     <div class="r-fu-body"><p>Review follow-ons on merge 8fe66e390:</p><ul><li>a debug <code>print</code> committed in <code>tests/test_mask_threshold_consistency.py</code>;</li><li>the <code>(core, private_flux)</code> count golden in <code>test_topology_domain_partition.py</code> and the committed axis golden in <code>test_topology_o_qualification.py</code> were deleted rather than regenerated, so those operand counts are unpinned;</li><li>the fragment does not remark that the centred summation also cleared <code>test_exact_clip_moments.py::test_order_study_receipt_carries_the_map_the_record_is_transcribed_from</code>.</li></ul><p>Done when the print is gone, the two goldens are regenerated at main with their provenance, and the fragment notes the cleared test.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
-<article class="r-fu" data-id="f-cfs-fixed-point-production" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-13" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cfs-fixed-point-production" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-13" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="2026-10-13T09:19:00+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Make the locked fixed-point solve production-safe (§2)</h4>
     <div class="r-fu-body"><p>Four items from the split-read measurement:</p><ul><li>A cache miss refreshes the bounded jet rows reactively in 2.8 to 7.3 s. Prebuild or slide the rows outside the timed call, so a moving X-point never waits on them.</li><li>Guard the cached Newton against taking a saddle for the axis, which happened on four coarse 550-cell replay states.</li><li>Explain or remove the adaptive diverted 2,000-cell p99 tail of 1.64 ms.</li><li>Fuse the Bell jet evaluation with the Newton bookkeeping, the next device lever.</li></ul><p>Done when the solve meets p99 under 1 ms through 10,000 cells, with no refusal and no axis/saddle confusion across moving-state sweeps that cross the row window.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
+    <p class="r-fu-outcome"><p>Landed at merge 81dd96afc (run r-20261013T081627759784, review 102). <code>nova/equilibrium/fixed_points.py</code> solves the axis and X-point as one adaptive, batched, warm-started Newton over a bounded window of cached Bell jet rows, with a fused jet evaluation.</p><ul><li>Row maintenance is a separate call. An iterate leaving the window returns a typed needs-rows result instead of blocking.</li><li>A root-type guard rejects a saddle taken for the axis. The four coarse replay states now pass, and with the guard disabled seven tests fail.</li><li>H200: 2,520 calls through 10,000 cells, worst p99 0.705 ms, no refusals or wrong roots.</li><li>Open from review: the cause of the earlier 1.64 ms adaptive tail is still unattributed, and the module copies the prototype's Bell-mesh and source-jet code (<code>f-cfs-fixed-point-owner</code>).</li></ul></p>
     </article>
 <article class="r-fu" data-id="f-cfs-membership-hybrid" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="critical" data-written-by="reckon-build" data-written-at="2026-10-13" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Membership from the Bell level set with curved legs at the X-point (§2)</h4>
@@ -343,6 +344,11 @@
     <h4 class="r-fu-title">Explain the 72% booked-moment difference at 10,000 diverted cells (§3)</h4>
     <div class="r-fu-body"><p>The split-read measurement found the diverted 10,000-cell booked moments differing by 0.7199 relative from the reference, against 3.2e-4 and 1.7e-4 at 2,000 and 5,000 cells, while the read reported valid. Source hashes match.</p><p>Done when the cause is located in the read's fragments, in <code>current.book</code> or in the carrier, by comparing the 10,000-cell read-driven booking with the exact-support booking cell by cell, and is either fixed at its owner or named with the fix.</p></div>
     <pre class="r-fu-prompt">/reckon-build converged-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-cfs-fixed-point-owner" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-written-by="reckon-build" data-written-at="2026-10-13" data-recommends-skill="/reckon-build converged-forward-solve §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make the production fixed-point module the single owner of the Bell mesh (§2)</h4>
+    <div class="r-fu-body"><p><code>nova/equilibrium/fixed_points.py</code> carries near-verbatim copies of the prototype's Bell-mesh (<code>build_mesh</code>, <code>BellMesh</code>, <code>field_from_jets</code>, <code>polynomial_row</code>, <code>triangle_transform</code>) and source-jet code from <code>scripts/prototypes/read_route</code>.</p><p>Done when the prototype scripts import the production module rather than holding their own copies, so the Bell mesh has one owner. Record the unattributed 1.64 ms adaptive tail as a measured open item, or attribute it.</p></div>
+    <pre class="r-fu-prompt">/reckon-build converged-forward-solve §2</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

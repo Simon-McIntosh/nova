@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-10-13T13:45:42.762Z",
+  "dispatched_at": "2026-10-13T13:31:35Z",
+  "findings": [
+    {
+      "anchor": "tests/equilibrium/test_topology_read.py:2099",
+      "cites": "nova/biot/sectionaverage.py:80 _polygon_parts; nova/imas/diiid_machine_ids.py:204 _polygon_parts.",
+      "class": "duplicated_capability",
+      "id": "reuse-1",
+      "item": "reuse",
+      "severity": "follow-on",
+      "text": "the added nested polygon_parts generator duplicates the recursive _polygon_parts already owned by nova/biot/sectionaverage.py:80 (a production module) and nova/imas/diiid_machine_ids.py:204; it neither imports nor extends either owner, so the same polygon-descent recursion now exists in a fourth place, but it is a five-line test-local helper and does not change behaviour."
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T075801148546-book-ten-thousand/manifest.md:22",
+      "cites": "after_suite revision 1f497fbba56e0a773534e71dd62208c0354cd4c1 vs reviewed head 02a78968989354134852399996cdec4d77314190.",
+      "class": "revision_provenance_mismatch",
+      "id": "provenance-1",
+      "item": "provenance",
+      "severity": "follow-on",
+      "text": "the after_suite records revision 1f497fbba rather than the reviewed head 02a789689, so the completed suite run is not at its own recorded head; git diff --stat 1f497fbba 02a789689 is docs-only, so the code under test is byte-identical and the delta holds, but the provenance pair a reader compares does not line up."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production runtime code under nova/ reaches the landed change: it is confined to a test helper, one new test module, four prototype scripts and docs, so CALL_SITES is emitted as none.",
+    "diff": "read commit by commit against base 6fce3ebfc2f6b46fb1a53db17c31d293699455cd; 0cfd2a756 changes the polygon descent in _kernel_backed_field, the rest add the prototype scripts, the new test, the svg and the fragment.",
+    "done_when": "all five done_when items land in the diff: the 0.72 and controls (combined.log, diagnostic.log), the cell-by-cell localisation (fragment table and svg), the mechanism plus failing test (tests/test_book_ten_thousand.py), the valid=True honesty check (fragment), and the fragment plus svg deliverable.",
+    "goal": "the node goal is to locate the cause of the 72 percent booked-moment difference at 10,000 diverted cells; the diff localises it to 97 interior reference cells, names the mechanism (a Shapely GeometryCollection whose Polygon part _kernel_backed_field skipped), repairs the helper at tests/equilibrium/test_topology_read.py:2099, and adds tests/test_book_ten_thousand.py.",
+    "manifest": "read; status complete, commit 02a789689 present, baseline_suite 8 failures at 6fce3ebf and after_suite 5 failures at 1f497fbba both completed true, negative_control_log named and reproduced, blockers none.",
+    "write_paths": "git diff --stat 6fce3ebfc2f6b46fb1a53db17c31d293699455cd 02a78968989354134852399996cdec4d77314190 lists nine files, all inside the seven declared write paths; nova/equilibrium/topology.py and nova/equilibrium/clip_quadrature.py are declared but untouched, which the fragment explains as the defect lying in the reference helper rather than production."
+  },
+  "justifications": {
+    "durability": "tests/test_book_ten_thousand.py:41 asserts reference.moments.cell_current[0] > 0 against the value the repaired helper produces, and negative-control.log shows restoring the MultiPolygon-only branch reddens that id with assert 0.0 > 0 at EXIT=1.",
+    "evidence": "repaired-rows.log records 3.1727896e-4 / 1.6769815e-4 / 5.9852314e-5 at 2,000/5,000/10,000 cells and topology-base-retry.log plus sharded-head-corrected.log give the 8-to-5 failure delta, but the after_suite at manifest.md:22 runs revision 1f497fbba, one commit before the reviewed head 02a789689.",
+    "fit": "the prototype modules and the added test follow the surrounding idiom and carry no version suffix or ticket reference, though the directory name scripts/prototypes/book_ten_thousand/ echoes the followup id and the commit subject fix(equilibrium) touches a tests/ file rather than nova/equilibrium/.",
+    "goal_fidelity": "the fragment docs/evidence/fragments/converged-forward-solve/book-ten-thousand.html localises the difference to 97 cells in one interior radial column and the test at tests/test_book_ten_thousand.py:41 exercises the repaired helper at tests/equilibrium/test_topology_read.py:2099 that produced it.",
+    "reuse": "the nested generator polygon_parts at tests/equilibrium/test_topology_read.py:2099 re-implements the recursive polygon-member extraction the repository already owns at nova/biot/sectionaverage.py:80 (_polygon_parts) and nova/imas/diiid_machine_ids.py:204, without extending either owner.",
+    "scope_discipline": "every path in git diff --stat 6fce3ebfc2f6b46fb1a53db17c31d293699455cd 02a78968989354134852399996cdec4d77314190 (the four prototype modules, compare_topology.sh, tests/test_book_ten_thousand.py, tests/equilibrium/test_topology_read.py, the svg and the fragment) is inside the manifest's declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to locate the cause of the 72 percent booked-moment difference at 10,000 diverted cells; the diff localises it to 97 interior reference cells, names the mechanism in docs/evidence/fragments/converged-forward-solve/book-ten-thousand.html, repairs the reference helper _kernel_backed_field at tests/equilibrium/test_topology_read.py:2099, and adds the reproducing test tests/test_book_ten_thousand.py.\nVERDICT done_when: all five done_when items land in the diff; (1) the 0.72 and the 2,000/5,000 controls are recorded in combined.log and diagnostic.log, (2) the 97-cell localisation is recorded in the fragment table and the svg, (3) the mechanism plus a failing test are present at tests/test_book_ten_thousand.py, (4) the valid=True honesty check is answered in the fragment, (5) the fragment and figure are committed as declared.\nVERDICT write_paths: git diff --stat 6fce3ebfc2f6b46fb1a53db17c31d293699455cd 02a78968989354134852399996cdec4d77314190 lists nine files, all inside the seven declared write paths; the two declared-but-unwritten production paths (nova/equilibrium/topology.py, nova/equilibrium/clip_quadrature.py) are untouched because the defect was in the reference helper, not production.\nVERDICT manifest: read; status complete, commit list 02a789689 present at the reviewed head, baseline_suite and after_suite both completed true at 8 and 5 failures with zero added ids, negative_control_log named and reproduced; the after_suite names revision 1f497fbba rather than the head 02a789689.\nVERDICT diff: read commit by commit against base 6fce3ebfc2f6b46fb1a53db17c31d293699455cd; 0cfd2a756 changes the polygon descent in _kernel_backed_field (tests/equilibrium/test_topology_read.py:2099-2104), the remaining commits add the prototype scripts, the new test, the figure and the fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the fragment docs/evidence/fragments/converged-forward-solve/book-ten-thousand.html localises the difference to 97 cells in one interior radial column and names the defect (a Shapely GeometryCollection whose Polygon part the old helper skipped), and the repaired helper at tests/equilibrium/test_topology_read.py:2099 is exercised by tests/test_book_ten_thousand.py:41.\nSCORE evidence: 16\nJUSTIFICATION evidence: repaired-rows.log records 3.1727896e-4 / 1.6769815e-4 / 5.9852314e-5 at 2,000/5,000/10,000 cells and topology-base-retry.log plus sharded-head-corrected.log give the 8-to-5 failure delta, but the after_suite at manifest.md:22 runs revision 1f497fbba, one commit before the reviewed head 02a789689.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff --stat 6fce3ebfc2f6b46fb1a53db17c31d293699455cd 02a78968989354134852399996cdec4d77314190 (the four prototype modules, compare_topology.sh, tests/test_book_ten_thousand.py, tests/equilibrium/test_topology_read.py, the svg and the fragment) is inside the manifest's declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_book_ten_thousand.py:41 asserts reference.moments.cell_current[0] > 0 against the value the repaired helper produces, and negative-control.log shows restoring the MultiPolygon-only branch reddens that id with assert 0.0 > 0 at EXIT=1.\nSCORE fit: 17\nJUSTIFICATION fit: the prototype modules and the added test follow the surrounding idiom and carry no version suffix or ticket reference, though the directory name scripts/prototypes/book_ten_thousand/ echoes the followup id and the commit subject fix(equilibrium) touches a tests/ file rather than nova/equilibrium/.\nSCORE reuse: 5\nJUSTIFICATION reuse: the nested generator polygon_parts at tests/equilibrium/test_topology_read.py:2099 re-implements the recursive polygon-member extraction the repository already owns at nova/biot/sectionaverage.py:80 (_polygon_parts) and nova/imas/diiid_machine_ids.py:204, without extending either owner.\nFINDING tests/equilibrium/test_topology_read.py:2099 follow-on: the added nested polygon_parts generator duplicates the recursive _polygon_parts already owned by nova/biot/sectionaverage.py:80 (a production module) and nova/imas/diiid_machine_ids.py:204; it neither imports nor extends either owner, so the same polygon-descent recursion now exists in a fourth place, but it is a five-line test-local helper and does not change behaviour.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T075801148546-book-ten-thousand/manifest.md:22 follow-on: the after_suite records revision 1f497fbba56e0a773534e71dd62208c0354cd4c1 rather than the reviewed head 02a78968989354134852399996cdec4d77314190, so the completed suite run is not at its own recorded head; git diff --stat 1f497fbba 02a789689 is docs-only, so the code under test is byte-identical and the delta holds, but the provenance pair a reader compares does not line up.",
+  "review_run_id": "r-20261013T133115498861-review-of-book-ten-thousand-02a789689893",
+  "reviewed_base_sha": "6fce3ebfc2f6b46fb1a53db17c31d293699455cd",
+  "reviewed_head_sha": "02a78968989354134852399996cdec4d77314190",
+  "reviewed_run_id": "r-20261013T075801148546-book-ten-thousand",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T13:40:07+00:00",
+  "total": 94
+}

@@ -247,10 +247,10 @@ def measure(args):
     exact = jnp.stack(tuple(reference.moments), -1)
     reference_jets = jnp.einsum("ncmq,cm->nq", rows, exact)
     # State construction is setup, outside the timed solve.
-    nodal = [
-        stack_jet(jax.jit(jax.vmap(field.evaluate))(jnp.asarray(nodes[selected])))
-        for field in fields
-    ]
+    nodal_jets = jax.jit(
+        lambda field, points: stack_jet(jax.vmap(field.evaluate)(points))
+    )
+    nodal = [nodal_jets(field, jnp.asarray(nodes[selected])) for field in fields]
     exterior = [jet - reference_jets for jet in nodal]
     receipt = dict(
         kind=args.kind,
@@ -281,16 +281,22 @@ def measure(args):
         normal_form_radius=0.054806712567833996 if saddle is not None else 0.0
     )
     reader = jax.jit(topology.read)
-    book = jax.jit(current.book)
+    book = jax.jit(
+        lambda psi, reading, geometry, quadrature: current.book(
+            psi, reading, geometry, profile, quadrature
+        )
+    )
+    sample_values = jax.jit(
+        lambda field, points: jax.vmap(jax.vmap(field.value))(points)
+    )
     bookings = []
     for index, field in enumerate(fields):
         reading = reader(field, geometry, convention, policy)
-        psi = jax.jit(jax.vmap(jax.vmap(field.value)))(geometry.sample_points)
+        psi = sample_values(field, geometry.sample_points)
         booked = book(
             psi,
             reading,
             geometry,
-            profile,
             current.Quadrature(sigma=convention.sigma, segments=64),
         )
         jax.block_until_ready(booked)
@@ -389,8 +395,7 @@ def main():
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
         f"REVISION={revision} TREE={ROOT} COMMAND={sys.executable} "
-        "-m scripts.prototypes.fixed_points.measure "
-        + " ".join(sys.argv[1:]),
+        "-m scripts.prototypes.fixed_points.measure " + " ".join(sys.argv[1:]),
         flush=True,
     )
     print(

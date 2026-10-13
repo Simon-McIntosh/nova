@@ -134,12 +134,6 @@ def test_spline_boundary_deadband_preserves_the_first_active_set_trip():
         active_set_steps=1,
     )
     fixed = solved.equilibrium.fixed_point
-    print(
-        "active-set evidence",
-        np.asarray(fixed.active_set_mask_differences),
-        float(fixed.residual),
-        flush=True,
-    )
 
     assert int(fixed.active_set_iterations) == 1
     np.testing.assert_array_equal(

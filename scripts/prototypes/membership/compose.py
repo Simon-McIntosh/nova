@@ -44,11 +44,14 @@ def composed(payload, radius, crossed):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("rows", type=Path)
+    parser.add_argument("--verify", action="store_true")
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(
         f"revision={revision} tree={Path.cwd()} command={sys.executable} "
-        "-m scripts.prototypes.membership.compose " + str(args.rows),
+        "-m scripts.prototypes.membership.compose "
+        + str(args.rows)
+        + (" --verify" if args.verify else ""),
         flush=True,
     )
     print(
@@ -57,7 +60,9 @@ def main():
         flush=True,
     )
     assert jax.default_backend() == "gpu"
-    output = args.rows / "composed.json"
+    output = args.rows / (
+        "composed-verification.json" if args.verify else "composed.json"
+    )
     receipt = dict(rows=[], complete=False)
     for cells in (2000, 5000):
         for kind in ("diverted", "limited"):
@@ -71,14 +76,14 @@ def main():
                 operands = payload, jnp.asarray(0.054806712567833996), jnp.asarray(flag)
                 jax.block_until_ready(program(*operands))
                 walls = []
-                for _ in range(3):
+                for _ in range(1 if args.verify else 3):
                     started = perf_counter()
                     result = program(*operands)
                     jax.block_until_ready(result)
                     walls.append(perf_counter() - started)
-                reference = np.load(
-                    args.rows / f"{kind}-{cells}-booked-{name}.npz"
-                )["membership"]
+                reference = np.load(args.rows / f"{kind}-{cells}-booked-{name}.npz")[
+                    "membership"
+                ]
                 difference = float(np.max(np.abs(np.asarray(result[0]) - reference)))
                 np.testing.assert_allclose(result[0], reference, rtol=0, atol=1e-12)
                 row = dict(

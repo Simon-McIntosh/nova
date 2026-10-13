@@ -48,7 +48,7 @@ def _census_route(requested_cells, oracle_fixture, certificate, exact, carrier, 
     exact_state = certificate._exact_state(CASE, exact, coordinates)
     empty = oracle_fixture.forward_operator(source, machine)
     physical = oracle_fixture.exact_current_moments(
-        source, empty, exact_state, analytic=exact
+        source, empty, exact_state, analytic=exact, support_arm="legacy"
     )
     coefficients = empty.coupling_current_moments(physical)
     interior = oracle_fixture._internal_flux_image(empty, coefficients)

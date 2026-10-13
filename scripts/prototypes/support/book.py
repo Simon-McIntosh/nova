@@ -250,8 +250,17 @@ def measure(kind, cells, directory, cache):
         exterior + operator.current_moment_image(legacy) - analytic
     )[: len(machine.node)]
     legacy_map = float(np.max(np.abs(np.where(shadow, 0, legacy_delta))) / span)
+    # Diverted 550-cell legacy booking map error. The constant is the value the
+    # booking row reports for legacy_map_error, measured by job 1283981, whose
+    # base arm ran the diverted-550 row on the base tree (437a68db4) and whose
+    # head arm reproduced it bit-identically. The row and the value are
+    # recorded in the exterior-fixture-delegation evidence fragment.
+    # This node does not re-measure it: the row's machine and exterior fixture
+    # receipts are absent, so the harness row raises FileNotFoundError before
+    # booking rather than printing a number. The earlier pin of 0.197327 was
+    # 1.36e-2 away, so it could only ever fail.
     if kind == "diverted" and cells == 550:
-        assert abs(legacy_map / 0.197327 - 1) < 5e-6, legacy_map
+        assert abs(legacy_map / 0.1946465024178517 - 1) < 5e-6, legacy_map
     density_scale = np.maximum(
         np.abs(np.asarray(truth.cell_current)),
         abs(float(total))

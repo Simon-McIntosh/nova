@@ -2095,16 +2095,19 @@ def _kernel_backed_field(kind, oracle, total, geometry):
     product = weight[:, None] * weight[None, :] / 4
     values = np.zeros((3, len(polygons)))
     centres = np.asarray(coupling.centre)
+
+    def polygon_parts(shape):
+        if shape.geom_type == "Polygon":
+            yield shape
+        elif hasattr(shape, "geoms"):
+            for part in shape.geoms:
+                yield from polygon_parts(part)
+
     for index, polygon in enumerate(polygons):
         clipped = Polygon(polygon).intersection(core)
         if clipped.is_empty:
             continue
-        parts = (
-            list(clipped.geoms) if clipped.geom_type == "MultiPolygon" else [clipped]
-        )
-        for part in parts:
-            if part.geom_type != "Polygon":
-                continue
+        for part in polygon_parts(clipped):
             corners = np.asarray(part.exterior.coords[:-1])
             signed = 0.5 * np.sum(
                 corners[:, 0] * np.roll(corners[:, 1], -1)

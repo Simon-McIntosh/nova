@@ -82,3 +82,20 @@ def test_failed_state_keeps_last_accepted_warm_start():
     rows = run_sweep(executable, [0, 1, 2], jnp.zeros((1, 2)), 1.0, np.zeros((3, 1, 2)))
     assert not rows[1]["valid"][0]
     np.testing.assert_array_equal(rows[2]["positions"], [[0.0, 0.0]])
+
+
+def test_axis_classification_rejects_a_minimum():
+    from nova.equilibrium.topology import FieldJet, StationaryRead
+    from scripts.prototypes.fixed_points.measure import run_sweep
+
+    def executable(state, seed, pitch):
+        return StationaryRead(
+            seed,
+            FieldJet(jnp.zeros(1), jnp.zeros((1, 2)), jnp.eye(2)[None]),
+            jnp.ones(1, dtype=bool),
+            jnp.ones(1, dtype=bool),
+            jnp.zeros(1),
+        )
+
+    rows = run_sweep(executable, [0], jnp.zeros((1, 2)), 1.0, np.zeros((1, 1, 2)))
+    assert "wrong-stationary-type" in rows[0]["failures"]

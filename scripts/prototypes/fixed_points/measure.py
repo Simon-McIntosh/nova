@@ -72,9 +72,10 @@ def run_sweep(
         )
         errors = np.linalg.norm(position - target, axis=-1) / float(pitch)
         determinants = np.linalg.det(np.asarray(result.jet.hessian))
-        classification = (determinants[0] > 0) and (
-            len(position) == 1 or determinants[1] < 0
+        axis_is_maximum = np.all(
+            np.linalg.eigvalsh(np.asarray(result.jet.hessian)[0]) < 0
         )
+        classification = axis_is_maximum and (len(position) == 1 or determinants[1] < 0)
         failures = []
         if not np.all(np.asarray(result.valid)):
             failures.append("no-convergence")

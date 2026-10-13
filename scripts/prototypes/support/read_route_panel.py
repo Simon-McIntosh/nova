@@ -62,7 +62,11 @@ def main() -> None:
     axis_flux = float(support.reading.axis_flux)
     levels = np.sort(
         np.concatenate(
-            (axis_flux * np.linspace(0.1, 0.9, 5), [0.0], axis_flux * [-0.1, -0.2])
+            (
+                axis_flux * np.linspace(0.1, 0.9, 5),
+                [0.0],
+                axis_flux * np.asarray([-0.1, -0.2]),
+            )
         )
     )
     figure, axes = plt.subplots(figsize=(14, 9), dpi=100)

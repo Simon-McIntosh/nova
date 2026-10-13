@@ -20,7 +20,7 @@ import numpy as np
 import nova
 from benchmarks import solovev_certificate as certificate
 from nova.database.zarrstore import ZarrStore
-from nova.equilibrium import current, gs, topology
+from nova.equilibrium import current, fixed_points, gs, topology
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.solve_request import (
     ExplicitSolveSeed,
@@ -140,6 +140,36 @@ def linear_timings(equation, operator, initial, arguments, result, method):
         rows=rows,
         jacobian_seconds=None,
         factor_seconds=None,
+    )
+
+
+def stationary_seed_probe(operands, cache, moments, roots, axis_sign):
+    """Inspect nearby root basins without changing the solve's selected seed."""
+    centres = np.asarray(operands.geometry.centre)
+    distance = np.linalg.norm(centres - np.asarray(roots[0]), axis=1)
+    candidates = jnp.concatenate(
+        (roots[:1], jnp.asarray(centres[np.argsort(distance)[:32]]))
+    )
+    pitch = jnp.median(operands.geometry.pitch)
+    solve = jax.jit(
+        jax.vmap(
+            lambda seed: fixed_points.solve(
+                cache,
+                moments,
+                seed[None],
+                seed[None],
+                pitch,
+                axis_sign,
+            )
+        )
+    )
+    result = solve(candidates)
+    return dict(
+        seeds=np.asarray(candidates).tolist(),
+        positions=np.asarray(result.position[:, 0]).tolist(),
+        values=np.asarray(result.jet.value[:, 0]).tolist(),
+        valid=np.asarray(result.valid[:, 0]).tolist(),
+        status=np.asarray(result.status[:, 0]).tolist(),
     )
 
 
@@ -302,6 +332,10 @@ def main():
                 "unconstrained; augmented constraints retained separately"
             )
             row["production_seed"] = seed_receipt
+            write(destination, row)
+            row["production_stationary_candidates"] = stationary_seed_probe(
+                operands, cache, operator.seed_moments(seed), roots, -convention.sigma
+            )
             write(destination, row)
         for method in ("krylov", "dense"):
             collection = (

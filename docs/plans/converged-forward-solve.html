@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="210">
+<meta name="plan-version" content="211">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -675,6 +675,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261013T080937054811-proto-membership-hybrid" data-who="reckon-build" data-when="2026-10-13T13:28:40Z">
     <div class="r-comment-body"><p>[Booking-effect comparison](/nova/evidence/fragments/converged-forward-solve/proto-membership-hybrid.html#proto-membership-hybrid-landing): H200 job 1284342 TIMEOUT after 02:30:24; 3/6 rows and 14/24 method records. Diverted 5000 B lowers analytic/Picard booking errors 76.4221%/81.8637% with 16.2464% maximum added warm wall. Limited 5000 Picard reference interrupted; both 10000 rows unstarted. No method lock.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261013T152535840167-review-of-proto-membership-hybrid-fbcf4f29b6ee" data-who="reckon-build" data-when="2026-10-13T15:41:21.293Z">
+    <div class="r-comment-body"><p>Independent review of proto-membership-hybrid (base 5e9d987b03d6ba3961066a2581ccd2f2ffa0763f, head fbcf4f29b6ee513f935f8446a82ee9712bea6104): approved, 0 blocking findings; scores goal_fidelity 14, evidence 13, scope_discipline 20, durability 14, fit 18, reuse 18; added_failure_count 0 with no added failure ids.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

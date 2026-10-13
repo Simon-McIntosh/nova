@@ -87,6 +87,7 @@ def run_sweep(
         rows.append(
             dict(
                 state=index,
+                warm_seed=np.asarray(seed).tolist(),
                 positions=position.tolist(),
                 error_pitches=errors.tolist(),
                 valid=np.asarray(result.valid).tolist(),
@@ -97,14 +98,15 @@ def run_sweep(
             )
         )
         # Preserve a failed result in the record, but do not poison later states.
-        seed = result.position if np.isfinite(position).all() else seed
+        accepted = result.valid & jnp.all(jnp.isfinite(result.position), axis=-1)
+        seed = jnp.where(accepted[:, None], result.position, seed)
     return rows
 
 
 def latency(executable, fields, sweep, pitch, calls):
     # Device operands and prior-state seeds are prepared before starting any clock.
-    seeds = [jnp.asarray(row["positions"]) for row in sweep]
-    operands = [(fields[i], seeds[max(0, i - 1)], pitch) for i in range(len(fields))]
+    seeds = [jnp.asarray(row["warm_seed"]) for row in sweep]
+    operands = [(fields[i], seeds[i], pitch) for i in range(len(fields))]
     jax.block_until_ready(operands)
     jax.block_until_ready(executable(*operands[0]))
     times = []

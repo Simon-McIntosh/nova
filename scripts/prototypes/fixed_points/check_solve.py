@@ -63,3 +63,22 @@ def test_uncached_iterate_is_refused():
     result = jax.jit(solve)(field, jnp.asarray([[0.3, -0.1]]), jnp.asarray(1.0))
     assert not result.valid[0]
     assert not np.isfinite(result.jet.value[0])
+
+
+def test_failed_state_keeps_last_accepted_warm_start():
+    from nova.equilibrium.topology import FieldJet, StationaryRead
+    from scripts.prototypes.fixed_points.measure import run_sweep
+
+    def executable(state, seed, pitch):
+        position = jnp.full_like(seed, 99.0) if state == 1 else seed
+        return StationaryRead(
+            position,
+            FieldJet(jnp.zeros(1), jnp.zeros((1, 2)), -jnp.eye(2)[None]),
+            jnp.asarray([state != 1]),
+            jnp.ones(1, dtype=bool),
+            jnp.zeros(1),
+        )
+
+    rows = run_sweep(executable, [0, 1, 2], jnp.zeros((1, 2)), 1.0, np.zeros((3, 1, 2)))
+    assert not rows[1]["valid"][0]
+    np.testing.assert_array_equal(rows[2]["positions"], [[0.0, 0.0]])

@@ -110,3 +110,32 @@ def test_curvature_contributes_to_saddle_improvement():
     )
     assert measured["valid"] and straight["valid"]
     assert measured["saddle_error"] < straight["saddle_error"]
+
+
+def test_curve_crossing_patch_uses_intersection_distance():
+    from scripts.prototypes.membership.hybrid import crossed_within_radius
+
+    form = topology.saddle_normal_form(
+        jnp.zeros(2),
+        jnp.diag(jnp.asarray((-2.0, 2.0))),
+        jnp.zeros((2, 2, 2)),
+        1e-12,
+    )
+    square = jnp.asarray(((0.4, 0.4), (0.6, 0.4), (0.6, 0.6), (0.4, 0.6)))
+    check = jax.jit(crossed_within_radius)
+    assert check(square, 4, form, 0.6)
+    assert not check(square, 4, form, 0.55)
+    assert not check(square + jnp.asarray((0.0, -0.6)), 4, form, 0.6)
+
+
+def test_outside_fragments_are_byte_identical():
+    _, rows = _receipt()
+    arms = [
+        row for name, row in rows.items() if name.endswith(("_preserved", "_radius"))
+    ]
+    assert len(arms) >= 2
+    for row in arms:
+        assert row["outside_byte_identical"]
+        assert row["outside_area_byte_identical"]
+        assert row["outside_edge_byte_identical"]
+        assert row["outside_selection_changes"] == 0

@@ -9,6 +9,7 @@ import argparse
 import ast
 import hashlib
 import json
+import pickle
 from pathlib import Path
 import subprocess
 import sys
@@ -31,7 +32,7 @@ from scripts.prototypes.fixed_points.solve import (
     solve,
 )
 from scripts.prototypes.fixed_points.measure import membership as straight_membership
-from scripts.prototypes.membership.hybrid import membership
+from scripts.prototypes.membership.hybrid import membership, patch_membership
 from scripts.prototypes.read_route import jets as jet_module
 from scripts.prototypes.read_route.bell import build_mesh, field_from_jets, read_bell
 from scripts.prototypes.read_route.check_element import stack_jet
@@ -254,6 +255,116 @@ def run(args):
             represented_cells=int(np.sum(result[3])),
             fixed_positions=np.asarray(fixed.position).tolist(),
         )
+        remedy_results = {}
+        if args.remedies:
+            payload = (
+                nodal,
+                indices,
+                mesh,
+                geometry,
+                fixed,
+                bell,
+                convention.sigma,
+                saddle is not None,
+            )
+            with (args.out / f"{args.kind}-{args.cells}-{state}-replay.pkl").open(
+                "wb"
+            ) as stream:
+                pickle.dump(jax.tree.map(np.asarray, payload), stream)
+            for remedy, crossed in (("preserved", False), ("radius", True)):
+                remedy_operands = (
+                    *payload,
+                    jnp.asarray(args.radius),
+                    jnp.asarray(crossed),
+                )
+                started = perf_counter()
+                program = (
+                    jax.jit(patch_membership)
+                    .lower(*remedy_operands, jnp.asarray(1.0))
+                    .compile()
+                )
+                cold = perf_counter() - started
+                repaired = program(*remedy_operands, jnp.asarray(1.0))
+                jax.block_until_ready(repaired)
+                times = []
+                for _ in range(20):
+                    started = perf_counter()
+                    jax.block_until_ready(program(*remedy_operands, jnp.asarray(1.0)))
+                    times.append(perf_counter() - started)
+                outside = ~np.asarray(repaired[3])
+                unchanged = (
+                    np.asarray(repaired[0])[outside].tobytes()
+                    == np.asarray(bell.membership)[outside].tobytes()
+                )
+                area_unchanged = (
+                    np.asarray(repaired[5])[outside].tobytes()
+                    == np.asarray(bell.fragment_area)[outside].tobytes()
+                )
+                edges_unchanged = (
+                    np.asarray(repaired[6])[outside].tobytes()
+                    == np.asarray(bell.edge_interval)[outside].tobytes()
+                )
+                assert unchanged and area_unchanged and edges_unchanged
+                record(
+                    state + "_" + remedy,
+                    repaired[0],
+                    repaired[1],
+                    median_seconds=float(np.median(times)),
+                    p99_seconds=float(np.percentile(times, 99)),
+                    compile_seconds=cold,
+                    represented_cells=int(np.sum(repaired[3])),
+                    radius_m=args.radius if crossed else None,
+                    outside_byte_identical=unchanged,
+                    outside_area_byte_identical=area_unchanged,
+                    outside_edge_byte_identical=edges_unchanged,
+                    outside_selection_changes=int(np.sum(repaired[7])),
+                )
+                remedy_results[remedy] = repaired
+                np.savez(
+                    args.out / f"{args.kind}-{args.cells}-{state}-{remedy}.npz",
+                    membership=np.asarray(repaired[0]),
+                    represented=np.asarray(repaired[3]),
+                    reference=truth,
+                    area=area,
+                    near=near,
+                )
+            if saddle is not None and state == "booked":
+                discrepancy = (
+                    np.abs(np.asarray(result[0]) - truth) * area / np.median(area)
+                )
+                cell = int(np.argmax(np.where(near, discrepancy, -1)))
+                local = (
+                    geometry.vertices[cell] - geometry.centre[cell]
+                ) / geometry.pitch[cell]
+                coefficient = (
+                    (convention.sigma * bell.field_coefficients[cell])
+                    .at[0]
+                    .add(-convention.sigma * bell.boundary_flux)
+                )
+                conic = topology.quadratic_cell_fragments(
+                    local, geometry.vertex_count[cell], coefficient
+                )
+                conic_area = np.asarray(conic.area * geometry.pitch[cell] ** 2)
+                selected_area = float(
+                    np.sum(np.where(np.asarray(result[4][cell]), conic_area, 0))
+                )
+                diagnosis = dict(
+                    cell=cell,
+                    immediate_patch=bool(result[3][cell]),
+                    bell_normal_form=bool(bell.normal_form_cells[cell]),
+                    conic_area=conic_area.tolist(),
+                    bell_area=np.asarray(bell.fragment_area[cell]).tolist(),
+                    bell_selected=np.asarray(bell.fragment_selected[cell]).tolist(),
+                    conic_selected=np.asarray(result[4][cell]).tolist(),
+                    conic_fraction_at_bell_level=selected_area / float(area[cell]),
+                    conic_fraction=float(result[0][cell]),
+                    bell_fraction=float(bell.membership[cell]),
+                    bell_boundary_flux=float(bell.boundary_flux),
+                    cached_boundary_flux=float(level),
+                )
+                receipt["outside_diagnosis"] = diagnosis
+                print("OUTSIDE_DIAGNOSIS", json.dumps(diagnosis), flush=True)
+                persist(output, receipt)
         zero = executable(*operands, jnp.asarray(0.0))
         jax.block_until_ready(zero)
         record(state + "_zero_third", zero[0], zero[1])
@@ -298,6 +409,16 @@ def run(args):
                 bell.valid & live.valid,
                 np.asarray(live.membership),
             )
+            np.save(
+                args.out / "picard-kernel-membership.npy", np.asarray(live.membership)
+            )
+            for remedy, repaired in remedy_results.items():
+                record(
+                    "picard_" + remedy + "_vs_kernel",
+                    repaired[0],
+                    repaired[1] & live.valid,
+                    np.asarray(live.membership),
+                )
         persist(output, receipt)
     receipt["complete"] = True
     persist(output, receipt)
@@ -310,6 +431,8 @@ def main():
     parser.add_argument("--cells", type=int, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--cache-revision", required=True)
+    parser.add_argument("--remedies", action="store_true")
+    parser.add_argument("--radius", type=float, default=0.054806712567833996)
     args = parser.parse_args()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     print(

@@ -21,7 +21,14 @@ from nova.biot.polygonanalytic import packed_analytic_moments
 from nova.equilibrium import topology
 from nova.equilibrium.solve_request import TopologyPolicy
 
-__all__ = ["solve", "maintain_rows"]
+__all__ = [
+    "BellField",
+    "build_mesh",
+    "field_from_jets",
+    "maintain_rows",
+    "solve",
+    "stack_jet",
+]
 
 POWERS = tuple(
     (degree - vertical, vertical)
@@ -86,7 +93,7 @@ class BellMesh:
     local_vertices: jax.Array
 
 
-def _build_mesh(nodes, sample_index, geometry):
+def build_mesh(nodes, sample_index, geometry):
     nodes, indices = np.asarray(nodes), np.asarray(sample_index)
     triangles = np.stack(
         [indices[:, [1, edge, edge + 1]] for edge in range(2, 6)], axis=1
@@ -117,7 +124,7 @@ def _build_mesh(nodes, sample_index, geometry):
 
 @jax.tree_util.register_dataclass
 @dataclass(frozen=True)
-class _BellField:
+class BellField:
     """Piecewise Bell polynomial; shared jets make value and gradient continuous."""
 
     coefficients: jax.Array
@@ -156,8 +163,15 @@ class _BellField:
             jax.hessian(self.value)(point),
         )
 
+    def sampled_coefficient(self, geometry):
+        """Own-node quadratic fit of the nodal flux, centre read from the element."""
+        values = self.jets[self.sample_index, 0]
+        centres = jax.vmap(self.cell_value)(jnp.arange(len(values)), geometry.centre)
+        values = values.at[:, 0].set(centres)
+        return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
 
-def _field_from_jets(jets, sample_index, mesh):
+
+def field_from_jets(jets, sample_index, mesh):
     scale = mesh.scales
     factors = jnp.stack(
         (jnp.ones_like(scale), scale, scale, scale**2, scale**2, scale**2), axis=-1
@@ -184,7 +198,7 @@ def _field_from_jets(jets, sample_index, mesh):
     coefficients = coefficients.at[..., :6].add(
         anchor * jnp.asarray((1.0, 1.0, 1.0, 0.5, 1.0, 0.5))
     )
-    return _BellField(coefficients, mesh, jets, sample_index)
+    return BellField(coefficients, mesh, jets, sample_index)
 
 
 def _source_jets(point, coupling):
@@ -289,7 +303,7 @@ class _CachedField:
             self.mesh.generators[cell][None, :],
             self.mesh.local_vertices[cell, triangle][None, None, :, :],
         )
-        field = _field_from_jets(jets, jnp.zeros((1, 1), dtype=jnp.int32), local_mesh)
+        field = field_from_jets(jets, jnp.zeros((1, 1), dtype=jnp.int32), local_mesh)
         # Evaluate all six polynomial derivatives in one contraction. Integer
         # power tables avoid both repeated autodiff traces and negative powers.
         scale = self.mesh.scales[cell, triangle]
@@ -375,7 +389,7 @@ class RowMaintenance:
 _row_program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
 
 
-def _stack_jet(jet: topology.FieldJet) -> jax.Array:
+def stack_jet(jet: topology.FieldJet) -> jax.Array:
     return jnp.stack(
         (
             jet.value,
@@ -390,7 +404,7 @@ def _stack_jet(jet: topology.FieldJet) -> jax.Array:
 
 
 _exterior_program = jax.jit(
-    lambda exterior, points: _stack_jet(jax.vmap(exterior.evaluate)(points))
+    lambda exterior, points: stack_jet(jax.vmap(exterior.evaluate)(points))
 )
 
 
@@ -423,7 +437,7 @@ def maintain_rows(
         nodes, inverse = np.unique(
             np.round(samples.reshape(-1, 2), 12), axis=0, return_inverse=True
         )
-        mesh = _build_mesh(nodes, inverse.reshape(samples.shape[:-1]), geometry)
+        mesh = build_mesh(nodes, inverse.reshape(samples.shape[:-1]), geometry)
         old_lookup = np.full(len(nodes), -1, dtype=np.int32)
     else:
         mesh, nodes = cache.mesh, np.asarray(cache.nodes)

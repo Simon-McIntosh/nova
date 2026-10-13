@@ -2941,6 +2941,21 @@ def _curvature_derivatives(field, point, pitch):
     return third, fourth
 
 
+def _read_policy(geometry, policy):
+    """Widen the normal-form radius to the pitch floor and check capacities."""
+    if policy.fragment_capacity < 2:
+        raise ValueError("the topology read requires two fragment slots per cell")
+    from dataclasses import replace
+
+    return replace(
+        policy,
+        normal_form_radius=jnp.maximum(
+            policy.normal_form_radius,
+            policy.normal_form_pitch_floor * jnp.median(geometry.pitch),
+        ),
+    )
+
+
 def read(field, geometry, convention, policy):
     """Read total-field nulls and the open axis-connected hex-cell interior.
 
@@ -2949,17 +2964,7 @@ def read(field, geometry, convention, policy):
     uses regular point-derivative rays and their analytic area integrals.
     Refusals retain explicit validity and integer reasons under jit and vmap.
     """
-    if policy.fragment_capacity < 2:
-        raise ValueError("the topology read requires two fragment slots per cell")
-    from dataclasses import replace
-
-    policy = replace(
-        policy,
-        normal_form_radius=jnp.maximum(
-            policy.normal_form_radius,
-            policy.normal_form_pitch_floor * jnp.median(geometry.pitch),
-        ),
-    )
+    policy = _read_policy(geometry, policy)
     sigma = convention.sigma
     coefficient, centre_flux = _sampled_flux(field, geometry)
     from nova.equilibrium.contour_tree import build_contour_tree
@@ -2979,6 +2984,84 @@ def read(field, geometry, convention, policy):
     nulls, live, required, census_resolved = _null_census(
         field, geometry, coefficient, policy, tree
     )
+    return _read_at_nulls(
+        field,
+        geometry,
+        convention,
+        policy,
+        coefficient,
+        nulls,
+        live,
+        required,
+        census_resolved,
+        tree,
+    )
+
+
+def read_at_stationary_points(field, geometry, convention, policy, solved):
+    """Read the connected support from stationary points solved elsewhere.
+
+    ``solved`` carries ``position``, ``jet`` and ``valid`` for the axis first
+    and then each X-point candidate, as the batched fixed-point solve returns
+    them. No contour tree or null census is built: the supplied points are the
+    census. ``field`` supplies ``sampled_coefficient(geometry)`` for the own-node
+    fit and the point jets the saddle normal form and wall events differentiate.
+    """
+    policy = _read_policy(geometry, policy)
+    capacity = policy.null_capacity
+    count = solved.position.shape[0]
+    if count > capacity:
+        raise ValueError("more stationary points than the null capacity")
+    pad = capacity - count
+
+    def padded(leaf):
+        widths = [(0, pad)] + [(0, 0)] * (leaf.ndim - 1)
+        return jnp.pad(leaf, widths)
+
+    valid = padded(jnp.asarray(solved.valid))
+    nulls = StationaryRead(
+        padded(solved.position),
+        jax.tree.map(padded, solved.jet),
+        valid,
+        valid,
+        jnp.where(
+            valid, int(TopologyReason.OK), int(TopologyReason.NO_QUALIFIED_AXIS)
+        ).astype(jnp.int32),
+    )
+    inside = jax.vmap(lambda point: jnp.any(_inside_cells(geometry, point)))(
+        nulls.position
+    )
+    live = valid & inside
+    return _read_at_nulls(
+        field,
+        geometry,
+        convention,
+        policy,
+        field.sampled_coefficient(geometry),
+        nulls,
+        live,
+        jnp.sum(live, dtype=jnp.int32),
+        jnp.asarray(True),
+        None,
+    )
+
+
+def _read_at_nulls(
+    field,
+    geometry,
+    convention,
+    policy,
+    coefficient,
+    nulls,
+    live,
+    required,
+    census_resolved,
+    tree,
+):
+    """Select the confined support given the live stationary points."""
+    sigma = convention.sigma
+    mesh = geometry.contour_mesh
+    tree_overflow = jnp.asarray(False) if tree is None else tree.overflow
     eigenvalues = jnp.linalg.eigvalsh(sigma * nulls.jet.hessian)
     axes = live & jnp.all(eigenvalues < 0.0, axis=1)
     saddles = live & (eigenvalues[:, 0] < 0.0) & (eigenvalues[:, 1] > 0.0)
@@ -3119,7 +3202,7 @@ def read(field, geometry, convention, policy):
     unambiguous = (jnp.sum(equal_level) <= 1) & unique_axis & census_resolved
     capacity_ok = (
         (required <= policy.null_capacity)
-        & ~tree.overflow
+        & ~tree_overflow
         & ~jnp.asarray(mesh.overflow)
     )
     fit_singular_values = jnp.linalg.svd(geometry.fit_inverse, compute_uv=False)

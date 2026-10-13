@@ -48,10 +48,10 @@ def polynomial_cache(cubic=False):
     nodes = np.concatenate(
         (np.zeros((1, 2)), np.stack((np.cos(theta), np.sin(theta)), -1))
     )
-    mesh = fixed._build_mesh(
+    mesh = fixed.build_mesh(
         nodes, np.arange(7)[None], SimpleNamespace(pitch=np.ones(1))
     )
-    jets = fixed._stack_jet(jax.vmap(Polynomial(cubic).evaluate)(jnp.asarray(nodes)))
+    jets = fixed.stack_jet(jax.vmap(Polynomial(cubic).evaluate)(jnp.asarray(nodes)))
     return fixed.RowCache(
         mesh, jnp.asarray(nodes), jnp.arange(7), jnp.zeros((7, 1, 3, 6)), jets
     )
@@ -134,7 +134,7 @@ def test_coarse_replay_never_accepts_saddle_as_axis(state):
         / "scripts/prototypes/fixed_points/coarse-replay.npz"
     )
     with np.load(path) as data:
-        mesh = fixed._build_mesh(
+        mesh = fixed.build_mesh(
             data["nodes"], data["indices"], SimpleNamespace(pitch=data["pitch"])
         )
         jets = jnp.asarray(data[f"jets_{state}"])
@@ -231,8 +231,8 @@ def test_closed_form_equilibrium_on_small_hex_mesh(kind):
     nodes, inverse = np.unique(
         np.round(samples.reshape(-1, 2), 12), axis=0, return_inverse=True
     )
-    mesh = fixed._build_mesh(nodes, inverse.reshape(samples.shape[:-1]), geometry)
-    jets = fixed._stack_jet(jax.vmap(analytic.evaluate)(jnp.asarray(nodes)))
+    mesh = fixed.build_mesh(nodes, inverse.reshape(samples.shape[:-1]), geometry)
+    jets = fixed.stack_jet(jax.vmap(analytic.evaluate)(jnp.asarray(nodes)))
     cache = fixed.RowCache(
         mesh,
         jnp.asarray(nodes),
@@ -253,10 +253,10 @@ def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
     first = polynomial_cache(True)
     first_nodes = np.asarray(first.nodes)
     nodes = np.concatenate((first_nodes, first_nodes + (1.5, 0.0)))
-    mesh = fixed._build_mesh(
+    mesh = fixed.build_mesh(
         nodes, np.arange(14).reshape(2, 7), SimpleNamespace(pitch=np.ones(2))
     )
-    jets = fixed._stack_jet(
+    jets = fixed.stack_jet(
         jax.vmap(Polynomial(True).evaluate)(
             jnp.asarray(first_nodes) - jnp.asarray((1.5, 0.0))
         )

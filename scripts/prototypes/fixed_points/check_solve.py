@@ -143,3 +143,31 @@ def test_cache_miss_refresh_retries_whole_solve(monkeypatch):
     assert len(receipt) == 1
     assert result.valid[0]
     np.testing.assert_allclose(result.position[0], root, atol=1e-13, rtol=0)
+
+
+def test_axis_and_saddle_share_a_batched_newton_loop():
+    from dataclasses import dataclass
+    from nova.equilibrium.topology import FieldJet
+    from scripts.prototypes.fixed_points.solve import solve_adaptive
+
+    @jax.tree_util.register_dataclass
+    @dataclass(frozen=True)
+    class CubicField:
+        def evaluate(self, point):
+            x, y = point
+            return FieldJet(
+                -x * x - y * y + y**3,
+                jnp.asarray((-2 * x, -2 * y + 3 * y * y)),
+                jnp.diag(jnp.asarray((-2.0, -2 + 6 * y))),
+            )
+
+    field = CubicField()
+    seeds = jnp.asarray(((0.1, 0.05), (0.1, 0.62)))
+    fixed = jax.jit(solve)(field, seeds, jnp.asarray(1.0))
+    adaptive = jax.jit(solve_adaptive)(field, seeds, jnp.asarray(1.0))
+    np.testing.assert_allclose(adaptive.position, ((0, 0), (0, 2 / 3)), atol=1e-10)
+    np.testing.assert_allclose(adaptive.position, fixed.position, atol=1e-10)
+    assert np.all(adaptive.valid)
+    assert np.max(adaptive.iterations) < 6
+    assert np.linalg.det(adaptive.jet.hessian[0]) > 0
+    assert np.linalg.det(adaptive.jet.hessian[1]) < 0

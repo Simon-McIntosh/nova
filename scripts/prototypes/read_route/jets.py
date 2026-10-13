@@ -1,6 +1,9 @@
 """Precompute polygon point jets and read a cellwise Hermite field."""
 
 from dataclasses import dataclass
+import hashlib
+import json
+from pathlib import Path
 from time import perf_counter
 from types import FunctionType
 
@@ -10,6 +13,7 @@ import numpy as np
 
 from nova.biot.polygonanalytic import packed_analytic_moments
 from nova.equilibrium import topology
+from nova.database.filepath import FilePath
 
 
 def _source_jets(point, coupling):
@@ -71,7 +75,9 @@ def _source_jets(point, coupling):
     return jnp.einsum("cbq,cbm->cmq", coefficients, transform)
 
 
-def build_jet_matrix(coupling, geometry, total, reference_moments, batch=4):
+def build_jet_matrix(
+    coupling, geometry, total, reference_moments, batch=4, persist=False
+):
     """Build the three (nodes, cells, six-jet) source matrices in batches."""
     started = perf_counter()
     samples = np.asarray(geometry.sample_points)
@@ -79,9 +85,43 @@ def build_jet_matrix(coupling, geometry, total, reference_moments, batch=4):
         np.round(samples.reshape(-1, 2), 12), axis=0, return_inverse=True
     )
     sample_index = inverse.reshape(samples.shape[:-1])
-    rows = np.empty((len(nodes), len(coupling.centre), 3, 6), dtype=np.float64)
+    shape = (len(nodes), len(coupling.centre), 3, 6)
+    checkpoint = None
+    first_unbuilt = 0
+    previous_wall = 0.0
+    if persist:
+        digest = hashlib.sha256(nodes.tobytes())
+        for operand in jax.tree_util.tree_leaves(coupling):
+            digest.update(np.asarray(operand).tobytes())
+        digest.update(Path(__file__).read_bytes())
+        from nova.biot import polygonanalytic
+
+        digest.update(Path(polygonanalytic.__file__).read_bytes())
+        store = FilePath(
+            dirname=Path("/work/projects/imas_gpu/sophelio/evidence/conforming-jets")
+            / digest.hexdigest()
+        )
+        store.makepath()
+        checkpoint = store.path / "progress.json"
+        matrix_path = store.path / "matrix.npy"
+        if checkpoint.exists():
+            progress = json.loads(checkpoint.read_text())
+            first_unbuilt = progress["nodes_complete"]
+            previous_wall = progress["build_seconds"]
+            rows = np.lib.format.open_memmap(matrix_path, mode="r+")
+            assert rows.shape == shape
+        else:
+            rows = np.lib.format.open_memmap(
+                matrix_path, mode="w+", dtype=np.float64, shape=shape
+            )
+        print(
+            f"JET_STORE path={matrix_path} start={first_unbuilt} bytes={rows.nbytes}",
+            flush=True,
+        )
+    else:
+        rows = np.empty(shape, dtype=np.float64)
     point_batch = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
-    for first in range(0, len(nodes), batch):
+    for first in range(first_unbuilt, len(nodes), batch):
         last = min(first + batch, len(nodes))
         points = nodes[first:last]
         if len(points) < batch:
@@ -91,6 +131,21 @@ def build_jet_matrix(coupling, geometry, total, reference_moments, batch=4):
         rows[first:last] = np.asarray(point_batch(jnp.asarray(points), coupling))[
             : last - first
         ]
+        if checkpoint is not None and (
+            last == len(nodes) or first % (batch * 100) == 0
+        ):
+            rows.flush()
+            pending = checkpoint.with_suffix(".pending")
+            pending.write_text(
+                json.dumps(
+                    dict(
+                        nodes_complete=last,
+                        build_seconds=previous_wall + perf_counter() - started,
+                        bytes=rows.nbytes,
+                    )
+                )
+            )
+            pending.replace(checkpoint)
         if first % (batch * 500) == 0:
             elapsed = perf_counter() - started
             print(
@@ -115,7 +170,7 @@ def build_jet_matrix(coupling, geometry, total, reference_moments, batch=4):
         axis=-1,
     ) - jnp.einsum("ncmq,cm->nq", matrix, jnp.asarray(reference))
     jax.block_until_ready(exterior)
-    elapsed = perf_counter() - started
+    elapsed = previous_wall + perf_counter() - started
     print(
         f"JET_READY nodes={len(nodes)} cells={len(coupling.centre)} "
         f"bytes={rows.nbytes} seconds={elapsed:.6f}",
@@ -142,6 +197,10 @@ class HermiteField:
 
     def value(self, point):
         cell = jnp.argmin(jnp.sum((self.centre - point) ** 2, axis=-1))
+        return self.local_value(cell, point)
+
+    def local_value(self, cell, point):
+        """Evaluate this cell explicitly, including on a shared edge."""
         node = self.nodes[self.sample_index[cell]]
         jet = self.jets[self.sample_index[cell]]
         delta = point[None, :] - node

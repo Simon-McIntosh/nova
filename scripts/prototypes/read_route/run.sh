@@ -18,6 +18,7 @@ run_case() {
   local -a command
   log="$output/$kind-$cells.log"
   command=("$python" "$root/scripts/prototypes/read_route/measure.py" --kind "$kind" --cells "$cells" --out "$output/$kind-$cells.json")
+  if [[ "${READ_ROUTE_BELL:-0}" == 1 ]]; then command+=(--bell); fi
   reuse_marker=none
   if [[ -n "${READ_ROUTE_REUSE_PREFIX:-}" ]]; then
     prefix="$READ_ROUTE_REUSE_PREFIX/$kind-$cells.log"
@@ -53,12 +54,9 @@ run_case() {
 failed=0
 read -r -a rung_cells <<< "${READ_ROUTE_CELLS:-2000 5000 10000}"
 for cells in "${rung_cells[@]}"; do
-  run_case limited "$cells" &
-  limited_pid=$!
-  run_case diverted "$cells" &
-  diverted_pid=$!
-  wait "$limited_pid" || failed=1
-  wait "$diverted_pid" || failed=1
+  for kind in ${READ_ROUTE_KINDS:-limited diverted}; do
+    run_case "$kind" "$cells" || failed=1
+  done
 done
 if [[ "${READ_ROUTE_RENDER:-1}" == 1 ]]; then
   "$python" "$root/scripts/prototypes/read_route/render.py" "$output" \

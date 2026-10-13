@@ -76,6 +76,11 @@ def main():
                     result = program(*operands)
                     jax.block_until_ready(result)
                     walls.append(perf_counter() - started)
+                reference = np.load(
+                    args.rows / f"{kind}-{cells}-booked-{name}.npz"
+                )["membership"]
+                difference = float(np.max(np.abs(np.asarray(result[0]) - reference)))
+                np.testing.assert_allclose(result[0], reference, rtol=0, atol=1e-12)
                 row = dict(
                     kind=kind,
                     cells=cells,
@@ -84,6 +89,7 @@ def main():
                     median_seconds=float(np.median(walls)),
                     compile_seconds=cold,
                     seconds=walls,
+                    membership_max_delta=difference,
                     cost_boundary=(
                         "full Bell read and patch, including redundant null census"
                     ),

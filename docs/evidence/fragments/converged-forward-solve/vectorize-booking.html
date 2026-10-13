@@ -11,10 +11,10 @@
 program, replacing the sequential scan">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s3">
-<meta name="plan-commits" content="adeff8346,486d369ad">
+<meta name="plan-commits" content="adeff8346,486d369ad,f2a831d4d">
 <meta name="plan-recorded-at" content="2026-10-13">
 <meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="CPU binary64 identity and regression; H200 rung cost not measured">
+<meta name="plan-environment" content="CPU binary64 identity at 1 to 2000 cells with warm walls; fresh H200 2000-cell machines built, carrier cost comparison pending">
 
 <title>Cell-batched current booking | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
@@ -32,8 +32,8 @@ The loop is now a single <code>jax.vmap</code> over the cell index; the per-cell
 body — fragment rings, membership and normal-form conditioning, and the clipped
 support quadrature — is unchanged. One compiled program remains, with effects
 batched over cells, so the booking no longer serialises across cells. The work
-is committed at <code>adeff8346</code> (product) and <code>486d369ad</code>
-(test).</p>
+is committed at <code>adeff8346</code> (product), <code>486d369ad</code> and
+<code>f2a831d4d</code> (tests).</p>
 
 <section id="vectorize-booking-identity">
 <h2>Identity against the sequential reference</h2>
@@ -43,18 +43,29 @@ booking verbatim as <code>_reference_book</code>, and its own copies of
 <code>_conic_rings</code> and <code>_normal_rings</code> as
 <code>_reference_conic_rings</code> and <code>_reference_normal_rings</code>, so
 the oracle is independent of the product's ring builders and not only of its
-iteration. Tiled cells are compared at 1, 64 and 200:</p>
+iteration. Tiled cells are compared at 1, 64 and 200 in the default lane and at
+2,000 in a test marked <code>slow</code>. Both programs are compiled and warmed
+before the wall is taken, so the two wall columns compare execution:</p>
 <table id="vectorize-booking-identity-table">
-<thead><tr><th>Cells</th><th>max |batched − scan|</th><th>max relative</th></tr></thead>
+<thead><tr><th>Cells</th><th>max |batched − scan|</th><th>max relative</th><th>batched wall [s]</th><th>scan wall [s]</th></tr></thead>
 <tbody>
-<tr><td>1</td><td>0.000e+00</td><td>0.000e+00</td></tr>
-<tr><td>64</td><td>0.000e+00</td><td>0.000e+00</td></tr>
-<tr><td>200</td><td>0.000e+00</td><td>0.000e+00</td></tr>
+<tr><td>1</td><td>0.000e+00</td><td>0.000e+00</td><td>0.0199</td><td>0.00135</td></tr>
+<tr><td>64</td><td>0.000e+00</td><td>0.000e+00</td><td>1.050</td><td>0.0573</td></tr>
+<tr><td>200</td><td>0.000e+00</td><td>0.000e+00</td><td>5.506</td><td>0.187</td></tr>
+<tr><td>2,000</td><td>0.000e+00</td><td>0.000e+00</td><td>87.66</td><td>1.698</td></tr>
 </tbody>
 </table>
 <p id="vectorize-booking-identity-note">The booked moments, the normalization and
-the validity receipt are bit-identical at every rung. The 2,000 / 5,000 /
-10,000-cell rungs of the done-when were not run: see the caveat below.</p>
+the validity receipt are bit-identical at every rung, including 2,000 cells
+(<code>4 passed in 154.12 s</code>). The wall columns are CPU binary64 on a tiled
+toy fixture, and they run against the batched form: the sequential reference is
+15 to 52 times faster there. The cause is the per-cell body's nested
+<code>jax.lax.cond</code>, which a <code>vmap</code> lowers to a batched select
+that evaluates every branch for every cell, where the <code>scan</code> takes one
+branch per cell. That is a property of this fixture's control flow, not of the
+certificate carrier, whose booking wall is what the H200 rows below measure. The
+CPU walls are reported because they were measured, and they do not support a
+speed-up claim on their own.</p>
 </section>
 
 <section id="vectorize-booking-negative">
@@ -103,6 +114,16 @@ this head's, because <code>current.py</code> is the only file that differs
 between the trees, so a second machine would measure the builder rather than the
 booking. Each booking is taken on the analytic certificate state and on one
 Picard image of it, the state the flux map returns.</p>
+<p id="vectorize-booking-rung-fresh">The fresh machines build and the four 2,000-cell combinations are
+measured; the 5,000-cell combinations were still building at the fence. Both
+2,000-cell machines built on the device in this allocation
+(<code>diverted</code>: 2,098 cells, 245.0 s; <code>limited</code>: 2,105 cells,
+244.1 s) with no cache hit, and the sequential booking on each took 9.08 s and
+9.07 s of device wall, normalising to the closed-form current to 2.2e-16 and
+1.0e-7 relative. The 5,000-cell pairs and the base-versus-head comparison persist
+under the run directory at <code>h200/fresh/</code>
+(<code>compare-summary.json</code>) and are read from there when the allocation
+finishes.</p>
 <p id="vectorize-booking-rung-pending">The 10,000-cell rung is not attempted: its
 machine is being built by the carrier-requalify node, whose cache held an
 <code>analytic_oracle_hex_machine_10000.zarr</code> lock at

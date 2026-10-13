@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's own two-arm gate logs give the derivation: baseline_suite at ab54cccac16558c7a27ab9e93a6aa65c489c7671 ran check_legacy.py green (5 passed, 0 failed, `5 passed in 40.92s`, EXIT=0, baseline.log) and after_suite at 3aed5d4671d689a7682aeaed56f8a19dd65d7ad4 ran the same file green (5 passed, 0 failed, `5 passed in 17.38s`, EXIT=0, after.log); head failures minus base failures is empty, so added_failure_count is 0 with no added_failure_ids. The defined-after files do not exist at the base arm.",
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/prototypes/read_route/bell.py:180",
+    "scripts/prototypes/read_route/jets.py:240"
+  ],
+  "completed_at": "2026-10-13T08:07:13.695Z",
+  "dispatched_at": "2026-10-13T07:47:43Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/manifest.md",
+      "line": "baseline_suite",
+      "severity": "follow-on",
+      "text": "follow-on: the two-arm suite delta runs only scripts/prototypes/read_route/check_legacy.py, which loads jets.py by path and never imports the new scripts/prototypes/fixed_points modules, so added_failure_count is 0 by construction and the delta cannot detect a regression in the changed fixed_points code."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-split-read.md",
+      "line": "kernel",
+      "severity": "follow-on",
+      "text": "follow-on: the live polygon kernel arm is not retimed in the final allocation (its earlier 61-265 ms wall rejected it), so the 1 ms median/p99 budget is asserted only for the cached-jet and cached-adaptive arms, not the second field arm the done_when names."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-split-read.md",
+      "line": "10000",
+      "severity": "follow-on",
+      "text": "follow-on: the diverted 10000-cell booking records a booked-moment relative difference of 0.7199 against 0.00032/0.00017 at the lower rungs with matrix source hashes unchanged, an unexplained anomaly the node correctly left to the upstream booking owner outside its scope."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit against base ab54cccac16558c7a27ab9e93a6aa65c489c7671; the 24 commits add the fixed_points prototype (solve.py, cache.py, measure.py, render.py, check_solve.py, check_position.py, check_device.py), fold the two read_route field-adapter owners into one read_field in jets.py and reroute read_bell through it, add check_adapter.py and the latency SVG and evidence fragment.",
+    "done_when": "read the source node's done_when (prompt.txt, eight clauses); the gate asserts each -- measure.py:120 run_sweep sweeps >=20 states and records position error in pitches per arm, measure.py:180 closed-form positive control asserts max error < 1e-9, measure.py latency() times >=100 synchronized calls at each rung, and check_position.py is the negative position control; the manifest records the runs and results.",
+    "goal": "the node's goal is to measure a warm-started fixed-point solve at the iterate against a 1 ms budget at 2,000-10,000 cells; scripts/prototypes/fixed_points/measure.py runs it on H200 job 1284109 and scripts/prototypes/fixed_points/solve.py:102 solve() and cache.py warm the solve from the previous state's points with two field arms.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/manifest.md; status complete, 24 commits, changed_paths and test_logs present, a bare negative_control_log path with the Hessian-zero mutation described, baseline_suite and after_suite as runnable single-line JSON, blockers none.",
+    "write_paths": "the node declared six write paths (scripts/prototypes/fixed_points, scripts/prototypes/read_route, docs/figures/converged-forward-solve/split-read, docs/evidence/fragments/converged-forward-solve/proto-split-read.html, the crew report, docs/figures/converged-forward-solve/proto-split-read); git diff --stat ab54cccac16558c7a27ab9e93a6aa65c489c7671 3a7dddc0798132e98e2fdefe217da8e54bd20984 lists 12 files and every one is inside those paths, with no plan file or peer path touched."
+  },
+  "justifications": {
+    "durability": "check_solve.py:60 asserts solve reaches a root the test sets independently and check_solve.py:126 fails if run_sweep re-seeds from a refused state, each reddening on the regression it names, and check_position.py is verified by the reproducing negative log.",
+    "evidence": "the done_when's 1 ms figure is recorded off H200 job 1284109 (final-scheduler-receipt.log 01:23:26 / 02:30:00) and the negative control reproduces at check_position.py:13 (max error 1.3377 > 1.0, EXIT=1), but the two-arm suite arm reads only the pre-existing check_legacy.py, which does not import the new fixed_points modules.",
+    "fit": "solve.py and cache.py follow the prototype idiom of the surrounding read_route modules and introduce no plan label, version suffix or forbidden name, and render.py draws the SVG (docs/figures/converged-forward-solve/split-read/latency.svg) with direct labels and the 1 ms dotted limit.",
+    "goal_fidelity": "measure.py:120-210 and solve.py:102 implement the warm two-arm measurement the goal names, and the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-split-read.md states the selected policy.",
+    "reuse": "read_field (jets.py:243) folds the two former adapter owners into one and solve.py:110 solve_adaptive reuses topology._conditioned_hessian rather than re-implementing it, so the change extends the owners rather than forking them.",
+    "scope_discipline": "git diff --stat ab54cccac16558c7a27ab9e93a6aa65c489c7671 3a7dddc0798132e98e2fdefe217da8e54bd20984 lists only the twelve files under the six declared write paths, with no plan or peer edit."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node's goal is to measure a warm-started fixed-point solve at the iterate against a 1 ms budget at 2,000-10,000 cells; scripts/prototypes/fixed_points/measure.py runs it on H200 job 1284109 and scripts/prototypes/fixed_points/solve.py:102 solve() and cache.py warm the solve from the previous state's points with two field arms.\nVERDICT done_when: read the source node's done_when (prompt.txt, eight clauses); the gate asserts each -- measure.py:120 run_sweep sweeps >=20 states and records position error in pitches per arm, measure.py:180 closed-form positive control asserts max error < 1e-9, measure.py latency() times >=100 synchronized calls at each rung, and check_position.py is the negative position control; the manifest records the runs and results.\nVERDICT write_paths: the node declared six write paths (scripts/prototypes/fixed_points, scripts/prototypes/read_route, docs/figures/converged-forward-solve/split-read, docs/evidence/fragments/converged-forward-solve/proto-split-read.html, the crew report, docs/figures/converged-forward-solve/proto-split-read); git diff --stat ab54cccac16558c7a27ab9e93a6aa65c489c7671 3a7dddc0798132e98e2fdefe217da8e54bd20984 lists 12 files and every one is inside those paths, with no plan file or peer path touched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/manifest.md; status complete, 24 commits, changed_paths and test_logs present, a bare negative_control_log path with the Hessian-zero mutation described, baseline_suite and after_suite as runnable single-line JSON, blockers none.\nVERDICT diff: read commit by commit against base ab54cccac16558c7a27ab9e93a6aa65c489c7671; the 24 commits add the fixed_points prototype (solve.py, cache.py, measure.py, render.py, check_solve.py, check_position.py, check_device.py), fold the two read_route field-adapter owners into one read_field in jets.py and reroute read_bell through it, add check_adapter.py and the latency SVG and evidence fragment.\nCALL_SITES: scripts/prototypes/read_route/bell.py:180, scripts/prototypes/read_route/jets.py:240\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: measure.py:120-210 and solve.py:102 implement the warm two-arm measurement the goal names, and the report /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-split-read.md states the selected policy.\nSCORE evidence: 18\nJUSTIFICATION evidence: the done_when's 1 ms figure is recorded off H200 job 1284109 (final-scheduler-receipt.log 01:23:26 / 02:30:00) and the negative control reproduces at check_position.py:13 (max error 1.3377 > 1.0, EXIT=1), but the two-arm suite arm reads only the pre-existing check_legacy.py, which does not import the new fixed_points modules.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat ab54cccac16558c7a27ab9e93a6aa65c489c7671 3a7dddc0798132e98e2fdefe217da8e54bd20984 lists only the twelve files under the six declared write paths, with no plan or peer edit.\nSCORE durability: 19\nJUSTIFICATION durability: check_solve.py:60 asserts solve reaches a root the test sets independently and check_solve.py:126 fails if run_sweep re-seeds from a refused state, each reddening on the regression it names, and check_position.py is verified by the reproducing negative log.\nSCORE fit: 18\nJUSTIFICATION fit: solve.py and cache.py follow the prototype idiom of the surrounding read_route modules and introduce no plan label, version suffix or forbidden name, and render.py draws the SVG (docs/figures/converged-forward-solve/split-read/latency.svg) with direct labels and the 1 ms dotted limit.\nSCORE reuse: 19\nJUSTIFICATION reuse: read_field (jets.py:243) folds the two former adapter owners into one and solve.py:110 solve_adaptive reuses topology._conditioned_hessian rather than re-implementing it, so the change extends the owners rather than forking them.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/manifest.md:baseline_suite follow-on: the two-arm suite delta runs only scripts/prototypes/read_route/check_legacy.py, which loads jets.py by path and never imports the new scripts/prototypes/fixed_points modules, so added_failure_count is 0 by construction and the delta cannot detect a regression in the changed fixed_points code.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-split-read.md:kernel follow-on: the live polygon kernel arm is not retimed in the final allocation (its earlier 61-265 ms wall rejected it), so the 1 ms median/p99 budget is asserted only for the cached-jet and cached-adaptive arms, not the second field arm the done_when names.\nFINDING /home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-split-read.md:10000 follow-on: the diverted 10000-cell booking records a booked-moment relative difference of 0.7199 against 0.00032/0.00017 at the lower rungs with matrix source hashes unchanged, an unexplained anomaly the node correctly left to the upstream booking owner outside its scope.\nreviewed_base_sha: ab54cccac16558c7a27ab9e93a6aa65c489c7671\nreviewed_head_sha: 3a7dddc0798132e98e2fdefe217da8e54bd20984",
+  "review_run_id": "r-20261013T074713739443-review-of-proto-split-read-3a7dddc07981",
+  "reviewed_base_sha": "ab54cccac16558c7a27ab9e93a6aa65c489c7671",
+  "reviewed_head_sha": "3a7dddc0798132e98e2fdefe217da8e54bd20984",
+  "reviewed_run_id": "r-20261013T042103961779-proto-split-read",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261013T074713739443-review-of-proto-split-read-3a7dddc07981"
+  },
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T08:07:56.834628+00:00",
+  "total": 113
+}

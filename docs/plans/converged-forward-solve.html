@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="198">
+<meta name="plan-version" content="199">
 <meta name="plan-modified" content="2026-10-13">
 </head>
 <body>
@@ -642,6 +642,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261013T042103961779-proto-split-read" data-who="reckon-build" data-when="2026-10-13T07:37:28Z">
     <div class="r-comment-body"><p>[Completed stationary-read measurement](/nova/evidence/fragments/converged-forward-solve/proto-split-read.html#proto-split-read-landing): all six H200 cases complete; 2400 timed calls and 720 moving-state solves, no primary failures. Diverted fixed-six p99 &lt;=0.877157 ms and limited adaptive &lt;=0.508199 ms through 10000 cells. Adaptive diverted 2000 tail 1.638275 ms retained. Three eight-pitch sweeps recover cache misses; refresh 2.804/4.226/7.308 s. Straight-leg saddle error 0.005919/0.004342 at 2000/5000; coarse wrong-axis roots and anomalous 10000 booking remain production follow-ons.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261013T074713739443-review-of-proto-split-read-3a7dddc07981" data-who="reckon-build" data-when="2026-10-13T08:07:13.695Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261013T042103961779-proto-split-read at base ab54cccac16558c7a27ab9e93a6aa65c489c7671 / head 3a7dddc0798132e98e2fdefe217da8e54bd20984 scored 113/120 (goal_fidelity 19, evidence 18, scope_discipline 20, durability 19, fit 18, reuse 19), item_aggregate 6/6, call_site_count 2, added_failure_count 0; three follow-on findings and no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20261005T170209771036" data-who="" data-when="">
     <div class="r-comment-body"><p>2026-10-05: design repair <code>cfs-design-saddle-rule</code> landed (commit <code>6ea685c39</code>, review 96, durability exempted as prose). The design document now states the locked saddle rule and the Biot-derivative rule, keeps the half-order level-set probe as the before arm with a second-order saddle acceptance, adds <code>test_saddle_support_order[analytic-row]</code> to the clause table, and routes receipts above a few MB to GPFS. Record: <a href="/nova/evidence/archive/converged-forward-solve-landed.html#design">landed record, design anchor</a>. §2 <code>topology.read</code> is in flight on codex-astra with one ruling recorded on the run: the exterior field enters the read as a differentiable point evaluator (conductor Biot kernels in production; the oracle's closed form minus the kernel image of the reference moments in the analytic fixtures), so no mesh-flux derivative is taken anywhere.</p></div>

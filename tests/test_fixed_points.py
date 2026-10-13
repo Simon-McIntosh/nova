@@ -276,3 +276,55 @@ def test_newton_trajectory_leaves_rows_without_building(monkeypatch):
     assert result.position[0, 0] > 0.75
     assert not result.valid[0]
     assert result.status[0] == fixed.FixedPointStatus.NEEDS_ROWS
+
+
+@pytest.mark.parametrize("amplitude", [0.0, 0.07], ids=["analytic", "booked"])
+@pytest.mark.parametrize("offset", [0.0, 0.035], ids=["zero_steps", "multiple_steps"])
+def test_stationary_moment_tangent_is_independent_of_warm_start(amplitude, offset):
+    from tests.test_current_book_fragments import _split_cell
+
+    cache = polynomial_cache(True)
+    rows = cache.rows.at[:, 0, 0, 0].set(cache.nodes[:, 1])
+    rows = rows.at[:, 0, 0, 2].set(1.0)
+    cache = replace(cache, rows=rows)
+    moments = jnp.zeros((1, 3))
+    if amplitude:
+        booking = jax.jit(_split_cell)()
+        assert bool(booking.valid)
+        moments = jnp.stack(booking[:3], axis=-1)
+        moments *= amplitude / moments[0, 0]
+    root = np.sqrt(1 - 3 * amplitude)
+    positions = jnp.asarray(
+        ((0.13, -0.21 + (1 - root) / 3), (0.13, -0.21 + (1 + root) / 3))
+    )
+    seeds = positions + offset
+
+    def evaluate(value):
+        state = moments.at[0, 0].set(value)
+        return fixed.solve(cache, state, seeds, positions, jnp.asarray(1.0))
+
+    value = jnp.asarray(amplitude)
+    result = evaluate(value)
+    assert np.all(result.valid)
+    if offset == 0:
+        assert np.all(result.iterations == 0)
+    else:
+        assert np.all(result.iterations >= 2)
+    def outputs(value):
+        result = evaluate(value)
+        return result.position, result.jet
+    _, tangent = jax.jvp(outputs, (value,), (jnp.ones_like(value),))
+    step = 1e-5
+    central = jax.tree.map(
+        lambda a, b: (a - b) / (2 * step), outputs(value + step), outputs(value - step)
+    )
+    print(
+        f"AMPLITUDE={amplitude} OFFSET={offset} ITERATIONS={result.iterations} "
+        f"JVP={tangent[0]} CENTRAL={central[0]}"
+    )
+    assert np.linalg.norm(np.asarray(central[0])) > 0.5
+    for actual, expected in zip(
+        jax.tree.leaves(tangent), jax.tree.leaves(central), strict=True
+    ):
+        assert np.isfinite(np.asarray(actual)).all()
+        np.testing.assert_allclose(actual, expected, rtol=1e-6, atol=1e-8)

@@ -505,8 +505,14 @@ def _root_type(hessian: jax.Array, axis_sign: jax.Array) -> jax.Array:
     return (determinant < 0).at[0].set(axis)
 
 
+@partial(jax.custom_jvp, nondiff_argnums=(3,))
 def _adaptive(field, seeds, pitch, iterations):
+    """Find stationary points without tying their tangents to the step count."""
     policy = TopologyPolicy(polish_iterations=iterations)
+    # An implicit tangent assumes stationarity, including in the returned jet.
+    tolerance = jnp.minimum(
+        policy.position_tolerance, 64.0 * jnp.finfo(seeds.dtype).eps
+    )
 
     def evaluate(position):
         jet = jax.vmap(field.evaluate)(position)
@@ -535,7 +541,7 @@ def _adaptive(field, seeds, pitch, iterations):
             & jnp.isfinite(jet.value)
             & jnp.all(jnp.isfinite(correction), axis=-1)
         )
-        done = usable & (length <= policy.position_tolerance * pitch)
+        done = usable & (length <= tolerance * pitch)
         correction *= jnp.minimum(1.0, pitch / jnp.where(length > 0, length, 1.0))[
             :, None
         ]
@@ -566,6 +572,38 @@ def _adaptive(field, seeds, pitch, iterations):
         condition, update, initial
     )
     return position, jet, done, counts
+
+
+@_adaptive.defjvp
+def _adaptive_jvp(iterations, primals, tangents):
+    field, seeds, pitch = primals
+    field_tangent, _seed_tangent, _pitch_tangent = tangents
+    result = _adaptive(field, seeds, pitch, iterations)
+    position, jet, converged, counts = result
+    conditioned, hessian = jax.vmap(topology._conditioned_hessian, in_axes=(0, None))(
+        jet.hessian, TopologyPolicy().hessian_tolerance
+    )
+    gradient_tangent = jax.jvp(
+        lambda operand: jax.vmap(operand.evaluate)(position).gradient,
+        (field,),
+        (field_tangent,),
+    )[1]
+    position_tangent = -jnp.linalg.solve(hessian, gradient_tangent[..., None])[..., 0]
+    position_tangent = jnp.where(
+        (converged & conditioned)[:, None], position_tangent, jnp.nan
+    )
+    jet_tangent = jax.jvp(
+        lambda operand, points: jax.vmap(operand.evaluate)(points),
+        (field, position),
+        (field_tangent, position_tangent),
+    )[1]
+    # Seeds select a root's basin; the converged root follows the field alone.
+    return result, (
+        position_tangent,
+        jet_tangent,
+        jnp.zeros(converged.shape, dtype=jax.dtypes.float0),
+        jnp.zeros(counts.shape, dtype=jax.dtypes.float0),
+    )
 
 
 @partial(jax.jit, static_argnames=("iterations",))

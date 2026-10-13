@@ -312,6 +312,7 @@ def measure(args):
         receipt["booked_moment_relative_difference"],
         flush=True,
     )
+    programs = {}
     for state_kind, all_moments in [
         ("analytic", [exact] * args.states),
         ("picard", bookings),
@@ -332,17 +333,28 @@ def measure(args):
             ("cached-jet", cached_fields),
         ]:
             print("COMPILE_SOLVE", state_kind, name, flush=True)
-            executable, cold, size = compile_solver(arm_fields[0], initial, pitch)
+            if name not in programs:
+                programs[name] = compile_solver(arm_fields[0], initial, pitch)
+            executable, cold, size = programs[name]
             sweep = run_sweep(
                 executable, arm_fields, initial, pitch, truth, reference_rows
             )
             if name == "kernel":
                 reference_rows = sweep if state_kind == "picard" else None
             timed = latency(executable, arm_fields, sweep, pitch, args.calls)
+            travel = float(
+                np.linalg.norm(
+                    np.asarray(sweep[-1]["positions"])[-1]
+                    - np.asarray(sweep[0]["positions"])[-1]
+                )
+                / float(pitch)
+            )
             row = dict(
                 arm=name,
+                measured_travel_pitches=travel,
                 state_kind=state_kind,
                 cold_compile_seconds=cold,
+                reused_executable=state_kind == "picard",
                 executable_bytes=size,
                 iterations_per_call=6,
                 sweep=sweep,

@@ -683,6 +683,71 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "manifest is blocked; process kept for resume",
+    "scratch_bytes": 5017,
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261012T041630390638-cfs-wire-current-book",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 5017,
+        "path": "/tmp/reckon-crew-scratch/r-20261012T041630390638-cfs-wire-current-book"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "c054a721ff52ac74d5b36d25b4fcfff9c62c5abc",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wire-current-book",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-10-12T04:28:31Z",
+            "session_id": "01a12e5a-f34d-79e0-a277-5a3bf11e7638",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wire-current-book"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session 01a12e5a-f34d-79e0-a277-5a3bf11e7638"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-10-12T04:28:31Z",
+      "session_id": "01a12e5a-f34d-79e0-a277-5a3bf11e7638",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/cfs-wire-current-book"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01a12e5a-f34d-79e0-a277-5a3bf11e7638"
+  },
   "resume_waiver": {
     "reason": "superseded: the read's field semantics this run asked about are settled by lead rulings c-s21-fixed-point-lock (cached-jet fixed points) and the membership-hybrid route; the wiring is redispatched fresh from current main once membership lands",
     "session_id": "01a12e5a-f34d-79e0-a277-5a3bf11e7638",

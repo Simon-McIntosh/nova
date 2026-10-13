@@ -219,3 +219,31 @@ def test_nonfinite_field_is_not_reported_as_missing_rows():
     result = fixed.solve(cache, jnp.zeros((1, 3)), seed, seed, jnp.asarray(1.0))
     assert not result.valid[0]
     assert result.status[0] != fixed.FixedPointStatus.NEEDS_ROWS
+
+
+@pytest.mark.parametrize("kind", ["limited", "diverted"])
+def test_closed_form_equilibrium_on_small_hex_mesh(kind):
+    from tests.equilibrium import test_topology_read as fixture
+
+    _, analytic, wall, axis, saddle = fixture._analytic_inputs(kind)
+    geometry = fixture._realised_hex_geometry(wall, 50)
+    samples = np.asarray(geometry.sample_points)
+    nodes, inverse = np.unique(
+        np.round(samples.reshape(-1, 2), 12), axis=0, return_inverse=True
+    )
+    mesh = fixed._build_mesh(nodes, inverse.reshape(samples.shape[:-1]), geometry)
+    jets = fixed._stack_jet(jax.vmap(analytic.evaluate)(jnp.asarray(nodes)))
+    cache = fixed.RowCache(
+        mesh,
+        jnp.asarray(nodes),
+        jnp.arange(len(nodes)),
+        jnp.zeros((len(nodes), 1, 3, 6)),
+        jets,
+    )
+    roots = jnp.asarray([axis] if saddle is None else [axis, saddle])
+    pitch = jnp.median(geometry.pitch)
+    result = fixed.solve(cache, jnp.zeros((1, 3)), roots + 0.03 * pitch, roots, pitch)
+    assert np.all(result.valid)
+    assert np.max(np.linalg.norm(np.asarray(result.position - roots), axis=-1)) < float(
+        pitch
+    )

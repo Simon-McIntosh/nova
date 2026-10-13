@@ -52,6 +52,11 @@ def main():
                     "conftest.py",
                     "pyproject.toml",
                     "tests/conftest.py",
+                    "tests/equilibrium/test_topology_read.py",
+                    "tests/rotating_equilibrium_references.py",
+                    "scripts/analytic_oracle_fixtures",
+                    "tests/__init__.py",
+                    "scripts/__init__.py",
                 ]
             )
             with tarfile.open(fileobj=io.BytesIO(archive)) as source:
@@ -108,7 +113,9 @@ raise SystemExit(pytest.main(arguments))
             )
             stream.write(f"EXIT={result.returncode}\n")
         text = log.read_text()
-        failures = re.findall(r"^(?:FAILED|ERROR) (\S+)", text, re.MULTILINE)
+        failures = sorted(
+            set(re.findall(r"^(?:FAILED|ERROR) (\S+)", text, re.MULTILINE))
+        )
         completed = bool(re.search(r"\d+ (?:passed|failed|error)", text))
         record = dict(
             revision=revision,

@@ -340,18 +340,21 @@ def run(args):
                 walls.append(perf_counter() - start)
             booked = book(psi, reading)
             jax.block_until_ready(booked)
-            assert bool(booked.valid), (state, method)
             target = reference_booking[:3]
+            admitted = bool(booked.valid)
             row = dict(
                 state=state,
                 method=method,
-                valid=bool(booked.valid),
-                booked_moment_error=relative(booked[:3], target),
+                valid=admitted,
+                read_valid=bool(reading.valid),
+                raw_current=float(booked.raw_current),
+                moments_finite=bool(jnp.all(jnp.isfinite(jnp.asarray(booked[:3])))),
+                booked_moment_error=relative(booked[:3], target) if admitted else None,
                 warm_seconds=float(np.median(walls)),
                 compile_seconds=cold,
                 patch_cells=int(jnp.sum(reading.normal_form_cells)),
             )
-            if state == "analytic":
+            if state == "analytic" and admitted:
                 difference = ClippedCurrentMoments(
                     *(a - b for a, b in zip(booked[:3], exact, strict=True))
                 )
@@ -360,6 +363,8 @@ def run(args):
                 row["map_flux_error"] = float(
                     jnp.max(jnp.abs(delta)) / jnp.max(jnp.abs(truth))
                 )
+            elif state == "analytic":
+                row["map_flux_error"] = None
             receipt["rows"].append(row)
             persist(output, receipt)
             np.savez_compressed(

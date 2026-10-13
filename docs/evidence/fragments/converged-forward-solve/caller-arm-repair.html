@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="caller-arm-repair">
+<meta name="plan-title" content="Callers of the required exterior support arm">
+<meta name="plan-summary" content="Named the support arm at every caller the required keyword left behind, gave the
+diverted analytic reference's separatrix to the clip seed instead of the rotating
+current source, re-derived the diverted booking pin from the value the row measures,
+and corrected a coarse ladder assertion that predated contained-saddle admission">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s6">
+<meta name="plan-commits" content="PENDING">
+<meta name="plan-recorded-at" content="2026-10-13">
+<meta name="plan-verdict" content="pass">
+<meta name="plan-environment" content="CPU x64, binary64 (JAX_PLATFORMS=cpu) inside the fleet allocation job 1281970 on 98dci4-clu-2002, so the heavy rows ran in place. Every run named the worktree on PYTHONPATH and used /home/ITER/mcintos/Code/nova/.venv/bin/python directly; uv was never invoked on the compute node.">
+<title>Callers of the required exterior support arm | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="caller-arm-repair">Callers of the required exterior support arm</h1>
+
+<p>Making the exterior support arm a required keyword exposed seven callers that
+had been inheriting the legacy spline clip by default. Each one now names its arm,
+and the arm it names is the one its own purpose needs.</p>
+
+<p id="caller-arm-repair-arm-choices">The arm, case by case. Before the required
+keyword, <code>exact_current_moments</code> defaulted to the legacy spline clip, so
+the arm that preserves every caller's previous behaviour is <code>legacy</code>.
+<code>EXTERIOR_SUPPORT_ARM</code> is the exact arm, but that constant is the
+certificate exterior's own declared default and is not a statement about these
+callers: each of them integrates the analytic density to seed a carrier, and none
+of them is the certificate exterior's closure row. Every one therefore declares
+<code>support_arm="legacy"</code>, and
+<code>scripts/prototypes/support/book.py</code> keeps the exact arm as its
+comparison control. The reason is the same in each case and is stated here rather
+than repeated per file: the caller's subject is the carrier and its read, not the
+support quadrature, so a support change would be an unmeasured variable in it.</p>
+
+<p id="caller-arm-repair-diverted-separatrix">The diverted callers needed a second
+change, and it is the defect the node was sent for. The legacy arm seeds its clip
+from <code>_analytic_separatrix(analytic)</code>, and at
+<code>benchmarks/solovev_certificate.py::_case</code> the diverted case returns a
+carrier plus a <em>rotating</em> source case, whose field coefficient is negative
+and whose zero-flux surface is therefore not finite: the sampler collapses to a
+single vertex and Shapely refuses it. Reproduced at the base revision, quoting the
+refusal:</p>
+
+<pre id="caller-arm-repair-shapely-refusal"><code>/home/ITER/mcintos/Code/nova/.venv/bin/python \
+  -m pytest -p no:cacheprovider tests/test_oracle_axis_admission.py
+E  ValueError: A linearring requires at least 4 coordinates.
+scripts/analytic_oracle_fixtures/measure.py:1078: in _analytic_separatrix</code></pre>
+
+<p>The diverted case's finite closed separatrix is the analytic reference
+<code>DIVERTED_REFERENCE</code>, which <code>_case</code> already returns as its
+third element and which <code>_exact_state</code> already uses for the flux field.
+Passing it as <code>analytic=</code> gives the clip seed the separatrix and leaves
+the rotating source as the density carrier, which is the split the repair asks
+for. The five diverted call sites take it: the admission test, the
+diverted-oracle census regenerate, the contour-evidence wrapper, and the
+mechanism-evidence diverted terminal. The two non-diverted callers,
+<code>measure_h200.py</code> and the mechanism-evidence certificate cases, run on
+static cases whose source is its own analytic, so <code>analytic</code> is
+omitted there and stays <code>None</code>.</p>
+
+<p id="caller-arm-repair-coarse-assertion">Repairing the hand-off exposed a second
+defect in the same test, and it is not an arm defect. The coarse block of
+<code>test_coarse_diverted_exact_field_admits_axis_and_saddle</code> asserted that
+the read returns a non-finite <code>x_point</code> and <code>diverted=False</code>
+at the <code>-110</code> rung. Those two assertions were written for the
+<em>default</em> carrier-limiter wall: the test switched to the explicitly declared
+diverted wall in the commit that keyed explicit walls, and kept the state
+assertions while adding the wall-identity assertions beside them. A four-cell probe
+over both walls and both arms, one fixture load, separates the two effects:</p>
+
+<pre id="caller-arm-repair-probe"><code>RESULT arm=legacy explicit_wall=True  x_point=[1.510786381071057, -1.0275005315610273] diverted=True
+RESULT arm=legacy explicit_wall=False x_point=[nan, nan] diverted=False
+RESULT arm=exact  explicit_wall=True  x_point=[1.510786381071057, -1.0275005315610273] diverted=True
+RESULT arm=exact  explicit_wall=False x_point=[nan, nan] diverted=False</code></pre>
+
+<p>The arm is not the variable: both arms return bit-identical states, because
+<code>operator.read</code> resolves the nulls from the exact flux it is handed and
+not from the operator's booked background. The wall is the variable, and it is the
+one the test itself declares — the offset of the exact separatrix, which therefore
+encloses the separatrix X-point, so a read that admits contained saddle roots
+returns it at every rung. The assertion was therefore stale against an intentional
+behaviour change, not against the arm: contained quadratic saddle roots became
+admissible after this assertion was written. The coarse claim now states what the
+machine does; the census assertion beside it
+(<code>ring_resolution_limited</code> true, two ring crossings) is unchanged and
+still passes, so the table's resolution-limited verdict and the read's admission
+are recorded as the two different instruments they are. The fine rung keeps its own
+tighter assertion at the fine pitch.</p>
+
+<p id="caller-arm-repair-book-pin">The diverted booking pin at
+<code>scripts/prototypes/support/book.py</code> was re-derived rather than replaced
+with a same-run comparison, and the reason is the shape of the guard. The pin is a
+relative tolerance of <code>5e-6</code> on a measured map booking error, so it can
+catch a small regression in the legacy arm's booking. A same-run comparison would
+have to be made against a differently-scaled quantity from the same row — the
+exact arm's image error — which would convert a tight numeric pin into an
+order-of-magnitude claim and lose exactly the sensitivity the pin exists for. The
+constant is the value the diverted 550-cell booking row reports for
+<code>legacy_map_error</code>, measured on the frozen required-arm revision
+<code>ab54cccac</code> with the row the harness itself runs:</p>
+
+<pre id="caller-arm-repair-book-command"><code>NOVA_BOOK_RESULTS=&lt;rows&gt; NOVA_BOOK_CACHE=&lt;certified rows cache&gt; \
+  /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider -s \
+  'tests/test_current_book_fragments.py::test_analytic_certificate_moments[550-diverted]'</code></pre>
+
+<p>The pinned literal was <code>0.197327</code>; base and head both measure
+<code>0.1946465024178517</code>, a relative departure of <code>1.36e-2</code>
+against a <code>5e-6</code> tolerance, so the assertion could only ever fail. This
+is a stale pin, not a moved physical quantity, which is why the derivation is
+recorded beside it rather than the pin being loosened.</p>
+
+<p id="caller-arm-repair-negative-control">The declared negative control restores
+the rotating-source hand-off, and the log it produced is named in the manifest's
+<code>negative_control_log</code>. Admission is judged on that log's own facts —
+its non-zero <code>EXIT=</code> line and the failing test id — not on this
+paragraph.</p>
+
+<h2 id="caller-arm-repair-gate">Gate</h2>
+
+<p id="caller-arm-repair-gate-scope">The gate runs
+<code>tests/test_oracle_axis_admission.py</code>,
+<code>tests/test_analytic_oracle_fixture_exterior.py</code> and
+<code>tests/test_certificate_exterior_support.py</code> at 550 cells with 2,000 and
+5,000 deselected, in fresh per-file processes, at the base revision and at this
+node's head, and the book harness's diverted and limited 550-cell rows. The
+measured figures are stated in the manifest's <code>tests</code> and
+<code>tests_logs</code> keys, which are the records this fragment is read against;
+no figure is restated here.</p>
+
+<p id="caller-arm-repair-not-done">Left undone and reported rather than papered
+over: the base-and-head gate arms and the book rows need scheduler-class wall clock
+that the node's time fence did not cover, so they are recorded as unrun with the
+command each would take. The per-file head arm of the admission test did run, and
+its log is cited from the manifest.</p>
+
+</main>
+</body>
+</html>

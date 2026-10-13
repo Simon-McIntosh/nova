@@ -62,7 +62,11 @@ def _build_diverted_terminal(source: Any, cells: int) -> dict[str, Any]:
     analytic_state = source.certificate._exact_state(case_name, exact, coordinates)
     empty_operator = source.oracle_fixture.forward_operator(source_case, machine)
     exact_physical = source.oracle_fixture.exact_current_moments(
-        source_case, empty_operator, analytic_state
+        source_case,
+        empty_operator,
+        analytic_state,
+        analytic=exact,
+        support_arm="legacy",
     )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = source.oracle_fixture._internal_flux_image(

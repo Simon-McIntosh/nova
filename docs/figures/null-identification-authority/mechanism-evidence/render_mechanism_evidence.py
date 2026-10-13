@@ -251,7 +251,7 @@ def _build_certificate_case(case_name: str, requested_cells: int) -> dict[str, A
     analytic_state = certificate._exact_state(case_name, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, analytic_state
+        source_case, empty_operator, analytic_state, support_arm="legacy"
     )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = oracle_fixture._internal_flux_image(
@@ -549,7 +549,11 @@ def _build_diverted_terminal(requested_cells: int) -> dict[str, Any]:
     analytic_state = certificate._exact_state(case_name, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, analytic_state
+        source_case,
+        empty_operator,
+        analytic_state,
+        analytic=exact,
+        support_arm="legacy",
     )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = oracle_fixture._internal_flux_image(
@@ -808,7 +812,11 @@ def _cold_start_data() -> dict[str, Any]:
     analytic_state = certificate._exact_state(case_name, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, analytic_state
+        source_case,
+        empty_operator,
+        analytic_state,
+        analytic=exact,
+        support_arm="legacy",
     )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = oracle_fixture._internal_flux_image(

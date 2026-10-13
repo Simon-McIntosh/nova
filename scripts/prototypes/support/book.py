@@ -250,8 +250,15 @@ def measure(kind, cells, directory, cache):
         exterior + operator.current_moment_image(legacy) - analytic
     )[: len(machine.node)]
     legacy_map = float(np.max(np.abs(np.where(shadow, 0, legacy_delta))) / span)
+    # Diverted 550-cell legacy booking map error, re-derived at base revision
+    # ab54cccac by the row the harness runs:
+    #   NOVA_BOOK_RESULTS=<rows> NOVA_BOOK_CACHE=<cache> \
+    #     .venv/bin/python -m pytest -p no:cacheprovider -s \
+    #     'tests/test_current_book_fragments.py::test_analytic_certificate_moments[550-diverted]'
+    # The base and the required-arm head both report 0.1946465024178517; the
+    # earlier pin of 0.197327 was 1.36e-2 away, so it could only ever fail.
     if kind == "diverted" and cells == 550:
-        assert abs(legacy_map / 0.197327 - 1) < 5e-6, legacy_map
+        assert abs(legacy_map / 0.1946465024178517 - 1) < 5e-6, legacy_map
     density_scale = np.maximum(
         np.abs(np.asarray(truth.cell_current)),
         abs(float(total))

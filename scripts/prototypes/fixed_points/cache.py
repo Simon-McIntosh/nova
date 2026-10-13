@@ -65,6 +65,8 @@ def solve_with_refresh(
     for attempt in range(16):
         result = executable(field, seeds, pitch)
         jax.block_until_ready(result)
+        if np.all(np.asarray(result.valid)):
+            return result, field, events
         absent = missing_nodes(field, result.position)
         if not len(absent):
             return result, field, events

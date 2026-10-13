@@ -144,7 +144,23 @@ def solve_adaptive(field, seeds, pitch, iterations=6):
         conditioned, safe = jax.vmap(topology._conditioned_hessian, in_axes=(0, None))(
             jet.hessian, policy.hessian_tolerance
         )
-        correction = jnp.linalg.solve(safe, jet.gradient[..., None])[..., 0]
+        # A scaled two-by-two inverse avoids library LU stages for two scalars.
+        scale = jnp.max(jnp.abs(safe), axis=(-2, -1))
+        matrix = safe / scale[:, None, None]
+        gradient = jet.gradient / scale[:, None]
+        determinant = (
+            matrix[:, 0, 0] * matrix[:, 1, 1] - matrix[:, 0, 1] * matrix[:, 1, 0]
+        )
+        correction = (
+            jnp.stack(
+                (
+                    matrix[:, 1, 1] * gradient[:, 0] - matrix[:, 0, 1] * gradient[:, 1],
+                    matrix[:, 0, 0] * gradient[:, 1] - matrix[:, 1, 0] * gradient[:, 0],
+                ),
+                axis=-1,
+            )
+            / determinant[:, None]
+        )
         length = jnp.linalg.norm(correction, axis=-1)
         finite = jnp.isfinite(jet.value) & jnp.all(jnp.isfinite(correction), axis=-1)
         usable = conditioned & finite

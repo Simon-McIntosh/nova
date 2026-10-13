@@ -6,6 +6,7 @@ from nova.jax.config import configure_dtypes
 configure_dtypes()
 
 import argparse
+import hashlib
 from dataclasses import replace
 import json
 from pathlib import Path
@@ -394,10 +395,6 @@ def measure(args):
                 receipt["profile"] = dict(
                     cost=executable.cost_analysis(), hlo_path=str(profile_path)
                 )
-                with jax.profiler.trace(
-                    str(args.out / f"{args.kind}-{args.cells}-profile")
-                ):
-                    jax.block_until_ready(executable(arm_fields[0], initial, pitch))
             travel = float(
                 np.linalg.norm(
                     np.asarray(sweep[-1]["positions"])[-1]
@@ -459,6 +456,47 @@ def measure(args):
                     )
                     seed = jnp.where(result.valid[:, None], result.position, seed)
                 row["recovered_sweep"] = repaired
+                if state_kind == "picard":
+                    from functools import partial
+
+                    extended = (
+                        jax.jit(partial(solve_adaptive, iterations=24))
+                        .lower(arm_fields[0], initial, pitch)
+                        .compile()
+                    )
+                    extended_rows = []
+                    seed = initial
+                    for index, field in enumerate(arm_fields):
+                        result, _, events = solve_with_refresh(
+                            extended,
+                            field,
+                            seed,
+                            pitch,
+                            nodes,
+                            reference.coupling,
+                            exact,
+                            fields[index],
+                        )
+                        target = np.asarray(reference_rows[index]["positions"])
+                        extended_rows.append(
+                            dict(
+                                state=index,
+                                valid=np.asarray(result.valid).tolist(),
+                                iterations=np.asarray(result.iterations).tolist(),
+                                hessian_eigenvalues=np.linalg.eigvalsh(
+                                    np.asarray(result.jet.hessian)
+                                ).tolist(),
+                                error_pitches=(
+                                    np.linalg.norm(
+                                        np.asarray(result.position) - target, axis=-1
+                                    )
+                                    / float(pitch)
+                                ).tolist(),
+                                refresh_events=events,
+                            )
+                        )
+                        seed = jnp.where(result.valid[:, None], result.position, seed)
+                    row["extended_recovered_sweep"] = extended_rows
             receipt["rows"].append(row)
             persist(out, receipt)
             print(
@@ -480,6 +518,10 @@ def measure(args):
                 negative = run_sweep(executable, mutated, initial, pitch, truth)
                 receipt["zero_hessian_control"] = negative
                 persist(out, receipt)
+    with jax.profiler.trace(str(args.out / f"{args.kind}-{args.cells}-profile")):
+        jax.block_until_ready(
+            programs["cached-adaptive"][0](cached_fields[0], initial, pitch)
+        )
     if args.coverage and saddle is not None:
         receipt["coverage"] = coverage_measure(
             args,
@@ -617,6 +659,18 @@ def main():
     print(
         f"NOVA_MODULE={nova.__file__} CWD={Path.cwd().resolve()} "
         f"DEVICES={jax.devices()}",
+        flush=True,
+    )
+    print(
+        "SOURCE_DIGESTS",
+        json.dumps(
+            {
+                name: hashlib.sha256(
+                    Path(__file__).with_name(name).read_bytes()
+                ).hexdigest()
+                for name in ("measure.py", "solve.py", "cache.py")
+            }
+        ),
         flush=True,
     )
     assert jax.default_backend() == "gpu"

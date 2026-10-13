@@ -49,6 +49,7 @@ def test_neighbours_are_edge_connected_not_a_distance_disc():
     geometry = SimpleNamespace(
         vertices=jnp.asarray(origins[:, None] + square),
         vertex_count=jnp.full(4, 4),
+        pitch=jnp.ones(4),
         neighbour=jnp.asarray(
             ((-1, 1, 2, -1), (-1, -1, 3, 0), (0, 3, -1, -1), (1, -1, -1, 2))
         ),

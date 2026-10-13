@@ -123,15 +123,28 @@ measurement rather than by inference. The three rows differ only in the last
 two digits of the booking-image error (0.19363746572287618, 0.19363746572287982,
 0.1936374657228774), which is binary64 noise and not a kernel change.</p>
 
-<p>The move therefore happened after <code>acaea2c9c</code>. The plan records
-that the caller-arm repair (<code>30c84c3b3</code>) measured this same quantity
-identically at its base and head, so the mover sits between the near-edge repair
-and that repair's base. Two merges touch the kernel, the support machinery or
-the certificate fixture in that range, and the exterior-fixture delegation
-(<code>c3c95a467</code>) is the one that replaces the fixture's own integrator
-with the shared moment owner &mdash; the change most able to move this row. It is
-measured against its first parent in this run and reported in the manifest's
-follow-ons.</p>
+<p>The move therefore happened after <code>acaea2c9c</code>. Two further
+revisions were measured to bracket it, and both already carry the new value:</p>
+
+<table>
+  <thead><tr><th>revision</th><th>what it is</th><th>map_relative_sup</th></tr></thead>
+  <tbody>
+    <tr><td><code>acaea2c9c</code></td><td>near-edge moment kernel repair merge</td><td>0.1973269787169759</td></tr>
+    <tr><td><code>8fe66e390</code></td><td>red-base-triage merge, first parent of <code>c3c95a467</code></td><td>0.19464650241785292</td></tr>
+    <tr><td><code>c3c95a467</code></td><td>exterior-fixture delegation merge</td><td>0.1946465024178517</td></tr>
+  </tbody>
+</table>
+
+<p>So the exterior-fixture delegation is <em>excluded</em> as well: the value is
+already 0.1946465 at its first parent, so that merge did not move the row even
+though it is the merge that routes the exterior through the shared moment owner.
+The mover lies between <code>acaea2c9c</code> and <code>8fe66e390</code>, a
+range holding five merges, of which the first after the near-edge repair is the
+polygon-moment-owner merge <code>1b68b8099</code> and the next is the exterior
+exact-support merge <code>f68870f99</code>. Those two are measured against each
+other in this run and reported in the manifest's follow-ons; the value at
+<code>8fe66e390</code> equals the value at main to 1.2e-16, so the quantity has
+been stable across everything after the mover.</p>
 
 <p>Two notes on how these rows were produced. The extracted trees refuse the row
 through their own positive-control pin, which is a caller-supplied expectation

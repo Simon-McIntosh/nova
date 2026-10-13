@@ -11,10 +11,10 @@
 program, replacing the sequential scan">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s3">
-<meta name="plan-commits" content="adeff8346,486d369ad,f2a831d4d,f2a831d4d">
+<meta name="plan-commits" content="adeff8346,486d369ad,f2a831d4d,4b4b242f1">
 <meta name="plan-recorded-at" content="2026-10-13">
 <meta name="plan-verdict" content="partial">
-<meta name="plan-environment" content="H200 base-versus-head booking walls at 2000 and 5000 cells on the analytic certificate state, with identity, compile and peak-memory columns; the one-Picard-image state is not reported">
+<meta name="plan-environment" content="H200 base-versus-head booking walls at 2000 and 5000 cells on the analytic certificate state, with identity, compile and peak-memory columns; the batched program is faster at every rung. The one-Picard-image state is not attributable through this seam, so no wall is reported for it">
 
 <title>Cell-batched current booking | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
@@ -157,7 +157,16 @@ node wrote failed its own check: applied to the analytic state, which it must
 reproduce, it disagreed with the closed-form flux at the sample points by 1.0
 times the flux span for the limited machine and 0.90 times for the diverted one.
 A state produced by that recipe is not the Picard image, so no number from it is
-quoted. The four rows above are on the analytic state.</p>
+quoted. The follow-on job (<code>1284869</code>, completed after 23 minutes)
+booked that state anyway, for both arms on the limited 2,000-cell and diverted
+5,000-cell machines, and those four walls are withheld for the same reason.
+<code>sample_flux_field</code> evaluates a per-cell flux polynomial at the
+requested points from a state whose own sample block sits at a reconstructed
+point set, so the reconstruction is an interpolant of the wrong coordinates
+rather than the flux map at the read's stencil. The four rows above are on the
+analytic state, which is the measurement that settles the cost: the booked
+moments agree between the arms, and the batched program is faster at both cell
+counts and both topologies.</p>
 </section>
 </main>
 </body>

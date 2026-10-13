@@ -286,25 +286,32 @@ def measure(args):
             psi, reading, geometry, profile, quadrature
         )
     )
-    sample_values = jax.jit(
-        lambda field, points: jax.vmap(jax.vmap(field.value))(points)
+    # Hold the input state fixed and vary the prescribed exterior. Each output
+    # is one Picard image of this input under its own exterior supply.
+    reading = reader(analytic, geometry, convention, policy)
+    psi = jax.jit(lambda field, points: jax.vmap(jax.vmap(field.value))(points))(
+        analytic, geometry.sample_points
     )
-    bookings = []
-    for index, field in enumerate(fields):
-        reading = reader(field, geometry, convention, policy)
-        psi = sample_values(field, geometry.sample_points)
-        booked = book(
-            psi,
-            reading,
-            geometry,
-            current.Quadrature(sigma=convention.sigma, segments=64),
-        )
-        jax.block_until_ready(booked)
-        bookings.append(jnp.stack(tuple(booked[:3]), -1))
-        print("BOOKED", index, bool(booked.valid), flush=True)
-        if not bool(booked.valid):
-            receipt.setdefault("booking_failures", []).append(index)
-            persist(out, receipt)
+    booked = book(
+        psi,
+        reading,
+        geometry,
+        current.Quadrature(sigma=convention.sigma, segments=64),
+    )
+    jax.block_until_ready(booked)
+    bookings = [jnp.stack(tuple(booked[:3]), -1)] * args.states
+    receipt["booking_valid"] = bool(booked.valid)
+    receipt["picard_input"] = "unshifted analytic state; varying exterior supply"
+    receipt["booked_moment_relative_difference"] = float(
+        jnp.max(jnp.abs(bookings[0] - exact)) / jnp.max(jnp.abs(exact))
+    )
+    persist(out, receipt)
+    print(
+        "BOOKED",
+        bool(booked.valid),
+        receipt["booked_moment_relative_difference"],
+        flush=True,
+    )
     for state_kind, all_moments in [
         ("analytic", [exact] * args.states),
         ("picard", bookings),

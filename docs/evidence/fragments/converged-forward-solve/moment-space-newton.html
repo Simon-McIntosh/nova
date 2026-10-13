@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="moment-space-newton">
+<meta name="plan-title" content="Implicit stationary-point tangents and forward migration dependency">
+<meta name="plan-summary" content="Stationary-point tangent repair verified; moment-space forward integration blocked on exterior jets">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-commits" content="4d4c29724816c41a1e256ec93bc142f95d1ed819">
+<meta name="plan-recorded-at" content="2026-10-13"><meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="CPU x64, shared root virtual environment, fleet allocation">
+<title>Implicit stationary-point tangents | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head><body><main class="plan-doc">
+<h1 id="moment-space-newton-outcome">Implicit stationary-point tangents</h1>
+<table><thead><tr><th>Item</th><th>Recorded result</th></tr></thead><tbody>
+<tr><td>Product change</td><td><code>fixed_points._adaptive</code> has a custom JVP using −H⁻¹ times the field-gradient tangent at the converged point. Jet tangents include both field and point motion. Root stationarity is bounded by 64 machine eps times pitch.</td></tr>
+<tr><td>Zero-step defect reproduced</td><td>Unmodified code returned zero position JVP against vertical central differences +0.5000000000157655 and −0.49999999997829553.</td></tr>
+<tr><td>Baseline</td><td><code>tests/test_fixed_points.py</code>: 17 passed, 2 failed; both zero-step regression cases failed. Base <code>2be7601fdd73557e87fce380a859aaf58d184209</code>, before the product edit.</td></tr>
+<tr><td>Repair gate</td><td>19 passed in 50.72 s. Analytic and normalized one-cell <code>current.book</code> states; zero and four Newton steps; position and all jet entries agree with central differences at rtol 1e-6, atol 1e-8. These polynomial controls are not the 2,000-cell analytic and Picard-image gate.</td></tr>
+<tr><td>Gate logs</td><td><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/fixed-baseline.log</code>; <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T185617649894-moment-space-newton/fixed-polished.log</code>. Both record import provenance. The repair gate ran on the working-tree changes before commit.</td></tr>
+<tr><td>Intermediate failure</td><td>The first implicit-tangent gate passed the zero-step cases but exposed approximately 1.3e-8 central-difference noise in the stationary gradient after multi-step termination. Tightening primal stationarity fixed it; test tolerances were retained.</td></tr>
+<tr><td>Required input dependency</td><td><code>scripts/analytic_oracle_fixtures/measure.py:958</code>, <code>forward_operator()</code>, passes only sampled exterior flux through <code>_target()</code> into <code>FluxTarget.source_target</code>. The locked Bell read requires exterior gradients and Hessians too. The operator owns neither an exterior evaluator nor conductor geometry from which those derivatives can be built. This producer belongs to the concurrent carrier scope.</td></tr>
+<tr><td>Forward migration</td><td>Not implemented. No legacy path deleted or routed. Staged retirement keeps the legacy read until its consumers migrate. Production default unchanged.</td></tr>
+<tr><td>Unmeasured gates</td><td>Membership and booking JVP at scale; dense/Krylov H200 comparison; analytic and production-seed convergence; full forward-module delta; legacy-reinstatement negative control; Newton residual and converged-flux figure. No H200 job submitted.</td></tr>
+</tbody></table>
+<h2 id="moment-space-newton-migration">Remaining legacy migration inventory</h2>
+<table><thead><tr><th>Inventory definition</th><th>Scope</th></tr></thead><tbody>
+<tr><td>292 references</td><td>All Python matches of <code>_support_partition</code>, <code>_fixed_design_read</code> and <code>_fixed_design_topology</code> under nova, tests, benchmarks and scripts at the tangent-repair head. Calls, aliases, mocks, definitions and textual references are retained so indirect consumers are not lost. This is an inventory before forward-path migration, not a claim that every row is a call.</td></tr>
+</tbody></table>
+<table><thead><tr><th>Path and line</th><th>Reference</th></tr></thead><tbody>
+<tr><td><code>benchmarks/axis_seed_census.py:102</code></td><td><code>operator._fixed_design_topology.read_with_connectivity(</code></td></tr>
+<tr><td><code>benchmarks/axis_seed_census.py:117</code></td><td><code>_vmap_o, vmap_x = operator._fixed_design_topology.grid(grid_flux)</code></td></tr>
+<tr><td><code>benchmarks/bank_revision_reproduction.py:212</code></td><td><code>topology = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/carrier_arms.py:236</code></td><td><code>operator._support_partition(state)</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:332</code></td><td><code>wall = np.asarray(operator._fixed_design_topology.wall.coordinate, dtype=np.float64)</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:364</code></td><td><code>operator._fixed_design_topology.wall.coordinate, dtype=jnp.float64</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:366</code></td><td><code>capacity = int(operator._fixed_design_topology.grid.locator.maxsize)</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:368</code></td><td><code>axis_kind = operator._fixed_design_topology.grid.extremum_polarity</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:381</code></td><td><code>centroid, _ = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:507</code></td><td><code>capacity = int(operator._fixed_design_topology.grid.locator.maxsize)</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:509</code></td><td><code>axis_kind = operator._fixed_design_topology.grid.extremum_polarity</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:516</code></td><td><code>centroid, wall_flux = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:589</code></td><td><code>contained = operator._fixed_design_topology.contained_x_candidates(</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:661</code></td><td><code>wall_data = operator._fixed_design_topology.wall_anchor_data(</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:664</code></td><td><code>qualified_extremum = operator._fixed_design_topology.qualified_o_candidates(</code></td></tr>
+<tr><td><code>benchmarks/census_kernel_timing.py:718</code></td><td><code>axis_kind = operator._fixed_design_topology.grid.extremum_polarity</code></td></tr>
+<tr><td><code>benchmarks/centroid_radius_attribution.py:157</code></td><td><code>The read is the same ``_fixed_design_read`` the moment observation runs,</code></td></tr>
+<tr><td><code>benchmarks/centroid_radius_attribution.py:165</code></td><td><code>_masks, topology, _connected, _admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>benchmarks/chord_booking_operation_trace.py:390</code></td><td><code>partition = operator._support_partition(jnp.asarray(analytic), None)</code></td></tr>
+<tr><td><code>benchmarks/coupling_moment_order_evaluation.py:606</code></td><td><code>partition = operator._support_partition(jnp.asarray(oracle_state))</code></td></tr>
+<tr><td><code>benchmarks/diiid_forward_gs_match.py:686</code></td><td><code>table = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>benchmarks/diiid_forward_gs_match.py:3320</code></td><td><code>_vmap_o, vmap_x = operator._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>benchmarks/diiid_gate_frame_identity.py:427</code></td><td><code>census = operator._fixed_design_topology.grid.candidate_table_status(pool)</code></td></tr>
+<tr><td><code>benchmarks/diverted_map_error_decomposition.py:172</code></td><td><code>operator._support_partition(jnp.asarray(analytic), None)</code></td></tr>
+<tr><td><code>benchmarks/diverted_map_error_decomposition.py:174</code></td><td><code>masks, topology, _connected, admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>benchmarks/diverted_map_error_decomposition.py:207</code></td><td><code>&quot;source&quot;: &quot;nova/equilibrium/forward_operator.py:_fixed_design_read&quot;,</code></td></tr>
+<tr><td><code>benchmarks/diverted_map_error_decomposition.py:229</code></td><td><code>masks, topology, sample_psi_norm, _production_support = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/diverted_map_error_decomposition.py:309</code></td><td><code>masks, _topology, sample_psi_norm, profile_support = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/dual_stencil_census.py:400</code></td><td><code>centroid, _wall = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>benchmarks/dual_stencil_census.py:503</code></td><td><code>centroid, _wall = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>benchmarks/efit_forward_parity_slice.py:3489</code></td><td><code>original_read = operator._fixed_design_read</code></td></tr>
+<tr><td><code>benchmarks/efit_forward_parity_slice.py:3537</code></td><td><code>operator._fixed_design_read = count_read</code></td></tr>
+<tr><td><code>benchmarks/efit_forward_parity_slice.py:3562</code></td><td><code>operator._fixed_design_read = original_read</code></td></tr>
+<tr><td><code>benchmarks/efit_parity_tared_external_field.py:332</code></td><td><code>operator._support_partition(jnp.asarray(reference))</code></td></tr>
+<tr><td><code>benchmarks/empty_exact_polygon_probe.py:129</code></td><td><code>base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/exact_clip_low_state_discriminator.py:537</code></td><td><code>terminal_partition = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/exact_clip_low_state_discriminator.py:540</code></td><td><code>analytic_partition = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/exact_clip_memory_scaling.py:371</code></td><td><code>masks, topology, _sample_psi_norm, support = operator._support_partition(state)</code></td></tr>
+<tr><td><code>benchmarks/exact_clip_memory_scaling.py:576</code></td><td><code>profile.operator._support_partition(state)</code></td></tr>
+<tr><td><code>benchmarks/exact_clip_warm_cost.py:371</code></td><td><code>masks, read, connected, admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>benchmarks/exact_clip_warm_cost.py:588</code></td><td><code>profile.operator._support_partition(terminal, int(TopologyClass.LIMITED))</code></td></tr>
+<tr><td><code>benchmarks/exact_cut_cell_moment_stages.py:236</code></td><td><code>masks, topology, samples, support = active._support_partition(value, None)</code></td></tr>
+<tr><td><code>benchmarks/exact_support_floor_attribution.py:340</code></td><td><code>partition = active._support_partition(state, None)</code></td></tr>
+<tr><td><code>benchmarks/frozen_current_flux_image_gate.py:660</code></td><td><code>masks, topology, _connected, _admitted = operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/frozen_current_flux_image_gate.py:835</code></td><td><code>np.asarray(empty_operator._fixed_design_read(physical)[1].boundary_flux)</code></td></tr>
+<tr><td><code>benchmarks/global_spline_read_on_hex.py:487</code></td><td><code>operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/global_spline_read_on_hex.py:491</code></td><td><code>operator._fixed_design_topology.grid.read_census(flux_pool)</code></td></tr>
+<tr><td><code>benchmarks/global_spline_read_on_hex.py:508</code></td><td><code>locator = operator._fixed_design_topology.grid.fit_locator</code></td></tr>
+<tr><td><code>benchmarks/global_spline_read_on_hex.py:526</code></td><td><code>operator._fixed_design_read(jnp.asarray(perturbed))</code></td></tr>
+<tr><td><code>benchmarks/global_spline_read_on_hex.py:572</code></td><td><code>&quot;spline_shape&quot;: list(operator._fixed_design_topology.grid.spline_shape),</code></td></tr>
+<tr><td><code>benchmarks/held_tip_trip_diagnosis.py:388</code></td><td><code>masks, topology, _connected, axis_admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>benchmarks/held_tip_trip_diagnosis.py:391</code></td><td><code>grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>benchmarks/held_tip_trip_diagnosis.py:392</code></td><td><code>locator = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>benchmarks/held_tip_trip_diagnosis.py:556</code></td><td><code>locator = profile.operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>benchmarks/held_tip_trip_diagnosis.py:602</code></td><td><code>profile.operator._fixed_design_topology.x_point_index</code></td></tr>
+<tr><td><code>benchmarks/limited_anchor_containment.py:171</code></td><td><code>_masks, private, _connected, admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>benchmarks/limited_anchor_containment.py:988</code></td><td><code>&quot;`_fixed_design_read` with `private_wall_node_mask=None`; the &quot;</code></td></tr>
+<tr><td><code>benchmarks/limited_row_shadow_census.py:555</code></td><td><code>topology = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/limited_row_shadow_census.py:573</code></td><td><code>topology = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/limited_row_shadow_census.py:694</code></td><td><code>&quot;symbol&quot;: &quot;_fixed_design_read&quot;,</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:380</code></td><td><code>operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:389</code></td><td><code>if operator._fixed_design_topology.connectivity_radius.size:</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:460</code></td><td><code>operator._fixed_design_topology.wall_anchor_bracket(</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:471</code></td><td><code>operator._fixed_design_read(jnp.asarray(injected), int(TopologyClass.LIMITED))</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:474</code></td><td><code>operator._fixed_design_read(</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:781</code></td><td><code>operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:785</code></td><td><code>operator._fixed_design_topology.grid.read_census(grid_flux)</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:790</code></td><td><code>operator._fixed_design_topology.contained_x_candidates(vmap_x), dtype=bool</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:878</code></td><td><code>operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:947</code></td><td><code>(&quot;self._fixed_design_read&quot;, &quot;_class_margin_read=lambda&quot;),</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:949</code></td><td><code>&quot;fixed_design_read&quot;: _pointer(ForwardFluxOperator._fixed_design_read),</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:952</code></td><td><code>(&quot;self.moment_geometry is not None&quot;, &quot;self._fixed_design_read&quot;),</code></td></tr>
+<tr><td><code>benchmarks/limiter_read_resolution_audit.py:1567</code></td><td><code>&quot;`_fixed_design_read` at line 2006. Because these hex carriers have &quot;</code></td></tr>
+<tr><td><code>benchmarks/moment_map_derivative_contract.py:178</code></td><td><code>fixed_topology = profile.operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/nan_tangent_localisation.py:227</code></td><td><code>masks, _topology, _sample_flux, support = operator._support_partition(state)</code></td></tr>
+<tr><td><code>benchmarks/nan_tangent_localisation.py:255</code></td><td><code>masks, _topology, sample_flux, support = operator._support_partition(candidate)</code></td></tr>
+<tr><td><code>benchmarks/nan_tangent_localisation.py:321</code></td><td><code>masks, topology, sample_flux, support = operator._support_partition(candidate)</code></td></tr>
+<tr><td><code>benchmarks/newton_cycle_mask_switch.py:142</code></td><td><code>grid_o, grid_x = operator._fixed_design_topology.grid(grid_flux)</code></td></tr>
+<tr><td><code>benchmarks/newton_cycle_mask_switch.py:143</code></td><td><code>axis_data = operator._fixed_design_topology.o_point_data(grid_o, operator.polarity)</code></td></tr>
+<tr><td><code>benchmarks/newton_cycle_mask_switch.py:144</code></td><td><code>wall_data = operator._fixed_design_topology.wall(wall_flux, operator.polarity)</code></td></tr>
+<tr><td><code>benchmarks/null_census_assertion.py:551</code></td><td><code>fgrid = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>benchmarks/null_census_assertion.py:552</code></td><td><code>ftop = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/observable_route_discriminator.py:226</code></td><td><code>partition = profile.operator._support_partition(flux)</code></td></tr>
+<tr><td><code>benchmarks/oracle_start_newton_probe.py:404</code></td><td><code>_masks, _topology_state, _sample, support = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/outboard_census_exact_total.py:165</code></td><td><code>base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/pinned_branch_contrast.py:120</code></td><td><code>_masks, topology = operator._fixed_design_topology.read(</code></td></tr>
+<tr><td><code>benchmarks/pinned_branch_contrast.py:126</code></td><td><code>_limited, diverted = operator._fixed_design_topology.grid(grid_flux)</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_first_step_directions.py:317</code></td><td><code>partition = operator._support_partition(state)</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_fixed_point_attribution.py:61</code></td><td><code>census = operator._fixed_design_topology.grid.candidate_table_status(pool)</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_fixed_point_attribution.py:81</code></td><td><code>masks, _, sample_flux, support = operator._support_partition(jnp.asarray(state))</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_map_fidelity.py:317</code></td><td><code>partition = active._support_partition(state, requested_class)</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_production_ladder.py:103</code></td><td><code>census = operator._fixed_design_topology.grid.candidate_table_status(pool)</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_production_ladder.py:171</code></td><td><code>masks, _, samples, support = operator._support_partition(state)</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_seed_policy.py:189</code></td><td><code>grid = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_terminal_state.py:48</code></td><td><code>grid = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_terminal_state.py:65</code></td><td><code>grid = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_trip_panels.py:235</code></td><td><code>masks, _, sample_flux, support = operator._support_partition(jnp.asarray(state))</code></td></tr>
+<tr><td><code>benchmarks/plasma_cell_trip_panels.py:375</code></td><td><code>census = operator._fixed_design_topology.grid.candidate_table_status(</code></td></tr>
+<tr><td><code>benchmarks/polish_support_performance.py:382</code></td><td><code>return operator._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>benchmarks/polish_support_performance.py:390</code></td><td><code>return operator._fixed_design_read(state[:physical_number], requested)</code></td></tr>
+<tr><td><code>benchmarks/polish_support_performance.py:435</code></td><td><code>operator._fixed_design_topology.grid(grid_flux)[0].shape[0]</code></td></tr>
+<tr><td><code>benchmarks/polish_support_performance.py:441</code></td><td><code>topology_reads_per_fixed_design_read = 2</code></td></tr>
+<tr><td><code>benchmarks/polish_support_performance.py:445</code></td><td><code>* topology_reads_per_fixed_design_read</code></td></tr>
+<tr><td><code>benchmarks/polish_support_performance.py:455</code></td><td><code>&quot;topology_reads_per_fixed_design_read&quot;: (</code></td></tr>
+<tr><td><code>benchmarks/polish_support_performance.py:456</code></td><td><code>topology_reads_per_fixed_design_read</code></td></tr>
+<tr><td><code>benchmarks/poloidal_convergence_atlas.py:810</code></td><td><code>_masks, topology_state, _connected, _admitted = operator._fixed_design_read(  # noqa: SLF001</code></td></tr>
+<tr><td><code>benchmarks/private_region_parallel_kernel.py:91</code></td><td><code>read = operator._fixed_design_read(jnp.asarray(physical, dtype=jnp.float64))</code></td></tr>
+<tr><td><code>benchmarks/private_region_parallel_kernel.py:198</code></td><td><code>topo = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/program_scope_census.py:447</code></td><td><code>&quot;function&quot;: &quot;ForwardFluxOperator._fixed_design_read&quot;,</code></td></tr>
+<tr><td><code>benchmarks/program_scope_census.py:449</code></td><td><code>ForwardFluxOperator._fixed_design_read,</code></td></tr>
+<tr><td><code>benchmarks/program_scope_census.py:450</code></td><td><code>&quot;result = self._fixed_design_topology.read_qualification&quot;,</code></td></tr>
+<tr><td><code>benchmarks/reversed_current_guard_diagnosis.py:149</code></td><td><code>topology = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/settled_mask_stall.py:980</code></td><td><code>masks, topology, sample_psi_norm, support = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/settled_mask_stall.py:1016</code></td><td><code>masks, topology, _sample_psi_norm, support = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/solovev_certificate.py:3222</code></td><td><code>support = operator._support_partition(jnp.asarray(analytic), requested_class)[3]</code></td></tr>
+<tr><td><code>benchmarks/solovev_cut_cell_moments.py:331</code></td><td><code>masks, topology, sample_flux, support = operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/solovev_solver_discriminator.py:231</code></td><td><code>original = ForwardFluxOperator._fixed_design_read</code></td></tr>
+<tr><td><code>benchmarks/solovev_solver_discriminator.py:250</code></td><td><code>ForwardFluxOperator._fixed_design_read = fixed_design_read</code></td></tr>
+<tr><td><code>benchmarks/solovev_solver_discriminator.py:255</code></td><td><code>ForwardFluxOperator._fixed_design_read = original</code></td></tr>
+<tr><td><code>benchmarks/support_order_arms.py:294</code></td><td><code>partition = operator._support_partition(state)</code></td></tr>
+<tr><td><code>benchmarks/topology_parity_harness.py:588</code></td><td><code>masks, state, _connected, admitted = operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/topology_parity_harness.py:698</code></td><td><code>&quot;ForwardFluxOperator._fixed_design_read on cached cell polygons&quot;</code></td></tr>
+<tr><td><code>benchmarks/topology_parity_harness.py:1037</code></td><td><code>&quot;ForwardFluxOperator._fixed_design_read with MomentGeometry built &quot;</code></td></tr>
+<tr><td><code>benchmarks/topology_read_resolution_ladder.py:221</code></td><td><code>locator = operator._fixed_design_topology.grid.locator</code></td></tr>
+<tr><td><code>benchmarks/topology_read_resolution_ladder.py:310</code></td><td><code>grid_flux, _wall_flux = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>benchmarks/topology_read_resolution_ladder.py:312</code></td><td><code>operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/topology_read_resolution_ladder.py:315</code></td><td><code>operator._fixed_design_topology.grid.read_census(</code></td></tr>
+<tr><td><code>benchmarks/topology_read_resolution_ladder.py:336</code></td><td><code>operator._fixed_design_topology.contained_x_candidates(saddle_rows),</code></td></tr>
+<tr><td><code>benchmarks/topology_read_resolution_ladder.py:868</code></td><td><code>_masks, topology, _connected, admitted = operator._fixed_design_read(state)</code></td></tr>
+<tr><td><code>benchmarks/traced_selection_seam.py:152</code></td><td><code>_masks, topology = operator._fixed_design_topology.read(</code></td></tr>
+<tr><td><code>benchmarks/traced_selection_seam.py:158</code></td><td><code>_axis_candidates, x_candidates = operator._fixed_design_topology.grid(grid_flux)</code></td></tr>
+<tr><td><code>benchmarks/trip_quantum_profile.py:519</code></td><td><code>fixed_topology = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>benchmarks/trip_quantum_profile.py:528</code></td><td><code>_masks, topology, _connected, _admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>benchmarks/unit_amplitude_current_census.py:302</code></td><td><code>base_masks, topology, _connected, _admitted = operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:321</code></td><td><code>capacity = int(operator._fixed_design_topology.grid.locator.maxsize)</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:323</code></td><td><code>axis_kind = operator._fixed_design_topology.grid.extremum_polarity</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:330</code></td><td><code>centroid, wall_flux = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:384</code></td><td><code>contained = operator._fixed_design_topology.contained_x_candidates(</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:412</code></td><td><code>wall_data = operator._fixed_design_topology.wall_anchor_data(</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:415</code></td><td><code>qualified_extremum = operator._fixed_design_topology.qualified_o_candidates(</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:540</code></td><td><code>axis_kind = operator._fixed_design_topology.grid.extremum_polarity</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:585</code></td><td><code>centroid, _wall = operator._fixed_design_topology.split_flux_map(</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:635</code></td><td><code>operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:660</code></td><td><code>centroid, _wall = operator._fixed_design_topology.split_flux_map(</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:704</code></td><td><code>centroid_flux, _wall = operator._fixed_design_topology.split_flux_map(</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:803</code></td><td><code>centroid_flux, _wall = operator._fixed_design_topology.split_flux_map(</code></td></tr>
+<tr><td><code>benchmarks/vertex_ring_census.py:850</code></td><td><code>axis_kind = operator._fixed_design_topology.grid.extremum_polarity</code></td></tr>
+<tr><td><code>benchmarks/wall_resolution_ladder.py:425</code></td><td><code>_vmap_o, typed_candidates = operator._fixed_design_topology.grid(grid_flux)</code></td></tr>
+<tr><td><code>benchmarks/wall_shadow_firing_census.py:125</code></td><td><code>masks, topology, _connected, _admitted = operator._fixed_design_read(  # noqa: SLF001</code></td></tr>
+<tr><td><code>benchmarks/xpoint_cell_allocation_rca.py:713</code></td><td><code>masks, _topology, sample_flux, support = mode_operator._support_partition(</code></td></tr>
+<tr><td><code>benchmarks/xpoint_cell_allocation_rca.py:771</code></td><td><code>operator._fixed_design_topology.grid.candidate_table_status(grid_flux)</code></td></tr>
+<tr><td><code>benchmarks/xpoint_cell_wedge_oracle.py:652</code></td><td><code>operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>benchmarks/zero_converged_block_census.py:410</code></td><td><code>topology = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>nova/equilibrium/batched_labeller.py:612</code></td><td><code>free_admitted = self.operator._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/batched_labeller.py:695</code></td><td><code>selected_admitted = self.operator._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward.py:1469</code></td><td><code>_o_candidates, x_candidates = self.operator._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward.py:2757</code></td><td><code>reader = getattr(self.operator, &quot;_fixed_design_topology&quot;, None)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:254</code></td><td><code>&quot;_fixed_design_topology&quot;,</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:263</code></td><td><code>_TOPOLOGY_STATE_NAMES = (&quot;topology&quot;, &quot;_fixed_design_topology&quot;)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:2493</code></td><td><code>self._fixed_design_topology = _host_tree(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:2981</code></td><td><code>if self._fixed_design_topology.grid.direct_sample_count:</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:2993</code></td><td><code>_axis_rows, saddles = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:2997</code></td><td><code>qualified = self._fixed_design_topology.contained_x_candidates(saddles) &amp; (</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3004</code></td><td><code>def _fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3008</code></td><td><code>initial = self._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3015</code></td><td><code>grid_flux, _wall_flux = self._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3016</code></td><td><code>vmap_o, _vmap_x = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3021</code></td><td><code>result = self._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3091</code></td><td><code>and not self._fixed_design_topology.connectivity_radius.size</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3093</code></td><td><code>emergent = self._fixed_design_read(physical)[1]</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3105</code></td><td><code>_vmap_o, vmap_x = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3154</code></td><td><code>_vmap_o, vmap_x = self._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3158</code></td><td><code>topology = self._fixed_design_read(physical)[1]</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3159</code></td><td><code>admitted = self._fixed_design_topology.contained_x_candidates(vmap_x)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3181</code></td><td><code>_masks, topology, _connected, admitted = self._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3190</code></td><td><code>masks, topology, _connected, admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3327</code></td><td><code>def _support_partition(self, psi, requested_class=None):</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3332</code></td><td><code>masks, topology, _connected, admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3611</code></td><td><code>masks, _topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3616</code></td><td><code>self._support_partition(psi, requested_class)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3672</code></td><td><code>partition = self._support_partition(psi, requested_class)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3684</code></td><td><code>partition = self._support_partition(psi, requested_class)</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3724</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3728</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3790</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/forward_operator.py:3794</code></td><td><code>masks, topology, _connected, _admitted = self._fixed_design_read(</code></td></tr>
+<tr><td><code>nova/equilibrium/reduced_newton.py:2372</code></td><td><code>_masks, _topology, _connected, axis_admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>scripts/analytic_oracle_fixtures/measure.py:1254</code></td><td><code>)._support_partition(jnp.asarray(state))</code></td></tr>
+<tr><td><code>scripts/analytic_oracle_fixtures/measure.py:1391</code></td><td><code>masks, _topology, sample_flux, profile_support = operator._support_partition(</code></td></tr>
+<tr><td><code>scripts/density_forcing_ladder/measure.py:273</code></td><td><code>partition = operator._support_partition(exact)</code></td></tr>
+<tr><td><code>scripts/density_moment_projection/measure.py:253</code></td><td><code>partition = operator._support_partition(exact)</code></td></tr>
+<tr><td><code>scripts/density_moment_projection/measure.py:551</code></td><td><code>partition = operator._support_partition(exact)</code></td></tr>
+<tr><td><code>scripts/density_moment_projection/measure.py:681</code></td><td><code>operator._support_partition(exact)</code></td></tr>
+<tr><td><code>scripts/dina_profile_routes/measure.py:253</code></td><td><code>masks = operator._support_partition(seed)[0]</code></td></tr>
+<tr><td><code>scripts/dina_profile_routes/measure_controls.py:273</code></td><td><code>partition = operator._support_partition(seed)</code></td></tr>
+<tr><td><code>scripts/dina_profile_routes/measure_controls.py:390</code></td><td><code>masks = operator._support_partition(seed)[0]</code></td></tr>
+<tr><td><code>scripts/map_forcing_attribution/measure.py:113</code></td><td><code>partition = operator._support_partition(exact)</code></td></tr>
+<tr><td><code>scripts/moment_branch_integration/measure.py:35</code></td><td><code>masks, _topology, sample_flux, profile_support = operator._support_partition(</code></td></tr>
+<tr><td><code>scripts/moment_branch_integration/measure.py:85</code></td><td><code>_masks, _topology, _sample, support = operator._support_partition(</code></td></tr>
+<tr><td><code>scripts/moment_route_adjudication/measure.py:375</code></td><td><code>masks, topology, sample_flux, support, _common = operator._support_partition(</code></td></tr>
+<tr><td><code>scripts/normalization_discriminator/measure.py:167</code></td><td><code>partition = operator._support_partition(exact)</code></td></tr>
+<tr><td><code>scripts/prototypes/ladder/report.py:106</code></td><td><code>&quot;`ForwardFluxOperator._fixed_design_read`, which calls &quot;</code></td></tr>
+<tr><td><code>scripts/prototypes/ladder/report.py:209</code></td><td><code>&quot;`flux_map` API: `_support_partition` unconditionally invokes &quot;</code></td></tr>
+<tr><td><code>scripts/prototypes/ladder/report.py:210</code></td><td><code>&quot;`_fixed_design_read`. No product override was introduced.&quot;,</code></td></tr>
+<tr><td><code>scripts/prototypes/support/book.py:121</code></td><td><code>lambda: jax.jit(lambda psi: operator._support_partition(psi, branch))(analytic),</code></td></tr>
+<tr><td><code>scripts/prototypes/support/measure.py:142</code></td><td><code>active._support_partition = MethodType(support_partition, active)</code></td></tr>
+<tr><td><code>scripts/prototypes/support/measure.py:268</code></td><td><code>lambda: jax.jit(lambda state: operator._support_partition(state, branch))(</code></td></tr>
+<tr><td><code>scripts/prototypes/support/report.py:111</code></td><td><code>+ &quot;mismatch even at the analytic state. It is not the exact-support booking error. Here legacy support means the existing spline geometry: the fixture uses _analytic_profile_support, not _fixed_design_read.&quot;,</code></td></tr>
+<tr><td><code>scripts/prototypes/support/report.py:225</code></td><td><code>&quot;Only the prototype instance&#x27;s private `_support_partition` is overridden. &quot;</code></td></tr>
+<tr><td><code>scripts/prototypes/support/report.py:229</code></td><td><code>&quot;- **legacy:** unmodified `_fixed_design_read` and `_profile_support`. &quot;</code></td></tr>
+<tr><td><code>tests/test_analytic_oracle_fixture_exterior.py:92</code></td><td><code>&quot;_fixed_design_read&quot;,</code></td></tr>
+<tr><td><code>tests/test_banked_null_reads.py:32</code></td><td><code>self._fixed_design_topology = _FakeTable(rows)</code></td></tr>
+<tr><td><code>tests/test_boundary_flux_derivative.py:104</code></td><td><code>topology = profile.operator._fixed_design_topology</code></td></tr>
+<tr><td><code>tests/test_certificate_exterior_support.py:107</code></td><td><code>partition_fn = jax.jit(lambda state: operator._support_partition(state, BRANCH))</code></td></tr>
+<tr><td><code>tests/test_connectivity_class_reader.py:33</code></td><td><code>_masks, topology, _connected, _axis_admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_connectivity_class_reader.py:38</code></td><td><code>_vmap_o, classification_x = operator._fixed_design_topology.grid(field)</code></td></tr>
+<tr><td><code>tests/test_connectivity_class_reader.py:135</code></td><td><code>_masks, topology, _connected, axis_admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_connectivity_class_reader.py:141</code></td><td><code>_vmap_o, classification_x = operator._fixed_design_topology.grid(field)</code></td></tr>
+<tr><td><code>tests/test_diiid_forward_gs_match.py:122</code></td><td><code>_fixed_design_topology=SimpleNamespace(</code></td></tr>
+<tr><td><code>tests/test_efit_topology_corroboration.py:346</code></td><td><code>_fixed_design_topology=SimpleNamespace(</code></td></tr>
+<tr><td><code>tests/test_forward_census.py:385</code></td><td><code>census = operator._fixed_design_topology.grid.candidate_table_status(flux_pool)</code></td></tr>
+<tr><td><code>tests/test_forward_census.py:407</code></td><td><code>coarse_grid = coarse_operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>tests/test_forward_census.py:438</code></td><td><code>assert not fine_operator._fixed_design_topology.grid.structured</code></td></tr>
+<tr><td><code>tests/test_forward_census.py:477</code></td><td><code>operator._fixed_design_topology.grid.locator.physical_origin,</code></td></tr>
+<tr><td><code>tests/test_forward_operator_domain.py:109</code></td><td><code>operator._fixed_design_read = lambda _psi, _requested=None: (</code></td></tr>
+<tr><td><code>tests/test_forward_parity_constrained_arm.py:86</code></td><td><code>_fixed_design_read=None,</code></td></tr>
+<tr><td><code>tests/test_forward_secondary_null.py:114</code></td><td><code>_fixed_design_topology=topology,</code></td></tr>
+<tr><td><code>tests/test_forward_secondary_null.py:150</code></td><td><code>_o_candidates, x_candidates = operator._fixed_design_topology.grid(grid_flux)</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:11</code></td><td><code>measure, domain masks and achieved topology from one ``_support_partition``;</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:18</code></td><td><code>``cell_current_moments``, and the latter issues its own ``_fixed_design_read``.</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:77</code></td><td><code>def _counted_fixed_design_reads(action):</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:79</code></td><td><code>original = ForwardFluxOperator._fixed_design_read</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:87</code></td><td><code>with mock.patch.object(ForwardFluxOperator, &quot;_fixed_design_read&quot;, counted):</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:100</code></td><td><code>partition = self._support_partition(psi, requested_class)</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:113</code></td><td><code>admitted = operator._fixed_design_read</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:134</code></td><td><code>fused_reads = _counted_fixed_design_reads(</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:140</code></td><td><code>unfused_reads = _counted_fixed_design_reads(</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:165</code></td><td><code>fused_reads = _counted_fixed_design_reads(</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:168</code></td><td><code>two_request_reads = _counted_fixed_design_reads(</code></td></tr>
+<tr><td><code>tests/test_fused_same_state_read.py:215</code></td><td><code>``_support_partition``; the two-read decomposition takes its topology from</code></td></tr>
+<tr><td><code>tests/test_limiter_spline_minimum.py:159</code></td><td><code>_masks, topology, _connected, _admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_limiter_spline_minimum.py:162</code></td><td><code>grid_flux, wall_flux = operator._fixed_design_topology.split_flux_map(physical)</code></td></tr>
+<tr><td><code>tests/test_mask_threshold_consistency.py:76</code></td><td><code>masks, state, _connected, admitted = profile.operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_mask_threshold_consistency.py:79</code></td><td><code>initial = profile.operator._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>tests/test_null_generator_admission.py:27</code></td><td><code>grid = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>tests/test_null_generator_admission.py:111</code></td><td><code>actual, _topology, _connected, admitted = operator._fixed_design_read(state)</code></td></tr>
+<tr><td><code>tests/test_null_generator_admission.py:170</code></td><td><code>expected = operator._fixed_design_topology.grid.candidate_table_status(</code></td></tr>
+<tr><td><code>tests/test_null_generator_admission.py:198</code></td><td><code>grid = operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>tests/test_null_generator_admission.py:240</code></td><td><code>census = operator._fixed_design_topology.grid.candidate_table_status(pool)</code></td></tr>
+<tr><td><code>tests/test_null_generator_admission.py:377</code></td><td><code>table = case.operator._fixed_design_topology.grid.candidate_table_status(</code></td></tr>
+<tr><td><code>tests/test_oracle_axis_admission.py:50</code></td><td><code>table_status = operator._fixed_design_topology.grid.candidate_table_status(</code></td></tr>
+<tr><td><code>tests/test_oracle_axis_admission.py:62</code></td><td><code>coarse_grid = coarse_operator._fixed_design_topology.grid</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_flood_families.py:288</code></td><td><code>np.asarray(operator._fixed_design_topology.connectivity_rings), carrier.rings</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_flood_families.py:291</code></td><td><code>np.asarray(operator._fixed_design_topology.connectivity_shared_edges),</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_shadow_telemetry.py:97</code></td><td><code>masks, topology, _connected, admitted = operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_topology_read.py:143</code></td><td><code>topology = operator._fixed_design_topology</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_topology_read.py:334</code></td><td><code>actual, state, _connected, admitted = operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_topology_read.py:343</code></td><td><code>census = operator._fixed_design_topology.grid.candidate_table_status(</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_topology_read.py:379</code></td><td><code>operator._fixed_design_topology.connectivity_radius = jnp.empty(0)</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_topology_read.py:380</code></td><td><code>operator._fixed_design_topology.connectivity_height = jnp.empty(0)</code></td></tr>
+<tr><td><code>tests/test_plasma_cell_topology_read.py:391</code></td><td><code>qualification = operator._fixed_design_topology.read_qualification(</code></td></tr>
+<tr><td><code>tests/test_reduced_newton_constraint_bounds.py:218</code></td><td><code>original = profile.operator._fixed_design_read</code></td></tr>
+<tr><td><code>tests/test_reduced_newton_constraint_bounds.py:224</code></td><td><code>monkeypatch.setattr(profile.operator, &quot;_fixed_design_read&quot;, no_axis)</code></td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py:22</code></td><td><code>&quot;_fixed_design_read&quot;,</code></td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py:34</code></td><td><code>&quot;_fixed_design_read&quot;,</code></td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py:203</code></td><td><code>positive = operator._fixed_design_topology.grid.candidate_table_status(</code></td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py:255</code></td><td><code>_masks, topology, _connected, admitted = case.operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py:262</code></td><td><code>case.operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py:310</code></td><td><code>_reference_o, reference_x = operator._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>tests/test_solve_path_census_inputs.py:313</code></td><td><code>_terminal_o, terminal_x = operator._fixed_design_topology.grid(</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:439</code></td><td><code>&quot;ForwardFluxOperator._fixed_design_read&quot;: [2],</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:453</code></td><td><code>&quot;ForwardFluxOperator._fixed_design_read&quot;: [2, 3],</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:475</code></td><td><code>&quot;ForwardFluxOperator._fixed_design_read&quot;: [2, 3],</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:494</code></td><td><code>&quot;ForwardFluxOperator._fixed_design_read&quot;: [4],</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:496</code></td><td><code>stray={&quot;ForwardFluxOperator._fixed_design_read&quot;: [1, 1]},</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:552</code></td><td><code>&quot;ForwardFluxOperator._fixed_design_read&quot;: [4],</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:554</code></td><td><code>stray={&quot;ForwardFluxOperator._fixed_design_read&quot;: [1, 1]},</code></td></tr>
+<tr><td><code>tests/test_solve_program_size.py:629</code></td><td><code>module = _hlo_module({&quot;ForwardFluxOperator._fixed_design_read&quot;: [4]})</code></td></tr>
+<tr><td><code>tests/test_solve_receipt_topology.py:62</code></td><td><code>_masks, topology, _connected, axis_admitted = profile.operator._fixed_design_read(</code></td></tr>
+<tr><td><code>tests/test_stationary_point_admission.py:225</code></td><td><code>assert operator._fixed_design_topology.grid.locator.maxsize == 30</code></td></tr>
+<tr><td><code>tests/test_stationary_point_admission.py:290</code></td><td><code>operator._fixed_design_topology = _QualificationSequence()</code></td></tr>
+<tr><td><code>tests/test_stationary_point_admission.py:296</code></td><td><code>masks, state, connected, admitted = operator._fixed_design_read(jnp.asarray([0.0]))</code></td></tr>
+<tr><td><code>tests/test_stationary_point_admission.py:322</code></td><td><code>_masks, state, _connected, admitted = operator._fixed_design_read(physical)</code></td></tr>
+<tr><td><code>tests/test_two_branch_batch_cost.py:18</code></td><td><code>def test_limited_fixture_support_partition_uses_a_tensor_product_grid() -&gt; None:</code></td></tr>
+<tr><td><code>tests/test_two_branch_batch_cost.py:34</code></td><td><code>partition = forward_operator(case, machine)._support_partition(</code></td></tr>
+<tr><td><code>tests/test_two_branch_batch_cost.py:42</code></td><td><code>def test_diverted_fixture_support_partition_uses_the_tensor_product_grid() -&gt; None:</code></td></tr>
+<tr><td><code>tests/test_two_branch_batch_cost.py:46</code></td><td><code>partition = profile.operator._support_partition(root, TopologyClass.DIVERTED)</code></td></tr>
+<tr><td><code>tests/test_wall_anchor_shadow.py:105</code></td><td><code>operator._fixed_design_read = fixed_read</code></td></tr>
+<tr><td><code>tests/test_wall_height_exclusion.py:597</code></td><td><code>operator._fixed_design_read = lambda _physical, _requested=None: (</code></td></tr>
+<tr><td><code>tests/test_wall_node_private_shadow.py:69</code></td><td><code>operator._fixed_design_topology = SimpleNamespace(</code></td></tr>
+<tr><td><code>tests/test_wall_node_private_shadow.py:79</code></td><td><code>operator, &quot;_fixed_design_read&quot;, lambda *_args: (masks, state, None, True)</code></td></tr>
+<tr><td><code>tests/test_wall_resolution_ladder.py:64</code></td><td><code>_fixed_design_topology=SimpleNamespace(</code></td></tr>
+</tbody></table>
+</main></body></html>

@@ -15,6 +15,7 @@ def main():
     receipts = [
         json.loads(path.read_text()) for path in sorted(args.rows.glob("*.json"))
     ]
+    receipts = [item for item in receipts if "kind" in item and "rows" in item]
     plt.style.use("data-ink")
     figure, axes = plt.subplots(2, 2, figsize=(14, 10), sharex=True, sharey=True)
     for column, kind in enumerate(("limited", "diverted")):

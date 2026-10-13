@@ -13,7 +13,10 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import topology
-from nova.equilibrium.clip_quadrature import clipped_support_current_moments
+from nova.equilibrium.clip_quadrature import (
+    ClippedCurrentMoments,
+    clipped_support_current_moments,
+)
 from nova.equilibrium.stencil_mesh import FluxFieldPolynomial
 
 
@@ -227,6 +230,19 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
         counts = geometry.vertex_count[index][None]
         return integrate(index, rings, counts)
 
+    def integrate_live_rings(index, rings, counts):
+        live = counts >= 3
+        live_count = jnp.sum(live, dtype=jnp.int32)
+        ring_index = jnp.nonzero(live, size=len(counts), fill_value=0)[0]
+        zero = ClippedCurrentMoments(*(jnp.zeros((), rings.dtype) for _ in range(3)))
+
+        def add_ring(slot, total):
+            ring = ring_index[slot]
+            value = integrate(index, rings[ring][None], counts[ring][None])
+            return jax.tree.map(lambda prior, addition: prior + addition, total, value)
+
+        return jax.lax.fori_loop(0, live_count, add_ring, zero)
+
     def cut_cell(index):
         centre = geometry.centre[index]
         vertices, count = geometry.vertices[index], geometry.vertex_count[index]
@@ -241,7 +257,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
                 read.fragment_selected[index],
                 quadrature.segments,
             )
-            moments = integrate(index, rings, counts)
+            moments = integrate_live_rings(index, rings, counts)
             return jax.tree.map(lambda value: jnp.where(valid, value, jnp.nan), moments)
 
         def normal(_):
@@ -254,7 +270,7 @@ def book(psi, read, geometry, profile, quadrature=Quadrature()):
                 read.edge_interval[index],
                 quadrature.segments,
             )
-            return integrate(index, rings, counts)
+            return integrate_live_rings(index, rings, counts)
 
         return jax.lax.cond(read.normal_form_cells[index], normal, conic, None)
 

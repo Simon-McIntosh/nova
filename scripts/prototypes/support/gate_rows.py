@@ -68,8 +68,13 @@ def main():
                     str(tree / name),
                 ]
                 program = (
-                    "import os,nova,pytest; "
+                    "from nova.jax.config import configure_dtypes; "
+                    "configure_dtypes(); import jax; "
+                    "assert jax.config.jax_enable_x64 is True; "
+                    "import os,nova,pytest,importlib; "
+                    "forward=importlib.import_module('nova.equilibrium.forward'); "
                     "print('NOVA_MODULE='+nova.__file__+"
+                    "' MEASUREMENT_MODULE='+forward.__file__+"
                     "' CWD='+os.getcwd(),flush=True); "
                     f"raise SystemExit(pytest.main({test_args!r}))"
                 )

@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "measured: the reviewed run's own gate logs give baseline_suite (ab54cccac16558c7a27ab9e93a6aa65c489c7671, 1 failed) and after_suite (19b882c8cf4c814fd3e97db36199cc4f7f4f7b9f, 0 failed) describing the three test files at 550 cells; the head failure set is empty and the base failure set names only the coarse diverted admission row, so no failure is added.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-10-13T06:55:57.343Z",
+  "dispatched_at": "2026-10-13T06:32:24Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html",
+      "line": "121",
+      "severity": "follow-on",
+      "text": "follow-on: the paragraph the delta rewrote asserts \"This is a stale pin rather than a moved physical quantity\", but the cited sibling fragment records the question as \"still not separable ... from the head side alone\" and cfs-current-book.html:103 measured the same legacy_map_error at 0.197326978718 (2026-10-10) against 0.1946465024178517 now, so the quantity moved and the stale-not-moved justification for keeping the literal is unsupported."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html",
+      "line": "16",
+      "severity": "follow-on",
+      "text": "follow-on: plan-commits lists b5401b15b and ac2f3bf61 but omits f8bae04cb, the commit that last edited this fragment, so the record does not name its own final revision."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit against 8e1d0e37f; b5401b15b rewrites the book.py comment, ac2f3bf61 and f8bae04cb rewrite the fragment paragraph and summary; two files, +37/-30, no executable behaviour changed.",
+    "done_when": "done_when (3) offered re-derivation at this base or a same-run comparison; the delta instead attributes 0.1946465024178517 to job 1283981 at tree 437a68db4, which the cited fragment and that job's own log confirm, so the clause is met by delegation rather than as literally written.",
+    "goal": "the three gained commits correct only the booking-pin provenance at scripts/prototypes/support/book.py:254 and docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html:109, replacing the false \"re-derived at base ab54cccac\" claim with the true source (job 1283981); the node's caller-repair goal itself is unchanged.",
+    "manifest": "read; the repair round is recorded under checkpoint (manifest line 10), which names b5401b15b and ac2f3bf61 answering findings f0ab0e71d72 and fa0bae0ba48 and the measuring run job 1283981.",
+    "write_paths": "the delta changes exactly scripts/prototypes/support/book.py and docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html, both declared; nothing outside."
+  },
+  "justifications": {
+    "durability": "the repair round's own control (logs/negative_control_repair.log) fails the book.py and fragment checks on reverting b5401b15b and ac2f3bf61, but no repository test guards the comment text and the pin assertion at scripts/prototypes/support/book.py:263 cannot run for want of the fixture receipts.",
+    "evidence": "the provenance reconciles to the measuring job's own log (book_diverted.log:41, 0.1946465024178517) and exterior-fixture-delegation.html, but the pin guard at scripts/prototypes/support/book.py:263 still cannot execute here and the retained \"stale rather than moved\" claim at caller-arm-repair.html:121 is contradicted.",
+    "fit": "the comment at scripts/prototypes/support/book.py:254 follows the surrounding idiom and cites a durable evidence fragment with no plan, stage or ticket token.",
+    "goal_fidelity": "scripts/prototypes/support/book.py:254 now names job 1283981 as the measuring run, removing the false ab54cccac provenance.",
+    "reuse": "the delta adds no definition; it reuses the exterior node's recorded measurement (docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html) rather than re-deriving a parallel one.",
+    "scope_discipline": "git diff --name-only 8e1d0e37f..f8bae04cb lists exactly scripts/prototypes/support/book.py and docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html, both inside the declared write paths."
+  },
+  "project": "nova",
+  "raw_text": "VERDICT goal: the three gained commits correct only the booking-pin provenance at scripts/prototypes/support/book.py:254 and docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html:109, replacing the false \"re-derived at base ab54cccac\" claim with the true source (job 1283981); the node's caller-repair goal itself is unchanged.\nVERDICT done_when: done_when (3) offered re-derivation at this base or a same-run comparison; the delta instead attributes 0.1946465024178517 to job 1283981 at tree 437a68db4, which the cited fragment and that job's own log confirm, so the clause is met by delegation rather than as literally written.\nVERDICT write_paths: the delta changes exactly scripts/prototypes/support/book.py and docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html, both declared; nothing outside.\nVERDICT manifest: read; the repair round is recorded under checkpoint (manifest line 10), which names b5401b15b and ac2f3bf61 answering findings f0ab0e71d72 and fa0bae0ba48 and the measuring run job 1283981.\nVERDICT diff: read commit by commit against 8e1d0e37f; b5401b15b rewrites the book.py comment, ac2f3bf61 and f8bae04cb rewrite the fragment paragraph and summary; two files, +37/-30, no executable behaviour changed.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/prototypes/support/book.py:254 now names job 1283981 as the measuring run, removing the false ab54cccac provenance.\nSCORE evidence: 17\nJUSTIFICATION evidence: the provenance reconciles to the measuring job's own log (book_diverted.log:41, 0.1946465024178517) and exterior-fixture-delegation.html, but the pin guard at scripts/prototypes/support/book.py:263 still cannot execute here and the retained \"stale rather than moved\" claim at caller-arm-repair.html:121 is contradicted.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 8e1d0e37f..f8bae04cb lists exactly scripts/prototypes/support/book.py and docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html, both inside the declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: the repair round's own control (logs/negative_control_repair.log) fails the book.py and fragment checks on reverting b5401b15b and ac2f3bf61, but no repository test guards the comment text and the pin assertion at scripts/prototypes/support/book.py:263 cannot run for want of the fixture receipts.\nSCORE fit: 18\nJUSTIFICATION fit: the comment at scripts/prototypes/support/book.py:254 follows the surrounding idiom and cites a durable evidence fragment with no plan, stage or ticket token.\nSCORE reuse: 20\nJUSTIFICATION reuse: the delta adds no definition; it reuses the exterior node's recorded measurement (docs/evidence/fragments/converged-forward-solve/exterior-fixture-delegation.html) rather than re-deriving a parallel one.\nFINDING docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html:121 follow-on: the paragraph the delta rewrote asserts \"This is a stale pin rather than a moved physical quantity\", but the cited sibling fragment records the question as \"still not separable ... from the head side alone\" and cfs-current-book.html:103 measured the same legacy_map_error at 0.197326978718 (2026-10-10) against 0.1946465024178517 now, so the quantity moved and the stale-not-moved justification for keeping the literal is unsupported.\nFINDING docs/evidence/fragments/converged-forward-solve/caller-arm-repair.html:16 follow-on: plan-commits lists b5401b15b and ac2f3bf61 but omits f8bae04cb, the commit that last edited this fragment, so the record does not name its own final revision.\n",
+  "review_run_id": "r-20261013T063206305959-review-of-caller-arm-repair-f8bae04cb981",
+  "reviewed_base_sha": "8e1d0e37f7226e31475ae2e69c559248dcb705d4",
+  "reviewed_head_sha": "f8bae04cb981e05fa9a3b1458129d49a76104bf5",
+  "reviewed_run_id": "r-20261013T042304376799-caller-arm-repair",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash"
+  },
+  "rubric": "code",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T06:57:35.838195+00:00",
+  "total": 108
+}

@@ -237,15 +237,26 @@ def read_with_jets(
     jets = exterior + jnp.einsum("ncmq,cm->nq", matrix, stacked)
     field = HermiteField(jets, nodes, sample_index, geometry.centre, geometry.pitch)
 
+    return read_field(field, geometry, convention, policy, finite_curvature=True)
+
+
+def read_field(field, geometry, convention, policy, *, finite_curvature=False):
+    """Adapt nodal samples once for both polynomial field representations."""
+
     def sampled_flux(field, geometry):
         values = field.jets[field.sample_index, 0]
-        coefficient = jnp.einsum("nij,nj->ni", geometry.fit_inverse, values)
-        return coefficient, field.jets[field.sample_index[:, 0], 0]
+        if hasattr(field, "cell_value"):
+            centres = jax.vmap(field.cell_value)(
+                jnp.arange(len(values)), geometry.centre
+            )
+            values = values.at[:, 0].set(centres)
+        return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values), values[:, 0]
 
-    curvature = FunctionType(
-        topology._curvature_derivatives.__code__,
-        dict(topology._curvature_derivatives.__globals__, TotalField=HermiteField),
-    )
+    curvature = topology._curvature_derivatives
+    if finite_curvature:
+        curvature = FunctionType(
+            curvature.__code__, dict(curvature.__globals__, TotalField=type(field))
+        )
     adapted = FunctionType(
         topology.read.__code__,
         dict(

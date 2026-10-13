@@ -2,13 +2,13 @@
 
 from dataclasses import dataclass
 from math import factorial
-from types import FunctionType
 
 import jax
 import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium import topology
+from scripts.prototypes.read_route.jets import read_field
 
 POWERS = tuple(
     (degree - vertical, vertical)
@@ -177,17 +177,7 @@ def field_from_jets(jets, sample_index, mesh):
 def read_bell(field, geometry, convention, policy):
     """Use exact nodal samples and the Bell field in the existing topology body."""
 
-    def sampled_flux(field, geometry):
-        values = field.jets[field.sample_index, 0]
-        centres = jax.vmap(field.cell_value)(jnp.arange(len(values)), geometry.centre)
-        values = values.at[:, 0].set(centres)
-        return jnp.einsum("nij,nj->ni", geometry.fit_inverse, values), values[:, 0]
-
-    adapted = FunctionType(
-        topology.read.__code__,
-        dict(topology.read.__globals__, _sampled_flux=sampled_flux),
-    )
-    return adapted(field, geometry, convention, policy)
+    return read_field(field, geometry, convention, policy)
 
 
 def read_cached_bell(payload, geometry, convention, policy):

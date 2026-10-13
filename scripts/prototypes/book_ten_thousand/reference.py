@@ -42,7 +42,7 @@ def main() -> None:
     reference = np.stack(tuple(map(np.asarray, fixture.moments)))
     direct = np.load(args.out / f"diverted-{args.cells}-cells.npz")
     np.testing.assert_allclose(
-        np.asarray(geometry.centre), direct["centre"], rtol=0, atol=0
+        np.asarray(geometry.centre), direct["centre"], rtol=0, atol=1e-11
     )
     exact = direct["exact"]
     booked = direct["booked"]

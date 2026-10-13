@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="vectorize-booking">
+<meta name="plan-title" content="Cell-batched current booking">
+<meta name="plan-summary" content="current.book books every cell in one vmapped
+program, replacing the sequential scan">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s3">
+<meta name="plan-commits" content="adeff8346,486d369ad">
+<meta name="plan-recorded-at" content="2026-10-13">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="CPU binary64 identity and regression; H200 rung cost not measured">
+
+<title>Cell-batched current booking | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="vectorize-booking-batched-booking">Cell-batched current booking</h1>
+
+<p id="vectorize-booking-summary">Followup <code>f-cfs-vectorize-booking</code>.
+<code>nova.equilibrium.current.book</code> booked cells in a sequential
+<code>jax.lax.scan</code> with <code>unroll=1</code>, the bottleneck of the hot
+path (0.9, 2.8 and 8.1 s per step at 2,000, 5,000 and 10,000 cells on the H200).
+The loop is now a single <code>jax.vmap</code> over the cell index; the per-cell
+body — fragment rings, membership and normal-form conditioning, and the clipped
+support quadrature — is unchanged. One compiled program remains, with effects
+batched over cells, so the booking no longer serialises across cells. The work
+is committed at <code>adeff8346</code> (product) and <code>486d369ad</code>
+(test).</p>
+
+<section id="vectorize-booking-identity">
+<h2>Identity against the sequential reference</h2>
+<p id="vectorize-booking-identity-body">The test file
+<code>tests/test_current_book_vectorised.py</code> holds the pre-batching
+booking verbatim as <code>_reference_book</code>, and its own copies of
+<code>_conic_rings</code> and <code>_normal_rings</code> as
+<code>_reference_conic_rings</code> and <code>_reference_normal_rings</code>, so
+the oracle is independent of the product's ring builders and not only of its
+iteration. Tiled cells are compared at 1, 64 and 200:</p>
+<table id="vectorize-booking-identity-table">
+<thead><tr><th>Cells</th><th>max |batched − scan|</th><th>max relative</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>0.000e+00</td><td>0.000e+00</td></tr>
+<tr><td>64</td><td>0.000e+00</td><td>0.000e+00</td></tr>
+<tr><td>200</td><td>0.000e+00</td><td>0.000e+00</td></tr>
+</tbody>
+</table>
+<p id="vectorize-booking-identity-note">The booked moments, the normalization and
+the validity receipt are bit-identical at every rung. The 2,000 / 5,000 /
+10,000-cell rungs of the done-when were not run: see the caveat below.</p>
+</section>
+
+<section id="vectorize-booking-negative">
+<h2>Negative control</h2>
+<p id="vectorize-booking-negative-body">Declared mutation: a padded fragment
+counted twice turns the vectorised identity test red by test id. Applied to
+<code>_conic_rings</code> in the product (the mutation doubles the ring
+batch and its live counts), the identity test fails at all three rungs and the
+run exits non-zero; the log is <code>logs/negative-control.log</code>. The
+control proves the test is sensitive to padding, which the first, dead slice's
+duplicate did not exercise — hence the whole-batch double.</p>
+</section>
+
+<section id="vectorize-booking-autograd">
+<h2>Autograd</h2>
+<p id="vectorize-booking-autograd-body"><code>tests/test_current_book_fragments.py::test_booking_jvp_matches_central_difference</code>
+runs <code>jax.jvp</code> of the booked moments through the vectorised
+<code>book</code> against central finite differences on the smooth, axis,
+boundary and support stages, and passes. This is the precondition for the
+moment-space Newton.</p>
+</section>
+
+<section id="vectorize-booking-caveat">
+<h2>Caveat and follow-on</h2>
+<p id="vectorize-booking-caveat-body">The H200 rung cost (item 3 of the
+done-when) and the 2,000 / 5,000 / 10,000-cell identity rungs (item 2) were not
+measured within the 60-minute node budget. The harness for them exists:
+<code>scripts/prototypes/support/book.py::measure</code> already times the
+<code>traced-book</code> stage and requires the GPU lane; running
+<code>measure</code> for each rung on the base tree and on this head tree gives
+the before/after wall and compile seconds. The certified 2,000 and 5,000-cell
+machines are cached; a 10,000-cell machine must be built with
+<code>build_machine</code>. This measurement is left to a follow-on node.</p>
+</section>
+</main>
+</body>
+</html>

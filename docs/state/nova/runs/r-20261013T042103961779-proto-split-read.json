@@ -1,0 +1,407 @@
+{
+  "agent": {
+    "alias": "astra6",
+    "backend": "codex-astra",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6-astra",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 5,
+  "attempt_kind": "resume",
+  "backend": "codex-astra",
+  "base_sha": "ab54cccac16558c7a27ab9e93a6aa65c489c7671",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 13029632,
+      "cached_input_tokens_cumulative": 13029632,
+      "input_tokens": 13295350,
+      "input_tokens_cumulative": 13295350,
+      "output_tokens": 90529,
+      "output_tokens_cumulative": 90529,
+      "reasoning_output_tokens": 45370,
+      "reasoning_output_tokens_cumulative": 45370
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 3412,
+    "files": 12,
+    "removed": 18
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "cef0433c46a8141fe3d14dae540bdf46a7e0c506",
+    "cf4c1e2e57b8abdc7d2f5148b6c82c75bdc95bd3",
+    "dad5f3c63b453ded7ce6e34ec1084fe888b138aa",
+    "d2dbd05aa575503c67508ffa319faca0b2e10b82",
+    "3aed5d4671d689a7682aeaed56f8a19dd65d7ad4",
+    "226dc5cfd9cf8e2e397b38f6f7983d90d118a7e0",
+    "e2f1e0cff2526b8a078090fcdc8bae8a715d13cf",
+    "140465f5261a1bc3e2cff03f25e8462813faf4a1",
+    "763401ea06d71c14422f6e0172265c781d3f2fc4",
+    "3b38f36c4f6e01aa339042134a5d804a7572c9c0",
+    "88caeef3c16666061017cd5adad51bb2adac7716",
+    "a189497203a4da946f7d58db382e68019636c27f",
+    "1ae0bee3541c2bcd6f233c8d05346b35b861fee9",
+    "790abb1d0b81e4f00479ab1c28a4cf4e13637d03",
+    "b8af92152c72e95981f7dd28aa6e1beec285d84a",
+    "399f9006fdd70cadde5d87793183c5f1ccb33bc9",
+    "aa2182b962e3689eab44619ba607f64fea8c0f22",
+    "6a4a5a2d5135340e7a951f67e69f7b79093b2e29",
+    "b44368a4247f081476ae96a84795961829f07b87",
+    "b075dba795c60b4c8bccb3f4e661a8cd3f94753f",
+    "e601c5e24c7a8cfca7b8a66ba21662745b2bffbb",
+    "7c0bb134cd8876cd37eebe2c63af814a7955f9b1",
+    "586f3ebd3b94c82cb7e79467659d87dad44537c1",
+    "3a7dddc0798132e98e2fdefe217da8e54bd20984"
+  ],
+  "completed_at": "2026-10-13T07:37:28Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-10-13T04:21:30Z",
+  "disposition": "handed-off",
+  "dispute_count": 0,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "follow_on_paths": [
+    "prebuild/slide",
+    "0.0003172789592236335/0.00016769815472631697"
+  ],
+  "gate": "passed",
+  "gate_check": {
+    "command": "READ_ROUTE_JETS_MODULE=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-split-read/scripts/prototypes/read_route/jets.py JAX_PLATFORMS=cpu PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-split-read /home/ITER/mcintos/Code/nova/.venv/bin/python -m pytest -p no:cacheprovider --rootdir=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-split-read /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/proto-split-read/scripts/prototypes/read_route/check_legacy.py -q -s --tb=short",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/after.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.2857142857142857,
+    "plan": "converged-forward-solve",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-10-13T05:21:04.245492+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-10-13T04:21:04Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 23,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 4,
+    "headroom": 10,
+    "mean_context": 146667,
+    "observed_at": "2026-10-13T04:20:41Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 23,
+      "aggregate_tokens_per_second": 288.378,
+      "detail": "",
+      "mean_tokens_per_second": 75.889,
+      "observed_at": "2026-10-13T04:20:41Z",
+      "runs": 3.8,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-10-13T07:37:28Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "missing_rollout",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": {
+    "attempt": 2,
+    "kind": "lane-change",
+    "lanes": [
+      {
+        "changed_at": "2026-10-13T04:21:56Z",
+        "detail": "starting fresh because the session cannot follow the move from harness 'claude' to 'codex'",
+        "from_backend": "clive",
+        "from_harness": "claude",
+        "reason": "hard numerical and performance prototype (sub-millisecond fused Newton on the H200, moving X-point sweeps to 10,000 cells); the lead directs deep critical nodes to codex",
+        "session": "fresh",
+        "session_id": "cc72f47f-9a0d-4b4b-b42d-91779c6e99d0",
+        "session_source": "stream",
+        "to_backend": "codex-astra",
+        "to_harness": "codex"
+      }
+    ],
+    "root_run_id": "r-20261013T042103961779-proto-split-read"
+  },
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/manifest.md",
+  "member": "disposable-r-20261013T042103961779-proto-split-read",
+  "model_key": "astra",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "proto-split-read",
+  "node_definition": {
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "coordinator": {
+      "authoring_turn": {
+        "source": "claude-code-session-transcript",
+        "status": "measured",
+        "tokens": {
+          "cache_creation_input_tokens": 356,
+          "cached_input_tokens": 597987,
+          "input_tokens": 598345,
+          "output_tokens": 741,
+          "reasoning_output_tokens": 0,
+          "total_tokens": 599086,
+          "uncached_input_tokens": 2
+        }
+      },
+      "harness": "claude-code",
+      "runtime_session_id": "184d1501-2f1d-4fba-893c-8c871d612764",
+      "session_id": "s21-nova"
+    },
+    "done_when": "Lead ruling 2026-10-12 (followup f-cfs-split-read): fixed points must be found in under 1 ms, and the X-point moves. The read splits into a fixed-point solve and a separate membership step. Measure two field arms for the fixed-point solve. Build on scripts/prototypes/read_route: its Bell element, jets.py and measure.py, read-only. Work in scripts/prototypes/fixed_points. Before writing a Newton, reuse the existing null polishing or stationary-point Newton in nova/equilibrium (topology and census code); if it does not fit, say why. No product API changes.\n\nDone when:\n(1) Solver. A warm-started Newton for the gradient of psi equal to zero finds the magnetic axis and the primary X-point, starting from the previous state's fixed points. Each iteration evaluates psi's gradient and Hessian only at the iterate. The whole solve, axis and X-point with every iteration, is ONE compiled device program per call: no host loop per iteration and no host round-trip inside the solve. Two arms:\n (a) cached-jet: locate the cell holding the iterate; form only that cell's nodal jets (value, gradient, Hessian) as the rows of the jet coupling for those nodes contracted with the current moments, plus the exterior's nodal jets; evaluate the Bell element at the iterate. Store no dense all-node jet cache. Either form the rows on demand from the polygon kernel or keep a bounded row cache, and report its bytes at each rung;\n (b) kernel: the polygon kernel's point jets at the iterate, summed over all source cells in the same program.\n(2) Latency. On the H200, give the per-call warm wall of one fixed-point solve (axis plus X-point), with device synchronisation included: median and 99th percentile over at least 100 calls at each rung, against the 1 ms target. Also report cold compile seconds, executable bytes, and Newton iterations per call.\n(3) Moving X-point. Build a sweep of at least 20 states per case and rung whose X-point travels several pitches across the sweep: analytic states with varied shaping or external field, and one-Picard-image states. Solve each warm-started from the previous state's solution. Report:\n- position error in pitches, against the closed form for analytic states and against the kernel arm for booked states;\n- iteration counts;\n- every failure: no convergence, a wrong saddle admitted, or the X-point lost.\nState whether the cached-jet arm, whose nodes sit at source-cell corners where the booked field's Hessian is log-singular, converges as reliably as the kernel arm on booked states.\n(4) Membership, measured but not gated at 1 ms. Take nodal psi values from a single-component (value-only) coupling contracted with the moments, plus the exterior. Classify cells by level set, except in the X-point's neighbourhood, where cells are classified geometrically by the separatrix leg directions from the X-point Hessian. Report the membership error against the closed form at 2,000 and 5,000 cells beside the old saddle-membership values, and the step's wall.\n(5) Rungs: about 2,000, 5,000 and 10,000 cells, limited and diverted.\n(6) Controls. Positive: the closed-form arm's fixed points reproduce to roundoff. Negative: the cached-jet arm with the Hessian degrees of freedom zeroed fails the X-point position bound by test id.\n(7) Fold in the Bell node review follow-on: scripts/prototypes/read_route has two owners of the topology.read field-adapter seam, read_with_jets in jets.py and read_bell in bell.py. Keep one adapter and route the other field through it.\n(8) Write a report under the crew reports directory, with the recommendation stated as the decision the lead would lock. Write the evidence fragment docs/evidence/fragments/converged-forward-solve/proto-split-read.html with plan-evidence-for converged-forward-solve; reckon audit-doc must report 0 errors. Draw one SVG under docs/figures/converged-forward-solve/split-read of per-call latency against cells, one line per arm, with the 1 ms target drawn as a dotted limit.\n\nRun conditions: H200 rows run as one job through RECKON_ALLOW_NESTED_LAUNCH=1 scripts/h200_test_lane/run.sh --log (an absolute path in the run directory) --wait -- (targets), or one sbatch job on --partition=betelgeuse --reservation=gpu_0003_grpA --gres=gpu:1 with rungs as rows inside the allocation (never an array), --time sized to finish, XLA_PYTHON_CLIENT_PREALLOCATE=false and TMPDIR=/tmp in the submit environment and in every child; submit for real and read squeue a minute later rather than trusting sbatch --test-only. On a compute node run /home/ITER/mcintos/Code/nova/.venv/bin/python directly with PYTHONPATH set to the run worktree and never invoke uv; every login-node uv command carries --no-sync and nothing runs uv sync. configure_dtypes() before any array and jax_enable_x64 asserted True. Gates pass by delta against orientation_base_sha in per-module fresh processes, both arms running the same test files with the repository root conftest, baseline_suite and after_suite as single-line JSON whose log_path names one log file and whose command is literally runnable. Any wait is declared on the job that finishes last as wait_probe [\"sacct\",\"-n\",\"-X\",\"-P\",\"-j\",\"(job id)\",\"-o\",\"State\"] and wait_terminal [\"COMPLETED\",\"FAILED\",\"CANCELLED\",\"TIMEOUT\",\"OUT_OF_MEMORY\",\"NODE_FAIL\"] as JSON lists, and names every job it depends on in wait_condition. The certified 550, 2,000 and 5,000-cell machines and exteriors are cached under /home/ITER/mcintos/.config/reckon/crew/runs/r-20261009T181553786165-proto-support/ordered/rows/cache and may be read in place, never written. Run filepath relativize over any evidence fragment before committing. Commit with conventional subjects and bodies at every step and write the manifest and commit before every job wait; the manifest commits line lists every commit; status is complete, blocked or failed, which the worker sets itself. No plan labels in source names or comments.\n\nJob shape: one H200 job with rungs and sweeps as rows inside the allocation, each row's receipt persisted as it lands, --time 02:30:00 at most. Smoke-test both arms at about 550 cells in a short job first. Import provenance: run from your own tree as the working directory and print nova.__file__ in each log header. Latency is measured with jax.block_until_ready on the result, after one warm-up call, and never includes host-side array construction.",
+    "estimated_hours": 5.0,
+    "goal": "Measure a warm-started fixed-point solve at the iterate against a 1 ms budget at 2,000 to 10,000 cells",
+    "id": "proto-split-read",
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-10-13T04:21:04Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 23,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 4,
+      "headroom": 10,
+      "mean_context": 146667,
+      "observed_at": "2026-10-13T04:20:41Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 23,
+        "aggregate_tokens_per_second": 288.378,
+        "detail": "",
+        "mean_tokens_per_second": 75.889,
+        "observed_at": "2026-10-13T04:20:41Z",
+        "runs": 3.8,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261013T042103961779-proto-split-read/manifest.md",
+    "negative_control": "the cached-jet arm with its Hessian degrees of freedom zeroed fails the X-point position bound by test id",
+    "plan": "converged-forward-solve",
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§2",
+    "spec_level": "exact",
+    "time_budget": "60m",
+    "token_budget": null,
+    "write_paths": [
+      "scripts/prototypes/fixed_points",
+      "scripts/prototypes/read_route",
+      "docs/figures/converged-forward-solve/split-read",
+      "docs/evidence/fragments/converged-forward-solve/proto-split-read.html",
+      "/home/ITER/mcintos/.config/reckon/crew/reports/nova/resolution-pivot/proto-split-read.md",
+      "docs/figures/converged-forward-solve/proto-split-read"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "proto-split-read",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-10-13T04:21:11.442292+00:00",
+    "score": 0.56875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "Hard numerical and performance prototype: single compiled Newton program per call, sub-millisecond latency on the H200, moving X-point sweeps to 10,000 cells; deep reasoning, critical risk",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "typesafe/jev-1.13",
+    "latency_ms": 5000.385,
+    "model": null,
+    "offered": [],
+    "probabilities": {}
+  },
+  "plan": "converged-forward-solve",
+  "plan_impl_at_dispatch": 0.2857142857142857,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "3a7dddc0798132e98e2fdefe217da8e54bd20984",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "ab54cccac16558c7a27ab9e93a6aa65c489c7671",
+    "reviewed_head_sha": "3a7dddc0798132e98e2fdefe217da8e54bd20984",
+    "scores": {
+      "durability": 19,
+      "evidence": 18,
+      "fit": 18,
+      "goal_fidelity": 19,
+      "reuse": 19,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 113
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "shadow",
+  "run_id": "r-20261013T042103961779-proto-split-read",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§2",
+  "session": "s21-nova",
+  "session_harness": "codex",
+  "session_id": "01a1337e-fe8e-7093-a513-6c5815202a54",
+  "session_model": "gpt-6-astra",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 13029632,
+    "cumulative_input_tokens": 26324982,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 135899
+  },
+  "time_budget": "60m",
+  "tool_steps": 0.0,
+  "unplanned_reason": null,
+  "unreconciled_override": {
+    "grace": "15m",
+    "requested": true,
+    "waived_runs": []
+  },
+  "wall_seconds": 11758,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 4,
+    "ended_during": "working",
+    "exit_code": 0,
+    "exited_at": "2026-10-13T07:37:32Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-10-13T07:13:46Z",
+    "recorded_by": "supervisor",
+    "run_id": "r-20261013T042103961779-proto-split-read",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 1129,
+    "worker_pid": 1321504
+  },
+  "worker_seconds": null,
+  "worker_seconds_source": "stalled",
+  "worktree_retention": null
+}

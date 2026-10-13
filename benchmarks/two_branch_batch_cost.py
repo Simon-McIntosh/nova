@@ -180,7 +180,7 @@ def _limited_fine_problem() -> tuple[ForwardProfile, Any, np.ndarray]:
     )
     oracle = exact_state(case, coordinates)
     empty = forward_operator(case, machine)
-    physical = exact_current_moments(case, empty, oracle)
+    physical = exact_current_moments(case, empty, oracle, support_arm="legacy")
     coefficients = empty.coupling_current_moments(physical)
     exterior = oracle - np.asarray(empty.current_moment_image(coefficients))
     profile = ForwardProfile(

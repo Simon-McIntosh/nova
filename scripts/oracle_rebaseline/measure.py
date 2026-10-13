@@ -546,7 +546,9 @@ def measure_fixture(name: str) -> dict[str, object]:
     )
     oracle = exact_state(case, coordinates)
     empty_operator = forward_operator(case, machine)
-    exact_physical = exact_current_moments(case, empty_operator, oracle)
+    exact_physical = exact_current_moments(
+        case, empty_operator, oracle, support_arm="legacy"
+    )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = _internal_flux_image(empty_operator, exact_coefficients)
     prescribed_exterior = oracle - exact_internal

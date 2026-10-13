@@ -464,7 +464,7 @@ def _solovev_measurement() -> dict[str, Any]:
     state = jnp.asarray(_exact_state(CASE_NAME, exact, coordinates))
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, np.asarray(state)
+        source_case, empty_operator, np.asarray(state), support_arm="legacy"
     )
     coefficients = empty_operator.coupling_current_moments(exact_physical)
     internal = oracle_fixture._internal_flux_image(empty_operator, coefficients)

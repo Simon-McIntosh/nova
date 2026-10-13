@@ -547,7 +547,7 @@ def _map_floor(
         source_case, machine
     ).with_clip_mode("chord")
     exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, analytic
+        source_case, empty_operator, analytic, support_arm="legacy"
     )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = np.asarray(

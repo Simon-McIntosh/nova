@@ -1173,14 +1173,6 @@ def _polygonanalytic_revision() -> str:
     return hashlib.sha256(source.read_bytes()).hexdigest()
 
 
-def _signed_ring_area(ring: np.ndarray) -> float:
-    """Return the twice-signed area of a ring, positive for a CCW exterior."""
-    following = np.roll(ring, -1, axis=0)
-    return float(
-        np.sum(ring[:, 0] * following[:, 1] - ring[:, 1] * following[:, 0])
-    )
-
-
 def analytic_support_polygons(
     analytic: object,
     operator: ForwardFluxOperator,
@@ -1199,41 +1191,7 @@ def analytic_support_polygons(
     from scripts.prototypes.support.geometry import analytic_polygons
 
     cells = tuple(np.asarray(cell) for cell in operator.moment_geometry.polygons)
-    return analytic_polygons(
-        analytic, cells, points=points, subdivisions=subdivisions
-    )
-
-
-def _polygon_current_moments(
-    case: RotatingEquilibrium,
-    operator: ForwardFluxOperator,
-    polygons,
-) -> CellCurrentMoments:
-    """Integrate the analytic density over clipped polygons, holes included."""
-    from scripts.prototypes.support.geometry import polygon_rings
-
-    centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
-    values = np.zeros((3, len(centres)))
-    for cell, polygon in enumerate(polygons):
-        if polygon.is_empty:
-            continue
-        for ring in polygon_rings(polygon):
-            if len(ring) < 3:
-                continue
-            signed = _signed_ring_area(ring)
-            if signed == 0.0:
-                continue
-            sign = 1.0 if signed > 0.0 else -1.0
-            points, weights = _polygon_rule(ring)
-            density = np.asarray(
-                case.toroidal_current_density(points[:, 0], points[:, 1])
-            )
-            weighted = sign * weights * density
-            offset = points - centres[cell]
-            values[0, cell] += float(np.sum(weighted))
-            values[1, cell] += float(np.sum(weighted * offset[:, 0]))
-            values[2, cell] += float(np.sum(weighted * offset[:, 1]))
-    return CellCurrentMoments(*values)
+    return analytic_polygons(analytic, cells, points=points, subdivisions=subdivisions)
 
 
 def exact_current_moments(
@@ -1242,26 +1200,34 @@ def exact_current_moments(
     state: np.ndarray,
     *,
     analytic: object | None = None,
-    support_arm: str = _LEGACY_SUPPORT_ARM,
+    support_arm: str,
 ) -> CellCurrentMoments:
     """Integrate analytic density over a declared analytic-support clip.
 
     ``support_arm`` selects the clip the density is integrated on.  ``"exact"``
-    uses the independent analytic-separatrix polygon intersection, so the
-    booked image cancels the analytic-density image the certificate books on
-    that same support; ``"legacy"`` keeps the production spline clip
+    uses the independent analytic-separatrix polygon intersection and integrates
+    it with the shared moment owner
+    (:func:`scripts.prototypes.support.geometry.analytic_moments`), so the booked
+    image cancels the analytic-density image the certificate books on that same
+    support; ``"legacy"`` keeps the production spline clip
     (:func:`_analytic_profile_support`) that seeds its support from analytic
     topology.
+
+    The arm is required rather than defaulted: the two arms drive different
+    clips and different quadratures, so a caller that omitted the arm would
+    silently follow whatever the default happened to be.  Where the exact
+    support is what is meant, name it.
     """
     if support_arm not in EXTERIOR_SUPPORT_ARMS:
         raise ValueError(f"unknown exterior support arm: {support_arm!r}")
     source = case if analytic is None else analytic
     if support_arm == _EXACT_SUPPORT_ARM:
+        from scripts.prototypes.support.geometry import analytic_moments
+
         polygons = analytic_support_polygons(source, operator)
-        return _polygon_current_moments(case, operator, polygons)
-    support = _analytic_profile_support(
-        source, operator, state
-    )
+        centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
+        return analytic_moments(case, polygons, centres)
+    support = _analytic_profile_support(source, operator, state)
     counts = np.asarray(support.vertex_count)
     vertices = np.asarray(support.support_vertices)
     centres = np.asarray(operator.moment_geometry.atomic_mesh.centroids)
@@ -1346,9 +1312,7 @@ def cached_fixture_exterior(
     support_arm: str = EXTERIOR_SUPPORT_ARM,
 ) -> tuple[CellCurrentMoments, np.ndarray, dict[str, object]]:
     """Load or build the analytic-clipped fixture exterior for one carrier."""
-    identity = _exterior_cache_identity(
-        case, analytic, machine, state, support_arm
-    )
+    identity = _exterior_cache_identity(case, analytic, machine, state, support_arm)
     store = ZarrStore(filename=EXTERIOR_CACHE_FILENAME, dirname=".nova")
     store.group = store.hash_attrs(identity)
     with _cache_lock(store) as lock_wait:

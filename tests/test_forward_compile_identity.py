@@ -33,7 +33,7 @@ def _certificate_row(case_name: str):
     oracle_state = certificate._exact_state(case_name, exact, coordinates)
     empty_operator = certificate.oracle_fixture.forward_operator(source_case, machine)
     exact_moments = certificate.oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
+        source_case, empty_operator, oracle_state, support_arm="legacy"
     )
     exact_coefficients = empty_operator.coupling_current_moments(exact_moments)
     exact_internal = certificate.oracle_fixture._internal_flux_image(

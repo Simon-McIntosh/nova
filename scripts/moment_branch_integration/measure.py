@@ -55,7 +55,9 @@ def measure() -> dict[str, object]:
     exact = fixture.exact_state(case, coordinates)
 
     empty = fixture.forward_operator(case, machine)
-    analytic_physical = fixture.exact_current_moments(case, empty, exact)
+    analytic_physical = fixture.exact_current_moments(
+        case, empty, exact, support_arm="legacy"
+    )
     analytic_coefficients = empty.coupling_current_moments(analytic_physical)
     analytic_internal = _internal_image(empty, analytic_coefficients)
     prescribed_exterior = exact - analytic_internal

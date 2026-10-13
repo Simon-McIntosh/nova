@@ -252,7 +252,7 @@ def _build_context(control: dict[str, Any]) -> dict[str, Any]:
     oracle_state = certificate._exact_state(CASE_NAME, exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
+        source_case, empty_operator, oracle_state, support_arm="legacy"
     )
     exact_coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = oracle_fixture._internal_flux_image(

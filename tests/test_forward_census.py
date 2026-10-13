@@ -373,7 +373,7 @@ def _diverted_oracle_read(requested_cells: int):
     oracle_state = _exact_state("diverted-jump-bearing", exact, coordinates)
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     exact_physical = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state, analytic=exact
+        source_case, empty_operator, oracle_state, analytic=exact, support_arm="legacy"
     )
     coefficients = empty_operator.coupling_current_moments(exact_physical)
     exact_internal = oracle_fixture._internal_flux_image(empty_operator, coefficients)

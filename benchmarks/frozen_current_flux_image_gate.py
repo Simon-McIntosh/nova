@@ -807,7 +807,7 @@ def measure_rung(case_name: str, requested_cells: int) -> dict[str, Any]:
     # gate reuses exactly that external and coil contribution.
     empty_operator = oracle_fixture.forward_operator(source_case, machine)
     certificate_moments = oracle_fixture.exact_current_moments(
-        source_case, empty_operator, oracle_state
+        source_case, empty_operator, oracle_state, support_arm="legacy"
     )
     certificate_coefficients = empty_operator.coupling_current_moments(
         certificate_moments

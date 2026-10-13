@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from functools import partial
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -79,11 +80,11 @@ def solve(field, seeds, pitch, iterations=6):
     """One device program reusing the production stationary-point Newton loop.
 
     Every call executes the stated fixed iteration budget plus one terminal
-    evaluation. Axis and saddle are mapped inside the same compiled program.
+    evaluation. Axis and saddle share a vectorised evaluation at each iteration.
     """
     policy = TopologyPolicy(polish_iterations=iterations)
-    return jax.lax.map(
-        lambda seed: topology.stationary_read(field, seed, pitch, policy), seeds
+    return jax.vmap(lambda seed: topology.stationary_read(field, seed, pitch, policy))(
+        seeds
     )
 
 
@@ -104,7 +105,7 @@ def select_cache_nodes(mesh, seeds, pitch, maximum=512):
 
 def build_rows(nodes, coupling, batch=3):
     """Build only bounded cache rows and report cold setup independently."""
-    function = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
+    function = _row_program
     chunks = []
     for first in range(0, len(nodes), batch):
         points = nodes[first : first + batch]
@@ -115,3 +116,101 @@ def build_rows(nodes, coupling, batch=3):
             np.asarray(function(jnp.asarray(padded), coupling))[: len(points)]
         )
     return jnp.asarray(np.concatenate(chunks))
+
+
+_row_program = jax.jit(jax.vmap(_source_jets, in_axes=(0, None)))
+
+
+class AdaptiveRead(NamedTuple):
+    position: object
+    jet: object
+    valid: object
+    tangent_valid: object
+    reason: object
+    iterations: object
+    evaluations: object
+
+
+def solve_adaptive(field, seeds, pitch, iterations=6):
+    """Batched Newton with device-side step termination and measured counts.
+
+    The production loop has a fixed budget, so early stopping needs this loop.
+    Its Hessian guard and pitch-limited Newton correction are reused here.
+    """
+    policy = TopologyPolicy(polish_iterations=iterations)
+
+    def evaluate(position):
+        jet = jax.vmap(field.evaluate)(position)
+        conditioned, safe = jax.vmap(topology._conditioned_hessian, in_axes=(0, None))(
+            jet.hessian, policy.hessian_tolerance
+        )
+        correction = jnp.linalg.solve(safe, jet.gradient[..., None])[..., 0]
+        length = jnp.linalg.norm(correction, axis=-1)
+        finite = jnp.isfinite(jet.value) & jnp.all(jnp.isfinite(correction), axis=-1)
+        usable = conditioned & finite
+        done = usable & (length <= policy.position_tolerance * pitch)
+        correction *= jnp.minimum(1.0, pitch / jnp.where(length > 0, length, 1.0))[
+            :, None
+        ]
+        return jet, correction, usable, done, conditioned
+
+    jet, correction, usable, done, conditioned = evaluate(seeds)
+    initial = (
+        jnp.asarray(0),
+        seeds,
+        jet,
+        correction,
+        usable,
+        done,
+        conditioned,
+        jnp.zeros(seeds.shape[0], dtype=jnp.int32),
+    )
+
+    def condition(carry):
+        index, _, _, _, usable, done, _, _ = carry
+        return (index < iterations) & jnp.any(usable & ~done)
+
+    def update(carry):
+        index, position, _, correction, usable, done, _, counts = carry
+        active = usable & ~done
+        position -= jnp.where(active[:, None], correction, 0.0)
+        jet, correction, usable, done, conditioned = evaluate(position)
+        return (
+            index + 1,
+            position,
+            jet,
+            correction,
+            usable,
+            done,
+            conditioned,
+            counts + active,
+        )
+
+    index, position, jet, _, usable, done, conditioned, counts = jax.lax.while_loop(
+        condition, update, initial
+    )
+    reason = jnp.where(
+        done,
+        int(topology.TopologyReason.OK),
+        jnp.where(
+            usable,
+            int(topology.TopologyReason.UNRESOLVED_COMPONENT),
+            int(topology.TopologyReason.NONFINITE_FIELD),
+        ),
+    )
+    return AdaptiveRead(position, jet, done, conditioned, reason, counts, index + 1)
+
+
+def missing_nodes(field, points):
+    """Return required node ids absent from the current bounded row window."""
+
+    def selected(point):
+        cell = jnp.argmin(jnp.sum((field.mesh.generators - point) ** 2, axis=-1))
+        local = (point - field.mesh.origins[cell]) / field.mesh.scales[cell, :, None]
+        bary = jnp.einsum("tij,tj->ti", field.mesh.inverse_edges[cell], local)
+        bary = jnp.concatenate((bary, 1 - jnp.sum(bary, axis=-1, keepdims=True)), -1)
+        triangle = jnp.argmax(jnp.min(bary, axis=-1))
+        return field.mesh.triangles[cell, triangle]
+
+    ids = np.unique(np.asarray(jax.vmap(selected)(jnp.asarray(points))))
+    return ids[np.asarray(field.lookup)[ids] < 0]

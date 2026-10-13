@@ -29,6 +29,7 @@ from scripts.prototypes.fixed_points.solve import (
     build_rows,
     select_cache_nodes,
     solve,
+    solve_adaptive,
 )
 from scripts.prototypes.read_route.bell import build_mesh
 from scripts.prototypes.read_route.check_element import stack_jet
@@ -44,9 +45,13 @@ def persist(path, value):
     temporary.replace(path)
 
 
-def compile_solver(field, seeds, pitch):
+def compile_solver(field, seeds, pitch, adaptive=False):
     start = perf_counter()
-    executable = jax.jit(solve).lower(field, seeds, pitch).compile()
+    executable = (
+        jax.jit(solve_adaptive if adaptive else solve)
+        .lower(field, seeds, pitch)
+        .compile()
+    )
     cold = perf_counter() - start
     try:
         size = len(executable.runtime_executable().serialize())
@@ -93,8 +98,8 @@ def run_sweep(
                 error_pitches=errors.tolist(),
                 valid=np.asarray(result.valid).tolist(),
                 determinants=determinants.tolist(),
-                iterations=6,
-                jet_evaluations_per_point=7,
+                iterations=np.asarray(getattr(result, "iterations", 6)).tolist(),
+                jet_evaluations_per_point=int(getattr(result, "evaluations", 7)),
                 failures=failures,
             )
         )
@@ -251,13 +256,16 @@ def measure(args):
     build_wall = perf_counter() - start
     print("ROWS_READY bytes=", rows.nbytes, "seconds=", build_wall, flush=True)
     exact = jnp.stack(tuple(reference.moments), -1)
+    active_cache_nodes = len(selected)
+    padding = 512 - len(selected)
+    rows = jnp.pad(rows, ((0, padding), (0, 0), (0, 0), (0, 0)))
     reference_jets = jnp.einsum("ncmq,cm->nq", rows, exact)
     # State construction is setup, outside the timed solve.
     nodal_jets = jax.jit(
         lambda field, points: stack_jet(jax.vmap(field.evaluate)(points))
     )
     nodal = [nodal_jets(field, jnp.asarray(nodes[selected])) for field in fields]
-    exterior = [jet - reference_jets for jet in nodal]
+    exterior = [jnp.pad(jet, ((0, padding), (0, 0))) - reference_jets for jet in nodal]
     receipt = dict(
         kind=args.kind,
         cells=args.cells,
@@ -267,7 +275,7 @@ def measure(args):
         closed_form_max_error_pitches=positive,
         closed_form_cold_seconds=cold,
         closed_form_executable_bytes=size,
-        cache_nodes=len(selected),
+        cache_nodes=active_cache_nodes,
         cache_cap_nodes=512,
         cache_bytes=rows.nbytes,
         cache_build_seconds=build_wall,
@@ -306,8 +314,27 @@ def measure(args):
     )
     jax.block_until_ready(booked)
     bookings = [jnp.stack(tuple(booked[:3]), -1)] * args.states
+    if args.shifted_bookings:
+        bookings = []
+        for field in fields:
+            reading = reader(field, geometry, convention, policy)
+            psi = jax.jit(
+                lambda field, points: jax.vmap(jax.vmap(field.value))(points)
+            )(field, geometry.sample_points)
+            shifted = book(
+                psi,
+                reading,
+                geometry,
+                current.Quadrature(sigma=convention.sigma, segments=64),
+            )
+            jax.block_until_ready(shifted)
+            bookings.append(jnp.stack(tuple(shifted[:3]), -1))
     receipt["booking_valid"] = bool(booked.valid)
-    receipt["picard_input"] = "unshifted analytic state; varying exterior supply"
+    receipt["picard_input"] = (
+        "independently shifted analytic inputs"
+        if args.shifted_bookings
+        else "unshifted analytic state; varying exterior supply"
+    )
     receipt["booked_moment_relative_difference"] = float(
         jnp.max(jnp.abs(bookings[0] - exact)) / jnp.max(jnp.abs(exact))
     )
@@ -337,10 +364,13 @@ def measure(args):
         for name, arm_fields in [
             ("kernel", kernel_fields),
             ("cached-jet", cached_fields),
+            ("cached-adaptive", cached_fields),
         ]:
             print("COMPILE_SOLVE", state_kind, name, flush=True)
             if name not in programs:
-                programs[name] = compile_solver(arm_fields[0], initial, pitch)
+                programs[name] = compile_solver(
+                    arm_fields[0], initial, pitch, adaptive=name == "cached-adaptive"
+                )
             executable, cold, size = programs[name]
             sweep = run_sweep(
                 executable,
@@ -353,7 +383,21 @@ def measure(args):
             )
             if name == "kernel":
                 reference_rows = sweep if state_kind == "picard" else None
-            timed = latency(executable, arm_fields, sweep, pitch, args.calls)
+            timed = (
+                latency(executable, arm_fields, sweep, pitch, args.calls)
+                if name != "kernel"
+                else dict(calls=0, median_seconds=None, p99_seconds=None, seconds=[])
+            )
+            if name == "cached-adaptive" and state_kind == "analytic":
+                profile_path = args.out / f"{args.kind}-{args.cells}-hlo.txt"
+                profile_path.write_text(executable.as_text())
+                receipt["profile"] = dict(
+                    cost=executable.cost_analysis(), hlo_path=str(profile_path)
+                )
+                with jax.profiler.trace(
+                    str(args.out / f"{args.kind}-{args.cells}-profile")
+                ):
+                    jax.block_until_ready(executable(arm_fields[0], initial, pitch))
             travel = float(
                 np.linalg.norm(
                     np.asarray(sweep[-1]["positions"])[-1]
@@ -375,10 +419,46 @@ def measure(args):
                 cold_compile_seconds=cold,
                 reused_executable=state_kind == "picard",
                 executable_bytes=size,
-                iterations_per_call=6,
+                iterations_per_call=[row["iterations"] for row in sweep],
                 sweep=sweep,
                 **timed,
             )
+            if args.shifted_bookings and name == "cached-adaptive":
+                from scripts.prototypes.fixed_points.cache import solve_with_refresh
+
+                repaired = []
+                seed = initial
+                for index, field in enumerate(arm_fields):
+                    result, _, events = solve_with_refresh(
+                        executable,
+                        field,
+                        seed,
+                        pitch,
+                        nodes,
+                        reference.coupling,
+                        exact,
+                        fields[index],
+                    )
+                    target = (
+                        truth[index]
+                        if state_kind == "analytic"
+                        else np.asarray(reference_rows[index]["positions"])
+                    )
+                    repaired.append(
+                        dict(
+                            state=index,
+                            valid=np.asarray(result.valid).tolist(),
+                            error_pitches=(
+                                np.linalg.norm(
+                                    np.asarray(result.position) - target, axis=-1
+                                )
+                                / float(pitch)
+                            ).tolist(),
+                            refresh_events=events,
+                        )
+                    )
+                    seed = jnp.where(result.valid[:, None], result.position, seed)
+                row["recovered_sweep"] = repaired
             receipt["rows"].append(row)
             persist(out, receipt)
             print(
@@ -400,6 +480,22 @@ def measure(args):
                 negative = run_sweep(executable, mutated, initial, pitch, truth)
                 receipt["zero_hessian_control"] = negative
                 persist(out, receipt)
+    if args.coverage and saddle is not None:
+        receipt["coverage"] = coverage_measure(
+            args,
+            cached_fields[0],
+            nodes,
+            reference,
+            exact,
+            analytic,
+            positions,
+            pitch,
+            programs["cached-adaptive"][0],
+            programs["kernel"][0],
+            bookings[0],
+        )
+        persist(out, receipt)
+        print("COVERAGE_ROW", json.dumps(receipt["coverage"]), flush=True)
     if args.membership and args.cells in (2000, 5000):
         unshifted = closed(analytic, jnp.asarray(positions), pitch)
         receipt["membership"] = membership_measure(
@@ -420,6 +516,86 @@ def measure(args):
     print("ROW_COMPLETE", str(out), flush=True)
 
 
+def coverage_measure(
+    args,
+    field,
+    nodes,
+    reference,
+    exact,
+    analytic,
+    positions,
+    pitch,
+    executable,
+    kernel,
+    moments,
+):
+    from scripts.prototypes.fixed_points.cache import solve_with_refresh, _nodal_jets
+
+    seed = jnp.asarray(positions + np.asarray((0.0, -2 * float(pitch))))
+    kernel_seed = seed
+    records = []
+    for index, shift in enumerate(np.linspace(-2, 6, args.states) * float(pitch)):
+        analytic_state = replace(analytic, shift=jnp.asarray((0.0, shift)))
+        lookup = np.asarray(field.lookup)
+        selected = np.flatnonzero(lookup >= 0)
+        ext = (
+            jnp.zeros_like(field.exterior)
+            .at[lookup[selected]]
+            .set(
+                _nodal_jets(analytic_state, jnp.asarray(nodes[selected]))
+                - jnp.einsum("ncmq,cm->nq", field.rows[lookup[selected]], exact)
+            )
+        )
+        field = replace(field, moments=moments, exterior=ext)
+        direct = KernelField(
+            analytic_state,
+            reference.coupling,
+            ClippedCurrentMoments(*(moments - exact).T),
+        )
+        truth = kernel(direct, kernel_seed, pitch)
+        jax.block_until_ready(truth)
+        start = perf_counter()
+        result, field, events = solve_with_refresh(
+            executable,
+            field,
+            seed,
+            pitch,
+            nodes,
+            reference.coupling,
+            exact,
+            analytic_state,
+        )
+        wall = perf_counter() - start
+        records.append(
+            dict(
+                state=index,
+                imposed_shift_pitches=shift / float(pitch),
+                positions=np.asarray(result.position).tolist(),
+                valid=np.asarray(result.valid).tolist(),
+                kernel_valid=np.asarray(truth.valid).tolist(),
+                error_pitches=(
+                    np.linalg.norm(
+                        np.asarray(result.position - truth.position), axis=-1
+                    )
+                    / float(pitch)
+                ).tolist(),
+                refresh_events=events,
+                total_seconds=wall,
+            )
+        )
+        seed = jnp.where(result.valid[:, None], result.position, seed)
+        kernel_seed = jnp.where(truth.valid[:, None], truth.position, kernel_seed)
+    return dict(
+        imposed_travel_pitches=8,
+        states=records,
+        refresh_count=sum(len(row["refresh_events"]) for row in records),
+        semantics=(
+            "host window refresh retries whole compiled solves; "
+            "miss latency is separate"
+        ),
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--kind", choices=("limited", "diverted"), required=True)
@@ -428,6 +604,8 @@ def main():
     parser.add_argument("--calls", type=int, default=100)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--membership", action="store_true")
+    parser.add_argument("--coverage", action="store_true")
+    parser.add_argument("--shifted-bookings", action="store_true")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()

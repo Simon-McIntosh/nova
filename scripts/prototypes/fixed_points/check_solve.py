@@ -99,3 +99,47 @@ def test_axis_classification_rejects_a_minimum():
 
     rows = run_sweep(executable, [0], jnp.zeros((1, 2)), 1.0, np.zeros((1, 1, 2)))
     assert "wrong-stationary-type" in rows[0]["failures"]
+
+
+@pytest.mark.parametrize("saddle", [False, True])
+def test_adaptive_batched_newton_stops_on_step(saddle):
+    from scripts.prototypes.fixed_points.solve import solve_adaptive
+
+    field, root = field_and_root(saddle)
+    seeds = jnp.asarray([[0.3, -0.1], [0.2, -0.3]])
+    result = jax.jit(solve_adaptive)(field, seeds, jnp.asarray(1.0))
+    assert np.all(result.valid)
+    np.testing.assert_allclose(
+        result.position, np.tile(root, (2, 1)), atol=1e-13, rtol=0
+    )
+    np.testing.assert_array_equal(result.iterations, [1, 1])
+    assert result.evaluations == 2
+
+
+def test_cache_miss_refresh_retries_whole_solve(monkeypatch):
+    from scripts.prototypes.fixed_points import cache
+    from scripts.prototypes.fixed_points.solve import solve_adaptive
+
+    field, root = field_and_root(True)
+    absent = replace(field, lookup=jnp.full(7, -1, dtype=jnp.int32))
+    events = []
+
+    def refresh(*args):
+        events.append("refresh")
+        return field, {"nodes_added": 7}
+
+    monkeypatch.setattr(cache, "refresh", refresh)
+    result, _, receipt = cache.solve_with_refresh(
+        jax.jit(solve_adaptive),
+        absent,
+        jnp.asarray([[0.3, -0.1]]),
+        jnp.asarray(1.0),
+        None,
+        None,
+        None,
+        None,
+    )
+    assert events == ["refresh"]
+    assert len(receipt) == 1
+    assert result.valid[0]
+    np.testing.assert_allclose(result.position[0], root, atol=1e-13, rtol=0)

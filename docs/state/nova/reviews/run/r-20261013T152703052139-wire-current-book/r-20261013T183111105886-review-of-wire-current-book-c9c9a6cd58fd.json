@@ -1,0 +1,106 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite (base-suite.log, revision eab9b56f1b9d714142a89be09d115e301e7ae48a) fails 19 ids; reviewed after_suite (head-suite.log, revision 3ffeef316d1e299d3e79e4ad1413e124d5f6a1ee) fails 17 ids. Set-difference head-minus-base is empty (head ids are a strict subset; base-only ids tests/equilibrium/test_topology_read.py::test_biot_moment_point_derivatives and test_kernel_backed_carrier_read[2616-diverted]), so added_failure_count 0 and added_failure_ids []. The after_suite revision 3ffeef316 differs from the reviewed head c9c9a6cd5, which is docs-only (the fragment, 1 line), so the code head is covered.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "docs/evidence/fragments/converged-forward-solve/wire-current-book.html (identity table, cost table, diverted-2000-read-support.svg)",
+    "H200 job 1284674 rows: diverted 2,000 booked-moment error 3.1727e-04 vs recorded 3.1728e-04, 5,000 1.6770e-04 vs 1.6770e-04, limited 4.6066e-05 / 1.7475e-05; map flux error 3.5718e-06 / 1.3722e-06",
+    "H200 job 1284699 10,000-cell cost: fixed points p99 0.280 ms (diverted), whole step median 8.37 s",
+    "gate base-suite.log revision eab9b56f1: 19 failing ids; head-suite.log revision 3ffeef316: 17 failing ids"
+  ],
+  "blocking_finding_count": 1,
+  "call_site_count": 4,
+  "call_sites": [
+    "nova/equilibrium/forward_operator.py:4056",
+    "nova/equilibrium/forward_operator.py:4109",
+    "nova/equilibrium/forward_operator.py:4133",
+    "scripts/prototypes/support/read_route_rows.py:152"
+  ],
+  "commits_read": [
+    "75a509777",
+    "eb6fda2f1",
+    "f55b11690",
+    "e88d1e2a4",
+    "fda95a4eb",
+    "50dfb46db",
+    "d170b5e24",
+    "3ffeef316",
+    "c9c9a6cd5"
+  ],
+  "completed_at": "2026-10-13T18:47:28.012Z",
+  "dimension_dispositions": {
+    "goal_fidelity": {
+      "kind": "folded",
+      "node": "moment-space-newton",
+      "recorded_at": "2026-10-13T18:49:54.622209+00:00"
+    }
+  },
+  "dispatched_at": "2026-10-13T18:31:54Z",
+  "evidence_inputs": [
+    "The locked read exists as one production module (nova/equilibrium/support_read.py) but is not on the production map or solve path; the legacy partition is the only support reader a flux-only caller has, so the operator rewire is blocked on a ruling about how the solve carries the state moments.",
+    "Booking is 99 percent of the step at every rung and is the next cost target, not the fixed points or the membership.",
+    "Both arms share the same 6 failing tests/test_current_book_fragments.py ids and the fragment's timeouts; they predate this node."
+  ],
+  "findings": [
+    {
+      "file": "nova/equilibrium/forward_operator.py",
+      "line": 3327,
+      "severity": "blocking",
+      "text": "_support_partition still calls self._fixed_design_read (the legacy spline-clip support and fixed-design read), and the production gs.apply call sites at :4056, :4109 and :4133 pass no moments, so support_read is reached only from scripts/prototypes/support/read_route_rows.py:152 and the tests; the goal ('route the forward map and solve support through the locked read and current.book') and done_when (1) 'no second, parallel support path' and (2) 'legacy spline-clip support and fixed-design read off the solve path' are unmet."
+    },
+    {
+      "file": "tests/test_support_read.py",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "done_when (5) requires a test that would fail if the legacy support partition were reinstated, run as the negative control; the run's controls (negative/negative-gs.log, negative/negative-support-read-2.log) exercise support_read.read's validity guard and gs.apply's moments branch only, and no test reddens on reinstating ForwardFluxOperator._support_partition, so the declared negative-control string is unfulfilled."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/wire-current-book.html",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the fragment records plan-verdict partial and the blocker, but the manifest status is 'complete'; the record overstates the node's state, since done_when (1),(2),(5) are unmet and the contract asks a worker to set a recognised terminal status that reflects that."
+    }
+  ],
+  "gate_arms_note": "The head code revision is 3ffeef316; the later commit c9c9a6cd5 is docs-only (the fragment, 1 line), so the after_suite gate at 3ffeef316 covers the reviewed code head c9c9a6cd5.",
+  "item_verdicts": {
+    "diff": "read commit by commit against eab9b56f1: 75a509777/eb6fda2f1 add support_read, f55b11690 adds the gs.apply moments operand, e88d1e2a4/fda95a4eb/50dfb46db add the tests and panel, d170b5e24/3ffeef316/c9c9a6cd5 record evidence; no source is deleted.",
+    "done_when": "clauses (3) identity (H200 job 1284674) and (4) cost are met and recorded; clause (5) delta holds (base 19 failing ids, head 17, strict subset -> 0 added); clauses (1) one read per step with no second path and (2) legacy spline-clip support and fixed-design read off the solve path are unmet, and the fragment's 'Deleted code: None' records it.",
+    "goal": "the node goal is to route the forward map and solve support through the locked read and current.book; nova/equilibrium/support_read.py:96 builds that read-and-book step and nova/equilibrium/gs.py:21 adds the moments operand, but the production map and solve still read support through ForwardFluxOperator._support_partition (nova/equilibrium/forward_operator.py:3327) which calls self._fixed_design_read, and every production gs.apply caller (:4056,:4109,:4133) passes no moments, so the routing the goal names is absent.",
+    "manifest": "read: status complete with a checkpoint naming the blocker, nine commits, baseline_suite (19 ids at eab9b56f1) and after_suite (17 ids at 3ffeef316) as completed JSON, negative_control_log negative/negative-gs.log, and the fragment recording verdict partial with the routing blocker.",
+    "write_paths": "met: the eab9b56f1..c9c9a6cd5 diff touches only nova/equilibrium/{support_read,topology,fixed_points,gs}.py, tests/{test_support_read,test_gs_booked_moments,test_fixed_points}.py, scripts/prototypes/support/*, and the docs figure and fragment, all inside the declared fence."
+  },
+  "justifications": {
+    "durability": "tests/test_support_read.py:132 and :142 guard the row-window miss against an independent topology.read reference and the two negative controls (negative/negative-gs.log, negative/negative-support-read-2.log) redden by id, but no test exists that fails if ForwardFluxOperator._support_partition is reinstated (there is none to reinstate), so the goal's own guard is absent.",
+    "evidence": "the identity rows (booked-moment error 3.1727e-04 and 1.6770e-04 at 2,000/5,000 diverted) and the warm step cost are measured on H200 job 1284674 and the delta gate records base 19 -> head 17 failing ids (0 added), but no deletion evidence exists (fragment 'Deleted code: None') and the declared routing negative control was not run.",
+    "fit": "nova/equilibrium/topology.py:3001 read_at_stationary_points and the extracted _read_at_nulls follow the module's census/body split, and the promoted names (fixed_points.BellField, build_mesh, field_from_jets, stack_jet) carry no plan label.",
+    "goal_fidelity": "nova/equilibrium/support_read.py:96 lands the read-and-book step and nova/equilibrium/gs.py:21 the moments operand, but nova/equilibrium/forward_operator.py:3327 still reads support through _fixed_design_read and no production gs.apply caller passes moments, so the map and solve are not routed.",
+    "reuse": "nova/equilibrium/topology.py:3040 feeds the same _read_at_nulls owner for topology.read and read_at_stationary_points, fixed_points.BellField is one field reused by the solve and the read, and support_read imports the fixed_points/current owners rather than copying the prototype.",
+    "scope_discipline": "every path in the eab9b56f1..c9c9a6cd5 diff is inside the declared write paths (nova/equilibrium, tests, scripts/prototypes/support, docs/figures|evidence under wire-current-book)."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to route the forward map and solve support through the locked read and current.book; nova/equilibrium/support_read.py:96 builds that read-and-book step and nova/equilibrium/gs.py:21 adds the moments operand, but the production map and solve still read support through ForwardFluxOperator._support_partition (nova/equilibrium/forward_operator.py:3327) which calls self._fixed_design_read, and every production gs.apply caller (:4056,:4109,:4133) passes no moments, so the routing the goal names is absent.\nVERDICT done_when: clauses (3) identity (H200 job 1284674) and (4) cost are met and recorded; clause (5) delta holds (base 19 failing ids, head 17, strict subset -> 0 added); clauses (1) one read per step with no second path and (2) legacy spline-clip support and fixed-design read off the solve path are unmet, and the fragment's 'Deleted code: None' records it.\nVERDICT write_paths: met: the eab9b56f1..c9c9a6cd5 diff touches only nova/equilibrium/{support_read,topology,fixed_points,gs}.py, tests/{test_support_read,test_gs_booked_moments,test_fixed_points}.py, scripts/prototypes/support/*, and the docs figure and fragment, all inside the declared fence.\nVERDICT manifest: read: status complete with a checkpoint naming the blocker, nine commits, baseline_suite (19 ids at eab9b56f1) and after_suite (17 ids at 3ffeef316) as completed JSON, negative_control_log negative/negative-gs.log, and the fragment recording verdict partial with the routing blocker.\nVERDICT diff: read commit by commit against eab9b56f1: 75a509777/eb6fda2f1 add support_read, f55b11690 adds the gs.apply moments operand, e88d1e2a4/fda95a4eb/50dfb46db add the tests and panel, d170b5e24/3ffeef316/c9c9a6cd5 record evidence; no source is deleted.\nCALL_SITES: nova/equilibrium/forward_operator.py:4056, nova/equilibrium/forward_operator.py:4109, nova/equilibrium/forward_operator.py:4133, scripts/prototypes/support/read_route_rows.py:152\nSCORE goal_fidelity: 7\nJUSTIFICATION goal_fidelity: nova/equilibrium/support_read.py:96 lands the read-and-book step and nova/equilibrium/gs.py:21 the moments operand, but nova/equilibrium/forward_operator.py:3327 still reads support through _fixed_design_read and no production gs.apply caller passes moments, so the map and solve are not routed.\nSCORE evidence: 15\nJUSTIFICATION evidence: the identity rows (booked-moment error 3.1727e-04 and 1.6770e-04 at 2,000/5,000 diverted) and the warm step cost are measured on H200 job 1284674 and the delta gate records base 19 -> head 17 failing ids (0 added), but no deletion evidence exists (fragment 'Deleted code: None') and the declared routing negative control was not run.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the eab9b56f1..c9c9a6cd5 diff is inside the declared write paths (nova/equilibrium, tests, scripts/prototypes/support, docs/figures|evidence under wire-current-book).\nSCORE durability: 10\nJUSTIFICATION durability: tests/test_support_read.py:132 and :142 guard the row-window miss against an independent topology.read reference and the two negative controls (negative/negative-gs.log, negative/negative-support-read-2.log) redden by id, but no test exists that fails if ForwardFluxOperator._support_partition is reinstated (there is none to reinstate), so the goal's own guard is absent.\nSCORE fit: 17\nJUSTIFICATION fit: nova/equilibrium/topology.py:3001 read_at_stationary_points and the extracted _read_at_nulls follow the module's census/body split, and the promoted names (fixed_points.BellField, build_mesh, field_from_jets, stack_jet) carry no plan label.\nSCORE reuse: 16\nJUSTIFICATION reuse: nova/equilibrium/topology.py:3040 feeds the same _read_at_nulls owner for topology.read and read_at_stationary_points, fixed_points.BellField is one field reused by the solve and the read, and support_read imports the fixed_points/current owners rather than copying the prototype.\nFINDING nova/equilibrium/forward_operator.py:3327 blocking: _support_partition still calls self._fixed_design_read (the legacy spline-clip support and fixed-design read), and the production gs.apply call sites at :4056, :4109 and :4133 pass no moments, so support_read is reached only from scripts/prototypes/support/read_route_rows.py:152 and the tests; the goal ('route the forward map and solve support through the locked read and current.book') and done_when (1) 'no second, parallel support path' and (2) 'legacy spline-clip support and fixed-design read off the solve path' are unmet.\nFINDING tests/test_support_read.py:1 follow-on: done_when (5) requires a test that would fail if the legacy support partition were reinstated, run as the negative control; the run's controls (negative/negative-gs.log, negative/negative-support-read-2.log) exercise support_read.read's validity guard and gs.apply's moments branch only, and no test reddens on reinstating ForwardFluxOperator._support_partition, so the declared negative-control string is unfulfilled.\nFINDING docs/evidence/fragments/converged-forward-solve/wire-current-book.html:1 follow-on: the fragment records plan-verdict partial and the blocker, but the manifest status is 'complete'; the record overstates the node's state, since done_when (1),(2),(5) are unmet and the contract asks a worker to set a recognised terminal status that reflects that.\n",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261013T183111105886-review-of-wire-current-book-c9c9a6cd58fd",
+  "reviewed_base_sha": "eab9b56f1b9d714142a89be09d115e301e7ae48a",
+  "reviewed_head_sha": "c9c9a6cd58fd812f0b051de0cd5a24fdcaabb358",
+  "reviewed_revision": "c9c9a6cd58fd812f0b051de0cd5a24fdcaabb358",
+  "reviewed_run_id": "r-20261013T152703052139-wire-current-book",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/wire-current-book",
+  "reviewer_node": "review-of-wire-current-book-c9c9a6cd58fd",
+  "reviewer_run_id": "r-20261013T183111105886-review-of-wire-current-book-c9c9a6cd58fd",
+  "scores": {
+    "durability": 10,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 7,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T18:45:00.000000+00:00",
+  "total": 84,
+  "verdict": "fail"
+}

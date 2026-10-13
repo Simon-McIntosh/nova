@@ -222,7 +222,8 @@ def main():
             lambda state: equation(operator, state, *arguments), (state,), (direction,)
         )
         errors = []
-        for epsilon in (1e-3, 1e-4, 1e-5):
+        difference_steps = (1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8)
+        for epsilon in difference_steps:
             central = (
                 equation(operator, state + epsilon * direction, *arguments)
                 - equation(operator, state - epsilon * direction, *arguments)
@@ -236,7 +237,9 @@ def main():
         derivative = dict(
             image=image,
             finite=bool(jnp.all(jnp.isfinite(tangent))),
+            steps=difference_steps,
             errors=errors,
+            matched=bool(any(np.isfinite(error) and error < 1e-4 for error in errors)),
             booking_response=float(jnp.linalg.norm(direction - tangent)),
         )
         row["derivatives"].append(derivative)

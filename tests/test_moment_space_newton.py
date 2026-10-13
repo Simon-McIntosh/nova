@@ -187,3 +187,30 @@ def test_moment_request_resolves_exact_support(route):
     assert request.clip_mode == "exact"
     with pytest.raises(ValueError, match="locked exact support"):
         replace(request, clip_mode="chord")
+
+
+def test_operator_constructor_keeps_exterior_inputs_distinct(monkeypatch):
+    """Dataclass construction delivers each exterior input to its own operand."""
+    import inspect
+
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+
+    signature = inspect.signature(ForwardFluxOperator.__post_init__)
+    sections, prescribed = object(), object()
+    captured = {}
+
+    def capture(*args):
+        captured.update(signature.bind(*args).arguments)
+
+    monkeypatch.setattr(ForwardFluxOperator, "__post_init__", capture)
+    ForwardFluxOperator(
+        grid=None,
+        wall=None,
+        source=None,
+        external_current=None,
+        area=None,
+        conductor_sections=sections,
+        prescribed_current_field=prescribed,
+    )
+    assert captured["conductor_sections"] is sections
+    assert captured["prescribed_current_field"] is prescribed

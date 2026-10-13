@@ -2348,8 +2348,8 @@ class ForwardFluxOperator:
     moment_roots: object | None = field(repr=False, default=None)
     moment_row_cache: object | None = field(repr=False, default=None)
     exterior_jet_response: object | None = field(repr=False, default=None)
-    conductor_sections: InitVar[object | None] = None
     prescribed_current_field: InitVar[PrescribedCurrentField | None] = None
+    conductor_sections: InitVar[object | None] = None
     prescribed_field: PrescribedCurrentField | None = field(
         init=False, repr=False, default=None
     )

@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import shlex
 import shutil
@@ -46,7 +47,7 @@ def main():
     command = shlex.join(
         [sys.executable, "-m", "scripts.prototypes.support.gate_rows", *sys.argv[1:]]
     )
-    overall = 0
+    receipts = {}
     for arm, tree, revision in (
         ("baseline", baseline, args.base),
         ("after", root, head),
@@ -99,8 +100,15 @@ def main():
                     if line.startswith(("FAILED ", "ERROR "))
                 ]
                 completed = (
-                    " passed" in text or " failed" in text or " errors in " in text
-                ) and result != 124
+                    bool(
+                        re.search(
+                            r"^=+.*(?: passed| failed| error| skipped).* in .* =+$",
+                            text,
+                            re.MULTILINE,
+                        )
+                    )
+                    and result != 124
+                )
                 records.append(
                     dict(
                         file=name,
@@ -131,8 +139,19 @@ def main():
             modules=records,
         )
         (args.out / f"{arm}-suite.json").write_text(json.dumps(receipt) + "\n")
-        overall = max(overall, status)
-    raise SystemExit(overall)
+        receipts[arm] = receipt
+    base_failures = set(receipts["baseline"]["failure_ids"])
+    head_failures = set(receipts["after"]["failure_ids"])
+    complete = all(receipt["completed"] for receipt in receipts.values())
+    delta = dict(
+        completed=complete,
+        added=sorted(head_failures - base_failures),
+        removed=sorted(base_failures - head_failures),
+        passed=complete and not (head_failures - base_failures),
+    )
+    (args.out / "delta.json").write_text(json.dumps(delta) + "\n")
+    print("DELTA=" + json.dumps(delta), flush=True)
+    raise SystemExit(0 if delta["passed"] else 1)
 
 
 if __name__ == "__main__":

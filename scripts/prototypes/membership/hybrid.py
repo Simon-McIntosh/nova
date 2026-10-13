@@ -140,7 +140,7 @@ def patch_membership(
     sigma,
     diverted,
     physical_radius,
-    use_crossed_cells,
+    use_crossed_cells=False,
     third_factor=1.0,
 ):
     """Replace local fragments while preserving the Bell receipt elsewhere.
@@ -149,6 +149,8 @@ def patch_membership(
     Connectivity is recomputed over the merged fragment graph; a changed
     positive-area selection outside the patch is refused. Membership outside
     the patch is copied from the Bell receipt without another reduction.
+    The default patch contains the null cell and its edge neighbours; the
+    crossing-based physical disc remains an explicit comparison option.
     """
     field = field_from_jets(jets, indices, mesh)
     point = fixed.position[-1]

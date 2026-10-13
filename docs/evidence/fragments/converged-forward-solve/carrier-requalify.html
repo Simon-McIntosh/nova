@@ -10,10 +10,10 @@
 <meta name="plan-summary" content="The carrier cache identity now hashes the packed polygon moment kernel and the coupling-assembly source instead of the fixture's own bytes, so a carrier assembled by the pre-repair kernel is refused rather than warm-loaded; the 5,000-cell certificate map rows are re-run on the repaired kernel">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
-<meta name="plan-commits" content="5f7456b62,b83358808,5ecafc760,327a3c074">
+<meta name="plan-commits" content="5f7456b62,b83358808,5ecafc760,327a3c074,f0659cbcd,3084de30a,60e976977,d36c7a1f7">
 <meta name="plan-recorded-at" content="2026-10-13">
 <meta name="plan-verdict" content="pass-with-follow-on">
-<meta name="plan-environment" content="Identity and refuse check on CPU x64 binary64 (JAX_PLATFORMS=cpu). The 5,000-cell certificate rows ran on the H200 lane (98dci4-gpu-0003, reservation gpu_0003_grpA) as job 1284720; the 10,000-cell rung and the three-revision attribution did not complete inside this run.">
+<meta name="plan-environment" content="Identity and refuse check on CPU x64 binary64 (JAX_PLATFORMS=cpu). The 5,000-cell certificate rows ran on the H200 lane (98dci4-gpu-0003, reservation gpu_0003_grpA) as job 1284720; the 10,000-cell rung on the device builder ran as job 1284803; the diverted 550-cell legacy attribution rows ran as jobs 1284795, 1284807 and 1284826. The fleet allocation (98dci4-clu-2002) carries no GPU, so every GPU-shaped row ran on the H200 lane.">
 <title>Requalify the fine certificate carriers on the repaired kernel | nova</title>
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -139,12 +139,28 @@ revisions were measured to bracket it, and both already carry the new value:</p>
 already 0.1946465 at its first parent, so that merge did not move the row even
 though it is the merge that routes the exterior through the shared moment owner.
 The mover lies between <code>acaea2c9c</code> and <code>8fe66e390</code>, a
-range holding five merges, of which the first after the near-edge repair is the
-polygon-moment-owner merge <code>1b68b8099</code> and the next is the exterior
-exact-support merge <code>f68870f99</code>. Those two are measured against each
-other in this run and reported in the manifest's follow-ons; the value at
-<code>8fe66e390</code> equals the value at main to 1.2e-16, so the quantity has
-been stable across everything after the mover.</p>
+range holding five merges. The two that touch the certificate fixture or the
+support machinery were measured against one another, and the row moves at
+exactly one of them:</p>
+
+<table>
+  <thead><tr><th>revision</th><th>what it is</th><th>map_relative_sup</th></tr></thead>
+  <tbody>
+    <tr><td><code>1b68b8099</code></td><td>polygon-moment-owner merge: route the polygon-moment reductions through the census owner</td><td>0.19732697871688842</td></tr>
+    <tr><td><code>f68870f99</code></td><td>cfs-exterior-exact-support merge: pose the certificate exterior on the exact analytic support</td><td>0.19464650241785292</td></tr>
+  </tbody>
+</table>
+
+<p><strong>The merge that moved it is <code>f68870f99</code></strong>, the merge
+that poses the certificate exterior on the exact analytic support. It is the
+only one of the five in the range at which the value is new, and the value it
+produces equals the value at main to 1.2e-16, so the quantity has been stable
+across everything after it. This is an intended accuracy change and not a
+regression: the merge replaces the certificate exterior's own integrator with
+the shared exact analytic support, which is the same delegation the plan records
+for the exterior fixture, so the 0.197327 anchor of 2026-10-10 was a statement
+about the fixture's own integrator and the 0.1946465 figure is the accuracy the
+exact analytic support delivers.</p>
 
 <p>Two notes on how these rows were produced. The extracted trees refuse the row
 through their own positive-control pin, which is a caller-supplied expectation
@@ -154,37 +170,85 @@ the process exits nonzero and the pin is not a check on the attribution. And the
 row driver requires a GPU even for the legacy arm, so all of these rows ran on
 the H200 lane; the fleet allocation carries no card.</p>
 
+<h2 id="carrier-requalify-ten-thousand">10,000-cell carrier and certificate rows</h2>
+
+<p>The 10,000-cell carrier was built on the <em>device</em> coupling builder
+(<code>NOVA_ANALYTIC_ORACLE_BUILDER=device</code>) in H200 job 1284803, and the
+certificate map rows were re-run at that rung on the same job. The device
+builder is what the finest rungs are built with: the 5,000-cell host assembly
+already took about 2,077&ndash;2,122 s, and the host path's assembly cost grows
+past a single allocation at 10,000 cells, so a host build at this rung is not
+required and was not attempted after the coordinator's ruling.</p>
+
+<p>The machine build wall was <strong>3,209.5846427511424 s</strong> (about
+53.5 min), reported by the fixture's own <code>build_seconds</code>; the
+fixture machine wall was 3,220.000154364854 s. The carrier store,
+<code>analytic_oracle_hex_machine_10000.zarr</code>, is
+<strong>3,526,603,966 bytes</strong> (3.28 GiB), written under the GPFS oracle
+cache root rather than the tracked tree. This repository has no evidence-root
+resolver in <code>nova/database/filepath.py</code> to resolve through, so the
+store is placed on the existing GPFS cache root
+<code>/work/projects/imas_gpu/analytic_oracle_cache</code>, in
+<code>carrier-requalify-10000/cache/</code>, under the GPFS evidence root the
+plan records.</p>
+
+<p><strong>The limited case completed.</strong> Realised 10,238 cells against a
+requested 10,000. Norm-relative map and booking-image error:</p>
+
+<table>
+  <thead><tr><th>rung</th><th>arm</th><th>map_relative_sup</th><th>booking_image_relative_sup</th></tr></thead>
+  <tbody>
+    <tr><td>limited 10,000</td><td>legacy</td><td>1.184537814361041e-3</td><td>1.1847947554828441e-3</td></tr>
+    <tr><td>limited 10,000</td><td>exact</td><td>2.1127846179840694e-5</td><td>2.1393759793170118e-5</td></tr>
+    <tr><td>limited 10,000</td><td>read</td><td>5.8365273838614036e-6</td><td>6.118329218540572e-6</td></tr>
+  </tbody>
+</table>
+
+<p>The limited legacy map error reads 1.184537814361041e-3 here against
+1.183879015537567e-3 at 5,000 cells. Both are the same quantity at different
+rungs; the fine rung resolves more cells and is the tighter statement.</p>
+
+<p><strong>The diverted case was refused, and the refusal is the stencil
+conditioning check.</strong> The device build of the diverted 10,000-cell
+carrier raised <code>ValueError: ring 475 centred on cell 535 cannot determine a
+quadratic (condition 1.758e+03)</code>, before any assembled carrier was
+persisted. That is exactly the check the coordinator names at
+<code>stencil_mesh.py:651</code>, condition 1.758e3, and is now carried as its
+own followup <code>f-cfs-stencil-ten-thousand</code>. So yes &mdash; this device
+build hit that check, on the diverted case only; the limited case assembles and
+measures and does not reach it. No diverted 10,000-cell row exists: the refusal
+is at carrier assembly, so there is no legacy, exact or read row for that case
+and none is recorded. The refusal receipt is
+<code>diverted-10000-legacy-exact-read-refusal.json</code> in the same GPFS
+directory.</p>
+
+<p>Two further facts about this rung belong with its wall. The read arm's XLA
+executable could not be serialized at 10,000 cells &mdash; the proto exceeded
+2 GiB (about 10.5 GB) &mdash; so that arm ran without a persisted executable,
+and
+device temporary bytes reached 22.6 GB. Neither changed a measured value; both
+size the rung for a later run.</p>
+
 <h2 id="carrier-requalify-outstanding">Not completed in this run</h2>
 
-<p>Three items of the followup's done-when are not measured in this record and
-are carried as follow-ons rather than reported as met:</p>
+<p>One item of the followup's done-when is not measured in this record and is
+carried as a follow-on rather than reported as met:</p>
 
 <ul>
-  <li><strong>The host-against-device block agreement.</strong> The 5,000-cell
-  host carrier exists on the repaired kernel, but no device build was produced
-  alongside it in this run, so the 1e-12 block agreement is not reported. The
-  rebuild submitted for that purpose found the host carrier a cache miss when
-  the device platform was enabled, so it was still assembling the host blocks
-  when this record was written; the host carrier the row driver persisted was
-  built with the CPU platform alone, and the two carrier cache groups are not
-  interchangeable.</li>
-  <li><strong>The 10,000-cell rung, both carrier and rows.</strong> The 5,000-cell
-  host assembly took about 2,077 to 2,122 s in job 1284720, and the 10,000-cell
-  host assembly did not finish before that job's 2.5-hour ceiling: the run left
-  a lock beside the 5,000-cell store and no 10,000-cell store. That path is not
-  required for the rung. The device coupling builder is what the finest rungs
-  are built with, and a 10,000-cell run on that builder, re-running the
-  legacy, exact and read rows on both certificate cases, is submitted as
-  <code>--time 02:30:00</code> with its store written under the GPFS oracle
-  cache root rather than the tracked tree. Its build wall is reported in the
-  manifest's follow-ons once the job lands. This repository has no
-  evidence-root resolver in <code>nova/database/filepath.py</code> to resolve
-  through, so the store is placed on the existing GPFS cache root
-  <code>/work/projects/imas_gpu/analytic_oracle_cache</code> and named there.</li>
-  <li><strong>The three-revision attribution.</strong> Measured, and it
-  excludes both candidate merges &mdash; see the section below. The value did
-  not move at any of the three revisions named, so the merge that moved it lies
-  later in history than <code>acaea2c9c</code>.</li>
+  <li><strong>The host-against-device block agreement at 5,000 cells.</strong>
+  The 5,000-cell host carrier exists on the repaired kernel, but no device build
+  was produced alongside it in this run, so the 1e-12 block agreement is not
+  reported. The rebuild submitted for that purpose found the host carrier a
+  cache miss when the device platform was enabled, because the platform is part
+  of the carrier cache identity: the host blocks were re-assembled under the
+  device platform. That is now fixed &mdash; the platform is set per carrier path,
+  with the host path built on <code>cpu</code> and only the device path on
+  <code>cuda,cpu</code> &mdash; and the check is resubmitted as one H200 job at
+  <code>--time 01:15:00</code>, sized from the measured host assembly of about
+  2,077 s plus margin. Its evidence is recorded in the manifest's follow-ons
+  once it lands. The host carrier the row driver persisted was built with the
+  CPU platform alone, and the two carrier cache groups are not interchangeable,
+  which is what the per-path platform setting resolves.</li>
 </ul>
 
 </main>

@@ -1,0 +1,97 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite (logs/base-fragments.log, revision 7c9d86bd48ac6ccc676a2b9ef5dc06eec3be2321) fails 6 ids and after_suite (logs/head-fragments.log, revision 2b46bbc0838d65dbc094014e66208bfe400bf5c4) fails the identical 6 ids, all tests/test_current_book_fragments.py::test_analytic_certificate_moments[550|2000|5000-limited|diverted]. The head-minus-base set-difference is empty, so added_failure_count 0 and added_failure_ids []. The 6 are pre-existing (they fail with KeyError 'NOVA_BOOK_RESULTS' before reaching booking, an absent-fixture condition, not a code defect). The after_suite revision 2b46bbc08 precedes the reviewed head f13542848; current.py, the only product file, is unchanged after adeff8346 (before 2b46bbc08), and the intervening commits are the test timing change and evidence docs, so the code head is covered.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "nova/equilibrium/current.py:272 -- booking is one jax.vmap(cell)(jnp.arange(len(geometry.centre))) with no residual scan; the landed product change is 3 lines (3 inserted, 3 deleted)",
+    "tests/test_current_book_vectorised.py:361-368 -- IDENTITY at 1/64/200/2000 cells max_abs=0.000e+00 max_rel=0.000e+00 (logs/head-vectorised-warm.log: 4 passed in 154.12s)",
+    "H200 job 1284869 (betelgeuse, gpu_0003_grpA, --gres=gpu:1, --time=02:00:00) COMPLETED exit 0:0 in 23:49 (logs/h200-booking.log): analytic-state per-step booking walls base->head limited 2000 2.339->1.220 (1.92x), diverted 2000 1.233->1.170 (1.05x), limited 5000 4.610->3.032 (1.52x), diverted 5000 4.433->3.428 (1.29x); peak device memory 0.71-3.03 GB base against 7.75-23.71 GB head",
+    "logs/negative-control.log: declared mutation (doubling the _conic_rings ring batch) turns test_vectorised_booking_matches_sequential_scan[1|64|200] red -- 3 failed, EXIT=1"
+  ],
+  "blocking_finding_count": 0,
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:119"
+  ],
+  "commits_read": [
+    "adeff8346",
+    "486d369ad",
+    "2b46bbc08",
+    "32d98f6bd",
+    "c08198958",
+    "f2a831d4d",
+    "9357df978",
+    "4b4b242f1",
+    "f13542848"
+  ],
+  "completed_at": "2026-10-13T23:05:31.196Z",
+  "dispatched_at": "2026-10-13T22:53:29Z",
+  "evidence_inputs": [
+    "The landing is correct on its own terms: current.book is a single vmapped program, bit-identical to the superseded scan on the tiled CPU fixture at 7c9d86bd..f13542848 and agreeing to floating-point reassociation (3.6e-12 worst, 4.5e-16 relative) on the H200 certificate carrier.",
+    "The product change is 3 lines and costs nothing in scope; the whole node turns on it. Two done-when clauses are not delivered and are registered follow-ons: the 10,000-cell rung (pending the carrier-requalify node's device store) and the one-Picard-image state wall (the flux-map image lives on the operator's own sample block while current.book consumes flux at the topology read's per-cell stencil, so no Picard-state number is quotable without an operator-side partition reconstruction owned outside this fence).",
+    "The batched program's peak device memory is 7.7-23.7 GB against the scan's 0.71-3.03 GB, a 7.4-10.6x increase, and it compiles 1.1-1.7x slower; the fragment flags this as the binding constraint on scaling to 10,000 cells.",
+    "The base/head arm delta is zero (6 failing ids both arms, all test_analytic_certificate_moments, from a missing NOVA_BOOK_RESULTS fixture), so no regression is introduced, but the base arm's log provenance is unverified (see finding; the log names tree=/tmp/vb-base while its recorded nova.__file__ resolves to the head worktree)."
+  ],
+  "findings": [
+    {
+      "file": "tests/test_current_book_vectorised.py",
+      "line": 373,
+      "severity": "follow-on",
+      "text": "the identity test compares the production book against _reference_book (the preserved sequential scan) and reddens on the declared booking mutation, but no assertion fails if book is reverted to the sequential scan itself: reinstating the base jax.lax.scan(cell, None, ...) at nova/equilibrium/current.py:272 leaves every assertion green, so done_when(1) 'no Python loop or sequential scan over cells remains on the path' has no guard and a future un-vectorisation would pass the suite."
+    },
+    {
+      "file": "logs/base-fragments.log",
+      "line": 1,
+      "severity": "follow-on",
+      "text": "the base arm header asserts tree=/tmp/vb-base (and manifest baseline_suite revision 7c9d86bd), but the same header's own provenance line prints nova.__file__=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/vectorize-booking/nova/__init__.py[?]; the module under test resolved to the head worktree, not the base scratch tree, so the recorded baseline revision is not what the log shows imported. The six failures are a KeyError 'NOVA_BOOK_RESULTS' reached before booking and are identical in both arms, so the zero delta stands; the defect is in the provenance of the base arm, not in the conclusion."
+    },
+    {
+      "file": "docs/evidence/fragments/converged-forward-solve/vectorize-booking.html",
+      "line": 150,
+      "severity": "follow-on",
+      "text": "done_when(2) and (3) name identity and per-step walls 'at about 2,000, 5,000 and 10,000 cells' and 'on analytic states and on one-Picard-image states'; the 10,000-cell rung and every one-Picard-image wall are withheld (plan-verdict partial, blockers in the manifest). Both are externally blocked -- the 10,000-cell machine on the carrier-requalify node's device store and the Picard image on an operator-side reconstruction outside this fence -- so neither is repairable within this node, but the delivered measure is a proper subset of the one the done_when states."
+    }
+  ],
+  "gate_arms_note": "after_suite is at 2b46bbc08, which predates the reviewed head f13542848; current.py is final at adeff8346 and the two later test/evidence commits do not touch it, so the code head is covered by the gate. The gate was not re-run for this review.",
+  "item_verdicts": {
+    "diff": "read commit by commit against 7c9d86bd48ac6ccc676a2b9ef5dc06eec3be2321: adeff8346 is the product change (3 lines in nova/equilibrium/current.py), 486d369ad adds tests/test_current_book_vectorised.py, f2a831d4d adds the warm-wall timing, and 2b46bbc08/32d98f6bd/c08198958/9357df978/4b4b242f1/f13542848 are the evidence fragment; no source is deleted.",
+    "done_when": "clauses (1) vectorisation, (2) identity on the tiled fixture (bit-identical) and the carrier (3.6e-12 at 2,000), (3) H200 cost at 2,000 and 5,000 cells in both topologies, (4) the jvp-versus-central-difference test, (5) the 6-ids-by-delta gate and the declared negative control, and (6) the fragment are delivered and recorded; the 10,000-cell rung and the one-Picard-image state named in (2)/(3) are not delivered and are registered as blockers/follow-ons.",
+    "goal": "the node goal is to vectorise current.book over cells; nova/equilibrium/current.py:272 replaces jax.lax.scan(cell, None, jnp.arange(len(geometry.centre)), unroll=1) with jax.vmap(cell)(jnp.arange(len(geometry.centre))), so booking runs as one vmapped compiled program with no per-cell Python loop or sequential scan on the path.",
+    "manifest": "read: status complete, nine commits listed, baseline_suite and after_suite as completed one-line JSON (both 6 failed / 8 passed), negative_control_log logs/negative-control.log, test_logs naming the head and H200 logs, and blockers naming the two withheld items.",
+    "write_paths": "met: the 7c9d86bd..f13542848 diff touches only nova/equilibrium/current.py, tests/test_current_book_vectorised.py and docs/evidence/fragments/converged-forward-solve/vectorize-booking.html, all inside the declared fence; tests/test_current_book_fragments.py and the docs/figures directory were in scope and untouched (the done-when names no figure)."
+  },
+  "justifications": {
+    "durability": "tests/test_current_book_vectorised.py:361-368 reddens on the declared booking mutation (logs/negative-control.log: 3 failed, EXIT=1), but no assertion fails if book is reverted to the sequential scan, so done_when(1) is unguarded.",
+    "evidence": "the identity (logs/head-vectorised-warm.log, max_abs=0 at 1/64/200/2000) and H200 cost rows (logs/h200-booking.log, job 1284869 COMPLETED) are recorded receipts, but logs/base-fragments.log:1 names tree=/tmp/vb-base while its recorded nova.__file__ resolves to the head worktree, and the 10,000-cell and Picard-state rows the measure asks for are absent.",
+    "fit": "nova/equilibrium/current.py:272 follows the module's jax idiom (the body already uses jax.lax.cond and jax.tree.map) and neither the source nor the test file introduces a plan or deliverable name.",
+    "goal_fidelity": "nova/equilibrium/current.py:272 removes the scan and makes booking one vmapped program, which is the goal, but the 10,000-cell rung and the one-Picard-image state named in done_when(2)/(3) are not delivered.",
+    "reuse": "the product change adds no definition and reuses the existing clipped_support_current_moments and _conic_rings owners, but the test's _reference_conic_rings/_reference_normal_rings duplicate current.py:59 and current.py:82 as a deliberately independent oracle.",
+    "scope_discipline": "every path in the 7c9d86bd..f13542848 diff is inside the declared write paths listed in the manifest."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to vectorise current.book over cells; nova/equilibrium/current.py:272 replaces jax.lax.scan(cell, None, jnp.arange(len(geometry.centre)), unroll=1) with jax.vmap(cell)(jnp.arange(len(geometry.centre))), so booking runs as one vmapped compiled program with no per-cell Python loop or sequential scan on the path.\nVERDICT done_when: clauses (1) vectorisation, (2) identity on the tiled fixture (bit-identical) and the carrier (3.6e-12 at 2,000), (3) H200 cost at 2,000 and 5,000 cells in both topologies, (4) the jvp-versus-central-difference test, (5) the 6-ids-by-delta gate and the declared negative control, and (6) the fragment are delivered and recorded; the 10,000-cell rung and the one-Picard-image state named in (2)/(3) are not delivered and are registered as blockers/follow-ons.\nVERDICT write_paths: met: the 7c9d86bd..f13542848 diff touches only nova/equilibrium/current.py, tests/test_current_book_vectorised.py and docs/evidence/fragments/converged-forward-solve/vectorize-booking.html, all inside the declared fence; tests/test_current_book_fragments.py and the docs/figures directory were in scope and untouched (the done-when names no figure).\nVERDICT manifest: read: status complete, nine commits listed, baseline_suite and after_suite as completed one-line JSON (both 6 failed / 8 passed), negative_control_log logs/negative-control.log, test_logs naming the head and H200 logs, and blockers naming the two withheld items.\nVERDICT diff: read commit by commit against 7c9d86bd48ac6ccc676a2b9ef5dc06eec3be2321: adeff8346 is the product change (3 lines in nova/equilibrium/current.py), 486d369ad adds tests/test_current_book_vectorised.py, f2a831d4d adds the warm-wall timing, and 2b46bbc08/32d98f6bd/c08198958/9357df978/4b4b242f1/f13542848 are the evidence fragment; no source is deleted.\nCALL_SITES: nova/equilibrium/support_read.py:119\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:272 removes the scan and makes booking one vmapped program, which is the goal, but the 10,000-cell rung and the one-Picard-image state named in done_when(2)/(3) are not delivered.\nSCORE evidence: 13\nJUSTIFICATION evidence: the identity (logs/head-vectorised-warm.log, max_abs=0 at 1/64/200/2000) and H200 cost rows (logs/h200-booking.log, job 1284869 COMPLETED) are recorded receipts, but logs/base-fragments.log:1 names tree=/tmp/vb-base while its recorded nova.__file__ resolves to the head worktree, and the 10,000-cell and Picard-state rows the measure asks for are absent.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the 7c9d86bd..f13542848 diff is inside the declared write paths listed in the manifest.\nSCORE durability: 14\nJUSTIFICATION durability: tests/test_current_book_vectorised.py:361-368 reddens on the declared booking mutation (logs/negative-control.log: 3 failed, EXIT=1), but no assertion fails if book is reverted to the sequential scan, so done_when(1) is unguarded.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/current.py:272 follows the module's jax idiom (the body already uses jax.lax.cond and jax.tree.map) and neither the source nor the test file introduces a plan or deliverable name.\nSCORE reuse: 16\nJUSTIFICATION reuse: the product change adds no definition and reuses the existing clipped_support_current_moments and _conic_rings owners, but the test's _reference_conic_rings/_reference_normal_rings duplicate current.py:59 and current.py:82 as a deliberately independent oracle.\nFINDING tests/test_current_book_vectorised.py:373 follow-on: the identity test compares the production book against _reference_book (the preserved sequential scan) and reddens on the declared booking mutation, but no assertion fails if book is reverted to the sequential scan itself: reinstating the base jax.lax.scan(cell, None, ...) at nova/equilibrium/current.py:272 leaves every assertion green, so done_when(1) 'no Python loop or sequential scan over cells remains on the path' has no guard and a future un-vectorisation would pass the suite.\nFINDING logs/base-fragments.log:1 follow-on: the base arm header asserts tree=/tmp/vb-base (and manifest baseline_suite revision 7c9d86bd), but the same header's own provenance line prints nova.__file__=/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/vectorize-booking/nova/__init__.py[?]; the module under test resolved to the head worktree, not the base scratch tree, so the recorded baseline revision is not what the log shows imported. The six failures are a KeyError 'NOVA_BOOK_RESULTS' reached before booking and are identical in both arms, so the zero delta stands; the defect is in the provenance of the base arm, not in the conclusion.\nFINDING docs/evidence/fragments/converged-forward-solve/vectorize-booking.html:150 follow-on: done_when(2) and (3) name identity and per-step walls 'at about 2,000, 5,000 and 10,000 cells' and 'on analytic states and on one-Picard-image states'; the 10,000-cell rung and every one-Picard-image wall are withheld (plan-verdict partial, blockers in the manifest). Both are externally blocked -- the 10,000-cell machine on the carrier-requalify node's device store and the Picard image on an operator-side reconstruction outside this fence -- so neither is repairable within this node, but the delivered measure is a proper subset of the one the done_when states.",
+  "review_kind": "independent review",
+  "review_run_id": "r-20261013T225311058439-review-of-vectorize-booking-f13542848c46",
+  "reviewed_base_sha": "7c9d86bd48ac6ccc676a2b9ef5dc06eec3be2321",
+  "reviewed_head_sha": "f13542848c4657b3a434727b28aaee784ba37dfb",
+  "reviewed_revision": "f13542848c4657b3a434727b28aaee784ba37dfb",
+  "reviewed_run_id": "r-20261013T185334786030-vectorize-booking",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/vectorize-booking",
+  "reviewer_node": "review-of-vectorize-booking-f13542848c46",
+  "reviewer_run_id": "r-20261013T225311058439-review-of-vectorize-booking-f13542848c46",
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 19,
+    "goal_fidelity": 14,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-13T23:01:12Z",
+  "total": 96,
+  "verdict": "pass-with-follow-ons"
+}

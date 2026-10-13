@@ -25,8 +25,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s0&quot;:&quot;done&quot;}">
 <meta name="plan-impl" content="0.16666666666666666">
-<meta name="plan-version" content="216">
-<meta name="plan-modified" content="2026-10-13">
+<meta name="plan-version" content="217">
+<meta name="plan-modified" content="2026-10-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -884,6 +884,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261013T152703052139-wire-current-book" data-who="reckon-build" data-when="2026-10-13T18:52:51.961Z">
     <div class="r-comment-body"><p>wire-current-book (partial, blocked on one ruling): support_read runs the batched fixed-point solve, Bell-only membership read at those points (topology.read_at_stationary_points) and current.book as one step, and gs.apply takes booked moments as an operand; H200 booked-moment error 0.000317 and 0.000168 diverted at 2,000 and 5,000 cells against recorded 3.1728e-4 and 1.6770e-4, map flux error 3.57e-06 and 1.37e-06, fixed points 0.342 ms median (0.772 ms p99) at 2,000 and 0.855 ms p99 at 10,000 cells, whole step 0.894 s, 2.77 s and 8.37 s diverted at 2,000, 5,000 and 10,000 cells; the legacy support partition is not removed because no flux-only caller has the state's booked moments</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261013T225311058439-review-of-vectorize-booking-f13542848c46" data-who="reckon-build" data-when="2026-10-13T23:05:31.196Z">
+    <div class="r-comment-body"><p>independent review of r-20261013T185334786030-vectorize-booking at f13542848; parsed record with six scores (goal_fidelity 14, evidence 13, scope_discipline 20, durability 14, fit 19, reuse 16; total 96), verdict pass-with-follow-ons, reviewed_base_sha 7c9d86bd48ac6ccc676a2b9ef5dc06eec3be2321 and reviewed_head_sha f13542848c4657b3a434727b28aaee784ba37dfb; added_failure_count 0, added_failure_ids []; three follow-on findings, none blocking.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261010T203842322123-review-of-cfs-coupling-build-scale" data-who="reckon-build" data-when="2026-10-10T20:53:30.671Z">
     <div class="r-comment-body"><p>Independent review of run r-20261010T184700018486-cfs-coupling-build-scale at head e5e794122. Scores goal_fidelity 18, evidence 18, scope_discipline 17, durability 17, fit 18, reuse 19 (total 107). The node meets its goal (device builds baked into the carriers: 5,000 cells 151.2 s, 10,000 cells 271.3 s at 75% GPU) and lands all four clauses of the resumed ruling; this review reproduced the head gate (6 passed, EXIT=0) and re-derived the negative control at head (uniform row gap 1.361e-10 over the 1e-10 bound, EXIT=1, matching the run's own log to all digits) and verified the persisted-carrier and wall-hash claims directly against the stores. One regression: _flux_blocks gained a required keyword-only builder with no default, so scripts/accuracy_cost_ladder/measure.py:140 now raises TypeError, which falsifies the ruling's 'no existing caller changes behaviour' clause and was invisible to the delta lane. Follow-ons: the fragment's reproduce command no longer selects the device path at head, a module docstring overstates measured agreement, and the ruling's diverted half was not measurable in this fixture.</p></div>

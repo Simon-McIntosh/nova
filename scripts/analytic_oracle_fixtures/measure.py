@@ -398,16 +398,26 @@ def _array_identity(value: np.ndarray) -> dict[str, object]:
     }
 
 
+def _polygonanalytic_source() -> Path:
+    """Return the path of the packed polygon moment kernel module."""
+    return Path(__file__).resolve().parents[2] / POLYGONANALYTIC_SOURCE
+
+
 def builder_revision() -> str:
     """Return a digest of the coupling-assembly sources that define a carrier.
 
     The carrier's blocks are only reproducible against the revision that
-    assembled them, so the digest of the assembly modules joins the semantic
-    identity: a later revision of the builder publishes a distinct cache group
-    rather than replaying a warm-load from blocks it would no longer produce.
+    assembled them, so the digest of the assembly sources joins the semantic
+    identity: a later revision publishes a distinct cache group rather than
+    replaying a warm-load from blocks it would no longer produce.  The sources
+    are the coupling-assembly module and the packed polygon moment kernel it
+    contracts through, so a carrier built on an earlier kernel is a different
+    carrier.  The fixture's own bytes are not among them: editing this module
+    changes how a carrier is measured, not the blocks a carrier carries, so it
+    must not invalidate every cached carrier.
     """
     digest = hashlib.sha256()
-    for path in (Path(__file__), Path(coupling_build.__file__)):
+    for path in (_polygonanalytic_source(), Path(coupling_build.__file__)):
         digest.update(path.read_bytes())
     return digest.hexdigest()[:16]
 
@@ -1169,8 +1179,7 @@ def _analytic_profile_support(
 
 def _polygonanalytic_revision() -> str:
     """Return the content digest of the module that contracts the flux image."""
-    source = Path(__file__).resolve().parents[2] / POLYGONANALYTIC_SOURCE
-    return hashlib.sha256(source.read_bytes()).hexdigest()
+    return hashlib.sha256(_polygonanalytic_source().read_bytes()).hexdigest()
 
 
 def analytic_support_polygons(

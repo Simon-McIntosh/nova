@@ -2643,6 +2643,26 @@ class ForwardFluxOperator:
             operands, self.moment_roots, exterior_response=response
         )
 
+    def seed_moments(self, state, *, current=None):
+        """Express an explicit moment seed or a sampled flux seed in moments.
+
+        A sampled flux seed is projected through the exact uniform-current
+        grid block. Its first moments start at zero; subsequent reads and
+        Newton steps use all three moments. No support partition is read.
+        """
+        values = jnp.asarray(state)
+        cells = self.grid.node_number
+        if values.shape == (cells, 3):
+            return values
+        if values.ndim != 1 or values.size not in {cells, self.node_number}:
+            raise ValueError("a seed must carry total flux or three moments per cell")
+        plasma_flux = values[:cells] - self.external(current)[:cells]
+        current_seed = jnp.linalg.solve(self.grid.plasma_target, plasma_flux)
+        return jnp.stack(
+            (current_seed, jnp.zeros_like(current_seed), jnp.zeros_like(current_seed)),
+            axis=-1,
+        )
+
     def moment_operands(self, current=None):
         """Resolve the same current operand in the exterior value and its jets."""
         from dataclasses import replace

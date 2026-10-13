@@ -569,9 +569,8 @@ class ForwardSolveRequest:
     constraints.  Existing ``constraint_pins`` remain post-solve validation
     claims, so the two meanings cannot be conflated.
 
-    ``clip_mode`` is request-owned state.  An omitted mode resolves to the
-    production ``"chord"`` default, while an explicit mode is carried through
-    the request, its resolved defaults, and its receipt.
+    Clip mode is request-owned: unconstrained Newton resolves to the locked
+    exact read, while constrained and other named routes retain their clip.
     """
 
     carrier_identity: str
@@ -586,7 +585,16 @@ class ForwardSolveRequest:
     prescribed_current: object | None = None
     enforce: tuple[str, ...] = ()
     compilation_cache_hit: bool = False
-    clip_mode: SupportClipMode = "chord"
+    clip_mode: SupportClipMode | None = None
+
+    @property
+    def uses_moments(self) -> bool:
+        """Select the moment equation for the unconstrained Newton default."""
+        return self.route in {"moment_dense", "moment_krylov"} or (
+            self.route == "newton_krylov"
+            and not self.constraint_pairs
+            and not self.enforce
+        )
 
     def __post_init__(self) -> None:
         """Require a self-consistent, statically shaped request."""
@@ -597,12 +605,13 @@ class ForwardSolveRequest:
             raise ValueError("request route must equal its resolved policy route")
         object.__setattr__(self, "constraint_pairs", tuple(self.constraint_pairs))
         object.__setattr__(self, "enforce", tuple(self.enforce))
+        if self.clip_mode is None:
+            object.__setattr__(
+                self, "clip_mode", "exact" if self.uses_moments else "chord"
+            )
         if self.clip_mode not in {"chord", "exact", "chord_cells"}:
             raise ValueError(f"unknown support clip mode {self.clip_mode!r}")
-        if (
-            self.route in {"moment_dense", "moment_krylov"}
-            and self.clip_mode != "exact"
-        ):
+        if self.uses_moments and self.clip_mode != "exact":
             raise ValueError("moment routes use the locked exact support read")
 
     @classmethod
@@ -618,8 +627,8 @@ class ForwardSolveRequest:
     ) -> ForwardSolveRequest:
         """Build a request from the version-keyed declaration plus deviations.
 
-        An omitted ``clip_mode`` uses the production ``"chord"`` default; an
-        explicit mode passes through unchanged.
+        Unconstrained Newton resolves to exact support; a constrained request
+        keeps its explicit clip or the constrained default.
         """
 
         policy = declared_forward_solve_policy(nova_version)

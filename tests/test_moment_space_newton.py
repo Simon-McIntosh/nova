@@ -143,7 +143,7 @@ def test_device_newton_backtracks_and_solves_every_moment(monkeypatch, method):
     np.testing.assert_array_equal(batched.moments[0], result.moments)
 
 
-def test_moment_forward_path_uses_only_the_locked_read():
+def test_default_forward_path_uses_only_the_locked_read(monkeypatch):
     import ast
     import inspect
     import textwrap
@@ -172,6 +172,26 @@ def test_moment_forward_path_uses_only_the_locked_read():
         isinstance(node, ast.Attribute) and node.attr == "_solve_moment_request"
         for node in ast.walk(entry)
     )
+    from types import SimpleNamespace
+    from nova.equilibrium.solve_request import ForwardSolveRequest, ExplicitSolveSeed
+
+    marker = object()
+    profile = object.__new__(ForwardProfile)
+    profile.operator = SimpleNamespace(source=object(), geometry_identity="control")
+    monkeypatch.setattr(profile, "_with_source", lambda *args, **kwargs: profile)
+    monkeypatch.setattr(
+        profile,
+        "_solve_moment_request",
+        lambda request: SimpleNamespace(equilibrium=marker),
+    )
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="control",
+        source_profile=profile.source,
+        seed_policy=ExplicitSolveSeed(jnp.ones((2, 3))),
+    )
+    assert request.uses_moments and request.clip_mode == "exact"
+    assert profile.solve(request).equilibrium is marker
+    assert profile.solve(jnp.ones((2, 3)), compilation_cache=False) is marker
 
 
 @pytest.mark.parametrize("route", ["moment_dense", "moment_krylov"])
@@ -212,3 +232,39 @@ def test_operator_constructor_keeps_exterior_inputs_distinct():
     )
     assert captured["sections"] is sections
     assert captured["prescribed"] is prescribed
+
+
+def test_flux_seed_projection_uses_exact_current_block():
+    from types import SimpleNamespace
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+
+    operator = object.__new__(ForwardFluxOperator)
+    matrix = jnp.asarray(((2.0, 0.3), (0.3, 3.0)))
+    operator.grid = SimpleNamespace(node_number=2, plasma_target=matrix)
+    operator.wall = SimpleNamespace(node_number=1)
+    operator.sample = None
+    exterior = jnp.asarray((1.0, 2.0, 3.0))
+    operator.external = lambda current=None: exterior
+    current = jnp.asarray((4.0, 7.0))
+    flux = exterior.at[:2].add(matrix @ current)
+    result = operator.seed_moments(flux)
+    np.testing.assert_allclose(result[:, 0], current, rtol=1e-14)
+    np.testing.assert_array_equal(result[:, 1:], 0.0)
+    direction = jnp.asarray((0.1, -0.3, 0.2))
+    _, tangent = jax.jvp(operator.seed_moments, (flux,), (direction,))
+    np.testing.assert_allclose(
+        tangent[:, 0], jnp.linalg.solve(matrix, direction[:2]), rtol=1e-14
+    )
+
+
+def test_augmented_default_retains_the_constrained_route():
+    from nova.equilibrium.solve_request import ForwardSolveRequest, ExplicitSolveSeed
+
+    request = ForwardSolveRequest.from_defaults(
+        carrier_identity="constrained-control",
+        source_profile=object(),
+        seed_policy=ExplicitSolveSeed(jnp.ones(2)),
+        constraint_pairs=(object(),),
+    )
+    assert not request.uses_moments
+    assert request.clip_mode == "chord"

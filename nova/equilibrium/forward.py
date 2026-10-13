@@ -2617,7 +2617,7 @@ class ForwardProfile:
     ) -> ForwardSolveReceipt:
         """Resolve one typed request whose constraint targets remain fixed."""
         active = self._with_source(request.source_profile, clip_mode=request.clip_mode)
-        if request.route in {"moment_dense", "moment_krylov"}:
+        if request.uses_moments:
             return active._solve_moment_request(request)
         if request.constraint_pairs and request.route not in _CONSTRAINABLE:
             raise ValueError(
@@ -2740,15 +2740,20 @@ class ForwardProfile:
             raise ValueError("target_current requires the current-pin policy")
         operands, cache = self.operator.moment_operands(request.current)
         roots = self.operator.moment_roots
-        initial = jnp.asarray(
-            request.seed_policy.resolve(self, current=request.current)
+        initial = self.operator.seed_moments(
+            request.seed_policy.resolve(self, current=request.current),
+            current=request.current,
         )
         cells = len(operands.geometry.centre)
         if initial.shape != (cells, 3):
             raise ValueError(
                 "moment Newton seed must carry three physical moments per cell"
             )
-        signed_current = float(jnp.sum(initial[:, 0]))
+        signed_current = float(
+            jnp.sum(initial[:, 0])
+            if request.target_current is None
+            else request.target_current
+        )
         convention = topology.TopologyConvention.from_cocos(17, signed_current)
         quadrature = booking.Quadrature(
             sigma=convention.sigma, target_current=request.target_current, segments=64
@@ -3023,6 +3028,41 @@ class ForwardProfile:
         if not policy.current_pin and target_current is not None:
             raise ValueError("target_current requires the current-pin policy")
         route = policy.route
+        if route in {"moment_dense", "moment_krylov"} or (
+            route == "newton_krylov" and not constraint_pairs and not enforce
+        ):
+            if options:
+                aliases = {
+                    "steps": "newton_steps",
+                    "newton_steps": "newton_steps",
+                    "convergence_tolerance": "kernel_tolerance",
+                    "qualification_tolerance": "qualification_tolerance",
+                    "iterations": "newton_steps",
+                    "gmres_iterations": "gmres_iterations",
+                    "tolerance": "kernel_tolerance",
+                }
+                unknown = set(options) - set(aliases)
+                if unknown:
+                    raise ValueError(
+                        f"unknown moment Newton options: {sorted(unknown)}"
+                    )
+                policy = replace(
+                    policy, **{aliases[name]: value for name, value in options.items()}
+                )
+            request = ForwardSolveRequest(
+                carrier_identity=self.operator.geometry_identity,
+                source_profile=self.source,
+                seed_policy=ExplicitSolveSeed(initial_flux),
+                policy=policy,
+                route=route,
+                target_current=target_current,
+                current=current,
+                prescribed_current=prescribed_current,
+                constraint_pins=pins,
+                constraint_pairs=constraint_pairs,
+                enforce=tuple(enforce),
+            )
+            return self._solve_request(request).equilibrium
 
         reject_unsupported_enforcement(enforce, self.source.closure_degrees)
         constraint_pairs = tuple(constraint_pairs)

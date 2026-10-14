@@ -7,7 +7,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="lean-map">
 <meta name="plan-title" content="Fixed-shape lean forward map prototype">
-<meta name="plan-summary" content="Eight analytic certificate map rows, booking-bias controls and pending converged solve">
+<meta name="plan-summary" content="Eight map rows, booking-bias controls and strict cold solves at the first cell rung">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s5">
 <meta name="plan-recorded-at" content="2026-10-14">
@@ -19,19 +19,26 @@
 </head>
 <body><main class="plan-doc">
 <header><h1 id="lean-map-title">Fixed-shape lean forward map prototype</h1>
-<p id="lean-map-summary">At the first device-built rung, analytic-state map error is 1.4323 × 10<sup>−4</sup> for 289 limited cells and 6.1896 × 10<sup>−4</sup> for 282 diverted cells. Both pass the requested tenfold map-fidelity margin. These are single map evaluations; converged solve acceptance is pending.</p></header>
+<p id="lean-map-summary">At the first device-built rung, analytic-state map error is 1.4323 × 10<sup>−4</sup> for 289 limited cells and 6.1896 × 10<sup>−4</sup> for 282 diverted cells. Both cold Newton solves reach residual below 10<sup>−12</sup> and nulls within one pitch. The warm cached-factor slices and cold compile walls miss the joint acceptance.</p></header>
 <section id="lean-map-bias"><h2>Reproduced point-booking bias</h2>
 <p id="lean-map-bias-measure">The hard-centroid diverted error reproduced at 0.418807 with 2,098 cells and 0.409206 with 5,158. Restricting bulk booking to connected full cells and retaining exact cut moments reduced these to 0.001850 and 0.0005712. At 2,098 cells the hard mask selected 21 zero-membership private cells and 419 partial cells. Keeping private cells while correcting cuts leaves 0.41436 error, so detached private flux explains the plateau. The corrected error decreases under refinement. H200 jobs 1285574 and 1285581 and their row JSON receipts carry the controls.</p></section>
 <section id="lean-map-values"><h2>Values-map ladder</h2>
-<table id="lean-map-values-table"><thead><tr><th>Topology</th><th>Cells</th><th>Relative sup error</th><th>Warm map wall</th><th>Read control</th></tr></thead><tbody>
-<tr><td>Limited</td><td>289</td><td>1.4323 × 10<sup>−4</sup></td><td>0.266 ms</td><td>0.0358 ms</td></tr>
-<tr><td>Diverted</td><td>282</td><td>6.1896 × 10<sup>−4</sup></td><td>0.144 ms</td><td>0.0454 ms</td></tr>
-<tr><td>Limited</td><td>553</td><td>4.6633 × 10<sup>−5</sup></td><td>0.284 ms</td><td>0.1419 ms</td></tr>
-<tr><td>Diverted</td><td>550</td><td>1.8214 × 10<sup>−4</sup></td><td>0.240 ms</td><td>0.2288 ms</td></tr>
-<tr><td>Limited</td><td>1,071</td><td>1.5567 × 10<sup>−5</sup></td><td>0.615 ms</td><td>0.4742 ms</td></tr>
-<tr><td>Diverted</td><td>1,074</td><td>1.1591 × 10<sup>−4</sup></td><td>0.634 ms</td><td>0.5402 ms</td></tr>
-<tr><td>Limited</td><td>2,105</td><td>4.6928 × 10<sup>−6</sup></td><td>0.915 ms</td><td>2.613 ms</td></tr>
-<tr><td>Diverted</td><td>2,098</td><td>1.7664 × 10<sup>−5</sup></td><td>0.892 ms</td><td>3.189 ms</td></tr>
+<table id="lean-map-values-table"><thead><tr><th>Topology</th><th>Cells</th><th>Relative sup error</th><th>Warm values wall</th><th>Peak-HBM byte floor</th></tr></thead><tbody>
+<tr><td>Limited</td><td>289</td><td>1.4323 × 10<sup>−4</sup></td><td>0.266 ms</td><td>0.00752 ms</td></tr>
+<tr><td>Diverted</td><td>282</td><td>6.1896 × 10<sup>−4</sup></td><td>0.144 ms</td><td>0.00716 ms</td></tr>
+<tr><td>Limited</td><td>553</td><td>4.6633 × 10<sup>−5</sup></td><td>0.284 ms</td><td>0.02752 ms</td></tr>
+<tr><td>Diverted</td><td>550</td><td>1.8214 × 10<sup>−4</sup></td><td>0.240 ms</td><td>0.02723 ms</td></tr>
+<tr><td>Limited</td><td>1,071</td><td>1.5567 × 10<sup>−5</sup></td><td>0.615 ms</td><td>0.10323 ms</td></tr>
+<tr><td>Diverted</td><td>1,074</td><td>1.1591 × 10<sup>−4</sup></td><td>0.634 ms</td><td>0.10381 ms</td></tr>
+<tr><td>Limited</td><td>2,105</td><td>4.6928 × 10<sup>−6</sup></td><td>0.915 ms</td><td>0.39879 ms</td></tr>
+<tr><td>Diverted</td><td>2,098</td><td>1.7664 × 10<sup>−5</sup></td><td>0.892 ms</td><td>0.39614 ms</td></tr>
 </tbody></table>
-<p id="lean-map-values-caveat">All eight H200 values rows completed in job 1285577. The read control uses reduction throughput; its estimate exceeds the observed wall at 2,000 cells, so it is not a physical bandwidth floor. The walls exclude booking, support read and Newton. The <a href="/nova/research/fixed-shape-lean-map.html">research document</a> holds the method, plots and provenance.</p></section>
+<p id="lean-map-values-caveat">All eight H200 values rows completed in job 1285577. The byte floors use the <a href="https://www.nvidia.com/en-us/data-center/h200/">H200 NVL 4.8 TB/s peak specification</a>. A reduction-throughput control was slower than the observed 2,000-cell matvec and was rejected as a floor. These walls exclude booking, support read and Newton. The <a href="/nova/research/fixed-shape-lean-map.html">research document</a> holds the method, plots and provenance.</p></section>
+<section id="lean-map-solve"><h2>Converged cold and refused warm rows</h2>
+<table id="lean-map-solve-table"><thead><tr><th>Topology; cells</th><th>Cold residual; wall</th><th>Terminal flux error; farthest null</th><th>Live-map wall</th><th>Cached-factor warm residual; wall</th></tr></thead><tbody>
+<tr><td>Limited; 289</td><td>9.2419 × 10<sup>−13</sup>; 11.71 s</td><td>1.4324 × 10<sup>−4</sup>; 5.48 × 10<sup>−8</sup> pitches</td><td>11.04 ms</td><td>1.8307 × 10<sup>−12</sup>; 307.5 ms</td></tr>
+<tr><td>Diverted; 282</td><td>7.5623 × 10<sup>−13</sup>; 23.86 s</td><td>6.2183 × 10<sup>−4</sup>; 1.56 × 10<sup>−5</sup> pitches</td><td>9.99 ms</td><td>2.2061 × 10<sup>−11</sup>; 156.2 ms</td></tr>
+</tbody></table>
+<p id="lean-map-solve-verdict">Job 1285598 recorded these independently recomputed terminal residuals. Cold Newton compiled in 80.19 s limited and 79.09 s diverted, exceeding the 60 s clause. Full-column <code>jacfwd</code> had requested 132.73 GiB and failed in job 1285579; the completed route linearises once and scans eight-column tangent batches. The first rung is the smallest tested map-accuracy-qualified count, but no tested count is certified against all §6 clauses. The <a href="/nova/research/fixed-shape-lean-map.html">research record</a> shows the terminal poloidal panels and remaining measurements.</p>
+<p id="lean-map-stage-measure">At 282 diverted cells, H200 job 1285602 measured 10.176 ms for the full live map, 6.120 ms for the isolated connected-support read and 4.322 ms for exact cut booking. The values and gathered-jet matvecs took 0.488 and 0.255 ms against peak-HBM byte floors of 0.00716 and 0.01005 ms. Stage calls overlap in the fused program; their walls are diagnostic, not additive.</p></section>
 </main></body></html>

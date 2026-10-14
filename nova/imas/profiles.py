@@ -9,6 +9,10 @@ import numpy as np
 # from scipy.interpolate import griddata, interp1d, RBFInterpolator, RectBivariateSpline
 import scipy.interpolate
 import scipy.spatial
+import contourpy
+from scipy.constants import mu_0
+from shapely import contains_xy
+from shapely.geometry import Point, Polygon
 
 from nova.biot.plasma import Flux
 from nova.imas.database import CoilData
@@ -18,6 +22,205 @@ from nova.imas.equilibrium import Equilibrium, EquilibriumData
 from nova.imas.getslice import GetSlice
 from nova.imas.pf_passive import PF_Passive
 from nova.imas.pf_active import PF_Active
+
+
+@dataclass(frozen=True)
+class PrescribedCurrent:
+    """One boundary-limited, current-matched toroidal current map."""
+
+    radius: np.ndarray
+    height: np.ndarray
+    current_density: np.ndarray
+    cell_current: np.ndarray
+    boundary: np.ndarray
+    boundary_source: str
+    boundary_fraction: float | None
+    endpoint_gap: float
+    scale_factor: float
+    centroid: tuple[float, float]
+    plasma_current: float
+
+
+def finite_flux_interpolant(coordinate, values):
+    """Interpolate finite stored flux-function samples through the boundary."""
+    coordinate = np.asarray(coordinate, float)
+    values = np.asarray(values, float)
+    finite = np.isfinite(coordinate) & np.isfinite(values)
+    if np.count_nonzero(finite) < 3:
+        raise ValueError("flux function has fewer than three finite samples")
+    return scipy.interpolate.interp1d(
+        coordinate[finite], values[finite], kind="quadratic", fill_value="extrapolate"
+    )
+
+
+def closed_plasma_boundary(
+    radius,
+    height,
+    psi,
+    outline,
+    axis,
+    psi_axis,
+    psi_boundary,
+    *,
+    x_points=None,
+    boundary_outline=None,
+):
+    """Prefer DINA's closed outlines before reconstructing a flux contour."""
+    radius = np.asarray(radius, float)
+    height = np.asarray(height, float)
+    outline = np.asarray(outline, float).reshape(-1, 2)
+    spacing = min(np.min(np.diff(radius)), np.min(np.diff(height)))
+    gap = (
+        float(np.linalg.norm(outline[0] - outline[-1]))
+        if len(outline)
+        else float("nan")
+    )
+
+    def valid(points):
+        if len(points) < 4 or not np.all(np.isfinite(points)):
+            return False
+        polygon = Polygon(points)
+        return polygon.is_valid and polygon.area > 0 and polygon.contains(Point(axis))
+
+    if np.isfinite(gap) and gap <= 0.1 * spacing and valid(outline):
+        return outline, "separatrix", None, gap
+
+    # A diverted outline can traverse both legs after circling the core. Two
+    # nearby passages through the X-point delimit its axis-enclosing loop.
+    for x_point in np.asarray(x_points if x_points is not None else [], float).reshape(
+        -1, 2
+    ):
+        if not len(outline) or not np.all(np.isfinite(x_point)):
+            continue
+        distance = np.linalg.norm(outline - x_point, axis=1)
+        near = np.flatnonzero(distance <= 2 * spacing)
+        groups = np.split(near, np.flatnonzero(np.diff(near) > 1) + 1)
+        passages = [
+            int(group[np.argmin(distance[group])]) for group in groups if len(group)
+        ]
+        candidates = []
+        for first_index, first in enumerate(passages):
+            for last in passages[first_index + 1 :]:
+                if last - first < 3:
+                    continue
+                loop = np.vstack((x_point, outline[first : last + 1], x_point))
+                if valid(loop):
+                    candidates.append((last - first, loop))
+        if candidates:
+            return (
+                min(candidates, key=lambda candidate: candidate[0])[1],
+                "separatrix_x_point",
+                None,
+                gap,
+            )
+
+    if boundary_outline is not None:
+        stored = np.asarray(boundary_outline, float).reshape(-1, 2)
+        stored_gap = (
+            float(np.linalg.norm(stored[0] - stored[-1]))
+            if len(stored)
+            else float("nan")
+        )
+        if np.isfinite(stored_gap) and stored_gap <= 0.1 * spacing and valid(stored):
+            return stored, "boundary_outline", None, gap
+
+    generator = contourpy.contour_generator(radius, height, np.asarray(psi).T)
+    for fraction in (0.999, 0.995, 0.99, 0.98, 0.95, 0.9, 0.8):
+        level = psi_axis + fraction * (psi_boundary - psi_axis)
+        loops = []
+        for points in generator.lines(level):
+            if np.linalg.norm(points[0] - points[-1]) <= 0.1 * spacing and valid(
+                points
+            ):
+                loops.append(points)
+        if loops:
+            return (
+                max(loops, key=lambda points: Polygon(points).area),
+                "last_closed_flux",
+                fraction,
+                gap,
+            )
+    raise ValueError("no simple closed plasma surface encloses the magnetic axis")
+
+
+def prescribe_current_density(
+    radius,
+    height,
+    psi,
+    psi_samples,
+    p_prime,
+    ff_prime,
+    psi_axis,
+    psi_boundary,
+    plasma_current,
+    outline,
+    axis,
+    flux_derivative_scale=2 * np.pi,
+    *,
+    x_points=None,
+    boundary_outline=None,
+):
+    """Evaluate stored flux functions inside the boundary and match current.
+
+    DINA stores derivatives against total poloidal flux. The current-density
+    expression uses derivatives against flux per radian, so its gradients are
+    multiplied by ``2*pi`` before evaluating the expression.
+    """
+    radius = np.asarray(radius, float)
+    height = np.asarray(height, float)
+    psi = np.asarray(psi, float)
+    if psi.shape != (len(radius), len(height)) or np.any(radius <= 0):
+        raise ValueError("psi must be an (R,Z) map with positive radius")
+    if np.isclose(psi_boundary, psi_axis):
+        raise ValueError("axis and boundary flux do not define a profile")
+    boundary, source, fraction, gap = closed_plasma_boundary(
+        radius,
+        height,
+        psi,
+        outline,
+        axis,
+        psi_axis,
+        psi_boundary,
+        x_points=x_points,
+        boundary_outline=boundary_outline,
+    )
+    grid_r, grid_z = np.meshgrid(radius, height, indexing="ij")
+    mask = contains_xy(Polygon(boundary), grid_r, grid_z)
+    psi_samples = np.asarray(psi_samples, float)
+    coordinate = (psi_samples - psi_samples[0]) / (psi_samples[-1] - psi_samples[0])
+    if not np.all(np.diff(coordinate) > 0):
+        raise ValueError("the stored flux-function coordinate must increase")
+    psi_norm = np.clip((psi - psi_axis) / (psi_boundary - psi_axis), 0, 1)
+    pressure = finite_flux_interpolant(coordinate, p_prime)(psi_norm)
+    field = finite_flux_interpolant(coordinate, ff_prime)(psi_norm)
+    raw_density = np.where(
+        mask,
+        flux_derivative_scale * (grid_r * pressure + field / (mu_0 * grid_r)),
+        0.0,
+    )
+    cell_area = np.gradient(radius)[:, None] * np.gradient(height)[None, :]
+    raw_current = float(np.sum(raw_density * cell_area))
+    if not np.isfinite(raw_current) or abs(raw_current) < 1e-12:
+        raise ValueError("flux functions integrate to zero or nonfinite current")
+    scale = float(plasma_current / raw_current)
+    cell_current = raw_density * cell_area * scale
+    centroid = (
+        float(np.sum(grid_r * cell_current) / plasma_current),
+        float(np.sum(grid_z * cell_current) / plasma_current),
+    )
+    return PrescribedCurrent(
+        radius,
+        height,
+        raw_density * scale,
+        cell_current,
+        boundary,
+        source,
+        fraction,
+        gap,
+        scale,
+        centroid,
+        float(plasma_current),
+    )
 
 
 @dataclass
@@ -110,9 +313,7 @@ class Profile(Flux, Equilibrium, GetSlice, CoilData):
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
-        return scipy.interpolate.interp1d(
-            x, y, kind="quadratic", fill_value="extrapolate"
-        )
+        return finite_flux_interpolant(x, y)
 
     def plot_profile(self, attr="p_prime", axes=None):
         """Plot flux function interpolants."""

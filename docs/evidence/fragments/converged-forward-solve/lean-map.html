@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="lean-map">
+<meta name="plan-title" content="Fixed-shape lean forward map prototype">
+<meta name="plan-summary" content="Analytic certificate map-error ladder and pending converged solve">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s5">
+<meta name="plan-recorded-at" content="2026-10-14">
+<meta name="plan-verdict" content="partial">
+<meta name="plan-environment" content="One reserved H200, binary64, device-built coarse carriers, fixed-shape Gauss values and bounded jet and cut rows">
+<title>Fixed-shape lean forward map prototype | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+<header><h1 id="lean-map-title">Fixed-shape lean forward map prototype</h1>
+<p id="lean-map-summary">At the first device-built rung, analytic-state map error is 1.4323 × 10<sup>−4</sup> for 289 limited cells and 6.1896 × 10<sup>−4</sup> for 282 diverted cells. Both pass the requested tenfold map-fidelity margin. These are single map evaluations; converged solve acceptance is pending.</p></header>
+<section id="lean-map-bias"><h2>Reproduced point-booking bias</h2>
+<p id="lean-map-bias-measure">The hard-centroid diverted error reproduced at 0.418807 with 2,098 cells and 0.409206 with 5,158. Restricting bulk booking to connected full cells and retaining exact cut moments reduced these to 0.001850 and 0.0005712. At 2,098 cells the hard mask selected 21 zero-membership private cells and 419 partial cells. The corrected error decreases under refinement rather than plateauing. H200 job 1285574 and its row JSON receipts carry the replay.</p></section>
+<section id="lean-map-values"><h2>Values-map ladder</h2>
+<table id="lean-map-values-table"><thead><tr><th>Topology</th><th>Cells</th><th>Relative sup error</th><th>Warm map wall</th><th>Measured read floor</th></tr></thead><tbody>
+<tr><td>Limited</td><td>289</td><td>1.4323 × 10<sup>−4</sup></td><td>0.266 ms</td><td>0.0358 ms</td></tr>
+<tr><td>Diverted</td><td>282</td><td>6.1896 × 10<sup>−4</sup></td><td>0.144 ms</td><td>0.0454 ms</td></tr>
+<tr><td>Limited</td><td>553</td><td>4.6633 × 10<sup>−5</sup></td><td>0.284 ms</td><td>0.1419 ms</td></tr>
+<tr><td>Diverted</td><td>550</td><td>1.8214 × 10<sup>−4</sup></td><td>0.240 ms</td><td>0.2288 ms</td></tr>
+<tr><td>Limited</td><td>1,071</td><td>1.5567 × 10<sup>−5</sup></td><td>0.615 ms</td><td>0.4742 ms</td></tr>
+<tr><td>Diverted</td><td>1,074</td><td>1.1591 × 10<sup>−4</sup></td><td>0.634 ms</td><td>0.5402 ms</td></tr>
+</tbody></table>
+<p id="lean-map-values-caveat">The H200 2,000-cell rows and the live-map/Newton measurement are still running. The table's walls exclude booking, support read and Newton, and cannot establish a sub-millisecond converged solve. The <a href="/nova/research/fixed-shape-lean-map.html">research document</a> holds the method and full provenance.</p></section>
+</main></body></html>

@@ -82,6 +82,13 @@
     "51d8d198f615008ec27c2ff6d216162fc774e186"
   ],
   "completed_at": "",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "exempted",
+      "reason": "Measurement-only research prototypes under scripts/prototypes/solve_options; the styling duplication in render.py is in a throwaway figure script, not product code, and the lead decision on the solve representation decides whether any of it survives",
+      "recorded_at": "2026-10-14T15:28:40.671190+00:00"
+    }
+  },
   "dispatched_at": "2026-10-14T04:41:54Z",
   "evidence_inputs": [
     "goal: 'Evaluate and measure the options for a sub-millisecond converged forward solve on fine grids'; done-when: one research document comparing six options with prototype-measured numbers at 2,000/5,000/10,000 cells, ending in a recommendation.",

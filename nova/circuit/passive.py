@@ -236,6 +236,8 @@ def terminal_impedance_spectrum(
     passive_resistance: np.ndarray,
     series: np.ndarray,
     frequency_hz: np.ndarray,
+    *,
+    terminal_resistance: np.ndarray | None = None,
 ) -> np.ndarray:
     """Series-coil terminal impedance with independent passive rings shorted.
 
@@ -270,6 +272,13 @@ def terminal_impedance_spectrum(
     omega = 2 * np.pi * frequency
     bare = wiring.T @ coil @ wiring
     result = 1j * omega[:, None, None] * bare
+    if terminal_resistance is not None:
+        coil_resistance = np.asarray(terminal_resistance, dtype=np.float64)
+        if coil_resistance.shape != (wiring.shape[1],):
+            raise ValueError("one terminal resistance is required per coil")
+        if np.any(~np.isfinite(coil_resistance)) or np.any(coil_resistance < 0):
+            raise ValueError("terminal resistance must be finite and non-negative")
+        result = result + np.diag(coil_resistance)[None, :, :]
     if n_passive:
         rate, vectors = eigh(np.diag(resistance), passive)
         if np.any(rate <= 0):

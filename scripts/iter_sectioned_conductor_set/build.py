@@ -14,7 +14,11 @@ from nova.circuit.conductor import (
     PolygonSection,
     subdivide_passive_thickness,
 )
-from nova.circuit.linkage import circuit_linkage_matrix, guard_positive_definite
+from nova.circuit.linkage import (
+    circuit_linkage_matrix,
+    guard_positive_definite,
+    preserve_series_terminal_linkage,
+)
 from nova.circuit.passive import terminal_impedance_spectrum
 from nova.imas.pulsedesign import ITER
 
@@ -132,7 +136,30 @@ def source_conductors() -> tuple[
     )
 
 
-def calculate(max_thickness: float, section_n_max: int) -> dict:
+def canonical_coil_reference(active) -> np.ndarray:
+    """Compute the whole-coil matrix through Nova's active-coil owner."""
+    from nova.imas.machine import PoloidalFieldActive
+
+    converted = imas.convert_ids(
+        active, str(active.ids_properties.version_put.data_dictionary)
+    )
+    for source, target in zip(active.coil, converted.coil, strict=True):
+        target.identifier = str(source.name)
+        target.name = str(source.name)
+    converted.circuit.resize(0)
+    converted.supply.resize(0)
+    model = PoloidalFieldActive(ids=converted, run=204)
+    model.inductance.solve(0)
+    return np.asarray(model.inductance.Psi, dtype=np.float64)
+
+
+def calculate(
+    max_thickness: float,
+    section_n_max: int,
+    *,
+    terminal_reference: np.ndarray | None = None,
+    raw_linkage: bool = False,
+) -> dict:
     conductors, coil_names, owner, thickness, source_resistance, passive_name = (
         source_conductors()
     )
@@ -147,6 +174,30 @@ def calculate(max_thickness: float, section_n_max: int) -> dict:
     )
     series = np.zeros((n_section, len(coil_names)))
     series[np.arange(n_section), owner] = 1.0
+    raw_coil_matrix = series.T @ matrix[:n_section, :n_section] @ series
+    active = read_ids(*SOURCE[0])
+    source_coil_names = [
+        str(coil.name).rsplit("(", 1)[-1].removesuffix(")") for coil in active.coil
+    ]
+    if source_coil_names != coil_names:
+        raise ValueError("active resistance and section coil order disagree")
+    coil_resistance = np.asarray(
+        [
+            float(coil.resistance) if coil.resistance.has_value else np.nan
+            for coil in active.coil
+        ]
+    )
+    if np.any(~np.isfinite(coil_resistance)):
+        raise ValueError("active source resistance is missing")
+    if not raw_linkage:
+        reference = (
+            canonical_coil_reference(active)
+            if terminal_reference is None
+            else np.asarray(terminal_reference, dtype=np.float64)
+        )
+        matrix[:n_section, :n_section] = preserve_series_terminal_linkage(
+            matrix[:n_section, :n_section], series, reference
+        )
     coil_matrix = series.T @ matrix[:n_section, :n_section] @ series
     passive_matrix = guard_positive_definite(matrix[n_section:, n_section:])
     resistance = (
@@ -159,6 +210,7 @@ def calculate(max_thickness: float, section_n_max: int) -> dict:
         resistance,
         series,
         FREQUENCY,
+        terminal_resistance=coil_resistance,
     )
     bare = terminal_impedance_spectrum(
         matrix[:n_section, :n_section],
@@ -167,8 +219,12 @@ def calculate(max_thickness: float, section_n_max: int) -> dict:
         np.empty(0),
         series,
         FREQUENCY,
+        terminal_resistance=coil_resistance,
     )
-    expected_bare = 2j * np.pi * FREQUENCY[:, None] * np.diag(coil_matrix)[None, :]
+    expected_bare = (
+        coil_resistance[None, :]
+        + 2j * np.pi * FREQUENCY[:, None] * np.diag(coil_matrix)[None, :]
+    )
     bare_error = float(
         np.max(np.abs(np.diagonal(bare, axis1=1, axis2=2) / expected_bare - 1))
     )
@@ -186,10 +242,14 @@ def calculate(max_thickness: float, section_n_max: int) -> dict:
             float(source_resistance.max()),
         ],
         "coil_inductance_h": coil_matrix.tolist(),
+        "raw_coil_inductance_h": raw_coil_matrix.tolist(),
+        "coil_resistance_ohm": coil_resistance.tolist(),
+        "terminal_reference_applied": not raw_linkage,
         "frequency_hz": FREQUENCY.tolist(),
         "screened_real_ohm": np.diagonal(screened.real, axis1=1, axis2=2).tolist(),
         "screened_imag_ohm": np.diagonal(screened.imag, axis1=1, axis2=2).tolist(),
         "bare_imag_ohm": np.diagonal(bare.imag, axis1=1, axis2=2).tolist(),
+        "bare_real_ohm": np.diagonal(bare.real, axis1=1, axis2=2).tolist(),
         "bare_error": bare_error,
         "passive_names": list(sorted(set(passive_name))),
     }
@@ -199,9 +259,21 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-thickness", type=float, required=True)
     parser.add_argument("--section-n-max", type=int, default=3)
+    parser.add_argument("--terminal-reference", type=Path)
+    parser.add_argument("--raw-linkage", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = calculate(args.max_thickness, args.section_n_max)
+    reference = None
+    if args.terminal_reference is not None:
+        reference = np.asarray(
+            json.loads(args.terminal_reference.read_text())["coil_inductance_h"]
+        )
+    result = calculate(
+        args.max_thickness,
+        args.section_n_max,
+        terminal_reference=reference,
+        raw_linkage=args.raw_linkage,
+    )
     args.output.write_text(json.dumps(result, indent=2))
     print(
         f"SUMMARY sections={result['section_count']} passive={result['passive_count']} "

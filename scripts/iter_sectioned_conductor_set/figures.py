@@ -80,7 +80,9 @@ def impedance_figure(path: Path, receipt: dict) -> None:
     screened = np.asarray(receipt["screened_real_ohm"]) + 1j * np.asarray(
         receipt["screened_imag_ohm"]
     )
-    bare = 1j * np.asarray(receipt["bare_imag_ohm"])
+    bare = np.asarray(receipt.get("bare_real_ohm", 0.0)) + 1j * np.asarray(
+        receipt["bare_imag_ohm"]
+    )
     fig, axes = plt.subplots(7, 2, figsize=(14, 19), dpi=100)
     for index, (name, ax) in enumerate(
         zip(receipt["coil_names"], axes.flat, strict=True)

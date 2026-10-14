@@ -115,6 +115,16 @@ def test_passive_screening_changes_terminal_impedance_and_removal_is_bare():
         coil, np.empty((2, 0)), np.empty((0, 0)), np.empty(0), series, frequency
     )[:, 0, 0]
     np.testing.assert_allclose(removed, bare, rtol=1e-14)
+    resistive = terminal_impedance_spectrum(
+        coil,
+        np.empty((2, 0)),
+        np.empty((0, 0)),
+        np.empty(0),
+        series,
+        frequency,
+        terminal_resistance=np.array([0.0057]),
+    )[:, 0, 0]
+    np.testing.assert_allclose(resistive, bare + 0.0057, rtol=1e-14)
 
 
 def test_terminal_reconciliation_preserves_differential_section_energy():

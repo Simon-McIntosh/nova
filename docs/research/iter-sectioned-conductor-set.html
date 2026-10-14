@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="iter-sectioned-conductor-set">
+  <meta name="plan-title" content="ITER Sectioned Conductor Set">
+  <meta name="plan-summary" content="Machine-description winding sections, passive thickness layers, and their measured coupling">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="iter-passive-plasma-circuit">
+  <meta name="plan-verifies" content="iter-passive-plasma-circuit#s1">
+  <title>ITER Sectioned Conductor Set | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Machine-description and circuit evidence</p>
+      <h1>ITER sectioned conductor set</h1>
+      <p class="lead">The run 204 winding geometry resolves into series pancakes, while the vessel and cryostat rings need independent through-thickness currents before their converter-band impedance can be used.</p>
+    </header>
+
+    <section id="sources">
+      <h2>Sources and winding placement</h2>
+      <p>The active source is <code>ITER_MACHINE_DESCRIPTION/3/111001/204/pf_active</code>, read with its written Data Dictionary 3.42.0. It contains six central-solenoid modules, six poloidal-field coils, and two four-turn in-vessel vertical-stabilization coils. Each CS or PF coil is represented by one rectangular winding pack, so the source supplies its total signed turns and bounding geometry but does not name the pancakes. The 295 sections here place the known winding stack evenly through that rectangle: 40 pancakes per CS module, eight double pancakes in PF1 and PF3–PF5, six in PF2, nine in PF6, and each explicit VS turn as one section. Floating-point remainder goes to the final pancake; every section sum equals the source coil's signed turns.</p>
+      <p>The winding counts come from the <a href="https://www.iter.org/node/20687/z-assembling-iters-largest-components">ITER PF assembly account</a> and the <a href="https://www.iter.org/fr/node/20687/central-solenoid-fabrication-photo-reportage">ITER CS fabrication account</a>. The <a href="https://fusionforenergy.europa.eu/downloads/procurements/itercalls/621/ITER%20C4N%2017228%20Summary_Tech_Spec%20YGVQT6_v1_0.pdf">vertical-stabilization coil specification</a> confirms four turns per upper and lower coil. Even spacing is a placement approximation because the machine-description rectangles omit individual turn centres and insulation gaps. ITER describes 14 turns per CS pancake, while this machine-description run has 554 effective turns per module, six fewer than 40 × 14. The model distributes the IDS effective turns equally over the 40 geometric layers rather than inventing which six layer connections account for the difference; the independent inductance check measures the resulting terminal effect.</p>
+      <p><code>MachineSection</code> carries the sub-coil directly: geometry and signed turns are the only new data. A second section type would duplicate its reader, outline and centroid seam without adding a distinct physical object.</p>
+    </section>
+
+    <section id="passive-input">
+      <h2>Passive input and the defect reproduced</h2>
+      <p>The vessel input is <code>ITER_MACHINE_DESCRIPTION/3/115004/6/pf_passive</code>, and the cryostat and other outer structures are <code>.../124001/3/pf_passive</code>, both read with their written Data Dictionary 3.40.1. They contain 210 and 248 toroidal loops. Of the 458 source elements, 450 are thick lines with explicit oriented cross sections. The thickest source section is 80 mm. Source loop resistance is retained and divided among independent equal-area layers, so a layer has its parent loop resistance multiplied by the number of layers. The IDS gives no resistance temperature; this study treats those supplied values as nominal at 293 K, without a measured temperature correction.</p>
+      <p>The earlier single-ring set reproduces the recorded skin-depth limit when its stored resistivity and thickness are checked: the 248 known-present cryostat rings reach a minimum of 1.79845 Hz, and the 210 vessel rings reach 29.3104 Hz. These values come from <code>ρ/(πμ₀t²)</code>, with the source ring's own <code>ρ</code> and thickness <code>t</code>. The finite positive counts are the positive control for the minimum calculation; this is a geometric validity limit, not a failure to read the data. Where a future loop omits resistance, the builder refuses it rather than silently assigning a material value.</p>
+      <p>The active IDS records zero series resistance for every superconducting CS and PF coil, 5.7 mΩ for VSU and 7.91 mΩ for VSL. Those are source values, treated here as nominal at 293 K for the resistive VS conductors because the IDS carries no resistance temperature. Superconductor AC losses and converter feeder resistance are outside this axisymmetric L/R set.</p>
+      <figure>
+        <img src="/nova/figures/iter-sectioned-conductor-set/conductors.svg" alt="Poloidal view of all ITER winding pancakes and passive wall layers">
+        <figcaption>Source winding rectangles divided into series pancakes (blue), and shaped vessel and outer-structure cross sections divided into independent toroidal layers (grey). The illustrated layer maximum is 50 mm so the subdivision remains legible at machine scale; the impedance study states its own finer numerical resolution.</figcaption>
+      </figure>
+    </section>
+
+    <section id="method">
+      <h2>Coupling method</h2>
+      <p>Every section and passive layer is one circuit row. Nova's two-section linkage integrates each finite-area source and averages the observer section, then symmetrizes the physical inductance matrix. A binary series map adds the section currents and flux linkages back to each coil terminal. The passive circuit block uses source ring resistances multiplied by layer count. The terminal spectrum follows the Schur complement of the shorted passive L/R block; one passive generalized eigensolve supplies the frequency sweep.</p>
+      <p>The active reference is the earlier nova-built coil matrix recorded by power_convertor. For an independent check, DINA <code>em_coupling</code> in ITER scenarios 105013/1 and 105014/1 is read with Data Dictionary 3.38.1. Its first 11 active rows map to five CS drives, with CS1U and CS1L in series, followed by PF1–PF6. Multiplying each row and column by its source turns converts DINA's per-turn coupling to terminal inductance. Applied to the earlier coil matrix as a positive mapping control, this gives at most 0.4124% self difference and 0.0884% mutual difference in both scenarios.</p>
+    </section>
+
+    <section id="coarse-check">
+      <h2>Coarse coupled check</h2>
+      <p>The first coupled calculation has 295 winding sections and 458 unsplit passive rings. On 21 logarithmic samples from 0.1 Hz to 5 kHz, deleting the passive block returns each bare coil terminal impedance with a maximum relative discrepancy of <code>1.11e-16</code>. The declared mutation removes passive coupling from a screened test arm: the screened expectation then fails, with one failing test id and <code>EXIT=1</code> in the negative-control log. These two observations establish both the no-passive identity and a test that would catch loss of screening.</p>
+      <table>
+        <thead><tr><th>Comparison</th><th>Maximum self difference</th><th>Maximum mutual difference</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Earlier nova coil matrix</td><td>1.820%</td><td>1.637%</td><td>0.5%</td></tr>
+          <tr><td>DINA 105013/1</td><td>1.806%</td><td>1.550%</td><td>0.5%</td></tr>
+          <tr><td>DINA 105014/1</td><td>1.806%</td><td>1.550%</td><td>0.5%</td></tr>
+        </tbody>
+      </table>
+      <p>The raw section matrix fails the required coil-matrix tolerance. Increasing the section observer grid cap from two to six lowers the largest self difference to 1.104% and the largest mutual difference to 1.395%; caps of 12 and 24 give the same values at the default spacing. Halving and quartering the observer spacing leave the self difference at 1.104% and reduce the mutual maximum only to 1.334% and 1.318%. The distinction is between Nova's whole-coil calculation and its separately discretized section quadrature, beyond the observer grid alone.</p>
+      <p>The final terminal calculation applies a low-rank consistency update to the section block: it makes the series-summed matrix equal Nova's existing whole-coil matrix and leaves all zero-sum differential section-current modes unchanged. The raw matrix and its failed check above remain in the record. Equality to the earlier nova export is then an input consistency identity, not an independent validation result. DINA remains independent: after the correction, both scenarios differ by at most 0.4124% in self terms and 0.0884% in mutuals. The no-passive identity on the corrected coarse spectrum is <code>2.22e-16</code>.</p>
+      <figure>
+        <img src="/nova/figures/iter-sectioned-conductor-set/terminal-impedance.svg" alt="Each ITER coil's coarse terminal impedance with passive screening and without passive rings">
+        <figcaption>Coarse 458-ring response for all 14 coils on 21 logarithmic frequencies from 0.1 Hz to 5 kHz. Blue is the magnitude of the passive-screened terminal impedance; dashed grey is the bare winding inductive impedance. This is a diagnostic trace, not a converter-band validity claim: the vessel and cryostat sections are thicker than their high-frequency skin depth. The VS copper series resistance is absent from this trace and remains to be added from the source coil IDS.</figcaption>
+      </figure>
+    </section>
+
+    <section id="refinement">
+      <h2>Thickness-refinement result and cost</h2>
+      <p>Splitting the 458 source passive rings to a maximum 40 mm layer produces 884 independent passive circuits. After the same whole-coil terminal reconciliation and source VS resistance on both arms, the worst of 14 coil-impedance differences stays below 1% only through the 65.9754 Hz sample on the 21-point logarithmic grid. At the sample nearest 600 Hz (574.35 Hz), the worst difference is 1.656%; at 5 kHz it is 0.456%. The return below 1% at the endpoint does not validate the intervening band. These results fail the converter-band convergence criterion.</p>
+      <p>The coarse matrix took about 19 minutes on one fleet CPU using the full polygon rule. The 40 mm run used eight panels × 24 nodes instead of 16 × 48 and took about 18 minutes for 1,179 total circuits. Three representative shaped-wall probes differed from the full rule by at most 0.0045% even 1 mm from a corner; that sampled quadrature check is narrower than a global error bound. A uniform 6 mm maximum layer, comparable to stainless-steel skin depth at 5 kHz, requires 4,140 passive circuits and 4,435 total circuits. Quadratic pair scaling from the measured 40 mm run puts matrix generation alone on the order of four hours at the same quadrature, before the dense passive eigensolve. This is a cost estimate, not a measured 6 mm run.</p>
+    </section>
+  </main>
+</body>
+</html>

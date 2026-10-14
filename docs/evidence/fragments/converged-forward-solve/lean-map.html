@@ -7,7 +7,7 @@
 <meta name="reckon-type" content="evidence">
 <meta name="plan-slug" content="lean-map">
 <meta name="plan-title" content="Fixed-shape lean forward map prototype">
-<meta name="plan-summary" content="Analytic certificate map-error ladder and pending converged solve">
+<meta name="plan-summary" content="Eight analytic certificate map rows, booking-bias controls and pending converged solve">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s5">
 <meta name="plan-recorded-at" content="2026-10-14">
@@ -21,15 +21,17 @@
 <header><h1 id="lean-map-title">Fixed-shape lean forward map prototype</h1>
 <p id="lean-map-summary">At the first device-built rung, analytic-state map error is 1.4323 × 10<sup>−4</sup> for 289 limited cells and 6.1896 × 10<sup>−4</sup> for 282 diverted cells. Both pass the requested tenfold map-fidelity margin. These are single map evaluations; converged solve acceptance is pending.</p></header>
 <section id="lean-map-bias"><h2>Reproduced point-booking bias</h2>
-<p id="lean-map-bias-measure">The hard-centroid diverted error reproduced at 0.418807 with 2,098 cells and 0.409206 with 5,158. Restricting bulk booking to connected full cells and retaining exact cut moments reduced these to 0.001850 and 0.0005712. At 2,098 cells the hard mask selected 21 zero-membership private cells and 419 partial cells. The corrected error decreases under refinement rather than plateauing. H200 job 1285574 and its row JSON receipts carry the replay.</p></section>
+<p id="lean-map-bias-measure">The hard-centroid diverted error reproduced at 0.418807 with 2,098 cells and 0.409206 with 5,158. Restricting bulk booking to connected full cells and retaining exact cut moments reduced these to 0.001850 and 0.0005712. At 2,098 cells the hard mask selected 21 zero-membership private cells and 419 partial cells. Keeping private cells while correcting cuts leaves 0.41436 error, so detached private flux explains the plateau. The corrected error decreases under refinement. H200 jobs 1285574 and 1285581 and their row JSON receipts carry the controls.</p></section>
 <section id="lean-map-values"><h2>Values-map ladder</h2>
-<table id="lean-map-values-table"><thead><tr><th>Topology</th><th>Cells</th><th>Relative sup error</th><th>Warm map wall</th><th>Measured read floor</th></tr></thead><tbody>
+<table id="lean-map-values-table"><thead><tr><th>Topology</th><th>Cells</th><th>Relative sup error</th><th>Warm map wall</th><th>Read control</th></tr></thead><tbody>
 <tr><td>Limited</td><td>289</td><td>1.4323 × 10<sup>−4</sup></td><td>0.266 ms</td><td>0.0358 ms</td></tr>
 <tr><td>Diverted</td><td>282</td><td>6.1896 × 10<sup>−4</sup></td><td>0.144 ms</td><td>0.0454 ms</td></tr>
 <tr><td>Limited</td><td>553</td><td>4.6633 × 10<sup>−5</sup></td><td>0.284 ms</td><td>0.1419 ms</td></tr>
 <tr><td>Diverted</td><td>550</td><td>1.8214 × 10<sup>−4</sup></td><td>0.240 ms</td><td>0.2288 ms</td></tr>
 <tr><td>Limited</td><td>1,071</td><td>1.5567 × 10<sup>−5</sup></td><td>0.615 ms</td><td>0.4742 ms</td></tr>
 <tr><td>Diverted</td><td>1,074</td><td>1.1591 × 10<sup>−4</sup></td><td>0.634 ms</td><td>0.5402 ms</td></tr>
+<tr><td>Limited</td><td>2,105</td><td>4.6928 × 10<sup>−6</sup></td><td>0.915 ms</td><td>2.613 ms</td></tr>
+<tr><td>Diverted</td><td>2,098</td><td>1.7664 × 10<sup>−5</sup></td><td>0.892 ms</td><td>3.189 ms</td></tr>
 </tbody></table>
-<p id="lean-map-values-caveat">The H200 2,000-cell rows and the live-map/Newton measurement are still running. The table's walls exclude booking, support read and Newton, and cannot establish a sub-millisecond converged solve. The <a href="/nova/research/fixed-shape-lean-map.html">research document</a> holds the method and full provenance.</p></section>
+<p id="lean-map-values-caveat">All eight H200 values rows completed in job 1285577. The read control uses reduction throughput; its estimate exceeds the observed wall at 2,000 cells, so it is not a physical bandwidth floor. The walls exclude booking, support read and Newton. The <a href="/nova/research/fixed-shape-lean-map.html">research document</a> holds the method, plots and provenance.</p></section>
 </main></body></html>

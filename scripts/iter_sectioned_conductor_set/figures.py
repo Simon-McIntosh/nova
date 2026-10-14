@@ -23,12 +23,18 @@ PASSIVE = "#777777"
 BARE = "#555555"
 
 
-def geometry_figure(path: Path, max_layer_thickness: float) -> None:
+def geometry_figure(
+    path: Path, max_layer_thickness: float, surface_layer: float
+) -> None:
     conductors, coil_names, owner, thickness, _resistance, _names = source_conductors()
     n_section = len(owner)
     passive = np.arange(n_section, n_section + len(thickness))
     refined = subdivide_passive_thickness(
-        conductors, passive, thickness, max_layer_thickness
+        conductors,
+        passive,
+        thickness,
+        max_layer_thickness,
+        surface_layer_m=surface_layer,
     )
     fig, ax = plt.subplots(figsize=(14, 17), dpi=100)
     poloidal_axes(ax)
@@ -112,7 +118,7 @@ def main() -> None:
     args = parser.parse_args()
     receipt = json.loads(args.receipt.read_text())
     args.directory.mkdir(parents=True, exist_ok=True)
-    geometry_figure(args.directory / "conductors.svg", 0.05)
+    geometry_figure(args.directory / "conductors.svg", 0.04, 0.006)
     impedance_figure(args.directory / "terminal-impedance.svg", receipt)
     print(f"SUMMARY wrote two figures for {len(receipt['coil_names'])} coils")
 

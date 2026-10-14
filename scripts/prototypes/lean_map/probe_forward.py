@@ -376,25 +376,48 @@ def run(kind, cells, cache, output, batch=False):
     if not batch:
         print("RESULT " + json.dumps(result, default=str), flush=True)
         return
-    for width in (1, 16, 128):
-        starts = jnp.broadcast_to(reference, (width,) + reference.shape)
-        started = perf_counter()
-        batch_program = (
-            jax.jit(jax.vmap(solve, in_axes=(0,) + (None,) * len(rest)))
-            .lower(starts, *rest)
-            .compile()
+    values_delta = shifted_values.exterior - values.exterior
+    window_delta = shifted_window.exterior - window.exterior
+
+    def batched_slice(offset):
+        varied_values = replace(
+            values, exterior=values.exterior + offset * values_delta
         )
-        batch_compile = perf_counter() - started
-        jax.block_until_ready(batch_program(starts, *rest))
+        varied_window = replace(
+            window, exterior=window.exterior + offset * window_delta
+        )
+        return warm_correct(
+            solution.moments,
+            factor,
+            varied_values,
+            jets,
+            varied_window,
+            rule,
+            fit_inverse,
+            sample_design,
+            geometry,
+            seeds,
+            convention,
+            booked.raw_current,
+        )
+
+    for width in (1, 16, 128):
+        offsets = jnp.linspace(0.5, 1.5, width)
         started = perf_counter()
-        outcomes = batch_program(starts, *rest)
+        batch_program = jax.jit(jax.vmap(batched_slice)).lower(offsets).compile()
+        batch_compile = perf_counter() - started
+        jax.block_until_ready(batch_program(offsets))
+        started = perf_counter()
+        outcomes = batch_program(offsets)
         jax.block_until_ready(outcomes)
         elapsed = perf_counter() - started
         result[f"batch_{width}"] = {
+            "route": "cached-factor-vmap",
             "compile_seconds": batch_compile,
             "wall_seconds": elapsed,
             "per_slice_ms": 1000 * elapsed / width,
             "converged": int(jnp.sum(outcomes.converged)),
+            "max_residual": float(jnp.max(outcomes.residual)),
         }
         result["stage"] = f"batch-{width}"
         _write(output, result)

@@ -286,6 +286,4 @@ __all__ = [
     "ConductorSet",
     "PolygonSection",
     "SensorSet",
-    "ThicknessSubdivision",
-    "subdivide_passive_thickness",
 ]

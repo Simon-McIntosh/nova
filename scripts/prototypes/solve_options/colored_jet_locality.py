@@ -150,6 +150,11 @@ def run(kind, cells, cache, bias_row, newton_row, out, mode):
     if not np.isfinite(response_max) or response_max <= 1e-12 or zero > 1e-12:
         raise ValueError("coloured jet tangent controls failed")
     reconstruction = float(np.max(np.abs(actual - predicted))) / response_max
+    out.mkdir(parents=True, exist_ok=True)
+    blocks_path = None
+    if mode == "fixed-point-evaluation" and reconstruction <= 1e-8:
+        blocks_path = out / f"{kind}-{cells}-local-blocks.npy"
+        np.save(blocks_path, local)
     result = dict(
         mode=mode,
         kind=kind,
@@ -167,10 +172,10 @@ def run(kind, cells, cache, bias_row, newton_row, out, mode):
         zero_direction_response_max=zero,
         local_reconstruction_relative_error=reconstruction,
         local_reconstruction_agrees=bool(reconstruction <= 1e-8),
+        local_blocks_path=str(blocks_path) if blocks_path is not None else None,
         gpu_memory=jax.devices()[0].memory_stats(),
         host_peak_rss_kib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
     )
-    out.mkdir(parents=True, exist_ok=True)
     (out / f"{kind}-{cells}-{mode}.json").write_text(
         json.dumps(result, indent=2) + "\n"
     )

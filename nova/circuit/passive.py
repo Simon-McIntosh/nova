@@ -103,8 +103,6 @@ class PassiveCircuitSystem:
         calibration hook; the geometry-exact linkage and every coupling stay
         fixed while the data-led resistance model reshapes the modes.
         """
-        from scipy.linalg import eigh
-
         r_diag = self.r_diag
         if r_multipliers is not None:
             multiplier = np.asarray(r_multipliers, dtype=np.float64)
@@ -115,8 +113,15 @@ class PassiveCircuitSystem:
             if np.any(~np.isfinite(multiplier)) or np.any(multiplier <= 0):
                 raise ValueError("r_multipliers must be finite and positive")
             r_diag = r_diag * multiplier
-        rate, vectors = eigh(np.diag(r_diag), self.lmat)
+        rate, vectors = _passive_modes(self.lmat, r_diag)
         return 1.0 / np.clip(rate, 1e-12, None), vectors
+
+
+def _passive_modes(lmat: np.ndarray, r_diag: np.ndarray):
+    """Shared generalized eigensolve for passive evolution and terminal spectra."""
+    from scipy.linalg import eigh
+
+    return eigh(np.diag(r_diag), lmat)
 
 
 @dataclass
@@ -246,8 +251,6 @@ def terminal_impedance_spectrum(
     frequency sweep a small weighted sum rather than repeated dense solves.
     With zero passive circuits the result is exactly the bare winding matrix.
     """
-    from scipy.linalg import eigh
-
     coil = np.asarray(coil_inductance, dtype=np.float64)
     coupling = np.asarray(mutual, dtype=np.float64)
     passive = np.asarray(passive_inductance, dtype=np.float64)
@@ -280,7 +283,7 @@ def terminal_impedance_spectrum(
             raise ValueError("terminal resistance must be finite and non-negative")
         result = result + np.diag(coil_resistance)[None, :, :]
     if n_passive:
-        rate, vectors = eigh(np.diag(resistance), passive)
+        rate, vectors = _passive_modes(passive, resistance)
         if np.any(rate <= 0):
             raise ValueError("passive inductance must store positive magnetic energy")
         mode_coupling = wiring.T @ coupling @ vectors

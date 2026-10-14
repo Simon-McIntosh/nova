@@ -10,7 +10,7 @@
 <meta name="plan-summary" content="Identity coverage passes mutation controls. The full radial maximum is near the wall and the host batch departs from fifty-digit quadrature; the diverted rerun is in progress.">
 <meta name="plan-evidence-for" content="converged-forward-solve">
 <meta name="plan-verifies" content="converged-forward-solve#s4">
-<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,ffb73fc17,bc237c5e1,4a35ccd6e,43d0ca2b7,166918859,55b338a82,7b99006ed,aee36c170,c05786857,399806fec,d89a39bf3,293554dcf,9d9e9562d">
+<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,ffb73fc17,bc237c5e1,4a35ccd6e,43d0ca2b7,166918859,55b338a82,7b99006ed,aee36c170,c05786857,399806fec,d89a39bf3,293554dcf,9d9e9562d,7e7ab108d,137b03ee0,d8930e97f">
 <meta name="plan-recorded-at" content="2026-10-14">
 <meta name="plan-verdict" content="partial">
 <title>Carrier agreement and identity | nova</title>
@@ -78,6 +78,15 @@ replay over all 11,932 targets differs from storage by only 6.77626e-21,
 below the declared 1.05646e-20 replay bound. Computing the target alone gives
 -1.777657987625937e-9, only 8.06790e-21 from the reference. The different
 batch widths localise the departure to the vectorised host near-field path.</p>
+
+<p>Two other leading pairs were checked with the same 50-digit rule. At target
+2705, cell 1177, the host is 1.2079184068262323e-19 from the reference and
+the device 3.477777487902636e-21. At target 10921, cell 4766, those errors
+are 8.078990324744166e-20 and 4.458503501660819e-22. Their host
+full-batch replays differ from storage by 3.38813e-21 and 3.36166e-21,
+respectively, both below the same 1.05646e-20 control bound. Across three
+different near-wall source cells the device is closer to the independent
+quadrature, while the stored host values reproduce at full batch width.</p>
 
 <p>These values do not support a new agreement floor: the two paths are not
 equally close to the independent reference. A correction belongs in

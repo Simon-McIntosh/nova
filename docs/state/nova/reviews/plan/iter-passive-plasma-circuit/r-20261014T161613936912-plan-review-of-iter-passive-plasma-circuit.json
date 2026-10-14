@@ -1,0 +1,88 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-10-14T16:23:32.123Z",
+  "dispatched_at": "2026-10-14T16:16:38Z",
+  "findings": [
+    {
+      "anchor": "nova/docs/plans/iter-passive-plasma-circuit.html:50 (and the \u00a71 body)",
+      "id": "reuse_search-1",
+      "reason": "the plan should state which of `machine.py`'s owner classes it extends (and whether a new section model is genuinely needed for winding sections) instead of proposing an ITER conductor build without naming the existing ITER conductor builder.",
+      "text": "the plan builds the sectioned ITER conductor set from `ITER_MACHINE_DESCRIPTION/3/111001` run 204 without citing the module that already reads exactly that: `nova/imas/machine.py` defines `Machine`, `Geometry` (with `pf_active`/`pf_passive`/`wall` fields, lines 1423\u20131497), `PoloidalFieldActive` (line 1032), `PoloidalFieldPassive` (line 965), `Wall` (line 1207), `IdsCoilData`/`ActiveCoilData`/`PassiveShellData` (lines 751\u20131030), `Loop`/`ActiveLoop`/`Element` (lines 568\u2013642) and the machine-description record seam `StaticMachineDescription`/`MachineCoil`/`MachineSection`/`MachineCoil`/`ImasGeometryReader`/`TabularGeometryReader`/`CrossSection` (lines 270\u2013566); `nova/imas/pulsedesign.py:26` defines `ITER(Machine)` with `pf_active=\"iter_md\"`, `pf_passive=\"iter_md\"`; `nova/imas/transient.py:15` defines `Transient(Machine)` with the same defaults. The plan's \u00a71 concept of a coil \"section\" (double pancake, CS pancake) is a second section model beside `machine.py`'s `MachineSection`/`CrossSection`.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/pf_passive.py:11",
+      "id": "duplicate_owner-1",
+      "reason": "naming `PF_Passive` as the comparison-source owner removes a re-implementation of that reader and fixes the group mapping the done-when depends on.",
+      "text": "\u00a73 compares the evolved passive currents \"group by group with DINA's own `pf_passive` currents\", but the mechanism that reads and groups DINA's `pf_passive` loop currents already exists as `PF_Passive(Plot, Scenario)` (`name = \"pf_passive\"`, `ids_node = \"loop\"`, `loop_attrs = [\"current\"]`), and `nova/imas/machine.py:965` `PoloidalFieldPassive` builds the passive geometry from the same IDS; the plan names neither file.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/imas/profiles.py:57",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a72's \"build the distribution\" step is largely `Profile.j_tor_rbs`; the plan should extend it rather than re-derive j_\u03c6, and say so.",
+      "text": "\u00a72 step 2 evaluates `j_\u03c6(R,Z) = R p\u2032(\u03c8) + FF\u2032(\u03c8)/(\u03bc0 R)` on nova's plasma grid from DINA's 1-D flux functions and its 2-D \u03c8 map, but `nova/imas/profiles.py` already implements this: `Profile.fluxfunctions` (line 57) with the `p_prime`/`ff_prime` branch, `Profile.j_tor_rbs` (line 87), `Profile._rbs` (line 96) and `Profile.delaunay` (line 92). The plan cites `nova/imas/equilibrium.py` and `nova/imas/extrapolate.py` but not the module that owns the flux-function-to-current-density evaluation.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "power_convertor/src/power_convertor/passive_structure.py:20",
+      "id": "duplicate_owner-3",
+      "reason": "the section must say whether the new export replaces the existing `PassiveStructure`/`matrices.json` representation or adds beside it, or the converter model will carry two divergent passive models.",
+      "text": "\u00a74 exports \"the reduced passive system: the eigenmodes kept, their decay times and their coupling to every coil section\" over the machine description, but the consumer already owns a reduced passive representation that reads the same source: `PassiveStructure` (filament inductance/mutual/resistance/group, source recorded in `data/iter/passive_structure/matrices.json` as `/work/imas/shared/imasdb/ITER_MACHINE_DESCRIPTION/3/111001/204/pf_active; .../115004/6/pf_passive; .../124001/3/pf_passive`), reduced by `power_convertor/src/power_convertor/passive_structure.py` and consumed by `coupled_circuit.py:31`. \u00a74 adds a parallel versioned file without naming that this representation is being superseded (the plan's own premise is that the existing ring model is invalid above 1.8/29\u201335 Hz).",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/docs/plans/iter-passive-plasma-circuit.html:143",
+      "id": "thin_wrapper-1",
+      "reason": "extending the existing serialiser is the honest change; a parallel loader is surface without depth unless the record shape genuinely cannot fit the existing contract.",
+      "text": "\u00a74's \"round-trip test of the loader passes in nova\" presupposes a new file contract plus a new nova loader, but the serialisation owner `nova/circuit/passive.py` already ships `save_circuit_system`/`load_circuit_system` (lines 570, 591) and `save_eigenbasis`/`load_eigenbasis` (lines 615, 633) for a `PassiveCircuitSystem`/`PassiveEigenbasis`, and `nova/circuit/screening.py` already exports `CoupledCircuit`. The plan does not say why the coupled plant cannot ride the existing circuit-system serialiser.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/docs/plans/iter-passive-plasma-circuit.html:128",
+      "id": "duplicate_owner-4",
+      "reason": "the export path should resolve through the project's `FilePath`/repository-relative mechanism so the artefact is discoverable and the receipt survives a checkout move.",
+      "text": "\u00a74 hard-codes the absolute destination `/home/ITER/mcintos/Code/power_convertor/data/iter/coupled_plant/`, while path resolution is owned by `nova/database/filepath.py` (`class FilePath`, line 358: `path`/`resolve`/`file`, and the repository-relative helpers `repository_relative` line 279 / `relativize_worktree_paths` line 74). A literal absolute path into a sibling repository both bypasses that owner and re-introduces a machine-local path the repo's own pre-commit hook (`scripts/git-hooks/pre-commit`, `filepath relativize --check`) is built to keep out of tracked files.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "nova/docs/plans/iter-passive-plasma-circuit.html:137",
+      "id": "interface_budget-1",
+      "reason": "the section must name what the new contract/loader retires (the existing `PassiveStructure` representation and `save_circuit_system`/`load_circuit_system`) or state why nothing can be.",
+      "text": "\u00a74 states \"The contract is written down in the record\", adding a new public loader and a new versioned file contract, and neither \u00a74 nor \u00a71's added conductor-set builder names a definition it retires or merges, or states why nothing can be; measured against this week's figures (public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0) the plan adds public-definition surface with no accounting in its own text.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_fingerprint": "7c6f55af8160a471b4045fc4947341d1072339e12e6cb873ce50cf469dca891b",
+  "plan_slug": "iter-passive-plasma-circuit",
+  "plan_version": 0,
+  "project": "nova",
+  "responses": {},
+  "review_run_id": "r-20261014T161613936912-plan-review-of-iter-passive-plasma-circuit",
+  "reviewed_blob_sha": "1ff06ec76c5f1695d3b55b823f17b96340698842",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the core of the plan extends existing deep modules (`PassiveCircuit`, `integrate_eddy_ode`, `circuit_linkage_matrix`); \u00a74 adds one export artefact plus its loader rather than a spread of wrappers.",
+    "duplicate_owner": "a finding \u2014 the plan's conductor set, passive loops, prescribed-plasma current density and reduced passive representation each have a named owning file the plan does not extend (census below).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds a new public loader and versioned file contract without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan cites `nova/circuit/{passive,propagate,linkage,screening}.py` and `nova/imas/{equilibrium,extrapolate}.py`, but the machinery it rebuilds is already owned by `nova/imas/machine.py`, `nova/imas/pf_passive.py`, `nova/imas/profiles.py` and `power_convertor/src/power_convertor/passive_structure.py`, none of which it names.",
+    "thin_wrapper": "a finding \u2014 \u00a74's versioned file plus its nova loader restates the serialise/deserialise pair `nova/circuit/passive.py` already ships (`save_circuit_system`/`load_circuit_system`, `save_eigenbasis`/`load_eigenbasis`) without saying why that owner cannot carry the coupled plant."
+  },
+  "section_digests": {
+    "_document": "5ffbe860f4568bb98d190775823ade569ce20740abe2bf4ddb709d205df62843",
+    "s1": "63770f20c41523e89a7ed5b22afc797c69e072d852b6ff5411d47362e8d1dc94",
+    "s2": "ebc3e4515b61b323a0f23274c4937514a791e806643b9a4b5bf595ae2909497a",
+    "s3": "7d4e81c7ee55efd20d29032c998e1494f4b69c533d9038b7856885ff5e94845a",
+    "s4": "a00f14740fdee45ef001a5556fa88739dc3689d51fca28c3a71b30f19bd86aa5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T16:26:53.247911+00:00"
+}

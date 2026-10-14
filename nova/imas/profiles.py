@@ -231,22 +231,6 @@ class Profile(Flux, Equilibrium, GetSlice, CoilData):
         """Return cached 2D RectBivariateSpline j_tor2d interpolant."""
         return self._rbs("j_tor2d")
 
-    def prescribed_current(self, outline: np.ndarray) -> PrescribedCurrent:
-        """Prescribe this slice on its stored map from its native flux functions."""
-        return prescribe_current_density(
-            self["r"],
-            self["z"],
-            self["psi2d"],
-            self["psi1d"],
-            self["p_prime"],
-            self["ff_prime"],
-            self.psi_axis,
-            self.psi_boundary,
-            self["ip"],
-            outline,
-            self["magnetic_axis"],
-        )
-
     @cached_property
     def delaunay(self):
         """Return Delaunay triangulation of unstructured equilibrium grid."""

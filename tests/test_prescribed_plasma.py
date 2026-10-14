@@ -66,6 +66,29 @@ def test_open_outline_uses_last_closed_flux_surface(current):
     assert np.sum(replacement.cell_current) == pytest.approx(1e6)
 
 
+def test_missing_edge_gradient_extrapolates_from_finite_samples(current):
+    radius = current.radius
+    height = current.height
+    rr, zz = np.meshgrid(radius, height, indexing="ij")
+    pressure_gradient = np.ones(50)
+    pressure_gradient[-1] = np.nan
+    replacement = prescribe_current_density(
+        radius,
+        height,
+        1 - (rr - 5) ** 2 - zz**2,
+        np.linspace(1, 0.36, 50),
+        pressure_gradient,
+        np.zeros(50),
+        1,
+        0.36,
+        1e6,
+        current.boundary,
+        (5, 0),
+    )
+    assert np.all(np.isfinite(replacement.cell_current))
+    assert replacement.scale_factor == pytest.approx(current.scale_factor)
+
+
 def test_finite_section_and_filament_linkage(current):
     conductors = ConductorSet(
         r=np.array([7.0, 7.0]),

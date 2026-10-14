@@ -40,6 +40,18 @@ class PrescribedCurrent:
     plasma_current: float
 
 
+def finite_flux_interpolant(coordinate, values):
+    """Interpolate finite stored flux-function samples through the boundary."""
+    coordinate = np.asarray(coordinate, float)
+    values = np.asarray(values, float)
+    finite = np.isfinite(coordinate) & np.isfinite(values)
+    if np.count_nonzero(finite) < 3:
+        raise ValueError("flux function has fewer than three finite samples")
+    return scipy.interpolate.interp1d(
+        coordinate[finite], values[finite], kind="quadratic", fill_value="extrapolate"
+    )
+
+
 def closed_plasma_boundary(radius, height, psi, outline, axis, psi_axis, psi_boundary):
     """Select a simple axis-enclosing outline or its last closed flux surface."""
     radius = np.asarray(radius, float)
@@ -91,8 +103,14 @@ def prescribe_current_density(
     plasma_current,
     outline,
     axis,
+    flux_derivative_scale=2 * np.pi,
 ):
-    """Evaluate stored flux functions inside the boundary and match current."""
+    """Evaluate stored flux functions inside the boundary and match current.
+
+    DINA stores derivatives against total poloidal flux. The current-density
+    expression uses derivatives against flux per radian, so its gradients are
+    multiplied by ``2*pi`` before evaluating the expression.
+    """
     radius = np.asarray(radius, float)
     height = np.asarray(height, float)
     psi = np.asarray(psi, float)
@@ -114,9 +132,13 @@ def prescribe_current_density(
     if not np.all(np.diff(coordinate) > 0):
         raise ValueError("the stored flux-function coordinate must increase")
     psi_norm = np.clip((psi - psi_axis) / (psi_boundary - psi_axis), 0, 1)
-    pressure = np.interp(psi_norm, coordinate, p_prime)
-    field = np.interp(psi_norm, coordinate, ff_prime)
-    raw_density = np.where(mask, grid_r * pressure + field / (mu_0 * grid_r), 0.0)
+    pressure = finite_flux_interpolant(coordinate, p_prime)(psi_norm)
+    field = finite_flux_interpolant(coordinate, ff_prime)(psi_norm)
+    raw_density = np.where(
+        mask,
+        flux_derivative_scale * (grid_r * pressure + field / (mu_0 * grid_r)),
+        0.0,
+    )
     cell_area = np.gradient(radius)[:, None] * np.gradient(height)[None, :]
     raw_current = float(np.sum(raw_density * cell_area))
     if not np.isfinite(raw_current) or abs(raw_current) < 1e-12:
@@ -247,9 +269,7 @@ class Profile(Flux, Equilibrium, GetSlice, CoilData):
 
     def _interp1d(self, x, y):
         """Return 1D interpolant."""
-        return scipy.interpolate.interp1d(
-            x, y, kind="quadratic", fill_value="extrapolate"
-        )
+        return finite_flux_interpolant(x, y)
 
     def plot_profile(self, attr="p_prime", axes=None):
         """Plot flux function interpolants."""

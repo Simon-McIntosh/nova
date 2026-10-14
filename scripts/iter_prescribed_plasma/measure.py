@@ -1,0 +1,392 @@
+"""Measure DINA prescribed current and plasma flux against stored diagnostics."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import imas
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.interpolate import RectBivariateSpline
+
+from nova.biot.greens import hybrid_greens
+from nova.biot.polygon import polygon_greens
+from nova.imas.machine import CrossSection
+from nova.imas.prescribed_plasma import plasma_flux_at_points
+from nova.imas.profiles import prescribe_current_density
+
+
+ROOT = Path(__file__).resolve().parents[2]
+FIGURES = ROOT / "docs/figures/iter-prescribed-plasma"
+OUTPUT = Path(
+    "/home/ITER/mcintos/Code/nova/.cache/iter-passive-plasma-circuit/"
+    "gate-logs/iter-prescribed-plasma"
+)
+URI = "imas:hdf5?user=mcintos;pulse=105014;run=1;database=iter;version=3"
+DD_VERSION = "3.38.1"
+
+
+def geometry_flux(target_r, target_z, element):
+    """Flux [Wb/A] from one finite IMAS conductor section."""
+    shape = CrossSection(element.geometry).data.poly
+    vertices = np.asarray(shape.exterior.coords)[:-1]
+    if int(element.geometry.geometry_type) == 2:
+        centroid = shape.centroid
+        extent = np.ptp(vertices, axis=0)
+        return hybrid_greens(
+            target_r,
+            target_z,
+            centroid.x,
+            centroid.y,
+            extent[0],
+            extent[1],
+        )[0]
+    return polygon_greens(target_r, target_z, vertices)[0]
+
+
+def conductor_sources(active, passive, target_r, target_z):
+    """Precompute finite-section flux signatures of scenario conductors."""
+    columns = []
+    owners = []
+    for category, groups in (("coil", active.coil), ("passive", passive.loop)):
+        for group_index, group in enumerate(groups):
+            for element in group.element:
+                turns = float(element.turns_with_sign)
+                columns.append(turns * geometry_flux(target_r, target_z, element))
+                owners.append((category, group_index))
+    return np.stack(columns, axis=1), owners
+
+
+def current_vector(active, passive, owners, index):
+    """Scenario current of each finite source section at an equilibrium index."""
+    return np.array(
+        [
+            float(
+                np.asarray(
+                    (active.coil if category == "coil" else passive.loop)[
+                        group
+                    ].current.data
+                )[index]
+            )
+            for category, group in owners
+        ]
+    )
+
+
+def prescribe_slice(slice_):
+    """Prescribe one native-DD equilibrium slice from its stored profiles."""
+    global_ = slice_.global_quantities
+    profile = slice_.profiles_1d
+    map_ = slice_.profiles_2d[0]
+    outline = slice_.boundary_separatrix.outline
+    return prescribe_current_density(
+        np.asarray(map_.grid.dim1),
+        np.asarray(map_.grid.dim2),
+        np.asarray(map_.psi),
+        np.asarray(profile.psi),
+        np.asarray(profile.dpressure_dpsi),
+        np.asarray(profile.f_df_dpsi),
+        float(global_.psi_axis),
+        float(global_.psi_boundary),
+        float(global_.ip),
+        np.c_[np.asarray(outline.r), np.asarray(outline.z)],
+        (float(global_.magnetic_axis.r), float(global_.magnetic_axis.z)),
+    )
+
+
+def loop_locations(magnetics):
+    """One radius and height per scenario flux-loop diagnostic."""
+    return np.array(
+        [
+            (float(loop.position[0].r), float(loop.position[0].z))
+            for loop in magnetics.flux_loop
+        ]
+    )
+
+
+def coil_locations(active):
+    """Coil section centroids, with one target per stored element."""
+    locations = []
+    names = []
+    for coil in active.coil:
+        for element in coil.element:
+            centroid = CrossSection(element.geometry).data.poly.centroid
+            locations.append((centroid.x, centroid.y))
+            names.append(str(coil.name).strip())
+    return np.asarray(locations), names
+
+
+def map_flux(slice_, locations):
+    """Stored 2-D total flux at locations inside the map's supported domain."""
+    map_ = slice_.profiles_2d[0]
+    radius = np.asarray(map_.grid.dim1)
+    height = np.asarray(map_.grid.dim2)
+    values = np.full(len(locations), np.nan)
+    inside = (
+        (locations[:, 0] >= radius[0])
+        & (locations[:, 0] <= radius[-1])
+        & (locations[:, 1] >= height[0])
+        & (locations[:, 1] <= height[-1])
+    )
+    spline = RectBivariateSpline(radius, height, np.asarray(map_.psi))
+    values[inside] = spline.ev(locations[inside, 0], locations[inside, 1])
+    return values
+
+
+def metric(values):
+    """Finite distribution summary with explicit count and quantiles."""
+    values = np.asarray(values, float)
+    values = values[np.isfinite(values)]
+    return {
+        "count": int(values.size),
+        "minimum": float(np.min(values)),
+        "p05": float(np.percentile(values, 5)),
+        "median": float(np.median(values)),
+        "p95": float(np.percentile(values, 95)),
+        "maximum": float(np.max(values)),
+    }
+
+
+def style_axes(axis):
+    axis.spines[["top", "right"]].set_visible(False)
+    axis.grid(False)
+    axis.tick_params(labelsize=16)
+    axis.xaxis.label.set_size(18)
+    axis.yaxis.label.set_size(18)
+
+
+def draw_figures(rows, representatives, linkage, names):
+    """Save spatial, time-history and residual figures as stand-alone SVGs."""
+    FIGURES.mkdir(parents=True, exist_ok=True)
+    fig, axes = plt.subplots(1, len(representatives), figsize=(14, 5))
+    for axis, (index, current, slice_) in zip(axes, representatives):
+        rr, zz = np.meshgrid(current.radius, current.height, indexing="ij")
+        levels = -np.array([0.2, 0.4, 0.6, 0.8]) * abs(current.current_density.min())
+        axis.contour(
+            rr,
+            zz,
+            current.current_density,
+            levels=np.sort(levels),
+            colors="#315f78",
+            linewidths=1.5,
+        )
+        axis.plot(
+            current.boundary[:, 0], current.boundary[:, 1], color="#a06635", lw=2.2
+        )
+        outline = slice_.boundary_separatrix.outline
+        if len(outline.r):
+            axis.plot(
+                np.asarray(outline.r),
+                np.asarray(outline.z),
+                color="#777777",
+                lw=1.1,
+                ls="--",
+            )
+        axis.plot(*current.centroid, marker="o", color="#315f78", ms=6)
+        axis.plot(
+            float(slice_.global_quantities.current_centre.r),
+            float(slice_.global_quantities.current_centre.z),
+            marker="x",
+            color="#222222",
+            ms=7,
+        )
+        axis.set_aspect("equal")
+        axis.set_axis_off()
+        axis.text(
+            0.04,
+            0.96,
+            f"t = {float(slice_.time):.1f} s",
+            transform=axis.transAxes,
+            va="top",
+            fontsize=16,
+        )
+    fig.tight_layout()
+    fig.savefig(FIGURES / "current-boundary.svg")
+    plt.close(fig)
+
+    time = np.array([row["time"] for row in rows])
+    fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
+    axes[0].plot(time, [row["scale_factor"] for row in rows], color="#315f78", lw=3)
+    axes[0].set_ylabel("current scale")
+    axes[1].plot(
+        time,
+        [row["centroid_error_r"] for row in rows],
+        color="#315f78",
+        lw=2.6,
+        label="radial",
+    )
+    axes[1].plot(
+        time,
+        [row["centroid_error_z"] for row in rows],
+        color="#a06635",
+        lw=2.6,
+        label="vertical",
+    )
+    axes[1].axhline(0.09375, color="#777777", lw=1.2, ls=":")
+    axes[1].axhline(-0.09375, color="#777777", lw=1.2, ls=":")
+    axes[1].set_ylabel("centroid error [m]")
+    axes[1].set_xlabel("scenario time [s]")
+    axes[1].legend(frameon=False, fontsize=15)
+    for axis in axes:
+        style_axes(axis)
+    fig.tight_layout()
+    fig.savefig(FIGURES / "scale-centroid.svg")
+    plt.close(fig)
+
+    fig, axis = plt.subplots(figsize=(14, 5))
+    for category, colour in (("coil", "#315f78"), ("loop", "#a06635")):
+        selected = [row for row in linkage if row["category"] == category]
+        if selected:
+            axis.scatter(
+                [row["time"] for row in selected],
+                [row["relative_residual"] for row in selected],
+                s=18,
+                color=colour,
+                label=category,
+            )
+    axis.axhline(0, color="#777777", lw=1.2)
+    axis.set_ylabel("plasma flux residual / |reference|")
+    axis.set_xlabel("scenario time [s]")
+    axis.legend(frameon=False, fontsize=15)
+    style_axes(axis)
+    fig.tight_layout()
+    fig.savefig(FIGURES / "linked-flux-residual.svg")
+    plt.close(fig)
+
+
+def main():
+    """Run the current census and independent linked-flux comparisons."""
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    with imas.DBEntry(URI, "r", dd_version=DD_VERSION) as entry:
+        equilibrium = entry.get("equilibrium", lazy=False, autoconvert=False)
+        active = entry.get("pf_active", lazy=False, autoconvert=False)
+        passive = entry.get("pf_passive", lazy=False, autoconvert=False)
+        magnetics = entry.get("magnetics", lazy=False, autoconvert=False)
+    loop_points = loop_locations(magnetics)
+    coil_points, coil_names = coil_locations(active)
+    locations = np.vstack((loop_points, coil_points))
+    kernel, owners = conductor_sources(
+        active, passive, locations[:, 0], locations[:, 1]
+    )
+    print(
+        f"REFERENCE_CONTROL loops={len(loop_points)} coils={len(coil_points)} "
+        f"sources={len(owners)} kernel_nonzero={np.count_nonzero(kernel)}"
+    )
+    eligible = [
+        index
+        for index, slice_ in enumerate(equilibrium.time_slice)
+        if abs(float(slice_.global_quantities.ip)) >= 1e5
+    ]
+    comparison = set(np.linspace(eligible[0], eligible[-1], 24, dtype=int))
+    representatives = set(np.linspace(eligible[0], eligible[-1], 3, dtype=int))
+    rows = []
+    linkage = []
+    selected = []
+    failures = []
+    map_control = []
+    for index in eligible:
+        slice_ = equilibrium.time_slice[index]
+        try:
+            current = prescribe_slice(slice_)
+        except ValueError as error:
+            failures.append((index, str(error)))
+            continue
+        global_ = slice_.global_quantities
+        centre = (float(global_.current_centre.r), float(global_.current_centre.z))
+        rows.append(
+            {
+                "index": index,
+                "time": float(slice_.time),
+                "ip": current.plasma_current,
+                "scale_factor": current.scale_factor,
+                "boundary_source": current.boundary_source,
+                "endpoint_gap": current.endpoint_gap,
+                "centroid_error_r": current.centroid[0] - centre[0],
+                "centroid_error_z": current.centroid[1] - centre[1],
+            }
+        )
+        if index in representatives:
+            selected.append((index, current, slice_))
+        if index not in comparison:
+            continue
+        stored = map_flux(slice_, locations)
+        source = kernel @ current_vector(active, passive, owners, index)
+        inferred = stored - source
+        predicted = plasma_flux_at_points(current, locations[:, 0], locations[:, 1])
+        for point_index, name in enumerate(
+            [str(loop.name).strip() for loop in magnetics.flux_loop] + coil_names
+        ):
+            if not np.isfinite(inferred[point_index]):
+                continue
+            category = "loop" if point_index < len(loop_points) else "coil"
+            reference = float(inferred[point_index])
+            residual = float(predicted[point_index] - reference)
+            linkage.append(
+                {
+                    "index": index,
+                    "time": float(slice_.time),
+                    "category": category,
+                    "name": name,
+                    "reference": reference,
+                    "predicted": float(predicted[point_index]),
+                    "residual": residual,
+                    "relative_residual": residual / max(abs(reference), 1.0),
+                }
+            )
+            if category == "loop":
+                loop = magnetics.flux_loop[point_index]
+                measured = float(np.asarray(loop.flux.data)[index])
+                map_control.append(stored[point_index] - measured)
+    scale = metric([row["scale_factor"] for row in rows])
+    centroid = metric(
+        [
+            max(abs(row["centroid_error_r"]), abs(row["centroid_error_z"]))
+            for row in rows
+        ]
+    )
+    residuals = {
+        category: metric(
+            [
+                abs(row["relative_residual"])
+                for row in linkage
+                if row["category"] == category
+            ]
+        )
+        for category in ("coil", "loop")
+    }
+    summary = {
+        "case": "ITER 105014/1",
+        "dd_version": DD_VERSION,
+        "eligible_slices": len(eligible),
+        "prescribed_slices": len(rows),
+        "failures": failures,
+        "scale_factor": scale,
+        "centroid_max_coordinate_error_m": centroid,
+        "fallback_slices": sum(row["boundary_source"] != "separatrix" for row in rows),
+        "grid_spacing_m": 0.09375,
+        "linked_flux_relative_error": residuals,
+        "map_minus_magnetics_flux_loop_wb": metric(map_control),
+        "coil_positions_inside_map": len(
+            set(row["name"] for row in linkage if row["category"] == "coil")
+        ),
+    }
+    (OUTPUT / "summary.json").write_text(
+        json.dumps(
+            {
+                "summary": summary,
+                "slices": rows,
+                "linkage": linkage,
+            },
+            indent=2,
+        )
+    )
+    print("SUMMARY " + json.dumps(summary, sort_keys=True))
+    draw_figures(rows, selected, linkage, coil_names)
+
+
+if __name__ == "__main__":
+    main()

@@ -10,7 +10,10 @@ from nova.circuit.conductor import (
     PolygonSection,
     subdivide_passive_thickness,
 )
-from nova.circuit.linkage import preserve_series_terminal_linkage
+from nova.circuit.linkage import (
+    circuit_linkage_matrix,
+    preserve_series_terminal_linkage,
+)
 from nova.circuit.passive import terminal_impedance_spectrum
 from nova.imas.machine import MachineCoil, MachineSection
 from nova.imas.pulsedesign import ITER
@@ -139,3 +142,32 @@ def test_terminal_reconciliation_preserves_differential_section_energy():
         differential @ linkage @ differential,
         rtol=1e-14,
     )
+
+
+@pytest.mark.parametrize(
+    "major,width,section_radius,offset,tolerance",
+    [
+        (1.5, 0.19, np.sqrt(0.19**2 / np.pi), -1.75, 0.05),
+        (1.0, 0.05, 0.447049 * 0.05, -2.0, 0.01),
+    ],
+)
+def test_single_ring_and_rectangular_coil_match_analytic_inductance(
+    major, width, section_radius, offset, tolerance
+):
+    """Round equivalent and Grover square-section thin-ring limits."""
+    turns = 1.0 if width > 0.1 else 12.0
+    conductor = ConductorSet(
+        r=[major],
+        z=[0.0],
+        dr=[width],
+        dz=[width],
+        current_share=[turns],
+        circuit=[0],
+    )
+    measured = circuit_linkage_matrix(
+        conductor, [0], section_scale_frac=0.05, section_n_max=24
+    )[0, 0]
+    expected = (
+        4e-7 * np.pi * major * (np.log(8 * major / section_radius) + offset) * turns**2
+    )
+    assert measured == pytest.approx(expected, rel=tolerance)

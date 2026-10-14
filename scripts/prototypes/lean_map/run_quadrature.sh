@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+trap 'status=$?; printf "EXIT=%d\n" "$status"' EXIT
 
 root="$(realpath "$(dirname "${BASH_SOURCE[0]}")/../../..")"
 run="$1"

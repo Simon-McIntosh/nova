@@ -120,6 +120,13 @@ def run(kind, cells, cache, output):
         "cut_selected": int(jnp.sum(old_inside & cut)),
         "full_cells": int(jnp.sum(full)),
         "cut_cells": int(jnp.sum(cut)),
+        "old_cut_current_fraction": float(
+            jnp.sum(jnp.where(old_inside & cut, geometry.full_area * density, 0.0))
+            / jnp.sum(jnp.where(old_inside, geometry.full_area * density, 0.0))
+        ),
+        "exact_cut_current_fraction": float(
+            jnp.sum(jnp.where(cut, exact_moments[:, 0], 0.0)) / target
+        ),
         "excluded_current_fraction": float(
             jnp.sum(
                 jnp.where(

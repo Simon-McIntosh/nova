@@ -21,8 +21,10 @@ from nova.equilibrium.solve_request import TopologyPolicy
 from scripts.analytic_oracle_fixtures import measure as fixture
 from scripts.prototypes.lean_map.forward import apply
 from scripts.prototypes.lean_map.jets import build_jets, gather_window
+from scripts.prototypes.lean_map.probe_bias import _image
 from scripts.prototypes.lean_map.quadrature import quadratic_fit, triangle_rule
 from scripts.prototypes.lean_map.values import build_values
+from scripts.prototypes.solve_options.point_bias import _exterior
 from scripts.prototypes.solve_options.profile import _machine
 from scripts.prototypes.support.geometry import certificate_field
 from tests.equilibrium.test_topology_read import _analytic_inputs
@@ -185,6 +187,19 @@ def run(kind, cells, cache, output):
     root_shift = np.linalg.norm(np.asarray(state.roots) - roots, axis=1)
     pitch = float(np.median(np.asarray(geometry.pitch)))
     scale = float(jnp.max(jnp.abs(reference[:, 0])))
+    operator = fixture.forward_operator(source, machine)
+    exterior, _ = _exterior(cache, key)
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    analytic = jnp.asarray(certificate._exact_state(name, exact, coordinates))
+    span = float(jnp.abs(reading.boundary_flux - reading.axis_flux))
+    mapped_flux_error = (
+        float(jnp.max(jnp.abs(exterior + _image(operator, state.moments) - analytic)))
+        / span
+    )
+    zero_state = compiled(*(jnp.zeros_like(reference), *arguments[1:]))
+    jax.block_until_ready(zero_state)
     result.update(
         stage="map-evaluated",
         compile_seconds=compile_seconds,
@@ -192,6 +207,7 @@ def run(kind, cells, cache, output):
         warm_wall_ms=1000 * float(np.median(walls)),
         map_residual_relative_sup=float(jnp.max(jnp.abs(state.moments - reference)))
         / scale,
+        mapped_flux_error=mapped_flux_error,
         root_shift_pitches=(root_shift / pitch).tolist(),
         root_status=np.asarray(state.root_status).tolist(),
         booking_status=int(state.booking_status),
@@ -199,6 +215,41 @@ def run(kind, cells, cache, output):
         cut_count=int(state.cut_count),
         topology_valid=bool(state.topology_valid),
         topology_qualified=bool(state.topology_qualified),
+        zero_current_root_status=np.asarray(zero_state.root_status).tolist(),
+        zero_current_booking_status=int(zero_state.booking_status),
+        zero_current_topology_valid=bool(zero_state.topology_valid),
+    )
+    _write(output, result)
+    if not (
+        bool(state.topology_valid)
+        and bool(state.topology_qualified)
+        and int(state.booking_status) == 0
+        and int(state.band_status) == 0
+    ):
+        print("RESULT " + json.dumps(result, default=str), flush=True)
+        return
+    rng = np.random.default_rng(1927)
+    component_scale = np.maximum(np.std(np.asarray(reference), axis=0), 1e-8)
+    direction = jnp.asarray(rng.normal(size=reference.shape) * component_scale)
+    rest = arguments[1:]
+    tangent = jax.jit(
+        lambda m, vector, *operands: jax.jvp(
+            lambda varied: mapped(varied, *operands).moments,
+            (m,),
+            (vector,),
+        )[1]
+    )(reference, direction, *rest)
+    tangent = jax.block_until_ready(tangent)
+    epsilon = 1e-5
+    upper = compiled(*(reference + epsilon * direction, *rest)).moments
+    lower = compiled(*(reference - epsilon * direction, *rest)).moments
+    difference = (upper - lower) / (2 * epsilon)
+    signal = float(jnp.max(jnp.abs(tangent)))
+    result.update(
+        stage="jvp-checked",
+        jvp_signal=signal,
+        jvp_fd_relative_sup=float(jnp.max(jnp.abs(tangent - difference)))
+        / max(signal, 1e-30),
     )
     _write(output, result)
     print("RESULT " + json.dumps(result, default=str), flush=True)

@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_derivation": "Reviewed baseline_suite (certificate-base-betelgeuse.log, revision a0b86e5d913cf01ba7619f6a102c9db5040bbdf1, completed true) fails 6 ids in 14.62s and after_suite (certificate-head-betelgeuse.log, revision bb248a9313ef67616b19b4383191f27d7b51d56e, completed true) fails the identical 6 ids in 14.64s, all tests/test_current_book_fragments.py::test_analytic_certificate_moments[550|2000|5000-limited|diverted]. The head-minus-base set-difference is empty, so added_failure_count 0 and added_failure_ids []. I read both logs: every failure is the same AssertionError at scripts/prototypes/support/book.py:55 (assert store.group == receipt[\"machine_cache\"][\"semantic_key\"]) inside the _cached_machine fixture, reached before current.book is called, so no candidate booking commit is reached and the zero delta is a genuine pre-existing fixture condition, not a masked regression.",
+  "added_failure_ids": [],
+  "artifacts": [
+    "nova/equilibrium/current.py:213-300 -- booking is rebuilt as a whole-cell vmap plus a compact cut batch (batch width 32) with a per-cell live-ring fori_loop; no cell-axis scan remains on the path",
+    "fresh.log (H200 job 1284893 COMPLETED 0:0, builder=device) -- base/head booking on the same machine: 2,098 cells base 1.045s/7.91GB vs head 26.0ms/0.279GB; 5,158 cells base 3.066s/23.13GB vs head 85.4ms/0.728GB; IDENTITY_VERDICT max_relative_sup 5.42e-16 and 4.45e-16, both within_identity_tolerance true against the 6.9e-16 bound",
+    "negative-control.log -- an isolated extraction of d4ab8cefc with the whole-cell vmap replaced by a sequential lax.scan lowers scan length 17; test_booking_does_not_scan_over_cells fails by test id, AssertionError, EXIT=1",
+    "baseline-qualified.log (11 passed, EXIT=0) and after-qualified.log (12 passed, EXIT=0) -- focused CPU fragments+vectorised gate, base to head delta of one added test",
+    "audit-doc on docs/evidence/fragments/converged-forward-solve/booking-cost.html in the reviewed worktree: conformant 1, 0 errors, matching the manifest claim"
+  ],
+  "blocking_finding_count": 0,
+  "call_site_count": 1,
+  "call_sites": [
+    "nova/equilibrium/support_read.py:119"
+  ],
+  "commits_read": [
+    "637a14ac52386717b2990a668f66f00c285b2467",
+    "d4ab8cefc23b5cf2a118d57c6791e51de9204e0a",
+    "bb248a9313ef67616b19b4383191f27d7b51d56e",
+    "8779ebe313772d3414991328656277f72d8bc13c"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-10-13T23:10:15Z",
+  "evidence_inputs": [
+    "The landed change is correct on its own terms: nova/equilibrium/current.py:213-300 partitions cells into full (membership >= 1-1e-14, booked on original vertices via whole_cell) and cut (0 < membership < 1, gathered into batches of 32 and integrated live-ring by live-ring), reproducing the superseded booking to 5.42e-16 relative at 2,098 and 4.45e-16 at 5,158 cells (fresh.log), and clearing its own stated target (sub-250 ms at 5,000) at 85.4 ms.",
+    "The node's done_when clause (3) is met in its primary form: identity against the current (inherited vmapped) booking. The alternate form, identity against the closed-form certificate moments, is not delivered -- the six analytic-certificate parametrizations fail in both arms at scripts/prototypes/support/book.py:55, a shared fixture cache-key assertion reached before current.book, and that file is outside the node's write scope. The node records this under follow_ons and sets the fragment plan-verdict partial, which is accurate.",
+    "The 10,000-cell rung is unmeasured and recorded pending: the done_when explicitly permits 'record it as pending' when the carrier-requalify device store is unavailable, and the manifest states the diverted 10,000-cell carrier is refused at stencil conditioning. Target achieved to 5,158 cells; the headline 'milliseconds on fine grids' is demonstrated at 5,158, not at 10,000.",
+    "Peak device memory falls 7.91 to 0.279 GB (28.4x) at 2,098 cells and 23.13 to 0.728 GB (31.8x) at 5,158 (fresh.log), consistent with the evidence fragment's claim of bounded memory via the 32-cell cut batch."
+  ],
+  "findings": [
+    {
+      "file": "tests/test_current_book_vectorised.py",
+      "line": 411,
+      "severity": "follow-on",
+      "text": "the guard asserts `cells not in lengths` with cells fixed at 17, so it reddens only when a lowered scan's length equals the exact cell count. It fires on the declared regression (negative-control.log shows scan length 17 from reinstating a sequential cell scan), so done_when(5) is guarded, but a sequential cell axis lowered with a different bound -- an outer scan over a padded or fixed-width axis, as the 32-wide cut batch would produce at a different batch width -- would pass. Tightening it to assert no scan axis spans the cell dimension would make the guard independent of the fixture's cell count."
+    },
+    {
+      "file": "scripts/prototypes/support/book.py",
+      "line": 55,
+      "severity": "follow-on",
+      "text": "the six analytic-certificate parametrizations -- the \u00a73 closed-form identity gate -- fail in both arms at this shared fixture's cache-key assertion (assert store.group == receipt[\"machine_cache\"][\"semantic_key\"]) before current.book runs, because the stored device-built machine identity lacks the builder keys and carries a different wall hash (preflight: 2000 e1181cd028835f12 vs 56c89ac4cf893668, 5000 cdccd053cb900cee vs 4c818bdbed936090). The node cannot repair it (file outside its fence) and records it under follow_ons; the effect is that the change's identity against closed-form certificate moments is unverified pending a merged carrier test that supplies matching receipts."
+    }
+  ],
+  "gate_arms_note": "after_suite revision bb248a9313ef67616b19b4383191f27d7b51d56e precedes the reviewed head 8779ebe31, whose only change is the evidence fragment (docs/evidence/fragments/converged-forward-solve/booking-cost.html); the product file nova/equilibrium/current.py is final at d4ab8cefc, so the code head is covered by the gate. The gate was not re-run for this review; the six-failure identity in both arms and the pre-booking assertion line were read from the two logs.",
+  "item_verdicts": {
+    "diff": "read commit by commit against a0b86e5d913cf01ba7619f6a102c9db5040bbdf1: 637a14ac5 rebuilds the booking in nova/equilibrium/current.py (whole-cell vmap + compact cut batch), d4ab8cefc integrates only live fragment rings, bb248a931 and 8779ebe31 add docs/evidence/fragments/converged-forward-solve/booking-cost.html; three files changed (current.py +157/-61 region, test_current_book_vectorised.py +32, fragment +57), matching the manifest changed_paths.",
+    "done_when": "clauses (1) profile, (2) restructure, (3) identity, (4) cost, (5) delta gate plus scan guard and (6) fragment",
+    "goal": "the node goal is to bring the per-step current booking from seconds to milliseconds on fine grids; nova/equilibrium/current.py:213-300 books full cells on their original vertices and packs cut cells in 32-wide batches with per-ring integration, measured at 26.0 ms (2,098 cells) and 85.4 ms (5,158 cells) from 1,045 ms and 3,066 ms (fresh.log).",
+    "manifest": "read: status complete, four commits, baseline_suite and after_suite as completed one-line JSON (both 6 failed), negative_control_log naming negative-control.log, test_logs naming the fresh/qualified/large/jvp/certificate logs, a landing line, and follow_ons naming the merged carrier as future work.",
+    "write_paths": "met: the a0b86e5d..8779ebe31 diff touches only nova/equilibrium/current.py, tests/test_current_book_vectorised.py and docs/evidence/fragments/converged-forward-solve/booking-cost.html, all inside the declared fence; tests/test_current_book_fragments.py and docs/figures were in scope and untouched."
+  },
+  "justifications": {
+    "durability": "tests/test_current_book_vectorised.py:411 reddens on the declared regression (negative-control.log: scan length 17, EXIT=1) and tests/test_current_book_vectorised.py:357-368 compares book against the independent sequential _reference_book to atol 1e-11, so a booking regression is caught, but the scan guard's cell-count equality check is narrower than the property it names.",
+    "evidence": "fresh.log records the cost and identity rows (job 1284893 COMPLETED, identity 5.42e-16/4.45e-16), baseline-qualified.log and after-qualified.log record the 11-12 passed delta, and audit-doc reports 0 errors on the fragment, but the closed-form certificate identity rows are absent because both arms fail at scripts/prototypes/support/book.py:55 and the 10,000-cell rung is unmeasured.",
+    "fit": "nova/equilibrium/current.py:213-300 follows the module's jax idiom (jax.lax.cond, jax.tree.map, jax.vmap already present) and the added comment and test name 'test_booking_does_not_scan_over_cells' carry no plan, sprint or deliverable identifier.",
+    "goal_fidelity": "nova/equilibrium/current.py:213-300 cuts the warm per-step booking to 26.0 ms and 85.4 ms at 2,098 and 5,158 cells, which is the goal, but the 10,000-cell fine-grid rung the plan names is unmeasured so 'milliseconds on fine grids' is shown only to 5,158.",
+    "reuse": "the product change adds no module-level definition and reuses the existing owners clipped_support_current_moments, ClippedCurrentMoments, FragmentSupport, _conic_rings and _normal_rings; a repository search for an existing live-ring / compact cut-batch mechanism (grep for integrate_live_rings, whole_cell, batch_width across nova/ and tests/) found none, so the batch and ring reduction are the first.",
+    "scope_discipline": "every path in the a0b86e5d..8779ebe31 diff is inside the declared write paths listed in the reviewed manifest, and no source is deleted."
+  },
+  "plan": "nova:converged-forward-solve",
+  "project": "nova",
+  "raw_text": "VERDICT goal: the node goal is to bring the per-step current booking from seconds to milliseconds on fine grids; nova/equilibrium/current.py:213-300 books full cells on their original vertices and packs cut cells in 32-wide batches with per-ring integration, measured at 26.0 ms (2,098 cells) and 85.4 ms (5,158 cells) from 1,045 ms and 3,066 ms (fresh.log).\nVERDICT done_when: clauses (1) profile (fragment booking-cost-profile-table), (2) restructure (batch 32, whole-cell closed form), (3) identity (fresh.log IDENTITY_VERDICT 5.42e-16/4.45e-16 within 6.9e-16), (4) cost (fresh.log base/head on one machine), (5) delta gate (baseline-qualified 11 passed / after-qualified 12 passed, certificate 6 failed both arms, zero added) plus the scan guard and its negative control, and (6) fragment (audit-doc 0 errors) are delivered and recorded; the closed-form certificate identity and the 10,000-cell rung are not delivered and are registered as pending/follow-on.\nVERDICT write_paths: met: the a0b86e5d..8779ebe31 diff touches only nova/equilibrium/current.py, tests/test_current_book_vectorised.py and docs/evidence/fragments/converged-forward-solve/booking-cost.html, all inside the declared fence; tests/test_current_book_fragments.py and docs/figures were in scope and untouched.\nVERDICT manifest: read: status complete, four commits, baseline_suite and after_suite as completed one-line JSON (both 6 failed), negative_control_log naming negative-control.log, test_logs naming the fresh/qualified/large/jvp/certificate logs, a landing line, and follow_ons naming the merged carrier as future work.\nVERDICT diff: read commit by commit against a0b86e5d913cf01ba7619f6a102c9db5040bbdf1: 637a14ac5 rebuilds the booking in nova/equilibrium/current.py (whole-cell vmap + compact cut batch), d4ab8cefc integrates only live fragment rings, bb248a931 and 8779ebe31 add docs/evidence/fragments/converged-forward-solve/booking-cost.html; three files changed, matching the manifest changed_paths.\nCALL_SITES: nova/equilibrium/support_read.py:119\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: nova/equilibrium/current.py:213-300 cuts the warm per-step booking to 26.0 ms and 85.4 ms at 2,098 and 5,158 cells, which is the goal, but the 10,000-cell fine-grid rung the plan names is unmeasured so 'milliseconds on fine grids' is shown only to 5,158.\nSCORE evidence: 17\nJUSTIFICATION evidence: fresh.log records the cost and identity rows (job 1284893 COMPLETED, identity 5.42e-16/4.45e-16), baseline-qualified.log and after-qualified.log record the 11-12 passed delta, and audit-doc reports 0 errors on the fragment, but the closed-form certificate identity rows are absent because both arms fail at scripts/prototypes/support/book.py:55 and the 10,000-cell rung is unmeasured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the a0b86e5d..8779ebe31 diff is inside the declared write paths listed in the reviewed manifest, and no source is deleted.\nSCORE durability: 18\nJUSTIFICATION durability: tests/test_current_book_vectorised.py:411 reddens on the declared regression (negative-control.log: scan length 17, EXIT=1) and tests/test_current_book_vectorised.py:357-368 compares book against the independent sequential _reference_book to atol 1e-11, so a booking regression is caught, but the scan guard's cell-count equality check is narrower than the property it names.\nSCORE fit: 19\nJUSTIFICATION fit: nova/equilibrium/current.py:213-300 follows the module's jax idiom (jax.lax.cond, jax.tree.map, jax.vmap already present) and the added comment and test name carry no plan, sprint or deliverable identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the product change adds no module-level definition and reuses the existing owners clipped_support_current_moments, ClippedCurrentMoments, FragmentSupport, _conic_rings and _normal_rings; a repository search for an existing live-ring / compact cut-batch mechanism found none, so the batch and ring reduction are the first.\nFINDING tests/test_current_book_vectorised.py:411 follow-on: the guard asserts `cells not in lengths` with cells fixed at 17, so it reddens only when a lowered scan's length equals the exact cell count; it fires on the declared regression but a sequential cell axis lowered with a different bound would pass.\nFINDING scripts/prototypes/support/book.py:55 follow-on: the six analytic-certificate parametrizations fail in both arms at this shared fixture's cache-key assertion before current.book runs, so the change's identity against closed-form certificate moments is unverified pending a merged carrier test that supplies matching receipts; the file is outside the node's write scope and is already recorded under follow_ons.",
+  "review_kind": "independent review",
+  "review_run_id": "legacy-569ab658cc2f",
+  "review_run_id_source": "derived",
+  "reviewed_base_sha": "a0b86e5d913cf01ba7619f6a102c9db5040bbdf1",
+  "reviewed_head_sha": "8779ebe313772d3414991328656277f72d8bc13c",
+  "reviewed_revision": "8779ebe313772d3414991328656277f72d8bc13c",
+  "reviewed_run_id": "r-20261013T230956570184-booking-cost",
+  "reviewed_worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s21-nova/booking-cost",
+  "reviewer_node": "review-of-booking-cost-8779ebe31377",
+  "reviewer_run_id": "r-20261014T004940642819-review-of-booking-cost-8779ebe31377",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "section": "\u00a73",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-10-14T00:54:00Z",
+  "total": 112,
+  "verdict": "pass-with-follow-ons"
+}

@@ -73,6 +73,25 @@ _EXACT_SUPPORT_ARM = "exact"
 _LEGACY_SUPPORT_ARM = "legacy"
 EXTERIOR_SUPPORT_ARM = _EXACT_SUPPORT_ARM
 POLYGONANALYTIC_SOURCE = "nova/biot/polygonanalytic.py"
+CARRIER_SOURCE_PATHS = (
+    POLYGONANALYTIC_SOURCE,
+    "nova/biot/polygon.py",
+    "nova/biot/plasmagrid.py",
+    "nova/biot/tiledassembly.py",
+    "nova/equilibrium/stencil_mesh.py",
+    "nova/frame/coilset.py",
+    "nova/frame/frame.py",
+    "nova/geometry/polygon.py",
+)
+CARRIER_BUILDER_FUNCTIONS = (
+    "limiter_contour",
+    "offset_wall",
+    "_resolved_wall",
+    "_clean_vertices",
+    "_flux_blocks",
+    "_assemble_families",
+    "build_machine",
+)
 OUTPUT = Path(__file__).resolve().parent
 FORBIDDEN_IMPORT_PREFIXES = ("h5py", "imas")
 FORBIDDEN_PATH_FRAGMENTS = (".geqdsk", ".npz", "/archive/", "stored_reference")
@@ -406,19 +425,28 @@ def _polygonanalytic_source() -> Path:
 def builder_revision() -> str:
     """Return a digest of the coupling-assembly sources that define a carrier.
 
-    The carrier's blocks are only reproducible against the revision that
-    assembled them, so the digest of the assembly sources joins the semantic
-    identity: a later revision publishes a distinct cache group rather than
-    replaying a warm-load from blocks it would no longer produce.  The sources
-    are the coupling-assembly module and the packed polygon moment kernel it
-    contracts through, so a carrier built on an earlier kernel is a different
-    carrier.  The fixture's own bytes are not among them: editing this module
-    changes how a carrier is measured, not the blocks a carrier carries, so it
-    must not invalidate every cached carrier.
+    The stored carrier includes mesh, ring and coupling arrays. Hash their
+    construction sources and the fixture functions that build those arrays.
+    Other fixture functions only measure or report the carrier, so edits to
+    those functions do not invalidate its cache group.
     """
     digest = hashlib.sha256()
-    for path in (_polygonanalytic_source(), Path(coupling_build.__file__)):
+    root = Path(__file__).resolve().parents[2]
+    for source in CARRIER_SOURCE_PATHS:
+        path = root / source
+        digest.update(source.encode())
         digest.update(path.read_bytes())
+    digest.update(Path(coupling_build.__file__).read_bytes())
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    definitions = {
+        node.name: node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name in CARRIER_BUILDER_FUNCTIONS
+    }
+    if set(definitions) != set(CARRIER_BUILDER_FUNCTIONS):
+        raise RuntimeError("carrier builder definition is missing")
+    for name in CARRIER_BUILDER_FUNCTIONS:
+        digest.update(ast.dump(definitions[name], include_attributes=False).encode())
     return digest.hexdigest()[:16]
 
 
@@ -769,9 +797,10 @@ def cached_machine(
         wall=wall,
         builder=builder,
     )
+    dirname = os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova")
     store = ZarrStore(
         filename=f"{CACHE_FILENAME}_{abs(requested_cells)}",
-        dirname=os.environ.get("NOVA_ANALYTIC_ORACLE_CACHE", ".nova"),
+        dirname=Path(dirname) if os.path.isabs(dirname) else dirname,
     )
     store.group = store.hash_attrs(identity)
     with _cache_lock(store) as lock_wait:

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="reckon-type" content="evidence">
+<meta name="plan-slug" content="carrier-agreement">
+<meta name="plan-title" content="Carrier agreement and identity">
+<meta name="plan-summary" content="Identity coverage passes mutation controls. Three near-wall radial entries put the host batch farther from fifty-digit quadrature. The diverted nine-block rerun also exceeds the radial floor.">
+<meta name="plan-evidence-for" content="converged-forward-solve">
+<meta name="plan-verifies" content="converged-forward-solve#s4">
+<meta name="plan-commits" content="c7b1b5dc4,618a735a6,cb38cd9c3,e4a0efa8f,58e6679eb,c7aa7e57c,ffb73fc17,bc237c5e1,4a35ccd6e,43d0ca2b7,166918859,55b338a82,7b99006ed,aee36c170,c05786857,399806fec,d89a39bf3,293554dcf,9d9e9562d,7e7ab108d,137b03ee0,d8930e97f,862b1adc4">
+<meta name="plan-recorded-at" content="2026-10-14">
+<meta name="plan-verdict" content="partial">
+<title>Carrier agreement and identity | nova</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+<h1 id="carrier-agreement">Carrier agreement and identity</h1>
+
+<p>The stored carrier includes node, area, polygon, stencil, interior-ring and
+nine coupling arrays. Its revision previously hashed the packed polygon kernel
+and coupling assembly only. A mesh or ring construction change could therefore
+replay arrays built by different source. The revision now fingerprints the
+mesh and ring modules, the coupling dependencies and the fixture functions
+that build the carrier. An edit to measurement-only fixture code leaves the
+revision unchanged.</p>
+
+<h2 id="carrier-agreement-identity">Identity guard</h2>
+<p>At the orientation base, the new test reproduced eight failures: edits to
+the mesh, ring and related construction sources, and to the fixture builder
+function, left <code>builder_revision</code> unchanged. The head arm passes all
+11 identities. Replacing <code>builder_revision</code> in a scratch tree with
+the former fixture-plus-coupling digest fails nine IDs, including the packed
+polygon kernel. The head arm fails none. The mutation log ends with
+<code>EXIT=1</code> and names each failing ID.</p>
+<table>
+<thead><tr><th>Fresh per-file process</th><th>Orientation base</th><th>Head</th></tr></thead>
+<tbody>
+<tr><td><code>tests/test_coupling_build.py</code></td><td>7 passed</td><td>7 passed</td></tr>
+<tr><td><code>tests/test_carrier_identity.py</code></td><td>8 failed, 3 passed</td><td>11 passed</td></tr>
+<tr><td><code>tests/test_analytic_oracle_fixture_exterior.py</code></td><td>2 passed</td><td>2 passed</td></tr>
+</tbody>
+</table>
+
+<h2 id="carrier-agreement-measurement">Numerical agreement</h2>
+<p>The prior 5,167-cell limited receipt reported
+<code>plasma_to_sample_r</code> at 1.2186816095922636e-12 norm-relative;
+the other eight blocks measured 1.5e-14 to 7.1e-13. H200 job 1284944
+completed with <code>EXIT=0</code> and compared all 61,652,644 entries of
+the stored host radial block against a fresh device assembly. Its completed
+JSON receipt reproduces that maximum. The largest gaps sit on near-wall
+cells 4860, 1177 and 4766. Their source centres lie 0.0185–0.0381 m from a
+wall vertex; the leading target-source distances are 0.0618–0.0814 m.
+These are near-field couplings, not coincident or singular pairs.</p>
+
+<table>
+<thead><tr><th>Target</th><th>Cell</th><th>Absolute radial gap [m Wb/A]</th><th>Gap / block scale</th><th>Wall vertex distance [m]</th></tr></thead>
+<tbody>
+<tr><td>11226</td><td>4860</td><td>1.2874900798265365e-19</td><td>1.2186816095922636e-12</td><td>0.038138</td></tr>
+<tr><td>2705</td><td>1177</td><td>1.173140631947206e-19</td><td>1.1104434403192664e-12</td><td>0.018536</td></tr>
+<tr><td>2700</td><td>1177</td><td>8.385626177817573e-20</td><td>7.937465746686454e-13</td><td>0.018536</td></tr>
+<tr><td>10921</td><td>4766</td><td>8.123575359760774e-20</td><td>7.689419942102502e-13</td><td>0.028901</td></tr>
+<tr><td>11096</td><td>4860</td><td>7.284483346386983e-20</td><td>6.895172264798334e-13</td><td>0.038138</td></tr>
+</tbody>
+</table>
+
+<p>The maximum is target (7.01271761983729, 3.136819170404031) against
+cell (7.09342091294632, 3.1475371319701004), separated by 0.0814119 m.
+An independent 50-digit mpmath evaluation uses the same 64-by-128 graded
+near-field quadrature nodes and authored three-edge section. It gives
+-1.777657987617869e-9 m Wb/A. The device entry is 1.29164e-21 from that
+value; the stored host entry is 1.27457e-19 away, 98.7 times farther. A host
+replay over all 11,932 targets differs from storage by only 6.77626e-21,
+below the declared 1.05646e-20 replay bound. Computing the target alone gives
+-1.777657987625937e-9, only 8.06790e-21 from the reference. The different
+batch widths localise the departure to the vectorised host near-field path.</p>
+
+<p>Two other leading pairs were checked with the same 50-digit rule. At target
+2705, cell 1177, the host is 1.2079184068262323e-19 from the reference and
+the device 3.477777487902636e-21. At target 10921, cell 4766, those errors
+are 8.078990324744166e-20 and 4.458503501660819e-22. Their host
+full-batch replays differ from storage by 3.38813e-21 and 3.36166e-21,
+respectively, both below the same 1.05646e-20 control bound. Across three
+different near-wall source cells the device is closer to the independent
+quadrature, while the stored host values reproduce at full batch width.</p>
+
+<p>These values do not support a new agreement floor: the two paths are not
+equally close to the independent reference. A correction belongs in
+<code>nova/biot/polygonanalytic.py</code>, outside this worker's write grant.
+The concrete candidate edit is in <code>_flux_area_integral</code>'s NumPy
+branch: accumulate signed radial terms
+<code>weighted * (displacement_r + dr)</code> with a reduction stable across
+target-batch widths, replacing its unconditioned
+<code>xp.sum(..., axis=(0, 1))</code>. The graded rule must remain the same.
+This candidate still needs validation against the reference and all nine
+blocks; it was not applied here.</p>
+
+<p>The first diverted 5,000-cell all-nine-block job, 1284938, reached its
+75-minute limit after persisting the host carrier but before writing a
+comparison receipt. The cache-path parser had interpreted the dot in the
+run-directory name as a FilePath suffix; an absolute override now passes as
+a Path while the relative default keeps its existing resolution. The
+completed 962 MB host carrier was copied into the intended run directory.
+Job 1284958 reused that host group, built the device group afresh and
+completed in 16:21 with <code>EXIT=0</code>. Its receipt names both group keys,
+records 5,158 realised cells and reports all nine blocks. The radial sample
+block is again the maximum, 1.0249978687933993e-12, which exceeds the
+1e-12 floor by 2.4998%. The other eight blocks are 4.51e-15 to 6.43e-13.</p>
+
+<table>
+<thead><tr><th>Diverted block</th><th>Host/device norm-relative gap</th></tr></thead>
+<tbody>
+<tr><td><code>plasma_to_grid</code></td><td>1.3546266193536203e-14</td></tr>
+<tr><td><code>plasma_to_grid_r</code></td><td>4.667520789499299e-13</td></tr>
+<tr><td><code>plasma_to_grid_z</code></td><td>6.431887689986539e-13</td></tr>
+<tr><td><code>plasma_to_wall</code></td><td>4.5098457392606785e-15</td></tr>
+<tr><td><code>plasma_to_wall_r</code></td><td>1.4791333403258007e-13</td></tr>
+<tr><td><code>plasma_to_wall_z</code></td><td>2.0865241423368282e-13</td></tr>
+<tr><td><code>plasma_to_sample</code></td><td>3.6814334678144844e-14</td></tr>
+<tr><td><code>plasma_to_sample_r</code></td><td>1.0249978687933993e-12</td></tr>
+<tr><td><code>plasma_to_sample_z</code></td><td>4.4213644305740566e-13</td></tr>
+</tbody>
+</table>
+
+<p>An earlier controlled CPU sample covered 98,304 target-cell entries across
+256 wall-adjacent cells. Its worst gap was 2.305072123406433e-13 at target
+2735, cell 1177. The receipt records <code>sampled_cell_count=256</code> and
+<code>completed=false</code>. The sample missed the full-block maximum, which
+is why the H200 receipt is the localisation authority. Earlier 550- and
+2,000-cell parity rows used a different certificate case and cannot justify
+a new 5,000-cell floor.</p>
+
+<figure id="carrier-agreement-radial-panel">
+  <img src="/nova/figures/converged-forward-solve/carrier-agreement/radial-sample.svg" alt="Limiter overview and close view locating the largest full-block radial disagreements">
+  <figcaption>The limited carrier's poloidal limiter and the eight largest
+  target-cell gaps in the complete 61,652,644-entry comparison. Black circles
+  mark source cells, blue crosses sample points, and grey segments join each
+  pair. The close view locates the full-block maximum at target 11226 and cell
+  4860 near the wall. The axes are hidden; limiter geometry gives spatial
+  context.</figcaption>
+</figure>
+</main>
+</body>
+</html>
